@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>제안서 Step1 — 입력 방식 비교</title>
+<style>
+  :root{
+    --navy:#1a2456; --pink:#ff4d94; --pink-soft:#ffe4ef;
+    --ink:#1b1b2b; --muted:#8a8aa3; --line:#e8e8f0;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:32px 20px 60px;
+    font-family:'Pretendard','Malgun Gothic',system-ui,sans-serif;
+    background:#fdf2f7; color:var(--ink);
+  }
+  h1{font-size:20px; text-align:center; margin:0 0 4px}
+  .sub{text-align:center; color:var(--muted); font-size:13px; margin:0 0 28px}
+  .row{display:flex; gap:28px; justify-content:center; flex-wrap:wrap; align-items:flex-start}
+  .col{width:340px}
+  .tag{
+    font-size:12px; font-weight:700; padding:6px 12px; border-radius:99px;
+    display:inline-block; margin-bottom:10px;
+  }
+  .tag.a{background:#e6e6ef; color:#6b6b85}
+  .tag.b{background:var(--pink); color:#fff}
+
+  .phone{
+    background:#fff; border-radius:26px; padding:20px 18px 22px;
+    box-shadow:0 10px 30px rgba(26,36,86,.10); border:1px solid var(--line);
+    min-height:430px; display:flex; flex-direction:column;
+  }
+  .bar{display:flex; align-items:center; gap:8px; margin-bottom:16px}
+  .dot{width:22px;height:22px;border-radius:50%;background:var(--pink-soft)}
+  .step{font-size:12px; color:var(--muted)}
+  .q{font-size:17px; font-weight:800; line-height:1.4; margin:0 0 4px}
+  .stock{font-size:12px; color:var(--pink); font-weight:700; margin:0 0 14px}
+
+  textarea{
+    width:100%; min-height:78px; padding:13px; font:inherit; font-size:14px;
+    border:2px solid var(--line); border-radius:14px; resize:none; outline:none;
+    background:#fafaff; line-height:1.5;
+  }
+  textarea:focus{border-color:var(--pink); background:#fff}
+  textarea::placeholder{color:#b8b8cc}
+
+  .hint{font-size:12px; color:var(--muted); margin:12px 0 8px}
+  .chips{display:flex; flex-direction:column; gap:8px}
+  .chip{
+    text-align:left; padding:11px 13px; font:inherit; font-size:13px; cursor:pointer;
+    border:1.5px solid var(--line); background:#fff; border-radius:12px; color:#4a4a68;
+    transition:.15s;
+  }
+  .chip:hover{border-color:var(--pink); color:var(--pink)}
+  .chip.sel{background:var(--navy); border-color:var(--navy); color:#fff}
+
+  .coach{
+    margin-top:14px; padding:13px; border-radius:14px;
+    background:var(--pink-soft); border:1.5px solid #ffc9dd; display:none;
+  }
+  .coach.on{display:block}
+  .coach p{margin:0 0 9px; font-size:13px; font-weight:700; color:#c2185b; line-height:1.45}
+  .coach input{
+    width:100%; padding:10px 12px; font:inherit; font-size:13px;
+    border:1.5px solid #ffc9dd; border-radius:10px; outline:none;
+  }
+  .coach input:focus{border-color:var(--pink)}
+  .skip{
+    margin-top:8px; font-size:11px; color:var(--muted); background:none;
+    border:none; cursor:pointer; text-decoration:underline; padding:0;
+  }
+
+  .next{
+    margin-top:auto; padding:13px; border-radius:14px; border:none; cursor:pointer;
+    background:var(--navy); color:#fff; font:inherit; font-weight:800; font-size:15px;
+  }
+  .next:disabled{background:#d5d5e2; cursor:not-allowed}
+
+  .out{
+    margin-top:14px; background:var(--navy); color:#c9d0f0; border-radius:16px;
+    padding:14px 16px; font-size:12px; line-height:1.75;
+  }
+  .out b{color:#fff; display:block; margin-bottom:7px; font-size:12px}
+  .out code{color:#ffd9e8; font-family:ui-monospace,Consolas,monospace}
+  .out .none{color:#7a83b8}
+  .verdict{
+    margin-top:10px; font-size:12px; padding:10px 12px; border-radius:10px; line-height:1.6;
+  }
+  .verdict.bad{background:#fff0f0; color:#c0392b; border:1px solid #ffd0d0}
+  .verdict.good{background:#eefaf1; color:#1e7e45; border:1px solid #c8ecd4}
+</style>
+</head>
+<body>
+
+<h1>제안서 Step1 — 어디에 무엇을 두느냐의 차이</h1>
+<p class="sub">양쪽 다 눌러보고, 아래 <b>저장되는 데이터</b>를 비교하면 된다.</p>
+
+<div class="row">
+
+  <!-- ================= A안 ================= -->
+  <div class="col">
+    <span class="tag a">A안 · 버튼이 입력을 대체</span>
+    <div class="phone">
+      <div class="bar"><div class="dot"></div><span class="step">1 / 3</span></div>
+      <p class="q">왜 사고 싶어?</p>
+      <p class="stock">삼성전자</p>
+
+      <div class="chips" id="a-chips">
+        <button class="chip" data-label="성장형">성장 가능성이 커 보여서</button>
+        <button class="chip" data-label="배당형">배당이 매력적이라서</button>
+        <button class="chip" data-label="기타">기타 (직접 쓰기)</button>
+      </div>
+      <textarea id="a-text" placeholder="직접 쓰기를 고르면 여기에 써요" style="margin-top:10px; display:none"></textarea>
+
+      <button class="next" id="a-next" disabled>다음</button>
+    </div>
+    <div class="out" id="a-out"><b>저장되는 데이터</b><span class="none">아직 없음</span></div>
+    <div class="verdict bad">
+      기타는 마지막에 있고 누르면 일이 더 생긴다 → 거의 안 눌린다.
+      저장되는 건 대부분 <b>버튼 라벨 하나</b>. 우리가 만든 선택지를 되읽는 데이터다.
+    </div>
+  </div>
+
+  <!-- ================= B안 ================= -->
+  <div class="col">
+    <span class="tag b">B안 · 버튼은 마중물, 코치가 마무리</span>
+    <div class="phone">
+      <div class="bar"><div class="dot"></div><span class="step">1 / 3</span></div>
+      <p class="q">왜 사고 싶어?</p>
+      <p class="stock">삼성전자</p>
+
+      <textarea id="b-text" placeholder="네 생각을 그대로 써 봐"></textarea>
+
+      <p class="hint">막히면 이렇게 써도 돼 👇</p>
+      <div class="chips" id="b-chips">
+        <button class="chip" data-label="성장형">성장 가능성이 커 보여서</button>
+        <button class="chip" data-label="제품경험형">내가 쓰는 폰을 만든 회사라서</button>
+      </div>
+
+      <div class="coach" id="b-coach">
+        <p id="b-ask"></p>
+        <input id="b-answer" placeholder="한 줄만 더 써 줘">
+        <button class="skip" id="b-skip">잘 모르겠어</button>
+      </div>
+
+      <button class="next" id="b-next" disabled>다음</button>
+    </div>
+    <div class="out" id="b-out"><b>저장되는 데이터</b><span class="none">아직 없음</span></div>
+    <div class="verdict good">
+      버튼은 <b>백지 공포만 없애고</b> 사라진다. 되묻기 1회로 아이 문장이 반드시 남는다.
+      → <b>라벨 + 원문</b> 둘 다 확보. 성향 리포트도 위험 분류도 여기서 나온다.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---------- A안 ----------
+const aChips = document.getElementById('a-chips');
+const aText  = document.getElementById('a-text');
+const aNext  = document.getElementById('a-next');
+const aOut   = document.getElementById('a-out');
+let aLabel = null;
+
+aChips.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  [...aChips.children].forEach(c => c.classList.remove('sel'));
+  chip.classList.add('sel');
+  aLabel = chip.dataset.label;
+  aText.style.display = aLabel === '기타' ? 'block' : 'none';
+  if (aLabel === '기타') aText.focus();
+  aNext.disabled = false;
+  renderA(chip.textContent);
+});
+aText.addEventListener('input', () => renderA('기타 (직접 쓰기)'));
+
+function renderA(chipText){
+  const free = aLabel === '기타' ? aText.value.trim() : '';
+  aOut.innerHTML = '<b>저장되는 데이터</b>'
+    + 'label: <code>' + aLabel + '</code><br>'
+    + 'text: ' + (free ? '<code>"' + esc(free) + '"</code>'
+                       : '<span class="none">없음 — 버튼 라벨뿐</span>');
+}
+
+// ---------- B안 ----------
+const bChips  = document.getElementById('b-chips');
+const bText   = document.getElementById('b-text');
+const bCoach  = document.getElementById('b-coach');
+const bAsk    = document.getElementById('b-ask');
+const bAnswer = document.getElementById('b-answer');
+const bSkip   = document.getElementById('b-skip');
+const bNext   = document.getElementById('b-next');
+const bOut    = document.getElementById('b-out');
+
+let bLabel = null, asked = false, skipped = false;
+
+// 되묻기: 정답을 주지 않고 근거만 되묻는다
+const ASK = {
+  '성장형'     : '어떤 걸 보고 성장할 거라고 생각했어?',
+  '제품경험형' : '그 제품의 어떤 점이 제일 마음에 들어?',
+  '자유'       : '그렇게 생각한 이유를 하나만 더 말해 줄래?'
+};
+
+bChips.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  bLabel = chip.dataset.label;
+  bText.value = chip.textContent;      // 버튼은 서술칸을 "채우고" 끝난다
+  bChips.style.display = 'none';       // 역할이 끝났으므로 사라진다
+  document.querySelector('.hint').style.display = 'none';
+  openCoach(ASK[bLabel]);
+});
+
+bText.addEventListener('input', () => {
+  if (!asked && bText.value.trim().length >= 6) {
+    bLabel = bLabel || '자유';
+    openCoach(ASK['자유']);
+  }
+  render();
+});
+
+function openCoach(q){
+  asked = true;
+  bAsk.textContent = q;
+  bCoach.classList.add('on');
+  bNext.disabled = false;
+  render();
+}
+
+bAnswer.addEventListener('input', () => { skipped = false; render(); });
+bSkip.addEventListener('click', () => {
+  skipped = true; bAnswer.value = '';
+  render();                             // 강제하지 않는다. 그대로 통과.
+});
+
+function render(){
+  const first  = bText.value.trim();
+  const second = bAnswer.value.trim();
+  bOut.innerHTML = '<b>저장되는 데이터</b>'
+    + 'label: <code>' + (bLabel || '자유') + '</code><br>'
+    + 'text: ' + (first ? '<code>"' + esc(first) + '"</code>' : '<span class="none">없음</span>') + '<br>'
+    + 'coach_answer: ' + (second ? '<code>"' + esc(second) + '"</code>'
+        : skipped ? '<span class="none">"몰라" → 부모 대화 스크립트로 전달</span>'
+                  : '<span class="none">대기</span>');
+}
+
+function esc(s){ return s.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+node_modules/
+.DS_Store
+*.log
+
+# 환경변수 — 키움 · Anthropic 키가 들어간다
+.env
+.env*.local
+
+# 로컬 SQLite (시연 데이터)
+data/
+*.db
+
+# 작업 부산물. 쿠키·다운로드 자료 등 리포에 들어가면 안 되는 것들
+tmp/
