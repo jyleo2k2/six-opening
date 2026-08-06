@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    /**
+     * bundler 해석을 쓴다 — 확장자 없는 상대 import를 허용하기 위함.
+     * web(Next/Turbopack)이 game의 TS 소스를 그대로 번들하는데,
+     * NodeNext 스타일의 './x.js' 표기는 Turbopack이 .ts로 되돌려 찾지 못한다.
+     * 대신 game 패키지는 tsx/vitest/번들러 없이 순수 node로는 실행할 수 없다.
+     */
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*", "data/**/*", "sim/**/*", "server/**/*", "tests/**/*"]
+}
