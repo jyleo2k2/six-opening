@@ -1,0 +1,29 @@
+{
+  "name": "stock-card-battle-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "e2e": "node scripts/e2e-playthrough.mjs",
+    "verify:loop1": "node scripts/verify-loop1.mjs",
+    "verify:t2": "node scripts/verify-t2.mjs",
+    "verify:t3": "node scripts/verify-t3.mjs",
+    "verify:t4": "node scripts/verify-t4.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "0.453.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "playwright": "1.62.1",
+    "typescript": "5.9.3",
+    "vite": "8.0.13"
+  }
+}

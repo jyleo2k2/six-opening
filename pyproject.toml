@@ -1,0 +1,10 @@
+[project]
+name = "six-opening"
+version = "0.1.0"
+description = "물려주는 계좌 — 병렬 Git 세션 관제 스크립트 실행 환경"
+requires-python = ">=3.12"
+dependencies = []
+
+# 제품 코드는 전부 TypeScript다. Python은 scripts/git_session_manager.py 하나를
+# 돌리기 위한 것이고 표준 라이브러리만 쓴다 — 의존성을 추가할 일이 생기면
+# 정말 필요한지 먼저 따진다.

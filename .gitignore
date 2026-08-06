@@ -12,3 +12,11 @@ data/
 
 # 작업 부산물. 쿠키·다운로드 자료 등 리포에 들어가면 안 되는 것들
 tmp/
+
+# Python — scripts/git_session_manager.py 실행 환경
+.venv/
+__pycache__/
+
+# 빌드 산출물
+dist/
+.next/
