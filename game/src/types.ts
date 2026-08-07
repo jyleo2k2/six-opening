@@ -100,7 +100,11 @@ export interface InfoForecast {
 
 export interface NewsDelivery {
   turn: number;
-  newsId: string;
+  /**
+   * 서버 내부 식별용(같은 턴 중복 배달 방지 검증 등). **viewFor가 제거한다** —
+   * id에 단서/배경 여부와 사건명이 들어 있어 클라이언트로 나가면 정보 설계가 깨진다.
+   */
+  newsId?: string;
   text: string;
 }
 

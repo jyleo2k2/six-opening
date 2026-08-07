@@ -30,6 +30,9 @@ describe('viewFor — 정보 비대칭 무결성 (기획서 §9)', () => {
     const mine = viewFor(s, 'p0');
     expect(mine.me.forecasts).toHaveLength(1);
     expect(mine.me.news).toHaveLength(1);
+    // newsId는 단서/배경 여부를 누설하므로 뷰에서 제거된다 — 본문만 남는다
+    expect(mine.me.news[0].newsId).toBeUndefined();
+    expect(mine.me.news[0].text.length).toBeGreaterThan(0);
 
     const theirs = viewFor(s, 'p1');
     expect(theirs.me.forecasts).toHaveLength(0);

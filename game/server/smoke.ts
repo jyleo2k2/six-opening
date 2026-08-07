@@ -67,6 +67,8 @@ async function main() {
   const roomB = await new Client(url).joinById(roomA.roomId, { nickname: '손님' });
   wire(roomB, guest, false);
 
+  // 봇 1명 합류 — 사람 2 + 봇 1로 완주해야 한다 (봇은 ready 없이도 진행을 막지 않는다)
+  roomA.send('addBot');
   roomA.send('start');
 
   const start = Date.now();
@@ -77,7 +79,7 @@ async function main() {
 
   // ── 검증 ────────────────────────────────────────────────────────────
   const standings = (host.settled as { standings: { rank: number; totalAsset: number }[] }).standings;
-  if (standings.length !== 2) fail(`정산 인원 ${standings.length} ≠ 2`);
+  if (standings.length !== 3) fail(`정산 인원 ${standings.length} ≠ 3 (사람 2 + 봇 1)`);
 
   const view = host.view!;
   if (view.phase !== 'ended') fail(`최종 페이즈 ${view.phase} ≠ ended`);
@@ -86,6 +88,10 @@ async function main() {
   if ((view as unknown as Record<string, unknown>).rng !== undefined) fail('viewFor 위반: rng가 와이어에 실렸다');
   if (view.me.holdings.length === 0) fail('방장 매수가 반영되지 않았다');
   if (view.me.forecasts.length === 0) fail('정보소 예보가 반영되지 않았다');
+  if (view.me.news.some((n) => (n as unknown as Record<string, unknown>).newsId !== undefined)) {
+    fail('viewFor 위반: newsId(단서/배경 식별자)가 와이어에 실렸다');
+  }
+  if (!view.standings.some((s) => s.nickname.startsWith('🤖'))) fail('봇이 정산 순위에 없다');
 
   const guestView = guest.view!;
   if (guestView.me.forecasts.length !== 0) fail('손님에게 타인 예보가 새어 들어갔다');
@@ -96,7 +102,7 @@ async function main() {
   if (!guest.emotes.includes('yar')) fail('이모티콘 릴레이 누락');
   if (!host.rejected.some((r) => r.includes('자기 액션만'))) fail('스푸핑 방어가 작동하지 않았다');
 
-  console.log('[smoke] 통과 — 2인 5턴 완주');
+  console.log('[smoke] 통과 — 사람 2 + 봇 1, 5턴 완주');
   console.log(`  정산: ${standings.map((s) => `${s.rank}위 ${s.totalAsset.toLocaleString()}원`).join(' · ')}`);
   console.log(`  이벤트: ${view.eventLog.map((e) => e.eventId).join(' → ')}`);
   process.exit(0);

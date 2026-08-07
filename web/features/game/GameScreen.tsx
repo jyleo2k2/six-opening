@@ -67,6 +67,7 @@ export function GameScreen({ roomId }: { roomId: string }) {
         sessionId={room.sessionId}
         roomCode={room.realRoomId}
         onStart={room.start}
+        onAddBot={room.addBot}
       />
     ) : (
       <p className="p-6 text-sm text-neutral-500">서버에 접속하는 중…</p>
@@ -82,13 +83,16 @@ function WaitingRoom({
   sessionId,
   roomCode,
   onStart,
+  onAddBot,
 }: {
   lobby: LobbyInfo;
   sessionId: string;
   roomCode: string;
   onStart: () => void;
+  onAddBot: () => void;
 }) {
   const isHost = lobby.hostId === sessionId;
+  const seatsLeft = lobby.max - lobby.players.length;
   return (
     <div className="flex flex-col gap-4 p-4">
       <header>
@@ -114,20 +118,36 @@ function WaitingRoom({
               {p.nickname ?? `플레이어${i + 1}`}
               {p.id === sessionId && <span className="ml-1 text-xs text-neutral-400">(나)</span>}
             </span>
-            {p.id === lobby.hostId && <span className="text-xs text-amber-600">방장</span>}
+            {p.isBot ? (
+              <span className="text-xs text-neutral-400">봇</span>
+            ) : (
+              p.id === lobby.hostId && <span className="text-xs text-amber-600">방장</span>
+            )}
           </div>
         ))}
       </section>
 
       {isHost ? (
-        <button
-          type="button"
-          onClick={onStart}
-          disabled={lobby.players.length < lobby.min}
-          className="rounded-xl bg-neutral-900 py-4 font-semibold text-white disabled:opacity-40"
-        >
-          {lobby.players.length < lobby.min ? `${lobby.min}명부터 시작할 수 있어요` : '게임 시작'}
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={onAddBot}
+            disabled={seatsLeft <= 0}
+            className="rounded-xl border border-neutral-300 py-3 font-semibold transition active:scale-[0.99] disabled:opacity-40"
+          >
+            🤖 봇 추가 {seatsLeft > 0 ? `(${seatsLeft}자리 남음)` : '(가득 참)'}
+          </button>
+          <button
+            type="button"
+            onClick={onStart}
+            disabled={lobby.players.length < lobby.min}
+            className="rounded-xl bg-neutral-900 py-4 font-semibold text-white disabled:opacity-40"
+          >
+            {lobby.players.length < lobby.min
+              ? `${lobby.min}명부터 시작할 수 있어요 — 봇을 넣어도 돼요`
+              : '게임 시작'}
+          </button>
+        </div>
       ) : (
         <p className="text-center text-sm text-neutral-500">방장이 시작하길 기다리는 중…</p>
       )}
@@ -276,7 +296,7 @@ function NewsAndInfo({
   return (
     <section className="flex flex-col gap-2">
       {news.map((n) => (
-        <div key={n.newsId} className="rounded-xl bg-amber-50 p-3">
+        <div key={`news-${n.turn}`} className="rounded-xl bg-amber-50 p-3">
           <p className="text-[10px] font-semibold text-amber-600">나에게만 온 소식</p>
           <p className="mt-0.5 text-sm leading-relaxed">{n.text}</p>
         </div>
