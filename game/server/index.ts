@@ -1,5 +1,5 @@
 /**
- * PvP 서버 부트스트랩.
+ * 게임 서버 부트스트랩 — 2~8인 히스토리 투자 시뮬 룸.
  *
  * stateful 롱커넥션이라 Vercel serverless에 올릴 수 없다 — Fly.io / Railway 별도 배포.
  *   npm run server -w game

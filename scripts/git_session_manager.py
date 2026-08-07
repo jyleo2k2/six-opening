@@ -34,28 +34,26 @@ LOCAL_SESSION_RULES: dict[str, Any] = {
         "김경렬",
     ],
     "task_pattern": r"[a-z0-9][a-z0-9._-]*",
-    "branch_example": "claude/이호연/card-engine",
+    "branch_example": "claude/이호연/game-screen",
     "integration_worker": "이재용",
     "owner_only_paths": [
         "AGENTS.md",
         "CLAUDE.md",
         "docs/기획서.md",
         "docs/구현계획.md",
-        "docs/기술스택-v0.1.md",
+        "docs/기술스택.md",
         "scripts/git_session_manager.py",
     ],
     # 공유 핫스팟. claim 경로 겹침으로 1차 방어되며, 이 목록은 "겹치면 이재용이
     # 단일 작성자를 지정한다"는 규약의 근거다 (AGENTS.md 참조).
-    # 출처: docs/구현계획.md §2에서 [핫스팟]·"공용"으로 표시한 파일들.
+    # 출처: docs/구현계획.md §3과 web/AGENTS.md의 공유 핫스팟 표.
     "hotspots": [
-        "engine/src/types.ts",
-        "engine/src/config.ts",
-        "web/lib/db.ts",
-        "web/lib/rules.ts",
-        "web/lib/stocks.ts",
-        "web/app/api/prices",
+        "game/src/types.ts",
         "web/app/layout.tsx",
+        "web/app/(child)/layout.tsx",
+        "web/components/ui",
         "web/app/globals.css",
+        "package.json",
         "web/package.json",
     ],
 }
