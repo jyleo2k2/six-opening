@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>타임머신 마켓 — 플레이 흐름 상세</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2b3140; --line2:#3a4152;
+    --tx:#e8eaf0; --tx2:#a7aebd; --tx3:#6f7889;
+    --accent:#e8506b; --amber:#f2a03d; --ok:#3fb27f; --info:#5b9cf5; --violet:#9b7ce8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    line-height:1.72;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1020px;margin:0 auto;padding:48px 24px 96px}
+  header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:20px}
+  .eyebrow{color:var(--accent);font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
+  h1{font-size:31px;line-height:1.25;margin:0 0 12px;letter-spacing:-.02em}
+  .sub{color:var(--tx2);font-size:14.5px;margin:0;max-width:72ch}
+  h2{font-size:21px;margin:56px 0 6px;letter-spacing:-.01em}
+  h2 .num{color:var(--tx3);font-size:11.5px;font-weight:700;display:block;margin-bottom:6px;letter-spacing:.14em}
+  h3{font-size:15.5px;margin:28px 0 6px}
+  h3 .t{color:var(--tx3);font-weight:600;font-size:12px;margin-left:8px}
+  p{color:var(--tx2);font-size:14.5px;margin:8px 0}
+  .lead{color:var(--tx);font-size:15px;max-width:74ch}
+  ul,ol{color:var(--tx2);font-size:14.5px;padding-left:20px;margin:10px 0}
+  li{margin:6px 0}
+  li strong,td strong,p strong{color:var(--tx);font-weight:600}
+  em{color:var(--tx);font-style:normal;border-bottom:1px dotted var(--line2)}
+  code{background:var(--panel2);padding:2px 7px;border-radius:4px;font-size:12.5px;color:#eeb3bd;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+  th,td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--tx3);font-weight:600;font-size:11px;letter-spacing:.07em;text-transform:uppercase;background:var(--panel)}
+  td{color:var(--tx2)}
+  .card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:10px;padding:15px 18px;margin:16px 0}
+  .card.ok{border-left-color:var(--ok)} .card.warn{border-left-color:var(--amber)}
+  .card.info{border-left-color:var(--info)} .card.vio{border-left-color:var(--violet)}
+  .card h4{margin:0 0 5px;font-size:14.5px;color:var(--tx)}
+  .card p{margin:4px 0;font-size:14px}
+  .mock{background:#12151c;border:1px solid var(--line2);border-radius:12px;padding:16px 18px;margin:14px 0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--tx2);
+    line-height:1.85;white-space:pre-wrap;overflow-x:auto}
+  .mock b{color:var(--tx);font-weight:600}
+  .mock .up{color:#7fd6a8} .mock .dn{color:#e88a9c} .mock .dim{color:var(--tx3)}
+  .mock .am{color:#f6c98a} .mock .vi{color:#c9b6f5} .mock .bl{color:#a8ccfa}
+
+  /* timeline */
+  .tl{border-left:2px solid var(--line2);margin:20px 0 20px 8px;padding-left:22px}
+  .tl .step{position:relative;margin-bottom:26px}
+  .tl .step::before{content:"";position:absolute;left:-29px;top:5px;width:12px;height:12px;border-radius:50%;
+    background:var(--panel2);border:2px solid var(--line2)}
+  .tl .step.hot::before{background:#341f26;border-color:var(--accent)}
+  .tl .step.good::before{background:#152a22;border-color:var(--ok)}
+  .tl .when{font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.1em;text-transform:uppercase}
+  .tl .what{font-size:15.5px;font-weight:650;margin:2px 0 4px;color:var(--tx)}
+  .tl .desc{font-size:13.5px;color:var(--tx2);max-width:70ch}
+
+  .bar{display:flex;border-radius:9px;overflow:hidden;border:1px solid var(--line2);margin:14px 0;height:44px}
+  .bar div{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:650;
+    flex-direction:column;line-height:1.3;text-align:center}
+  .bar .s1{background:#1a2333;color:#a8ccfa} .bar .s2{background:#2a1d33;color:#c9b6f5}
+  .bar .s3{background:#331f24;color:#ffb0be} .bar .s4{background:#1c2f26;color:#8fdcb6}
+  .bar span{font-size:9.5px;opacity:.75;font-weight:500}
+
+  .players{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+  .pl{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:12.5px}
+  .pl b{display:block;font-size:13.5px;margin-bottom:2px}
+  .pl span{color:var(--tx3);font-size:11.5px;line-height:1.5;display:block}
+  .pl.bot{border-style:dashed}
+  footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);color:var(--tx3);font-size:12.5px}
+  @media(max-width:720px){ .players{grid-template-columns:1fr 1fr} h1{font-size:25px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">타임머신 마켓 · Play Flow</p>
+  <h1>플레이 흐름 상세</h1>
+  <p class="sub">앱을 켜는 순간부터 결과 화면을 닫는 순간까지 — 화면 단위, 초 단위로 따라가는 한 판의 전체 여정 · 2026-08-07</p>
+</header>
+
+<h2><span class="num">SECTION 01</span>한 판의 전체 구조</h2>
+
+<div class="mock"><b>로비</b> → <b>매칭</b> → <b>입장 연출</b> → <span class="bl">[ 라운드 × 5 ]</span> → <b>최종 정산</b> → <b>시상</b> → <b>오늘의 나 리포트</b> → 로비
+
+한 라운드 = <span class="bl">준비</span> → <span class="vi">채팅</span> → <span class="dn">사건</span> → <span class="up">순위</span></div>
+
+<div class="bar">
+  <div class="s1" style="flex:36">① 준비<span>1R 3분 · 이후 90초</span></div>
+  <div class="s2" style="flex:12">② 채팅<span>60초</span></div>
+  <div class="s3" style="flex:6">③ 사건<span>30초</span></div>
+  <div class="s4" style="flex:6">④ 순위<span>30초</span></div>
+</div>
+
+<table>
+  <tr><th>모드</th><th>구성</th><th>총 소요</th><th>용도</th></tr>
+  <tr><td><strong>퀵 매치 (기본)</strong></td><td>3라운드</td><td><strong>약 10분</strong></td><td>일상 플레이 · 발표 시연</td></tr>
+  <tr><td><strong>정규전</strong></td><td>5라운드</td><td>약 17분</td><td>주말 · 친구방 · 랭킹 반영</td></tr>
+</table>
+<p>타이머는 전부 <strong>서버 기준으로 동기화</strong>되고, 화면 상단에 항상 떠 있다. 페이즈가 끝나면 전원이 동시에 다음 페이즈로 넘어간다 — 개인별 대기 없음.</p>
+
+<h2><span class="num">SECTION 02</span>게임 전 — 로비에서 입장까지</h2>
+
+<div class="tl">
+  <div class="step">
+    <div class="when">로비</div>
+    <div class="what">모드 선택과 예습</div>
+    <div class="desc">화면에는 [퀵 매치] [정규전] [친구방 만들기] 세 버튼. 그 옆에 도감 진입점 — <em>"이기고 싶으면 섹터 도감부터"</em>. 내 투자자 레벨, 도감 완성률(<code>기업 12/16</code>)이 함께 보인다. 친구방은 초대코드 6자리로 입장하고, 여기서만 자유 채팅이 열린다.</div>
+  </div>
+  <div class="step">
+    <div class="when">매칭 · 5~20초</div>
+    <div class="what">대기 화면 = 상식 카드</div>
+    <div class="desc">매칭 도는 동안 "오늘의 상식" 카드 한 장. <em>"주식은 회사의 조각이에요. 삼성전자 1주를 사면 삼성전자의 아주 작은 주인이 되는 거예요."</em> 30초 내에 인원이 안 차면 남는 자리는 AI 봇이 채운다 — 아이는 기다리지 않는다.</div>
+  </div>
+  <div class="step hot">
+    <div class="when">입장 연출 · 10초</div>
+    <div class="what">타임머신 발진</div>
+    <div class="desc">"2011년부터 2020년 사이, 실제로 있었던 일들이 벌어집니다. 무슨 일이 언제 터질지는 아무도 모릅니다." — 연도 숫자가 슬롯머신처럼 돌다가 물음표로 멈춘다. <strong>어느 해인지는 끝까지 알려주지 않는다.</strong> 전원 잔고 100만원 지급 연출.</div>
+  </div>
+  <div class="step">
+    <div class="when">첫 판 한정 · 30초</div>
+    <div class="what">미니 브리핑 (건너뛰기 가능)</div>
+    <div class="desc">계정 생성 후 첫 게임에만 섹터 8개를 카드 한 장씩으로 훑어준다. "✈️ 여행·항공 — 사람들이 여행을 가면 강해져요." 이후 판부터는 바로 시작.</div>
+  </div>
+</div>
+
+<h2><span class="num">SECTION 03</span>라운드 상세 — 초 단위로 따라가기</h2>
+<p class="lead">이제 4명이 입장했다고 하자. 예시 인물로 계속 간다.</p>
+
+<div class="players">
+  <div class="pl"><b>👦 민준 (나)</b><span>초5 · 신중한 타입</span></div>
+  <div class="pl"><b>👧 서연</b><span>공격적 · 채팅 활발</span></div>
+  <div class="pl"><b>👦 지호</b><span>남 말 잘 믿음</span></div>
+  <div class="pl bot"><b>🤖 하윤 (봇)</b><span>빈 자리 자동 충원</span></div>
+</div>
+
+<h3>① 준비 페이즈 <span class="t">1라운드 3분 · 이후 90초</span></h3>
+
+<div class="tl">
+  <div class="step hot">
+    <div class="when">0:00 — 자동으로 뜸</div>
+    <div class="what">나만의 뉴스 1건</div>
+    <div class="desc">준비 페이즈가 열리면 내 뉴스가 전면 카드로 먼저 뜬다. 닫기 전까지 다른 조작 불가 — 반드시 한 번은 읽게 된다.</div>
+  </div>
+</div>
+
+<div class="mock"><b>📰 나만 받은 뉴스</b>                    <span class="dim">다른 친구들은 다른 뉴스를 받았어요</span>
+
+ 중국 정부가 자국민의 한국 단체관광을
+ 당분간 제한하기로 했습니다.
+
+ <span class="dim">[ 확인 ]</span></div>
+
+<p>뉴스 배분 규칙: 4명이면 서로 다른 섹터의 뉴스 4건. 그중 <strong>절반만 이번 라운드 사건의 진짜 전조</strong>이고 나머지는 노이즈다. 민준의 뉴스는 전조였다(다음 사건: 사드·한한령). 서연이 받은 "새 스마트폰 판매 호조"는 노이즈다. <strong>누구 뉴스가 진짜인지는 아무도 모른다</strong> — 이 비대칭이 채팅 페이즈의 연료다.</p>
+
+<div class="tl">
+  <div class="step">
+    <div class="when">0:10 ~</div>
+    <div class="what">시장 화면 — 자유 행동</div>
+    <div class="desc">뉴스를 닫으면 시장 화면. 여기서 남은 시간 동안 순서 제약 없이 자유롭게: <strong>ⓐ 시장 훑기 ⓑ 정보소 ⓒ 매수·매도.</strong> 몇 번이든 반복 가능, 같은 페이즈 안에서는 가격이 변하지 않으므로 사고팔아도 손해가 없다.</div>
+  </div>
+</div>
+
+<div class="mock"><b>[ 시장 ]</b>                        ⏱ <span class="am">2:41</span>   내 현금 <b>100만원</b>
+
+ 🔲 반도체     <span class="dim">—</span>        🎤 엔터      <span class="dim">—</span>
+ 🎮 인터넷     <span class="dim">—</span>        ✈️ 여행·항공  <span class="dim">—</span>
+ 💊 바이오     <span class="dim">—</span>        💄 화장품     <span class="dim">—</span>
+ 🚗 자동차     <span class="dim">—</span>        🔋 배터리     <span class="dim">—</span>
+
+ <span class="dim">[ 🏪 정보소 ]                  [ 💬 지난 채팅 다시 보기 ]</span></div>
+
+<p><strong>민준의 사고 과정이 곧 게임 디자인이다:</strong> "중국이 관광을 막는다… 중국 손님으로 돈 버는 게 어디지?" — 지난주에 섹터 도감에서 <em>"화장품은 중국과 사이가 나빠지면 약해져요"</em>를 읽었다면 여기서 답이 나온다. 안 읽었다면 정보소에서 5만원을 내면 된다. <strong>같은 결론, 다른 비용.</strong></p>
+
+<div class="mock"><b>💄 화장품</b>
+
+ 아모레퍼시픽   82,000원/주    [ 사기 ]
+ LG생활건강    124,000원/주    [ 사기 ]
+
+────────────────────────────────
+ 아모레퍼시픽을 얼마나 살까?
+
+ [ 10만원 ] [ 20만원 ] [ 50만원 ] [ 전액 ]
+ ────●─────────────────  <b>20만원</b>
+ <span class="dim">≈ 2.4주 · 남는 현금 80만원</span>
+
+ ⚠️ 잠깐 — 민준이는 지금 <b>판다</b>가 아니라 <b>산다</b>를 눌렀어요.
+    나쁜 소식이 예상되면 안 사는 것도 선택이에요.</div>
+
+<p>민준의 선택: 화장품을 <strong>사지 않고</strong>, 중국 악재와 무관해 보이는 반도체 30만 + 바이오 20만. 현금 50만은 남겨둔다. — 공매도가 없는 이 게임에서 나쁜 예감에 대응하는 방법은 <strong>"안 사기"와 "미리 팔기"뿐</strong>이고, 그래서 현금 보유가 자연스럽게 전략이 된다.</p>
+
+<div class="tl">
+  <div class="step">
+    <div class="when">2:30 (잔여 30초)</div>
+    <div class="what">마감 임박 알림</div>
+    <div class="desc">타이머가 빨개지고 진동. 아무것도 안 한 플레이어는 <strong>전액 현금 보유로 자동 처리</strong>된다 — 페널티 없음. 아무 행동도 강제되지 않는 게임이다.</div>
+  </div>
+</div>
+
+<h3>② 채팅 페이즈 <span class="t">60초</span></h3>
+<p>전원의 화면이 채팅방으로 전환된다. 템플릿 조합으로만 발언할 수 있다(랜덤 매칭 기준). <strong>내 보유 현황은 자동 공개되지 않는다</strong> — 말로 밝히거나, 남이 정찰을 사야만 안다.</p>
+
+<div class="mock"><b>💬 작전 회의</b>                                  ⏱ <span class="am">0:47</span>
+
+ <b>서연</b>  내 뉴스 알려줄게 → 스마트폰이 잘 팔린대
+ <b>서연</b>  나는 반도체 샀어 🔲
+ <b>지호</b>  나도 반도체 살걸 😳
+ <b>민준</b>  💄 화장품 조심해
+ <b>서연</b>  민준 말은 믿지 마 😏
+ <b>지호</b>  누구 말이 맞아?? 😵
+ <span class="dim">🤖 하윤   나는 골고루 샀어</span>
+
+ [ 나는 ○○ 샀어 ] [ ○○ 조심해 ] [ 내 뉴스 알려줄게 ]
+ [ ○○ 말은 믿지 마 ] [ 진짜야 ] [ 😂 😏 😳 🔥 ]</div>
+
+<div class="card vio">
+  <h4>채팅 페이즈에서 실제로 벌어지는 게임</h4>
+  <p>민준은 진실을 말했지만 <strong>득이 되는 진실만 말했다</strong>(화장품 경고만 하고, 자기가 뭘 샀는지는 안 밝혔다). 서연은 자기 뉴스를 공개했지만 그건 노이즈였다 — 본인도 모른 채 가짜 정보를 퍼뜨린 셈이다. 지호는 이번에도 남 말에 흔들린다. <strong>여기서 한 발언과 믿음이 전부 로그로 남아</strong> 시상(진실의 눈)과 게임 후 리포트의 원료가 된다.</p>
+  <p>채팅이 끝나면 10초의 <strong>막판 정정 시간</strong>을 줄지는 미결정 — 주면 "채팅 듣고 갈아타기"가 가능해져 채팅의 무게가 커지고, 안 주면 준비 페이즈의 판단이 무거워진다. (권장: 안 주기 — 페이즈 역할이 선명해진다)</p>
+</div>
+
+<h3>③ 사건 페이즈 <span class="t">30초 · 조작 없음, 전원 관람</span></h3>
+<p>사건은 12개 풀에서 <strong>중복 없이</strong> 뽑힌다(한 판에 같은 사건 두 번 없음). 연출 시퀀스:</p>
+
+<div class="tl">
+  <div class="step hot">
+    <div class="when">0 ~ 5초</div>
+    <div class="what">긴장 — 화면이 어두워지고 "뉴스 속보" 사이렌</div>
+    <div class="desc">전원의 화면이 동시에 멈춘다. 조작 불가. 심장 박동 사운드.</div>
+  </div>
+  <div class="step hot">
+    <div class="when">5 ~ 12초</div>
+    <div class="what">사건 공개</div>
+    <div class="desc"><strong>"🚨 사드 배치 결정 — 중국, 한류 제한 조치 시작"</strong> — 사건 카드가 쾅 하고 박힌다. 실제 있었던 일이라는 표기와 함께.</div>
+  </div>
+  <div class="step">
+    <div class="when">12 ~ 25초</div>
+    <div class="what">섹터별 반응 — 게임의 쇼타임</div>
+    <div class="desc">8개 섹터 게이지가 동시에 움직인다. 화장품이 <span style="color:#e88a9c">뚝뚝 무너지고</span>, 엔터가 따라 내려가고, 나머지는 잔잔. 내가 보유한 섹터에는 내 얼굴 아이콘이 붙어 있어서 <strong>내 돈이 어디서 녹는지/버티는지가 한눈에</strong> 보인다.</div>
+  </div>
+  <div class="step">
+    <div class="when">25 ~ 30초</div>
+    <div class="what">내 잔고 정산</div>
+    <div class="desc">"민준: -0.4% (반도체 -2%, 바이오 +1%, 현금 무사)" — 개인별 손익 요약이 잠깐 뜬다.</div>
+  </div>
+</div>
+
+<div class="mock"><span class="dim">등락 적용 공식 (사건마다 실제 데이터 기준)</span>
+
+ 게임 등락률 = 실제 사건 전후 N거래일 등락률 × random(0.7~1.3)
+
+ 사드·한한령 예시:
+  💄 화장품  실제 <span class="dn">-18%</span>  →  이번 판 <span class="dn">-21.4%</span>
+  🎤 엔터    실제 <span class="dn">-12%</span>  →  이번 판 <span class="dn">-9.1%</span>
+  ✈️ 여행    실제 <span class="dn">-8%</span>   →  이번 판 <span class="dn">-7.2%</span>
+  나머지 섹터 = 소폭 랜덤 노이즈 (±2% 이내)</div>
+
+<h3>④ 순위 페이즈 <span class="t">30초</span></h3>
+
+<div class="mock"><b>🏁 라운드 1 결과</b>
+
+ 1위  🤖 하윤   102.1만  <span class="up">▲ 2</span>      😎
+ 2위  👦 민준   99.6만   <span class="up">▲ 1</span>      🔥
+ 3위  👧 서연   97.3만   <span class="dn">▼ 2</span>      😭
+ 4위  👦 지호   91.0만   <span class="dn">▼ 1</span>      😱😱😱
+
+ <span class="dim">지호: 화장품에 50만원을 넣었다…</span>
+
+ [ 😂 ] [ 😭 ] [ 😱 ] [ 👍 ] [ 🔥 ] [ 🫡 ]</div>
+
+<p>순위가 밀리고 올라가는 애니메이션이 전체 화면으로 나오고, 그 위로 이모티콘이 날아다닌다. <strong>이 30초가 이 게임의 소셜 코어다</strong> — 지호의 절규 이모티콘에 다들 웃고, 다음 라운드로.</p>
+<p>이후 <strong>라운드 2~5는 같은 루프의 반복</strong>이다. 달라지는 것: 준비 페이즈가 90초로 줄고(종목 파악이 끝났으므로), 새 뉴스가 배분되고, 자산 격차 때문에 정보소 할인(하위권 50%)이 작동하기 시작하고, 채팅에 전 라운드의 원한과 신뢰가 쌓인다 — "지호야 이번엔 내 말 믿어" / "너 저번에 틀렸잖아".</p>
+
+<h2><span class="num">SECTION 04</span>게임 후 — 정산에서 로비 복귀까지</h2>
+
+<div class="tl">
+  <div class="step good">
+    <div class="when">정산 · 15초</div>
+    <div class="what">최종 순위 발표</div>
+    <div class="desc">전 라운드 자산 변화가 꺾은선 그래프로 리플레이된다 — "서연이 3라운드에 코로나로 무너지는 순간" 같은 드라마가 그래프에 그대로 보인다. 우승자 연출.</div>
+  </div>
+  <div class="step good">
+    <div class="when">시상 · 15초</div>
+    <div class="what">3개의 상 — 우승자가 아니어도 상을 받는다</div>
+    <div class="desc">🏆 수익왕(하윤) · 🔍 진실의 눈(민준 — 가짜 정보에 한 번도 안 속음) · 🛡️ 든든이(민준 — 최대 낙폭 -3%). <strong>4명 중 3명이 뭔가를 받는다.</strong> 진 아이도 빈손으로 나가지 않는 구조.</div>
+  </div>
+  <div class="step">
+    <div class="when">보상</div>
+    <div class="what">경험치 · 도감 해금</div>
+    <div class="desc">이기든 지든 레벨 경험치. 이번 판에 처음 보유한 기업, 처음 겪은 사건이 도감에 등록된다 — <code>📖 사건 도감에 '사드·한한령'이 추가됐어요!</code></div>
+  </div>
+  <div class="step hot">
+    <div class="when">오늘의 나 · 개인 화면</div>
+    <div class="what">행동 리포트 — 실전으로 가는 다리</div>
+    <div class="desc">아래 목업 참조. 이 화면의 마지막 버튼이 게임 밖(뉴스 → 찜 → 제안서)으로 이어지는 유일한 출구다.</div>
+  </div>
+</div>
+
+<div class="mock"><b>🎮 오늘의 나 — 지호의 리포트</b>
+
+ 채팅에서 들은 말을 <b>4번</b> 믿었어요.
+ 그중 <span class="dn">3번이 틀린 정보</span>였어요 😅
+
+ 내가 직접 뉴스를 읽고 판단한 건 <b>1번</b>,
+ <span class="up">그건 맞았어요.</span>
+
+ ────────────────────────────
+ 💡 다음 판 작전: 남의 말보다 <b>내 뉴스</b>를 먼저 보자.
+    📖 화장품이 왜 떨어졌는지 도감에서 복습하기 →
+
+ 🌏 그런데 <b>진짜 오늘의 세상</b>은 어떨까?
+    [ 오늘의 진짜 뉴스 보러가기 → ]</div>
+
+<h2><span class="num">SECTION 05</span>엣지 케이스 규칙</h2>
+<table>
+  <tr><th style="width:26%">상황</th><th>처리</th></tr>
+  <tr><td><strong>준비 페이즈 무행동</strong></td><td>전액 현금 보유로 진행. 페널티 없음 — "안 사기"도 정당한 선택이므로</td></tr>
+  <tr><td><strong>중도 이탈</strong></td><td>자산 동결, 최종 순위 꼴찌 처리(확정). 남은 라운드 동안 좌석은 유지되나 행동 없음</td></tr>
+  <tr><td><strong>인원 미달</strong></td><td>매칭 30초 내 미충원 시 AI 봇 충원. 게임 도중 실인원이 1명이 되어도 봇들과 계속 진행 — 조기 종료 없음</td></tr>
+  <tr><td><strong>동점</strong></td><td>최종 자산 동일 시 공동 순위. 수익왕 공동 수상</td></tr>
+  <tr><td><strong>재접속</strong></td><td>60초 내 복귀 시 현 페이즈부터 재개. 그 사이 페이즈는 자동 처리(무행동)로 넘어감</td></tr>
+  <tr><td><strong>사건 중복</strong></td><td>한 판 안에서 같은 사건은 다시 나오지 않음 (12개 풀에서 비복원 추출)</td></tr>
+</table>
+
+<h2><span class="num">SECTION 06</span>이 흐름이 지키고 있는 설계 원칙</h2>
+<ul>
+  <li><strong>강제 노출은 뉴스 한 장뿐.</strong> 나머지(정보소·도감·채팅 발언)는 전부 선택 — 게임이 등 떠밀지 않는다.</li>
+  <li><strong>페이즈마다 역할이 하나씩.</strong> 준비=판단 · 채팅=심리전 · 사건=관람 · 순위=감정 공유. 겹치지 않아서 초등학생도 리듬을 탄다.</li>
+  <li><strong>지는 아이를 위한 장치가 3중.</strong> 정보소 하위권 할인(역전 기회) · 시상 3종(수익 외 성취) · 무조건 경험치(성장). 8명 중 7명이 지는 게임은 진 아이가 돌아와야 산다.</li>
+  <li><strong>모든 행동이 로그가 된다.</strong> 템플릿 채팅 덕분에 "믿음/속음"이 파싱 가능하고, 그게 시상·리포트·(장기적으로) 부모 리포트의 데이터가 된다.</li>
+  <li><strong>실전으로 나가는 출구는 딱 하나, 게임이 끝난 뒤.</strong> 게임 중에는 실제 투자로 이어지는 어떤 버튼도 없다.</li>
+</ul>
+
+<footer>
+  타임머신 마켓 · 플레이 흐름 상세 · 2026-08-07 ·
+  퀵 매치(3라운드 ≈ 10분) 기본 / 정규전(5라운드 ≈ 17분) ·
+  미결정: 채팅 후 막판 정정 시간 부여 여부(권장: 미부여)
+</footer>
+
+</div>
+</body>
+</html>

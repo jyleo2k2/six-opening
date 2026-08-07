@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>타임머신 마켓 — 정보 시스템 &amp; 도감 설계</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2b3140; --line2:#3a4152;
+    --tx:#e8eaf0; --tx2:#a7aebd; --tx3:#6f7889;
+    --accent:#e8506b; --amber:#f2a03d; --ok:#3fb27f; --info:#5b9cf5; --violet:#9b7ce8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    line-height:1.72;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1020px;margin:0 auto;padding:48px 24px 96px}
+  header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:20px}
+  .eyebrow{color:var(--accent);font-size:12.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 10px}
+  h1{font-size:31px;line-height:1.25;margin:0 0 12px;letter-spacing:-.02em}
+  .sub{color:var(--tx2);font-size:14.5px;margin:0;max-width:72ch}
+  h2{font-size:21px;margin:56px 0 6px;letter-spacing:-.01em}
+  h2 .num{color:var(--tx3);font-size:11.5px;font-weight:700;display:block;margin-bottom:6px;letter-spacing:.14em}
+  h3{font-size:15.5px;margin:28px 0 6px}
+  p{color:var(--tx2);font-size:14.5px;margin:8px 0}
+  .lead{color:var(--tx);font-size:15px;max-width:74ch}
+  ul,ol{color:var(--tx2);font-size:14.5px;padding-left:20px;margin:10px 0}
+  li{margin:6px 0}
+  li strong,td strong,p strong{color:var(--tx);font-weight:600}
+  em{color:var(--tx);font-style:normal;border-bottom:1px dotted var(--line2)}
+  code{background:var(--panel2);padding:2px 7px;border-radius:4px;font-size:12.5px;color:#eeb3bd;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+  th,td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--tx3);font-weight:600;font-size:11px;letter-spacing:.07em;text-transform:uppercase;background:var(--panel)}
+  td{color:var(--tx2)}
+  .card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:10px;padding:15px 18px;margin:16px 0}
+  .card.ok{border-left-color:var(--ok)} .card.warn{border-left-color:var(--amber)}
+  .card.info{border-left-color:var(--info)} .card.vio{border-left-color:var(--violet)}
+  .card h4{margin:0 0 5px;font-size:14.5px;color:var(--tx)}
+  .card p{margin:4px 0;font-size:14px}
+  .hero{background:linear-gradient(180deg,#1c1f28,#171a21);border:1px solid var(--line2);
+    border-radius:14px;padding:24px 28px;margin:24px 0;text-align:center}
+  .hero .q{font-size:11.5px;color:var(--tx3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+  .hero .a{font-size:20px;line-height:1.55;color:var(--tx);font-weight:600;letter-spacing:-.01em}
+  .hero .a b{color:#ffb0be;font-weight:700}
+  .hero .n{font-size:13px;color:var(--tx3);margin-top:12px}
+  .mock{background:#12151c;border:1px solid var(--line2);border-radius:12px;padding:16px 18px;margin:14px 0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--tx2);
+    line-height:1.85;white-space:pre-wrap;overflow-x:auto}
+  .mock b{color:var(--tx);font-weight:600}
+  .mock .up{color:#7fd6a8} .mock .dn{color:#e88a9c} .mock .dim{color:var(--tx3)}
+  .mock .g1{color:#c98f6a} .mock .g2{color:#b8c0cc} .mock .g3{color:#e8c76a}
+
+  .chain{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;justify-content:center;
+    background:#13161d;border:1px solid var(--line);border-radius:12px;padding:22px 16px;margin:18px 0}
+  .chain .st{background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:11px 15px;
+    font-size:13px;text-align:center;min-width:130px;max-width:190px}
+  .chain .st b{display:block;font-size:13.5px;margin-bottom:2px}
+  .chain .st span{display:block;font-size:11px;color:var(--tx3);line-height:1.5}
+  .chain .ar{display:flex;align-items:center;color:var(--tx3);font-size:17px;padding:0 10px}
+  .chain .st.pay{background:#33291a;border-color:var(--amber)} .chain .st.pay b{color:#f6c98a}
+  .chain .st.free{background:#152a22;border-color:var(--ok)} .chain .st.free b{color:#8fdcb6}
+  .chain .st.hi{background:#341f26;border-color:var(--accent)} .chain .st.hi b{color:#ffc3ce}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+  .box h4{margin:0 0 4px;font-size:14.5px}
+  .box .tagline{font-size:11.5px;color:var(--tx3);margin:0 0 9px}
+  .box ul{font-size:13.5px;margin:6px 0}
+  .box.no{border-top:3px solid var(--accent)} .box.yes{border-top:3px solid var(--ok)}
+  .verdict{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-left:6px}
+  .v-no{background:rgba(232,80,107,.14);color:#ffb0be;border:1px solid #5c2731}
+  .v-yes{background:rgba(63,178,127,.14);color:#8fdcb6;border:1px solid #2c5a44}
+
+  .codex{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+  .cx{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 16px}
+  .cx .ic{font-size:20px;line-height:1}
+  .cx .t{font-size:14.5px;font-weight:650;margin:6px 0 3px}
+  .cx .d{font-size:12.5px;color:var(--tx2);line-height:1.6}
+  .cx .tag{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:20px;margin-top:8px;
+    border:1px solid var(--line2);color:var(--tx3)}
+  .cx .tag.lock{border-color:var(--violet);color:#c9b6f5}
+  .cx .tag.open{border-color:var(--ok);color:#8fdcb6}
+  footer{margin-top:64px;padding-top:22px;border-top:1px solid var(--line);color:var(--tx3);font-size:12.5px}
+  @media(max-width:820px){ .codex{grid-template-columns:1fr 1fr} }
+  @media(max-width:620px){ .codex,.grid2{grid-template-columns:1fr} h1{font-size:25px} .chain .ar{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">타임머신 마켓 · Information &amp; Codex</p>
+  <h1>정보 시스템 &amp; 도감 설계</h1>
+  <p class="sub">정보소가 무엇을 파는가, 그리고 도감이 왜 게임 공략집인 동시에 교육자료가 되는가 — 이 둘은 같은 시스템의 양 끝이다 · 2026-08-07</p>
+</header>
+
+<div class="hero">
+  <div class="q">이 문서의 결론 한 줄</div>
+  <div class="a">정보소는 <b>정답</b>이 아니라 <b>해석</b>을 판다.<br>그래서 <b>공부한 아이는 정보를 살 필요가 없다.</b></div>
+  <div class="n">도감이 게임 공략집이 되는 이유가 여기 있다.</div>
+</div>
+
+<h2><span class="num">SECTION 01</span>먼저 — 정보소가 팔면 안 되는 것</h2>
+<p class="lead">정보소 설계는 이 게임의 장르를 결정한다. 무엇을 파느냐에 따라 완전히 다른 게임이 된다.</p>
+
+<div class="grid2">
+  <div class="box no">
+    <h4>"다음 사건이 뭔지" <span class="verdict v-no">기각</span></h4>
+    <div class="tagline">예: "다음엔 전염병이 돌 거예요"</div>
+    <ul>
+      <li>사건 풀이 12개뿐이라 힌트가 곧 <strong>정답 유출</strong>이다</li>
+      <li><strong>현실에 없는 능력</strong>을 가르친다 — 미래의 사건을 미리 아는 투자자는 없다</li>
+      <li>"정보만 사면 미래를 안다"는 잘못된 인식을 심는다</li>
+    </ul>
+  </div>
+  <div class="box no">
+    <h4>"어떤 섹터가 오를지" <span class="verdict v-no">기각</span></h4>
+    <div class="tagline">예: "반도체를 사세요"</div>
+    <ul>
+      <li>이건 그냥 <strong>정답을 파는 것</strong>이다. 사면 이기고, 생각할 필요가 없다</li>
+      <li>돈 많은 사람이 이기는 게임이 된다</li>
+      <li><strong>리딩방과 구조가 똑같다</strong> — 우리가 문제라고 지적한 그것을 게임이 재현한다</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card ok">
+  <h4>정답을 팔면 안 되는 진짜 이유</h4>
+  <p>정답을 파는 순간 <strong>사고력이 필요 없어지고, 도감을 읽을 이유도 사라진다.</strong> 반대로 '해석'을 팔면, 스스로 해석할 수 있는 아이는 돈을 아낄 수 있다. <em>공부가 곧 실력이 되는 구조</em>가 만들어진다.</p>
+</div>
+
+<h2><span class="num">SECTION 02</span>이 게임의 핵심 사슬</h2>
+<p class="lead">뉴스는 <strong>사실만</strong> 준다. 사실을 섹터로 번역하는 것이 이 게임의 실력이고, 그 번역을 돈으로 살 수도 있고 공부로 얻을 수도 있다.</p>
+
+<div class="chain">
+  <div class="st"><b>📰 내 뉴스</b><span>사실만<br>"중국이 한국 단체관광을 제한"</span></div>
+  <div class="ar">→</div>
+  <div class="st hi"><b>🧠 해석</b><span>어떤 섹터가 움직일까?<br><strong>여기가 실력</strong></span></div>
+  <div class="ar">→</div>
+  <div class="st"><b>💰 판단</b><span>사거나 팔거나<br>가만히 있거나</span></div>
+</div>
+
+<p style="text-align:center;color:var(--tx3);font-size:13px;margin:6px 0 4px">해석 단계를 통과하는 방법은 두 가지다</p>
+
+<div class="chain">
+  <div class="st pay"><b>🏪 정보소에서 산다</b><span>돈이 든다<br>싸면 틀린다</span></div>
+  <div class="ar">또는</div>
+  <div class="st free"><b>📖 도감을 읽어둔다</b><span>공짜다<br>한 번 알면 계속 쓴다</span></div>
+</div>
+
+<div class="card vio">
+  <h4>뉴스가 사건의 '전조'라는 게 이 설계의 핵심</h4>
+  <p>준비턴의 뉴스는 다음 사건과 <strong>느슨하게 연결</strong>된다. "중국이 한국 단체관광을 제한한다"는 뉴스를 받은 아이는, 다음 사건이 한한령일 수 있다는 걸 <em>스스로 추론</em>할 수 있다. 정보소가 사건을 알려줄 필요가 없다.</p>
+  <p><strong>단, 8개 뉴스가 전부 전조면 예측이 너무 쉬워진다.</strong> 절반 정도만 진짜 전조로 두고 나머지는 관계없는 사실(노이즈)로 섞는다. 그래서 채팅턴에서 <em>"내 뉴스는 이런데 너는 뭐 받았어?"</em>를 맞춰봐야 한다 — 소셜 추리가 여기서 완성된다.</p>
+</div>
+
+<h2><span class="num">SECTION 03</span>정보소가 파는 것 — 상품 2종 × 등급 3단</h2>
+<p class="lead">종류를 3개 이상 두면 준비턴 안에 초등학생이 판단할 수 없다. <strong>딱 2종만</strong> 둔다.</p>
+
+<h3>① 📊 해설 — "이 뉴스, 어디에 영향 줘?"</h3>
+<p>이 게임의 메인 상품이자 교육 장치. 내가 받은 뉴스(또는 채팅에서 들은 뉴스)를 섹터로 번역해준다.</p>
+<div class="mock"><b>📰 내 뉴스</b>
+ 중국 정부가 자국민의 한국 단체관광을
+ 당분간 제한하기로 했습니다.
+
+<b>🏪 정보소 · 해설 사기</b>
+
+ <span class="g1">🥉 찌라시</span>            1만원
+ "관광객이 줄면… 음, 비행기 쪽 아닐까?"
+ <span class="dim">→ 여행·항공 (반은 맞고 반은 놓쳤다)</span>
+
+ <span class="g2">🥈 증권가 리포트</span>      5만원
+ "면세점 매출 비중이 큰 화장품이 타격을 받습니다."
+ <span class="dim">→ 화장품 (핵심 하나는 짚었다)</span>
+
+ <span class="g3">🥇 애널리스트 보고서</span>   20만원
+ "화장품·엔터·여행 세 섹터가 직접 영향권입니다.
+  특히 엔터는 공연·방송 규제까지 겹칩니다."
+ <span class="dim">→ 화장품 · 엔터 · 여행 (전부 정확)</span></div>
+
+<div class="card ok">
+  <h4>여기가 도감과 만나는 지점</h4>
+  <p>섹터 도감의 <strong>화장품</strong> 항목에 이렇게 적혀 있다 — <em>"중국과 사이가 나빠지면 약해져요."</em> 이걸 읽어둔 아이는 <strong>20만원짜리 보고서를 사지 않고도 같은 결론에 도달한다.</strong> 그리고 그 20만원을 주식 사는 데 쓴다.</p>
+  <p style="margin-top:8px;color:var(--tx)">발표 문장 — <em>"저희 게임에서 공부는 강요되지 않습니다. 공부한 아이가 그냥 더 잘합니다."</em></p>
+</div>
+
+<h3>② 🔭 정찰 — "쟤는 뭘 샀을까?"</h3>
+<p>소셜 게임의 심리전 상품. 채팅턴과 직결된다. 남이 뭘 샀는지 알면 <em>"쟤가 뭔가 아는구나"</em> 또는 <em>"쟤 망하겠는데"</em>를 판단할 수 있다.</p>
+<div class="mock"><b>🏪 정보소 · 정찰 사기</b>
+
+ <span class="g1">🥉 소문</span>              1만원
+ "누군가 화장품에 크게 걸었대."
+ <span class="dim">→ 누군지는 모른다. 사실이 아닐 수도 있다</span>
+
+ <span class="g2">🥈 귀동냥</span>            5만원
+ "민준이가 화장품을 40만원어치 샀어."
+ <span class="dim">→ 한 명의 실제 보유 현황</span>
+
+ <span class="g3">🥇 전체 현황</span>          20만원
+ 민준 화장품 40만 · 서연 반도체 30만
+ 지호 현금 100만 · 하윤 엔터 25만 …
+ <span class="dim">→ 전원 공개</span></div>
+
+<div class="card warn">
+  <h4>정보소 밸런스 — 부익부를 반드시 막아야 한다</h4>
+  <p>돈 많은 사람이 20만원짜리를 계속 사면 1등이 독주하고 나머지는 흥미를 잃는다. 두 장치를 건다.</p>
+  <ul>
+    <li><strong>라운드당 구매 2회 제한</strong> — 무엇을 살지 고민하게 만든다. 이 고민 자체가 재미다</li>
+    <li><strong>자산 하위권 할인</strong> — 하위 3명은 50% 할인. 뒤처져도 따라잡을 길이 있어야 끝까지 한다</li>
+  </ul>
+</div>
+
+<h2><span class="num">SECTION 04</span>도감 — 게임 공략집이 곧 교육자료다</h2>
+<p class="lead">도감을 "교육 코너"로 만들면 아무도 안 읽는다. <strong>게임을 더 잘하기 위해 읽는 공략집</strong>으로 만들면 아이가 알아서 읽는다. 그 공략집의 내용이 주식 기초 지식일 뿐이다.</p>
+
+<div class="codex">
+  <div class="cx">
+    <div class="ic">📕</div><div class="t">게임의 규칙</div>
+    <div class="d">어떻게 하는 게임인지. 라운드 구조, 정보소 사용법, 채팅 방법.</div>
+    <span class="tag open">처음부터 열림</span>
+  </div>
+  <div class="cx">
+    <div class="ic">📦</div><div class="t">섹터 도감</div>
+    <div class="d"><strong>공략의 핵심.</strong> 8개 섹터가 각각 어떤 소식에 강하고 약한지.</div>
+    <span class="tag open">처음부터 열림</span>
+  </div>
+  <div class="cx">
+    <div class="ic">📖</div><div class="t">용어 사전</div>
+    <div class="d">주식 · 주가 · 수익률 · 분산투자 · 낙폭 · 시가총액. 게임 화면 곳곳에서 바로 연결.</div>
+    <span class="tag open">처음부터 열림</span>
+  </div>
+  <div class="cx">
+    <div class="ic">🏢</div><div class="t">기업 도감</div>
+    <div class="d">게임에서 <strong>보유해본</strong> 회사만 열린다. 무엇으로 돈을 버는지.</div>
+    <span class="tag lock">해금형</span>
+  </div>
+  <div class="cx">
+    <div class="ic">🗓</div><div class="t">사건 도감</div>
+    <div class="d">게임에서 <strong>겪어본</strong> 사건만 열린다. 실제로 무슨 일이었고 어떤 섹터가 움직였는지.</div>
+    <span class="tag lock">해금형</span>
+  </div>
+  <div class="cx">
+    <div class="ic">💡</div><div class="t">투자의 기본</div>
+    <div class="d">분산투자 · 현금도 하나의 선택 · 남 말 믿지 않기 · 잃지 않는 것의 가치.</div>
+    <span class="tag lock">단계 해금</span>
+  </div>
+</div>
+
+<h3>섹터 도감이 실제로 어떻게 생겨야 하나</h3>
+<div class="mock"><b>💄 화장품</b>                          <span class="dim">도감 3 / 8</span>
+
+ <b>어떤 회사가 있어?</b>
+ 아모레퍼시픽, LG생활건강.
+ 화장품을 만들어서 팔아요. 특히 <b>중국에 많이 팔아요.</b>
+
+ <span class="up">💪 이럴 때 강해요</span>
+  · 중국 관광객이 한국에 많이 올 때
+  · 한국 문화(K뷰티)가 인기일 때
+
+ <span class="dn">💧 이럴 때 약해요</span>
+  · 중국과 사이가 나빠질 때
+  · 사람들이 밖에 잘 안 나갈 때
+
+ <b>📌 내가 겪어본 사건</b>
+  ✓ 사드 배치·한한령   ✓ 코로나 확산
+  <span class="dim">🔒 메르스 유행 (아직 못 겪음)</span></div>
+
+<div class="card info">
+  <h4>도감의 설계 원칙 4가지</h4>
+  <p><strong>① 도감은 경기장 밖에 있다 — 예습과 복습의 공간.</strong> 게임 중에는 도감을 열 수 없다(열 이유도 없다 — 3분 준비턴에 도감을 읽으면 그 라운드는 버리는 것이다). 대신 <strong>경기 전</strong>에 읽어둔 아이가 유리하고, <strong>경기 후</strong> 결과 화면이 "왜 그랬는지"를 도감으로 안내한다. 스포츠의 전술 노트와 같다 — 경기 중에 읽는 게 아니라, 읽고 들어가는 것.</p>
+  <p><strong>② 공략에 필요한 건 처음부터 열려 있어야 한다.</strong> 섹터 도감·용어 사전·규칙이 잠겨 있으면 예습 자체가 불가능하다. 기업·사건 도감만 해금형으로 둬서 수집욕을 만든다.</p>
+  <p><strong>③ 한 항목 5문장 이내.</strong> 초등학생이다. 아이콘과 짧은 문장, 강할 때/약할 때 두 줄이 핵심이다.</p>
+  <p><strong>④ 도감 완성률이 계정 성장과 연결된다.</strong> <code>기업 12/16 · 사건 8/12</code>가 채워지는 게 보여야 모으고 싶어진다.</p>
+  <p style="margin-top:8px;color:var(--tx3);font-size:13px">게임 중 허용하는 건 <strong>툴팁 한 줄</strong>까지만 — 결과 화면의 <code>낙폭</code> 같은 단어를 길게 누르면 한 문장 설명이 뜨는 정도. 전체 도감 열람은 로비에서만.</p>
+</div>
+
+<h3>용어 사전에 들어갈 것 (게임에 실제로 등장하는 것만)</h3>
+<table>
+  <tr><th style="width:24%">단계</th><th>용어</th></tr>
+  <tr><td><strong>1단계 · 기본</strong></td><td>주식 / 주가 / 회사의 조각 / 사기(매수) · 팔기(매도) / 현금</td></tr>
+  <tr><td><strong>2단계 · 게임하며</strong></td><td>수익률 / 평가금액 / 섹터 / 시가총액 / 상장</td></tr>
+  <tr><td><strong>3단계 · 잘하려면</strong></td><td>분산투자 / 낙폭 / 손절 / 리스크 / 현금 비중</td></tr>
+  <tr><td><strong>4단계 · 실전 준비</strong></td><td>지정가 · 시장가 / 체결 / 배당 / 장기투자</td></tr>
+</table>
+<p>4단계는 <strong>실제 투자 파트(제안서)에서 쓰는 용어</strong>다. 게임 도감이 실전 기능의 온보딩을 미리 해주는 셈이다.</p>
+
+<h2><span class="num">SECTION 05</span>예습 → 경기 → 복습 루프</h2>
+<p class="lead">"읽으면 유리하다"만으로는 부족하다. 경기 <strong>전</strong>과 <strong>후</strong>, 아이가 도감을 펼치게 되는 순간을 설계한다.</p>
+
+<h3>경기 전 — 예습을 유도하는 장치</h3>
+<table>
+  <tr><th style="width:26%">장치</th><th>내용</th></tr>
+  <tr><td><strong>매칭 대기 화면</strong></td><td>대기 중 <em>"오늘의 상식"</em> 카드 한 장이 뜬다. 3초, 한 문장이라 부담이 없다. 탭하면 해당 도감 항목으로</td></tr>
+  <tr><td><strong>로비의 공략 배너</strong></td><td><em>"이기고 싶으면 섹터 도감부터"</em> — 게임 시작 버튼 옆에 도감 진입점을 나란히 둔다</td></tr>
+  <tr><td><strong>완성률 표시</strong></td><td><code>기업 12/16 · 사건 8/12</code>. 빈칸이 보여야 채우고 싶어진다</td></tr>
+  <tr><td><strong>첫 판 전 미니 브리핑</strong></td><td>첫 게임 시작 전에만 섹터 8개를 한 장짜리 카드로 훑어준다 (30초, 건너뛰기 가능)</td></tr>
+</table>
+
+<h3>경기 후 — 복습으로 연결하는 장치</h3>
+<table>
+  <tr><th style="width:26%">장치</th><th>내용</th></tr>
+  <tr><td><strong>결과 화면 링크</strong></td><td>패배 원인이 된 섹터를 결과 화면에서 바로 도감으로 연결. <em>"화장품이 왜 떨어졌는지 볼래?"</em> — <strong>가장 궁금한 순간은 진 직후다</strong></td></tr>
+  <tr><td><strong>새 항목 해금 알림</strong></td><td>이번 판에 처음 보유한 기업, 처음 겪은 사건이 <code>📖 도감에 새 항목이 추가됐어요!</code>로 뜬다. 결과 화면에서 바로 열람</td></tr>
+  <tr><td><strong>다음 판 예고</strong></td><td>복습을 마치면 <em>"다음 판에선 이 지식을 써먹어 보자"</em> → 다시 매칭으로. 복습이 재도전 동기가 된다</td></tr>
+</table>
+
+<div class="card ok">
+  <h4>이 루프가 만드는 것</h4>
+  <p><code>예습(도감) → 경기 → 패배/승리 → 복습(도감) → 재도전</code> — 게임의 리트라이 루프에 공부가 끼어 있는 구조다. 아이는 "공부하고 게임한다"가 아니라 <strong>"이기려고 읽는다".</strong> 그리고 정보소 구매 화면의 <em>"섹터 도감을 미리 읽어두면 다음 판엔 무료로 알 수 있어요"</em> 한 줄이 다음 예습을 예약한다.</p>
+</div>
+
+<h2><span class="num">SECTION 06</span>왜 이 설계가 심사에서 강한가</h2>
+<div class="card ok">
+  <h4>세 가지를 동시에 답한다</h4>
+  <p><strong>① "교육 서비스라면서 게임만 하는 것 아니냐"</strong><br>
+  → 도감은 게임 공략집입니다. 경기 전에 읽어둔 아이가 이기고, 진 아이는 결과 화면에서 "왜 졌는지"를 도감으로 복습합니다. <em>예습–경기–복습 루프에 공부가 끼어 있어서, 강요하지 않아도 읽게 됩니다.</em></p>
+  <p style="margin-top:10px"><strong>② "정보를 돈 주고 사는 건 사행성 아니냐"</strong><br>
+  → 저희 정보소는 정답을 팔지 않습니다. <strong>해석</strong>을 팝니다. 그리고 스스로 해석할 수 있는 아이는 살 필요가 없습니다. 오히려 <em>"공짜 정보는 없고, 싼 정보는 대개 틀린다"</em>를 가르칩니다.</p>
+  <p style="margin-top:10px"><strong>③ "리딩방 피해 예방이랑 무슨 상관이냐"</strong><br>
+  → 아이는 이 게임에서 만원짜리 찌라시를 믿고 돈을 잃어봅니다. <strong>실제 계좌에서 겪기 전에요.</strong></p>
+</div>
+
+<h2><span class="num">SECTION 07</span>아직 정해야 할 것</h2>
+<table>
+  <tr><th style="width:30%">항목</th><th>내용</th></tr>
+  <tr><td><strong>뉴스-사건 연결 강도</strong></td><td>8개 뉴스 중 몇 개를 진짜 전조로 둘지. 너무 많으면 예측이 쉽고, 너무 적으면 뉴스가 무의미해진다 (3~4개 권장)</td></tr>
+  <tr><td><strong>해설의 대상</strong></td><td>내 뉴스만 해설해주는지, 채팅에서 들은 남의 뉴스도 해설해주는지 — 후자면 채팅의 가치가 크게 올라간다</td></tr>
+  <tr><td><strong>찌라시의 오답률</strong></td><td>🥉가 몇 %나 틀릴지. 너무 자주 틀리면 아무도 안 사고, 너무 맞으면 등급 차이가 무의미해진다</td></tr>
+  <tr><td><strong>도감 집필량</strong></td><td>섹터 8 + 기업 16 + 사건 12 + 용어 약 20 = <strong>56개 항목.</strong> 각 5문장이면 감당 가능하지만 일정에 반영해야 한다</td></tr>
+  <tr><td><strong>도감의 위치</strong></td><td>게임 로비에만 둘지, 앱 홈에서도 독립 진입할 수 있게 할지 — <strong>홈 진입을 권장</strong>: 부모가 "우리 애가 이런 걸 배워요"를 확인하는 화면이 되고, 심사 시연에서도 교육성을 보여주는 진입점이 된다</td></tr>
+</table>
+
+<footer>
+  타임머신 마켓 · 정보 시스템 &amp; 도감 설계 · 2026-08-07 ·
+  핵심 원칙: 정보소는 정답이 아니라 <strong>해석</strong>을 판다 → 공부한 아이는 정보를 살 필요가 없다 → 도감이 공략집이 된다
+</footer>
+
+</div>
+</body>
+</html>
