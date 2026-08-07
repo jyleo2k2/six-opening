@@ -15,7 +15,7 @@ export interface LobbyInfo {
   hostId: string;
   min: number;
   max: number;
-  players: { id: string; nickname?: string }[];
+  players: { id: string; nickname?: string; isBot?: boolean }[];
 }
 
 export interface PhaseInfo {
@@ -129,6 +129,7 @@ export function useGameRoom(roomId: string, nickname: string) {
     error,
     clearRejected: useCallback(() => setRejected(null), []),
     start: useCallback(() => send('start'), [send]),
+    addBot: useCallback(() => send('addBot'), [send]),
     ready: useCallback(() => send('ready'), [send]),
     chat: useCallback((text: string) => send('chat', { text }), [send]),
     emote: useCallback((kind: Emote) => send('emote', { kind }), [send]),
