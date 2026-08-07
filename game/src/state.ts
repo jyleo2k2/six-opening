@@ -1,64 +1,57 @@
-import { STARTER_DECK } from '../data/decks';
-import { expandDomain } from './domain';
-import { refillHand } from './hand';
+import { COMPANIES, EVENTS } from '../data';
+import { dealNews } from './news';
+import { shuffle } from './rng';
 import { RULES } from './rules';
-import { SECTORS, type GameState, type PlayerState, type Sector } from './types';
+import type { GameState, PlayerState } from './types';
 
-export interface NewGameOptions {
-  seed?: number;
-  playerIds?: [string, string];
-  decks?: [string[], string[]];
+export interface SetupPlayer {
+  id: string;
+  nickname: string;
 }
 
-function createPlayer(id: string, deck: string[]): PlayerState {
-  return {
-    id,
-    cash: { KRW: RULES.START_KRW, USD: RULES.START_USD },
-    deck: [...deck],
-    hand: [],
-    field: [],
-    swapUsedThisTurn: false,
-    skillUsedThisTurn: false,
-  };
-}
-
-function neutralMods(): Record<Sector, number> {
-  return Object.fromEntries(SECTORS.map((s) => [s, 1])) as Record<Sector, number>;
+export interface SetupOptions {
+  seed: number;
+  players: SetupPlayer[];
 }
 
 /**
- * 게임 시작 — 기획서 §3.
- *   · 각자 원화 1,000,000 + $1,000, 덱 30장
- *   · 선공/후공은 호출자가 정한다(랜덤 매칭은 서버 책임)
- *   · 시작 시 패가 5종류가 되도록 드로우
- *   · 영역 전개 1회 발동 (Q4 추천안)
+ * 새 판 생성 — 이벤트 5개 비복원 추첨(비공개), 시세판 초기화, 1턴 뉴스 배정까지.
+ * 이후의 모든 상태 변화는 reduce()로만 일어난다.
  */
-export function createInitialState(options: NewGameOptions = {}): GameState {
-  const { seed = Date.now() & 0x7fffffff, playerIds = ['p0', 'p1'], decks } = options;
+export function createInitialState(opts: SetupOptions): GameState {
+  const n = opts.players.length;
+  if (n < RULES.minPlayers || n > RULES.maxPlayers) {
+    throw new Error(`인원은 ${RULES.minPlayers}~${RULES.maxPlayers}명이다 (현재 ${n}명)`);
+  }
+  if (new Set(opts.players.map((p) => p.id)).size !== n) {
+    throw new Error('플레이어 id가 겹친다');
+  }
+
+  const rng = { seed: opts.seed | 0 };
+
+  const players: PlayerState[] = opts.players.map((p) => ({
+    id: p.id,
+    nickname: p.nickname,
+    cash: RULES.seedCash,
+    holdings: [],
+    news: [],
+    forecasts: [],
+    infoBoughtThisTurn: false,
+  }));
 
   const state: GameState = {
-    players: [
-      createPlayer(playerIds[0], decks?.[0] ?? STARTER_DECK),
-      createPlayer(playerIds[1], decks?.[1] ?? STARTER_DECK),
-    ],
-    turn: 0,
-    round: 1,
-    current: 0,
-    fxRate: RULES.FX_RATE,
-    priceMods: neutralMods(),
-    activeEventId: null,
+    poolId: '2011-2020',
+    players,
+    turn: 1,
+    phase: 'prep',
+    prices: Object.fromEntries(COMPANIES.map((c) => [c.id, c.basePrice])),
+    // 역사 순서와 무관한 랜덤 배치 — 코로나 다음에 대지진이 올 수 있다 (기획서 §5.1)
+    eventQueue: shuffle(rng, EVENTS.map((e) => e.id)).slice(0, RULES.turns),
     eventLog: [],
-    rng: { seed },
-    finished: false,
+    purchases: [],
+    rng,
   };
 
-  expandDomain(state);
-  refillHand(state.players[0], state);
-  refillHand(state.players[1], state);
-
+  dealNews(state);
   return state;
 }
-
-export const currentPlayer = (state: GameState): PlayerState => state.players[state.current];
-export const opponent = (state: GameState): PlayerState =>
-  state.players[state.current === 0 ? 1 : 0];

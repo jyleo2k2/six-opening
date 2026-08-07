@@ -2,7 +2,7 @@
   "name": "six-opening",
   "version": "0.1.0",
   "private": true,
-  "description": "키즈:키움 — 자녀용 영웅문 (PvP 카드게임 · 도감/뉴스 · 투자 제안서)",
+  "description": "키즈:키움 — 자녀용 영웅문 (히스토리 투자 시뮬 · 도감/뉴스 · 투자 제안서)",
   "workspaces": [
     "game",
     "web"

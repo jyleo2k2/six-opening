@@ -6,8 +6,8 @@ node_modules/
 .env
 .env*.local
 
-# 로컬 SQLite (시연 데이터)
-data/
+# 로컬 SQLite (시연 데이터) — 루트만. 앵커 없이 쓰면 game/data(밸런스 데이터)까지 ignore된다
+/data/
 *.db
 
 # 작업 부산물. 쿠키·다운로드 자료 등 리포에 들어가면 안 되는 것들

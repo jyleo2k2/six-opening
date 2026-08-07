@@ -1,34 +1,28 @@
-import { getStock } from '../data/index';
-import { currentPrice, toKRW } from './pricing';
-import { MARKET_CURRENCY, type GameState, type PlayerState } from './types';
+import type { GameState, PlayerState, Standing } from './types';
 
-/**
- * 총자산(원) = 원화 현금 + 달러 현금 × 기준환율
- *            + Σ 한국주식 평가금액 + Σ 미국주식 평가금액 × 기준환율
- * 기획서 §2.
- */
-export function totalAssetKRW(player: PlayerState, state: GameState): number {
-  let sum = player.cash.KRW + player.cash.USD * state.fxRate;
-
-  for (const holding of player.field) {
-    const card = getStock(holding.cardId);
-    const value = currentPrice(card, state) * holding.qty;
-    sum += toKRW(value, MARKET_CURRENCY[card.market], state.fxRate);
-  }
-  return Math.round(sum);
+/** 총자산(원) = 현금 + Σ 보유 수량 × 현재가 */
+export function totalAsset(state: GameState, player: PlayerState): number {
+  return player.holdings.reduce(
+    (sum, h) => sum + h.qty * (state.prices[h.companyId] ?? 0),
+    player.cash,
+  );
 }
 
-export interface Settlement {
-  totals: [number, number];
-  /** 승자 인덱스. 동점이면 null — 기획서 Q10 추천안 = 무승부 */
-  winner: 0 | 1 | null;
+/** 총자산 순위 — 동점은 공동 순위 (기획서 §6) */
+export function standings(state: GameState): Standing[] {
+  const rows = state.players.map((p) => ({
+    playerId: p.id,
+    nickname: p.nickname,
+    totalAsset: totalAsset(state, p),
+  }));
+  rows.sort((a, b) => b.totalAsset - a.totalAsset);
+  return rows.map((row) => ({
+    ...row,
+    rank: 1 + rows.filter((other) => other.totalAsset > row.totalAsset).length,
+  }));
 }
 
-export function settle(state: GameState): Settlement {
-  const totals: [number, number] = [
-    totalAssetKRW(state.players[0], state),
-    totalAssetKRW(state.players[1], state),
-  ];
-  const winner = totals[0] === totals[1] ? null : totals[0] > totals[1] ? 0 : 1;
-  return { totals, winner };
+/** 5턴 종료 정산 — 총자산 최다가 우승 */
+export function settle(state: GameState): { standings: Standing[] } {
+  return { standings: standings(state) };
 }
