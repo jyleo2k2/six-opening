@@ -1,9 +1,11 @@
+import { getCompany } from '../../data';
+import { RULES } from '../rules';
 import type { Action, GameState } from '../types';
 
 /**
- * 매수·매도 (기획서 §3.2) — 시장가 즉시 체결, 수수료 없음, 정수 주.
- * 공매도·대출 없음: 현금과 보유 주식이 전부다.
- * reduce()가 만든 사본을 변형한다. 에러면 사유 문자열, 성공이면 null.
+ * 금액 기반 매매 (기획서 §3.2) — 만원 단위 슬라이더 → 소수점 주식.
+ * 시장가 즉시 체결, 수수료 없음, 공매도·대출 없음. 사건만 가격을 움직인다.
+ * 금액이 잔고·보유를 넘으면 가능한 만큼으로 줄여 체결한다(슬라이더 UX).
  */
 export function buy(state: GameState, action: Extract<Action, { type: 'buy' }>): string | null {
   if (state.phase !== 'prep') return '준비 페이즈에만 매매할 수 있다';
@@ -11,23 +13,21 @@ export function buy(state: GameState, action: Extract<Action, { type: 'buy' }>):
   const player = state.players.find((p) => p.id === action.playerId);
   if (!player) return '없는 플레이어다';
 
-  if (!Number.isInteger(action.qty) || action.qty <= 0) return '수량은 1 이상의 정수다';
-
   const price = state.prices[action.companyId];
   if (price === undefined) return '없는 종목이다';
 
-  const cost = price * action.qty;
-  if (player.cash < cost) return '현금이 부족하다';
+  if (!Number.isFinite(action.amount)) return '금액이 이상하다';
+  const amount = Math.min(Math.floor(action.amount), player.cash);
+  if (amount < RULES.minTradeAmount) return `최소 ${RULES.minTradeAmount.toLocaleString()}원부터 살 수 있다`;
 
-  player.cash -= cost;
+  player.cash -= amount;
   const holding = player.holdings.find((h) => h.companyId === action.companyId);
-  if (holding) {
-    // 평균 매수 단가 — 가중평균
-    holding.avgCost = (holding.avgCost * holding.qty + cost) / (holding.qty + action.qty);
-    holding.qty += action.qty;
-  } else {
-    player.holdings.push({ companyId: action.companyId, qty: action.qty, avgCost: price });
-  }
+  if (holding) holding.qty += amount / price;
+  else player.holdings.push({ companyId: action.companyId, qty: amount / price });
+
+  const sector = getCompany(action.companyId).sector;
+  if (!player.boughtSectors.includes(sector)) player.boughtSectors.push(sector);
+  if (!player.heldEver.includes(action.companyId)) player.heldEver.push(action.companyId);
   return null;
 }
 
@@ -37,18 +37,24 @@ export function sell(state: GameState, action: Extract<Action, { type: 'sell' }>
   const player = state.players.find((p) => p.id === action.playerId);
   if (!player) return '없는 플레이어다';
 
-  if (!Number.isInteger(action.qty) || action.qty <= 0) return '수량은 1 이상의 정수다';
-
-  const holding = player.holdings.find((h) => h.companyId === action.companyId);
-  if (!holding) return '보유하지 않은 종목이다';
-  if (holding.qty < action.qty) return '보유 수량보다 많이 팔 수 없다';
-
   const price = state.prices[action.companyId];
   if (price === undefined) return '없는 종목이다';
 
-  player.cash += price * action.qty;
-  holding.qty -= action.qty;
-  if (holding.qty === 0) {
+  const holding = player.holdings.find((h) => h.companyId === action.companyId);
+  if (!holding) return '보유하지 않은 종목이다';
+
+  if (!Number.isFinite(action.amount)) return '금액이 이상하다';
+  const holdingValue = holding.qty * price;
+  const amount = Math.min(Math.floor(action.amount), holdingValue);
+  if (amount < RULES.minTradeAmount && amount < holdingValue) {
+    return `최소 ${RULES.minTradeAmount.toLocaleString()}원부터 팔 수 있다`;
+  }
+
+  holding.qty -= amount / price;
+  player.cash += amount;
+  // 잔여 평가 100원 미만은 정리 (부동소수 먼지)
+  if (holding.qty * price < RULES.dustValue) {
+    player.cash += Math.max(0, Math.round(holding.qty * price));
     player.holdings = player.holdings.filter((h) => h !== holding);
   }
   return null;

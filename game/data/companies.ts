@@ -1,133 +1,27 @@
 import type { Company } from '../src/types';
 
 /**
- * 종목 16 — 8섹터 × 2 (기획서 §7.1).
- *
- * 전부 익명 가상 회사다. 실존 기업명·티커·상표 연상 네이밍 금지 (game/AGENTS.md).
- * 시작가는 5,000~100,000원 — 시드 100만원으로 최저가 ~120주, 최고가 ~11주가 잡히는 스케일.
- * 소개 문구는 아이 눈높이 편집 텍스트라 검수 대상이다. 문구 확장은 트랙 ③ 공급 · 트랙 ① 승인.
+ * 실명 16종목 — 8섹터 × 2 (기획서 §7, v2에서 실명 확정).
+ * 시작가는 시연 시점 근사가(정적 팩) — 게임은 실시세를 호출하지 않는다.
+ * 소개는 사실 서술만. 추천·전망·수익 보장 표현 금지 (콘텐츠 정책).
  */
 export const COMPANIES: readonly Company[] = [
-  // 반도체/IT
-  {
-    id: 'hanbit-semi',
-    name: '한빛반도체',
-    sector: 'semi',
-    basePrice: 86_000,
-    blurb: '컴퓨터와 스마트폰의 두뇌가 되는 메모리칩을 만들어요.',
-  },
-  {
-    id: 'mir-chips',
-    name: '미르칩스',
-    sector: 'semi',
-    basePrice: 41_000,
-    blurb: '게임기와 서버에 들어가는 특수 칩을 설계해요.',
-  },
-  // 자동차
-  {
-    id: 'dallim-motors',
-    name: '달림모터스',
-    sector: 'auto',
-    basePrice: 62_000,
-    blurb: '국민 승용차부터 전기차까지 만드는 완성차 회사예요.',
-  },
-  {
-    id: 'burung-auto',
-    name: '부릉오토',
-    sector: 'auto',
-    basePrice: 23_500,
-    blurb: '자동차 부품을 만들어 완성차 회사에 납품해요.',
-  },
-  // 정유/화학
-  {
-    id: 'bulkkot-oil',
-    name: '불꽃정유',
-    sector: 'chem',
-    basePrice: 54_000,
-    blurb: '원유를 들여와 휘발유·경유로 정제해서 팔아요.',
-  },
-  {
-    id: 'mujigae-chem',
-    name: '무지개화학',
-    sector: 'chem',
-    basePrice: 33_000,
-    blurb: '플라스틱과 배터리 소재의 원료를 만들어요.',
-  },
-  // 바이오/제약
-  {
-    id: 'tuntun-pharm',
-    name: '튼튼제약',
-    sector: 'bio',
-    basePrice: 28_000,
-    blurb: '감기약부터 백신까지 만드는 제약 회사예요.',
-  },
-  {
-    id: 'saessak-bio',
-    name: '새싹바이오',
-    sector: 'bio',
-    basePrice: 11_500,
-    blurb: '새로운 치료제 개발에 도전하는 바이오 벤처예요.',
-  },
-  // 항공/여행
-  {
-    id: 'gureum-air',
-    name: '구름항공',
-    sector: 'travel',
-    basePrice: 17_500,
-    blurb: '해외 여러 도시로 비행기를 띄우는 항공사예요.',
-  },
-  {
-    id: 'sopung-tour',
-    name: '소풍여행',
-    sector: 'travel',
-    basePrice: 8_200,
-    blurb: '패키지 여행 상품을 파는 여행사예요.',
-  },
-  // 엔터/콘텐츠
-  {
-    id: 'dudung-ent',
-    name: '두둥엔터',
-    sector: 'enter',
-    basePrice: 36_000,
-    blurb: '아이돌 그룹을 키우고 콘서트를 여는 기획사예요.',
-  },
-  {
-    id: 'kkumnamu-studio',
-    name: '꿈나무스튜디오',
-    sector: 'enter',
-    basePrice: 14_000,
-    blurb: '드라마와 예능을 만드는 제작사예요.',
-  },
-  // 방산
-  {
-    id: 'bangpae-heavy',
-    name: '방패중공업',
-    sector: 'defense',
-    basePrice: 47_000,
-    blurb: '나라를 지키는 미사일과 장갑차를 만들어요.',
-  },
-  {
-    id: 'maeeye-precision',
-    name: '매의눈정밀',
-    sector: 'defense',
-    basePrice: 31_500,
-    blurb: '하늘과 바다를 살피는 레이더와 감시 장비를 만들어요.',
-  },
-  // 은행/금융
-  {
-    id: 'deundeun-bank',
-    name: '든든은행',
-    sector: 'finance',
-    basePrice: 9_900,
-    blurb: '예금을 받고 대출을 해주는 시중은행이에요.',
-  },
-  {
-    id: 'hwaljjak-sec',
-    name: '활짝증권',
-    sector: 'finance',
-    basePrice: 15_500,
-    blurb: '사람들이 주식을 사고팔 수 있게 도와주는 증권사예요.',
-  },
+  { id: 'sec1', name: '삼성전자', sector: 'semi', basePrice: 71_000, blurb: '반도체와 스마트폰을 만드는 국내 최대 전자 기업' },
+  { id: 'sec2', name: 'SK하이닉스', sector: 'semi', basePrice: 178_000, blurb: '메모리 반도체 전문 기업' },
+  { id: 'ent1', name: '하이브', sector: 'ent', basePrice: 205_000, blurb: 'BTS가 소속된 엔터테인먼트 회사' },
+  { id: 'ent2', name: 'JYP', sector: 'ent', basePrice: 68_000, blurb: '트와이스·스트레이키즈의 소속사' },
+  { id: 'net1', name: '네이버', sector: 'net', basePrice: 195_000, blurb: '검색·쇼핑·웹툰을 운영하는 인터넷 회사' },
+  { id: 'net2', name: '카카오', sector: 'net', basePrice: 48_000, blurb: '카카오톡을 만드는 회사' },
+  { id: 'trv1', name: '대한항공', sector: 'trv', basePrice: 23_000, blurb: '우리나라 대표 항공사' },
+  { id: 'trv2', name: '하나투어', sector: 'trv', basePrice: 58_000, blurb: '해외 패키지 여행 1위 여행사' },
+  { id: 'bio1', name: '셀트리온', sector: 'bio', basePrice: 182_000, blurb: '바이오 의약품을 개발하는 회사' },
+  { id: 'bio2', name: '삼성바이오로직스', sector: 'bio', basePrice: 780_000, blurb: '의약품을 대신 생산해 주는 회사' },
+  { id: 'cos1', name: '아모레퍼시픽', sector: 'cos', basePrice: 82_000, blurb: '설화수 등을 만드는 화장품 회사' },
+  { id: 'cos2', name: 'LG생활건강', sector: 'cos', basePrice: 310_000, blurb: '화장품과 생활용품을 만드는 회사' },
+  { id: 'car1', name: '현대차', sector: 'car', basePrice: 210_000, blurb: '우리나라 대표 자동차 회사' },
+  { id: 'car2', name: '기아', sector: 'car', basePrice: 95_000, blurb: '현대차그룹의 자동차 회사' },
+  { id: 'bat1', name: 'LG화학', sector: 'bat', basePrice: 320_000, blurb: '전기차 배터리 소재를 만드는 회사' },
+  { id: 'bat2', name: '삼성SDI', sector: 'bat', basePrice: 250_000, blurb: '전기차·전자기기용 배터리 회사' },
 ] as const;
 
 export function getCompany(id: string): Company {

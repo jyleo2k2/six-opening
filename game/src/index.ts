@@ -3,9 +3,10 @@
  * 판정을 다른 곳에 복제하지 말 것.
  */
 export * from './types';
-export { RULES, infoTier, type InfoTierDef } from './rules';
+export { RULES } from './rules';
 export { createInitialState, type SetupOptions, type SetupPlayer } from './state';
 export { reduce } from './actions';
-export { settle, standings, totalAsset } from './settle';
+export { settle, standings, awards, totalAsset } from './settle';
+export { infoPrice, isTrailing } from './info';
 export { viewFor } from './view';
 export { nextFloat, nextInt, nextRange, pick, shuffle } from './rng';

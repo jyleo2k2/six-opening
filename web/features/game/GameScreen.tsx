@@ -1,610 +1,281 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { EMOTES, EMOTE_LABEL, RULES, SECTOR_LABEL, type Emote, type GameView } from 'game';
-import { COMPANIES, getEvent } from 'game/data';
-import { won } from '@/lib/format';
-import { useGameRoom, type FeedLine, type LobbyInfo } from './useGameRoom';
+import { RULES } from 'game';
+import { notoKr, rajdhani } from './fonts';
+import { EndFlow } from './EndFlow';
+import { CodexOverlay, InfoShop, NewsModal, TradeSheet } from './Overlays';
+import { BottomBar, ChatScreen, EventScreen, FloatingEmotes, MarketScreen, RankScreen, TopBar } from './PlayScreens';
+import { useGameRoom, type LobbyInfo } from './useGameRoom';
+
+const KEYFRAMES = `
+@keyframes ykPop{from{transform:translateY(16px) scale(.95);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+@keyframes ykSiren{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes ykFloat{from{transform:translateY(0) scale(1);opacity:1}to{transform:translateY(-240px) scale(1.4);opacity:0}}
+@keyframes ykSpin{to{transform:rotate(360deg)}}
+@keyframes ykPulse{0%,100%{box-shadow:0 0 16px rgba(77,200,255,.45)}50%{box-shadow:0 0 34px rgba(77,200,255,.85)}}
+.yk input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:rgba(120,170,255,.25);outline:none}
+.yk input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#4dc8ff;border:3px solid #0d1220;box-shadow:0 0 10px rgba(77,200,255,.8);cursor:pointer}
+`;
 
 /**
- * 대전 화면 — 서버가 보낸 내 뷰(GameView)를 그대로 그린다.
- * 이벤트 큐·타인 뉴스·타인 보유는 애초에 수신되지 않는다 (기획서 §9).
+ * 대전 화면 — 서버가 viewFor()로 걸러 보낸 내 뷰만 그린다 (기획서 §9).
+ * 판정 로직을 여기 쓰지 말 것 — game 패키지의 reduce()가 유일한 판정자다.
  */
-const EMOTE_ICON: Record<Emote, string> = {
-  laugh: '😆',
-  cry: '😭',
-  despair: '😩',
-  thumbsup: '👍',
-  yar: '🤩',
-};
-
-const pct = (v: number) => `${v > 0 ? '+' : ''}${(v * 100).toFixed(1)}%`;
-const pctClass = (v: number) => (v > 0 ? 'text-red-500' : v < 0 ? 'text-blue-500' : 'text-neutral-400');
-
-export function GameScreen({ roomId }: { roomId: string }) {
+export function GameScreen({ roomId, mode }: { roomId: string; mode?: 'quick' | 'regular' }) {
   const [nickname, setNickname] = useState('');
   useEffect(() => {
-    const saved = sessionStorage.getItem('kk-nickname');
-    setNickname(saved?.trim() || `주주${Math.floor(Math.random() * 90) + 10}`);
+    setNickname(sessionStorage.getItem('kk-nickname')?.trim() || '키우미');
   }, []);
 
   const room = useGameRoom(roomId, nickname);
+  const isCreator = roomId === 'new';
 
-  // 방 생성 직후 주소를 실제 방 코드로 바꿔 초대가 가능하게 한다 (리마운트 없이)
+  // 방 생성 직후 주소를 초대코드로 (리마운트 없이)
   useEffect(() => {
-    if (roomId === 'new' && room.realRoomId) {
-      window.history.replaceState(null, '', `/game/${room.realRoomId}`);
+    if (isCreator && room.realRoomId) {
+      window.history.replaceState(null, '', `/game/${room.realRoomId}${mode === 'quick' ? '?mode=quick' : ''}`);
     }
-  }, [roomId, room.realRoomId]);
+  }, [isCreator, room.realRoomId, mode]);
 
-  // 거부 사유 토스트 자동 소거
+  // ⚡ 퀵 매치 — 매칭 연출 후 자동 시작 (서버가 봇을 채운다)
+  const quickStarted = useRef(false);
+  useEffect(() => {
+    if (mode !== 'quick' || !isCreator || !room.realRoomId || quickStarted.current) return;
+    quickStarted.current = true;
+    const timer = setTimeout(() => room.start('quick'), 4600);
+    return () => clearTimeout(timer);
+  }, [mode, isCreator, room.realRoomId, room.start, room]);
+
+  // 출발 연출 — 게임 시작 직후 1회
+  const [departDone, setDepartDone] = useState(false);
+
+  // 준비 페이즈 자동 뉴스 모달
+  const [newsShownTurn, setNewsShownTurn] = useState(0);
+  const [overlay, setOverlay] = useState<'news' | 'shop' | 'codex' | null>(null);
+  const [sheetSector, setSheetSector] = useState<string | null>(null);
+  useEffect(() => {
+    if (room.view?.phase === 'prep' && room.view.turn !== newsShownTurn) {
+      setOverlay('news');
+      setNewsShownTurn(room.view.turn);
+    }
+  }, [room.view?.phase, room.view?.turn, newsShownTurn, room.view]);
+
+  // 페이즈 전환 시 오버레이·준비 상태 정리
+  const [readySent, setReadySent] = useState(false);
+  useEffect(() => {
+    setReadySent(false);
+    setSheetSector(null);
+    if (room.view?.phase !== 'prep') setOverlay(null);
+  }, [room.view?.phase, room.view?.turn]);
+
+  // 순위 변동 화살표용 — 직전 순위 스냅샷
+  const prevRanksRef = useRef<Record<string, number> | null>(null);
+  const [rankDeltaBase, setRankDeltaBase] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    if (room.view?.phase === 'rank') {
+      setRankDeltaBase(prevRanksRef.current);
+      prevRanksRef.current = Object.fromEntries(room.view.standings.map((s) => [s.playerId, s.rank]));
+    }
+  }, [room.view?.phase, room.view?.turn, room.view]);
+
+  // 거부 토스트
   useEffect(() => {
     if (!room.rejected) return;
     const timer = setTimeout(room.clearRejected, 2500);
     return () => clearTimeout(timer);
   }, [room.rejected, room.clearRejected]);
 
-  if (room.error) {
-    return (
-      <div className="flex flex-col gap-3 p-6">
-        <p className="font-semibold">방에 들어갈 수 없어요</p>
-        <p className="text-sm text-neutral-500">{room.error}</p>
-        <p className="text-xs text-neutral-400">
-          게임 서버가 켜져 있는지 확인하세요: <code>npm run server</code>
-        </p>
-        <Link href="/game" className="rounded-xl bg-neutral-900 py-3 text-center font-semibold text-white">
-          로비로 돌아가기
-        </Link>
-      </div>
-    );
-  }
-
-  if (!room.view) {
-    return room.lobby ? (
-      <WaitingRoom
-        lobby={room.lobby}
-        sessionId={room.sessionId}
-        roomCode={room.realRoomId}
-        onStart={room.start}
-        onAddBot={room.addBot}
-      />
-    ) : (
-      <p className="p-6 text-sm text-neutral-500">서버에 접속하는 중…</p>
-    );
-  }
-
-  return <Table room={room} />;
-}
-
-// ── 대기실 ────────────────────────────────────────────────────────────
-function WaitingRoom({
-  lobby,
-  sessionId,
-  roomCode,
-  onStart,
-  onAddBot,
-}: {
-  lobby: LobbyInfo;
-  sessionId: string;
-  roomCode: string;
-  onStart: () => void;
-  onAddBot: () => void;
-}) {
-  const isHost = lobby.hostId === sessionId;
-  const seatsLeft = lobby.max - lobby.players.length;
-  return (
-    <div className="flex flex-col gap-4 p-4">
-      <header>
-        <h1 className="text-xl font-bold tracking-tight">대기실</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          친구에게 초대코드를 알려주세요. {lobby.min}~{lobby.max}명이 함께해요.
-        </p>
-      </header>
-
-      <button
-        type="button"
-        onClick={() => navigator.clipboard?.writeText(roomCode)}
-        className="rounded-xl border border-dashed border-neutral-300 py-4 text-center"
-      >
-        <span className="block text-xs text-neutral-500">초대코드 (누르면 복사)</span>
-        <span className="block font-mono text-lg font-bold tracking-widest">{roomCode}</span>
-      </button>
-
-      <section className="flex flex-col gap-1.5">
-        {lobby.players.map((p, i) => (
-          <div key={p.id} className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3">
-            <span className="font-medium">
-              {p.nickname ?? `플레이어${i + 1}`}
-              {p.id === sessionId && <span className="ml-1 text-xs text-neutral-400">(나)</span>}
-            </span>
-            {p.isBot ? (
-              <span className="text-xs text-neutral-400">봇</span>
-            ) : (
-              p.id === lobby.hostId && <span className="text-xs text-amber-600">방장</span>
-            )}
-          </div>
-        ))}
-      </section>
-
-      {isHost ? (
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={onAddBot}
-            disabled={seatsLeft <= 0}
-            className="rounded-xl border border-neutral-300 py-3 font-semibold transition active:scale-[0.99] disabled:opacity-40"
-          >
-            🤖 봇 추가 {seatsLeft > 0 ? `(${seatsLeft}자리 남음)` : '(가득 참)'}
-          </button>
-          <button
-            type="button"
-            onClick={onStart}
-            disabled={lobby.players.length < lobby.min}
-            className="rounded-xl bg-neutral-900 py-4 font-semibold text-white disabled:opacity-40"
-          >
-            {lobby.players.length < lobby.min
-              ? `${lobby.min}명부터 시작할 수 있어요 — 봇을 넣어도 돼요`
-              : '게임 시작'}
-          </button>
-        </div>
-      ) : (
-        <p className="text-center text-sm text-neutral-500">방장이 시작하길 기다리는 중…</p>
-      )}
-    </div>
-  );
-}
-
-// ── 본 게임 ──────────────────────────────────────────────────────────
-function Table({ room }: { room: ReturnType<typeof useGameRoom> }) {
-  const view = room.view!;
-  const [readySent, setReadySent] = useState(false);
-  useEffect(() => setReadySent(false), [view.phase, view.turn]);
-
-  const names = useMemo(() => {
-    const map = new Map<string, string>();
-    map.set(view.me.id, view.me.nickname);
-    for (const other of view.others) map.set(other.id, other.nickname);
-    return map;
-  }, [view]);
-
-  const lastEvent = view.eventLog.at(-1);
-  const myNews = view.me.news.filter((n) => n.turn === view.turn);
-  const myForecast = view.me.forecasts.find((f) => f.turn === view.turn);
-
-  if (view.phase === 'ended') return <EndScreen view={view} />;
-
   const sendReady = () => {
     room.ready();
     setReadySent(true);
   };
 
+  const view = room.view;
+  const totalSeconds =
+    view?.phase === 'prep'
+      ? view.turn === 1
+        ? RULES.prepFirstSeconds
+        : RULES.prepSeconds
+      : view?.phase === 'chat'
+        ? RULES.chatSeconds
+        : view?.phase === 'event'
+          ? RULES.eventSeconds
+          : RULES.rankSeconds;
+
   return (
-    <div className="relative flex flex-col gap-3 p-3 pb-24">
-      {/* 헤더 — 턴·페이즈·타이머 */}
-      <header className="flex items-center justify-between rounded-xl bg-neutral-900 px-4 py-3 text-white">
-        <div>
-          <p className="text-xs text-neutral-400">
-            {view.turn}년차 / {RULES.turns}년 · {view.poolId}
-          </p>
-          <p className="font-semibold">
-            {view.phase === 'prep' ? '📰 준비 — 사고팔 시간' : view.phase === 'chat' ? '💬 작전 채팅' : '⚡ 사건 발생'}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold tabular-nums">{room.secondsLeft ?? '—'}</p>
-          <p className="text-[10px] text-neutral-400">남은 초</p>
-        </div>
-      </header>
-
-      {/* 순위 스트립 — 총자산만 공개된다 */}
-      <section className="flex gap-1.5 overflow-x-auto">
-        {view.standings.map((s) => (
-          <div
-            key={s.playerId}
-            className={`shrink-0 rounded-lg border px-2.5 py-1.5 text-xs ${
-              s.playerId === view.me.id ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-200'
-            }`}
-          >
-            <span className="font-semibold">{s.rank}위 {names.get(s.playerId) ?? '?'}</span>
-            <span className={s.playerId === view.me.id ? 'ml-1.5 text-neutral-300' : 'ml-1.5 text-neutral-500'}>
-              {won(s.totalAsset)}
-            </span>
-          </div>
-        ))}
-      </section>
-
-      {view.phase === 'prep' && (
-        <>
-          <NewsAndInfo
-            news={myNews}
-            forecast={myForecast}
-            cash={view.me.cash}
-            infoBought={view.me.infoBoughtThisTurn}
-            purchases={view.purchases.filter((p) => p.turn === view.turn)}
-            names={names}
-            meId={view.me.id}
-            onBuyInfo={room.buyInfo}
-          />
-          <PriceBoard view={view} lastChanges={lastEvent?.changes ?? {}} onBuy={room.buy} onSell={room.sell} />
-        </>
-      )}
-
-      {view.phase === 'chat' && <ChatPanel feed={room.feed} names={names} meId={view.me.id} onChat={room.chat} />}
-
-      {/* 준비 완료 + 이모티콘 — 이모티콘은 모든 페이즈 상시 (기획서 §4) */}
-      <div className="fixed inset-x-0 bottom-14 z-10 mx-auto flex max-w-md items-center gap-1.5 px-3">
-        {EMOTES.map((kind) => (
-          <button
-            key={kind}
-            type="button"
-            title={EMOTE_LABEL[kind]}
-            onClick={() => room.emote(kind)}
-            className="h-10 w-10 rounded-full border border-neutral-200 bg-white text-lg shadow-sm active:scale-90"
-          >
-            {EMOTE_ICON[kind]}
-          </button>
-        ))}
-        {(view.phase === 'prep' || view.phase === 'chat') && (
-          <button
-            type="button"
-            onClick={sendReady}
-            disabled={readySent}
-            className="ml-auto h-10 rounded-full bg-neutral-900 px-4 text-sm font-semibold text-white shadow-sm disabled:opacity-40"
-          >
-            {readySent ? '기다리는 중…' : '준비 완료'}
-          </button>
-        )}
-      </div>
-
-      {/* 최근 이모티콘 피드 */}
-      <EmoteTicker feed={room.feed} names={names} />
-
-      {view.phase === 'event' && lastEvent && (
-        <EventOverlay view={view} eventId={lastEvent.eventId} changes={lastEvent.changes} names={names} onNext={sendReady} readySent={readySent} />
-      )}
-
-      {room.rejected && (
-        <p className="fixed inset-x-0 bottom-28 z-20 mx-auto w-fit rounded-full bg-neutral-900/90 px-4 py-2 text-xs text-white">
-          {room.rejected}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ── 뉴스 + 정보소 ─────────────────────────────────────────────────────
-function NewsAndInfo({
-  news,
-  forecast,
-  cash,
-  infoBought,
-  purchases,
-  names,
-  meId,
-  onBuyInfo,
-}: {
-  news: GameView['me']['news'];
-  forecast: GameView['me']['forecasts'][number] | undefined;
-  cash: number;
-  infoBought: boolean;
-  purchases: GameView['purchases'];
-  names: Map<string, string>;
-  meId: string;
-  onBuyInfo: (tier: 1 | 2 | 3) => void;
-}) {
-  return (
-    <section className="flex flex-col gap-2">
-      {news.map((n) => (
-        <div key={`news-${n.turn}`} className="rounded-xl bg-amber-50 p-3">
-          <p className="text-[10px] font-semibold text-amber-600">나에게만 온 소식</p>
-          <p className="mt-0.5 text-sm leading-relaxed">{n.text}</p>
-        </div>
-      ))}
-
-      <div className="rounded-xl border border-neutral-200 p-3">
-        <div className="flex items-baseline justify-between">
-          <p className="text-sm font-semibold">정보소</p>
-          <p className="text-xs text-neutral-500">내 현금 {won(cash)}</p>
-        </div>
-        {forecast ? (
-          <div className="mt-2 rounded-lg bg-neutral-900 p-3 text-white">
-            <p className="text-[10px] text-neutral-400">{RULES.infoTiers[forecast.tier - 1].label} 예보 — 나만 안다</p>
-            <p className="mt-0.5 text-sm font-semibold">「{forecast.eventName}」이 온다는 소식!</p>
-            <p className="mt-1 text-xs text-neutral-300">
-              {forecast.up && <>오를 곳: {SECTOR_LABEL[forecast.up]} </>}
-              {forecast.down && <>· 내릴 곳: {SECTOR_LABEL[forecast.down]}</>}
-            </p>
-          </div>
+    <div className={`yk ${rajdhani.variable} ${notoKr.variable}`} style={{ position: 'fixed', inset: 0, zIndex: 40, background: '#04060c', color: '#e8eaf0', fontFamily: 'var(--font-kr),sans-serif' }}>
+      <style dangerouslySetInnerHTML={{ __html: KEYFRAMES }} />
+      <div style={{ position: 'relative', margin: '0 auto', maxWidth: 430, height: '100%', background: '#070a14', overflow: 'hidden' }}>
+        {room.error ? (
+          <ErrorScreen message={room.error} />
+        ) : !view ? (
+          mode === 'quick' ? (
+            <MatchScene nickname={nickname} />
+          ) : room.lobby ? (
+            <WaitingRoom lobby={room.lobby} sessionId={room.sessionId} roomCode={room.realRoomId} onAddBot={room.addBot} onStart={() => room.start('regular')} />
+          ) : (
+            <p style={{ padding: 24, fontSize: 13, color: '#8b93a7' }}>서버에 접속하는 중…</p>
+          )
+        ) : view.phase === 'ended' && room.settled ? (
+          <EndFlow view={view} settled={room.settled} />
         ) : (
-          <div className="mt-2 grid grid-cols-3 gap-1.5">
-            {RULES.infoTiers.map((tier) => (
-              <button
-                key={tier.tier}
-                type="button"
-                disabled={infoBought || cash < tier.price}
-                onClick={() => onBuyInfo(tier.tier)}
-                className="rounded-lg border border-neutral-200 py-2 text-center disabled:opacity-40"
-              >
-                <span className="block text-xs font-semibold">{tier.label}</span>
-                <span className="block text-[10px] text-neutral-500">{won(tier.price)}</span>
-              </button>
-            ))}
-          </div>
-        )}
-        {purchases.length > 0 && (
-          <p className="mt-2 text-[11px] text-neutral-500">
-            {purchases
-              .map((p) => `${p.playerId === meId ? '나' : (names.get(p.playerId) ?? '?')}: ${RULES.infoTiers[p.tier - 1].label} 구매`)
-              .join(' · ')}
-          </p>
-        )}
-      </div>
-    </section>
-  );
-}
-
-// ── 시세판 + 매매 ─────────────────────────────────────────────────────
-function PriceBoard({
-  view,
-  lastChanges,
-  onBuy,
-  onSell,
-}: {
-  view: GameView;
-  lastChanges: Record<string, { pct: number }>;
-  onBuy: (companyId: string, qty: number) => void;
-  onSell: (companyId: string, qty: number) => void;
-}) {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [qty, setQty] = useState(1);
-
-  const held = (companyId: string) => view.me.holdings.find((h) => h.companyId === companyId);
-
-  return (
-    <section className="flex flex-col gap-1.5">
-      <h2 className="px-1 text-sm font-semibold text-neutral-500">시세판</h2>
-      {COMPANIES.map((company) => {
-        const price = view.prices[company.id];
-        const change = lastChanges[company.id];
-        const holding = held(company.id);
-        const open = selected === company.id;
-        const maxBuy = Math.floor(view.me.cash / price);
-
-        return (
-          <div key={company.id} className="rounded-xl border border-neutral-200">
-            <button
-              type="button"
-              onClick={() => {
-                setSelected(open ? null : company.id);
-                setQty(1);
-              }}
-              className="flex w-full items-center justify-between p-3 text-left"
-            >
-              <div>
-                <p className="text-sm font-semibold">
-                  {company.name}
-                  {holding && <span className="ml-1.5 rounded bg-neutral-100 px-1 text-[10px]">{holding.qty}주</span>}
-                </p>
-                <p className="text-[10px] text-neutral-400">{SECTOR_LABEL[company.sector]}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold tabular-nums">{won(price)}</p>
-                <p className={`text-[10px] ${change ? pctClass(change.pct) : 'text-neutral-300'}`}>
-                  {change ? pct(change.pct) : '—'}
-                </p>
-              </div>
-            </button>
-
-            {open && (
-              <div className="flex items-center gap-1.5 border-t border-neutral-100 p-2">
-                <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} className="h-9 w-9 rounded-lg border border-neutral-200">
-                  −
-                </button>
-                <span className="w-10 text-center text-sm font-semibold tabular-nums">{qty}</span>
-                <button type="button" onClick={() => setQty((q) => q + 1)} className="h-9 w-9 rounded-lg border border-neutral-200">
-                  +
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onBuy(company.id, qty)}
-                  disabled={qty > maxBuy}
-                  className="ml-auto h-9 rounded-lg bg-red-500 px-3 text-xs font-semibold text-white disabled:opacity-40"
-                >
-                  매수 {won(price * qty)}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onSell(company.id, qty)}
-                  disabled={!holding || qty > holding.qty}
-                  className="h-9 rounded-lg bg-blue-500 px-3 text-xs font-semibold text-white disabled:opacity-40"
-                >
-                  매도
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </section>
-  );
-}
-
-// ── 채팅 ─────────────────────────────────────────────────────────────
-function ChatPanel({
-  feed,
-  names,
-  meId,
-  onChat,
-}: {
-  feed: FeedLine[];
-  names: Map<string, string>;
-  meId: string;
-  onChat: (text: string) => void;
-}) {
-  const [draft, setDraft] = useState('');
-  const submit = () => {
-    const text = draft.trim();
-    if (!text) return;
-    onChat(text);
-    setDraft('');
-  };
-
-  return (
-    <section className="flex flex-col gap-2">
-      <div className="flex min-h-48 flex-col gap-1.5 rounded-xl bg-neutral-50 p-3">
-        <p className="text-[10px] text-neutral-400">
-          찌라시를 흘려도, 진실을 말해도 됩니다. 믿을지는 각자의 몫.
-        </p>
-        {feed.filter((line) => line.text).slice(-30).map((line) => (
-          <p key={line.id} className="text-sm">
-            <span className={`font-semibold ${line.playerId === meId ? 'text-amber-600' : ''}`}>
-              {line.playerId === meId ? '나' : (line.nickname ?? names.get(line.playerId) ?? '?')}
-            </span>{' '}
-            {line.text}
-          </p>
-        ))}
-      </div>
-      <div className="flex gap-1.5">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && submit()}
-          maxLength={RULES.chatMaxLength}
-          placeholder="소문, 자랑, 연막…"
-          className="h-11 flex-1 rounded-xl border border-neutral-200 px-3 text-sm"
-        />
-        <button type="button" onClick={submit} className="h-11 rounded-xl bg-neutral-900 px-4 text-sm font-semibold text-white">
-          전송
-        </button>
-      </div>
-    </section>
-  );
-}
-
-// ── 이모티콘 티커 ─────────────────────────────────────────────────────
-function EmoteTicker({ feed, names }: { feed: FeedLine[]; names: Map<string, string> }) {
-  const recent = feed.filter((line) => line.emote).slice(-4);
-  if (recent.length === 0) return null;
-  return (
-    <div className="pointer-events-none fixed inset-x-0 top-16 z-10 mx-auto flex w-fit gap-1.5">
-      {recent.map((line) => (
-        <span key={line.id} className="rounded-full bg-white/95 px-2.5 py-1 text-xs shadow">
-          {names.get(line.playerId) ?? '?'} {EMOTE_ICON[line.emote!]}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-// ── 이벤트 연출 ───────────────────────────────────────────────────────
-function EventOverlay({
-  view,
-  eventId,
-  changes,
-  names,
-  onNext,
-  readySent,
-}: {
-  view: GameView;
-  eventId: string;
-  changes: Record<string, { before: number; after: number; pct: number }>;
-  names: Map<string, string>;
-  onNext: () => void;
-  readySent: boolean;
-}) {
-  const event = getEvent(eventId);
-  const myHoldings = view.me.holdings;
-
-  return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-between overflow-y-auto bg-neutral-950/95 p-5 text-white">
-      <div>
-        <p className="text-xs text-neutral-400">{event.year} · 실제로 있었던 일</p>
-        <h2 className="mt-1 text-2xl font-bold">{event.name}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-300">{event.blurb}</p>
-
-        {myHoldings.length > 0 && (
-          <div className="mt-4 flex flex-col gap-1">
-            <p className="text-xs text-neutral-400">내 주식은…</p>
-            {myHoldings.map((h) => {
-              const change = changes[h.companyId];
-              const company = COMPANIES.find((c) => c.id === h.companyId);
-              return (
-                <div key={h.companyId} className="flex justify-between rounded-lg bg-white/10 px-3 py-2 text-sm">
-                  <span>{company?.name ?? h.companyId} × {h.qty}</span>
-                  <span className={change ? pctClass(change.pct) : 'text-neutral-400'}>
-                    {change ? pct(change.pct) : '변화 없음'}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <div className="mt-5 flex flex-col gap-1">
-          <p className="text-xs text-neutral-400">순위</p>
-          {view.standings.map((s) => (
-            <div
-              key={s.playerId}
-              className={`flex justify-between rounded-lg px-3 py-2 text-sm ${
-                s.playerId === view.me.id ? 'bg-amber-400 font-semibold text-neutral-900' : 'bg-white/10'
-              }`}
-            >
-              <span>
-                {s.rank}위 {s.playerId === view.me.id ? '나' : (names.get(s.playerId) ?? '?')}
-              </span>
-              <span className="tabular-nums">{won(s.totalAsset)}</span>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', background: 'linear-gradient(180deg,#0a0e1e,#070a14 40%)' }}>
+            <TopBar view={view} secondsLeft={room.secondsLeft} totalSeconds={totalSeconds} onReady={sendReady} readySent={readySent} />
+            <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+              {(view.phase === 'prep') && (
+                <MarketScreen view={view} onOpenNews={() => setOverlay('news')} onOpenShop={() => setOverlay('shop')} onOpenSector={(s) => setSheetSector(s)} />
+              )}
+              {view.phase === 'chat' && <ChatScreen view={view} room={room} chats={room.chats} />}
+              {view.phase === 'event' && <EventScreen view={view} onReady={sendReady} readySent={readySent} />}
+              {view.phase === 'rank' && <RankScreen view={view} prevRanks={rankDeltaBase} emotes={room.emotes} room={room} secondsLeft={room.secondsLeft} />}
+              {view.phase !== 'rank' && <FloatingEmotes emotes={room.emotes} />}
             </div>
-          ))}
-        </div>
-      </div>
+            <BottomBar view={view} />
+          </div>
+        )}
 
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={readySent}
-        className="mt-5 rounded-xl bg-white py-4 font-semibold text-neutral-900 disabled:opacity-40"
-      >
-        {readySent ? '다른 친구들을 기다리는 중…' : '다음 ▶'}
-      </button>
+        {view && !departDone && <DepartScene onDone={() => setDepartDone(true)} />}
+        {view && view.phase === 'prep' && overlay === 'news' && <NewsModal view={view} onClose={() => setOverlay(null)} />}
+        {view && view.phase === 'prep' && overlay === 'shop' && <InfoShop view={view} room={room} onClose={() => setOverlay(null)} />}
+        {view && view.phase === 'prep' && sheetSector && <TradeSheet view={view} room={room} sectorId={sheetSector} onClose={() => setSheetSector(null)} />}
+        {overlay === 'codex' && <CodexOverlay onClose={() => setOverlay(null)} />}
+
+        {room.rejected && (
+          <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', bottom: 96, zIndex: 70, whiteSpace: 'nowrap', background: 'rgba(13,18,32,.95)', border: '1px solid rgba(255,77,107,.4)', borderRadius: 999, padding: '8px 16px', fontSize: 12 }}>
+            {room.rejected}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
 
-// ── 종료 대시보드 ─────────────────────────────────────────────────────
-function EndScreen({ view }: { view: GameView }) {
-  const names = new Map<string, string>([[view.me.id, view.me.nickname], ...view.others.map((o) => [o.id, o.nickname] as const)]);
-  const winner = view.standings[0];
+function ErrorScreen({ message }: { message: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 24 }}>
+      <p style={{ fontWeight: 900, fontSize: 16 }}>방에 들어갈 수 없어요</p>
+      <p style={{ fontSize: 12, color: '#8b93a7' }}>{message}</p>
+      <p style={{ fontSize: 11, color: '#5c6682' }}>게임 서버가 켜져 있는지 확인하세요: <code>npm run server</code></p>
+      <Link href="/game" style={{ textAlign: 'center', fontWeight: 900, padding: '13px 0', background: 'linear-gradient(90deg,#37b6ff,#4dd6ff)', color: '#06101f', clipPath: 'polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)' }}>
+        로비로 돌아가기
+      </Link>
+    </div>
+  );
+}
+
+/** S2 매칭 연출 — 퀵 매치: 봇 슬롯이 차오르고 자동 시작 */
+function MatchScene({ nickname }: { nickname: string }) {
+  const [filled, setFilled] = useState(1);
+  const [tipIndex, setTipIndex] = useState(0);
+  const TIPS = [
+    '정보소의 싼 정보는 대개 틀립니다. 비싼 정보도 100%는 아니에요.',
+    '안 사는 것도 전략입니다. 무행동 페널티는 없어요.',
+    '내 뉴스는 일부만 진짜 전조 — 남의 말은 더 의심하세요.',
+    '잃지 않는 것도 이기는 것. 든든이 상이 있습니다.',
+  ];
+  useEffect(() => {
+    const timers = [1, 2, 3].map((i) => setTimeout(() => setFilled(i + 1), 700 + i * 1000));
+    timers.push(setTimeout(() => setTipIndex((v) => v + 1), 3200));
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const slots = [
+    { name: nickname || '키우미', color: '#4dc8ff', ch: '나' },
+    { name: '미르봇', color: '#a78bfa', ch: '미' },
+    { name: '수리봇', color: '#ff8fab', ch: '수' },
+    { name: '한별봇', color: '#6ee7b7', ch: '한' },
+  ];
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <header className="rounded-2xl bg-neutral-900 p-5 text-center text-white">
-        <p className="text-xs text-neutral-400">{RULES.turns}년의 결과</p>
-        <p className="mt-1 text-2xl font-bold">🏆 {names.get(winner.playerId) ?? '?'}</p>
-        <p className="mt-1 text-sm text-neutral-300">{won(winner.totalAsset)}</p>
-      </header>
-
-      <section className="flex flex-col gap-1.5">
-        {view.standings.map((s) => (
-          <div
-            key={s.playerId}
-            className={`flex items-center justify-between rounded-xl border p-4 ${
-              s.playerId === view.me.id ? 'border-neutral-900' : 'border-neutral-200'
-            }`}
-          >
-            <span className="font-semibold">
-              {s.rank}위 {s.playerId === view.me.id ? '나' : (names.get(s.playerId) ?? '?')}
-            </span>
-            <span className="tabular-nums text-sm">{won(s.totalAsset)}</span>
+    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 30%,#131b36,#05070f 75%)', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '70px 24px 40px' }}>
+      <div style={{ fontSize: 9, letterSpacing: 4, color: '#4dc8ff', fontWeight: 700 }}>MATCHING</div>
+      <div style={{ fontWeight: 900, fontSize: 21, marginTop: 6 }}>대전 상대를 찾는 중…</div>
+      <div style={{ fontSize: 11, color: '#7d87a3', marginTop: 4 }}>안 모이면 AI 봇이 들어와요</div>
+      <div style={{ position: 'relative', width: 120, height: 120, margin: '34px 0' }}>
+        <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid rgba(77,200,255,.15)' }} />
+        <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid transparent', borderTopColor: '#4dc8ff', animation: 'ykSpin 1.1s linear infinite' }} />
+        <div style={{ position: 'absolute', inset: 14, borderRadius: '50%', background: "#0d1220 url('/game/action.png') center/cover" }} />
+      </div>
+      <div style={{ display: 'flex', gap: 14 }}>
+        {slots.map((slot, i) => (
+          <div key={slot.name} style={{ textAlign: 'center', opacity: i < filled ? 1 : 0.3, transition: 'opacity .5s' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 12, background: i === 0 ? "#1a2138 url('/game/avatar.png') center/cover" : i < filled ? slot.color : '#141a2b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 18, color: '#0b1020', boxShadow: `0 0 0 1.5px ${slot.color}, 0 0 14px ${i < filled ? 'rgba(77,200,255,.35)' : 'transparent'}` }}>
+              {i === 0 ? '' : i < filled ? slot.ch : '?'}
+            </div>
+            <div style={{ fontSize: 10, color: '#aeb8d2', marginTop: 5, fontWeight: 700 }}>{slot.name}</div>
           </div>
         ))}
-      </section>
+      </div>
+      <div style={{ marginTop: 'auto', width: '100%', background: 'rgba(13,18,32,.85)', border: '1px solid rgba(120,170,255,.18)', padding: 14, clipPath: 'polygon(12px 0,100% 0,100% 100%,0 100%,0 12px)' }}>
+        <div style={{ fontSize: 9, letterSpacing: 2, color: '#ffd166', fontWeight: 700 }}>💡 상식 카드</div>
+        <div style={{ fontSize: 12.5, lineHeight: 1.6, marginTop: 6, color: '#d5dcee' }}>{TIPS[tipIndex % TIPS.length]}</div>
+      </div>
+    </div>
+  );
+}
 
-      <p className="text-center text-[11px] text-neutral-400">명예의 전당 기록은 준비 중이에요 (T6)</p>
+/** S2 출발 연출 — 타임머신: 2026 → 과거로 */
+function DepartScene({ onDone }: { onDone: () => void }) {
+  const [year, setYear] = useState('2026');
+  useEffect(() => {
+    const years = ['2025', '2023', '2019', '2016', '2013', '2011', '????'];
+    const timers = years.map((y, i) => setTimeout(() => setYear(y), 320 + i * 340));
+    timers.push(setTimeout(onDone, 320 + years.length * 340 + 700));
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <div style={{ position: 'absolute', inset: 0, zIndex: 65, background: '#020308', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+      <div style={{ width: 170, height: 170, borderRadius: '50%', border: '1px solid rgba(77,200,255,.25)', position: 'absolute', animation: 'ykSpin 6s linear infinite', borderTopColor: '#4dc8ff' }} />
+      <div style={{ width: 210, height: 210, borderRadius: '50%', border: '1px dashed rgba(77,200,255,.15)', position: 'absolute', animation: 'ykSpin 11s linear infinite reverse' }} />
+      <div style={{ fontSize: 9, letterSpacing: 5, color: '#4dc8ff', fontWeight: 700 }}>TIME MACHINE</div>
+      <div style={{ fontFamily: 'var(--font-num)', fontWeight: 700, fontSize: 88, letterSpacing: 6, color: '#eaf4ff', textShadow: '0 0 30px rgba(77,200,255,.8)' }}>{year}</div>
+      <div style={{ fontSize: 12, color: '#7d87a3', textAlign: 'center', lineHeight: 1.7 }}>2011년부터 2020년 사이,<br />실제로 있었던 일들이 벌어집니다</div>
+    </div>
+  );
+}
 
-      <Link href="/game" className="rounded-xl bg-neutral-900 py-4 text-center font-semibold text-white">
-        로비로
-      </Link>
+/** 친구방 대기실 — 초대코드 + 봇 추가 + 정규전 시작 */
+function WaitingRoom({ lobby, sessionId, roomCode, onAddBot, onStart }: { lobby: LobbyInfo; sessionId: string; roomCode: string; onAddBot: () => void; onStart: () => void }) {
+  const isHost = lobby.hostId === sessionId;
+  const seatsLeft = lobby.max - lobby.players.length;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, padding: '32px 18px' }}>
+      <div>
+        <span style={{ fontSize: 9, letterSpacing: 4, color: '#4dc8ff', fontWeight: 700 }}>FRIEND ROOM</span>
+        <h1 style={{ fontWeight: 900, fontSize: 22, margin: '4px 0 0' }}>대기실</h1>
+        <p style={{ fontSize: 12, color: '#8b93a7', marginTop: 4 }}>친구에게 초대코드를 알려주세요. {lobby.min}~{lobby.max}명 · 정규전 5라운드</p>
+      </div>
+      <button type="button" onClick={() => navigator.clipboard?.writeText(roomCode)} style={{ background: 'rgba(13,18,32,.85)', border: '1px dashed rgba(120,170,255,.35)', padding: '14px 0', color: '#fff', cursor: 'pointer' }}>
+        <span style={{ display: 'block', fontSize: 10, color: '#8b93a7' }}>초대코드 (누르면 복사)</span>
+        <span style={{ display: 'block', fontFamily: 'var(--font-num)', fontSize: 19, fontWeight: 700, letterSpacing: 4 }}>{roomCode}</span>
+      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {lobby.players.map((p, i) => (
+          <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(13,18,32,.8)', border: '1px solid rgba(120,170,255,.14)', padding: '11px 14px' }}>
+            <span style={{ fontWeight: 700, fontSize: 13 }}>
+              {p.nickname ?? `주주${i + 1}`}
+              {p.id === sessionId && <span style={{ marginLeft: 6, fontSize: 10, color: '#5c6682' }}>(나)</span>}
+            </span>
+            <span style={{ fontSize: 10, color: p.isBot ? '#8b93a7' : '#ffd166' }}>{p.isBot ? '🤖 봇' : p.id === lobby.hostId ? '방장' : ''}</span>
+          </div>
+        ))}
+      </div>
+      {isHost ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 6 }}>
+          <button type="button" onClick={onAddBot} disabled={seatsLeft <= 0} style={{ padding: '12px 0', fontWeight: 900, fontSize: 13, background: 'rgba(13,18,32,.8)', border: '1px solid rgba(120,170,255,.25)', color: seatsLeft > 0 ? '#c9d2e8' : '#3a4152', cursor: 'pointer' }}>
+            🤖 봇 추가 {seatsLeft > 0 ? `(${seatsLeft}자리)` : '(가득 참)'}
+          </button>
+          <button type="button" onClick={onStart} disabled={lobby.players.length < lobby.min} style={{ padding: '14px 0', fontWeight: 900, fontSize: 15, border: 'none', cursor: 'pointer', background: lobby.players.length >= lobby.min ? 'linear-gradient(90deg,#37b6ff,#4dd6ff)' : 'rgba(255,255,255,.06)', color: lobby.players.length >= lobby.min ? '#06101f' : '#5c6682', clipPath: 'polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)' }}>
+            {lobby.players.length < lobby.min ? `${lobby.min}명부터 — 봇을 넣어도 돼요` : '게임 시작'}
+          </button>
+        </div>
+      ) : (
+        <p style={{ textAlign: 'center', fontSize: 12, color: '#8b93a7' }}>방장이 시작하길 기다리는 중…</p>
+      )}
+      <Link href="/game" style={{ textAlign: 'center', fontSize: 11, color: '#5c6682' }}>← 로비로</Link>
     </div>
   );
 }

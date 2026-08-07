@@ -1,6 +1,7 @@
 import { fail, ok, type Action, type GameState, type Result } from '../types';
 import { advancePhase } from './advancePhase';
 import { buyInfo } from './buyInfo';
+import { chat } from './chat';
 import { buy, sell } from './trade';
 
 /**
@@ -20,6 +21,9 @@ export function reduce(state: GameState, action: Action): Result<GameState> {
       break;
     case 'buyInfo':
       error = buyInfo(draft, action);
+      break;
+    case 'chat':
+      error = chat(draft, action);
       break;
     case 'advancePhase':
       error = advancePhase(draft);

@@ -1,40 +1,49 @@
 /**
- * 룰 상수 — 밸런스 조정은 여기부터.
- * 수치를 바꾸면 sim 전후표를 PR에 붙인다 (game/AGENTS.md §밸런스).
+ * 룰 상수 — 밸런스 조정은 여기부터. 수치 변경 시 sim 전후표 필수 (game/AGENTS.md).
+ * 근거: docs/기획서.md v2 (영웅키움)
  */
 export const RULES = {
   minPlayers: 2,
   maxPlayers: 8,
-  /** 시드 자금(원) — 기획서 §2.1 */
   seedCash: 1_000_000,
-  /** 총 턴 수. 1턴 = 1년 — 기획서 §2.2 */
-  turns: 5,
-  /** 페이즈 시간(초). 서버 타이머가 권위, 클라는 표시만 — 초안, 플레이테스트로 조정 */
-  prepSeconds: 90,
-  chatSeconds: 60,
-  eventSeconds: 20,
-  /** 채팅 한 줄 최대 길이 — 기획서 §4 */
-  chatMaxLength: 200,
-  /** 준비턴 무료 뉴스가 이번 턴 이벤트의 단서일 확률 (나머지는 시대 배경 뉴스) */
-  clueChance: 0.5,
-  /** 가격 바닥(원) */
-  priceFloor: 100,
+  /** 퀵 3라운드 / 정규 5라운드 (기획서 §1) */
+  turnsQuick: 3,
+  turnsRegular: 5,
+  /** 퀵 매치는 봇을 채워 최소 이 인원으로 시작한다 */
+  quickMatchSeats: 4,
+
+  /** 페이즈 시간(초) — 서버 타이머가 권위. 초안 【미정: 플레이테스트】 */
+  prepFirstSeconds: 60,
+  prepSeconds: 45,
+  chatSeconds: 25,
+  eventSeconds: 13,
+  rankSeconds: 14,
+
+  /** 매매 — 금액 기반, 만원 단위 슬라이더 (기획서 §3.2) */
+  minTradeAmount: 10_000,
+  tradeStep: 10_000,
+  /** 잔여 평가액이 이보다 작으면 보유 정리 */
+  dustValue: 100,
+
   /**
-   * 정보소 3티어 — 기획서 §3.3. 가격·적중률은 시뮬 튜닝 대상.
-   * 5/15/30만 초안은 sim에서 정보 추종 봇이 압도적 꼴찌(평균 -23%)라 인하했다 —
-   * 정보를 사는 플레이가 이겨야 코어 루프가 산다.
+   * 정보소 (기획서 §3.3) — 게임당 2회, 꼴찌 50% 할인.
+   * 프로토 초안 1/5/20만은 sim에서 확실한 손해(보고서 완벽 활용해도 기대이익 < 가격)라
+   * 1/4/10만으로 인하 — 정보가 살 가치 있어야 코어 루프가 산다. sim 전후표는 PR 참조.
    */
-  infoTiers: [
-    { tier: 1, label: '찌라시', price: 30_000, accuracy: 0.4 },
-    { tier: 2, label: '소식통', price: 80_000, accuracy: 0.7 },
-    { tier: 3, label: '고급 정보', price: 150_000, accuracy: 0.95 },
-  ],
+  infoUsesPerGame: 2,
+  infoPrices: [10_000, 30_000, 80_000] as const,
+  /** 해설 탭 적중률 — 찌라시/리포트/보고서 */
+  analysisAccuracy: [0.5, 0.75, 0.95] as const,
+  /** 정찰 🥉 익명 소문이 진실일 확률 */
+  scoutRumorTruth: 0.6,
+  catchupDiscount: 0.5,
+
+  /** 뉴스 — 진짜 전조는 라운드마다 딱 2명 (기획서 §3.1) */
+  clueHolders: 2,
+
+  /** 사건 — 등락 = imp × 밴드, 무영향 섹터 ±노이즈 (기획서 §5) */
+  bandMin: 0.7,
+  bandMax: 1.3,
+  noisePct: 0.02,
+  priceFloor: 100,
 } as const;
-
-export type InfoTierDef = (typeof RULES.infoTiers)[number];
-
-export function infoTier(tier: 1 | 2 | 3): InfoTierDef {
-  const def = RULES.infoTiers.find((t) => t.tier === tier);
-  if (!def) throw new Error(`없는 정보 티어: ${tier}`);
-  return def;
-}

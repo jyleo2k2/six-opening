@@ -1,132 +1,153 @@
 /**
  * 룰 엔진 공용 타입 — 클라(web)·서버(game/server)·시뮬레이터가 모두 이 파일을 본다.
  * 여기가 바뀌면 세 소비자가 동시에 영향받는다. 계약 변경은 별도 PR로 분리할 것.
+ * 근거: docs/기획서.md v2 (영웅키움 — 프로토 병합판)
  */
 
-// ── 섹터 ────────────────────────────────────────────────────────────────
-// 기획서 §7.2 — 8종. 이벤트 효과는 항상 섹터 단위로 정의한다 (종목 고유 지정 금지).
-export const SECTORS = [
-  'semi',
-  'auto',
-  'chem',
-  'bio',
-  'travel',
-  'enter',
-  'defense',
-  'finance',
-] as const;
+// ── 섹터 8종 (기획서 §7) ────────────────────────────────────────────────
+export const SECTORS = ['semi', 'ent', 'net', 'trv', 'bio', 'cos', 'car', 'bat'] as const;
 
 export type Sector = (typeof SECTORS)[number];
 
-export const SECTOR_LABEL: Record<Sector, string> = {
-  semi: '반도체/IT',
-  auto: '자동차',
-  chem: '정유/화학',
-  bio: '바이오/제약',
-  travel: '항공/여행',
-  enter: '엔터/콘텐츠',
-  defense: '방산',
-  finance: '은행/금융',
-};
+export interface SectorInfo {
+  id: Sector;
+  name: string;
+  emoji: string;
+  /** 도감 — 오를 때 */
+  up: string;
+  /** 도감 — 조심할 때 */
+  down: string;
+}
 
-// ── 이모티콘 — 모든 페이즈 상시 사용 (기획서 §4) ─────────────────────────
-export const EMOTES = ['laugh', 'cry', 'despair', 'thumbsup', 'yar'] as const;
+// ── 이모티콘 — 모든 페이즈 상시 (기획서 §4) ─────────────────────────────
+export const EMOTES = ['laugh', 'cry', 'scream', 'thumbsup', 'fire'] as const;
 
 export type Emote = (typeof EMOTES)[number];
 
-export const EMOTE_LABEL: Record<Emote, string> = {
-  laugh: '웃음',
-  cry: '울음',
-  despair: '절망',
-  thumbsup: '따봉',
-  yar: '야르',
+export const EMOTE_ICON: Record<Emote, string> = {
+  laugh: '😂',
+  cry: '😭',
+  scream: '😱',
+  thumbsup: '👍',
+  fire: '🔥',
 };
 
-// ── 데이터 팩 (기획서 §7) ────────────────────────────────────────────────
+// ── 작전 회의 템플릿 (기획서 §4 — 자유 텍스트 없음) ─────────────────────
+export const CHAT_VERBS = ['샀어', '살 거야', '팔았어', '사지 마', '조심해', '믿지 마'] as const;
+
+export type ChatVerb = (typeof CHAT_VERBS)[number];
+
+export const CHAT_SUBJECT_FIXED = ['나는', '얘들아'] as const;
+
+// ── 데이터 팩 (기획서 §7·§8) ────────────────────────────────────────────
 export interface Company {
   id: string;
-  /** 익명 가상 회사 — 실존 기업명·상표 연상 금지 (기획서 §7.1) */
+  /** 실명 종목 (v2 확정). 소개는 사실 서술만 — 추천·전망 표현 금지 */
   name: string;
   sector: Sector;
-  /** 시작가(원). 5,000~100,000 스케일 — 시드 100만원으로 정수 주 매매가 성립하는 범위 */
+  /** 시연 시점 근사가(원). 정적 팩 — 게임은 실시세를 호출하지 않는다 */
   basePrice: number;
-  /** 아이 눈높이 한 줄 소개 */
   blurb: string;
 }
-
-/** 섹터별 등락 범위. 부호는 동일해야 한다(방향 = 역사 고정), 폭은 발동 시 종목마다 개별 추첨 */
-export type EffectRange = readonly [min: number, max: number];
 
 export interface GameEvent {
   id: string;
   name: string;
-  /** 실제 연도 표기 — 연출·교육 프레임용 */
-  year: string;
-  tone: 'good' | 'bad' | 'mixed';
-  /** 실제 역사 한 줄 설명 — 사건 배너에 반드시 병기, 희화화 금지 (기획서 §8) */
-  blurb: string;
-  effects: Partial<Record<Sector, EffectRange>>;
+  /** 사건 카드 부제 (한 줄) */
+  subtitle: string;
+  /** 관찰 구간 표기 — "5거래일" 등 */
+  window: string;
+  /**
+   * 사건 전후 실제 관찰 등락률(원값). 발동 시 종목마다 × 밴드(0.7~1.3).
+   * 부호(방향)는 역사 그대로 — 바꾸려면 사료 근거를 PR에 첨부 (game/AGENTS.md)
+   */
+  imp: Partial<Record<Sector, number>>;
+  /** 진짜 전조 뉴스가 가리키는 섹터 */
+  clueSector: Sector;
+  /** 전조 뉴스 본문 — 사실만, 주가 얘기 없음 */
+  clueText: string;
 }
 
-export interface NewsItem {
-  id: string;
-  /** 어느 사건의 단서인가. null = 이벤트와 무관한 시대 배경 뉴스 */
-  eventId: string | null;
-  /** 사실만, 주가 얘기 없음 (기획서 §3.1) */
+export interface NoiseNews {
+  sector: Sector;
   text: string;
 }
 
 // ── 플레이어 ────────────────────────────────────────────────────────────
 export interface Holding {
   companyId: string;
+  /** 금액 기반 매매 → 소수점 주식 (기획서 §3.2) */
   qty: number;
-  /** 평균 매수 단가 — 추가 매수 시 가중평균 */
-  avgCost: number;
-}
-
-/**
- * 정보소 예보 (기획서 §3.3). 빗나가면 미끼 사건 기준으로 만들어진다 —
- * 수신자는 payload만으로 진위를 구별할 수 없다.
- */
-export interface InfoForecast {
-  turn: number;
-  tier: 1 | 2 | 3;
-  eventId: string;
-  eventName: string;
-  /** 가장 크게 오를/내릴 섹터. 해당 방향 효과가 없으면 null */
-  up: Sector | null;
-  down: Sector | null;
 }
 
 export interface NewsDelivery {
   turn: number;
-  /**
-   * 서버 내부 식별용(같은 턴 중복 배달 방지 검증 등). **viewFor가 제거한다** —
-   * id에 단서/배경 여부와 사건명이 들어 있어 클라이언트로 나가면 정보 설계가 깨진다.
-   */
-  newsId?: string;
+  sector: Sector;
   text: string;
+  /**
+   * 진짜 전조 여부 — 서버 내부용. **viewFor가 제거한다.**
+   * 새는 순간 "절반만 진짜" 설계가 죽는다.
+   */
+  real?: boolean;
+}
+
+export type InfoTab = 'analysis' | 'scout';
+
+/** 정보소 결과 — 구매자 전용. 등급은 보여도 진위는 안 보인다 */
+export interface InfoRecord {
+  turn: number;
+  tab: InfoTab;
+  tier: 1 | 2 | 3;
+  text: string;
+  /** 해설 탭의 핵심 요지(UI 하이라이트·봇용). 미끼도 같은 형태 — 진위 구별 불가 */
+  hint?: { sector: Sector; up: boolean };
+}
+
+/** 구매 사실 — 전원 공개, 내용은 비공개 (기획서 §9) */
+export interface PurchaseRecord {
+  turn: number;
+  playerId: string;
+  tab: InfoTab;
+  tier: 1 | 2 | 3;
+}
+
+/** 회의 거짓말 기록 — "[나는][X][샀어]"인데 미보유. 서버 내부용(viewFor 제거) */
+export interface Lie {
+  playerId: string;
+  sector: Sector;
+  turn: number;
 }
 
 export interface PlayerState {
   id: string;
   nickname: string;
+  /** UI 식별 색·글자칩 (아바타 대용) */
+  color: string;
+  ch: string;
+  bot: boolean;
   cash: number;
   holdings: Holding[];
-  /** 내 뉴스함 — 나만 본다 (기획서 §9) */
   news: NewsDelivery[];
-  /** 내 예보함 — 나만 본다 (기획서 §9) */
-  forecasts: InfoForecast[];
-  infoBoughtThisTurn: boolean;
+  intel: InfoRecord[];
+  /** 정보소 잔여 횟수 — 게임당 2회 (기획서 §3.3) */
+  infoLeft: number;
+  /** 최대 낙폭(MDD) 추적 — 든든이 상 */
+  peak: number;
+  maxDrawdown: number;
+  /** 안 속은 횟수 — 진실의 눈 상 */
+  notFooled: number;
+  /** 이번 라운드에 매수한 섹터 (거짓말 정산용, 라운드마다 리셋) */
+  boughtSectors: Sector[];
+  /** 이 판에서 한 번이라도 보유했던 종목 — 도감 해금·귀환 랜딩 */
+  heldEver: string[];
 }
 
 // ── 게임 상태 ───────────────────────────────────────────────────────────
-export type Phase = 'prep' | 'chat' | 'event' | 'ended';
+export type Phase = 'prep' | 'chat' | 'event' | 'rank' | 'ended';
 
 export interface AppliedChange {
   before: number;
   after: number;
-  /** 실제 적용 등락률 */
   pct: number;
 }
 
@@ -136,62 +157,83 @@ export interface AppliedEvent {
   changes: Record<string, AppliedChange>;
 }
 
-/** 정보소 구매 사실 — 전원 공개, 내용은 비공개 (기획서 §3.3) */
-export interface PurchaseRecord {
-  turn: number;
-  playerId: string;
-  tier: 1 | 2 | 3;
-}
-
 export interface RngState {
   seed: number;
 }
 
 export interface GameState {
-  /** 연대 데이터 팩 (1차: '2011-2020') */
   poolId: string;
   players: PlayerState[];
-  /** 1..RULES.turns */
+  /** 1..turns */
   turn: number;
+  /** 이 판의 라운드 수 — 퀵 3 / 정규 5 (기획서 §1) */
+  turns: number;
   phase: Phase;
-  /** companyId → 현재가(원). 이벤트만 가격을 움직인다 (기획서 §3.2) */
   prices: Record<string, number>;
-  /** 이번 판 사건들(턴 순서, 비복원 추첨). 서버만 안다 — viewFor가 제거한다 */
+  /** 서버만 안다 — viewFor가 제거한다 */
   eventQueue: string[];
   eventLog: AppliedEvent[];
   purchases: PurchaseRecord[];
+  /** 서버 내부용 — viewFor가 제거한다 */
+  lies: Lie[];
   rng: RngState;
 }
 
 // ── 액션 ────────────────────────────────────────────────────────────────
 export type Action =
-  | { type: 'buy'; playerId: string; companyId: string; qty: number }
-  | { type: 'sell'; playerId: string; companyId: string; qty: number }
-  | { type: 'buyInfo'; playerId: string; tier: 1 | 2 | 3 }
-  /** 페이즈 전환 — 서버(타이머·전원 준비)만 보낸다. 클라이언트 발신 금지 */
+  | { type: 'buy'; playerId: string; companyId: string; amount: number }
+  | { type: 'sell'; playerId: string; companyId: string; amount: number }
+  | { type: 'buyInfo'; playerId: string; tab: InfoTab; tier: 1 | 2 | 3 }
+  /** 작전 회의 템플릿 발화 — 자산 무영향, 거짓말 기록용. 릴레이는 서버 몫 */
+  | { type: 'chat'; playerId: string; subject: string; sector: Sector; verb: ChatVerb }
+  /** 서버(타이머·전원 준비)만 보낸다 */
   | { type: 'advancePhase' };
 
 // ── 뷰 — 정보 비대칭 필터 결과 (기획서 §9) ──────────────────────────────
 export interface Standing {
   playerId: string;
   nickname: string;
+  color: string;
+  ch: string;
+  bot: boolean;
   totalAsset: number;
-  /** 동점 공동 순위 */
+  returnPct: number;
   rank: number;
 }
 
-/** 타인 요약 — 현금·보유 내역은 비공개, 총자산만 공개 */
+export interface AwardRow {
+  playerId: string;
+  nickname: string;
+  color: string;
+  ch: string;
+  value: string;
+}
+
+export interface Awards {
+  /** 🏆 수익왕 — 최종 자산 1위 */
+  profitKing: AwardRow;
+  /** 🔍 진실의 눈 — 안 속은 횟수 1위 */
+  truthEye: AwardRow;
+  /** 🛡️ 든든이 — 최대 낙폭 최소 */
+  steady: AwardRow;
+}
+
+/** 타인 요약 — 섹터 보유 칩은 공개, 종목·수량·현금은 비공개 (기획서 §9) */
 export interface OpponentSummary {
   id: string;
   nickname: string;
+  color: string;
+  ch: string;
+  bot: boolean;
   totalAsset: number;
-  /** 구매 사실은 공개 — "쟤 뭔가 샀다"가 채팅 소재가 된다 */
-  infoBoughtThisTurn: boolean;
+  heldSectors: Sector[];
+  infoLeft: number;
 }
 
 export interface GameView {
   poolId: string;
   turn: number;
+  turns: number;
   phase: Phase;
   prices: Record<string, number>;
   eventLog: AppliedEvent[];

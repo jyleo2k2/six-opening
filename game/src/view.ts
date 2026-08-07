@@ -1,15 +1,16 @@
+import { getCompany } from '../data';
 import { standings, totalAsset } from './settle';
-import type { GameState, GameView } from './types';
+import type { GameState, GameView, Sector } from './types';
 
 /**
  * 플레이어별 상태 필터 — 정보 비대칭 무결성의 관문 (기획서 §9).
  *
  * 서버는 상태를 내보낼 때 반드시 이 함수를 거친다. broadcast(state) 금지.
  * 여기서 빠지는 것:
- *   - eventQueue — 이번 판 사건들. 새는 순간 게임이 죽는다
- *   - rng — 시드가 새면 미래(등락폭·판정)를 계산할 수 있다
- *   - 타인의 news·forecasts·cash·holdings — 공개는 총자산과 구매 사실뿐
- *   - 내 뉴스의 newsId — id 문자열에 단서/배경 여부가 들어 있다 (본문만 내보낸다)
+ *   - eventQueue·rng — 서버만 안다. 새면 미래를 계산할 수 있다
+ *   - lies — 거짓말 기록. 새면 "진실의 눈"이 죽는다
+ *   - 내 뉴스의 real 플래그 — "절반만 진짜" 설계의 심장
+ *   - 타인의 현금·종목·수량·뉴스·정보 내용 — 공개는 총자산·섹터 보유 칩·구매 사실뿐
  */
 export function viewFor(state: GameState, playerId: string): GameView {
   const me = state.players.find((p) => p.id === playerId);
@@ -17,12 +18,13 @@ export function viewFor(state: GameState, playerId: string): GameView {
 
   const mine = structuredClone(me);
   for (const news of mine.news) {
-    delete news.newsId;
+    delete news.real;
   }
 
   return {
     poolId: state.poolId,
     turn: state.turn,
+    turns: state.turns,
     phase: state.phase,
     prices: { ...state.prices },
     eventLog: structuredClone(state.eventLog),
@@ -34,8 +36,12 @@ export function viewFor(state: GameState, playerId: string): GameView {
       .map((p) => ({
         id: p.id,
         nickname: p.nickname,
+        color: p.color,
+        ch: p.ch,
+        bot: p.bot,
         totalAsset: totalAsset(state, p),
-        infoBoughtThisTurn: p.infoBoughtThisTurn,
+        heldSectors: [...new Set<Sector>(p.holdings.map((h) => getCompany(h.companyId).sector))],
+        infoLeft: p.infoLeft,
       })),
   };
 }

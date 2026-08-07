@@ -1,94 +1,77 @@
 import { describe, expect, it } from 'vitest';
-import { createInitialState, reduce, type GameState } from '../src';
-
-const P = [
-  { id: 'p0', nickname: '가' },
-  { id: 'p1', nickname: '나' },
-];
+import { createInitialState, reduce, RULES, type Action, type GameState } from '../src';
+import { players } from './setup.test';
 
 function fresh(): GameState {
-  return createInitialState({ seed: 7, players: P });
+  return createInitialState({ seed: 7, players: players(2) });
 }
 
-function must(state: GameState, action: Parameters<typeof reduce>[1]): GameState {
+function must(state: GameState, action: Action): GameState {
   const result = reduce(state, action);
   if (!result.ok) throw new Error(result.reason);
   return result.value;
 }
 
-describe('매수', () => {
-  it('시장가 즉시 체결 — 현금 차감, 보유 기록', () => {
+describe('금액 기반 매수 (소수점 주식)', () => {
+  it('10만원어치 삼성전자 — 현금 차감, 수량 = 금액/가격', () => {
     const s0 = fresh();
-    const price = s0.prices['deundeun-bank'];
-    const s1 = must(s0, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: 10 });
-
+    const s1 = must(s0, { type: 'buy', playerId: 'p0', companyId: 'sec1', amount: 100_000 });
     const me = s1.players[0];
-    expect(me.cash).toBe(1_000_000 - price * 10);
-    expect(me.holdings).toEqual([{ companyId: 'deundeun-bank', qty: 10, avgCost: price }]);
+    expect(me.cash).toBe(1_000_000 - 100_000);
+    expect(me.holdings[0].qty).toBeCloseTo(100_000 / 71_000, 6);
+    expect(me.boughtSectors).toEqual(['semi']);
+    expect(me.heldEver).toEqual(['sec1']);
   });
 
-  it('추가 매수는 평균단가 가중평균', () => {
+  it('고가주(삼성바이오 78만원)도 1만원어치 살 수 있다', () => {
+    const s = must(fresh(), { type: 'buy', playerId: 'p0', companyId: 'bio2', amount: 10_000 });
+    expect(s.players[0].holdings[0].qty).toBeCloseTo(10_000 / 780_000, 8);
+  });
+
+  it('잔고 초과 금액은 잔고로 캡, 최소 1만원 미만은 거부', () => {
     let s = fresh();
-    s = must(s, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: 10 }); // @9,900
-    // 가격이 변한 뒤 추가 매수 — 테스트에서만 시세판을 직접 조작한다
-    s.prices['deundeun-bank'] = 19_900;
-    s = must(s, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: 10 });
-
-    const holding = s.players[0].holdings[0];
-    expect(holding.qty).toBe(20);
-    expect(holding.avgCost).toBeCloseTo((9_900 * 10 + 19_900 * 10) / 20);
-  });
-
-  it('현금 부족·비정수 수량·없는 종목을 거부한다', () => {
-    const s = fresh();
-    expect(reduce(s, { type: 'buy', playerId: 'p0', companyId: 'hanbit-semi', qty: 12 }).ok).toBe(false); // 86,000×12 > 100만
-    expect(reduce(s, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: 0 }).ok).toBe(false);
-    expect(reduce(s, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: -1 }).ok).toBe(false);
-    expect(reduce(s, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: 1.5 }).ok).toBe(false);
-    expect(reduce(s, { type: 'buy', playerId: 'p0', companyId: 'samsung', qty: 1 }).ok).toBe(false);
-    expect(reduce(s, { type: 'buy', playerId: 'ghost', companyId: 'deundeun-bank', qty: 1 }).ok).toBe(false);
+    s = must(s, { type: 'buy', playerId: 'p0', companyId: 'net2', amount: 5_000_000 });
+    expect(s.players[0].cash).toBe(0);
+    expect(reduce(s, { type: 'buy', playerId: 'p0', companyId: 'net2', amount: 10_000 }).ok).toBe(false);
+    expect(reduce(fresh(), { type: 'buy', playerId: 'p0', companyId: 'net2', amount: 9_999 }).ok).toBe(false);
+    expect(reduce(fresh(), { type: 'buy', playerId: 'p0', companyId: 'ghost', amount: 10_000 }).ok).toBe(false);
   });
 });
 
 describe('매도', () => {
-  it('보유분 안에서 판다 — 현금 증가, 전량 매도 시 보유 제거', () => {
+  it('부분 매도 후 잔량 유지, 전액 매도 시 보유 정리(먼지 포함)', () => {
     let s = fresh();
-    const price = s.prices['sopung-tour'];
-    s = must(s, { type: 'buy', playerId: 'p0', companyId: 'sopung-tour', qty: 10 });
-    s = must(s, { type: 'sell', playerId: 'p0', companyId: 'sopung-tour', qty: 4 });
+    s = must(s, { type: 'buy', playerId: 'p0', companyId: 'trv1', amount: 200_000 });
+    s = must(s, { type: 'sell', playerId: 'p0', companyId: 'trv1', amount: 50_000 });
+    expect(s.players[0].cash).toBe(1_000_000 - 200_000 + 50_000);
+    expect(s.players[0].holdings[0].qty * s.prices.trv1).toBeCloseTo(150_000, 4);
 
-    expect(s.players[0].holdings[0].qty).toBe(6);
-    expect(s.players[0].cash).toBe(1_000_000 - price * 10 + price * 4);
-
-    s = must(s, { type: 'sell', playerId: 'p0', companyId: 'sopung-tour', qty: 6 });
+    s = must(s, { type: 'sell', playerId: 'p0', companyId: 'trv1', amount: 999_999_999 });
     expect(s.players[0].holdings).toEqual([]);
     expect(s.players[0].cash).toBe(1_000_000);
   });
 
-  it('초과 매도·미보유 종목·비정수 수량을 거부한다 (공매도 없음)', () => {
-    let s = fresh();
-    s = must(s, { type: 'buy', playerId: 'p0', companyId: 'sopung-tour', qty: 3 });
-    expect(reduce(s, { type: 'sell', playerId: 'p0', companyId: 'sopung-tour', qty: 4 }).ok).toBe(false);
-    expect(reduce(s, { type: 'sell', playerId: 'p0', companyId: 'gureum-air', qty: 1 }).ok).toBe(false);
-    expect(reduce(s, { type: 'sell', playerId: 'p0', companyId: 'sopung-tour', qty: 0.5 }).ok).toBe(false);
+  it('미보유 종목 매도 거부', () => {
+    expect(reduce(fresh(), { type: 'sell', playerId: 'p0', companyId: 'trv1', amount: 10_000 }).ok).toBe(false);
   });
 });
 
-describe('페이즈 제한', () => {
-  it('매매는 준비 페이즈 전용이다', () => {
+describe('페이즈 제한·순수성', () => {
+  it('매매는 준비 페이즈 전용', () => {
     const chat = must(fresh(), { type: 'advancePhase' });
     expect(chat.phase).toBe('chat');
-    expect(reduce(chat, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: 1 }).ok).toBe(false);
-    expect(reduce(chat, { type: 'sell', playerId: 'p0', companyId: 'deundeun-bank', qty: 1 }).ok).toBe(false);
+    expect(reduce(chat, { type: 'buy', playerId: 'p0', companyId: 'sec1', amount: 10_000 }).ok).toBe(false);
   });
-});
 
-describe('reduce 순수성', () => {
-  it('입력 상태를 변형하지 않는다', () => {
+  it('reduce는 입력을 변형하지 않는다', () => {
     const s0 = fresh();
     const snapshot = structuredClone(s0);
-    reduce(s0, { type: 'buy', playerId: 'p0', companyId: 'deundeun-bank', qty: 5 });
+    reduce(s0, { type: 'buy', playerId: 'p0', companyId: 'sec1', amount: 50_000 });
     reduce(s0, { type: 'advancePhase' });
     expect(s0).toEqual(snapshot);
+  });
+
+  it('최소 거래 단위 상수 정합성', () => {
+    expect(RULES.minTradeAmount).toBe(RULES.tradeStep);
   });
 });

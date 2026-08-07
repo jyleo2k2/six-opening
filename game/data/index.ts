@@ -1,7 +1,8 @@
 /**
- * 2011~2020 연대 데이터 팩 — 종목 16 · 이벤트 13 · 뉴스 풀.
- * 다른 연대(2001~2010 등) 확장은 팩 추가로만 한다 — 엔진 수정 없음 (기술스택 §3).
+ * 2011~2020 사건 팩 — 실명 종목 16 · 사건 12 · 노이즈 뉴스 · 섹터 도감.
+ * 다른 연대 확장은 팩 추가로만 한다 — 엔진 수정 없음 (기술스택 §3).
  */
+export { SECTOR_INFOS, sectorInfo, sectorName } from './sectors';
 export { COMPANIES, getCompany } from './companies';
 export { EVENTS, getEvent } from './events';
-export { NEWS } from './news';
+export { NOISE_NEWS } from './noise';
