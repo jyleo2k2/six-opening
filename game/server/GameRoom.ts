@@ -146,7 +146,8 @@ export class GameRoom extends Room {
 
   /** 전원 준비 완료 시 조기 전환 (준비·채팅 페이즈만) */
   private handleReady(client: Client) {
-    if (!this.game || (this.game.phase !== 'prep' && this.game.phase !== 'chat')) return;
+    // 이벤트 연출도 전원이 '다음'을 누르면 스킵된다 — 타이머는 상한일 뿐이다
+    if (!this.game || this.game.phase === 'ended') return;
     this.ready.add(client.sessionId);
     if (this.ready.size >= this.game.players.length) this.advance();
   }

@@ -13,9 +13,11 @@
     "test:watch": "vitest",
     "sim": "tsx sim/index.ts",
     "server": "tsx server/index.ts",
+    "smoke": "tsx server/smoke.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@colyseus/sdk": "^0.17.43",
     "@types/node": "^26.1.2",
     "tsx": "^4.23.9",
     "typescript": "^7.0.2",
