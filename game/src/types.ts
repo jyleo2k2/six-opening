@@ -4,107 +4,139 @@
  */
 
 // ── 섹터 ────────────────────────────────────────────────────────────────
-// 기획서 §4.1 — 가격 효과는 항상 섹터 단위로만 지정한다. 종목 고유 지정 금지.
+// 기획서 §7.2 — 8종. 이벤트 효과는 항상 섹터 단위로 정의한다 (종목 고유 지정 금지).
 export const SECTORS = [
-  'semiconductor',
-  'energy',
+  'semi',
   'auto',
-  'consumer',
+  'chem',
+  'bio',
+  'travel',
+  'enter',
   'defense',
-  'shipping',
   'finance',
 ] as const;
 
 export type Sector = (typeof SECTORS)[number];
 
 export const SECTOR_LABEL: Record<Sector, string> = {
-  semiconductor: '반도체',
-  energy: '에너지',
+  semi: '반도체/IT',
   auto: '자동차',
-  consumer: '소비재/음식',
-  defense: '방산/우주',
-  shipping: '조선/해양',
+  chem: '정유/화학',
+  bio: '바이오/제약',
+  travel: '항공/여행',
+  enter: '엔터/콘텐츠',
+  defense: '방산',
   finance: '은행/금융',
 };
 
-// ── 시장·통화 ───────────────────────────────────────────────────────────
-export type Market = 'KR' | 'US';
-export type Currency = 'KRW' | 'USD';
+// ── 이모티콘 — 모든 페이즈 상시 사용 (기획서 §4) ─────────────────────────
+export const EMOTES = ['laugh', 'cry', 'despair', 'thumbsup', 'yar'] as const;
 
-export const MARKET_CURRENCY: Record<Market, Currency> = { KR: 'KRW', US: 'USD' };
+export type Emote = (typeof EMOTES)[number];
 
-// ── 카드 ────────────────────────────────────────────────────────────────
-export interface StockCard {
-  kind: 'stock';
+export const EMOTE_LABEL: Record<Emote, string> = {
+  laugh: '웃음',
+  cry: '울음',
+  despair: '절망',
+  thumbsup: '따봉',
+  yar: '야르',
+};
+
+// ── 데이터 팩 (기획서 §7) ────────────────────────────────────────────────
+export interface Company {
   id: string;
+  /** 익명 가상 회사 — 실존 기업명·상표 연상 금지 (기획서 §7.1) */
   name: string;
-  ticker: string;
-  market: Market;
   sector: Sector;
-  /** 게임 시작 시점의 전일 종가. 시장 통화 기준. pipelines/close_snapshot이 갱신한다 */
+  /** 시작가(원). 5,000~100,000 스케일 — 시드 100만원으로 정수 주 매매가 성립하는 범위 */
   basePrice: number;
-  /** 아이 눈높이 설명 */
+  /** 아이 눈높이 한 줄 소개 */
   blurb: string;
-  keywords: [string, string, string];
 }
 
-/** 섹터 단위 가격 효과. delta 0.1 = +10% */
-export interface SectorEffect {
-  sector: Sector;
-  delta: number;
-}
+/** 섹터별 등락 범위. 부호는 동일해야 한다(방향 = 역사 고정), 폭은 발동 시 종목마다 개별 추첨 */
+export type EffectRange = readonly [min: number, max: number];
 
-export interface SkillCard {
-  kind: 'skill';
+export interface GameEvent {
   id: string;
   name: string;
-  /** 뉴스 헤드라인 형태의 컨셉 문구 */
-  headline: string;
-  effects: SectorEffect[];
-}
-
-export interface HedgeCard {
-  kind: 'hedge';
-  id: string;
-  name: string;
-  headline: string;
-  /** 무효화할 섹터. 비면 전 섹터 */
-  sectors: Sector[];
-}
-
-export type Card = StockCard | SkillCard | HedgeCard;
-
-// ── 경제환경(영역 전개) ─────────────────────────────────────────────────
-export interface MacroEvent {
-  id: string;
-  /** 1970년대 석유파동 등 실제 경제사 이벤트명 */
-  name: string;
+  /** 실제 연도 표기 — 연출·교육 프레임용 */
   year: string;
-  tone: 'good' | 'bad';
-  /** 아이 눈높이 해설 — 도감·연출에서 재사용 */
+  tone: 'good' | 'bad' | 'mixed';
+  /** 실제 역사 한 줄 설명 — 사건 배너에 반드시 병기, 희화화 금지 (기획서 §8) */
   blurb: string;
-  /** 섹터별 가격 효과. delta 0.1 = +10% */
-  matrix: Record<Sector, number>;
+  effects: Partial<Record<Sector, EffectRange>>;
 }
 
-// ── 게임 상태 ───────────────────────────────────────────────────────────
+export interface NewsItem {
+  id: string;
+  /** 어느 사건의 단서인가. null = 이벤트와 무관한 시대 배경 뉴스 */
+  eventId: string | null;
+  /** 사실만, 주가 얘기 없음 (기획서 §3.1) */
+  text: string;
+}
+
+// ── 플레이어 ────────────────────────────────────────────────────────────
 export interface Holding {
-  cardId: string;
+  companyId: string;
   qty: number;
-  /** 평균단가 (해당 종목의 시장 통화 기준) — 기획서 Q11 */
+  /** 평균 매수 단가 — 추가 매수 시 가중평균 */
   avgCost: number;
+}
+
+/**
+ * 정보소 예보 (기획서 §3.3). 빗나가면 미끼 사건 기준으로 만들어진다 —
+ * 수신자는 payload만으로 진위를 구별할 수 없다.
+ */
+export interface InfoForecast {
+  turn: number;
+  tier: 1 | 2 | 3;
+  eventId: string;
+  eventName: string;
+  /** 가장 크게 오를/내릴 섹터. 해당 방향 효과가 없으면 null */
+  up: Sector | null;
+  down: Sector | null;
+}
+
+export interface NewsDelivery {
+  turn: number;
+  newsId: string;
+  text: string;
 }
 
 export interface PlayerState {
   id: string;
-  cash: Record<Currency, number>;
-  /** 카드 id 배열. 같은 종류가 여러 장 들어간다 */
-  deck: string[];
-  hand: string[];
-  /** 종목카드 존 3개 = 최대 3종류 */
-  field: Holding[];
-  swapUsedThisTurn: boolean;
-  skillUsedThisTurn: boolean;
+  nickname: string;
+  cash: number;
+  holdings: Holding[];
+  /** 내 뉴스함 — 나만 본다 (기획서 §9) */
+  news: NewsDelivery[];
+  /** 내 예보함 — 나만 본다 (기획서 §9) */
+  forecasts: InfoForecast[];
+  infoBoughtThisTurn: boolean;
+}
+
+// ── 게임 상태 ───────────────────────────────────────────────────────────
+export type Phase = 'prep' | 'chat' | 'event' | 'ended';
+
+export interface AppliedChange {
+  before: number;
+  after: number;
+  /** 실제 적용 등락률 */
+  pct: number;
+}
+
+export interface AppliedEvent {
+  turn: number;
+  eventId: string;
+  changes: Record<string, AppliedChange>;
+}
+
+/** 정보소 구매 사실 — 전원 공개, 내용은 비공개 (기획서 §3.3) */
+export interface PurchaseRecord {
+  turn: number;
+  playerId: string;
+  tier: 1 | 2 | 3;
 }
 
 export interface RngState {
@@ -112,30 +144,58 @@ export interface RngState {
 }
 
 export interface GameState {
-  players: [PlayerState, PlayerState];
-  /** 0-based 누적 턴 수. 10이면 종료 */
+  /** 연대 데이터 팩 (1차: '2011-2020') */
+  poolId: string;
+  players: PlayerState[];
+  /** 1..RULES.turns */
   turn: number;
-  /** 1..5 */
-  round: number;
-  current: 0 | 1;
-  /** 기준환율 원/$ — 기획서 Q9에서 변동제로 바뀌면 여기를 이벤트가 건드린다 */
-  fxRate: number;
-  /** 섹터별 누적 가격 배율 ∏(1 + 효과ᵢ) — 기획서 §8 */
-  priceMods: Record<Sector, number>;
-  activeEventId: string | null;
-  eventLog: string[];
+  phase: Phase;
+  /** companyId → 현재가(원). 이벤트만 가격을 움직인다 (기획서 §3.2) */
+  prices: Record<string, number>;
+  /** 이번 판 사건들(턴 순서, 비복원 추첨). 서버만 안다 — viewFor가 제거한다 */
+  eventQueue: string[];
+  eventLog: AppliedEvent[];
+  purchases: PurchaseRecord[];
   rng: RngState;
-  finished: boolean;
 }
 
 // ── 액션 ────────────────────────────────────────────────────────────────
 export type Action =
-  | { type: 'buy'; cardId: string; qty: number }
-  | { type: 'sell'; cardId: string; qty: number }
-  | { type: 'exchange'; from: Currency; amount: number }
-  | { type: 'swapDeck'; handCardId: string; deckCardId: string }
-  | { type: 'playSkill'; cardId: string }
-  | { type: 'endTurn' };
+  | { type: 'buy'; playerId: string; companyId: string; qty: number }
+  | { type: 'sell'; playerId: string; companyId: string; qty: number }
+  | { type: 'buyInfo'; playerId: string; tier: 1 | 2 | 3 }
+  /** 페이즈 전환 — 서버(타이머·전원 준비)만 보낸다. 클라이언트 발신 금지 */
+  | { type: 'advancePhase' };
+
+// ── 뷰 — 정보 비대칭 필터 결과 (기획서 §9) ──────────────────────────────
+export interface Standing {
+  playerId: string;
+  nickname: string;
+  totalAsset: number;
+  /** 동점 공동 순위 */
+  rank: number;
+}
+
+/** 타인 요약 — 현금·보유 내역은 비공개, 총자산만 공개 */
+export interface OpponentSummary {
+  id: string;
+  nickname: string;
+  totalAsset: number;
+  /** 구매 사실은 공개 — "쟤 뭔가 샀다"가 채팅 소재가 된다 */
+  infoBoughtThisTurn: boolean;
+}
+
+export interface GameView {
+  poolId: string;
+  turn: number;
+  phase: Phase;
+  prices: Record<string, number>;
+  eventLog: AppliedEvent[];
+  purchases: PurchaseRecord[];
+  standings: Standing[];
+  me: PlayerState;
+  others: OpponentSummary[];
+}
 
 export type Result<T> = { ok: true; value: T } | { ok: false; reason: string };
 

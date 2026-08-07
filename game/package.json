@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "룰 엔진(SSOT) · 카드/이벤트 데이터 · PvP 서버 · 밸런스 시뮬레이터",
+  "description": "룰 엔진(SSOT) · 종목/이벤트 데이터 · 멀티 서버 · 밸런스 시뮬레이터",
   "exports": {
     ".": "./src/index.ts",
     "./data": "./data/index.ts"
