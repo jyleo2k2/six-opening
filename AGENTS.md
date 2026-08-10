@@ -13,11 +13,11 @@
 - 문서 우선순위: 기획서 > 기능명세 > 디자인시스템 > 기술스택·가드 파일 (충돌 시)
 - 자기 폴더의 AGENTS.md가 허용한 범위 밖 파일 수정 금지. 공용 변경은 `web/shared/AGENTS.md`의 요청 로그 절차
 - LLM 출력은 반드시 `shared/llm` 필터 경유. AI가 종목 추천·매매 시점·목표가·수익률 전망·훈계를 말하면 버그
-- **펫은 자유 입력 없음** — AI에게 말을 거는 입력 UI 금지. 펫이 먼저 발화, 반응은 선택지. 판단력 채점도 전면 금지
+- **AI 코치는 선발화로 시작** — MTS 행동 감지 뒤 먼저 말을 건다. 이후 자연어 대화는 종목 유니버스·자녀 본인 아카이브·서비스/금융 기초로만 허용하며, 투자 추천·매매 시점·가격·수익률 전망·훈계는 금지. 판단력 채점도 전면 금지
 - [사실]/[추론]/[가정] 표기를 발췌 시 떼지 말 것
 - 원안 보존 (수정 금지): `docs/키움_가족모의투자_팀공유_정리_v2.md`, `docs/펫서비스기획.md`
 - md가 원본, `docs/자료정리.html`은 뷰 — 기획 변경 시 md 먼저
 
 ## 스택 요약 (상세: docs/기술스택.md)
 
-Next.js(App Router)+TS+Tailwind, `web/` 하위, feature-sliced(`features/f*` = 소유 경계). LLM: F8 펫 리액션=claude-sonnet-5, F8 순간·질문/F9 서술=claude-opus-5, 서버 전용·임계치 트리거 시에만. 시세: 키움 REST API+폴백 캐시. 상태: zustand. 픽스처 우선 개발. 검증: `npm run build`.
+Next.js(App Router)+TS+Tailwind, `web/` 하위, feature-sliced(`features/f*` = 소유 경계). LLM: F8 AI 코치 대화/F9 서술, 서버 전용·`shared/llm` 필터 경유. 시세: 키움 REST API+폴백 캐시. 상태: zustand. 픽스처 우선 개발. 검증: `npm run build`.
