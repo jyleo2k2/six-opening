@@ -1,6 +1,7 @@
 # 비밀키 — 절대 커밋 금지
 .env
 .env.*
+!.env.kiwoom.example
 web/.env
 web/.env.*
 
@@ -21,3 +22,6 @@ Thumbs.db
 
 # tmp
 records
+
+# Generated Kiwoom chart output
+kiwoom-line-chart.html
