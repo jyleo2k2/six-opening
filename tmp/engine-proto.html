@@ -1,0 +1,1654 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>키움 가족리그 · 성향 엔진 프로토타입</title>
+  <style>
+    :root {
+      --navy: #001E5A;
+      --magenta: #D70082;
+      --gray: #BEBEBE;
+      --bg: #F6F7FA;
+      --white: #FFFFFF;
+      --up: #E8322E;
+      --down: #1668DC;
+      --ink: #1A2233;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: var(--bg); }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: Pretendard, "Segoe UI", "Malgun Gothic", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, summary { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; }
+
+    button:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid var(--magenta);
+      outline-offset: 3px;
+    }
+
+    .app {
+      width: min(100%, 430px);
+      min-height: 100vh;
+      margin: 0 auto;
+      background: var(--bg);
+      box-shadow: 0 0 36px rgba(0, 30, 90, 0.10);
+    }
+
+    .topbar {
+      position: relative;
+      overflow: hidden;
+      padding: 22px 20px 24px;
+      color: var(--white);
+      background: var(--navy);
+    }
+
+    .topbar::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      bottom: -54px;
+      width: 150px;
+      height: 150px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+    }
+
+    .brand-row,
+    .title-row,
+    .section-head,
+    .score-head,
+    .action-row,
+    .json-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      opacity: 0.82;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .live-badge::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--magenta);
+      box-shadow: 0 0 0 4px rgba(215, 0, 130, 0.18);
+    }
+
+    h1 {
+      margin: 12px 0 2px;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 13px;
+    }
+
+    .switcher {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      margin-top: 18px;
+      padding: 4px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .switcher button {
+      min-height: 40px;
+      border: 0;
+      border-radius: 9px;
+      color: rgba(255, 255, 255, 0.72);
+      background: transparent;
+      font-weight: 700;
+    }
+
+    .switcher button[aria-selected="true"] {
+      color: var(--navy);
+      background: var(--white);
+      box-shadow: 0 3px 12px rgba(0, 30, 90, 0.14);
+    }
+
+    main {
+      display: grid;
+      gap: 14px;
+      padding: 16px 14px 36px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid rgba(190, 190, 190, 0.55);
+      border-radius: 16px;
+      background: var(--white);
+      box-shadow: 0 8px 22px rgba(0, 30, 90, 0.06);
+    }
+
+    .hero-card {
+      padding: 20px;
+      border-color: transparent;
+      color: var(--white);
+      background: var(--navy);
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--magenta);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero-card .eyebrow { color: var(--white); opacity: 0.72; }
+
+    h2, h3, p { margin-top: 0; }
+
+    h2 {
+      margin-bottom: 5px;
+      font-size: 18px;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin-bottom: 0;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .hero-copy {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 13px;
+    }
+
+    .pipeline {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+    }
+
+    .pipe-step {
+      min-width: 0;
+      padding: 10px 5px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .pipe-step strong,
+    .pipe-step span { display: block; }
+
+    .pipe-step strong { font-size: 12px; }
+    .pipe-step span { margin-top: 2px; font-size: 10px; opacity: 0.68; }
+    .pipe-arrow { font-weight: 900; opacity: 0.55; }
+
+    .note-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 29px;
+      padding: 5px 10px;
+      border: 1px solid var(--gray);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .hero-card .chip {
+      border-color: rgba(255, 255, 255, 0.25);
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .chip.accent {
+      border-color: var(--magenta);
+      color: var(--magenta);
+    }
+
+    .section-head { align-items: flex-start; margin-bottom: 14px; }
+
+    .section-description {
+      margin: 4px 0 0;
+      color: rgba(26, 34, 51, 0.64);
+      font-size: 12px;
+    }
+
+    .assumption {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border: 1px solid var(--magenta);
+      border-radius: 999px;
+      color: var(--magenta);
+      background: var(--white);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .event-list {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .event-item {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: center;
+      min-height: 54px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      background: var(--bg);
+    }
+
+    .event-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--gray);
+      border-radius: 50%;
+      color: var(--navy);
+      background: var(--white);
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .event-item strong,
+    .event-item span { display: block; }
+
+    .event-item strong { font-size: 12px; }
+    .event-item span { margin-top: 1px; color: rgba(26, 34, 51, 0.62); font-size: 12px; }
+
+    .action-row { margin-top: 14px; }
+
+    .primary,
+    .secondary {
+      min-height: 46px;
+      border-radius: 12px;
+      font-weight: 800;
+    }
+
+    .primary {
+      flex: 1;
+      border: 1px solid var(--magenta);
+      color: var(--white);
+      background: var(--magenta);
+    }
+
+    .primary.applied {
+      border-color: var(--navy);
+      background: var(--navy);
+    }
+
+    .secondary {
+      padding: 0 14px;
+      border: 1px solid var(--navy);
+      color: var(--navy);
+      background: var(--white);
+    }
+
+    .secondary[hidden] { display: none; }
+
+    .order-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 12px;
+      background: var(--bg);
+    }
+
+    .order-tab {
+      min-height: 40px;
+      border: 0;
+      border-radius: 9px;
+      color: rgba(26, 34, 51, 0.58);
+      background: transparent;
+      font-weight: 800;
+    }
+
+    .order-tab[aria-selected="true"] {
+      color: var(--white);
+      background: var(--navy);
+      box-shadow: 0 3px 10px rgba(0, 30, 90, 0.14);
+    }
+
+    .order-field { margin-top: 15px; }
+
+    fieldset.order-field {
+      margin-inline: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    .order-label,
+    .confidence-legend {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .quantity-wrap {
+      position: relative;
+    }
+
+    .quantity-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 46px 0 14px;
+      border: 1px solid var(--gray);
+      border-radius: 12px;
+      color: var(--ink);
+      background: var(--white);
+      font-size: 17px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .quantity-input:focus {
+      border-color: var(--magenta);
+      outline: 3px solid rgba(215, 0, 130, 0.12);
+    }
+
+    .quantity-unit {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(26, 34, 51, 0.58);
+      font-weight: 800;
+      pointer-events: none;
+    }
+
+    .confidence-group {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .confidence-button {
+      min-height: 42px;
+      border: 1px solid var(--gray);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--white);
+      font-size: 12px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .confidence-button[aria-pressed="true"] {
+      border-color: var(--magenta);
+      color: var(--white);
+      background: var(--magenta);
+    }
+
+    .confidence-caption {
+      margin: 7px 0 0;
+      color: rgba(26, 34, 51, 0.58);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .signal-status {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .signal-counter {
+      padding: 10px;
+      border: 1px solid rgba(190, 190, 190, 0.55);
+      border-radius: 12px;
+      background: var(--bg);
+    }
+
+    .signal-counter strong,
+    .signal-counter span { display: block; }
+
+    .signal-counter strong { color: var(--navy); font-size: 11px; }
+    .signal-counter span { margin-top: 3px; color: rgba(26, 34, 51, 0.62); font-size: 10px; }
+
+    .signal-count {
+      color: var(--magenta);
+      font-size: 14px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .session-limit {
+      margin: 11px 0 0;
+      color: rgba(26, 34, 51, 0.62);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .signal-bubble {
+      position: relative;
+      margin-top: 18px;
+      padding: 14px;
+      border: 1px solid var(--navy);
+      border-radius: 16px;
+      color: var(--ink);
+      background: var(--white);
+      box-shadow: 0 8px 22px rgba(0, 30, 90, 0.08);
+    }
+
+    .signal-bubble[hidden] { display: none; }
+
+    .signal-bubble::before {
+      content: "";
+      position: absolute;
+      top: -7px;
+      left: 28px;
+      width: 12px;
+      height: 12px;
+      transform: rotate(45deg);
+      border-top: 1px solid var(--navy);
+      border-left: 1px solid var(--navy);
+      background: var(--white);
+    }
+
+    .bubble-speaker {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--navy);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .bubble-dot {
+      display: grid;
+      place-items: center;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      color: var(--white);
+      background: var(--magenta);
+      font-size: 9px;
+    }
+
+    .bubble-message {
+      margin: 9px 0 12px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .quiet-button {
+      min-height: 36px;
+      padding: 0 13px;
+      border: 1px solid var(--navy);
+      border-radius: 999px;
+      color: var(--navy);
+      background: var(--white);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .server-badge {
+      position: sticky;
+      top: 8px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      margin-bottom: 12px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: var(--white);
+      background: var(--navy);
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .event-log {
+      max-height: 270px;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+      border-top: 1px solid rgba(190, 190, 190, 0.55);
+      list-style: none;
+    }
+
+    .log-empty {
+      padding: 28px 12px;
+      color: rgba(26, 34, 51, 0.52);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .log-row {
+      display: grid;
+      grid-template-columns: 58px 42px 1fr;
+      gap: 7px;
+      align-items: start;
+      padding: 10px 2px;
+      border-bottom: 1px solid rgba(190, 190, 190, 0.42);
+      font-size: 10px;
+    }
+
+    .log-time {
+      color: rgba(26, 34, 51, 0.52);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .log-type {
+      color: var(--magenta);
+      font-weight: 900;
+    }
+
+    .log-message { color: var(--ink); }
+
+    .llm-gate {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 12px;
+      border: 1px solid var(--gray);
+      border-radius: 12px;
+      color: rgba(26, 34, 51, 0.52);
+      background: rgba(190, 190, 190, 0.32);
+      font-weight: 800;
+    }
+
+    .profile-summary {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 18px;
+      padding: 15px;
+      border-radius: 14px;
+      color: var(--white);
+      background: var(--navy);
+    }
+
+    .summary-kicker {
+      margin: 0 0 2px;
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.68;
+    }
+
+    .profile-type {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .summary-caption {
+      margin: 5px 0 0;
+      font-size: 11px;
+      opacity: 0.72;
+    }
+
+    .summary-mark {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      width: 44px;
+      height: 44px;
+      transform: translateY(-50%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+    }
+
+    .summary-mark::before,
+    .summary-mark::after {
+      content: "";
+      position: absolute;
+      background: var(--magenta);
+    }
+
+    .summary-mark::before { width: 18px; height: 3px; top: 20px; left: 12px; }
+    .summary-mark::after { width: 3px; height: 18px; top: 12px; left: 20px; }
+
+    .score-list { display: grid; gap: 17px; }
+    .score-head { margin-bottom: 7px; }
+
+    .score-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .score-value {
+      min-width: 32px;
+      color: var(--navy);
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .delta {
+      display: none;
+      min-width: 30px;
+      padding: 3px 6px;
+      border: 1px solid var(--magenta);
+      border-radius: 999px;
+      color: var(--magenta);
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1.2;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .delta.visible { display: inline-block; }
+    .delta.zero { border-color: var(--gray); color: var(--ink); }
+
+    .track {
+      position: relative;
+      height: 9px;
+      overflow: visible;
+      border-radius: 999px;
+      background: rgba(190, 190, 190, 0.48);
+    }
+
+    .fill {
+      position: relative;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--navy);
+      transition: width 650ms cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .fill::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -6px;
+      width: 12px;
+      height: 12px;
+      transform: translateY(-50%);
+      border: 3px solid var(--white);
+      border-radius: 50%;
+      background: var(--magenta);
+      box-shadow: 0 0 0 1px var(--magenta);
+    }
+
+    .ends {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      color: rgba(26, 34, 51, 0.56);
+      font-size: 10px;
+    }
+
+    .score-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 18px 0 0;
+      padding-top: 14px;
+      border-top: 1px solid rgba(190, 190, 190, 0.55);
+      color: rgba(26, 34, 51, 0.68);
+      font-size: 11px;
+    }
+
+    .score-note strong { color: var(--navy); }
+
+    .trace-empty {
+      display: grid;
+      place-items: center;
+      min-height: 112px;
+      padding: 18px;
+      border: 1px dashed var(--gray);
+      border-radius: 12px;
+      color: rgba(26, 34, 51, 0.55);
+      background: var(--bg);
+      text-align: center;
+    }
+
+    .trace-list {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .trace-list[hidden], .trace-empty[hidden] { display: none; }
+
+    .trace-item {
+      display: grid;
+      grid-template-columns: 24px 1fr auto;
+      gap: 9px;
+      align-items: start;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(190, 190, 190, 0.46);
+    }
+
+    .trace-item:last-child { border-bottom: 0; }
+
+    .trace-number {
+      display: grid;
+      place-items: center;
+      width: 23px;
+      height: 23px;
+      border-radius: 50%;
+      color: var(--white);
+      background: var(--navy);
+      font-size: 10px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .trace-copy strong,
+    .trace-copy span { display: block; }
+
+    .trace-copy strong { font-size: 12px; }
+    .trace-copy span { margin-top: 2px; color: rgba(26, 34, 51, 0.62); font-size: 11px; }
+
+    .trace-delta {
+      padding-top: 2px;
+      color: var(--magenta);
+      font-size: 12px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .trace-delta.zero { color: rgba(26, 34, 51, 0.48); }
+
+    details {
+      border: 1px solid rgba(190, 190, 190, 0.55);
+      border-radius: 12px;
+      background: var(--white);
+    }
+
+    summary {
+      position: relative;
+      padding: 14px 38px 14px 14px;
+      color: var(--navy);
+      font-weight: 800;
+      list-style: none;
+      cursor: pointer;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+
+    summary::after {
+      content: "+";
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--magenta);
+      font-size: 19px;
+      font-weight: 500;
+    }
+
+    details[open] summary::after { content: "−"; }
+
+    .rule-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0 14px 14px;
+      list-style: none;
+    }
+
+    .rule-list li {
+      display: grid;
+      grid-template-columns: 73px 1fr;
+      gap: 9px;
+      color: rgba(26, 34, 51, 0.68);
+      font-size: 11px;
+    }
+
+    .rule-list strong { color: var(--ink); }
+
+    .json-panel {
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: var(--navy);
+    }
+
+    .json-head {
+      padding: 11px 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .json-head span:last-child { color: rgba(255, 255, 255, 0.58); font-weight: 500; }
+
+    pre {
+      max-height: 275px;
+      margin: 0;
+      padding: 14px;
+      overflow: auto;
+      color: var(--white);
+      font: 11px/1.65 Consolas, "SFMono-Regular", monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+      tab-size: 2;
+    }
+
+    .compare-card {
+      padding: 18px;
+      color: var(--white);
+      background: var(--navy);
+    }
+
+    .compare-card .eyebrow { color: var(--white); opacity: 0.68; }
+
+    .compare-copy {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .compare-caption {
+      margin: 8px 0 0;
+      color: rgba(255, 255, 255, 0.68);
+      font-size: 11px;
+    }
+
+    .guardrail {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 13px 14px;
+      border: 1px solid rgba(190, 190, 190, 0.55);
+      border-radius: 12px;
+      background: var(--white);
+    }
+
+    .guardrail-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: var(--white);
+      background: var(--magenta);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .guardrail strong,
+    .guardrail span { display: block; }
+
+    .guardrail strong { color: var(--navy); font-size: 12px; }
+    .guardrail span { margin-top: 2px; color: rgba(26, 34, 51, 0.62); font-size: 11px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      z-index: 10;
+      width: min(calc(100% - 32px), 390px);
+      padding: 13px 16px;
+      transform: translate(-50%, 18px);
+      border-radius: 12px;
+      color: var(--white);
+      background: var(--navy);
+      box-shadow: 0 12px 30px rgba(0, 30, 90, 0.25);
+      font-size: 12px;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 360px) {
+      .pipeline { gap: 4px; }
+      .pipe-step { padding-inline: 2px; }
+      .pipe-step strong { font-size: 10px; }
+      .pipe-step span { font-size: 9px; }
+      .card { padding: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand-row">
+        <p class="brand">키움 가족 모의투자 리그</p>
+        <span class="live-badge">ENGINE LIVE</span>
+      </div>
+      <div class="title-row">
+        <div>
+          <h1>성향 엔진 실험실</h1>
+          <p class="subtitle">행동 한 건이 스타일에 어떻게 반영되는지 확인해요.</p>
+        </div>
+      </div>
+      <div class="switcher" role="tablist" aria-label="가족 계정 전환">
+        <button type="button" role="tab" aria-selected="true" data-profile="minji">민지 · 자녀</button>
+        <button type="button" role="tab" aria-selected="false" data-profile="mom">엄마 · 부모</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="card hero-card" aria-labelledby="pipeline-title">
+        <p class="eyebrow">HOW IT WORKS</p>
+        <h2 id="pipeline-title">숫자는 엔진이, 이야기는 AI가</h2>
+        <p class="hero-copy">생성형 AI가 성향 점수를 추측하지 않도록 계산과 서술을 분리했어요.</p>
+        <div class="pipeline" aria-label="성향 리포트 생성 과정">
+          <div class="pipe-step"><strong>행동</strong><span>거래·탐색</span></div>
+          <span class="pipe-arrow" aria-hidden="true">›</span>
+          <div class="pipe-step"><strong>룰 엔진</strong><span>5축 계산</span></div>
+          <span class="pipe-arrow" aria-hidden="true">›</span>
+          <div class="pipe-step"><strong>리포트</strong><span>AI 서술</span></div>
+        </div>
+        <div class="note-row">
+          <span class="chip">LLM 점수 계산 없음</span>
+          <span class="chip">챗봇 대화 미반영</span>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="scenario-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">LIVE INPUT</p>
+            <h2 id="scenario-title">방금 행동을 넣어볼까?</h2>
+            <p class="section-description">시드 3주치에 이번 행동 한 건을 더해 다시 계산해요.</p>
+          </div>
+          <span class="assumption">[가정] 시연 규칙</span>
+        </div>
+        <ul class="event-list" id="eventList" aria-label="반영할 행동 이벤트"></ul>
+        <div class="action-row">
+          <button class="primary" type="button" id="applyButton">이 행동 반영하기</button>
+          <button class="secondary" type="button" id="resetButton" hidden>되돌리기</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="signal-demo-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">PROACTIVE SIGNAL</p>
+            <h2 id="signal-demo-title">키웅이는 헤맬 때만 먼저 말해요</h2>
+            <p class="section-description">수량 수정과 매수·매도 전환만 브라우저에서 감지해요.</p>
+          </div>
+          <span class="assumption">시연 간격 10초</span>
+        </div>
+
+        <div class="order-tabs" role="tablist" aria-label="주문 종류">
+          <button class="order-tab" type="button" role="tab" aria-selected="true" data-order-side="buy">매수</button>
+          <button class="order-tab" type="button" role="tab" aria-selected="false" data-order-side="sell">매도</button>
+        </div>
+
+        <div class="order-field">
+          <label class="order-label" for="quantityInput">수량</label>
+          <div class="quantity-wrap">
+            <input class="quantity-input" id="quantityInput" type="number" inputmode="numeric" min="1" step="1" value="1" aria-describedby="quantityHint">
+            <span class="quantity-unit">주</span>
+          </div>
+          <span class="sr-only" id="quantityHint">입력이 0.7초 멈추면 수량 수정 1회로 계산합니다.</span>
+        </div>
+
+        <fieldset class="order-field">
+          <legend class="confidence-legend">얼마나 자신 있어?</legend>
+          <div class="confidence-group">
+            <button class="confidence-button" type="button" aria-pressed="true" data-confidence="25">25</button>
+            <button class="confidence-button" type="button" aria-pressed="false" data-confidence="50">50</button>
+            <button class="confidence-button" type="button" aria-pressed="false" data-confidence="75">75</button>
+            <button class="confidence-button" type="button" aria-pressed="false" data-confidence="100">100</button>
+          </div>
+          <p class="confidence-caption">정답은 없어!</p>
+        </fieldset>
+
+        <div class="signal-status" aria-label="선제 신호 감지 상태">
+          <div class="signal-counter">
+            <strong>수량 수정 · 45초</strong>
+            <span><b class="signal-count" id="quantityCount">0/3</b> · 0.7초 멈춤 기준</span>
+          </div>
+          <div class="signal-counter">
+            <strong>탭 전환 · 30초</strong>
+            <span><b class="signal-count" id="tabCount">0/3</b> · 실제 전환만</span>
+          </div>
+        </div>
+        <p class="session-limit" id="sessionLimit">이번 세션 발화 0/2 · 발화 간 최소 10초</p>
+
+        <div class="signal-bubble" id="signalBubble" aria-live="polite" hidden>
+          <div class="bubble-speaker"><span class="bubble-dot" aria-hidden="true">AI</span>키웅이</div>
+          <p class="bubble-message" id="signalMessage"></p>
+          <button class="quiet-button" type="button" id="muteSignalButton">[괜찮아]</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="event-log-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">LOCAL EVENT LOG</p>
+            <h2 id="event-log-title">계산·감지 이벤트 로그</h2>
+            <p class="section-description">가장 최근 이벤트가 위에 표시돼요.</p>
+          </div>
+        </div>
+        <div class="server-badge">서버 호출: 0회 — 전부 브라우저 안에서 계산됨</div>
+        <ol class="event-log" id="localEventLog" aria-live="polite"></ol>
+        <button class="llm-gate" type="button" disabled>여기서부터 서버 필요(LLM)</button>
+      </section>
+
+      <section class="card" aria-labelledby="score-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">WEEK 4 SNAPSHOT</p>
+            <h2 id="score-title">이번 주 투자 스타일</h2>
+          </div>
+          <span class="chip accent" id="stateChip">시드 3주 반영</span>
+        </div>
+        <div class="profile-summary">
+          <p class="summary-kicker" id="summaryKicker">이번 주 민지는</p>
+          <p class="profile-type" id="profileType">재빨리 개척자형</p>
+          <p class="summary-caption">매주 새로 계산되는 스타일이에요.</p>
+          <span class="summary-mark" aria-hidden="true"></span>
+        </div>
+        <div class="score-list" id="scoreList"></div>
+        <p class="score-note"><strong>정답은 없어!</strong> 이 숫자는 실력이나 등급이 아니라, 지금까지 보인 행동이 어느 쪽에 가까운지 나타내요.</p>
+      </section>
+
+      <section class="card" aria-labelledby="trace-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">EXPLAINABLE TRACE</p>
+            <h2 id="trace-title">왜 이렇게 움직였을까?</h2>
+          </div>
+          <span class="chip" id="traceCount">대기 중</span>
+        </div>
+        <div class="trace-empty" id="traceEmpty">위의 버튼을 누르면 축별 반영 근거가 여기에 나타나요.</div>
+        <ol class="trace-list" id="traceList" hidden></ol>
+      </section>
+
+      <section class="card" aria-labelledby="rules-title">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">RULES & OUTPUT</p>
+            <h2 id="rules-title">엔진 안쪽도 확인해요</h2>
+            <p class="section-description">가중치는 사용자 검증 전 시연용 가정이며 확정 공식이 아니에요.</p>
+          </div>
+        </div>
+
+        <details>
+          <summary>5축은 무엇을 관찰하나요?</summary>
+          <ul class="rule-list">
+            <li><strong>집중–분산</strong><span>종목·업종별 보유 비중의 쏠림</span></li>
+            <li><strong>속도</strong><span>평균 보유기간과 주간 회전율</span></li>
+            <li><strong>신중함</strong><span>주문 전 탐색 깊이와 확신도–행동의 일치</span></li>
+            <li><strong>손실 대응</strong><span>하락 구간의 보유·매도·추가매수 패턴</span></li>
+            <li><strong>탐험심</strong><span>새 종목과 새 업종을 시도한 비율</span></li>
+          </ul>
+        </details>
+
+        <div class="json-panel" aria-labelledby="json-label">
+          <div class="json-head">
+            <span id="json-label">ENGINE_OUTPUT.json</span>
+            <span>LLM 입력 전</span>
+          </div>
+          <pre id="jsonOutput"></pre>
+        </div>
+      </section>
+
+      <section class="card compare-card" aria-labelledby="compare-title">
+        <p class="eyebrow">FAMILY VIEW</p>
+        <h2 id="compare-title">가족 비교는 우열을 가리지 않아요</h2>
+        <p class="compare-copy">민지는 재빨리, 엄마는 진득하게.<br>스타일이 달라요.</p>
+        <p class="compare-caption">서로의 방식이 왜 다른지 대화를 시작하는 한 줄이에요.</p>
+      </section>
+
+      <div class="guardrail">
+        <span class="guardrail-icon" aria-hidden="true">AI</span>
+        <div>
+          <strong>AI는 계산된 사실만 읽어요</strong>
+          <span>엔진 JSON 밖의 행동을 만들지 않고, 종목 추천·시점·가격·수익률 전망은 출력 필터가 막아요.</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const axes = [
+      { key: "balance", name: "집중–분산", left: "한우물형", right: "골고루형" },
+      { key: "speed", name: "속도", left: "진득이형", right: "재빨리형" },
+      { key: "caution", name: "신중함", left: "직진형", right: "돌다리형" },
+      { key: "loss", name: "손실 대응", left: "버티기형", right: "갈아타기형" },
+      { key: "explore", name: "탐험심", left: "익숙함형", right: "개척자형" }
+    ];
+
+    const profiles = {
+      minji: {
+        name: "민지",
+        role: "자녀",
+        type: "재빨리 개척자형",
+        initial: { balance: 42, speed: 73, caution: 51, loss: 44, explore: 76 },
+        current: { balance: 38, speed: 78, caution: 43, loss: 44, explore: 82 },
+        totals: { initialTrades: 11, currentTrades: 12, exploreEvents: 27 },
+        events: [
+          { icon: "1", title: "탐색", text: "삼성전자·현대차를 둘러봄 · 76초" },
+          { icon: "2", title: "생각 기록", text: "그냥 느낌이 좋아 · 확신 25" },
+          { icon: "3", title: "주문", text: "삼성전자 1주 · 수량 3회 수정" }
+        ],
+        traces: {
+          balance: "새 종목이 포트폴리오에 더해져 보유 비중이 조금 나뉘었어요.",
+          speed: "이번 주 거래 횟수가 늘어 회전율이 움직였어요.",
+          caution: "확신 25에서 바로 주문해 탐색 대비 행동 간격이 짧아졌어요.",
+          loss: "이번 행동에는 하락 구간 대응이 없어 그대로예요.",
+          explore: "새 업종 종목을 처음 보유해 시도 비율이 높아졌어요."
+        },
+        input: { stock: "삼성전자", quantity: 1, reasonTag: "FEELING", confidence: 25 }
+      },
+      mom: {
+        name: "엄마",
+        role: "부모",
+        type: "돌다리 분석가형",
+        initial: { balance: 67, speed: 31, caution: 78, loss: 29, explore: 39 },
+        current: { balance: 64, speed: 30, caution: 82, loss: 29, explore: 44 },
+        totals: { initialTrades: 8, currentTrades: 9, exploreEvents: 34 },
+        events: [
+          { icon: "1", title: "탐색", text: "4개 종목을 비교해 봄 · 3분 12초" },
+          { icon: "2", title: "생각 기록", text: "뉴스에서 봤어요 · 확신 75" },
+          { icon: "3", title: "주문", text: "LG화학 1주 · 수량 1회 수정" }
+        ],
+        traces: {
+          balance: "새 종목이 더해져 보유 비중의 쏠림이 조금 줄었어요.",
+          speed: "충분히 살펴본 뒤 주문해 기존 보유 리듬과 비슷해요.",
+          caution: "여러 종목을 비교하고 확신과 행동이 이어져 탐색 깊이가 높아졌어요.",
+          loss: "이번 행동에는 하락 구간 대응이 없어 그대로예요.",
+          explore: "처음 보유한 업종이 생겨 새 업종 시도 비율이 높아졌어요."
+        },
+        input: { stock: "LG화학", quantity: 1, reasonTag: "NEWS", confidence: 75 }
+      }
+    };
+
+    const signalRules = {
+      quantity: {
+        message: "몇 주 살지 계산해볼까?",
+        label: "수량 수정 도움",
+        windowMs: 45000
+      },
+      side: {
+        message: "매수와 매도 차이가 헷갈려?",
+        label: "매수·매도 도움",
+        windowMs: 30000
+      }
+    };
+
+    const state = {
+      activeProfile: "minji",
+      applied: { minji: false, mom: false },
+      toastTimer: null,
+      logs: [],
+      signal: {
+        activeSide: "buy",
+        confidence: 25,
+        lastStableQuantity: 1,
+        quantityTimer: null,
+        quantityEdits: [],
+        tabSwitches: [],
+        spokenCount: 0,
+        lastSpokenAt: 0,
+        currentSignal: null,
+        muted: new Set(),
+        queue: [],
+        pendingTimer: null
+      }
+    };
+
+    const eventList = document.getElementById("eventList");
+    const scoreList = document.getElementById("scoreList");
+    const traceList = document.getElementById("traceList");
+    const traceEmpty = document.getElementById("traceEmpty");
+    const traceCount = document.getElementById("traceCount");
+    const applyButton = document.getElementById("applyButton");
+    const resetButton = document.getElementById("resetButton");
+    const stateChip = document.getElementById("stateChip");
+    const summaryKicker = document.getElementById("summaryKicker");
+    const profileType = document.getElementById("profileType");
+    const jsonOutput = document.getElementById("jsonOutput");
+    const toast = document.getElementById("toast");
+    const quantityInput = document.getElementById("quantityInput");
+    const quantityCount = document.getElementById("quantityCount");
+    const tabCount = document.getElementById("tabCount");
+    const sessionLimit = document.getElementById("sessionLimit");
+    const signalBubble = document.getElementById("signalBubble");
+    const signalMessage = document.getElementById("signalMessage");
+    const muteSignalButton = document.getElementById("muteSignalButton");
+    const localEventLog = document.getElementById("localEventLog");
+
+    function signed(value) {
+      return value > 0 ? `+${value}` : `${value}`;
+    }
+
+    function timeStamp(date = new Date()) {
+      return [date.getHours(), date.getMinutes(), date.getSeconds()]
+        .map(value => String(value).padStart(2, "0"))
+        .join(":");
+    }
+
+    function renderLog() {
+      localEventLog.replaceChildren();
+
+      if (state.logs.length === 0) {
+        const empty = document.createElement("li");
+        empty.className = "log-empty";
+        empty.textContent = "아직 기록된 이벤트가 없어요.";
+        localEventLog.append(empty);
+        return;
+      }
+
+      state.logs.forEach(entry => {
+        const item = document.createElement("li");
+        item.className = "log-row";
+
+        const time = document.createElement("time");
+        time.className = "log-time";
+        time.textContent = entry.time;
+
+        const type = document.createElement("span");
+        type.className = "log-type";
+        type.textContent = entry.type;
+
+        const message = document.createElement("span");
+        message.className = "log-message";
+        message.textContent = entry.message;
+
+        item.append(time, type, message);
+        localEventLog.append(item);
+      });
+    }
+
+    function addLog(type, message) {
+      state.logs.unshift({ time: timeStamp(), type, message });
+      state.logs = state.logs.slice(0, 40);
+      renderLog();
+    }
+
+    function recent(events, windowMs) {
+      const threshold = Date.now() - windowMs;
+      return events.filter(time => time >= threshold);
+    }
+
+    function renderSignalState() {
+      const signal = state.signal;
+      signal.quantityEdits = recent(signal.quantityEdits, signalRules.quantity.windowMs);
+      signal.tabSwitches = recent(signal.tabSwitches, signalRules.side.windowMs);
+
+      quantityCount.textContent = `${Math.min(signal.quantityEdits.length, 3)}/3`;
+      tabCount.textContent = `${Math.min(signal.tabSwitches.length, 3)}/3`;
+      sessionLimit.textContent = `이번 세션 발화 ${signal.spokenCount}/2 · 발화 간 최소 10초`;
+
+      document.querySelectorAll("[data-order-side]").forEach(button => {
+        button.setAttribute("aria-selected", String(button.dataset.orderSide === signal.activeSide));
+      });
+
+      document.querySelectorAll("[data-confidence]").forEach(button => {
+        button.setAttribute("aria-pressed", String(Number(button.dataset.confidence) === signal.confidence));
+      });
+    }
+
+    function showSignal(signalKey) {
+      const signal = state.signal;
+      const rule = signalRules[signalKey];
+      signal.currentSignal = signalKey;
+      signal.lastSpokenAt = Date.now();
+      signal.spokenCount += 1;
+      signalMessage.textContent = rule.message;
+      muteSignalButton.dataset.signal = signalKey;
+      signalBubble.hidden = false;
+      addLog("발화", `${rule.label} · “${rule.message}”`);
+      renderSignalState();
+    }
+
+    function processSignalQueue() {
+      const signal = state.signal;
+      window.clearTimeout(signal.pendingTimer);
+      signal.pendingTimer = null;
+
+      while (signal.queue.length && signal.muted.has(signal.queue[0])) {
+        const skipped = signal.queue.shift();
+        addLog("제한", `${signalRules[skipped].label} · 세션 내 뮤트로 발화 생략`);
+      }
+
+      if (signal.queue.length === 0) return;
+
+      if (signal.spokenCount >= 2) {
+        signal.queue = [];
+        addLog("제한", "세션 최대 발화 2회에 도달해 추가 발화를 생략");
+        renderSignalState();
+        return;
+      }
+
+      const waitMs = Math.max(0, 10000 - (Date.now() - signal.lastSpokenAt));
+      if (waitMs > 0) {
+        addLog("제한", `발화 최소 간격 적용 · ${Math.ceil(waitMs / 1000)}초 뒤 확인`);
+        signal.pendingTimer = window.setTimeout(processSignalQueue, waitMs);
+        return;
+      }
+
+      showSignal(signal.queue.shift());
+    }
+
+    function requestSignal(signalKey) {
+      const signal = state.signal;
+      const rule = signalRules[signalKey];
+
+      if (signal.muted.has(signalKey)) {
+        addLog("제한", `${rule.label} · 세션 내 뮤트로 발화 생략`);
+        return;
+      }
+
+      if (signal.spokenCount >= 2) {
+        addLog("제한", `${rule.label} 감지 · 세션 최대 발화 2회로 생략`);
+        return;
+      }
+
+      if (!signal.queue.includes(signalKey)) signal.queue.push(signalKey);
+      processSignalQueue();
+    }
+
+    function scoreData(profile) {
+      return state.applied[state.activeProfile] ? profile.current : profile.initial;
+    }
+
+    function renderEvents(profile) {
+      eventList.innerHTML = profile.events.map(event => `
+        <li class="event-item">
+          <span class="event-icon" aria-hidden="true">${event.icon}</span>
+          <div><strong>${event.title}</strong><span>${event.text}</span></div>
+        </li>
+      `).join("");
+    }
+
+    function renderScores(profile, scores) {
+      const isApplied = state.applied[state.activeProfile];
+      scoreList.innerHTML = axes.map(axis => {
+        const delta = profile.current[axis.key] - profile.initial[axis.key];
+        const deltaClass = delta === 0 ? "delta visible zero" : "delta visible";
+        return `
+          <div class="score" data-axis="${axis.key}">
+            <div class="score-head">
+              <span class="score-title">${axis.name}${isApplied ? `<span class="${deltaClass}">${signed(delta)}</span>` : ""}</span>
+              <span class="score-value">${scores[axis.key]}</span>
+            </div>
+            <div class="track" role="meter" aria-label="${axis.name}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${scores[axis.key]}">
+              <div class="fill" style="width:${scores[axis.key]}%"></div>
+            </div>
+            <div class="ends"><span>${axis.left}</span><span>${axis.right}</span></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderTrace(profile) {
+      const isApplied = state.applied[state.activeProfile];
+      traceEmpty.hidden = isApplied;
+      traceList.hidden = !isApplied;
+      traceCount.textContent = isApplied ? "5축 재계산" : "대기 중";
+
+      if (!isApplied) {
+        traceList.innerHTML = "";
+        return;
+      }
+
+      traceList.innerHTML = axes.map((axis, index) => {
+        const delta = profile.current[axis.key] - profile.initial[axis.key];
+        return `
+          <li class="trace-item">
+            <span class="trace-number">${index + 1}</span>
+            <div class="trace-copy"><strong>${axis.name}</strong><span>${profile.traces[axis.key]}</span></div>
+            <span class="trace-delta${delta === 0 ? " zero" : ""}">${signed(delta)}</span>
+          </li>
+        `;
+      }).join("");
+    }
+
+    function renderJson(profile, scores) {
+      const isApplied = state.applied[state.activeProfile];
+      const output = {
+        week: 4,
+        profile: profile.name,
+        status: isApplied ? "RECALCULATED" : "SEED_ONLY",
+        scores: {
+          balance: scores.balance,
+          speed: scores.speed,
+          caution: scores.caution,
+          lossResponse: scores.loss,
+          exploration: scores.explore
+        },
+        typeLabel: profile.type,
+        evidence: {
+          trades: isApplied ? profile.totals.currentTrades : profile.totals.initialTrades,
+          exploreEvents: profile.totals.exploreEvents,
+          latestReasonTag: isApplied ? profile.input.reasonTag : null,
+          latestConfidence: isApplied ? profile.input.confidence : null
+        },
+        excluded: ["chatMessages"],
+        generatedBy: "rule-statistics-engine"
+      };
+      jsonOutput.textContent = JSON.stringify(output, null, 2);
+    }
+
+    function render() {
+      const profile = profiles[state.activeProfile];
+      const isApplied = state.applied[state.activeProfile];
+      const scores = scoreData(profile);
+
+      document.querySelectorAll("[data-profile]").forEach(button => {
+        const selected = button.dataset.profile === state.activeProfile;
+        button.setAttribute("aria-selected", String(selected));
+        button.tabIndex = selected ? 0 : -1;
+      });
+
+      summaryKicker.textContent = `이번 주 ${profile.name}${profile.role === "부모" ? "는" : "는"}`;
+      profileType.textContent = profile.type;
+      stateChip.textContent = isApplied ? "방금 행동 반영" : "시드 3주 반영";
+      applyButton.textContent = isApplied ? "반영 완료" : "이 행동 반영하기";
+      applyButton.classList.toggle("applied", isApplied);
+      applyButton.disabled = isApplied;
+      resetButton.hidden = !isApplied;
+
+      renderEvents(profile);
+      renderScores(profile, scores);
+      renderTrace(profile);
+      renderJson(profile, scores);
+    }
+
+    function showToast(message) {
+      window.clearTimeout(state.toastTimer);
+      toast.textContent = message;
+      toast.classList.add("show");
+      state.toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2400);
+    }
+
+    document.querySelectorAll("[data-profile]").forEach(button => {
+      button.addEventListener("click", () => {
+        state.activeProfile = button.dataset.profile;
+        render();
+        addLog("계산", `${profiles[state.activeProfile].name}의 시드·반영 상태로 5축 화면 갱신`);
+        showToast(`${profiles[state.activeProfile].name}의 엔진 데이터로 전환했어요.`);
+      });
+
+      button.addEventListener("keydown", event => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+        event.preventDefault();
+        const nextProfile = state.activeProfile === "minji" ? "mom" : "minji";
+        state.activeProfile = nextProfile;
+        render();
+        addLog("계산", `${profiles[nextProfile].name}의 시드·반영 상태로 5축 화면 갱신`);
+        document.querySelector(`[data-profile="${nextProfile}"]`).focus();
+      });
+    });
+
+    document.querySelectorAll("[data-order-side]").forEach(button => {
+      button.addEventListener("click", () => {
+        const nextSide = button.dataset.orderSide;
+        const signal = state.signal;
+        if (nextSide === signal.activeSide) return;
+
+        signal.activeSide = nextSide;
+        signal.tabSwitches = recent(signal.tabSwitches, signalRules.side.windowMs);
+        signal.tabSwitches.push(Date.now());
+        const count = signal.tabSwitches.length;
+        addLog("감지", `매수·매도 탭 전환 ${Math.min(count, 3)}/3 · ${nextSide === "buy" ? "매수" : "매도"} 선택`);
+
+        if (count >= 3) {
+          signal.tabSwitches = [];
+          requestSignal("side");
+        }
+
+        renderSignalState();
+      });
+    });
+
+    quantityInput.addEventListener("input", () => {
+      const signal = state.signal;
+      const capturedValue = quantityInput.value;
+      window.clearTimeout(signal.quantityTimer);
+
+      signal.quantityTimer = window.setTimeout(() => {
+        if (quantityInput.value !== capturedValue) return;
+        const nextQuantity = Number(capturedValue);
+        if (!Number.isInteger(nextQuantity) || nextQuantity < 1) return;
+        if (nextQuantity === signal.lastStableQuantity) return;
+
+        signal.lastStableQuantity = nextQuantity;
+        signal.quantityEdits = recent(signal.quantityEdits, signalRules.quantity.windowMs);
+        signal.quantityEdits.push(Date.now());
+        const count = signal.quantityEdits.length;
+        addLog("감지", `수량 수정 ${Math.min(count, 3)}/3 · ${nextQuantity}주로 확정`);
+
+        if (count >= 3) {
+          signal.quantityEdits = [];
+          requestSignal("quantity");
+        }
+
+        renderSignalState();
+      }, 700);
+    });
+
+    document.querySelectorAll("[data-confidence]").forEach(button => {
+      button.addEventListener("click", () => {
+        const confidence = Number(button.dataset.confidence);
+        if (confidence === state.signal.confidence) return;
+        state.signal.confidence = confidence;
+        renderSignalState();
+        addLog("입력", `확신도 ${confidence} 선택 · 정답이나 등급으로 사용하지 않음`);
+      });
+    });
+
+    muteSignalButton.addEventListener("click", () => {
+      const signalKey = muteSignalButton.dataset.signal;
+      if (!signalKey) return;
+      state.signal.muted.add(signalKey);
+      state.signal.currentSignal = null;
+      signalBubble.hidden = true;
+      addLog("뮤트", `${signalRules[signalKey].label} · 이번 세션에서 다시 말하지 않음`);
+      processSignalQueue();
+    });
+
+    applyButton.addEventListener("click", () => {
+      state.applied[state.activeProfile] = true;
+      const profile = profiles[state.activeProfile];
+      render();
+      addLog("계산", `${profile.name}의 거래 ${profile.totals.currentTrades}건으로 5축 재계산 완료`);
+      showToast(`${profile.name}의 방금 행동을 5축에 다시 반영했어요.`);
+      document.getElementById("score-title").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    resetButton.addEventListener("click", () => {
+      const profile = profiles[state.activeProfile];
+      state.applied[state.activeProfile] = false;
+      render();
+      addLog("계산", `${profile.name}의 시드 3주 점수로 되돌림`);
+      showToast("시드 3주 상태로 되돌렸어요.");
+    });
+
+    render();
+    renderSignalState();
+    addLog("계산", "민지의 시드 3주 데이터로 5축 초기 계산 완료");
+  </script>
+</body>
+</html>
