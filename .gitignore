@@ -14,3 +14,10 @@ web/next-env.d.ts
 # OS·에디터
 .DS_Store
 Thumbs.db
+
+# ai
+.claude
+.agents
+
+# tmp
+records
