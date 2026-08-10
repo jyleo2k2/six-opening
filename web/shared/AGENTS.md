@@ -1,8 +1,8 @@
 # shared/ — 공용 계약 (오케스트레이터 소유)
 
 - **기능 에이전트 수정 금지. import만 허용.** 여기를 두 에이전트가 동시에 고치는 순간 충돌이 난다 — 창구는 오케스트레이터 하나.
-- 구성: `ui/`(디자인시스템 §6의 공용 컴포넌트 10종) · `engine/`(정량 지표 순수 함수 — LLM 금지, 부수효과 금지) · `llm/`(모델 상수·공통 호출 client·filter) · `store/`(zustand) · `types/` · `data/`(stocks·seed·fixtures)
-- `llm/` 모델 상수: F1·F4 → `claude-opus-5`, F7 → `claude-sonnet-5`. 변경은 상수 한 줄로.
+- 구성: `ui/`(디자인시스템 §6의 공용 컴포넌트 10종 — PetAvatar·ConfidenceSelector 포함) · `engine/`(행동 프로파일 엔진·정량 지표·펫 성장 순수 함수 — LLM 금지, 부수효과 금지) · `llm/`(모델 상수·공통 호출 client·filter) · `store/`(zustand — 계정·거래·확신도·체류 이벤트·펫 상태) · `types/` · `data/`(stocks·seed(4주차·펫 Lv.2)·fixtures)
+- `llm/` 모델 상수: F8 펫 리액션 → `claude-sonnet-5` / F8 오늘의 순간·주간 질문, F9 성향 서술 → `claude-opus-5`. 변경은 상수 한 줄로.
 - `engine/`은 `types/`만 import (의존 방향 고정). 테스트: 지표 함수마다 최소 1개 어설션.
 
 ## 변경 요청 절차
