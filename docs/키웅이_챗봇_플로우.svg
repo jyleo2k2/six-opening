@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1400" viewBox="0 0 1200 1400" font-family="Pretendard, 'Segoe UI', 'Malgun Gothic', sans-serif">
+  <rect x="0" y="0" width="1200" height="1400" fill="#F6F7FA"/>
+
+  <text x="56" y="56" font-size="26" font-weight="700" fill="#001E5A">키웅이 챗봇 — 대화 처리 플로우</text>
+  <text x="56" y="84" font-size="14" fill="#1A2233" opacity="0.7">F10 · 물어보면 답하고, 헤매면 먼저 돕는다 — 추천·예측은 구조적으로 거절한다</text>
+
+  <!-- ============ A. 챗봇 진입 (decision) ============ -->
+  <g>
+    <polygon points="420,126 520,170 420,214 320,170" fill="#001E5A"/>
+    <text x="420" y="176" font-size="15" font-weight="600" fill="#FFFFFF" text-anchor="middle">챗봇 진입</text>
+  </g>
+
+  <!-- A -> B -->
+  <path d="M420 214 L420 266" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="414,262 426,262 420,272" fill="#001E5A"/>
+  <text x="432" y="246" font-size="12" fill="#1A2233" opacity="0.75">플로팅 버튼</text>
+
+  <!-- A -> P -->
+  <path d="M520 170 L850 170 L850 266" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="844,262 856,262 850,272" fill="#001E5A"/>
+  <rect x="612" y="150" width="106" height="20" fill="#F6F7FA"/>
+  <text x="665" y="164" font-size="12" fill="#1A2233" opacity="0.75" text-anchor="middle">선제 신호 3종</text>
+
+  <!-- ============ B. 추천 질문 또는 직접 입력 ============ -->
+  <g>
+    <rect x="307" y="272" width="226" height="56" rx="14" fill="#FFFFFF" stroke="#001E5A" stroke-width="2"/>
+    <text x="420" y="306" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">추천 질문 또는 직접 입력</text>
+  </g>
+
+  <!-- ============ P. 고정 도움 발화 ============ -->
+  <g>
+    <rect x="770" y="272" width="160" height="56" rx="14" fill="#FFFFFF" stroke="#D70082" stroke-width="2"/>
+    <text x="850" y="306" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">고정 도움 발화</text>
+  </g>
+
+  <!-- P -> B (직접 질문) -->
+  <path d="M770 300 L545 300" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="549,294 549,306 539,300" fill="#001E5A"/>
+  <rect x="620" y="290" width="76" height="20" fill="#F6F7FA"/>
+  <text x="658" y="304" font-size="12" fill="#1A2233" opacity="0.75" text-anchor="middle">직접 질문</text>
+
+  <!-- P -> M (괜찮아) -->
+  <path d="M850 328 L850 386" stroke="#D70082" stroke-width="2" fill="none"/>
+  <polygon points="844,382 856,382 850,392" fill="#D70082"/>
+  <text x="862" y="362" font-size="12" fill="#D70082">괜찮아</text>
+
+  <!-- ============ M. 세션 뮤트 ============ -->
+  <g>
+    <rect x="757" y="392" width="186" height="56" rx="14" fill="#D70082"/>
+    <text x="850" y="426" font-size="15" font-weight="600" fill="#FFFFFF" text-anchor="middle">해당 신호 세션 뮤트</text>
+  </g>
+
+  <!-- ============ G0. 요청·세션 검증 ============ -->
+  <g>
+    <rect x="332" y="392" width="176" height="56" rx="14" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="2"/>
+    <text x="420" y="426" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">요청·세션 검증</text>
+  </g>
+  <path d="M420 448 L420 491" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="414,487 426,487 420,497" fill="#001E5A"/>
+
+  <!-- ============ G1. 입력 안전 게이트 (decision) ============ -->
+  <g>
+    <polygon points="420,497 545,545 420,593 295,545" fill="#001E5A"/>
+    <text x="420" y="551" font-size="15" font-weight="600" fill="#FFFFFF" text-anchor="middle">입력 안전 게이트</text>
+  </g>
+
+  <!-- G1 -> R (차단) -->
+  <path d="M295 545 L130 545 L130 656" stroke="#D70082" stroke-width="2" fill="none"/>
+  <polygon points="124,652 136,652 130,662" fill="#D70082"/>
+  <text x="212" y="524" font-size="11" fill="#D70082" text-anchor="middle">추천·예측·개인정보</text>
+  <text x="212" y="538" font-size="11" fill="#D70082" text-anchor="middle">유해·위기</text>
+
+  <!-- G1 -> I (허용) -->
+  <path d="M545 545 L624 545" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="620,539 620,551 630,545" fill="#001E5A"/>
+  <rect x="562" y="524" width="46" height="18" fill="#F6F7FA"/>
+  <text x="585" y="537" font-size="12" font-weight="600" fill="#001E5A" text-anchor="middle">허용</text>
+
+  <!-- ============ R. 고정 안전 응답 ============ -->
+  <g>
+    <rect x="30" y="662" width="200" height="56" rx="14" fill="#D70082"/>
+    <text x="130" y="696" font-size="15" font-weight="600" fill="#FFFFFF" text-anchor="middle">상황별 고정 안전 응답</text>
+  </g>
+
+  <!-- ============ I. 질문 목적 (decision) ============ -->
+  <g>
+    <polygon points="730,501 830,545 730,589 630,545" fill="#001E5A"/>
+    <text x="730" y="551" font-size="15" font-weight="600" fill="#FFFFFF" text-anchor="middle">질문 목적</text>
+  </g>
+
+  <!-- I -> bus -->
+  <path d="M730 589 L730 628" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M280 628 L950 628" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M280 628 L280 662" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="274,658 286,658 280,668" fill="#001E5A"/>
+  <path d="M512 628 L512 662" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="506,658 518,658 512,668" fill="#001E5A"/>
+  <path d="M742 628 L742 662" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="736,658 748,658 742,668" fill="#001E5A"/>
+  <path d="M950 628 L950 662" stroke="#D70082" stroke-width="2" fill="none"/>
+  <polygon points="944,658 956,658 950,668" fill="#D70082"/>
+
+  <!-- ============ F / S / T / L ============ -->
+  <g>
+    <rect x="175" y="668" width="210" height="72" rx="14" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="2"/>
+    <text x="280" y="694" font-size="11" font-weight="600" fill="#D70082" text-anchor="middle">금융 개념·사용법</text>
+    <text x="280" y="719" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">용어 사전·FAQ 우선</text>
+  </g>
+  <g>
+    <rect x="404" y="668" width="216" height="72" rx="14" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="2"/>
+    <text x="512" y="694" font-size="11" font-weight="600" fill="#D70082" text-anchor="middle">종목 사실</text>
+    <text x="512" y="719" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">승인된 종목 데이터 조회</text>
+  </g>
+  <g>
+    <rect x="650" y="668" width="185" height="72" rx="14" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="2"/>
+    <text x="742" y="694" font-size="11" font-weight="600" fill="#D70082" text-anchor="middle">본인 기록·성향·아카이브</text>
+    <text x="742" y="719" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">읽기 전용 서버 툴</text>
+  </g>
+  <g>
+    <rect x="865" y="668" width="170" height="72" rx="14" fill="#FFFFFF" stroke="#D70082" stroke-width="2.5"/>
+    <text x="950" y="694" font-size="11" font-weight="600" fill="#D70082" text-anchor="middle">기타 허용 질문</text>
+    <text x="950" y="719" font-size="15" font-weight="700" fill="#001E5A" text-anchor="middle">Luna 최대 1회</text>
+  </g>
+
+  <!-- F/S/T/L -> V bus -->
+  <path d="M280 740 L280 778" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M512 740 L512 778" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M742 740 L742 778" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M950 740 L950 778" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M280 778 L950 778" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M610 778 L610 796" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="604,792 616,792 610,802" fill="#001E5A"/>
+
+  <!-- ============ V. 출처·권한·수치 검증 ============ -->
+  <g>
+    <rect x="512" y="802" width="196" height="56" rx="14" fill="#FFFFFF" stroke="#001E5A" stroke-width="2"/>
+    <text x="610" y="836" font-size="15" font-weight="600" fill="#001E5A" text-anchor="middle">출처·권한·수치 검증</text>
+  </g>
+
+  <!-- R -> O -->
+  <path d="M130 718 L130 950 L319 950" stroke="#D70082" stroke-width="2" fill="none"/>
+  <polygon points="315,944 315,956 325,950" fill="#D70082"/>
+
+  <!-- V -> O -->
+  <path d="M610 858 L610 950 L521 950" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="525,944 525,956 515,950" fill="#001E5A"/>
+
+  <!-- ============ O. 공통 출력 게이트 ============ -->
+  <g>
+    <rect x="325" y="922" width="190" height="56" rx="14" fill="#FFFFFF" stroke="#001E5A" stroke-width="3"/>
+    <text x="420" y="956" font-size="15" font-weight="700" fill="#001E5A" text-anchor="middle">공통 출력 게이트</text>
+  </g>
+  <path d="M420 978 L420 1031" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="414,1027 426,1027 420,1037" fill="#001E5A"/>
+
+  <!-- ============ E. 최종 답변 ============ -->
+  <g>
+    <rect x="317" y="1037" width="206" height="56" rx="14" fill="#001E5A"/>
+    <text x="420" y="1071" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">3문장 이내 쉬운 답변</text>
+  </g>
+  <path d="M420 1093 L420 1137" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="414,1133 426,1133 420,1143" fill="#001E5A"/>
+
+  <!-- ============ N. 다음 행동 (decision) ============ -->
+  <g>
+    <polygon points="420,1143 520,1185 420,1227 320,1185" fill="#001E5A"/>
+    <text x="420" y="1191" font-size="15" font-weight="600" fill="#FFFFFF" text-anchor="middle">다음 행동</text>
+  </g>
+
+  <!-- N -> bus -->
+  <path d="M420 1227 L420 1255" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M170 1255 L680 1255" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <path d="M170 1255 L170 1266" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="164,1262 176,1262 170,1272" fill="#001E5A"/>
+  <path d="M420 1255 L420 1266" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="414,1262 426,1262 420,1272" fill="#001E5A"/>
+  <path d="M680 1255 L680 1266" stroke="#001E5A" stroke-width="2" fill="none"/>
+  <polygon points="674,1262 686,1262 680,1272" fill="#001E5A"/>
+
+  <!-- ============ N1 / N2 / N3 ============ -->
+  <g>
+    <rect x="115" y="1272" width="110" height="56" rx="14" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="2"/>
+    <text x="170" y="1306" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">닫기</text>
+  </g>
+  <g>
+    <rect x="340" y="1272" width="160" height="56" rx="14" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="2"/>
+    <text x="420" y="1306" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">관련 화면 보기</text>
+  </g>
+  <g>
+    <rect x="615" y="1272" width="130" height="56" rx="14" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="2"/>
+    <text x="680" y="1306" font-size="15" font-weight="600" fill="#1A2233" text-anchor="middle">계속 질문</text>
+  </g>
+
+  <!-- ============ 범례 ============ -->
+  <g>
+    <rect x="855" y="1140" width="300" height="196" rx="16" fill="#FFFFFF" stroke="#BEBEBE" stroke-width="1.5"/>
+    <text x="879" y="1172" font-size="13" font-weight="700" fill="#001E5A">범례</text>
+
+    <polygon points="901,1190 925,1202 901,1214 877,1202" fill="#001E5A"/>
+    <text x="937" y="1207" font-size="12" fill="#1A2233">분기 판단</text>
+
+    <rect x="877" y="1228" width="48" height="22" rx="7" fill="#FFFFFF" stroke="#001E5A" stroke-width="2"/>
+    <text x="937" y="1244" font-size="12" fill="#1A2233">사용자 액션·검증</text>
+
+    <rect x="877" y="1260" width="48" height="22" rx="7" fill="#D70082"/>
+    <text x="937" y="1276" font-size="12" fill="#1A2233">안전 차단·고정 응답</text>
+
+    <rect x="877" y="1292" width="48" height="22" rx="7" fill="#FFFFFF" stroke="#D70082" stroke-width="2.5"/>
+    <text x="937" y="1308" font-size="12" fill="#1A2233">LLM 호출 (Luna)</text>
+  </g>
+</svg>
