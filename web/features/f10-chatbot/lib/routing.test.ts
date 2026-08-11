@@ -6,6 +6,8 @@ const orderContext = { screen: "order" as const, quantity: 10, unitPrice: 12500 
 
 assert.equal(routeMessage("PER이 뭐야?", stockContext).route, "faq");
 assert.equal(routeMessage("ETF가 뭐야?", stockContext).route, "faq");
+assert.equal(routeMessage("평가손익이 뭐야?", stockContext).route, "faq");
+assert.equal(routeMessage("거래량이 많으면 뭐야?", stockContext).route, "faq");
 assert.equal(routeMessage("매수 어떻게 해?", stockContext).route, "faq");
 assert.equal(routeMessage("이 회사는 뭐 하는 회사야?", stockContext).route, "context");
 assert.equal(routeMessage("10주면 얼마야?", orderContext).text.includes("125,000원"), true);

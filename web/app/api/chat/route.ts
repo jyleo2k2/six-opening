@@ -1,12 +1,15 @@
 import { NextRequest } from "next/server";
 import { filterGeneratedText, SAFE_REFUSAL, takeCompleteSentences } from "../../../shared/llm/filter";
 import { streamChatAnswer } from "../../../features/f10-chatbot/lib/openai";
+import type { ConversationMessage } from "../../../features/f10-chatbot/lib/openai";
 import { ChatContext, routeMessage } from "../../../features/f10-chatbot/lib/routing";
 
 export const runtime = "nodejs";
 
 const encoder = new TextEncoder();
 const FALLBACK = "키웅이가 잠깐 낮잠 중이야! 조금 있다 다시 물어봐 줘 🐻";
+const MAX_HISTORY_MESSAGES = 8;
+const MAX_HISTORY_TEXT_LENGTH = 500;
 
 function event(type: "status" | "text" | "done", value: string) {
   return encoder.encode(`event: ${type}\ndata: ${JSON.stringify(value)}\n\n`);
@@ -18,15 +21,39 @@ function isChatContext(value: unknown): value is ChatContext {
   return ["home", "stock", "order", "archive"].includes(String(context.screen));
 }
 
+function parseHistory(value: unknown): ConversationMessage[] | null {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) return null;
+
+  const recent = value.slice(-MAX_HISTORY_MESSAGES);
+  if (
+    !recent.every(
+      (entry) =>
+        entry &&
+        typeof entry === "object" &&
+        ["assistant", "user"].includes(String((entry as Record<string, unknown>).role)) &&
+        typeof (entry as Record<string, unknown>).text === "string",
+    )
+  ) {
+    return null;
+  }
+
+  return recent
+    .map((entry) => entry as ConversationMessage)
+    .map(({ role, text }) => ({ role, text: text.trim().slice(0, MAX_HISTORY_TEXT_LENGTH) }))
+    .filter(({ text }) => text.length > 0);
+}
+
 export async function POST(request: NextRequest) {
-  let body: { message?: unknown; context?: unknown };
+  let body: { message?: unknown; context?: unknown; history?: unknown };
   try {
     body = await request.json();
   } catch {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  if (typeof body.message !== "string" || !isChatContext(body.context)) {
+  const history = parseHistory(body.history);
+  if (typeof body.message !== "string" || !isChatContext(body.context) || !history) {
     return Response.json({ error: "Invalid chat payload" }, { status: 400 });
   }
 
@@ -49,7 +76,7 @@ export async function POST(request: NextRequest) {
 
       try {
         send("status", "답변을 준비하는 중");
-        const response = await streamChatAnswer(message, context);
+        const response = await streamChatAnswer(message, context, history);
         let buffer = "";
         let sentSentences = 0;
 

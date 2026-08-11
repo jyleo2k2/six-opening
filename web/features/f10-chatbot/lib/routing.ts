@@ -1,3 +1,5 @@
+import { findChatbotKnowledge } from "../../../shared/data/chatbot-knowledge";
+
 export type ChatRoute =
   | "faq"
   | "context"
@@ -18,19 +20,6 @@ export type ChatReply = {
   text: string;
   steps: readonly string[];
 };
-
-const ANSWERS = {
-  per: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자야. 같은 업종 회사끼리 함께 보면 이해하기 쉬워.",
-  etf: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이야. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어.",
-  market: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이야. 주문을 넣는 순간의 가격과 조금 달라질 수 있어.",
-  limit: "지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이야. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어.",
-  profit: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이야. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아.",
-  dividend: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해. 모든 회사가 배당하는 것은 아니야.",
-  order: "주문 화면에서는 수량과 예상 금액을 먼저 확인해. 그다음 네가 고른 이유를 기록하면 돼.",
-  record: "기록에서는 고른 이유와 확신도를 남길 수 있어. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거야.",
-  archive: "아카이브에서는 네가 남긴 거래와 생각을 다시 볼 수 있어. 점수표가 아니라 네 투자 스타일을 관찰하는 기록이야.",
-  company: "종목 상세 화면에는 그 회사가 하는 일과 공개된 과거 정보가 있어. 회사 설명과 차트를 차례로 보면 돼.",
-} as const;
 
 const RECOMMENDATION_PATTERNS = [
   "종목사",
@@ -84,10 +73,6 @@ function getContextReply(message: string, context: ChatContext): ChatReply | nul
     );
   }
 
-  if (context.screen === "archive" && ["지난기록", "기록어떻게", "아카이브"].some((word) => message.includes(word))) {
-    return reply("context", ANSWERS.archive, ["현재 아카이브 화면 확인"]);
-  }
-
   return null;
 }
 
@@ -129,15 +114,10 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const contextReply = getContextReply(message, context);
   if (contextReply) return contextReply;
 
-  if (message.includes("per")) return reply("faq", ANSWERS.per, ["용어 사전 확인"]);
-  if (message.includes("etf")) return reply("faq", ANSWERS.etf, ["용어 사전 확인"]);
-  if (message.includes("시장가")) return reply("faq", ANSWERS.market, ["용어 사전 확인"]);
-  if (message.includes("지정가")) return reply("faq", ANSWERS.limit, ["용어 사전 확인"]);
-  if (message.includes("배당")) return reply("faq", ANSWERS.dividend, ["용어 사전 확인"]);
-  if (message.includes("수익률")) return reply("faq", ANSWERS.profit, ["용어 사전 확인"]);
-  if (message.includes("주문") || message.includes("매수어떻게")) return reply("faq", ANSWERS.order, ["사용법 FAQ 확인"]);
-  if (message.includes("기록") || message.includes("확신")) return reply("faq", ANSWERS.record, ["사용법 FAQ 확인"]);
-  if (message.includes("회사")) return reply("faq", ANSWERS.company, ["종목 설명 안내"]);
+  const knowledge = findChatbotKnowledge(message);
+  if (knowledge) {
+    return reply("faq", knowledge.answer, [knowledge.kind === "glossary" ? "용어 사전 확인" : "사용법 FAQ 확인"]);
+  }
 
   return reply(
     "fallback",
