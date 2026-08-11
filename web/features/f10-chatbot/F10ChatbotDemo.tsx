@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   PROACTIVE_SCRIPTS,
   ProactiveSignal,
@@ -96,6 +96,7 @@ export function F10ChatbotDemo() {
   const [isLoading, setIsLoading] = useState(false);
   const [signal, setSignal] = useState<ProactiveSignal | null>(null);
   const [mutedSignals, setMutedSignals] = useState<ProactiveSignal[]>([]);
+  const messagesRef = useRef<HTMLDivElement>(null);
 
   const currentScreen = SCREENS[screen];
   const chatContext = useMemo(
@@ -115,8 +116,14 @@ export function F10ChatbotDemo() {
     [mutedSignals],
   );
 
+  useEffect(() => {
+    const element = messagesRef.current;
+    if (element) element.scrollTop = element.scrollHeight;
+  }, [isOpen, messages]);
+
   async function ask(question: string) {
     const reply = routeMessage(question, chatContext);
+    const history = messages.slice(-8);
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
@@ -137,7 +144,7 @@ export function F10ChatbotDemo() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, context: chatContext }),
+        body: JSON.stringify({ message: question, context: chatContext, history }),
       });
 
       if (!response.ok || !response.body) throw new Error("Chat request failed");
@@ -327,9 +334,9 @@ export function F10ChatbotDemo() {
       {isOpen && (
         <section
           aria-label={COPY.title}
-          className="fixed inset-x-0 bottom-0 z-30 mx-auto max-h-[72vh] max-w-[430px] rounded-t-[24px] bg-white shadow-2xl"
+          className="fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[min(72dvh,720px)] max-w-[430px] flex-col overflow-hidden rounded-t-[24px] bg-white shadow-2xl"
         >
-          <div className="flex items-center justify-between border-b border-gray/40 px-5 py-4">
+          <div className="flex shrink-0 items-center justify-between border-b border-gray/40 px-5 py-4">
             <div>
               <p className="text-base font-bold text-navy">{COPY.title}</p>
               <p className="mt-0.5 text-xs text-ink/60">{COPY.subtitle}</p>
@@ -344,7 +351,7 @@ export function F10ChatbotDemo() {
             </button>
           </div>
 
-          <div className="max-h-[42vh] space-y-3 overflow-y-auto px-4 py-4">
+          <div ref={messagesRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
             {messages.length === 0 && (
               <MessageBubble
                 message={{ role: "assistant", text: COPY.greeting }}
@@ -355,7 +362,7 @@ export function F10ChatbotDemo() {
             ))}
           </div>
 
-          <div className="border-t border-gray/40 px-4 py-3">
+          <div className="shrink-0 border-t border-gray/40 px-4 py-3">
             <p className="mb-3 rounded-xl bg-bg px-3 py-2 text-xs text-ink/70">
               <span className="font-semibold text-navy">{COPY.status}: </span>
               {status}
