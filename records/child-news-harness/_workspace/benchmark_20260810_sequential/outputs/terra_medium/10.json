@@ -1,0 +1,20 @@
+{
+  "decision": "publish",
+  "headline": "포항 양식어류 27만7천마리 폐사",
+  "one_line": { "text": "포항에서 양식어류 27만7000마리가 폐사했어요.", "source_ids": ["S1"] },
+  "cards": [
+    { "type": "what_happened", "title": "무슨 일이야?", "sentences": [
+      { "text": "제목은 고수온 장기화로 물고기가 폐사했다고 전해요.", "epistemic": "fact", "source_ids": ["S1"] }
+    ] },
+    { "type": "business_link", "title": "우리 생활과 무슨 관계야?", "sentences": [
+      { "text": "요약 패시지는 수산물 생산 기반을 언급했어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "unknown", "title": "아직 모르는 점", "sentences": [
+      { "text": "지원 뒤 양식어류 피해가 얼마나 줄지는 알 수 없어요.", "epistemic": "unknown", "source_ids": [] }
+    ] }
+  ],
+  "word_box": [],
+  "fact_quiz": { "question": "폐사한 양식어류는 몇 마리인가요?", "options": ["27만7000마리", "53마리", "4675마리"], "answer_index": 0, "explanation": "제목은 양식어류 27만7000마리 폐사를 전해요.", "source_ids": ["S1"] },
+  "family_question": "수산물 생산이 우리 생활과 어떻게 이어질지 이야기해 볼까요?",
+  "safety": { "contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false }
+}

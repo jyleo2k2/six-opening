@@ -1,0 +1,57 @@
+{
+  "decision": "publish",
+  "headline": "코스닥 열흘 새 32% 상승",
+  "one_line": {
+    "text": "코스닥은 열흘 새 32% 상승했다고 제목에 나왔어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "코스닥은 열흘 새 32% 상승했다고 제목에 나왔어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "왜 움직였어?",
+      "sentences": [
+        {
+          "text": "기사 요약은 기관 매수가 성장주에 집중됐다고 전해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "기사 제목과 요약 패시지 밖의 내용은 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "제목에 따르면 코스닥은 며칠 동안 32% 올랐나요?",
+    "options": ["열흘", "한 달", "하루"],
+    "answer_index": 0,
+    "explanation": "제목에 ‘열흘 새 32% 상승’이라고 나왔어요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "시장이 빠르게 움직였다는 소식을 들으면 무엇이 궁금한가요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

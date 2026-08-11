@@ -1,0 +1,70 @@
+{
+  "decision": "publish",
+  "headline": "정부가 로봇 구매 확대",
+  "one_line": {
+    "text": "정부가 피지컬 AI 구매를 크게 늘리기로 했어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "휴머노이드와 4족보행 로봇을 공공 구매해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "산업과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "정부는 로봇 핵심 부품 연구개발도 추진해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "구매할 로봇 수는 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "피지컬 AI",
+      "meaning": "현실 공간에서 기계를 움직이게 하는 인공지능이에요."
+    },
+    {
+      "term": "휴머노이드",
+      "meaning": "사람과 비슷한 모습으로 만든 로봇이에요."
+    },
+    {
+      "term": "연구개발",
+      "meaning": "새 기술이나 제품을 연구하고 만드는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "로봇 파운드리를 세울 곳은 어디인가요?",
+    "options": ["새만금", "성남", "포항"],
+    "answer_index": 0,
+    "explanation": "요약 패시지에 새만금 구축 계획이 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "공공기관에서 로봇을 어디에 활용할 수 있을까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

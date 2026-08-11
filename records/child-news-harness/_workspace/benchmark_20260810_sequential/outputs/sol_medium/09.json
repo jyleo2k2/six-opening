@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "우주데이터센터 협력 논의",
+  "one_line": {
+    "text": "우주항공청이 우주데이터센터 산업 협력을 논의했어요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "우주항공청이 산업계와 기술 협력 방안을 논의했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "산업과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "우주에서 데이터를 저장하고 처리하는 기술을 다뤘어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "구체적인 협력 방식은 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "데이터센터",
+      "meaning": "많은 데이터를 저장하고 처리하는 시설이에요."
+    },
+    {
+      "term": "산업계",
+      "meaning": "어떤 산업에서 일하는 여러 기업과 관계자를 뜻해요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "우주데이터센터는 무엇을 저장하고 처리하나요?",
+    "options": ["데이터", "양식어류", "주차 로봇"],
+    "answer_index": 0,
+    "explanation": "요약 패시지에 데이터를 저장하고 처리한다고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "우주에서 데이터를 처리하려면 무엇을 살펴봐야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

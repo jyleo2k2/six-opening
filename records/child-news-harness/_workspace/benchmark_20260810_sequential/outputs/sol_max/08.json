@@ -1,0 +1,71 @@
+{
+  "decision": "publish",
+  "headline": "혈액에서 뇌질환 진단 단서 발견",
+  "one_line": {
+    "text": "피 한 방울에서 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "피 한 방울로 뇌질환을 가려낼 진단 단서가 발견됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        },
+        {
+          "text": "연구 결과는 신경과학 분야 국제학술지에 실렸어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "어디에 쓰일 수 있어?",
+      "sentences": [
+        {
+          "text": "퇴행성 뇌질환을 가려내는 단서로 제시됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "어떤 질환을 얼마나 정확히 가리는지는 확인되지 않아요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "퇴행성 뇌질환",
+      "meaning": "뇌의 기능이 점차 나빠지는 질환을 뜻해요."
+    },
+    {
+      "term": "진단",
+      "meaning": "검사를 통해 질환이 있는지 판단하는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "연구 결과는 어디에 실렸나요?",
+    "options": ["신경과학 국제학술지", "여행 잡지", "요리책"],
+    "answer_index": 0,
+    "explanation": "패시지에 신경과학 분야 국제학술지라고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "진단 단서를 실제 검사에 쓰려면 무엇을 더 확인해야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

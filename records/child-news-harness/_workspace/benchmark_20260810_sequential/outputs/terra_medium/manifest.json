@@ -1,0 +1,15 @@
+{
+  "configuration_label": "terra_medium",
+  "files": [
+    { "filename": "01.json", "validation_passed": true },
+    { "filename": "02.json", "validation_passed": true },
+    { "filename": "03.json", "validation_passed": true },
+    { "filename": "04.json", "validation_passed": true },
+    { "filename": "05.json", "validation_passed": true },
+    { "filename": "06.json", "validation_passed": true },
+    { "filename": "07.json", "validation_passed": true },
+    { "filename": "08.json", "validation_passed": true },
+    { "filename": "09.json", "validation_passed": true },
+    { "filename": "10.json", "validation_passed": true }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "코스닥 열흘 새 32% 상승",
+  "one_line": {
+    "text": "코스닥이 열흘 사이 32% 상승했어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "성장주들이 상승 종목 상위권을 차지했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "왜 움직였어?",
+      "sentences": [
+        {
+          "text": "기사에서는 기관 매수가 성장주에 몰렸다고 분석했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "상승 흐름이 앞으로 이어질지는 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "코스닥",
+      "meaning": "우리나라 중소·벤처기업 주식이 많이 거래되는 시장이에요."
+    },
+    {
+      "term": "기관",
+      "meaning": "여러 사람의 돈을 모아 투자하는 전문 조직이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "코스닥은 열흘 사이 얼마나 상승했나요?",
+    "options": ["12%", "22%", "32%"],
+    "answer_index": 2,
+    "explanation": "제목에 열흘 새 32% 상승했다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "시장이 빠르게 움직일 때 어떤 정보를 살펴보면 좋을까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

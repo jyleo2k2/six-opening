@@ -1,0 +1,57 @@
+{
+  "decision": "publish",
+  "headline": "TSMC 7월 매출 사상 최대",
+  "one_line": {
+    "text": "기사 제목은 TSMC의 7월 매출이 45% 늘었다고 전해요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "요약 패시지는 7월 매출이 사상 최대를 경신했다고 전해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "요약 패시지는 AI 관련 반도체 수요 호조를 언급해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "이 자료만으로 매출 증가의 모든 이유는 알 수 없어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "기사 제목에서 TSMC의 7월 매출은 몇 % 늘었다고 했나요?",
+    "options": ["45%", "7%", "100%"],
+    "answer_index": 0,
+    "explanation": "기사 제목에는 7월 매출이 45% 늘었다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "회사의 매출 소식에서 어떤 숫자를 더 확인하고 싶은지 이야기해 볼까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

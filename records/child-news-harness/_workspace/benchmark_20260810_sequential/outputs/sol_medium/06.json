@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "LX세미콘 차량용 MCU 공급",
+  "one_line": {
+    "text": "LX세미콘이 차량용 MCU를 현대차·기아에 공급해요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "LX세미콘이 개발한 차량용 반도체가 양산됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1", "S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "이 반도체는 차량 안전장치 기능에 쓰여요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "공급 수량은 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "MCU",
+      "meaning": "기계의 여러 기능을 제어하는 작은 반도체예요."
+    },
+    {
+      "term": "양산",
+      "meaning": "제품을 같은 방식으로 많이 만들어 내는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "차량용 MCU를 공급받는 회사는 어디인가요?",
+    "options": ["현대차·기아", "TSMC", "네이버"],
+    "answer_index": 0,
+    "explanation": "뉴스 제목에 현대차·기아에 공급한다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "자동차 안전장치에 반도체가 왜 필요할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

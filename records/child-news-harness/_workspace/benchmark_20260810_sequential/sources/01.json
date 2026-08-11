@@ -1,0 +1,25 @@
+{
+  "title": "코스닥 열흘새 32% 상승… 삼전닉스 떠난 돈, 성장주 몰려[코스닥 질주...",
+  "publisher": "파이낸셜뉴스",
+  "published_at": "2026-08-10T09:28:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "market",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "http://www.fnnews.com/news/202608101826002370",
+    "naver": "https://n.news.naver.com/mnews/article/014/0005559617?sid=101"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: 코스닥 열흘새 32% 상승… 삼전닉스 떠난 돈, 성장주 몰려[코스닥 질주..."
+    },
+    {
+      "id": "S2",
+      "kind": "analysis",
+      "text": "네이버 검색 API 요약 패시지: 기관의 코스닥 매수세가 반도체 소부장과 바이오, 로봇 등 성장주에 집중된 가운데 낙폭과대와 정책... 반도체 소부장과 바이오, 로봇 등 성장주가 상위권을 차지했다. 같은 기간 심텍은 81.66%, 알테오젠은 61.81..."
+    }
+  ]
+}

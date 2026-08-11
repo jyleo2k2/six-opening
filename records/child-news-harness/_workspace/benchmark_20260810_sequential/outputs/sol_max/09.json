@@ -1,0 +1,72 @@
+{
+  "decision": "publish",
+  "headline": "우주청, 우주데이터센터 협력 논의",
+  "one_line": {
+    "text": "우주청이 우주데이터센터 개발 협력을 산업계와 논의했어요.",
+    "source_ids": ["S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "우주청이 우주데이터센터 협력 방안을 논의했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1", "S2"]
+        },
+        {
+          "text": "논의는 10일 리벨리온 본사에서 열렸어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "산업과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "우주에서 데이터를 저장하고 처리하는 기술을 개발해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        },
+        {
+          "text": "기술 개발을 위해 산업계와 협력 방안을 논의했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "구체적인 협력 방식은 패시지에서 확인되지 않아요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "우주데이터센터",
+      "meaning": "우주에서 데이터를 저장하고 처리하는 시설이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "우주데이터센터는 어디에서 데이터를 처리하나요?",
+    "options": ["우주 공간", "학교 운동장", "바닷속"],
+    "answer_index": 0,
+    "explanation": "패시지에 우주 공간이라고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "우주에서 데이터를 처리할 때 무엇을 살펴봐야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

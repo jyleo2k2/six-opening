@@ -1,0 +1,62 @@
+{
+  "decision": "publish",
+  "headline": "네이버, 앤트로픽에 간접 투자",
+  "one_line": {
+    "text": "네이버가 앤트로픽에 간접 투자한 사실이 확인됐어요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "네이버가 앤트로픽에 간접 투자한 사실이 확인됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1", "S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사랑 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "네이버 벤처스가 VC 펀드를 통한 투자로 소개됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "투자 규모는 비공개로 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": ["S1"]
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "간접 투자",
+      "meaning": "다른 펀드를 통해 투자하는 방식이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "네이버가 간접 투자한 곳은 어디인가요?",
+    "options": ["앤트로픽", "TSMC", "현대차"],
+    "answer_index": 0,
+    "explanation": "제목과 요약에 앤트로픽 투자가 나와요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "family_question": "기업이 AI 회사에 투자했다는 소식에서 어떤 점이 궁금한가요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

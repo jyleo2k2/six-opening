@@ -1,0 +1,25 @@
+{
+  "title": "포항 양식어류 27만7000마리 폐사…고수온 장기화에 40억 투입 '생존전'",
+  "publisher": "뉴스타운",
+  "published_at": "2026-08-10T10:14:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "economy",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "http://www.newstown.co.kr/news/articleView.html?idxno=711878",
+    "naver": "http://www.newstown.co.kr/news/articleView.html?idxno=711878"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: 포항 양식어류 27만7000마리 폐사…고수온 장기화에 40억 투입 '생존전'"
+    },
+    {
+      "id": "S2",
+      "kind": "analysis",
+      "text": "네이버 검색 API 요약 패시지: 안정적인 수산물 생산기반을 유지하는 것이 어촌 경제뿐 아니라 소비자 물가와 식품 공급 측면에서도 중요한 이유다. 앞으로 포항의 고수온 대책 역시 지원 장비 수량이나 투입 예산만으로 성과를 평가하기보다..."
+    }
+  ]
+}

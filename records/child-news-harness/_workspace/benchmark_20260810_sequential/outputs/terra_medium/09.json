@@ -1,0 +1,20 @@
+{
+  "decision": "publish",
+  "headline": "우주데이터센터 협력 논의",
+  "one_line": { "text": "우주항공청이 우주데이터센터 기술 협력을 논의했어요.", "source_ids": ["S1", "S2"] },
+  "cards": [
+    { "type": "what_happened", "title": "무슨 일이야?", "sentences": [
+      { "text": "우주항공청은 산업계와 협력 방안을 논의했어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "business_link", "title": "산업과 무슨 관계야?", "sentences": [
+      { "text": "우주데이터센터는 우주에서 데이터를 저장하고 처리하는 기술이에요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "unknown", "title": "아직 모르는 점", "sentences": [
+      { "text": "기술 개발 일정은 자료에서 확인되지 않았어요.", "epistemic": "unknown", "source_ids": [] }
+    ] }
+  ],
+  "word_box": [],
+  "fact_quiz": { "question": "협력 방안을 논의한 기관은 어디인가요?", "options": ["우주항공청", "네이버 벤처스", "LX세미콘"], "answer_index": 0, "explanation": "요약 패시지는 우주항공청이 논의했다고 전해요.", "source_ids": ["S2"] },
+  "family_question": "우주에서 데이터를 저장한다면 무엇이 궁금한가요?",
+  "safety": { "contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false }
+}

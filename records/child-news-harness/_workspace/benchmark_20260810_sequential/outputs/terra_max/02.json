@@ -1,0 +1,57 @@
+{
+  "decision": "publish",
+  "headline": "청년 고용보험 가입자 감소",
+  "one_line": {
+    "text": "기사 제목은 29세 이하 가입자가 47개월째 줄었다고 전해요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "29세 이하 고용보험 가입자가 47개월째 줄었다고 해요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "우리 생활과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "요약 패시지는 불경기와 일자리 미스매치를 이유로 언급해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "이 자료만으로 가입자가 준 정확한 이유는 알 수 없어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "기사 제목에서 가입자는 몇 개월째 줄었다고 했나요?",
+    "options": ["47개월째", "29개월째", "10개월째"],
+    "answer_index": 0,
+    "explanation": "기사 제목에는 47개월째 줄었다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "청년이 일자리를 찾을 때 어떤 도움이 필요할지 이야기해 볼까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

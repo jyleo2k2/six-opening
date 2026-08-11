@@ -1,0 +1,62 @@
+{
+  "decision": "publish",
+  "headline": "아파트서 주차 로봇 실증",
+  "one_line": {
+    "text": "현대차그룹이 아파트에서 주차 로봇을 처음 실증해요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "지하 주차장 53면 구역에서 로봇 2세트를 운영해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "현대위아의 주차 로봇이 실증에 쓰여요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "실증 기간은 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "실증",
+      "meaning": "기술이 실제 장소에서 잘 작동하는지 시험하는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "주차 로봇을 운영하는 구역은 몇 면인가요?",
+    "options": ["23면", "53면", "83면"],
+    "answer_index": 1,
+    "explanation": "요약 패시지에 53면의 별도 구역이라고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "주차 로봇을 시험할 때 무엇을 살펴봐야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

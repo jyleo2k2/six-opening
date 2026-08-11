@@ -1,0 +1,25 @@
+{
+  "title": "AI 반도체도 우주로… 우주청, '우주데이터센터' 산업계 협력 논의",
+  "publisher": "한국일보",
+  "published_at": "2026-08-10T09:02:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "industry",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "https://www.hankookilbo.com/news/article/A2026081015140000661?did=NA",
+    "naver": "https://n.news.naver.com/mnews/article/469/0000947237?sid=101"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: AI 반도체도 우주로… 우주청, '우주데이터센터' 산업계 협력 논의"
+    },
+    {
+      "id": "S2",
+      "kind": "fact",
+      "text": "네이버 검색 API 요약 패시지: 우주항공청이 우주 공간에서 데이터를 저장하고 처리하는 우주데이터센터 기술 개발을 위해 산업계와 협력 방안을 논의했다. 우주항공청은 10일 경기 성남시 리벨리온 본사에서 우주데이터센터 기술 관련 산업계..."
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "decision": "publish",
+  "headline": "혈액 한 방울로 뇌질환 단서",
+  "one_line": {
+    "text": "피 한 방울로 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "피 한 방울로 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "어디에 쓰일 수 있어?",
+      "sentences": [
+        {
+          "text": "요약에는 연구 결과가 국제 학술지에 실렸다고 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "실제 진단에 사용되는지는 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "연구팀이 찾았다고 소개된 것은 무엇인가요?",
+    "options": ["진단 단서", "새로운 병원", "운동 방법"],
+    "answer_index": 0,
+    "explanation": "제목에 퇴행성 뇌질환의 진단 단서가 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "새로운 진단 연구를 들으면 어떤 점을 더 알아보고 싶나요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "decision": "publish",
+  "headline": "정부 로봇 공공 구매 확대",
+  "one_line": { "text": "정부가 피지컬 AI와 로봇 구매 확대를 알렸어요.", "source_ids": ["S1"] },
+  "cards": [
+    { "type": "what_happened", "title": "무슨 일이야?", "sentences": [
+      { "text": "공공 구매 대상으로 휴머노이드와 네발 로봇이 언급됐어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "business_link", "title": "산업과 무슨 관계야?", "sentences": [
+      { "text": "정부는 로봇 핵심 부품 연구개발도 언급했어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "unknown", "title": "아직 모르는 점", "sentences": [
+      { "text": "구매 규모와 사업 일정은 자료에서 확인되지 않았어요.", "epistemic": "unknown", "source_ids": [] }
+    ] }
+  ],
+  "word_box": [],
+  "fact_quiz": { "question": "공공 구매 대상으로 언급된 것은 무엇인가요?", "options": ["휴머노이드 로봇", "양식어류", "고용보험"], "answer_index": 0, "explanation": "요약 패시지에 휴머노이드 로봇이 나와요.", "source_ids": ["S2"] },
+  "family_question": "로봇에 필요한 부품에는 무엇이 있을지 이야기해 볼까요?",
+  "safety": { "contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false }
+}

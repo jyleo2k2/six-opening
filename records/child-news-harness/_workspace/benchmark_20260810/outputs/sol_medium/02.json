@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "청년 고용보험 가입 47개월 감소",
+  "one_line": {
+    "text": "29세 이하 가입자가 47개월째 줄었어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "29세 이하 고용보험 가입자가 계속 감소했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "우리 생활과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "요약은 경력직 위주 채용도 원인으로 언급했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "가입자 감소 규모는 현재 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "고용보험",
+      "meaning": "일을 잃었을 때 생활과 재취업을 돕는 제도예요."
+    },
+    {
+      "term": "일자리 미스매치",
+      "meaning": "구직자와 회사가 원하는 조건이 맞지 않는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "어느 나이대의 가입자가 줄었나요?",
+    "options": ["29세 이하", "39세 이하", "49세 이하"],
+    "answer_index": 0,
+    "explanation": "제목은 29세 이하 가입자 감소를 전했어요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "청년이 일자리를 찾을 때 어떤 조건을 살펴볼까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

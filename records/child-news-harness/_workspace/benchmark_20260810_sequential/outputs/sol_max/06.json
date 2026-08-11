@@ -1,0 +1,76 @@
+{
+  "decision": "publish",
+  "headline": "LX세미콘 차량용 MCU 공급",
+  "one_line": {
+    "text": "LX세미콘이 차량용 MCU를 현대차와 기아에 공급해요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "LX세미콘이 차량용 MCU 양산을 시작했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        },
+        {
+          "text": "현대차와 기아에도 공급을 시작했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "LX세미콘이 자체 개발한 차량용 반도체예요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        },
+        {
+          "text": "장애물을 감지하면 창문을 다시 여는 기능과 연결돼요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "정확한 공급 물량은 패시지에서 확인되지 않아요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "MCU",
+      "meaning": "차량 장치의 움직임을 제어하는 반도체예요."
+    },
+    {
+      "term": "양산",
+      "meaning": "제품을 많이 만들어 내는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "LX세미콘은 차량용 MCU를 어디에 공급하나요?",
+    "options": ["현대차와 기아", "항공사", "학교"],
+    "answer_index": 0,
+    "explanation": "제목에 현대차와 기아에 공급한다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "차량 안전 기능에서 반도체는 어떤 일을 해야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

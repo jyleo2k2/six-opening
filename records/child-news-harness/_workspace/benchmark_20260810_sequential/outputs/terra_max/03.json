@@ -1,0 +1,62 @@
+{
+  "decision": "publish",
+  "headline": "정부, 로봇 공공 구매 확대",
+  "one_line": {
+    "text": "기사 제목은 정부가 피지컬 AI 구매를 확대한다고 전해요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "요약 패시지는 로봇의 공공 구매를 언급해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        },
+        {
+          "text": "휴머노이드와 4족보행 로봇이 함께 언급됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "산업과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "요약 패시지는 로봇 핵심 부품 연구개발을 언급해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "구매가 언제 얼마나 늘어나는지는 자료에서 확인되지 않아요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "요약 패시지에서 공공 구매가 언급된 것은 무엇인가요?",
+    "options": ["휴머노이드와 4족보행 로봇", "자동차", "스마트폰"],
+    "answer_index": 0,
+    "explanation": "요약 패시지는 두 종류의 로봇 공공 구매를 언급해요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "새로운 기술을 살 때 어떤 정보를 확인하면 좋을지 이야기해 볼까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

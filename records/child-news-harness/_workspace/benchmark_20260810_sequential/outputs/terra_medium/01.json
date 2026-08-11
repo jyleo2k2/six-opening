@@ -1,0 +1,20 @@
+{
+  "decision": "publish",
+  "headline": "코스닥 열흘새 32% 상승",
+  "one_line": { "text": "코스닥이 열흘 동안 32% 올랐어요.", "source_ids": ["S1"] },
+  "cards": [
+    { "type": "what_happened", "title": "무슨 일이야?", "sentences": [
+      { "text": "기관의 코스닥 매수세가 성장주에 집중됐어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "business_link", "title": "왜 움직였어?", "sentences": [
+      { "text": "기사에서는 낙폭과대와 정책을 배경으로 봤어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "unknown", "title": "아직 모르는 점", "sentences": [
+      { "text": "자료만으로 코스닥 상승의 모든 이유는 알 수 없어요.", "epistemic": "unknown", "source_ids": [] }
+    ] }
+  ],
+  "word_box": [],
+  "fact_quiz": { "question": "코스닥은 열흘 동안 얼마나 올랐나요?", "options": ["32%", "47개월", "50%"], "answer_index": 0, "explanation": "제목에 코스닥이 열흘새 32% 상승했다고 나와요.", "source_ids": ["S1"] },
+  "family_question": "시장 지수가 움직인 이유를 볼 때 어떤 정보를 살펴볼까요?",
+  "safety": { "contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false }
+}

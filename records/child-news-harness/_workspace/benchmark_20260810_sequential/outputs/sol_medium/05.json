@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "TSMC 7월 매출 45% 증가",
+  "one_line": {
+    "text": "TSMC의 7월 매출이 45% 늘어 사상 최대였어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "TSMC가 7월 매출 기록을 다시 세웠어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1", "S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "자료는 AI 반도체 수요 호조를 배경으로 설명했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "매출 증가의 세부 항목은 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "매출",
+      "meaning": "회사가 물건이나 서비스를 팔아 얻은 금액이에요."
+    },
+    {
+      "term": "파운드리",
+      "meaning": "다른 회사가 설계한 반도체를 대신 만드는 사업이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "TSMC의 7월 매출은 몇 퍼센트 늘었나요?",
+    "options": ["25%", "35%", "45%"],
+    "answer_index": 2,
+    "explanation": "뉴스 제목에 7월 매출이 45% 늘었다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "반도체 수요 변화가 회사 매출에 어떻게 연결될까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

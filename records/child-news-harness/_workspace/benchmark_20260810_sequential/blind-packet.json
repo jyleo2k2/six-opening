@@ -1,0 +1,4012 @@
+{
+  "aliases": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
+  "articles": [
+    {
+      "order": 1,
+      "title": "코스닥 열흘새 32% 상승… 삼전닉스 떠난 돈, 성장주 몰려[코스닥 질주...",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 코스닥 열흘새 32% 상승… 삼전닉스 떠난 돈, 성장주 몰려[코스닥 질주..."
+        },
+        {
+          "id": "S2",
+          "kind": "analysis",
+          "text": "네이버 검색 API 요약 패시지: 기관의 코스닥 매수세가 반도체 소부장과 바이오, 로봇 등 성장주에 집중된 가운데 낙폭과대와 정책... 반도체 소부장과 바이오, 로봇 등 성장주가 상위권을 차지했다. 같은 기간 심텍은 81.66%, 알테오젠은 61.81..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": {
+            "text": "기사 제목은 코스닥이 열흘 새 32% 올랐다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "기사 제목은 코스닥이 열흘 새 32% 올랐다고 전해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "요약 패시지는 기관의 매수세를 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "왜 움직였어?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 반도체 소부장과 바이오, 로봇을 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 자료만으로 상승 원인을 모두 확인할 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "기사 제목에서 코스닥은 얼마나 올랐다고 했나요?",
+            "options": [
+              "32%",
+              "10%",
+              "81.66%"
+            ],
+            "answer_index": 0,
+            "explanation": "기사 제목에는 열흘 새 32% 상승이라고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "시장이 크게 움직인 이유를 살필 때 어떤 정보를 더 찾고 싶나요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": {
+            "text": "코스닥은 열흘 새 32% 상승했다고 제목에 나왔어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "코스닥은 열흘 새 32% 상승했다고 제목에 나왔어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "왜 움직였어?",
+              "sentences": [
+                {
+                  "text": "기사 요약은 기관 매수가 성장주에 집중됐다고 전해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "기사 제목과 요약 패시지 밖의 내용은 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "제목에 따르면 코스닥은 며칠 동안 32% 올랐나요?",
+            "options": [
+              "열흘",
+              "한 달",
+              "하루"
+            ],
+            "answer_index": 0,
+            "explanation": "제목에 ‘열흘 새 32% 상승’이라고 나왔어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "시장이 빠르게 움직였다는 소식을 들으면 무엇이 궁금한가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": {
+            "text": "코스닥은 열흘 새 32% 상승했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "코스닥은 열흘 새 32% 상승했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "성장주가 상승 종목 상위권을 차지했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "왜 움직였어?",
+              "sentences": [
+                {
+                  "text": "패시지는 기관 매수가 성장주에 몰렸다고 분석했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "상승의 모든 원인은 이 패시지만으로 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "코스닥",
+              "meaning": "여러 회사 주식이 거래되는 시장이에요."
+            },
+            {
+              "term": "성장주",
+              "meaning": "성장 가능성이 주목받는 회사의 주식이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "코스닥은 열흘 새 얼마나 상승했나요?",
+            "options": [
+              "12%",
+              "22%",
+              "32%"
+            ],
+            "answer_index": 2,
+            "explanation": "제목에 열흘 새 32% 상승했다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "시장이 빠르게 움직일 때 어떤 정보를 살펴보면 좋을까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": {
+            "text": "코스닥이 열흘 사이 32% 올랐어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "기관의 매수가 성장주에 집중됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "왜 움직였어?",
+              "sentences": [
+                {
+                  "text": "반도체 부품·장비와 바이오, 로봇주가 주목받았어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 흐름이 얼마나 이어질지는 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "코스닥",
+              "meaning": "여러 중소·기술 기업의 주식이 거래되는 시장이에요."
+            },
+            {
+              "term": "기관",
+              "meaning": "연기금이나 금융회사처럼 큰돈을 운용하는 곳이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "코스닥은 열흘 사이 얼마나 올랐나요?",
+            "options": [
+              "12%",
+              "22%",
+              "32%"
+            ],
+            "answer_index": 2,
+            "explanation": "뉴스 제목에 열흘 새 32% 상승했다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "시장이 빠르게 움직일 때 어떤 정보를 살펴보면 좋을까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "코스닥 열흘새 32% 상승",
+          "one_line": {
+            "text": "코스닥이 열흘 동안 32% 올랐어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "기관의 코스닥 매수세가 성장주에 집중됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "왜 움직였어?",
+              "sentences": [
+                {
+                  "text": "기사에서는 낙폭과대와 정책을 배경으로 봤어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "자료만으로 코스닥 상승의 모든 이유는 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "코스닥은 열흘 동안 얼마나 올랐나요?",
+            "options": [
+              "32%",
+              "47개월",
+              "50%"
+            ],
+            "answer_index": 0,
+            "explanation": "제목에 코스닥이 열흘새 32% 상승했다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "시장 지수가 움직인 이유를 볼 때 어떤 정보를 살펴볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 2,
+      "title": "29세 이하 청년 고용보험 가입자 47개월째 줄어",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 29세 이하 청년 고용보험 가입자 47개월째 줄어"
+        },
+        {
+          "id": "S2",
+          "kind": "attributed_claim",
+          "text": "네이버 검색 API 요약 패시지: 그러면서 \"청년 고용 감소는 불경기, 일자리 미스매치에 더해 기업의 경력직 위주 채용, AI 및 로봇 도입, 신참이나 기간제 해고 현상 때문\"이라며 \"29세 이하 고용이 점점 어려워지는 상황으로 청년 고용이 쉽게..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "청년 고용보험 가입자 감소",
+          "one_line": {
+            "text": "기사 제목은 29세 이하 가입자가 47개월째 줄었다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "29세 이하 고용보험 가입자가 47개월째 줄었다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 불경기와 일자리 미스매치를 이유로 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 자료만으로 가입자가 준 정확한 이유는 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "기사 제목에서 가입자는 몇 개월째 줄었다고 했나요?",
+            "options": [
+              "47개월째",
+              "29개월째",
+              "10개월째"
+            ],
+            "answer_index": 0,
+            "explanation": "기사 제목에는 47개월째 줄었다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "청년이 일자리를 찾을 때 어떤 도움이 필요할지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "청년 가입자 감소 47개월째",
+          "one_line": {
+            "text": "29세 이하 청년 고용보험 가입자가 47개월째 줄고 있어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "29세 이하 청년 고용보험 가입자가 47개월째 줄고 있어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약에는 29세 이하 고용이 점점 어려워진다고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "기사 전체 내용과 더 자세한 수치는 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "청년 고용보험 가입자는 몇 개월째 줄고 있나요?",
+            "options": [
+              "47개월째",
+              "7개월째",
+              "17개월째"
+            ],
+            "answer_index": 0,
+            "explanation": "뉴스 제목에 47개월째 줄었다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "청년 일자리 소식을 가족과 이야기한다면 무엇이 궁금한가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "청년 고용보험 가입 47개월 감소",
+          "one_line": {
+            "text": "29세 이하 가입자가 47개월째 줄었어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "29세 이하 고용보험 가입자가 47개월째 줄었어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "패시지는 불경기도 원인으로 들었어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "패시지는 기업의 경력직 위주 채용도 원인으로 들었어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "줄어든 정확한 인원은 패시지에서 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "29세 이하 가입자는 몇 개월째 줄었나요?",
+            "options": [
+              "37개월",
+              "47개월",
+              "57개월"
+            ],
+            "answer_index": 1,
+            "explanation": "제목에 47개월째 줄었다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "청년들이 일자리를 찾을 때 어떤 어려움이 있을까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "청년 고용보험 47개월 감소",
+          "one_line": {
+            "text": "29세 이하 고용보험 가입자가 47개월째 줄었어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "청년 고용보험 가입자 감소가 오래 이어졌어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "자료는 불경기와 경력직 위주 채용 등을 이유로 들었어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "가입자가 몇 명 줄었는지는 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "고용보험",
+              "meaning": "일하는 사람이 실직 등에 대비하도록 돕는 제도예요."
+            },
+            {
+              "term": "경력직",
+              "meaning": "관련 일을 해 본 경험이 있는 사람을 뜻해요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "청년 고용보험 가입자는 몇 개월째 줄었나요?",
+            "options": [
+              "27개월",
+              "37개월",
+              "47개월"
+            ],
+            "answer_index": 2,
+            "explanation": "뉴스 제목에 47개월째 줄었다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "처음 일자리를 찾는 청년에게 어떤 정보가 필요할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "청년 고용보험 가입자 감소",
+          "one_line": {
+            "text": "29세 이하 고용보험 가입자가 47개월째 줄었어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "29세 이하 청년의 고용보험 가입자가 계속 줄었어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 청년 고용이 어려워지고 있다고 전했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "가입자가 줄어든 정확한 이유는 자료만으로 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "줄었다고 나온 사람은 누구인가요?",
+            "options": [
+              "29세 이하 청년",
+              "로봇 연구원",
+              "주차장 이용자"
+            ],
+            "answer_index": 0,
+            "explanation": "제목은 29세 이하 청년의 가입자가 줄었다고 말해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "일자리 관련 뉴스를 볼 때 어떤 자료를 더 확인하고 싶나요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 3,
+      "title": "정부, 피지컬 AI 구매 대폭 확대…로봇 생태계 키운다",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 정부, 피지컬 AI 구매 대폭 확대…로봇 생태계 키운다"
+        },
+        {
+          "id": "S2",
+          "kind": "fact",
+          "text": "네이버 검색 API 요약 패시지: 휴머노이드·4족보행 로봇 공공 구매…새만금에 '로봇 파운드리' 구축 소부장 중소기업 상생협력 방안도... 정부는 로봇 부품 중소기업의 경쟁력을 높이기 위해 액추에이터와 센서, 로봇손 등 핵심 부품 전용 연구개발(R&D)..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "정부, 로봇 공공 구매 확대",
+          "one_line": {
+            "text": "기사 제목은 정부가 피지컬 AI 구매를 확대한다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 로봇의 공공 구매를 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "휴머노이드와 4족보행 로봇이 함께 언급됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 로봇 핵심 부품 연구개발을 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "구매가 언제 얼마나 늘어나는지는 자료에서 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "요약 패시지에서 공공 구매가 언급된 것은 무엇인가요?",
+            "options": [
+              "휴머노이드와 4족보행 로봇",
+              "자동차",
+              "스마트폰"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지는 두 종류의 로봇 공공 구매를 언급해요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "새로운 기술을 살 때 어떤 정보를 확인하면 좋을지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "정부, 로봇 구매 확대",
+          "one_line": {
+            "text": "정부가 피지컬 AI 구매를 대폭 확대한다는 소식이에요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "정부가 피지컬 AI 구매를 대폭 확대한다는 소식이에요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약에는 액추에이터와 센서 연구개발 내용도 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "구매 규모와 시행 시기는 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "요약에 나온 공공 구매 대상은 무엇인가요?",
+            "options": [
+              "휴머노이드·4족보행 로봇",
+              "자동차",
+              "선박"
+            ],
+            "answer_index": 0,
+            "explanation": "요약에 두 종류의 로봇 공공 구매가 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "이번 정책에서 가장 궁금한 로봇 분야는 무엇인가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "정부, 피지컬 AI 구매 확대",
+          "one_line": {
+            "text": "정부는 피지컬 AI 구매를 대폭 확대한다고 밝혔어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "정부는 피지컬 AI 구매를 대폭 확대한다고 밝혔어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "패시지에는 휴머노이드와 4족 보행 로봇 공공 구매가 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "새만금에는 로봇 파운드리를 구축한다고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "핵심 로봇 부품 전용 연구개발도 패시지에 담겼어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "정확한 구매 규모와 일정은 패시지에서 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "연구개발",
+              "meaning": "새 기술이나 제품을 연구하고 만드는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "로봇 파운드리를 구축한다고 나온 곳은 어디인가요?",
+            "options": [
+              "새만금",
+              "제주",
+              "부산"
+            ],
+            "answer_index": 0,
+            "explanation": "패시지에 새만금이라고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "공공기관의 로봇 구매는 산업에 어떤 변화를 줄까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "정부가 로봇 구매 확대",
+          "one_line": {
+            "text": "정부가 피지컬 AI 구매를 크게 늘리기로 했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "휴머노이드와 4족보행 로봇을 공공 구매해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "정부는 로봇 핵심 부품 연구개발도 추진해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "구매할 로봇 수는 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "피지컬 AI",
+              "meaning": "현실 공간에서 기계를 움직이게 하는 인공지능이에요."
+            },
+            {
+              "term": "휴머노이드",
+              "meaning": "사람과 비슷한 모습으로 만든 로봇이에요."
+            },
+            {
+              "term": "연구개발",
+              "meaning": "새 기술이나 제품을 연구하고 만드는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "로봇 파운드리를 세울 곳은 어디인가요?",
+            "options": [
+              "새만금",
+              "성남",
+              "포항"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지에 새만금 구축 계획이 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "공공기관에서 로봇을 어디에 활용할 수 있을까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "정부 로봇 공공 구매 확대",
+          "one_line": {
+            "text": "정부가 피지컬 AI와 로봇 구매 확대를 알렸어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "공공 구매 대상으로 휴머노이드와 네발 로봇이 언급됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "정부는 로봇 핵심 부품 연구개발도 언급했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "구매 규모와 사업 일정은 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "공공 구매 대상으로 언급된 것은 무엇인가요?",
+            "options": [
+              "휴머노이드 로봇",
+              "양식어류",
+              "고용보험"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지에 휴머노이드 로봇이 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "로봇에 필요한 부품에는 무엇이 있을지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 4,
+      "title": "현대차 ‘주차 로봇’ 아파트 첫 실증…최대 50% 더 수용",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 현대차 ‘주차 로봇’ 아파트 첫 실증…최대 50% 더 수용"
+        },
+        {
+          "id": "S2",
+          "kind": "fact",
+          "text": "네이버 검색 API 요약 패시지: 주차로봇 실증사업을 추진한다고 10일 밝혔다. 아파트에서 처음 실증하는 것으로 주차 공간 부족 및 혼잡... 현대차그룹은 더웨이브시티 지하 1층 주차장 내 53면의 별도 구역에서 현대위아 주차로봇 2세트를 운영한다...."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "현대차 주차 로봇 첫 실증",
+          "one_line": {
+            "text": "기사 제목은 현대차가 아파트에서 주차 로봇을 처음 실증한다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "아파트에서 처음 주차로봇 실증사업을 추진한다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "별도 구역에서 주차로봇 2세트를 운영한다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "현대차그룹은 현대위아 주차로봇을 운영한다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 자료만으로 실증이 끝나는 시점은 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "요약 패시지에서 운영한다고 한 주차로봇은 몇 세트인가요?",
+            "options": [
+              "2세트",
+              "1세트",
+              "53세트"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지에는 주차로봇 2세트를 운영한다고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "아파트 주차장이 혼잡할 때 어떤 점이 가장 불편할지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "현대차 아파트 주차로봇 첫 실증",
+          "one_line": {
+            "text": "현대차가 아파트에서 주차로봇 실증을 추진한다고 밝혔어요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "현대차가 아파트에서 주차로봇 실증을 추진한다고 밝혔어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사랑 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약에는 주차로봇 2세트를 53면에서 운영한다고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "주차로봇 실증 결과와 실제 변화는 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "실증",
+              "meaning": "실제 아파트에서 기술을 시험하는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "요약에는 주차로봇 몇 세트를 운영한다고 나왔나요?",
+            "options": [
+              "2세트",
+              "5세트",
+              "53세트"
+            ],
+            "answer_index": 0,
+            "explanation": "요약에 주차로봇 2세트를 운영한다고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "주차 공간을 바꾸는 기술에서 어떤 점을 살펴보고 싶나요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "현대차 주차 로봇 아파트 실증",
+          "one_line": {
+            "text": "현대차그룹이 아파트 주차 로봇 실증을 추진한다고 밝혔어요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "현대차그룹이 아파트에서 첫 실증을 추진한다고 밝혔어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1",
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "제목에는 주차 공간을 최대 50% 더 수용한다고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "현대위아 주차 로봇 2세트를 운영한다고 밝혔어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "실증 구역은 지하 1층 주차장의 53면이에요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "실증 기간은 패시지에서 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "실증",
+              "meaning": "실제 환경에서 기술을 시험하는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "주차 로봇 실증 구역은 어느 층에 있나요?",
+            "options": [
+              "지하 1층",
+              "지상 1층",
+              "지상 2층"
+            ],
+            "answer_index": 0,
+            "explanation": "패시지에 지하 1층이라고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "주차 로봇을 아파트에서 시험할 때 무엇을 살펴봐야 할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "아파트서 주차 로봇 실증",
+          "one_line": {
+            "text": "현대차그룹이 아파트에서 주차 로봇을 처음 실증해요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "지하 주차장 53면 구역에서 로봇 2세트를 운영해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "현대위아의 주차 로봇이 실증에 쓰여요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "실증 기간은 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "실증",
+              "meaning": "기술이 실제 장소에서 잘 작동하는지 시험하는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "주차 로봇을 운영하는 구역은 몇 면인가요?",
+            "options": [
+              "23면",
+              "53면",
+              "83면"
+            ],
+            "answer_index": 1,
+            "explanation": "요약 패시지에 53면의 별도 구역이라고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "주차 로봇을 시험할 때 무엇을 살펴봐야 할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "현대차 주차 로봇 첫 실증",
+          "one_line": {
+            "text": "현대차그룹이 아파트에서 주차 로봇을 처음 실증해요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "주차 로봇 실증사업이 10일 발표됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "현대위아 주차 로봇 2세트가 운영될 예정이에요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "실증 뒤 주차 공간이 얼마나 달라질지는 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "운영 예정인 주차 로봇은 몇 세트인가요?",
+            "options": [
+              "2세트",
+              "10세트",
+              "50세트"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지는 현대위아 로봇 2세트를 운영한다고 전해요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "주차 로봇을 쓴다면 어떤 점을 먼저 확인하고 싶나요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 5,
+      "title": "대만 TSMC, 7월 매출 45%↑…사상 최대 또 경신",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 대만 TSMC, 7월 매출 45%↑…사상 최대 또 경신"
+        },
+        {
+          "id": "S2",
+          "kind": "fact",
+          "text": "네이버 검색 API 요약 패시지: 세계 최대 반도체 파운드리업체인 대만 TSMC가 인공지능(AI) 관련 반도체 수요 호조에 힘입어 7월 매출이 사상 최대를 경신했다. 10일(현지시간) 블룸버그통신에 따르면 TSMC는 지난달 연결 매출액이 4675억8000만..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 사상 최대",
+          "one_line": {
+            "text": "기사 제목은 TSMC의 7월 매출이 45% 늘었다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 7월 매출이 사상 최대를 경신했다고 전해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 AI 관련 반도체 수요 호조를 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 자료만으로 매출 증가의 모든 이유는 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "기사 제목에서 TSMC의 7월 매출은 몇 % 늘었다고 했나요?",
+            "options": [
+              "45%",
+              "7%",
+              "100%"
+            ],
+            "answer_index": 0,
+            "explanation": "기사 제목에는 7월 매출이 45% 늘었다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "회사의 매출 소식에서 어떤 숫자를 더 확인하고 싶은지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 45% 증가",
+          "one_line": {
+            "text": "TSMC의 7월 매출이 45% 늘어 사상 최대를 기록했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "TSMC의 7월 매출이 45% 늘어 사상 최대를 기록했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사랑 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약은 AI 관련 반도체 수요 호조를 함께 전해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "요약 패시지 뒤의 매출 내용은 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "TSMC의 7월 매출은 어떻게 됐나요?",
+            "options": [
+              "45% 늘고 사상 최대",
+              "45% 줄고 최저",
+              "변화 없음"
+            ],
+            "answer_index": 0,
+            "explanation": "제목에 45% 증가와 사상 최대 경신이 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "기업의 매출 소식에서 어떤 점이 가장 궁금한가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 45% 증가",
+          "one_line": {
+            "text": "TSMC의 7월 매출이 45% 늘어 사상 최대를 기록했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "TSMC의 7월 매출이 45% 늘었어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "7월 매출은 사상 최대 기록을 다시 세웠어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1",
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "TSMC는 세계 최대 반도체 파운드리 업체라고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "패시지는 AI 반도체 수요 호조를 배경으로 설명했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "45%의 비교 기준은 패시지에서 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "파운드리",
+              "meaning": "다른 회사가 설계한 반도체를 만들어 주는 사업이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "TSMC의 7월 매출은 몇 퍼센트 늘었나요?",
+            "options": [
+              "25%",
+              "35%",
+              "45%"
+            ],
+            "answer_index": 2,
+            "explanation": "제목에 45% 늘었다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "회사의 매출이 달라질 때 어떤 원인을 함께 살펴볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 45% 증가",
+          "one_line": {
+            "text": "TSMC의 7월 매출이 45% 늘어 사상 최대였어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "TSMC가 7월 매출 기록을 다시 세웠어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1",
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "자료는 AI 반도체 수요 호조를 배경으로 설명했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "매출 증가의 세부 항목은 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "매출",
+              "meaning": "회사가 물건이나 서비스를 팔아 얻은 금액이에요."
+            },
+            {
+              "term": "파운드리",
+              "meaning": "다른 회사가 설계한 반도체를 대신 만드는 사업이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "TSMC의 7월 매출은 몇 퍼센트 늘었나요?",
+            "options": [
+              "25%",
+              "35%",
+              "45%"
+            ],
+            "answer_index": 2,
+            "explanation": "뉴스 제목에 7월 매출이 45% 늘었다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "반도체 수요 변화가 회사 매출에 어떻게 연결될까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 사상 최대",
+          "one_line": {
+            "text": "TSMC의 7월 매출이 사상 최대를 새로 썼어요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "TSMC의 7월 매출은 지난해보다 45% 늘었어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "TSMC는 세계 최대 반도체 파운드리 업체로 소개됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이후 매출 변화는 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "TSMC 매출은 얼마나 늘었나요?",
+            "options": [
+              "45%",
+              "32%",
+              "50%"
+            ],
+            "answer_index": 0,
+            "explanation": "제목은 TSMC의 7월 매출이 45% 늘었다고 말해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "반도체를 만드는 회사의 역할을 어떻게 설명할 수 있을까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 6,
+      "title": "LX세미콘, 차량용 MCU 양산 … 현대차·기아에 공급 시작",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: LX세미콘, 차량용 MCU 양산 … 현대차·기아에 공급 시작"
+        },
+        {
+          "id": "S2",
+          "kind": "fact",
+          "text": "네이버 검색 API 요약 패시지: LX세미콘이 자사에서 개발한 차량용 반도체가 현대차·기아에 공급된다고 밝혔다. 10일 LX세미콘은 '모터... 시스템 반도체다. 창문이 자동으로 닫히는 도중에 장애물이 감지되면 다시 열리는 안전장치 기능과 차량..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급",
+          "one_line": {
+            "text": "기사 제목은 LX세미콘이 현대차·기아에 공급을 시작했다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "LX세미콘이 차량용 MCU를 양산한다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "요약 패시지는 차량용 반도체가 공급된다고 전해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 창문 안전장치 기능을 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 자료만으로 공급 물량은 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "LX세미콘이 공급을 시작한 곳은 어디인가요?",
+            "options": [
+              "현대차·기아",
+              "학교",
+              "병원"
+            ],
+            "answer_index": 0,
+            "explanation": "기사 제목에는 현대차·기아에 공급을 시작했다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "자동차의 안전장치에 어떤 기능이 필요할지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급 시작",
+          "one_line": {
+            "text": "LX세미콘이 차량용 MCU를 현대차·기아에 공급하기 시작했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "LX세미콘이 차량용 MCU를 현대차·기아에 공급하기 시작했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사랑 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "차량 창문에 장애물이 감지되면 다시 열리는 기능이 소개됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "반도체의 다른 기능과 공급 규모는 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "MCU",
+              "meaning": "차량용 반도체의 한 종류예요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "LX세미콘은 어디에 차량용 반도체를 공급하나요?",
+            "options": [
+              "현대차·기아",
+              "학교",
+              "병원"
+            ],
+            "answer_index": 0,
+            "explanation": "제목에 현대차·기아 공급 시작이 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "차량용 반도체가 자동차에서 어떤 일을 하는지 궁금한가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급",
+          "one_line": {
+            "text": "LX세미콘이 차량용 MCU를 현대차와 기아에 공급해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "LX세미콘이 차량용 MCU 양산을 시작했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "현대차와 기아에도 공급을 시작했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "LX세미콘이 자체 개발한 차량용 반도체예요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "장애물을 감지하면 창문을 다시 여는 기능과 연결돼요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "정확한 공급 물량은 패시지에서 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "MCU",
+              "meaning": "차량 장치의 움직임을 제어하는 반도체예요."
+            },
+            {
+              "term": "양산",
+              "meaning": "제품을 많이 만들어 내는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "LX세미콘은 차량용 MCU를 어디에 공급하나요?",
+            "options": [
+              "현대차와 기아",
+              "항공사",
+              "학교"
+            ],
+            "answer_index": 0,
+            "explanation": "제목에 현대차와 기아에 공급한다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "차량 안전 기능에서 반도체는 어떤 일을 해야 할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급",
+          "one_line": {
+            "text": "LX세미콘이 차량용 MCU를 현대차·기아에 공급해요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "LX세미콘이 개발한 차량용 반도체가 양산됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1",
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "이 반도체는 차량 안전장치 기능에 쓰여요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "공급 수량은 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "MCU",
+              "meaning": "기계의 여러 기능을 제어하는 작은 반도체예요."
+            },
+            {
+              "term": "양산",
+              "meaning": "제품을 같은 방식으로 많이 만들어 내는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "차량용 MCU를 공급받는 회사는 어디인가요?",
+            "options": [
+              "현대차·기아",
+              "TSMC",
+              "네이버"
+            ],
+            "answer_index": 0,
+            "explanation": "뉴스 제목에 현대차·기아에 공급한다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "자동차 안전장치에 반도체가 왜 필요할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 반도체 공급",
+          "one_line": {
+            "text": "LX세미콘이 차량용 반도체를 현대차·기아에 공급해요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "LX세미콘이 개발한 차량용 반도체 공급이 발표됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "이 반도체에는 창문 안전장치 기능이 언급됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "공급되는 반도체의 수량은 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "반도체를 공급받는 회사는 어디인가요?",
+            "options": [
+              "현대차·기아",
+              "TSMC",
+              "우주항공청"
+            ],
+            "answer_index": 0,
+            "explanation": "제목과 요약 패시지는 현대차·기아 공급을 말해요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "family_question": "자동차 안에서 반도체가 맡을 일을 찾아볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 7,
+      "title": "네이버, 클로드 개발사 앤트로픽에 간접 투자…규모는 '비공개'",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 네이버, 클로드 개발사 앤트로픽에 간접 투자…규모는 '비공개'"
+        },
+        {
+          "id": "S2",
+          "kind": "fact",
+          "text": "네이버 검색 API 요약 패시지: 네이버(035420)가 인공지능(AI) 모델 '클로드' 개발사 앤트로픽에 투자한 사실이 확인됐다. 10일 IT업계에 따르면 네이버의 실리콘밸리 투자법인 네이버 벤처스는 지난해 하반기 벤처캐피털(VC)이 운영하는 펀드를 통해..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "네이버, 앤트로픽 간접 투자",
+          "one_line": {
+            "text": "기사 제목은 네이버가 앤트로픽에 간접 투자했다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 네이버의 투자 사실이 확인됐다고 전해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 네이버 벤처스를 투자법인으로 소개해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "투자 규모는 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "기사 제목에서 네이버가 간접 투자한 회사는 어디인가요?",
+            "options": [
+              "앤트로픽",
+              "현대차",
+              "TSMC"
+            ],
+            "answer_index": 0,
+            "explanation": "기사 제목에는 앤트로픽에 간접 투자했다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "회사가 다른 회사와 연결될 때 무엇을 궁금해할지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "네이버, 앤트로픽에 간접 투자",
+          "one_line": {
+            "text": "네이버가 앤트로픽에 간접 투자한 사실이 확인됐어요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "네이버가 앤트로픽에 간접 투자한 사실이 확인됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1",
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사랑 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "네이버 벤처스가 VC 펀드를 통한 투자로 소개됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "투자 규모는 비공개로 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "간접 투자",
+              "meaning": "다른 펀드를 통해 투자하는 방식이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "네이버가 간접 투자한 곳은 어디인가요?",
+            "options": [
+              "앤트로픽",
+              "TSMC",
+              "현대차"
+            ],
+            "answer_index": 0,
+            "explanation": "제목과 요약에 앤트로픽 투자가 나와요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "family_question": "기업이 AI 회사에 투자했다는 소식에서 어떤 점이 궁금한가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "네이버, 앤트로픽에 간접 투자",
+          "one_line": {
+            "text": "네이버가 클로드 개발사 앤트로픽에 간접 투자했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "네이버가 앤트로픽에 투자한 사실이 확인됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "앤트로픽은 AI 모델 클로드 개발사예요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1",
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "네이버 벤처스가 지난해 하반기 펀드를 통해 투자했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "투자 규모는 공개되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "간접 투자",
+              "meaning": "펀드 같은 중간 수단을 거쳐 투자하는 방식이에요."
+            },
+            {
+              "term": "펀드",
+              "meaning": "여러 사람이나 기관의 돈을 모아 운용하는 자금이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "앤트로픽이 개발한 AI 모델은 무엇인가요?",
+            "options": [
+              "클로드",
+              "주차 로봇",
+              "MCU"
+            ],
+            "answer_index": 0,
+            "explanation": "제목과 패시지에 클로드라고 나와요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "family_question": "회사가 간접 투자할 때 어떤 정보를 공개하면 좋을까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "네이버가 앤트로픽 간접 투자",
+          "one_line": {
+            "text": "네이버가 클로드 개발사 앤트로픽에 간접 투자했어요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "네이버 벤처스가 펀드를 통해 투자했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "네이버의 실리콘밸리 투자법인이 참여했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "투자 규모는 공개되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "간접 투자",
+              "meaning": "펀드 같은 중간 통로를 거쳐 돈을 투자하는 방식이에요."
+            },
+            {
+              "term": "펀드",
+              "meaning": "여러 사람이나 기관의 돈을 모아 운용하는 자금이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "네이버는 무엇을 통해 투자했나요?",
+            "options": [
+              "펀드",
+              "주차 로봇",
+              "고용보험"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지에 펀드를 통한 투자라고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "회사가 다른 기업에 간접 투자하는 이유는 무엇일까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "네이버 앤트로픽 간접 투자",
+          "one_line": {
+            "text": "네이버의 앤트로픽 간접 투자 사실이 확인됐어요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "네이버 벤처스는 펀드를 통해 투자한 것으로 전해졌어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "회사는 어떻게 연결돼?",
+              "sentences": [
+                {
+                  "text": "클로드는 앤트로픽이 개발한 AI 모델이에요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "투자 규모는 공개되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "네이버가 투자한 것으로 전해진 회사는 어디인가요?",
+            "options": [
+              "앤트로픽",
+              "현대위아",
+              "한국뇌연구원"
+            ],
+            "answer_index": 0,
+            "explanation": "제목은 네이버의 앤트로픽 간접 투자를 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "회사들이 펀드를 통해 투자하는 이유를 어떻게 생각하나요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 8,
+      "title": "피 한방울로 '퇴행성 뇌질환' 가려낸다…진단 단서 발견",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 피 한방울로 '퇴행성 뇌질환' 가려낸다…진단 단서 발견"
+        },
+        {
+          "id": "S2",
+          "kind": "fact",
+          "text": "네이버 검색 API 요약 패시지: 10일 한국뇌연구원에 따르면 윤종혁·김형준·천무경 박사 연구팀은 대구경북과학기술원(DGIST)... 연구 결과는 신경과학 분야 국제학술지 '액타 뉴로패솔로지카 커뮤니케이션즈' 최신호에 게재됐다. 천무경 박사는 \"여러..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "피 한 방울 뇌질환 진단 단서",
+          "one_line": {
+            "text": "기사 제목은 피 한 방울로 뇌질환 진단 단서를 찾는 연구를 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 한국뇌연구원 연구팀을 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "연구 결과는 국제학술지에 게재됐다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "어디에 쓰일 수 있어?",
+              "sentences": [
+                {
+                  "text": "기사 제목은 퇴행성 뇌질환 진단 단서를 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 연구가 실제 진단에 쓰이는지는 자료에서 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "기사 제목에서 진단 단서를 찾는 데 언급된 것은 무엇인가요?",
+            "options": [
+              "피 한 방울",
+              "자동차",
+              "로봇"
+            ],
+            "answer_index": 0,
+            "explanation": "기사 제목에는 피 한 방울이 언급돼 있어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "새로운 건강 연구를 볼 때 어떤 점을 더 확인하고 싶은지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "혈액 한 방울로 뇌질환 단서",
+          "one_line": {
+            "text": "피 한 방울로 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "피 한 방울로 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "어디에 쓰일 수 있어?",
+              "sentences": [
+                {
+                  "text": "요약에는 연구 결과가 국제 학술지에 실렸다고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "실제 진단에 사용되는지는 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "연구팀이 찾았다고 소개된 것은 무엇인가요?",
+            "options": [
+              "진단 단서",
+              "새로운 병원",
+              "운동 방법"
+            ],
+            "answer_index": 0,
+            "explanation": "제목에 퇴행성 뇌질환의 진단 단서가 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "새로운 진단 연구를 들으면 어떤 점을 더 알아보고 싶나요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "혈액에서 뇌질환 진단 단서 발견",
+          "one_line": {
+            "text": "피 한 방울에서 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "피 한 방울로 뇌질환을 가려낼 진단 단서가 발견됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "연구 결과는 신경과학 분야 국제학술지에 실렸어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "어디에 쓰일 수 있어?",
+              "sentences": [
+                {
+                  "text": "퇴행성 뇌질환을 가려내는 단서로 제시됐어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "어떤 질환을 얼마나 정확히 가리는지는 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "퇴행성 뇌질환",
+              "meaning": "뇌의 기능이 점차 나빠지는 질환을 뜻해요."
+            },
+            {
+              "term": "진단",
+              "meaning": "검사를 통해 질환이 있는지 판단하는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "연구 결과는 어디에 실렸나요?",
+            "options": [
+              "신경과학 국제학술지",
+              "여행 잡지",
+              "요리책"
+            ],
+            "answer_index": 0,
+            "explanation": "패시지에 신경과학 분야 국제학술지라고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "진단 단서를 실제 검사에 쓰려면 무엇을 더 확인해야 할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "혈액에서 뇌질환 진단 단서",
+          "one_line": {
+            "text": "피 한 방울로 퇴행성 뇌질환을 가릴 단서가 발견됐어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "연구팀이 혈액을 이용한 진단 단서를 찾았어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "어디에 쓰일 수 있어?",
+              "sentences": [
+                {
+                  "text": "자료는 퇴행성 뇌질환을 가려내는 단서라고 설명해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "어떤 질환을 구별하는지는 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "퇴행성 뇌질환",
+              "meaning": "뇌 기능이 서서히 약해지는 질환을 뜻해요."
+            },
+            {
+              "term": "진단 단서",
+              "meaning": "질환이 있는지 판단하는 데 참고하는 신호예요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "연구 결과는 어디에 실렸나요?",
+            "options": [
+              "국제학술지",
+              "고용보험 안내서",
+              "주차장 지도"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지에 신경과학 국제학술지 게재가 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "새 진단 단서를 확인하려면 어떤 연구가 더 필요할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "혈액으로 뇌질환 진단 단서",
+          "one_line": {
+            "text": "연구팀이 혈액으로 뇌질환을 살필 단서를 찾았어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "한국뇌연구원 연구팀의 결과가 학술지에 실렸어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "어디에 쓰일 수 있어?",
+              "sentences": [
+                {
+                  "text": "자료에서는 퇴행성 뇌질환 진단 단서를 다뤘어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 단서가 실제 진단에 쓰이는지는 자료에서 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "연구 결과가 실린 곳은 어디인가요?",
+            "options": [
+              "국제학술지",
+              "아파트 주차장",
+              "우주데이터센터"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지는 연구 결과가 국제학술지에 실렸다고 전해요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "연구 결과를 확인할 때 어떤 정보가 더 필요할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 9,
+      "title": "AI 반도체도 우주로… 우주청, '우주데이터센터' 산업계 협력 논의",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: AI 반도체도 우주로… 우주청, '우주데이터센터' 산업계 협력 논의"
+        },
+        {
+          "id": "S2",
+          "kind": "fact",
+          "text": "네이버 검색 API 요약 패시지: 우주항공청이 우주 공간에서 데이터를 저장하고 처리하는 우주데이터센터 기술 개발을 위해 산업계와 협력 방안을 논의했다. 우주항공청은 10일 경기 성남시 리벨리온 본사에서 우주데이터센터 기술 관련 산업계..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "우주데이터센터 협력 논의",
+          "one_line": {
+            "text": "요약 패시지는 우주데이터센터 기술 협력 방안을 논의했다고 전해요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "우주항공청이 산업계와 협력 방안을 논의했다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "논의 장소는 경기 성남시 리벨리온 본사였어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "우주데이터센터는 우주에서 데이터를 저장하고 처리하는 기술이에요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 자료만으로 기술이 언제 완성되는지는 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "우주데이터센터는 어디에서 데이터를 저장하고 처리하나요?",
+            "options": [
+              "우주 공간",
+              "바다 밑",
+              "학교 운동장"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지는 우주 공간에서 데이터를 저장하고 처리한다고 해요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "우주에서 데이터를 저장하고 처리하면 어떤 점이 궁금한지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "우주항공청, 우주데이터센터 협력 논의",
+          "one_line": {
+            "text": "우주항공청이 우주데이터센터 기술 협력을 산업계와 논의했어요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "우주항공청이 우주데이터센터 기술 협력을 산업계와 논의했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "우주에서 데이터를 저장하고 처리하는 기술이라고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "기술 개발 일정과 실제 운영 여부는 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "우주데이터센터",
+              "meaning": "우주에서 데이터를 저장하고 처리하는 기술이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "우주데이터센터는 무엇을 하기 위한 기술인가요?",
+            "options": [
+              "우주에서 데이터 저장·처리",
+              "바닷물 정화",
+              "농작물 재배"
+            ],
+            "answer_index": 0,
+            "explanation": "요약에 우주에서 데이터를 저장하고 처리한다고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "우주데이터센터 협력 소식에서 어떤 점을 더 묻고 싶나요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "우주청, 우주데이터센터 협력 논의",
+          "one_line": {
+            "text": "우주청이 우주데이터센터 개발 협력을 산업계와 논의했어요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "우주청이 우주데이터센터 협력 방안을 논의했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1",
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "논의는 10일 리벨리온 본사에서 열렸어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "우주에서 데이터를 저장하고 처리하는 기술을 개발해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "기술 개발을 위해 산업계와 협력 방안을 논의했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "구체적인 협력 방식은 패시지에서 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "우주데이터센터",
+              "meaning": "우주에서 데이터를 저장하고 처리하는 시설이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "우주데이터센터는 어디에서 데이터를 처리하나요?",
+            "options": [
+              "우주 공간",
+              "학교 운동장",
+              "바닷속"
+            ],
+            "answer_index": 0,
+            "explanation": "패시지에 우주 공간이라고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "우주에서 데이터를 처리할 때 무엇을 살펴봐야 할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "우주데이터센터 협력 논의",
+          "one_line": {
+            "text": "우주항공청이 우주데이터센터 산업 협력을 논의했어요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "우주항공청이 산업계와 기술 협력 방안을 논의했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "우주에서 데이터를 저장하고 처리하는 기술을 다뤘어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "구체적인 협력 방식은 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "데이터센터",
+              "meaning": "많은 데이터를 저장하고 처리하는 시설이에요."
+            },
+            {
+              "term": "산업계",
+              "meaning": "어떤 산업에서 일하는 여러 기업과 관계자를 뜻해요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "우주데이터센터는 무엇을 저장하고 처리하나요?",
+            "options": [
+              "데이터",
+              "양식어류",
+              "주차 로봇"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지에 데이터를 저장하고 처리한다고 나와요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "우주에서 데이터를 처리하려면 무엇을 살펴봐야 할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "우주데이터센터 협력 논의",
+          "one_line": {
+            "text": "우주항공청이 우주데이터센터 기술 협력을 논의했어요.",
+            "source_ids": [
+              "S1",
+              "S2"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "우주항공청은 산업계와 협력 방안을 논의했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "산업과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "우주데이터센터는 우주에서 데이터를 저장하고 처리하는 기술이에요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "기술 개발 일정은 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "협력 방안을 논의한 기관은 어디인가요?",
+            "options": [
+              "우주항공청",
+              "네이버 벤처스",
+              "LX세미콘"
+            ],
+            "answer_index": 0,
+            "explanation": "요약 패시지는 우주항공청이 논의했다고 전해요.",
+            "source_ids": [
+              "S2"
+            ]
+          },
+          "family_question": "우주에서 데이터를 저장한다면 무엇이 궁금한가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    },
+    {
+      "order": 10,
+      "title": "포항 양식어류 27만7000마리 폐사…고수온 장기화에 40억 투입 '생존전'",
+      "source_units": [
+        {
+          "id": "S1",
+          "kind": "fact",
+          "text": "뉴스 제목: 포항 양식어류 27만7000마리 폐사…고수온 장기화에 40억 투입 '생존전'"
+        },
+        {
+          "id": "S2",
+          "kind": "analysis",
+          "text": "네이버 검색 API 요약 패시지: 안정적인 수산물 생산기반을 유지하는 것이 어촌 경제뿐 아니라 소비자 물가와 식품 공급 측면에서도 중요한 이유다. 앞으로 포항의 고수온 대책 역시 지원 장비 수량이나 투입 예산만으로 성과를 평가하기보다..."
+        }
+      ],
+      "outputs": {
+        "A": {
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7000마리 폐사",
+          "one_line": {
+            "text": "기사 제목은 포항 양식어류 27만7000마리가 폐사했다고 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "포항 양식어류 27만7000마리가 폐사했다고 해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "기사 제목은 고수온 장기화를 함께 언급해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 수산물 생산 기반이 소비자 물가와 관계있다고 봐요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "이 자료만으로 피해 원인을 모두 확인할 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "기사 제목에서 폐사한 양식어류 수는 몇 마리인가요?",
+            "options": [
+              "27만7000마리",
+              "40마리",
+              "10마리"
+            ],
+            "answer_index": 0,
+            "explanation": "기사 제목에는 27만7000마리가 폐사했다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "수산물 생산이 우리 생활과 어떻게 이어지는지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "B": {
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7000마리 폐사",
+          "one_line": {
+            "text": "포항 양식어류 27만7000마리가 폐사했고 40억 원이 투입돼요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "포항 양식어류 27만7000마리가 폐사했다는 제목이에요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약은 수산물 생산이 물가와 식품 공급에 중요하다고 설명해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "고수온 대책의 세부 내용과 결과는 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "폐사",
+              "meaning": "물고기가 죽는 일을 뜻해요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "제목에 따르면 폐사한 양식어류는 몇 마리인가요?",
+            "options": [
+              "27만7000마리",
+              "2만7000마리",
+              "2700마리"
+            ],
+            "answer_index": 0,
+            "explanation": "제목에 27만7000마리 폐사라고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "수산물과 식품 공급 소식을 들으면 어떤 점이 궁금한가요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "C": {
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7000마리 폐사",
+          "one_line": {
+            "text": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                },
+                {
+                  "text": "제목에는 고수온 장기화에 40억을 투입한다고 나와요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "패시지는 수산물 생산이 어촌 경제에 중요하다고 설명해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                },
+                {
+                  "text": "소비자 물가와 식품 공급에도 중요하다고 설명해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "폐사한 물고기의 종류와 기간은 확인되지 않아요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "양식어류",
+              "meaning": "사람이 시설에서 기르는 물고기예요."
+            },
+            {
+              "term": "고수온",
+              "meaning": "물의 온도가 높은 상태를 뜻해요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "포항에서 폐사한 양식어류는 몇 마리인가요?",
+            "options": [
+              "2만7000마리",
+              "27만7000마리",
+              "277만 마리"
+            ],
+            "answer_index": 1,
+            "explanation": "제목에 27만7000마리라고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "수산물 생산이 줄면 어촌과 소비자에게 어떤 변화가 생길까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "D": {
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7천 폐사",
+          "one_line": {
+            "text": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "고수온이 길어지며 많은 양식어류가 폐사했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "자료는 안정적 생산이 물가와 식품 공급에 중요하다고 봤어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "어종별 피해 수는 자료에서 확인되지 않았어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [
+            {
+              "term": "양식어류",
+              "meaning": "사람이 시설에서 기르는 물고기예요."
+            },
+            {
+              "term": "고수온",
+              "meaning": "바닷물의 온도가 평소보다 높은 상태예요."
+            },
+            {
+              "term": "폐사",
+              "meaning": "기르거나 관리하던 동물이 죽는 일이에요."
+            }
+          ],
+          "fact_quiz": {
+            "question": "폐사한 양식어류는 몇 마리인가요?",
+            "options": [
+              "2만7000마리",
+              "27만7000마리",
+              "277만마리"
+            ],
+            "answer_index": 1,
+            "explanation": "뉴스 제목에 27만7000마리가 폐사했다고 나와요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "바닷물 온도가 높을 때 양식장은 무엇을 확인해야 할까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        },
+        "E": {
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7천마리 폐사",
+          "one_line": {
+            "text": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "cards": [
+            {
+              "type": "what_happened",
+              "title": "무슨 일이야?",
+              "sentences": [
+                {
+                  "text": "제목은 고수온 장기화로 물고기가 폐사했다고 전해요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S1"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "business_link",
+              "title": "우리 생활과 무슨 관계야?",
+              "sentences": [
+                {
+                  "text": "요약 패시지는 수산물 생산 기반을 언급했어요.",
+                  "epistemic": "fact",
+                  "source_ids": [
+                    "S2"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "unknown",
+              "title": "아직 모르는 점",
+              "sentences": [
+                {
+                  "text": "지원 뒤 양식어류 피해가 얼마나 줄지는 알 수 없어요.",
+                  "epistemic": "unknown",
+                  "source_ids": []
+                }
+              ]
+            }
+          ],
+          "word_box": [],
+          "fact_quiz": {
+            "question": "폐사한 양식어류는 몇 마리인가요?",
+            "options": [
+              "27만7000마리",
+              "53마리",
+              "4675마리"
+            ],
+            "answer_index": 0,
+            "explanation": "제목은 양식어류 27만7000마리 폐사를 전해요.",
+            "source_ids": [
+              "S1"
+            ]
+          },
+          "family_question": "수산물 생산이 우리 생활과 어떻게 이어질지 이야기해 볼까요?",
+          "safety": {
+            "contains_investment_advice": false,
+            "contains_price_forecast": false,
+            "contains_unsourced_claim": false
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "decision": "publish",
+  "headline": "포항 양식어류 27만7000마리 폐사",
+  "one_line": {
+    "text": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        },
+        {
+          "text": "제목에는 고수온 장기화에 40억을 투입한다고 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "우리 생활과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "패시지는 수산물 생산이 어촌 경제에 중요하다고 설명해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        },
+        {
+          "text": "소비자 물가와 식품 공급에도 중요하다고 설명해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "폐사한 물고기의 종류와 기간은 확인되지 않아요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "양식어류",
+      "meaning": "사람이 시설에서 기르는 물고기예요."
+    },
+    {
+      "term": "고수온",
+      "meaning": "물의 온도가 높은 상태를 뜻해요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "포항에서 폐사한 양식어류는 몇 마리인가요?",
+    "options": ["2만7000마리", "27만7000마리", "277만 마리"],
+    "answer_index": 1,
+    "explanation": "제목에 27만7000마리라고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "수산물 생산이 줄면 어촌과 소비자에게 어떤 변화가 생길까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

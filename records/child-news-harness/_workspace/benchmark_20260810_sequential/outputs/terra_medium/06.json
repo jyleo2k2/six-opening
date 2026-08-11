@@ -1,0 +1,20 @@
+{
+  "decision": "publish",
+  "headline": "LX세미콘 차량용 반도체 공급",
+  "one_line": { "text": "LX세미콘이 차량용 반도체를 현대차·기아에 공급해요.", "source_ids": ["S1", "S2"] },
+  "cards": [
+    { "type": "what_happened", "title": "무슨 일이야?", "sentences": [
+      { "text": "LX세미콘이 개발한 차량용 반도체 공급이 발표됐어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "business_link", "title": "회사는 어떻게 연결돼?", "sentences": [
+      { "text": "이 반도체에는 창문 안전장치 기능이 언급됐어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "unknown", "title": "아직 모르는 점", "sentences": [
+      { "text": "공급되는 반도체의 수량은 자료에서 확인되지 않았어요.", "epistemic": "unknown", "source_ids": [] }
+    ] }
+  ],
+  "word_box": [],
+  "fact_quiz": { "question": "반도체를 공급받는 회사는 어디인가요?", "options": ["현대차·기아", "TSMC", "우주항공청"], "answer_index": 0, "explanation": "제목과 요약 패시지는 현대차·기아 공급을 말해요.", "source_ids": ["S1", "S2"] },
+  "family_question": "자동차 안에서 반도체가 맡을 일을 찾아볼까요?",
+  "safety": { "contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false }
+}

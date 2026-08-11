@@ -1,0 +1,25 @@
+{
+  "title": "LX세미콘, 차량용 MCU 양산 … 현대차·기아에 공급 시작",
+  "publisher": "매일경제",
+  "published_at": "2026-08-10T10:19:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "company",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "https://www.mk.co.kr/article/12123205",
+    "naver": "https://n.news.naver.com/mnews/article/009/0005719186?sid=101"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: LX세미콘, 차량용 MCU 양산 … 현대차·기아에 공급 시작"
+    },
+    {
+      "id": "S2",
+      "kind": "fact",
+      "text": "네이버 검색 API 요약 패시지: LX세미콘이 자사에서 개발한 차량용 반도체가 현대차·기아에 공급된다고 밝혔다. 10일 LX세미콘은 '모터... 시스템 반도체다. 창문이 자동으로 닫히는 도중에 장애물이 감지되면 다시 열리는 안전장치 기능과 차량..."
+    }
+  ]
+}

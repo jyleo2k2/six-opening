@@ -1,0 +1,72 @@
+{
+  "decision": "publish",
+  "headline": "정부, 피지컬 AI 구매 확대",
+  "one_line": {
+    "text": "정부는 피지컬 AI 구매를 대폭 확대한다고 밝혔어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "정부는 피지컬 AI 구매를 대폭 확대한다고 밝혔어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        },
+        {
+          "text": "패시지에는 휴머노이드와 4족 보행 로봇 공공 구매가 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "산업과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "새만금에는 로봇 파운드리를 구축한다고 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        },
+        {
+          "text": "핵심 로봇 부품 전용 연구개발도 패시지에 담겼어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "정확한 구매 규모와 일정은 패시지에서 확인되지 않아요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "연구개발",
+      "meaning": "새 기술이나 제품을 연구하고 만드는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "로봇 파운드리를 구축한다고 나온 곳은 어디인가요?",
+    "options": ["새만금", "제주", "부산"],
+    "answer_index": 0,
+    "explanation": "패시지에 새만금이라고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "공공기관의 로봇 구매는 산업에 어떤 변화를 줄까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

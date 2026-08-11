@@ -1,0 +1,115 @@
+{
+  "source_basis": "naver_search_api_title_description",
+  "articles": [
+    {
+      "order": 1,
+      "filename": "01.json",
+      "candidate_id": "N0547",
+      "category": "시장",
+      "selection_reason": "시장 자금 이동과 지수 차이를 설명할 수 있음",
+      "title": "코스닥 열흘새 32% 상승… 삼전닉스 떠난 돈, 성장주 몰려[코스닥 질주...",
+      "publisher": "파이낸셜뉴스",
+      "original_link": "http://www.fnnews.com/news/202608101826002370",
+      "naver_link": "https://n.news.naver.com/mnews/article/014/0005559617?sid=101"
+    },
+    {
+      "order": 2,
+      "filename": "02.json",
+      "candidate_id": "N0529",
+      "category": "일자리",
+      "selection_reason": "고용 지표와 AI·로봇의 사회적 영향을 연결할 수 있음",
+      "title": "29세 이하 청년 고용보험 가입자 47개월째 줄어",
+      "publisher": "MBC",
+      "original_link": "https://imnews.imbc.com/news/2026/society/article/6843712_36918.html",
+      "naver_link": "https://n.news.naver.com/mnews/article/214/0001516995?sid=102"
+    },
+    {
+      "order": 3,
+      "filename": "03.json",
+      "candidate_id": "N0027",
+      "category": "로봇 산업정책",
+      "selection_reason": "휴머노이드와 로봇 부품 생태계를 구체적으로 설명할 수 있음",
+      "title": "정부, 피지컬 AI 구매 대폭 확대…로봇 생태계 키운다",
+      "publisher": "연합뉴스",
+      "original_link": "https://www.yna.co.kr/view/AKR20260810145500003?input=1195m",
+      "naver_link": "https://n.news.naver.com/mnews/article/001/0016243399?sid=101"
+    },
+    {
+      "order": 4,
+      "filename": "04.json",
+      "candidate_id": "N0522",
+      "category": "생활 로봇",
+      "selection_reason": "아파트 주차 문제를 로봇이 푸는 장면이 어린이에게 직관적임",
+      "title": "현대차 ‘주차 로봇’ 아파트 첫 실증…최대 50% 더 수용",
+      "publisher": "서울신문",
+      "original_link": "https://www.seoul.co.kr/news/economy/car/2026/08/10/20260810500232?wlog_tag3=naver",
+      "naver_link": "https://n.news.naver.com/mnews/article/081/0003669108?sid=101"
+    },
+    {
+      "order": 5,
+      "filename": "05.json",
+      "candidate_id": "N0043",
+      "category": "글로벌 반도체",
+      "selection_reason": "AI 수요와 반도체 위탁생산 기업의 매출을 연결할 수 있음",
+      "title": "대만 TSMC, 7월 매출 45%↑…사상 최대 또 경신",
+      "publisher": "머니투데이",
+      "original_link": "https://www.mt.co.kr/world/2026/08/10/2026081019074393500",
+      "naver_link": "https://n.news.naver.com/mnews/article/008/0005398032?sid=104"
+    },
+    {
+      "order": 6,
+      "filename": "06.json",
+      "candidate_id": "N0138",
+      "category": "자동차 반도체",
+      "selection_reason": "자동차 안전 기능과 반도체 공급 관계가 구체적임",
+      "title": "LX세미콘, 차량용 MCU 양산 … 현대차·기아에 공급 시작",
+      "publisher": "매일경제",
+      "original_link": "https://www.mk.co.kr/article/12123205",
+      "naver_link": "https://n.news.naver.com/mnews/article/009/0005719186?sid=101"
+    },
+    {
+      "order": 7,
+      "filename": "07.json",
+      "candidate_id": "N0110",
+      "category": "AI 기업",
+      "selection_reason": "네이버와 AI 모델 기업의 간접 투자 구조를 배울 수 있음",
+      "title": "네이버, 클로드 개발사 앤트로픽에 간접 투자…규모는 '비공개'",
+      "publisher": "뉴스1",
+      "original_link": "https://www.news1.kr/it-science/internet-platform/6254732",
+      "naver_link": "https://n.news.naver.com/mnews/article/421/0009106595?sid=105"
+    },
+    {
+      "order": 8,
+      "filename": "08.json",
+      "candidate_id": "N0336",
+      "category": "의료 과학",
+      "selection_reason": "혈액과 뇌질환 연구라는 과학 주제가 흥미롭고 출처가 명확함",
+      "title": "피 한방울로 '퇴행성 뇌질환' 가려낸다…진단 단서 발견",
+      "publisher": "뉴시스",
+      "original_link": "https://www.newsis.com/view/NISX20260810_0003743497",
+      "naver_link": "https://n.news.naver.com/mnews/article/003/0014118816?sid=102"
+    },
+    {
+      "order": 9,
+      "filename": "09.json",
+      "candidate_id": "N0644",
+      "category": "우주 데이터",
+      "selection_reason": "우주에서 데이터를 처리한다는 새 산업 개념이 어린이 흥미를 끔",
+      "title": "AI 반도체도 우주로… 우주청, '우주데이터센터' 산업계 협력 논의",
+      "publisher": "한국일보",
+      "original_link": "https://www.hankookilbo.com/news/article/A2026081015140000661?did=NA",
+      "naver_link": "https://n.news.naver.com/mnews/article/469/0000947237?sid=101"
+    },
+    {
+      "order": 10,
+      "filename": "10.json",
+      "candidate_id": "N0182",
+      "category": "기후와 먹거리",
+      "selection_reason": "고수온이 양식업·식품 공급·물가와 연결되는 구조를 보여줌",
+      "title": "포항 양식어류 27만7000마리 폐사…고수온 장기화에 40억 투입 '생존전'",
+      "publisher": "뉴스타운",
+      "original_link": "http://www.newstown.co.kr/news/articleView.html?idxno=711878",
+      "naver_link": "http://www.newstown.co.kr/news/articleView.html?idxno=711878"
+    }
+  ]
+}

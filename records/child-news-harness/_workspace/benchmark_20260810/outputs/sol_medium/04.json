@@ -1,0 +1,62 @@
+{
+  "decision": "publish",
+  "headline": "현대차 주차 로봇 아파트 실증",
+  "one_line": {
+    "text": "현대차가 아파트에서 주차 로봇을 처음 실증해요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "아파트 주차장에서 처음 하는 실증사업이에요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "현대차그룹은 53면 구역에 로봇 2세트를 운영해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "실증 결과는 현재 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "실증",
+      "meaning": "기술이 실제 장소에서 잘 작동하는지 시험하는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "주차 로봇은 몇 세트 운영되나요?",
+    "options": ["1세트", "2세트", "3세트"],
+    "answer_index": 1,
+    "explanation": "요약에 주차 로봇 2세트를 운영한다고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "주차 로봇을 시험할 때 무엇을 확인해야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

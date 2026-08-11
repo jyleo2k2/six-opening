@@ -1,0 +1,25 @@
+{
+  "title": "대만 TSMC, 7월 매출 45%↑…사상 최대 또 경신",
+  "publisher": "머니투데이",
+  "published_at": "2026-08-10T10:26:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "company",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "https://www.mt.co.kr/world/2026/08/10/2026081019074393500",
+    "naver": "https://n.news.naver.com/mnews/article/008/0005398032?sid=104"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: 대만 TSMC, 7월 매출 45%↑…사상 최대 또 경신"
+    },
+    {
+      "id": "S2",
+      "kind": "fact",
+      "text": "네이버 검색 API 요약 패시지: 세계 최대 반도체 파운드리업체인 대만 TSMC가 인공지능(AI) 관련 반도체 수요 호조에 힘입어 7월 매출이 사상 최대를 경신했다. 10일(현지시간) 블룸버그통신에 따르면 TSMC는 지난달 연결 매출액이 4675억8000만..."
+    }
+  ]
+}

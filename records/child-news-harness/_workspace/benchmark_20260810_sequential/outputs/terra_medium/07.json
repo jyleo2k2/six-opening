@@ -1,0 +1,20 @@
+{
+  "decision": "publish",
+  "headline": "네이버 앤트로픽 간접 투자",
+  "one_line": { "text": "네이버의 앤트로픽 간접 투자 사실이 확인됐어요.", "source_ids": ["S1", "S2"] },
+  "cards": [
+    { "type": "what_happened", "title": "무슨 일이야?", "sentences": [
+      { "text": "네이버 벤처스는 펀드를 통해 투자한 것으로 전해졌어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "business_link", "title": "회사는 어떻게 연결돼?", "sentences": [
+      { "text": "클로드는 앤트로픽이 개발한 AI 모델이에요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "unknown", "title": "아직 모르는 점", "sentences": [
+      { "text": "투자 규모는 공개되지 않았어요.", "epistemic": "unknown", "source_ids": [] }
+    ] }
+  ],
+  "word_box": [],
+  "fact_quiz": { "question": "네이버가 투자한 것으로 전해진 회사는 어디인가요?", "options": ["앤트로픽", "현대위아", "한국뇌연구원"], "answer_index": 0, "explanation": "제목은 네이버의 앤트로픽 간접 투자를 전해요.", "source_ids": ["S1"] },
+  "family_question": "회사들이 펀드를 통해 투자하는 이유를 어떻게 생각하나요?",
+  "safety": { "contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false }
+}

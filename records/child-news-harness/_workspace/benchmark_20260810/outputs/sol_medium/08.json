@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "혈액으로 뇌질환 진단 단서 발견",
+  "one_line": {
+    "text": "혈액으로 퇴행성 뇌질환을 가려낼 단서를 찾았어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "한국뇌연구원 연구팀이 연구 결과를 발표했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "어디에 쓰일 수 있어?",
+      "sentences": [
+        {
+          "text": "퇴행성 뇌질환을 가려내는 진단 단서예요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "검사의 정확도는 현재 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "퇴행성 뇌질환",
+      "meaning": "시간이 지나며 뇌 기능이 약해지는 병을 뜻해요."
+    },
+    {
+      "term": "진단",
+      "meaning": "검사를 통해 어떤 병인지 판단하는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "연구팀이 찾은 것은 무엇인가요?",
+    "options": ["진단 단서", "치료약", "수술 로봇"],
+    "answer_index": 0,
+    "explanation": "제목은 뇌질환 진단 단서를 발견했다고 전해요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "새 검사가 실제로 쓰이려면 무엇을 확인해야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

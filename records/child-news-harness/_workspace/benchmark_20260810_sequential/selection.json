@@ -1,0 +1,96 @@
+{
+  "date_kst": "2026-08-10",
+  "selection_rule": "어린이 설명 가능성, 구체적 사실, 경제·산업·과학 학습 가치, 주제·언론사 다양성",
+  "selections": [
+    {
+      "candidate_id": "N0547",
+      "original_link": "http://www.fnnews.com/news/202608101826002370",
+      "publisher": "파이낸셜뉴스",
+      "category": "시장",
+      "scope": "market",
+      "description_kind": "analysis",
+      "reason": "시장 자금 이동과 지수 차이를 설명할 수 있음"
+    },
+    {
+      "candidate_id": "N0529",
+      "original_link": "https://imnews.imbc.com/news/2026/society/article/6843712_36918.html",
+      "publisher": "MBC",
+      "category": "일자리",
+      "scope": "economy",
+      "description_kind": "attributed_claim",
+      "reason": "고용 지표와 AI·로봇의 사회적 영향을 연결할 수 있음"
+    },
+    {
+      "candidate_id": "N0027",
+      "original_link": "https://www.yna.co.kr/view/AKR20260810145500003?input=1195m",
+      "publisher": "연합뉴스",
+      "category": "로봇 산업정책",
+      "scope": "industry",
+      "description_kind": "fact",
+      "reason": "휴머노이드와 로봇 부품 생태계를 구체적으로 설명할 수 있음"
+    },
+    {
+      "candidate_id": "N0522",
+      "original_link": "https://www.seoul.co.kr/news/economy/car/2026/08/10/20260810500232?wlog_tag3=naver",
+      "publisher": "서울신문",
+      "category": "생활 로봇",
+      "scope": "company",
+      "description_kind": "fact",
+      "reason": "아파트 주차 문제를 로봇이 푸는 장면이 어린이에게 직관적임"
+    },
+    {
+      "candidate_id": "N0043",
+      "original_link": "https://www.mt.co.kr/world/2026/08/10/2026081019074393500",
+      "publisher": "머니투데이",
+      "category": "글로벌 반도체",
+      "scope": "company",
+      "description_kind": "fact",
+      "reason": "AI 수요와 반도체 위탁생산 기업의 매출을 연결할 수 있음"
+    },
+    {
+      "candidate_id": "N0138",
+      "original_link": "https://www.mk.co.kr/article/12123205",
+      "publisher": "매일경제",
+      "category": "자동차 반도체",
+      "scope": "company",
+      "description_kind": "fact",
+      "reason": "자동차 안전 기능과 반도체 공급 관계가 구체적임"
+    },
+    {
+      "candidate_id": "N0110",
+      "original_link": "https://www.news1.kr/it-science/internet-platform/6254732",
+      "publisher": "뉴스1",
+      "category": "AI 기업",
+      "scope": "company",
+      "description_kind": "fact",
+      "reason": "네이버와 AI 모델 기업의 간접 투자 구조를 배울 수 있음"
+    },
+    {
+      "candidate_id": "N0336",
+      "original_link": "https://www.newsis.com/view/NISX20260810_0003743497",
+      "publisher": "뉴시스",
+      "category": "의료 과학",
+      "scope": "science",
+      "description_kind": "fact",
+      "reason": "혈액과 뇌질환 연구라는 과학 주제가 흥미롭고 출처가 명확함"
+    },
+    {
+      "candidate_id": "N0644",
+      "original_link": "https://www.hankookilbo.com/news/article/A2026081015140000661?did=NA",
+      "publisher": "한국일보",
+      "category": "우주 데이터",
+      "scope": "industry",
+      "description_kind": "fact",
+      "reason": "우주에서 데이터를 처리한다는 새 산업 개념이 어린이 흥미를 끔"
+    },
+    {
+      "candidate_id": "N0182",
+      "original_link": "http://www.newstown.co.kr/news/articleView.html?idxno=711878",
+      "publisher": "뉴스타운",
+      "category": "기후와 먹거리",
+      "scope": "economy",
+      "description_kind": "analysis",
+      "reason": "고수온이 양식업·식품 공급·물가와 연결되는 구조를 보여줌"
+    }
+  ]
+}

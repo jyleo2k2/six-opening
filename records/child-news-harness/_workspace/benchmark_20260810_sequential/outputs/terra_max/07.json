@@ -1,0 +1,57 @@
+{
+  "decision": "publish",
+  "headline": "네이버, 앤트로픽 간접 투자",
+  "one_line": {
+    "text": "기사 제목은 네이버가 앤트로픽에 간접 투자했다고 전해요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "요약 패시지는 네이버의 투자 사실이 확인됐다고 전해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "요약 패시지는 네이버 벤처스를 투자법인으로 소개해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "투자 규모는 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "기사 제목에서 네이버가 간접 투자한 회사는 어디인가요?",
+    "options": ["앤트로픽", "현대차", "TSMC"],
+    "answer_index": 0,
+    "explanation": "기사 제목에는 앤트로픽에 간접 투자했다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "회사가 다른 회사와 연결될 때 무엇을 궁금해할지 이야기해 볼까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

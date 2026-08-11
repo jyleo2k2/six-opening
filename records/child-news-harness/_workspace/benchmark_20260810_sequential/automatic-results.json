@@ -1,0 +1,824 @@
+{
+  "generated_at": "2026-08-10T11:17:25.242Z",
+  "source_basis": "naver_search_api_title_description",
+  "article_count": 10,
+  "results": {
+    "sol_max": {
+      "model": "gpt-5.6-sol",
+      "thinking": "max",
+      "summary": {
+        "generated": 10,
+        "passed": 10,
+        "pass_rate": 1,
+        "average_text_characters": 392,
+        "average_source_units_referenced": 2,
+        "review_or_reject_count": 0
+      },
+      "articles": [
+        {
+          "order": 1,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": "코스닥은 열흘 새 32% 상승했어요.",
+          "family_question": "시장이 빠르게 움직일 때 어떤 정보를 살펴보면 좋을까요?",
+          "text_characters": 358,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\01.json"
+        },
+        {
+          "order": 2,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "청년 고용보험 가입 47개월 감소",
+          "one_line": "29세 이하 가입자가 47개월째 줄었어요.",
+          "family_question": "청년들이 일자리를 찾을 때 어떤 어려움이 있을까요?",
+          "text_characters": 326,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\02.json"
+        },
+        {
+          "order": 3,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "정부, 피지컬 AI 구매 확대",
+          "one_line": "정부는 피지컬 AI 구매를 대폭 확대한다고 밝혔어요.",
+          "family_question": "공공기관의 로봇 구매는 산업에 어떤 변화를 줄까요?",
+          "text_characters": 398,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\03.json"
+        },
+        {
+          "order": 4,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "현대차 주차 로봇 아파트 실증",
+          "one_line": "현대차그룹이 아파트 주차 로봇 실증을 추진한다고 밝혔어요.",
+          "family_question": "주차 로봇을 아파트에서 시험할 때 무엇을 살펴봐야 할까요?",
+          "text_characters": 399,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\04.json"
+        },
+        {
+          "order": 5,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 45% 증가",
+          "one_line": "TSMC의 7월 매출이 45% 늘어 사상 최대를 기록했어요.",
+          "family_question": "회사의 매출이 달라질 때 어떤 원인을 함께 살펴볼까요?",
+          "text_characters": 401,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\05.json"
+        },
+        {
+          "order": 6,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급",
+          "one_line": "LX세미콘이 차량용 MCU를 현대차와 기아에 공급해요.",
+          "family_question": "차량 안전 기능에서 반도체는 어떤 일을 해야 할까요?",
+          "text_characters": 409,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\06.json"
+        },
+        {
+          "order": 7,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "네이버, 앤트로픽에 간접 투자",
+          "one_line": "네이버가 클로드 개발사 앤트로픽에 간접 투자했어요.",
+          "family_question": "회사가 간접 투자할 때 어떤 정보를 공개하면 좋을까요?",
+          "text_characters": 386,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\07.json"
+        },
+        {
+          "order": 8,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "혈액에서 뇌질환 진단 단서 발견",
+          "one_line": "피 한 방울에서 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+          "family_question": "진단 단서를 실제 검사에 쓰려면 무엇을 더 확인해야 할까요?",
+          "text_characters": 403,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\08.json"
+        },
+        {
+          "order": 9,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "우주청, 우주데이터센터 협력 논의",
+          "one_line": "우주청이 우주데이터센터 개발 협력을 산업계와 논의했어요.",
+          "family_question": "우주에서 데이터를 처리할 때 무엇을 살펴봐야 할까요?",
+          "text_characters": 404,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\09.json"
+        },
+        {
+          "order": 10,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7000마리 폐사",
+          "one_line": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+          "family_question": "수산물 생산이 줄면 어촌과 소비자에게 어떤 변화가 생길까요?",
+          "text_characters": 435,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_max\\10.json"
+        }
+      ]
+    },
+    "sol_medium": {
+      "model": "gpt-5.6-sol",
+      "thinking": "medium",
+      "summary": {
+        "generated": 10,
+        "passed": 10,
+        "pass_rate": 1,
+        "average_text_characters": 360,
+        "average_source_units_referenced": 2,
+        "review_or_reject_count": 0
+      },
+      "articles": [
+        {
+          "order": 1,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": "코스닥이 열흘 사이 32% 올랐어요.",
+          "family_question": "시장이 빠르게 움직일 때 어떤 정보를 살펴보면 좋을까요?",
+          "text_characters": 344,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\01.json"
+        },
+        {
+          "order": 2,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "청년 고용보험 47개월 감소",
+          "one_line": "29세 이하 고용보험 가입자가 47개월째 줄었어요.",
+          "family_question": "처음 일자리를 찾는 청년에게 어떤 정보가 필요할까요?",
+          "text_characters": 368,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\02.json"
+        },
+        {
+          "order": 3,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "정부가 로봇 구매 확대",
+          "one_line": "정부가 피지컬 AI 구매를 크게 늘리기로 했어요.",
+          "family_question": "공공기관에서 로봇을 어디에 활용할 수 있을까요?",
+          "text_characters": 368,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\03.json"
+        },
+        {
+          "order": 4,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "아파트서 주차 로봇 실증",
+          "one_line": "현대차그룹이 아파트에서 주차 로봇을 처음 실증해요.",
+          "family_question": "주차 로봇을 시험할 때 무엇을 살펴봐야 할까요?",
+          "text_characters": 321,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\04.json"
+        },
+        {
+          "order": 5,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 45% 증가",
+          "one_line": "TSMC의 7월 매출이 45% 늘어 사상 최대였어요.",
+          "family_question": "반도체 수요 변화가 회사 매출에 어떻게 연결될까요?",
+          "text_characters": 369,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\05.json"
+        },
+        {
+          "order": 6,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급",
+          "one_line": "LX세미콘이 차량용 MCU를 현대차·기아에 공급해요.",
+          "family_question": "자동차 안전장치에 반도체가 왜 필요할까요?",
+          "text_characters": 352,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\06.json"
+        },
+        {
+          "order": 7,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "네이버가 앤트로픽 간접 투자",
+          "one_line": "네이버가 클로드 개발사 앤트로픽에 간접 투자했어요.",
+          "family_question": "회사가 다른 기업에 간접 투자하는 이유는 무엇일까요?",
+          "text_characters": 347,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\07.json"
+        },
+        {
+          "order": 8,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "혈액에서 뇌질환 진단 단서",
+          "one_line": "피 한 방울로 퇴행성 뇌질환을 가릴 단서가 발견됐어요.",
+          "family_question": "새 진단 단서를 확인하려면 어떤 연구가 더 필요할까요?",
+          "text_characters": 368,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\08.json"
+        },
+        {
+          "order": 9,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "우주데이터센터 협력 논의",
+          "one_line": "우주항공청이 우주데이터센터 산업 협력을 논의했어요.",
+          "family_question": "우주에서 데이터를 처리하려면 무엇을 살펴봐야 할까요?",
+          "text_characters": 369,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\09.json"
+        },
+        {
+          "order": 10,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7천 폐사",
+          "one_line": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+          "family_question": "바닷물 온도가 높을 때 양식장은 무엇을 확인해야 할까요?",
+          "text_characters": 390,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\sol_medium\\10.json"
+        }
+      ]
+    },
+    "terra_max": {
+      "model": "gpt-5.6-terra",
+      "thinking": "max",
+      "summary": {
+        "generated": 10,
+        "passed": 10,
+        "pass_rate": 1,
+        "average_text_characters": 355,
+        "average_source_units_referenced": 1.9,
+        "review_or_reject_count": 0
+      },
+      "articles": [
+        {
+          "order": 1,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": "기사 제목은 코스닥이 열흘 새 32% 올랐다고 전해요.",
+          "family_question": "시장이 크게 움직인 이유를 살필 때 어떤 정보를 더 찾고 싶나요?",
+          "text_characters": 348,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\01.json"
+        },
+        {
+          "order": 2,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "청년 고용보험 가입자 감소",
+          "one_line": "기사 제목은 29세 이하 가입자가 47개월째 줄었다고 전해요.",
+          "family_question": "청년이 일자리를 찾을 때 어떤 도움이 필요할지 이야기해 볼까요?",
+          "text_characters": 335,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\02.json"
+        },
+        {
+          "order": 3,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "정부, 로봇 공공 구매 확대",
+          "one_line": "기사 제목은 정부가 피지컬 AI 구매를 확대한다고 전해요.",
+          "family_question": "새로운 기술을 살 때 어떤 정보를 확인하면 좋을지 이야기해 볼까요?",
+          "text_characters": 367,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\03.json"
+        },
+        {
+          "order": 4,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "현대차 주차 로봇 첫 실증",
+          "one_line": "기사 제목은 현대차가 아파트에서 주차 로봇을 처음 실증한다고 전해요.",
+          "family_question": "아파트 주차장이 혼잡할 때 어떤 점이 가장 불편할지 이야기해 볼까요?",
+          "text_characters": 367,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\04.json"
+        },
+        {
+          "order": 5,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 사상 최대",
+          "one_line": "기사 제목은 TSMC의 7월 매출이 45% 늘었다고 전해요.",
+          "family_question": "회사의 매출 소식에서 어떤 숫자를 더 확인하고 싶은지 이야기해 볼까요?",
+          "text_characters": 341,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\05.json"
+        },
+        {
+          "order": 6,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급",
+          "one_line": "기사 제목은 LX세미콘이 현대차·기아에 공급을 시작했다고 전해요.",
+          "family_question": "자동차의 안전장치에 어떤 기능이 필요할지 이야기해 볼까요?",
+          "text_characters": 344,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\06.json"
+        },
+        {
+          "order": 7,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "네이버, 앤트로픽 간접 투자",
+          "one_line": "기사 제목은 네이버가 앤트로픽에 간접 투자했다고 전해요.",
+          "family_question": "회사가 다른 회사와 연결될 때 무엇을 궁금해할지 이야기해 볼까요?",
+          "text_characters": 321,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\07.json"
+        },
+        {
+          "order": 8,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "피 한 방울 뇌질환 진단 단서",
+          "one_line": "기사 제목은 피 한 방울로 뇌질환 진단 단서를 찾는 연구를 전해요.",
+          "family_question": "새로운 건강 연구를 볼 때 어떤 점을 더 확인하고 싶은지 이야기해 볼까요?",
+          "text_characters": 365,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\08.json"
+        },
+        {
+          "order": 9,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "우주데이터센터 협력 논의",
+          "one_line": "요약 패시지는 우주데이터센터 기술 협력 방안을 논의했다고 전해요.",
+          "family_question": "우주에서 데이터를 저장하고 처리하면 어떤 점이 궁금한지 이야기해 볼까요?",
+          "text_characters": 382,
+          "referenced_source_ids": [
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\09.json"
+        },
+        {
+          "order": 10,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7000마리 폐사",
+          "one_line": "기사 제목은 포항 양식어류 27만7000마리가 폐사했다고 전해요.",
+          "family_question": "수산물 생산이 우리 생활과 어떻게 이어지는지 이야기해 볼까요?",
+          "text_characters": 378,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_max\\10.json"
+        }
+      ]
+    },
+    "terra_medium": {
+      "model": "gpt-5.6-terra",
+      "thinking": "medium",
+      "summary": {
+        "generated": 10,
+        "passed": 10,
+        "pass_rate": 1,
+        "average_text_characters": 308,
+        "average_source_units_referenced": 2,
+        "review_or_reject_count": 0
+      },
+      "articles": [
+        {
+          "order": 1,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "코스닥 열흘새 32% 상승",
+          "one_line": "코스닥이 열흘 동안 32% 올랐어요.",
+          "family_question": "시장 지수가 움직인 이유를 볼 때 어떤 정보를 살펴볼까요?",
+          "text_characters": 286,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\01.json"
+        },
+        {
+          "order": 2,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "청년 고용보험 가입자 감소",
+          "one_line": "29세 이하 고용보험 가입자가 47개월째 줄었어요.",
+          "family_question": "일자리 관련 뉴스를 볼 때 어떤 자료를 더 확인하고 싶나요?",
+          "text_characters": 326,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\02.json"
+        },
+        {
+          "order": 3,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "정부 로봇 공공 구매 확대",
+          "one_line": "정부가 피지컬 AI와 로봇 구매 확대를 알렸어요.",
+          "family_question": "로봇에 필요한 부품에는 무엇이 있을지 이야기해 볼까요?",
+          "text_characters": 307,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\03.json"
+        },
+        {
+          "order": 4,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "현대차 주차 로봇 첫 실증",
+          "one_line": "현대차그룹이 아파트에서 주차 로봇을 처음 실증해요.",
+          "family_question": "주차 로봇을 쓴다면 어떤 점을 먼저 확인하고 싶나요?",
+          "text_characters": 305,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\04.json"
+        },
+        {
+          "order": 5,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 사상 최대",
+          "one_line": "TSMC의 7월 매출이 사상 최대를 새로 썼어요.",
+          "family_question": "반도체를 만드는 회사의 역할을 어떻게 설명할 수 있을까요?",
+          "text_characters": 308,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\05.json"
+        },
+        {
+          "order": 6,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 반도체 공급",
+          "one_line": "LX세미콘이 차량용 반도체를 현대차·기아에 공급해요.",
+          "family_question": "자동차 안에서 반도체가 맡을 일을 찾아볼까요?",
+          "text_characters": 310,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\06.json"
+        },
+        {
+          "order": 7,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "네이버 앤트로픽 간접 투자",
+          "one_line": "네이버의 앤트로픽 간접 투자 사실이 확인됐어요.",
+          "family_question": "회사들이 펀드를 통해 투자하는 이유를 어떻게 생각하나요?",
+          "text_characters": 300,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\07.json"
+        },
+        {
+          "order": 8,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "혈액으로 뇌질환 진단 단서",
+          "one_line": "연구팀이 혈액으로 뇌질환을 살필 단서를 찾았어요.",
+          "family_question": "연구 결과를 확인할 때 어떤 정보가 더 필요할까요?",
+          "text_characters": 312,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\08.json"
+        },
+        {
+          "order": 9,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "우주데이터센터 협력 논의",
+          "one_line": "우주항공청이 우주데이터센터 기술 협력을 논의했어요.",
+          "family_question": "우주에서 데이터를 저장한다면 무엇이 궁금한가요?",
+          "text_characters": 306,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\09.json"
+        },
+        {
+          "order": 10,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7천마리 폐사",
+          "one_line": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+          "family_question": "수산물 생산이 우리 생활과 어떻게 이어질지 이야기해 볼까요?",
+          "text_characters": 317,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\terra_medium\\10.json"
+        }
+      ]
+    },
+    "luna_max": {
+      "model": "gpt-5.6-luna",
+      "thinking": "max",
+      "summary": {
+        "generated": 10,
+        "passed": 10,
+        "pass_rate": 1,
+        "average_text_characters": 335,
+        "average_source_units_referenced": 1.8,
+        "review_or_reject_count": 0
+      },
+      "articles": [
+        {
+          "order": 1,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "코스닥 열흘 새 32% 상승",
+          "one_line": "코스닥은 열흘 새 32% 상승했다고 제목에 나왔어요.",
+          "family_question": "시장이 빠르게 움직였다는 소식을 들으면 무엇이 궁금한가요?",
+          "text_characters": 311,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\01.json"
+        },
+        {
+          "order": 2,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "청년 가입자 감소 47개월째",
+          "one_line": "29세 이하 청년 고용보험 가입자가 47개월째 줄고 있어요.",
+          "family_question": "청년 일자리 소식을 가족과 이야기한다면 무엇이 궁금한가요?",
+          "text_characters": 327,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\02.json"
+        },
+        {
+          "order": 3,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "정부, 로봇 구매 확대",
+          "one_line": "정부가 피지컬 AI 구매를 대폭 확대한다는 소식이에요.",
+          "family_question": "이번 정책에서 가장 궁금한 로봇 분야는 무엇인가요?",
+          "text_characters": 306,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\03.json"
+        },
+        {
+          "order": 4,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "현대차 아파트 주차로봇 첫 실증",
+          "one_line": "현대차가 아파트에서 주차로봇 실증을 추진한다고 밝혔어요.",
+          "family_question": "주차 공간을 바꾸는 기술에서 어떤 점을 살펴보고 싶나요?",
+          "text_characters": 345,
+          "referenced_source_ids": [
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\04.json"
+        },
+        {
+          "order": 5,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "TSMC 7월 매출 45% 증가",
+          "one_line": "TSMC의 7월 매출이 45% 늘어 사상 최대를 기록했어요.",
+          "family_question": "기업의 매출 소식에서 어떤 점이 가장 궁금한가요?",
+          "text_characters": 327,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\05.json"
+        },
+        {
+          "order": 6,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "LX세미콘 차량용 MCU 공급 시작",
+          "one_line": "LX세미콘이 차량용 MCU를 현대차·기아에 공급하기 시작했어요.",
+          "family_question": "차량용 반도체가 자동차에서 어떤 일을 하는지 궁금한가요?",
+          "text_characters": 349,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\06.json"
+        },
+        {
+          "order": 7,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "네이버, 앤트로픽에 간접 투자",
+          "one_line": "네이버가 앤트로픽에 간접 투자한 사실이 확인됐어요.",
+          "family_question": "기업이 AI 회사에 투자했다는 소식에서 어떤 점이 궁금한가요?",
+          "text_characters": 333,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\07.json"
+        },
+        {
+          "order": 8,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "혈액 한 방울로 뇌질환 단서",
+          "one_line": "피 한 방울로 퇴행성 뇌질환 진단 단서가 발견됐어요.",
+          "family_question": "새로운 진단 연구를 들으면 어떤 점을 더 알아보고 싶나요?",
+          "text_characters": 311,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\08.json"
+        },
+        {
+          "order": 9,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "우주항공청, 우주데이터센터 협력 논의",
+          "one_line": "우주항공청이 우주데이터센터 기술 협력을 산업계와 논의했어요.",
+          "family_question": "우주데이터센터 협력 소식에서 어떤 점을 더 묻고 싶나요?",
+          "text_characters": 379,
+          "referenced_source_ids": [
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\09.json"
+        },
+        {
+          "order": 10,
+          "status": "pass",
+          "validation_errors": [],
+          "decision": "publish",
+          "headline": "포항 양식어류 27만7000마리 폐사",
+          "one_line": "포항 양식어류 27만7000마리가 폐사했고 40억 원이 투입돼요.",
+          "family_question": "수산물과 식품 공급 소식을 들으면 어떤 점이 궁금한가요?",
+          "text_characters": 362,
+          "referenced_source_ids": [
+            "S1",
+            "S2"
+          ],
+          "output_path": "C:\\dev\\six-opening\\records\\child-news-harness\\_workspace\\benchmark_20260810_sequential\\outputs\\luna_max\\10.json"
+        }
+      ]
+    }
+  }
+}

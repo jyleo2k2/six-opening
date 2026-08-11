@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "네이버가 앤트로픽 간접 투자",
+  "one_line": {
+    "text": "네이버가 클로드 개발사 앤트로픽에 간접 투자했어요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "네이버 벤처스가 펀드를 통해 투자했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "네이버의 실리콘밸리 투자법인이 참여했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "투자 규모는 공개되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": ["S1"]
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "간접 투자",
+      "meaning": "펀드 같은 중간 통로를 거쳐 돈을 투자하는 방식이에요."
+    },
+    {
+      "term": "펀드",
+      "meaning": "여러 사람이나 기관의 돈을 모아 운용하는 자금이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "네이버는 무엇을 통해 투자했나요?",
+    "options": ["펀드", "주차 로봇", "고용보험"],
+    "answer_index": 0,
+    "explanation": "요약 패시지에 펀드를 통한 투자라고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "회사가 다른 기업에 간접 투자하는 이유는 무엇일까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

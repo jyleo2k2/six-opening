@@ -1,0 +1,70 @@
+{
+  "decision": "publish",
+  "headline": "포항 양식어류 27만7천 폐사",
+  "one_line": {
+    "text": "포항에서 양식어류 27만7000마리가 폐사했어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "고수온이 길어지며 많은 양식어류가 폐사했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "우리 생활과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "자료는 안정적 생산이 물가와 식품 공급에 중요하다고 봤어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "어종별 피해 수는 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "양식어류",
+      "meaning": "사람이 시설에서 기르는 물고기예요."
+    },
+    {
+      "term": "고수온",
+      "meaning": "바닷물의 온도가 평소보다 높은 상태예요."
+    },
+    {
+      "term": "폐사",
+      "meaning": "기르거나 관리하던 동물이 죽는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "폐사한 양식어류는 몇 마리인가요?",
+    "options": ["2만7000마리", "27만7000마리", "277만마리"],
+    "answer_index": 1,
+    "explanation": "뉴스 제목에 27만7000마리가 폐사했다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "바닷물 온도가 높을 때 양식장은 무엇을 확인해야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

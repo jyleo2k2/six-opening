@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "혈액에서 뇌질환 진단 단서",
+  "one_line": {
+    "text": "피 한 방울로 퇴행성 뇌질환을 가릴 단서가 발견됐어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "연구팀이 혈액을 이용한 진단 단서를 찾았어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "어디에 쓰일 수 있어?",
+      "sentences": [
+        {
+          "text": "자료는 퇴행성 뇌질환을 가려내는 단서라고 설명해요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "어떤 질환을 구별하는지는 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "퇴행성 뇌질환",
+      "meaning": "뇌 기능이 서서히 약해지는 질환을 뜻해요."
+    },
+    {
+      "term": "진단 단서",
+      "meaning": "질환이 있는지 판단하는 데 참고하는 신호예요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "연구 결과는 어디에 실렸나요?",
+    "options": ["국제학술지", "고용보험 안내서", "주차장 지도"],
+    "answer_index": 0,
+    "explanation": "요약 패시지에 신경과학 국제학술지 게재가 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "새 진단 단서를 확인하려면 어떤 연구가 더 필요할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

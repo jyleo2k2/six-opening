@@ -1,0 +1,57 @@
+{
+  "decision": "publish",
+  "headline": "청년 가입자 감소 47개월째",
+  "one_line": {
+    "text": "29세 이하 청년 고용보험 가입자가 47개월째 줄고 있어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "29세 이하 청년 고용보험 가입자가 47개월째 줄고 있어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "우리 생활과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "요약에는 29세 이하 고용이 점점 어려워진다고 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "기사 전체 내용과 더 자세한 수치는 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "청년 고용보험 가입자는 몇 개월째 줄고 있나요?",
+    "options": ["47개월째", "7개월째", "17개월째"],
+    "answer_index": 0,
+    "explanation": "뉴스 제목에 47개월째 줄었다고 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "청년 일자리 소식을 가족과 이야기한다면 무엇이 궁금한가요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

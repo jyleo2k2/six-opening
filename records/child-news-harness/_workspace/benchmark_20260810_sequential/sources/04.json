@@ -1,0 +1,25 @@
+{
+  "title": "현대차 ‘주차 로봇’ 아파트 첫 실증…최대 50% 더 수용",
+  "publisher": "서울신문",
+  "published_at": "2026-08-10T09:33:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "company",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "https://www.seoul.co.kr/news/economy/car/2026/08/10/20260810500232?wlog_tag3=naver",
+    "naver": "https://n.news.naver.com/mnews/article/081/0003669108?sid=101"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: 현대차 ‘주차 로봇’ 아파트 첫 실증…최대 50% 더 수용"
+    },
+    {
+      "id": "S2",
+      "kind": "fact",
+      "text": "네이버 검색 API 요약 패시지: 주차로봇 실증사업을 추진한다고 10일 밝혔다. 아파트에서 처음 실증하는 것으로 주차 공간 부족 및 혼잡... 현대차그룹은 더웨이브시티 지하 1층 주차장 내 53면의 별도 구역에서 현대위아 주차로봇 2세트를 운영한다...."
+    }
+  ]
+}

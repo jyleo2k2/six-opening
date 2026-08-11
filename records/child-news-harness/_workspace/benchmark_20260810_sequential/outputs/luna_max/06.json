@@ -1,0 +1,62 @@
+{
+  "decision": "publish",
+  "headline": "LX세미콘 차량용 MCU 공급 시작",
+  "one_line": {
+    "text": "LX세미콘이 차량용 MCU를 현대차·기아에 공급하기 시작했어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "LX세미콘이 차량용 MCU를 현대차·기아에 공급하기 시작했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사랑 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "차량 창문에 장애물이 감지되면 다시 열리는 기능이 소개됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "반도체의 다른 기능과 공급 규모는 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "MCU",
+      "meaning": "차량용 반도체의 한 종류예요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "LX세미콘은 어디에 차량용 반도체를 공급하나요?",
+    "options": ["현대차·기아", "학교", "병원"],
+    "answer_index": 0,
+    "explanation": "제목에 현대차·기아 공급 시작이 나와요.",
+    "source_ids": ["S1"]
+  },
+  "family_question": "차량용 반도체가 자동차에서 어떤 일을 하는지 궁금한가요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "decision": "publish",
+  "headline": "현대차 주차 로봇 아파트 실증",
+  "one_line": {
+    "text": "현대차그룹이 아파트 주차 로봇 실증을 추진한다고 밝혔어요.",
+    "source_ids": ["S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "현대차그룹이 아파트에서 첫 실증을 추진한다고 밝혔어요.",
+          "epistemic": "fact",
+          "source_ids": ["S1", "S2"]
+        },
+        {
+          "text": "제목에는 주차 공간을 최대 50% 더 수용한다고 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "현대위아 주차 로봇 2세트를 운영한다고 밝혔어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        },
+        {
+          "text": "실증 구역은 지하 1층 주차장의 53면이에요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "실증 기간은 패시지에서 확인되지 않아요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "실증",
+      "meaning": "실제 환경에서 기술을 시험하는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "주차 로봇 실증 구역은 어느 층에 있나요?",
+    "options": ["지하 1층", "지상 1층", "지상 2층"],
+    "answer_index": 0,
+    "explanation": "패시지에 지하 1층이라고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "주차 로봇을 아파트에서 시험할 때 무엇을 살펴봐야 할까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

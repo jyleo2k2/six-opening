@@ -1,0 +1,53 @@
+{
+  "configuration_label": "luna_max",
+  "model": "gpt-5.6-luna",
+  "thinking": "max",
+  "source_basis": "naver_search_api_title_description",
+  "files": {
+    "01.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "02.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "03.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "04.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "05.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "06.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "07.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "08.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "09.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    },
+    "10.json": {
+      "validation_passed": true,
+      "validation_errors": []
+    }
+  },
+  "summary": {
+    "generated": 10,
+    "validated": 10,
+    "failed": 0
+  }
+}

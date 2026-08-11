@@ -1,0 +1,71 @@
+{
+  "decision": "publish",
+  "headline": "네이버, 앤트로픽에 간접 투자",
+  "one_line": {
+    "text": "네이버가 클로드 개발사 앤트로픽에 간접 투자했어요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "네이버가 앤트로픽에 투자한 사실이 확인됐어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        },
+        {
+          "text": "앤트로픽은 AI 모델 클로드 개발사예요.",
+          "epistemic": "fact",
+          "source_ids": ["S1", "S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사는 어떻게 연결돼?",
+      "sentences": [
+        {
+          "text": "네이버 벤처스가 지난해 하반기 펀드를 통해 투자했어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "투자 규모는 공개되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": ["S1"]
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "간접 투자",
+      "meaning": "펀드 같은 중간 수단을 거쳐 투자하는 방식이에요."
+    },
+    {
+      "term": "펀드",
+      "meaning": "여러 사람이나 기관의 돈을 모아 운용하는 자금이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "앤트로픽이 개발한 AI 모델은 무엇인가요?",
+    "options": ["클로드", "주차 로봇", "MCU"],
+    "answer_index": 0,
+    "explanation": "제목과 패시지에 클로드라고 나와요.",
+    "source_ids": ["S1", "S2"]
+  },
+  "family_question": "회사가 간접 투자할 때 어떤 정보를 공개하면 좋을까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

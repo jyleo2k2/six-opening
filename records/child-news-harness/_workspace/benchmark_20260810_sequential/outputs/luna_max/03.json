@@ -1,0 +1,57 @@
+{
+  "decision": "publish",
+  "headline": "정부, 로봇 구매 확대",
+  "one_line": {
+    "text": "정부가 피지컬 AI 구매를 대폭 확대한다는 소식이에요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "정부가 피지컬 AI 구매를 대폭 확대한다는 소식이에요.",
+          "epistemic": "fact",
+          "source_ids": ["S1"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "산업과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "요약에는 액추에이터와 센서 연구개발 내용도 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "구매 규모와 시행 시기는 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [],
+  "fact_quiz": {
+    "question": "요약에 나온 공공 구매 대상은 무엇인가요?",
+    "options": ["휴머노이드·4족보행 로봇", "자동차", "선박"],
+    "answer_index": 0,
+    "explanation": "요약에 두 종류의 로봇 공공 구매가 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "이번 정책에서 가장 궁금한 로봇 분야는 무엇인가요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

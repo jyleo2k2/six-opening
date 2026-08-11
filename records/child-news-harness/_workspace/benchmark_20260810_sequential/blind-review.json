@@ -1,0 +1,55 @@
+{
+  "rubric": "API 제목·패시지 10건을 대상으로 한 상대 평가, 각 0~5점",
+  "aliases": {
+    "A": {
+      "scores": {
+        "source_fidelity": 5.0,
+        "child_readability": 3.5,
+        "context": 3.5,
+        "uncertainty": 5.0,
+        "engagement": 3.5
+      },
+      "note": "출처 경계를 가장 노골적으로 지키지만 ‘기사 제목은’ 같은 메타 문구가 반복되고 용어 풀이가 없다."
+    },
+    "B": {
+      "scores": {
+        "source_fidelity": 4.5,
+        "child_readability": 4.0,
+        "context": 3.5,
+        "uncertainty": 4.5,
+        "engagement": 4.0
+      },
+      "note": "안정적이고 간결하지만 설명 깊이와 용어 상자가 기사마다 들쭉날쭉하다."
+    },
+    "C": {
+      "scores": {
+        "source_fidelity": 4.5,
+        "child_readability": 4.5,
+        "context": 5.0,
+        "uncertainty": 5.0,
+        "engagement": 4.5
+      },
+      "note": "사실을 가장 풍부하게 연결하고 미확인 정보도 구체적으로 분리한다. 카드가 조금 길어질 수 있다."
+    },
+    "D": {
+      "scores": {
+        "source_fidelity": 4.5,
+        "child_readability": 5.0,
+        "context": 4.5,
+        "uncertainty": 4.5,
+        "engagement": 5.0
+      },
+      "note": "짧은 설명과 풍부한 용어 상자, 구체적인 가족 질문의 균형이 가장 좋다. 일부 관계 문장은 원문보다 한 단계 일반화된다."
+    },
+    "E": {
+      "scores": {
+        "source_fidelity": 4.5,
+        "child_readability": 4.5,
+        "context": 3.5,
+        "uncertainty": 4.5,
+        "engagement": 4.0
+      },
+      "note": "가장 빠르게 읽히는 요약형이지만 용어 풀이가 없고 기사 핵심 숫자나 연결 맥락을 덜 쓰는 경우가 있다."
+    }
+  }
+}

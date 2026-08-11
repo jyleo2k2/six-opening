@@ -1,0 +1,20 @@
+{
+  "decision": "publish",
+  "headline": "청년 고용보험 가입자 감소",
+  "one_line": { "text": "29세 이하 고용보험 가입자가 47개월째 줄었어요.", "source_ids": ["S1"] },
+  "cards": [
+    { "type": "what_happened", "title": "무슨 일이야?", "sentences": [
+      { "text": "29세 이하 청년의 고용보험 가입자가 계속 줄었어요.", "epistemic": "fact", "source_ids": ["S1"] }
+    ] },
+    { "type": "business_link", "title": "우리 생활과 무슨 관계야?", "sentences": [
+      { "text": "요약 패시지는 청년 고용이 어려워지고 있다고 전했어요.", "epistemic": "fact", "source_ids": ["S2"] }
+    ] },
+    { "type": "unknown", "title": "아직 모르는 점", "sentences": [
+      { "text": "가입자가 줄어든 정확한 이유는 자료만으로 알 수 없어요.", "epistemic": "unknown", "source_ids": [] }
+    ] }
+  ],
+  "word_box": [],
+  "fact_quiz": { "question": "줄었다고 나온 사람은 누구인가요?", "options": ["29세 이하 청년", "로봇 연구원", "주차장 이용자"], "answer_index": 0, "explanation": "제목은 29세 이하 청년의 가입자가 줄었다고 말해요.", "source_ids": ["S1"] },
+  "family_question": "일자리 관련 뉴스를 볼 때 어떤 자료를 더 확인하고 싶나요?",
+  "safety": { "contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false }
+}

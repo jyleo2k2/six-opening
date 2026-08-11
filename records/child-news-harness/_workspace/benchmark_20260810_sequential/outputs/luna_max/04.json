@@ -1,0 +1,62 @@
+{
+  "decision": "publish",
+  "headline": "현대차 아파트 주차로봇 첫 실증",
+  "one_line": {
+    "text": "현대차가 아파트에서 주차로봇 실증을 추진한다고 밝혔어요.",
+    "source_ids": ["S2"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "현대차가 아파트에서 주차로봇 실증을 추진한다고 밝혔어요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "회사랑 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "요약에는 주차로봇 2세트를 53면에서 운영한다고 나와요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "주차로봇 실증 결과와 실제 변화는 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "실증",
+      "meaning": "실제 아파트에서 기술을 시험하는 일이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "요약에는 주차로봇 몇 세트를 운영한다고 나왔나요?",
+    "options": ["2세트", "5세트", "53세트"],
+    "answer_index": 0,
+    "explanation": "요약에 주차로봇 2세트를 운영한다고 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "주차 공간을 바꾸는 기술에서 어떤 점을 살펴보고 싶나요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

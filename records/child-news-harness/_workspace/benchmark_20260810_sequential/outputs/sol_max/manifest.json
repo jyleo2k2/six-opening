@@ -1,0 +1,50 @@
+{
+  "configuration_label": "sol_max",
+  "files": [
+    {
+      "file": "01.json",
+      "validation_passed": true
+    },
+    {
+      "file": "02.json",
+      "validation_passed": true
+    },
+    {
+      "file": "03.json",
+      "validation_passed": true
+    },
+    {
+      "file": "04.json",
+      "validation_passed": true
+    },
+    {
+      "file": "05.json",
+      "validation_passed": true
+    },
+    {
+      "file": "06.json",
+      "validation_passed": true
+    },
+    {
+      "file": "07.json",
+      "validation_passed": true
+    },
+    {
+      "file": "08.json",
+      "validation_passed": true
+    },
+    {
+      "file": "09.json",
+      "validation_passed": true
+    },
+    {
+      "file": "10.json",
+      "validation_passed": true
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "failed_files": []
+  }
+}

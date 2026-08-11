@@ -1,0 +1,25 @@
+{
+  "title": "피 한방울로 '퇴행성 뇌질환' 가려낸다…진단 단서 발견",
+  "publisher": "뉴시스",
+  "published_at": "2026-08-10T10:00:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "science",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "https://www.newsis.com/view/NISX20260810_0003743497",
+    "naver": "https://n.news.naver.com/mnews/article/003/0014118816?sid=102"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: 피 한방울로 '퇴행성 뇌질환' 가려낸다…진단 단서 발견"
+    },
+    {
+      "id": "S2",
+      "kind": "fact",
+      "text": "네이버 검색 API 요약 패시지: 10일 한국뇌연구원에 따르면 윤종혁·김형준·천무경 박사 연구팀은 대구경북과학기술원(DGIST)... 연구 결과는 신경과학 분야 국제학술지 '액타 뉴로패솔로지카 커뮤니케이션즈' 최신호에 게재됐다. 천무경 박사는 \"여러..."
+    }
+  ]
+}

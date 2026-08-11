@@ -1,0 +1,25 @@
+{
+  "title": "네이버, 클로드 개발사 앤트로픽에 간접 투자…규모는 '비공개'",
+  "publisher": "뉴스1",
+  "published_at": "2026-08-10T10:21:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "company",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "https://www.news1.kr/it-science/internet-platform/6254732",
+    "naver": "https://n.news.naver.com/mnews/article/421/0009106595?sid=105"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: 네이버, 클로드 개발사 앤트로픽에 간접 투자…규모는 '비공개'"
+    },
+    {
+      "id": "S2",
+      "kind": "fact",
+      "text": "네이버 검색 API 요약 패시지: 네이버(035420)가 인공지능(AI) 모델 '클로드' 개발사 앤트로픽에 투자한 사실이 확인됐다. 10일 IT업계에 따르면 네이버의 실리콘밸리 투자법인 네이버 벤처스는 지난해 하반기 벤처캐피털(VC)이 운영하는 펀드를 통해..."
+    }
+  ]
+}

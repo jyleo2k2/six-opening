@@ -1,0 +1,66 @@
+{
+  "decision": "publish",
+  "headline": "정부가 피지컬 AI 구매 확대",
+  "one_line": {
+    "text": "정부가 피지컬 AI 구매를 크게 늘려요.",
+    "source_ids": ["S1"]
+  },
+  "cards": [
+    {
+      "type": "what_happened",
+      "title": "무슨 일이야?",
+      "sentences": [
+        {
+          "text": "휴머노이드와 4족보행 로봇을 공공 구매해요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "business_link",
+      "title": "산업과 무슨 관계야?",
+      "sentences": [
+        {
+          "text": "새만금에 로봇 파운드리를 구축할 계획이에요.",
+          "epistemic": "fact",
+          "source_ids": ["S2"]
+        }
+      ]
+    },
+    {
+      "type": "unknown",
+      "title": "아직 모르는 점",
+      "sentences": [
+        {
+          "text": "구매 규모와 일정은 현재 자료에서 확인되지 않았어요.",
+          "epistemic": "unknown",
+          "source_ids": []
+        }
+      ]
+    }
+  ],
+  "word_box": [
+    {
+      "term": "피지컬 AI",
+      "meaning": "현실 공간에서 기계의 움직임을 돕는 인공지능이에요."
+    },
+    {
+      "term": "파운드리",
+      "meaning": "다른 곳이 설계한 제품을 대신 만들어 주는 시설이에요."
+    }
+  ],
+  "fact_quiz": {
+    "question": "공공 구매 대상에 포함된 것은 무엇인가요?",
+    "options": ["4족보행 로봇", "전기 자전거", "태양광 패널"],
+    "answer_index": 0,
+    "explanation": "요약에 4족보행 로봇 공공 구매가 나와요.",
+    "source_ids": ["S2"]
+  },
+  "family_question": "공공기관에서 로봇을 어디에 활용할 수 있을까요?",
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

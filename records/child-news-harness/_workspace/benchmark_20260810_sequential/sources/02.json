@@ -1,0 +1,25 @@
+{
+  "title": "29세 이하 청년 고용보험 가입자 47개월째 줄어",
+  "publisher": "MBC",
+  "published_at": "2026-08-10T09:32:00.000Z",
+  "retrieved_at": "2026-08-10T10:42:25.363Z",
+  "audience": "10-13",
+  "scope": "economy",
+  "source_basis": "naver_search_api_title_description",
+  "source_links": {
+    "original": "https://imnews.imbc.com/news/2026/society/article/6843712_36918.html",
+    "naver": "https://n.news.naver.com/mnews/article/214/0001516995?sid=102"
+  },
+  "source_units": [
+    {
+      "id": "S1",
+      "kind": "fact",
+      "text": "뉴스 제목: 29세 이하 청년 고용보험 가입자 47개월째 줄어"
+    },
+    {
+      "id": "S2",
+      "kind": "attributed_claim",
+      "text": "네이버 검색 API 요약 패시지: 그러면서 \"청년 고용 감소는 불경기, 일자리 미스매치에 더해 기업의 경력직 위주 채용, AI 및 로봇 도입, 신참이나 기간제 해고 현상 때문\"이라며 \"29세 이하 고용이 점점 어려워지는 상황으로 청년 고용이 쉽게..."
+    }
+  ]
+}

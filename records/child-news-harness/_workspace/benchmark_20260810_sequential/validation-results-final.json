@@ -1,0 +1,415 @@
+{
+    "generated_at":  "2026-08-10T11:20:50.2646883Z",
+    "results":  {
+                    "sol_max":  [
+                                    {
+                                        "filename":  "01.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "02.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "03.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "04.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "05.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "06.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "07.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "08.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "09.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    },
+                                    {
+                                        "filename":  "10.json",
+                                        "pass":  true,
+                                        "exit_code":  0,
+                                        "errors":  [
+
+                                                   ]
+                                    }
+                                ],
+                    "sol_medium":  [
+                                       {
+                                           "filename":  "01.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "02.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "03.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "04.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "05.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "06.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "07.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "08.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "09.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       },
+                                       {
+                                           "filename":  "10.json",
+                                           "pass":  true,
+                                           "exit_code":  0,
+                                           "errors":  [
+
+                                                      ]
+                                       }
+                                   ],
+                    "terra_max":  [
+                                      {
+                                          "filename":  "01.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "02.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "03.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "04.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "05.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "06.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "07.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "08.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "09.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      },
+                                      {
+                                          "filename":  "10.json",
+                                          "pass":  true,
+                                          "exit_code":  0,
+                                          "errors":  [
+
+                                                     ]
+                                      }
+                                  ],
+                    "terra_medium":  [
+                                         {
+                                             "filename":  "01.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "02.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "03.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "04.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "05.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "06.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "07.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "08.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "09.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         },
+                                         {
+                                             "filename":  "10.json",
+                                             "pass":  true,
+                                             "exit_code":  0,
+                                             "errors":  [
+
+                                                        ]
+                                         }
+                                     ],
+                    "luna_max":  [
+                                     {
+                                         "filename":  "01.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "02.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "03.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "04.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "05.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "06.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "07.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "08.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "09.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     },
+                                     {
+                                         "filename":  "10.json",
+                                         "pass":  true,
+                                         "exit_code":  0,
+                                         "errors":  [
+
+                                                    ]
+                                     }
+                                 ]
+                }
+}
