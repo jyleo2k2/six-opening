@@ -1,5 +1,7 @@
 # web rules
 
+- 이 디렉터리의 `AGENTS.md`와 `CLAUDE.md`는 한 쌍이다. 둘 중 하나를 수정하면 같은 작업에서 짝 파일도 동일하게 수정하고 완료 전 비교한다.
+- 기능 작업은 가장 가까운 기능 가드가 가리키는 `SPEC.md`를 단일 명세로 사용한다. 관련 없는 전역 문서는 기본으로 읽지 않는다.
 - UI uses only the tokens and components in `../docs/디자인시스템.md`. Do not add arbitrary hex values or duplicate shared components.
 - Import from `shared/` only. Changes within it follow `shared/AGENTS.md`.
 - Use fixtures first. LLM access is server-only through `shared/llm` using the `openai` Responses API; external data passes only through `app/api/quote`, never direct client calls or `NEXT_PUBLIC_*` keys.
