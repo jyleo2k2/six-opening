@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { filterGeneratedText, SAFE_REFUSAL, takeCompleteSentences } from "../../../shared/llm/filter";
-import { streamOpenAiAnswer } from "../../../features/f10-chatbot/lib/openai";
+import { streamChatAnswer } from "../../../features/f10-chatbot/lib/openai";
 import { ChatContext, routeMessage } from "../../../features/f10-chatbot/lib/routing";
 
 export const runtime = "nodejs";
@@ -49,12 +49,14 @@ export async function POST(request: NextRequest) {
 
       try {
         send("status", "답변을 준비하는 중");
-        const response = await streamOpenAiAnswer(message, context);
+        const response = await streamChatAnswer(message, context);
         let buffer = "";
         let sentSentences = 0;
 
         for await (const chunk of response) {
-          buffer += chunk.choices[0]?.delta.content ?? "";
+          if (chunk.type !== "response.output_text.delta") continue;
+
+          buffer += chunk.delta;
           const sentences = takeCompleteSentences(buffer);
           buffer = sentences.remainder;
 

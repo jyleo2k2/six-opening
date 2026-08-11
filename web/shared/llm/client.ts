@@ -1,6 +1,9 @@
 import { config } from "dotenv";
-import { resolve } from "node:path";
 import OpenAI from "openai";
+import { resolve } from "node:path";
+
+export const LLM_MODEL = "gpt-5.6-luna";
+export const LLM_REASONING_EFFORT = "low" as const;
 
 let environmentLoaded = false;
 
@@ -11,7 +14,7 @@ function loadDevelopmentEnvironment() {
   config({ path: resolve(process.cwd(), "..", ".env"), quiet: true });
 }
 
-function getOpenAiEnvironment() {
+export function getLlmClient() {
   loadDevelopmentEnvironment();
 
   const apiKey = process.env.OPENAI_API_KEY;
@@ -19,18 +22,5 @@ function getOpenAiEnvironment() {
     throw new Error("OPENAI_API_KEY is not configured");
   }
 
-  const model = process.env.OPENAI_MODEL;
-  if (!model) {
-    throw new Error("OPENAI_MODEL is not configured");
-  }
-
-  return { apiKey, model };
-}
-
-export function getOpenAiClient() {
-  return new OpenAI({ apiKey: getOpenAiEnvironment().apiKey });
-}
-
-export function getOpenAiModel() {
-  return getOpenAiEnvironment().model;
+  return new OpenAI({ apiKey });
 }
