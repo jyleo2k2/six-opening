@@ -1,0 +1,73 @@
+<!-- @dsCard group="Colors" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>영웅 키움 — 컬러 토큰</title>
+<style>
+:root{
+  --navy:#001E5A; --magenta:#D70082; --gray:#BEBEBE; --bg:#F6F7FA;
+  --white:#FFFFFF; --up:#E8322E; --down:#1668DC; --ink:#1A2233;
+  --font:'Pretendard','Segoe UI','Malgun Gothic',sans-serif;
+}
+body{margin:0;padding:24px;background:var(--bg);font-family:var(--font);color:var(--ink);}
+h1{font-size:20px;margin:0 0 4px}
+.sub{font-size:12px;color:#6B7280;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sw{background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,30,90,.08)}
+.chipbox{height:64px}
+.meta{padding:10px 12px}
+.tok{font-size:13px;font-weight:600}
+.hex{font-size:12px;color:#6B7280;font-variant-numeric:tabular-nums}
+.use{font-size:11px;color:#6B7280;margin-top:4px;line-height:1.4}
+.rule{margin-top:20px;background:var(--white);border-left:4px solid var(--magenta);border-radius:12px;padding:14px 16px}
+.rule b{color:var(--magenta)}
+.rule p{margin:0;font-size:13px;line-height:1.6}
+.demo{margin-top:8px;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)}
+</style>
+</head>
+<body>
+<h1>컬러 토큰 — 이 8개 외 임의 색 금지</h1>
+<p class="sub">키움증권 공식 키컬러 기반. Tailwind config에 이 토큰만 등록한다.</p>
+
+<div class="grid">
+  <div class="sw"><div class="chipbox" style="background:#001E5A"></div>
+    <div class="meta"><div class="tok">navy</div><div class="hex">#001E5A</div>
+    <div class="use">헤더 · 핵심 정보 · 주요 카드 배경</div></div></div>
+
+  <div class="sw"><div class="chipbox" style="background:#D70082"></div>
+    <div class="meta"><div class="tok">magenta</div><div class="hex">#D70082</div>
+    <div class="use">CTA 버튼 · 선택 상태 · 강조</div></div></div>
+
+  <div class="sw"><div class="chipbox" style="background:#BEBEBE"></div>
+    <div class="meta"><div class="tok">gray</div><div class="hex">#BEBEBE</div>
+    <div class="use">구분선 · 비활성</div></div></div>
+
+  <div class="sw"><div class="chipbox" style="background:#1A2233"></div>
+    <div class="meta"><div class="tok">ink</div><div class="hex">#1A2233</div>
+    <div class="use">본문 텍스트</div></div></div>
+
+  <div class="sw"><div class="chipbox" style="background:#F6F7FA;border-bottom:1px solid #E5E7EB"></div>
+    <div class="meta"><div class="tok">bg</div><div class="hex">#F6F7FA</div>
+    <div class="use">화면 배경 (흰 카드가 뜨도록)</div></div></div>
+
+  <div class="sw"><div class="chipbox" style="background:#FFFFFF;border-bottom:1px solid #E5E7EB"></div>
+    <div class="meta"><div class="tok">white</div><div class="hex">#FFFFFF</div>
+    <div class="use">카드 · 콘텐츠 배경</div></div></div>
+
+  <div class="sw"><div class="chipbox" style="background:#E8322E"></div>
+    <div class="meta"><div class="tok">up</div><div class="hex">#E8322E</div>
+    <div class="use">상승 · 수익 (빨강)</div></div></div>
+
+  <div class="sw"><div class="chipbox" style="background:#1668DC"></div>
+    <div class="meta"><div class="tok">down</div><div class="hex">#1668DC</div>
+    <div class="use">하락 · 손실 (파랑)</div></div></div>
+</div>
+
+<div class="rule">
+  <p><b>등락색 반전 절대 금지.</b> 국내 증권앱 표준은 <b>상승=빨강 / 하락=파랑</b>이다. 해외식 초록·빨강을 쓰면 영웅문 사용자에게 정반대로 읽힌다. 수익률·등락에는 반드시 <code>up</code>/<code>down</code> + ▲▼ 기호를 함께 쓴다.</p>
+  <div class="demo"><span class="up">▲ +3.2%</span> &nbsp;&nbsp; <span class="down">▼ -1.8%</span></div>
+</div>
+</body>
+</html>

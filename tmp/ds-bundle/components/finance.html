@@ -1,0 +1,123 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>영웅 키움 — PriceText · ProgressBar · ConfidenceSelector</title>
+<style>
+:root{
+  --navy:#001E5A; --magenta:#D70082; --gray:#BEBEBE; --bg:#F6F7FA;
+  --white:#FFFFFF; --up:#E8322E; --down:#1668DC; --ink:#1A2233;
+  --font:'Pretendard','Segoe UI','Malgun Gothic',sans-serif;
+  --shadow:0 1px 3px rgba(0,30,90,.08);
+}
+body{margin:0;padding:24px;background:var(--bg);font-family:var(--font);color:var(--ink);}
+h1{font-size:20px;margin:0 0 20px}
+.sec{background:var(--white);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:14px}
+.sec h2{font-size:13px;color:#6B7280;margin:0 0 14px;font-weight:600}
+
+/* PriceText */
+.price{font-variant-numeric:tabular-nums;font-weight:700}
+.up{color:var(--up)} .down{color:var(--down)}
+.plist .r{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid #F0F1F5}
+.plist .r:last-child{border-bottom:0}
+.plist .nm{font-size:15px;font-weight:600}
+.plist .sub{font-size:12px;color:#9AA1AE;margin-top:2px}
+.plist .rt{text-align:right}
+.plist .big{font-size:17px}
+.plist .pct{font-size:13px;margin-top:2px}
+
+/* ProgressBar */
+.pb{height:9px;background:#EEF0F4;border-radius:999px;overflow:hidden}
+.pb i{display:block;height:100%;background:var(--magenta);border-radius:999px}
+.pb-navy i{background:var(--navy)}
+.pblabel{display:flex;justify-content:space-between;font-size:12px;color:#6B7280;margin-bottom:6px}
+
+/* 5축 게이지 */
+.axis{margin:14px 0}
+.axhead{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.axhead .l,.axhead .r{color:#9AA1AE}
+.axhead .on{color:var(--navy);font-weight:700}
+.axname{font-size:11px;color:#BEBEBE;margin-bottom:3px}
+
+/* ConfidenceSelector */
+.conf{display:flex;gap:8px}
+.conf button{flex:1;border:1.5px solid var(--gray);background:#fff;border-radius:12px;padding:12px 4px;font-family:var(--font);font-size:12px;color:var(--ink);cursor:pointer;line-height:1.5}
+.conf button .em{display:block;font-size:22px;margin-bottom:4px}
+.conf button.on{border-color:var(--magenta);background:#FFF0F8;color:var(--magenta);font-weight:700}
+.cap{text-align:center;font-size:12px;color:#9AA1AE;margin:10px 0 0}
+.q{font-size:15px;font-weight:600;margin:0 0 12px}
+.note{font-size:12px;color:#6B7280;line-height:1.6;margin:12px 0 0}
+</style>
+</head>
+<body>
+<h1>금융·스코어 컴포넌트</h1>
+
+<div class="sec">
+  <h2>PriceText — 등락색 + ▲▼ 자동. 상승=빨강 / 하락=파랑</h2>
+  <div class="plist">
+    <div class="r">
+      <div><div class="nm">삼성전자</div><div class="sub">3주 · 82,400원에 샀어</div></div>
+      <div class="rt"><div class="price big up">▲ 247,200</div><div class="price pct up">+3.2%</div></div>
+    </div>
+    <div class="r">
+      <div><div class="nm">카카오</div><div class="sub">5주 · 41,000원에 샀어</div></div>
+      <div class="rt"><div class="price big down">▼ 201,500</div><div class="price pct down">-1.8%</div></div>
+    </div>
+    <div class="r">
+      <div><div class="nm">현금</div></div>
+      <div class="rt"><div class="price big">412,000</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>ProgressBar — 시즌 진행</h2>
+  <div class="pblabel"><span>시즌 진행</span><span><b>3주차</b> / 4주</span></div>
+  <div class="pb"><i style="width:75%"></i></div>
+</div>
+
+<div class="sec">
+  <h2>성향 5축 게이지 — ProgressBar 병치 (레이더 차트는 만들지 않는다)</h2>
+  <div class="axis">
+    <div class="axname">집중–분산</div>
+    <div class="axhead"><span class="l">한우물형</span><span class="r on">골고루형</span></div>
+    <div class="pb pb-navy"><i style="width:72%"></i></div>
+  </div>
+  <div class="axis">
+    <div class="axname">속도</div>
+    <div class="axhead"><span class="l">진득이형</span><span class="r on">재빨리형</span></div>
+    <div class="pb pb-navy"><i style="width:81%"></i></div>
+  </div>
+  <div class="axis">
+    <div class="axname">신중함</div>
+    <div class="axhead"><span class="l on">직진형</span><span class="r">돌다리형</span></div>
+    <div class="pb pb-navy"><i style="width:34%"></i></div>
+  </div>
+  <div class="axis">
+    <div class="axname">손실 대응</div>
+    <div class="axhead"><span class="l">버티기형</span><span class="r on">갈아타기형</span></div>
+    <div class="pb pb-navy"><i style="width:58%"></i></div>
+  </div>
+  <div class="axis">
+    <div class="axname">탐험심</div>
+    <div class="axhead"><span class="l">익숙함형</span><span class="r on">개척자형</span></div>
+    <div class="pb pb-navy"><i style="width:88%"></i></div>
+  </div>
+  <p class="note">양끝 라벨을 항상 병기해 <b>우열이 없음</b>을 보인다. 점수·등급·"몇 점" 표현 금지.</p>
+</div>
+
+<div class="sec">
+  <h2>ConfidenceSelector — 4단계 탭 (슬라이더 아님)</h2>
+  <p class="q">키웅이가 궁금해해 — 얼마나 자신 있어?</p>
+  <div class="conf">
+    <button><span class="em">😕</span>잘 모르겠어</button>
+    <button class="on"><span class="em">🙂</span>조금</button>
+    <button><span class="em">😄</span>꽤</button>
+    <button><span class="em">🤩</span>완전</button>
+  </div>
+  <p class="cap">정답은 없어!</p>
+  <p class="note">"정답은 없어!" 캡션은 <b>항상 붙는다</b> — 채점이 아니라는 구조적 표시다.</p>
+</div>
+</body>
+</html>
