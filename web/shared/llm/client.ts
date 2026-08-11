@@ -1,8 +1,6 @@
 import { config } from "dotenv";
-import { GoogleGenAI } from "@google/genai";
 import { resolve } from "node:path";
-
-export const GEMINI_MODEL = "gemini-3.5-flash-lite";
+import OpenAI from "openai";
 
 let environmentLoaded = false;
 
@@ -13,13 +11,26 @@ function loadDevelopmentEnvironment() {
   config({ path: resolve(process.cwd(), "..", ".env"), quiet: true });
 }
 
-export function getGeminiClient() {
+function getOpenAiEnvironment() {
   loadDevelopmentEnvironment();
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not configured");
+    throw new Error("OPENAI_API_KEY is not configured");
   }
 
-  return new GoogleGenAI({ apiKey });
+  const model = process.env.OPENAI_MODEL;
+  if (!model) {
+    throw new Error("OPENAI_MODEL is not configured");
+  }
+
+  return { apiKey, model };
+}
+
+export function getOpenAiClient() {
+  return new OpenAI({ apiKey: getOpenAiEnvironment().apiKey });
+}
+
+export function getOpenAiModel() {
+  return getOpenAiEnvironment().model;
 }
