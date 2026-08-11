@@ -1,102 +1,210 @@
-export type ChatRoute = "faq" | "refusal" | "safety" | "fallback";
+export type ChatRoute =
+  | "faq"
+  | "context"
+  | "refusal"
+  | "safety"
+  | "outOfScope"
+  | "fallback";
+
+export type ChatContext = {
+  screen: "home" | "stock" | "order" | "archive";
+  stockName?: string;
+  quantity?: number;
+  unitPrice?: number;
+};
 
 export type ChatReply = {
   route: ChatRoute;
   text: string;
+  steps: readonly string[];
 };
 
 const ANSWERS = {
-  per: "PER\uc740 \ud68c\uc0ac \uc774\uc775\uacfc \uc8fc\uac00\ub97c \ube44\uad50\ud574 \ubcf4\ub294 \uc22b\uc790\uc57c. \uac19\uc740 \uc5c5\uc885 \ud68c\uc0ac\ub07c\ub9ac \ud568\uaed8 \ubcf4\uba74 \uc774\ud574\ud558\uae30 \uc26c\uc6cc.",
-  market: "\uc2dc\uc7a5\uac00\ub294 \uc9c0\uae08 \uc2dc\uc7a5\uc5d0\uc11c \ubc14\ub85c \uac70\ub798\ub418\ub294 \uac00\uaca9\uc73c\ub85c \uc8fc\ubb38\ud558\ub294 \ubc29\uc2dd\uc774\uc57c. \uac00\uaca9\uc774 \ub2ec\ub77c\uc9c8 \uc218 \uc788\ub2e4\ub294 \uc810\uc740 \uc8fc\ubb38 \uc804\uc5d0 \ud655\uc778\ud574 \ubd10.",
-  order: "\uc8fc\ubb38 \ud654\uba74\uc5d0\uc11c\ub294 \uc218\ub7c9\uacfc \uc608\uc0c1 \uae08\uc561\uc744 \uba3c\uc800 \ud655\uc778\ud574. \uadf8\ub2e4\uc74c \ub124\uac00 \uace0\ub978 \uc774\uc720\ub97c \uae30\ub85d\ud558\uba74 \ub3fc.",
-  profit: "\uc218\uc775\ub960\uc740 \ucc98\uc74c \uae08\uc561\uacfc \uc9c0\uae08 \uae08\uc561\uc774 \uc5bc\ub9c8\ub098 \ub2ec\ub77c\uc84c\ub294\uc9c0 \ube44\uc728\ub85c \ubcf4\ub294 \ubc29\uc2dd\uc774\uc57c. \uc22b\uc790\ub9cc \ubcf4\uae30\ubcf4\ub2e4 \ud22c\uc790 \uc774\uc720\ub3c4 \ud568\uaed8 \ub3cc\uc544\ubcf4\uba74 \uc88b\uc544.",
-  fallback: "\uad81\uae08\ud55c \ud654\uba74\uc774\ub098 \uc6a9\uc5b4\ub97c \uc870\uae08 \ub354 \uc790\uc138\ud788 \ub9d0\ud574\uc904\ub798? \ud0a4\uc6c5\uc774\ub294 \ud22c\uc790 \uae30\ucd08\uc640 \uc11c\ube44\uc2a4 \uc0ac\uc6a9\ubc95\uc744 \uac19\uc774 \ubcfc \uc218 \uc788\uc5b4.",
+  per: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자야. 같은 업종 회사끼리 함께 보면 이해하기 쉬워.",
+  etf: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이야. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어.",
+  market: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이야. 주문을 넣는 순간의 가격과 조금 달라질 수 있어.",
+  limit: "지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이야. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어.",
+  profit: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이야. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아.",
+  dividend: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해. 모든 회사가 배당하는 것은 아니야.",
+  order: "주문 화면에서는 수량과 예상 금액을 먼저 확인해. 그다음 네가 고른 이유를 기록하면 돼.",
+  record: "기록에서는 고른 이유와 확신도를 남길 수 있어. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거야.",
+  archive: "아카이브에서는 네가 남긴 거래와 생각을 다시 볼 수 있어. 점수표가 아니라 네 투자 스타일을 관찰하는 기록이야.",
+  company: "종목 상세 화면에는 그 회사가 하는 일과 공개된 과거 정보가 있어. 회사 설명과 차트를 차례로 보면 돼.",
 } as const;
 
 const RECOMMENDATION_PATTERNS = [
-  "\uC885\uBAA9\uC0AC",
-  "\ubb50 \uc0ac",
-  "\ucd94\ucc9c",
-  "\ub9e4\uc218\ud574",
-  "\ub9e4\ub3c4\ud574",
-  "\uc624\ub97c\uae4c",
-  "\ub0b4\ub9b4\uae4c",
-  "\ubaa9\ud45c\uac00",
-  "\uc190\uc808\uac00",
-  "\uc218\uc775\ub960 \uc804\ub9dd",
+  "종목사",
+  "뭐사",
+  "추천",
+  "매수해",
+  "매도해",
+  "오를까",
+  "내릴까",
+  "목표가",
+  "손절가",
+  "수익률전망",
+  "언제사",
+  "언제팔",
 ];
 
-const SAFETY_PATTERNS = ["\uc8fc\ubbfc\ubc88\ud638", "\ube44\ubc00\ubc88\ud638", "\uc695", "\uc8fd\uace0", "\uc790\ud574"];
+const PERSONAL_INFO_PATTERNS = ["주민번호", "비밀번호", "전화번호", "주소", "계좌번호"];
+const CRISIS_PATTERNS = ["자해", "죽고싶", "죽고 싶", "해치고싶", "해치고 싶"];
+const HARMFUL_PATTERNS = ["욕", "협박", "때리고", "죽여"];
+const OUT_OF_SCOPE_PATTERNS = ["숙제", "게임", "날씨", "노래", "영화"];
 
-export function routeMessage(input: string): ChatReply {
-  const message = input.trim().replaceAll(" ", "").toLowerCase();
+function normalize(input: string) {
+  return input.trim().replaceAll(" ", "").toLowerCase();
+}
 
-  if (SAFETY_PATTERNS.some((pattern) => message.includes(pattern))) {
-    return {
-      route: "safety",
-      text: "\uac1c\uc778\uc815\ubcf4\ub294 \uc785\ub825\ud558\uc9c0 \uc54a\uc544\ub3c4 \ub3fc. \ub9ce\uc774 \ud754\ub4e4\ub9ac\uac70\ub098 \uc704\ud5d8\ud558\ub2e4\uace0 \ub290\uaef4\uc9c0\uba74 \uac00\uae4c\uc6b4 \ubcf4\ud638\uc790\ub098 \ubbff\uc744 \uc218 \uc788\ub294 \uc5b4\ub978\uc5d0\uac8c \ubc14\ub85c \uc54c\ub824 \uc918.",
-    };
+function reply(route: ChatRoute, text: string, steps: readonly string[] = []) {
+  return { route, text, steps };
+}
+
+function formatWon(value: number) {
+  return `${value.toLocaleString("ko-KR")}원`;
+}
+
+function getContextReply(message: string, context: ChatContext): ChatReply | null {
+  if (context.screen === "order" && context.quantity && context.unitPrice) {
+    if (["예상금액", "얼마", "계산", "몇주", "수량"].some((word) => message.includes(word))) {
+      const total = context.quantity * context.unitPrice;
+      return reply(
+        "context",
+        `지금 화면의 ${context.quantity}주와 1주 ${formatWon(context.unitPrice)}을 곱하면 예상 금액은 ${formatWon(total)}이야. 실제 주문 전에는 화면의 최종 금액을 한 번 더 확인해 줘.`,
+        ["현재 주문 수량 확인", "표시 가격으로 계산"],
+      );
+    }
   }
 
-  if (message.includes("per")) return { route: "faq", text: ANSWERS.per };
-  if (message.includes("\uc2dc\uc7a5\uac00") || message.includes("\uc9c0\uc815\uac00")) return { route: "faq", text: ANSWERS.market };
-  if (message.includes("\uc8fc\ubb38") || message.includes("\ub9e4\uc218\uc5b4\ub5bb\uac8c")) {
-    return { route: "faq", text: ANSWERS.order };
+  if (context.screen === "stock" && ["이회사", "무슨회사", "회사뭐", "이종목"].some((word) => message.includes(word))) {
+    return reply(
+      "context",
+      `${context.stockName ?? "이 종목"} 상세 화면에는 회사가 하는 일과 공개된 과거 정보가 있어. 미래에 오를지보다 회사 설명과 최근 공개 자료를 먼저 살펴보면 좋아.`,
+      ["현재 종목 확인", "종목 설명 카드 안내"],
+    );
   }
-  if (message.includes("\uc218\uc775\ub960\uc774\ubb50") || message.includes("\uc218\uc775\ub960\ub73b")) {
-    return { route: "faq", text: ANSWERS.profit };
+
+  if (context.screen === "archive" && ["지난기록", "기록어떻게", "아카이브"].some((word) => message.includes(word))) {
+    return reply("context", ANSWERS.archive, ["현재 아카이브 화면 확인"]);
+  }
+
+  return null;
+}
+
+export function routeMessage(input: string, context: ChatContext): ChatReply {
+  const message = normalize(input);
+
+  if (CRISIS_PATTERNS.some((pattern) => message.includes(pattern))) {
+    return reply(
+      "safety",
+      "지금 혼자 견디지 않아도 돼. 가까운 보호자나 믿을 수 있는 어른에게 바로 알려 줘. 급하게 위험하다고 느껴지면 112나 119에 도움을 요청해 줘.",
+      ["안전 안내"],
+    );
+  }
+
+  if (PERSONAL_INFO_PATTERNS.some((pattern) => message.includes(pattern))) {
+    return reply(
+      "safety",
+      "개인정보는 채팅에 입력하지 않아도 돼. 계좌나 비밀번호처럼 중요한 정보는 보호자와 함께 앱의 공식 화면에서만 확인해 줘.",
+      ["개인정보 보호 안내"],
+    );
+  }
+
+  if (HARMFUL_PATTERNS.some((pattern) => message.includes(pattern))) {
+    return reply("safety", "서로 다치게 하는 말은 여기서 다루기 어려워. 투자 화면이나 금융 기초가 궁금하면 다시 물어봐 줘.", ["안전 안내"]);
   }
 
   if (RECOMMENDATION_PATTERNS.some((pattern) => message.includes(pattern))) {
-    return {
-      route: "refusal",
-      text: "\ud2b9\uc815 \uc885\ubaa9\uc744 \uace0\ub974\uac70\ub098 \uc0ac\uace0\ud314 \uc2dc\uc810\uc744 \uc815\ud574 \uc8fc\uc9c0\ub294 \ubabb\ud574. \ub300\uc2e0 \ud68c\uc0ac \uc815\ubcf4\uc640 \uc704\ud5d8, \uadf8\ub9ac\uace0 \ub124\uac00 \ud655\uc778\ud560 \uae30\uc900\uc744 \uac19\uc774 \uc0b4\ud3b4\ubcfc \uc218 \uc788\uc5b4.",
-    };
+    return reply(
+      "refusal",
+      "특정 종목을 고르거나 사고팔 시점을 정해 줄 수는 없어. 대신 회사가 하는 일, 위험, 그리고 네가 확인할 기준은 함께 볼 수 있어. 🐻",
+      ["투자 권유 차단", "학습 기준 안내"],
+    );
   }
 
-  return { route: "fallback", text: ANSWERS.fallback };
+  if (OUT_OF_SCOPE_PATTERNS.some((pattern) => message.includes(pattern))) {
+    return reply("outOfScope", "나는 이 서비스의 사용법과 투자 기초 이야기만 도와줄 수 있어. 화면이나 금융 용어가 궁금하면 물어봐 줘. 🐻", ["도메인 안내"]);
+  }
+
+  const contextReply = getContextReply(message, context);
+  if (contextReply) return contextReply;
+
+  if (message.includes("per")) return reply("faq", ANSWERS.per, ["용어 사전 확인"]);
+  if (message.includes("etf")) return reply("faq", ANSWERS.etf, ["용어 사전 확인"]);
+  if (message.includes("시장가")) return reply("faq", ANSWERS.market, ["용어 사전 확인"]);
+  if (message.includes("지정가")) return reply("faq", ANSWERS.limit, ["용어 사전 확인"]);
+  if (message.includes("배당")) return reply("faq", ANSWERS.dividend, ["용어 사전 확인"]);
+  if (message.includes("수익률")) return reply("faq", ANSWERS.profit, ["용어 사전 확인"]);
+  if (message.includes("주문") || message.includes("매수어떻게")) return reply("faq", ANSWERS.order, ["사용법 FAQ 확인"]);
+  if (message.includes("기록") || message.includes("확신")) return reply("faq", ANSWERS.record, ["사용법 FAQ 확인"]);
+  if (message.includes("회사")) return reply("faq", ANSWERS.company, ["종목 설명 안내"]);
+
+  return reply(
+    "fallback",
+    "나는 투자 기초와 서비스 사용법을 도와줄 수 있어. 예를 들어 ‘PER이 뭐야?’, ‘주문 전에 뭘 확인해?’처럼 물어봐 줘. 🐻",
+    ["질문 범위 확인"],
+  );
 }
 
-export type ProactiveSignal =
-  | "switch"
-  | "back"
-  | "quantity"
-  | "dwell"
-  | "amend"
-  | "revisit";
+export type ProactiveSignal = "switch" | "dwell" | "lossRevisit";
+
+export type CancelledOrder = { side: "buy" | "sell"; at: number };
+export type StockDetailEntry = { symbol: string; at: number };
+
+export type AnxietySignalInput = {
+  now: number;
+  currentScreen: ChatContext["screen"];
+  screenEnteredAt?: number;
+  cancelledOrders: readonly CancelledOrder[];
+  realizedLoss?: { symbol: string; soldAt: number; rate: number };
+  stockDetailEntries: readonly StockDetailEntry[];
+};
+
+const FIVE_MINUTES = 5 * 60 * 1000;
+
+function hasAlternatingCancellationTriplet(cancelledOrders: readonly CancelledOrder[]) {
+  const recent = cancelledOrders.slice(-3);
+  return recent.length === 3 && recent[0].side !== recent[1].side && recent[1].side !== recent[2].side;
+}
+
+export function detectAnxietySignals(input: AnxietySignalInput): ProactiveSignal[] {
+  const signals: ProactiveSignal[] = [];
+
+  if (hasAlternatingCancellationTriplet(input.cancelledOrders)) signals.push("switch");
+
+  if (
+    (input.currentScreen === "order" || input.currentScreen === "stock") &&
+    input.screenEnteredAt !== undefined &&
+    input.now - input.screenEnteredAt > FIVE_MINUTES
+  ) {
+    signals.push("dwell");
+  }
+
+  const loss = input.realizedLoss;
+  if (loss && loss.rate <= -10 && input.now >= loss.soldAt && input.now - loss.soldAt <= FIVE_MINUTES) {
+    const revisitCount = input.stockDetailEntries.filter(
+      (entry) => entry.symbol === loss.symbol && entry.at >= loss.soldAt && entry.at <= input.now,
+    ).length;
+    if (revisitCount >= 4) signals.push("lossRevisit");
+  }
+
+  return signals;
+}
 
 export const PROACTIVE_SCRIPTS: Record<
   ProactiveSignal,
-  { label: string; text: string; guide: string }
+  { label: string; text: string }
 > = {
   switch: {
-    label: "\ub9e4\uc218\u00b7\ub9e4\ub3c4 \ubc18\ubcf5 \uc804\ud658",
-    text: "\ub9e4\uc218\uc640 \ub9e4\ub3c4 \ucc28\uc774\uac00 \ud5f7\uac08\ub824?",
-    guide: "\ub9e4\uc218\ub294 \ubcf4\uc720 \uc218\ub7c9\uc744 \ub298\ub9ac\uace0, \ub9e4\ub3c4\ub294 \ubcf4\uc720 \uc218\ub7c9\uc744 \uc904\uc774\ub294 \uc8fc\ubb38\uc774\uc57c.",
-  },
-  back: {
-    label: "\uc8fc\ubb38 \ud655\uc778 \ub4a4\ub85c\uac00\uae30 \ubc18\ubcf5",
-    text: "\uc8fc\ubb38 \uc804\uc5d0 \ud655\uc778\ud558\uace0 \uc2f6\uc740 \uac8c \uc788\uc5b4?",
-    guide: "\uc8fc\ubb38 \ub2e8\uacc4\uc5d0\uc11c\ub294 \uc218\ub7c9\uacfc \uc608\uc0c1 \uae08\uc561\uc744 \uba3c\uc800 \ud655\uc778\ud558\uba74 \ub3fc.",
-  },
-  quantity: {
-    label: "\uc8fc\ubb38\uc218\ub7c9 \ubc18\ubcf5 \uc218\uc815",
-    text: "\uba87 \uc8fc \uc0b4\uc9c0 \uacc4\uc0b0\ud574\ubcfc\uae4c?",
-    guide: "\uc218\ub7c9\uc5d0 \ud604\uc7ac\uac00\ub97c \uacf1\ud558\uba74 \uc608\uc0c1 \uc8fc\ubb38 \uae08\uc561\uc744 \ud655\uc778\ud560 \uc218 \uc788\uc5b4.",
+    label: "매수·매도 취소 반복",
+    text: "매수와 매도 차이가 헷갈려?",
   },
   dwell: {
-    label: "\uc8fc\ubb38\u00b7\uc0c1\uc138 \ud654\uba74 \uc7a5\uae30 \uccb4\ub958",
-    text: "\uc5b4\ub514\uc5d0\uc11c \ub9c9\ud614\ub294\uc9c0 \uac19\uc774 \ubcfc\uae4c?",
-    guide: "\ud604\uc7ac \ud654\uba74\uc758 \ud56d\ubaa9 \ud558\ub098\ub97c \ub204\ub974\uba74 \uad00\ub828 \uc124\uba85\uc744 \ubcfc \uc218 \uc788\uc5b4.",
+    label: "주문·상세 화면 5분 초과 체류",
+    text: "어디에서 막혔는지 같이 볼까?",
   },
-  amend: {
-    label: "\ub9e4\ub9e4 \ucde8\uc18c\u00b7\uc815\uc815 \ubc18\ubcf5",
-    text: "\uc8fc\ubb38\uc774 \ub9c8\uc74c\ucc98\ub7fc \uc548 \ub3fc? \uac19\uc774 \ubcfc\uae4c?",
-    guide: "\ucde8\uc18c\uc640 \uc815\uc815\uc740 \uc8fc\ubb38 \uc0c1\ud0dc\ub97c \ub2e4\uc2dc \ud655\uc778\ud558\ub294 \uacfc\uc815\uc774\uc57c.",
-  },
-  revisit: {
-    label: "\ud3c9\uac00\uc190\uc2e4 \ub4a4 3\ucc28\ub840 \uc7ac\uc811\uc18d",
-    text: "\uad1c\ucc2e\uc544? \uc624\ub298 \uc2dc\uc7a5\uc774 \uc880 \ucd9c\ub801\uc600\uc9c0.",
-    guide: "\uae30\ub85d \ud654\uba74\uc5d0\uc11c \uc218\uce58\uc640 \ud22c\uc790 \uc774\uc720\ub97c \ucc28\ubd84\ud788 \ud655\uc778\ud574 \ubd10\ub3c4 \uc88b\uc544.",
+  lossRevisit: {
+    label: "손실 실현 종목 반복 조회",
+    text: "방금 본 종목이 계속 신경 쓰여?",
   },
 };
