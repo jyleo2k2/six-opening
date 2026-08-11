@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+<title>기록 완료</title>
+<rect width="390" height="844" fill="#FFFFFF"/>
+<g font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, Arial, sans-serif">
+<!-- phone outer -->
+<rect x="7" y="7" width="376" height="830" rx="54" fill="#D5D7DB"/>
+<rect x="15" y="15" width="360" height="814" rx="48" fill="#111"/>
+<clipPath id="screenClip"><rect x="19" y="19" width="352" height="806" rx="43"/></clipPath>
+<g clip-path="url(#screenClip)">
+<rect x="19" y="19" width="352" height="806" fill="#F4F5F8"/>
+<!-- status -->
+<rect x="19" y="19" width="352" height="78" fill="#082B6F"/>
+<text x="50" y="54" font-size="13" font-weight="700" fill="#fff">9:41</text>
+<rect x="145" y="31" width="100" height="32" rx="16" fill="#000"/>
+<g fill="#fff">
+<rect x="291" y="48" width="3" height="6" rx="1"/>
+<rect x="297" y="44" width="3" height="10" rx="1"/>
+<rect x="303" y="40" width="3" height="14" rx="1"/>
+<path d="M314 45q10-9 20 0M317 49q7-6 14 0M321 53q3-3 6 0" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+<rect x="340" y="41" width="22" height="11" rx="3" fill="none" stroke="#fff" stroke-width="1.3"/>
+<rect x="362" y="44" width="2" height="5" rx="1"/>
+</g>
+<rect x="19" y="19" width="352" height="806" fill="#082B6F"/><text x="50" y="54" font-size="13" font-weight="700" fill="#fff">9:41</text>
+<rect x="145" y="31" width="100" height="32" rx="16" fill="#000"/>
+<circle cx="195" cy="235" r="44" fill="#163B7B" stroke="#fff" stroke-dasharray="2 3"/>
+<text x="195" y="239" text-anchor="middle" font-size="11" fill="#fff">키움이</text>
+<text x="195" y="320" text-anchor="middle" font-size="24" font-weight="800" fill="#fff">기록 완료!</text>
+<text x="195" y="350" text-anchor="middle" font-size="12" fill="#D7E2F8">AI가 기억해둘게.</text>
+<text x="195" y="371" text-anchor="middle" font-size="12" fill="#D7E2F8">나중에 투자 기록에서 다시 만나자</text>
+<rect x="48" y="405" width="294" height="108" rx="13" fill="#173D7E"/>
+<text x="64" y="436" font-size="11" fill="#C5D4F1">삼성전자</text>
+<text x="326" y="436" text-anchor="end" font-size="11" font-weight="700" fill="#fff">2주 매수</text>
+<text x="64" y="466" font-size="11" fill="#C5D4F1">체결 금액</text>
+<text x="326" y="466" text-anchor="end" font-size="11" font-weight="700" fill="#fff">146,800원</text>
+<text x="64" y="496" font-size="11" fill="#C5D4F1">기록한 이유</text>
+<text x="326" y="496" text-anchor="end" font-size="11" font-weight="700" fill="#fff">좋은 뉴스를 봐서</text>
+<rect x="48" y="548" width="139" height="48" rx="10" fill="none" stroke="#fff" stroke-width="1.5"/>
+<text x="117.5" y="578" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">종목 더 보기</text>
+<rect x="203" y="548" width="139" height="48" rx="10" fill="#E6007E"/>
+<text x="272.5" y="578" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">홈으로</text>
+<rect x="143" y="810" width="104" height="5" rx="3" fill="#fff"/></g></g></svg>
