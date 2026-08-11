@@ -32,6 +32,8 @@ const COPY = {
   greeting:
     "\uc548\ub155, \ub098\ub294 \ud0a4\uc6c5\uc774\uc57c. \ud22c\uc790 \uae30\ucd08\uc640 \ud654\uba74 \uc0ac\uc6a9\ubc95\uc744 \ud568\uaed8 \ubcfc \uc218 \uc788\uc5b4.",
   recommended: "\ucd94\ucc9c \uc9c8\ubb38",
+  aiNotice: "\ud0a4\uc6c5\uc774\ub294 AI \ub3c4\uc6b0\ubbf8\uc57c",
+  status: "\ucc98\ub9ac \uc0c1\ud0dc",
   input: "\uad81\uae08\ud55c \uac83\uc744 \uc785\ub825\ud574 \uc918",
   send: "\ubcf4\ub0b4\uae30",
   avatar: "\uacf0",
@@ -90,10 +92,21 @@ export function F10ChatbotDemo() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
+  const [isLoading, setIsLoading] = useState(false);
   const [signal, setSignal] = useState<ProactiveSignal | null>(null);
   const [mutedSignals, setMutedSignals] = useState<ProactiveSignal[]>([]);
 
   const currentScreen = SCREENS[screen];
+  const chatContext = useMemo(
+    () => ({
+      screen,
+      stockName: screen === "stock" ? "\ud0a4\uc6c5\ud14c\ud06c" : undefined,
+      quantity: screen === "order" ? 10 : undefined,
+      unitPrice: screen === "order" ? 12500 : undefined,
+    }),
+    [screen],
+  );
   const visibleSignals = useMemo(
     () =>
       (Object.keys(PROACTIVE_SCRIPTS) as ProactiveSignal[]).filter(
@@ -102,30 +115,80 @@ export function F10ChatbotDemo() {
     [mutedSignals],
   );
 
-  function ask(question: string) {
-    const reply = routeMessage(question);
+  async function ask(question: string) {
+    const reply = routeMessage(question, chatContext);
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
-      { role: "assistant", text: reply.text },
     ]);
     setIsOpen(true);
     setInput("");
+    setStatus(reply.steps.at(-1) ?? "\ub2f5\ubcc0 \uc900\ube44 \uc644\ub8cc");
+
+    if (reply.route !== "fallback") {
+      setMessages((current) => [...current, { role: "assistant", text: reply.text }]);
+      return;
+    }
+
+    setIsLoading(true);
+    setMessages((current) => [...current, { role: "assistant", text: "" }]);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: question, context: chatContext }),
+      });
+
+      if (!response.ok || !response.body) throw new Error("Chat request failed");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let pending = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        pending += decoder.decode(value, { stream: true });
+        const events = pending.split("\n\n");
+        pending = events.pop() ?? "";
+
+        for (const item of events) {
+          const type = item.match(/^event: (.+)$/m)?.[1];
+          const data = item.match(/^data: (.+)$/m)?.[1];
+          if (!type || !data) continue;
+          const value = JSON.parse(data) as string;
+
+          if (type === "status") {
+            setStatus(value);
+          }
+          if (type === "text") {
+            setMessages((current) => {
+              const last = current.at(-1);
+              if (!last || last.role !== "assistant") return current;
+              return [...current.slice(0, -1), { ...last, text: `${last.text}${value}` }];
+            });
+          }
+        }
+      }
+    } catch {
+      setMessages((current) => {
+        const last = current.at(-1);
+        if (!last || last.role !== "assistant") return current;
+        return [
+          ...current.slice(0, -1),
+          { role: "assistant", text: "키웅이가 잠깐 낮잠 중이야! 조금 있다 다시 물어봐 줘 🐻" },
+        ];
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (input.trim()) ask(input);
-  }
-
-  function explainSignal() {
-    if (!signal) return;
-    setMessages((current) => [
-      ...current,
-      { role: "assistant", text: PROACTIVE_SCRIPTS[signal].guide },
-    ]);
-    setSignal(null);
-    setIsOpen(true);
+    if (input.trim() && !isLoading) void ask(input);
   }
 
   function dismissSignal() {
@@ -188,7 +251,7 @@ export function F10ChatbotDemo() {
           <section className="mt-6 rounded-2xl bg-bg p-4">
             <p className="text-xs font-semibold text-navy">{COPY.signalDemo}</p>
             <p className="mt-1 text-xs leading-5 text-ink/70">
-              {COPY.signalDescription}
+              실제 주문 UI 이벤트와 연결하기 전, 3가지 불안행동 신호를 여기에서 확인할 수 있어.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {visibleSignals.map((key) => (
@@ -230,14 +293,7 @@ export function F10ChatbotDemo() {
               </p>
             </div>
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-xs font-semibold">
-            <button
-              className="rounded-xl bg-bg px-2 py-3 text-navy"
-              onClick={explainSignal}
-              type="button"
-            >
-              {COPY.explain}
-            </button>
+          <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-semibold">
             <button
               className="rounded-xl bg-navy px-2 py-3 text-white"
               onClick={() => {
@@ -277,6 +333,7 @@ export function F10ChatbotDemo() {
             <div>
               <p className="text-base font-bold text-navy">{COPY.title}</p>
               <p className="mt-0.5 text-xs text-ink/60">{COPY.subtitle}</p>
+              <p className="mt-1 text-xs text-ink/60">{COPY.aiNotice}</p>
             </div>
             <button
               className="rounded-lg px-3 py-2 text-sm font-semibold text-ink"
@@ -299,6 +356,10 @@ export function F10ChatbotDemo() {
           </div>
 
           <div className="border-t border-gray/40 px-4 py-3">
+            <p className="mb-3 rounded-xl bg-bg px-3 py-2 text-xs text-ink/70">
+              <span className="font-semibold text-navy">{COPY.status}: </span>
+              {status}
+            </p>
             <p className="mb-2 text-xs font-semibold text-navy">
               {COPY.recommended}
             </p>
@@ -307,7 +368,8 @@ export function F10ChatbotDemo() {
                 <button
                   className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
                   key={question}
-                  onClick={() => ask(question)}
+                  disabled={isLoading}
+                  onClick={() => void ask(question)}
                   type="button"
                 >
                   {question}
@@ -325,7 +387,7 @@ export function F10ChatbotDemo() {
               />
               <button
                 className="rounded-xl bg-magenta px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
-                disabled={!input.trim()}
+                disabled={!input.trim() || isLoading}
                 type="submit"
               >
                 {COPY.send}

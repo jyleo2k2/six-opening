@@ -5,9 +5,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx features/f10-chatbot/lib/routing.test.ts"
+    "test": "tsx features/f10-chatbot/lib/routing.test.ts && tsx shared/llm/filter.test.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.16.0",
+    "dotenv": "^17.4.2",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"
