@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #001E5A;
+  --color-magenta: #D70082;
+  --color-gray: #BEBEBE;
+  --color-bg: #F6F7FA;
+  --color-ink: #1A2233;
+  --color-up: #E8322E;
+  --color-down: #1668DC;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--color-bg); }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: "Pretendard", "Segoe UI", "Malgun Gothic", sans-serif;
+}
+
+button, input { font: inherit; }
