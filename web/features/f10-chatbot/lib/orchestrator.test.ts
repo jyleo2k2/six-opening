@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { SAFE_REFUSAL } from "../../../shared/llm/filter";
-import { isGuidedDialogueAction } from "./contracts";
+import { isExplainAction } from "./contracts";
 import { CHAT_FALLBACK, createChatOutcome } from "./orchestrator";
 import type { ChatSession } from "./session";
 
@@ -30,27 +30,24 @@ async function main() {
   );
   assert.equal(faq.route, "faq");
   assert.equal(modelCalls, 0);
-  assert.equal(isGuidedDialogueAction(faq.action), true);
-  if (!isGuidedDialogueAction(faq.action)) throw new Error("guided action missing");
+  assert.equal(isExplainAction(faq.action), true);
+  if (!isExplainAction(faq.action)) throw new Error("explain action missing");
 
   const continued = await createChatOutcome(
-    { message: "응", context, guidedDialogue: faq.action.state },
+    { message: "회사의 직원 수와 주가", context, explainTurn: faq.action.turn, explainChoiceId: "employee-count" },
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(continued.response.text.includes("EPS"), true);
-  assert.equal(isGuidedDialogueAction(continued.action), true);
+  assert.equal(continued.response.text.includes("같은 업종"), true);
+  assert.equal(isExplainAction(continued.action), true);
   assert.equal(modelCalls, 0);
 
   const forgedTransition = await createChatOutcome(
     {
       message: "응",
       context,
-      guidedDialogue: {
-        topicId: "term:per",
-        explainedNodeIds: ["main"],
-        pendingNodeId: "forged",
-      },
+      explainTurn: { scriptId: "term:per", stage: "brief" },
+      explainChoiceId: "forged",
     },
     session,
     { generateAnswer: noModel },

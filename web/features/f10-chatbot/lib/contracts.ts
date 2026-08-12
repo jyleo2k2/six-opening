@@ -2,6 +2,8 @@ import {
   CHAT_SCREENS,
   type ChatContext,
   type ChatResponse,
+  type ExplainChoice,
+  type ExplainTurn,
   type ChatScreen,
   type ChatUiAction,
 } from "../../../shared/types/chatbot";
@@ -24,6 +26,8 @@ export type ChatRequest = {
   message: string;
   context: ChatContext;
   guidedDialogue?: GuidedDialogueState;
+  explainTurn?: ExplainTurn;
+  explainChoiceId?: string;
 };
 
 export type StandardChatActionPayload = Pick<
@@ -38,7 +42,14 @@ export type GuidedDialogueActionPayload = {
 
 export type ChatActionPayload =
   | StandardChatActionPayload
-  | GuidedDialogueActionPayload;
+  | GuidedDialogueActionPayload
+  | ExplainActionPayload;
+
+export type ExplainActionPayload = {
+  kind: "explain";
+  choices: readonly ExplainChoice[];
+  turn: ExplainTurn;
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -99,6 +110,17 @@ function parseGuidedDialogue(
   };
 }
 
+function parseExplainTurn(value: unknown): ExplainTurn | null | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return null;
+  if (
+    typeof value.scriptId !== "string" ||
+    !/^term:\S{1,80}$/.test(value.scriptId) ||
+    (value.stage !== "brief" && value.stage !== "detail")
+  ) return null;
+  return { scriptId: value.scriptId as ExplainTurn["scriptId"], stage: value.stage };
+}
+
 export function parseChatRequest(value: unknown): ChatRequest | null {
   if (!isRecord(value) || hasClientIdentity(value)) return null;
   if (typeof value.message !== "string" || !isRecord(value.context)) return null;
@@ -129,6 +151,13 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
 
   const guidedDialogue = parseGuidedDialogue(value.guidedDialogue);
   if (guidedDialogue === null) return null;
+  const explainTurn = parseExplainTurn(value.explainTurn);
+  const explainChoiceId = optionalString(value.explainChoiceId, MAX_GUIDED_ID_LENGTH);
+  if (
+    explainTurn === null ||
+    explainChoiceId === null ||
+    Boolean(explainTurn) !== Boolean(explainChoiceId)
+  ) return null;
 
   return {
     message,
@@ -140,6 +169,7 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
       ...(unitPrice ? { unitPrice } : {}),
     },
     ...(guidedDialogue ? { guidedDialogue } : {}),
+    ...(explainTurn && explainChoiceId ? { explainTurn, explainChoiceId } : {}),
   };
 }
 
@@ -149,6 +179,24 @@ export function isGuidedDialogueAction(
   if (!isRecord(value) || value.kind !== "guided_dialogue") return false;
   const state = parseGuidedDialogue(value.state);
   return state !== undefined && state !== null;
+}
+
+export function isExplainAction(value: unknown): value is ExplainActionPayload {
+  if (!isRecord(value) || value.kind !== "explain" || !Array.isArray(value.choices)) return false;
+  const turn = parseExplainTurn(value.turn);
+  return (
+    turn !== undefined &&
+    turn !== null &&
+    value.choices.length > 0 &&
+    value.choices.every(
+      (choice) =>
+        isRecord(choice) &&
+        typeof choice.id === "string" &&
+        choice.id.length > 0 &&
+        typeof choice.label === "string" &&
+        choice.label.length > 0,
+    )
+  );
 }
 
 export function isAllowedUiAction(value: unknown): value is ChatUiAction {

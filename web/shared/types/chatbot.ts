@@ -21,6 +21,35 @@ export type ChatResponse = {
   uiAction?: ChatUiAction;
 };
 
+export type ExplainStage = "brief" | "detail";
+
+export type ExplainChoice = {
+  id: string;
+  label: string;
+};
+
+export type ExplainScript = {
+  id: `term:${string}`;
+  brief: string;
+  check: {
+    prompt: string;
+    choices: readonly (ExplainChoice & { correct: boolean })[];
+  };
+  detail: string;
+  example: string;
+};
+
+export type ExplainTurn = {
+  scriptId: ExplainScript["id"];
+  stage: ExplainStage;
+};
+
+export type ExplainReply = {
+  text: string;
+  choices?: readonly ExplainChoice[];
+  turn?: ExplainTurn;
+};
+
 export const READ_ONLY_CHAT_TOOLS = [
   "approved_stock_facts",
   "own_trade_records",

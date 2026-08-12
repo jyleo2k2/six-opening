@@ -118,12 +118,9 @@ type ChatResponse = {
 type ChatAction =
   | Pick<ChatResponse, "suggestedQuestions" | "uiAction">
   | {
-      kind: "guided_dialogue";
-      state: {
-        topicId: `term:${string}` | `stock:${string}`;
-        explainedNodeIds: string[];
-        pendingNodeId: string;
-      };
+      kind: "explain";
+      turn: { scriptId: `term:${string}`; stage: "brief" | "detail" };
+      choices: Array<{ id: string; label: string }>;
     };
 ```
 
@@ -131,16 +128,15 @@ type ChatAction =
 - `uiAction`은 서버 허용 목록의 화면만 제안한다.
 - 모델이 URL을 만들거나 화면을 직접 이동시키지 않는다. 사용자가 버튼을 눌러야 실행한다.
 
-### 3.3 DAPIE 단계형 설명 대화
+### 3.3 4단계 설명 대화
 
-- 적용 범위는 등록된 용어 사전의 모든 `glossary` 항목과 모의투자 종목 유니버스의 모든 종목이다.
-- 용어는 현재 용어 설명 뒤에 용어 DB의 관련 용어 키워드를, 종목은 회사 소개 뒤에 `제공 제품·서비스`, `일상 접점`, `업종 역할` 키워드를 차례로 제안한다.
-- 각 턴은 현재 설명과 아직 설명하지 않은 DB 기반 키워드 하나를 “`… 쪽도 더 알아볼까?`”라고 제안하며, 자유 입력창은 항상 유지한다.
-- 사용자가 Yes 의미의 자연어로 답하면 제안한 키워드를 설명하고 다음 키워드를 제안한다. No 의미의 답변이면 대화를 종료한다. 그 밖의 답변에는 Yes/No를 다시 요청한다.
-- 클라이언트가 보낸 `topicId`, `explainedNodeIds`, `pendingNodeId`는 신뢰하지 않고 서버가 등록된 순서와 허용 전이인지 검증한다.
-- 단계형 설명은 고정된 승인 문구를 사용하고, LLM은 그래프 선택이나 전이에 관여하지 않는다.
-- 이해 여부를 시험하거나 점수화하지 않으며 사용자가 언제든 다른 질문으로 대화를 전환할 수 있다.
-- 자연어 질문에서 종목명·종목코드·등록 별칭 또는 용어 트리거를 결정적으로 찾는다. 현재 종목 화면에서 “이 회사”처럼 지시한 질문은 현재 화면 종목으로만 해석하며, 둘 이상을 임의로 선택하지 않는다.
+- [사실] DAPIE 연구의 대화형 설명 근거는 `docs/DAPIE_논문_추출.md`에 정리한다. 이 앱에서는 낯선 금융 용어 또는 복잡한 인과관계에만 적용하며, 서비스 사용법·기록 조회·안전 거절과 단순 용어는 기존 단답을 유지한다.
+- 단계는 `brief`(정확히 1문장 설명) → `check`(선택지형 이해 확인) → 오답일 때 `detail`(“음, 그건 아니야.”를 포함해 최대 3문장) → “모르겠어”일 때 `example`(최대 2문장) 순서다. 정답이면 “맞았어! 바로 그거야.”로 끝낸다.
+- 1차 구현 범위는 승인된 `term:per` 스크립트 한 건이다. 향후 범위는 어려운 금융 용어 약 20개, 종목의 산업 역할 질문 51개, 섹터 밸류체인 13개로 한정한다.
+- 모든 문구와 선택지는 승인된 정적 데이터만 사용한다. LLM은 단계 문구·선택지·정답을 생성하거나 해석하지 않는다.
+- 서버는 클라이언트가 보낸 `scriptId`, `stage`, `choiceId`를 등록된 스크립트와 현재 단계에 대조한다. 등록되지 않은 선택지 또는 단계 전이는 무효이며 기존 단답으로 돌아간다.
+- 본문뿐 아니라 확인 질문과 선택지 라벨도 정적 데이터 테스트에서 금지 표현·문장 수 게이트를 통과해야 한다.
+- 이해 여부를 평가하거나 점수화하지 않으며, 사용자는 언제든 다른 질문으로 전환할 수 있다.
 
 ## 4. 질문 목적별 실행 경계
 
@@ -174,11 +170,8 @@ type ChatRequest = {
     quantity?: number;
     unitPrice?: number;
   };
-  guidedDialogue?: {
-    topicId: `term:${string}` | `stock:${string}`;
-    explainedNodeIds: string[];
-    pendingNodeId: string;
-  };
+  explainTurn?: { scriptId: `term:${string}`; stage: "brief" | "detail" };
+  explainChoiceId?: string;
 };
 ```
 
@@ -192,7 +185,7 @@ type ChatRequest = {
 |---|---|
 | `status` | 질문 분류·자료 조회·답변 준비·안전 점검 상태 |
 | `text` | 모든 검증을 통과한 답변 텍스트 |
-| `action` | 검증된 `uiAction`·추천 질문 또는 DAPIE 후속 대화 상태 |
+| `action` | 검증된 `uiAction`·추천 질문 또는 4단계 설명의 선택지·전이 상태 |
 | `done` | 스트림 종료 |
 
 처리 상태 문구는 수작성 고정 문구다. “안전 점검 통과” 전에는 원시 모델 답변을 화면에 표시하지 않는다.
@@ -413,7 +406,7 @@ type SectorEducationContent = {
 - `switch`·`dwell`·`lossRevisit` 판정, 발화 간 3분·동일 신호 10분·세션 최대 2회·신호 뮤트·30분 초기화를 `shared/engine` 순수 함수로 구현했다.
 - 화면 진입·가시 탭 체류·주문 확인 취소를 공용 zustand 이벤트 저장소에 연결했다. `trade_filled`와 종목 재진입 계약도 같은 저장소가 받는다.
 - 대화 원문 없이 요청 ID·목적·경로·Tool·필터·실패 결과만 구조화 로그로 남긴다.
-- 등록 용어·종목의 DB 기반 후속 키워드 제안과 Yes/No DAPIE식 서버 검증 전이
+- `term:per`의 정적 4단계 설명·선택지·서버 검증 전이
 
 ### 12.2 남은 외부 의존성과 콘텐츠 작업
 

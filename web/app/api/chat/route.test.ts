@@ -31,8 +31,8 @@ async function main() {
     }),
   );
   const guidedStream = await guidedResponse.text();
-  assert.equal(guidedStream.includes('"kind":"guided_dialogue"'), true);
-  assert.equal(guidedStream.includes('"topicId":"term:per"'), true);
+  assert.equal(guidedStream.includes('"kind":"explain"'), true);
+  assert.equal(guidedStream.includes('"scriptId":"term:per"'), true);
 
   const refusalResponse = await POST(
     request({ message: "뭐 사면 돼?", context: { screen: "stock" } }),

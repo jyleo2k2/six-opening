@@ -6,8 +6,8 @@ import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
 import type { ChatUiAction } from "../../shared/types/chatbot";
 import {
   isAllowedUiAction,
-  isGuidedDialogueAction,
-  type GuidedDialogueActionPayload,
+  isExplainAction,
+  type ExplainActionPayload,
   type StandardChatActionPayload,
 } from "./lib/contracts";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
@@ -17,6 +17,7 @@ type Message = {
   role: "assistant" | "user";
   text: string;
   suggestedQuestions?: string[];
+  explainChoices?: ExplainActionPayload["choices"];
   uiAction?: ChatUiAction;
 };
 
@@ -84,10 +85,12 @@ function MessageBubble({
   message,
   onAction,
   onQuestion,
+  onExplainChoice,
 }: {
   message: Message;
   onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
+  onExplainChoice: (choice: ExplainActionPayload["choices"][number]) => void;
 }) {
   const userMessage = message.role === "user";
   const uiAction = message.uiAction;
@@ -127,6 +130,20 @@ function MessageBubble({
             ))}
           </div>
         )}
+        {!userMessage && Boolean(message.explainChoices?.length) && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {message.explainChoices?.map((choice) => (
+              <button
+                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                key={choice.id}
+                onClick={() => onExplainChoice(choice)}
+                type="button"
+              >
+                {choice.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -139,8 +156,8 @@ export function F10ChatbotDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
   const [isLoading, setIsLoading] = useState(false);
-  const [guidedAction, setGuidedAction] =
-    useState<GuidedDialogueActionPayload | null>(null);
+  const [explainAction, setExplainAction] =
+    useState<ExplainActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
@@ -220,8 +237,8 @@ export function F10ChatbotDemo() {
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
-  async function ask(question: string) {
-    const guidedDialogue = guidedAction?.state;
+  async function ask(question: string, explainChoiceId?: string) {
+    const explainTurn = explainAction?.turn;
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
@@ -230,7 +247,7 @@ export function F10ChatbotDemo() {
     setIsOpen(true);
     setInput("");
     setStatus("질문을 보내는 중");
-    setGuidedAction(null);
+    setExplainAction(null);
     setIsLoading(true);
 
     try {
@@ -240,7 +257,7 @@ export function F10ChatbotDemo() {
         body: JSON.stringify({
           message: question,
           context: chatContext,
-          ...(guidedDialogue ? { guidedDialogue } : {}),
+          ...(explainTurn && explainChoiceId ? { explainTurn, explainChoiceId } : {}),
         }),
       });
 
@@ -275,8 +292,13 @@ export function F10ChatbotDemo() {
             });
           }
           if (type === "action" && value && typeof value === "object") {
-            if (isGuidedDialogueAction(value)) {
-              setGuidedAction(value);
+            if (isExplainAction(value)) {
+              setExplainAction(value);
+              setMessages((current) => {
+                const last = current.at(-1);
+                if (!last || last.role !== "assistant") return current;
+                return [...current.slice(0, -1), { ...last, explainChoices: value.choices }];
+              });
               continue;
             }
 
@@ -494,6 +516,9 @@ export function F10ChatbotDemo() {
                 onQuestion={(question) => {
                   if (!isLoading) void ask(question);
                 }}
+                onExplainChoice={(choice) => {
+                  if (!isLoading) void ask(choice.label, choice.id);
+                }}
               />
             )}
             {messages.map((message, index) => (
@@ -503,6 +528,9 @@ export function F10ChatbotDemo() {
                 onAction={handleUiAction}
                 onQuestion={(question) => {
                   if (!isLoading) void ask(question);
+                }}
+                onExplainChoice={(choice) => {
+                  if (!isLoading) void ask(choice.label, choice.id);
                 }}
               />
             ))}

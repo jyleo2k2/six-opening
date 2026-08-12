@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   isAllowedUiAction,
+  isExplainAction,
   isGuidedDialogueAction,
   parseChatRequest,
   sanitizeActionPayload,
@@ -31,6 +32,26 @@ assert.equal(parseChatRequest({ message: "안녕", context: { screen: "stock", s
 assert.equal(
   parseChatRequest({ message: "내 기록", userId: "another-user", context: { screen: "archive" } }),
   null,
+);
+
+const explainTurn = { scriptId: "term:per" as const, stage: "brief" as const };
+assert.deepEqual(
+  parseChatRequest({
+    message: "회사가 번 이익과 주가",
+    context: { screen: "stock" },
+    explainTurn,
+    explainChoiceId: "profit-and-price",
+  })?.explainTurn,
+  explainTurn,
+);
+assert.equal(parseChatRequest({ message: "알겠어", context: { screen: "stock" }, explainTurn }), null);
+assert.equal(
+  isExplainAction({
+    kind: "explain",
+    turn: explainTurn,
+    choices: [{ id: "profit-and-price", label: "회사가 번 이익과 주가" }],
+  }),
+  true,
 );
 assert.equal(
   parseChatRequest({ message: "내 기록", context: { screen: "archive", targetUserId: "parent" } }),
