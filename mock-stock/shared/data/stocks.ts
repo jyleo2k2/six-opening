@@ -3,69 +3,69 @@ import type { Stock } from "@/shared/types";
 type CompanyDefinition = Pick<Stock, "symbol" | "name" | "sector">;
 
 const companies: CompanyDefinition[] = [
-  { symbol: "259960", name: "크래프톤", sector: "게임" },
-  { symbol: "251270", name: "넷마블", sector: "게임" },
-  { symbol: "036570", name: "NC", sector: "게임" },
-
-  { symbol: "000120", name: "CJ대한통운", sector: "물류" },
-  { symbol: "002320", name: "한진", sector: "물류" },
-  { symbol: "011200", name: "HMM", sector: "물류" },
-  { symbol: "086280", name: "현대글로비스", sector: "물류" },
-
-  { symbol: "005930", name: "삼성전자", sector: "반도체" },
-  { symbol: "000660", name: "SK하이닉스", sector: "반도체" },
-  { symbol: "011070", name: "LG이노텍", sector: "반도체" },
-
-  { symbol: "064350", name: "현대로템", sector: "방산" },
-  { symbol: "012450", name: "한화에어로스페이스", sector: "방산" },
-  { symbol: "047810", name: "한국항공우주", sector: "방산" },
-
   { symbol: "003230", name: "삼양식품", sector: "식품" },
   { symbol: "271560", name: "오리온", sector: "식품" },
   { symbol: "097950", name: "CJ제일제당", sector: "식품" },
   { symbol: "004370", name: "농심", sector: "식품" },
-  { symbol: "007310", name: "오뚜기", sector: "식품" },
 
-  { symbol: "015760", name: "한국전력", sector: "에너지" },
-  { symbol: "078930", name: "GS", sector: "에너지" },
-  { symbol: "010950", name: "S-Oil", sector: "에너지" },
-  { symbol: "096770", name: "SK이노베이션", sector: "에너지" },
+  { symbol: "259960", name: "크래프톤", sector: "게임" },
+  { symbol: "036570", name: "NC", sector: "게임" },
+  { symbol: "251270", name: "넷마블", sector: "게임" },
+  { symbol: "192080", name: "더블유게임즈", sector: "게임" },
 
   { symbol: "352820", name: "하이브", sector: "엔터" },
   { symbol: "041510", name: "에스엠", sector: "엔터" },
   { symbol: "035900", name: "JYP Ent.", sector: "엔터" },
-  { symbol: "035760", name: "CJ ENM", sector: "엔터" },
-  { symbol: "122870", name: "와이지엔터", sector: "엔터" },
+  { symbol: "122870", name: "와이지엔터테인먼트", sector: "엔터" },
+
+  { symbol: "000270", name: "기아", sector: "자동차" },
+  { symbol: "005380", name: "현대차", sector: "자동차" },
+  { symbol: "012330", name: "현대모비스", sector: "자동차" },
+
+  { symbol: "005930", name: "삼성전자", sector: "반도체" },
+  { symbol: "066570", name: "LG전자", sector: "반도체" },
+  { symbol: "000660", name: "SK하이닉스", sector: "반도체" },
+  { symbol: "402340", name: "SK스퀘어", sector: "반도체" },
+
+  { symbol: "278470", name: "에이피알", sector: "화장품" },
+  { symbol: "090430", name: "아모레퍼시픽", sector: "화장품" },
+  { symbol: "483650", name: "달바글로벌", sector: "화장품" },
+  { symbol: "051900", name: "LG생활건강", sector: "화장품" },
 
   { symbol: "021240", name: "코웨이", sector: "유통" },
+  { symbol: "089860", name: "롯데렌탈", sector: "유통" },
+  { symbol: "004170", name: "신세계", sector: "유통" },
   { symbol: "282330", name: "BGF리테일", sector: "유통" },
-  { symbol: "023530", name: "롯데쇼핑", sector: "유통" },
-  { symbol: "139480", name: "이마트", sector: "유통" },
-  { symbol: "007070", name: "GS리테일", sector: "유통" },
+
+  { symbol: "003490", name: "대한항공", sector: "항공" },
+  { symbol: "020560", name: "아시아나항공", sector: "항공" },
+  { symbol: "180640", name: "한진칼", sector: "항공" },
+
+  { symbol: "064350", name: "현대로템", sector: "방산" },
+  { symbol: "012450", name: "한화에어로스페이스", sector: "방산" },
+  { symbol: "079550", name: "LIG디펜스앤에어로스페이스", sector: "방산" },
+  { symbol: "047810", name: "한국항공우주", sector: "방산" },
 
   { symbol: "105560", name: "KB금융", sector: "은행·금융" },
   { symbol: "055550", name: "신한지주", sector: "은행·금융" },
   { symbol: "086790", name: "하나금융지주", sector: "은행·금융" },
   { symbol: "316140", name: "우리금융지주", sector: "은행·금융" },
-  { symbol: "323410", name: "카카오뱅크", sector: "은행·금융" },
   { symbol: "039490", name: "키움증권", sector: "은행·금융" },
 
-  { symbol: "000270", name: "기아", sector: "자동차" },
-  { symbol: "005380", name: "현대차", sector: "자동차" },
-  { symbol: "161390", name: "한국타이어", sector: "자동차" },
-  { symbol: "012330", name: "현대모비스", sector: "자동차" },
+  { symbol: "015760", name: "한국전력", sector: "에너지" },
+  { symbol: "010950", name: "S-Oil", sector: "에너지" },
+  { symbol: "078930", name: "GS", sector: "에너지" },
+  { symbol: "096770", name: "SK이노베이션", sector: "에너지" },
+
+  { symbol: "000120", name: "CJ대한통운", sector: "물류" },
+  { symbol: "011200", name: "HMM", sector: "물류" },
+  { symbol: "086280", name: "현대글로비스", sector: "물류" },
+  { symbol: "047050", name: "포스코인터내셔널", sector: "물류" },
 
   { symbol: "329180", name: "HD현대중공업", sector: "조선" },
-  { symbol: "010140", name: "삼성중공업", sector: "조선" },
   { symbol: "009540", name: "HD한국조선해양", sector: "조선" },
-
-  { symbol: "003490", name: "대한항공", sector: "항공" },
-  { symbol: "020560", name: "아시아나항공", sector: "항공" },
-  { symbol: "089590", name: "제주항공", sector: "항공" },
-
-  { symbol: "051900", name: "LG생활건강", sector: "화장품" },
-  { symbol: "278470", name: "에이피알", sector: "화장품" },
-  { symbol: "090430", name: "아모레퍼시픽", sector: "화장품" },
+  { symbol: "042660", name: "한화오션", sector: "조선" },
+  { symbol: "010140", name: "삼성중공업", sector: "조선" },
 ];
 
 const featuredStocks = new Map<string, Partial<Stock>>([

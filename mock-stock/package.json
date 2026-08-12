@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx shared/engine/comment-filter.test.ts && tsx shared/engine/trade-markers.test.ts"
+    "test": "tsx shared/engine/comment-filter.test.ts && tsx shared/engine/trade-markers.test.ts && tsx shared/data/stocks.test.ts"
   },
   "dependencies": {
     "next": "^16.3.0",
