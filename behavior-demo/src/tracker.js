@@ -10,7 +10,7 @@
 //     눌렀는지를 종목별로 기록하고, 그 상태에서 내린 매수 결정과 짝지어 본다.
 // ============================================================
 
-import { supabase, hasSupabase } from './supabase'
+import { supabase, hasSupabase } from './supabase.js'
 
 const GRID_ROWS = 4
 const GRID_COLS = 6
