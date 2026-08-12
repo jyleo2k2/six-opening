@@ -128,39 +128,43 @@ a:hover{color:#01185A}
 <span style="font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">손가락으로 슉 밀어봐 →</span>
 </div>
 
-<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:16px;padding:6px 58px 14px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
+<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:16px;padding:6px 48px 14px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
 <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
 <div onClick="{{ c.pick }}" style="{{ c.cardStyle }}">
 <div style="{{ c.glowStyle }}"></div>
 <div style="{{ c.gridStyle }}"></div>
 <div style="{{ c.sheenStyle }}"></div>
-<svg width="286" height="306" viewBox="0 0 286 306" style="position:absolute;left:0;top:0;pointer-events:none">
-<rect x="7" y="7" width="272" height="292" rx="25" fill="none" stroke="{{ c.brand }}" stroke-width="2.5" stroke-opacity="0.8"></rect>
-<rect x="13" y="13" width="260" height="280" rx="20" fill="none" stroke="{{ c.brand }}" stroke-width="1" stroke-opacity="0.28"></rect>
-<path d="M7 78 V32 A25 25 0 0 1 32 7 H92" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-opacity="0.55" stroke-linecap="round"></path>
-<path d="M196 7 H254 A25 25 0 0 1 279 32 V78" fill="none" stroke="{{ c.brand }}" stroke-width="3.5" stroke-linecap="round"></path>
-<path d="M7 228 V274 A25 25 0 0 0 32 299 H92" fill="none" stroke="{{ c.brand }}" stroke-width="3.5" stroke-linecap="round"></path>
-<path d="M196 299 H254 A25 25 0 0 0 279 274 V228" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-opacity="0.5" stroke-linecap="round"></path>
-<path d="M232 22 l11 11 M247 22 l11 11" stroke="{{ c.brand }}" stroke-width="2.5" stroke-linecap="round"></path>
-<path d="M118 299 H168" stroke="#FFFFFF" stroke-width="3" stroke-opacity="0.8" stroke-linecap="round"></path>
+<svg width="306" height="348" viewBox="0 0 306 348" style="position:absolute;left:0;top:0;pointer-events:none">
+<circle cx="232" cy="118" r="1.6" fill="#FFFFFF" fill-opacity="0.5"></circle>
+<circle cx="262" cy="196" r="1.2" fill="{{ c.brand }}" fill-opacity="0.8"></circle>
+<circle cx="46" cy="236" r="1.4" fill="#FFFFFF" fill-opacity="0.28"></circle>
+<circle cx="196" cy="96" r="1" fill="{{ c.brand }}" fill-opacity="0.7"></circle>
+<rect x="5.5" y="5.5" width="295" height="337" rx="27" fill="none" stroke="#FFFFFF" stroke-width="11" stroke-opacity="0.055"></rect>
+<rect x="17" y="17" width="272" height="314" rx="19" fill="none" stroke="{{ c.brand }}" stroke-width="1" stroke-opacity="0.22"></rect>
+<rect x="5.5" y="5.5" width="295" height="337" rx="27" fill="none" stroke="{{ c.brand }}" stroke-width="2.5" stroke-opacity="0.9" style="filter:drop-shadow(0 0 6px {{ c.brand }})"></rect>
+<path d="M5.5 104 V37 A31.5 31.5 0 0 1 37 5.5 H112" fill="none" stroke="{{ c.brand }}" stroke-width="4.5" stroke-linecap="round" style="filter:drop-shadow(0 0 7px {{ c.brand }})"></path>
+<path d="M16 104 V45 A23 23 0 0 1 39 22 H104" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.42" stroke-linecap="round"></path>
+<path d="M5.5 244 V311 A31.5 31.5 0 0 0 37 342.5 H112" fill="none" stroke="{{ c.brand }}" stroke-width="4.5" stroke-linecap="round" style="filter:drop-shadow(0 0 7px {{ c.brand }})"></path>
+<path d="M194 5.5 H269 A31.5 31.5 0 0 1 300.5 37 V104" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-opacity="0.6" stroke-linecap="round"></path>
+<path d="M194 342.5 H269 A31.5 31.5 0 0 0 300.5 311 V244" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-opacity="0.5" stroke-linecap="round"></path>
+<path d="M240 14 l14 14 M258 14 l14 14" stroke="{{ c.brand }}" stroke-width="3" stroke-linecap="round"></path>
+<path d="M276 12 h14 a5 5 0 0 1 5 5 v13 z" fill="{{ c.brand }}" fill-opacity="0.55"></path>
+<path d="M14 318 l12 12 M14 300 l30 30" stroke="{{ c.brand }}" stroke-width="2" stroke-opacity="0.55" stroke-linecap="round"></path>
+<path d="M126 342.5 H180" stroke="#FFFFFF" stroke-width="3.5" stroke-opacity="0.9" stroke-linecap="round" style="filter:drop-shadow(0 0 6px #FFFFFF)"></path>
 </svg>
-<div style="position:relative;display:flex;align-items:flex-start;gap:15px">
-<div style="flex:none">
+<div style="{{ c.podStyle }}"></div>
+<div style="position:relative;display:flex;align-items:flex-start;gap:14px">
 <div style="{{ c.artStyle }}">
 <sc-if value="{{ c.noLogo }}" hint-placeholder-val="{{ true }}">
-<span style="font-size:34px">{{ c.emoji }}</span>
+<span style="font-size:46px">{{ c.emoji }}</span>
 </sc-if>
 </div>
-<svg width="84" height="9" viewBox="0 0 84 9" style="{{ c.shelfStyle }}">
-<path d="M4 1 L11 7 H73 L80 1" fill="none" stroke="{{ c.brand }}" stroke-width="2" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"></path>
-</svg>
-</div>
-<div style="flex:1;min-width:0;padding-top:30px">
+<div style="flex:1;min-width:0;padding-top:34px">
 <div style="{{ c.catStyle }}">{{ c.category }}</div>
-<svg width="152" height="7" viewBox="0 0 152 7" style="{{ c.catBarStyle }}">
+<svg width="140" height="7" viewBox="0 0 140 7" style="{{ c.catBarStyle }}">
 <path d="M2 6 L7 1 M9 6 L14 1 M16 6 L21 1 M23 6 L28 1" stroke="{{ c.brand }}" stroke-width="2.4" stroke-linecap="round"></path>
-<path d="M34 3.5 H140" stroke="{{ c.brand }}" stroke-width="1.5" stroke-opacity="0.45"></path>
-<circle cx="145" cy="3.5" r="3.2" fill="{{ c.brand }}"></circle>
+<path d="M34 3.5 H128" stroke="{{ c.brand }}" stroke-width="1.5" stroke-opacity="0.4"></path>
+<circle cx="133" cy="3.5" r="3.2" fill="{{ c.brand }}" style="filter:drop-shadow(0 0 4px {{ c.brand }})"></circle>
 </svg>
 </div>
 </div>
@@ -170,12 +174,12 @@ a:hover{color:#01185A}
 <div style="{{ c.priceStyle }}">{{ c.priceText }}</div>
 <div style="{{ c.changeStyle }}">{{ c.changeText }}</div>
 </div>
-<svg width="120" height="90" viewBox="0 0 120 90" style="{{ c.chartStyle }}">
-<path d="{{ c.sparkArea }}" fill="{{ c.lineColor }}" fill-opacity="0.20"></path>
-<polyline points="{{ c.sparkLine }}" fill="none" stroke="{{ c.lineColor }}" stroke-width="8" stroke-opacity="0.16" stroke-linejoin="round" stroke-linecap="round"></polyline>
-<polyline points="{{ c.sparkLine }}" fill="none" stroke="{{ c.lineColor }}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"></polyline>
-<circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="9" fill="{{ c.lineColor }}" fill-opacity="0.28"></circle>
-<circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="4" fill="#FFFFFF"></circle>
+<svg width="128" height="118" viewBox="0 0 128 118" style="{{ c.chartStyle }}">
+<path d="{{ c.sparkArea }}" fill="{{ c.lineColor }}" fill-opacity="0.22"></path>
+<polyline points="{{ c.sparkLine }}" fill="none" stroke="{{ c.lineColor }}" stroke-width="10" stroke-opacity="0.14" stroke-linejoin="round" stroke-linecap="round"></polyline>
+<polyline points="{{ c.sparkLine }}" fill="none" stroke="{{ c.lineColor }}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 5px {{ c.lineColor }})"></polyline>
+<circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="11" fill="{{ c.lineColor }}" fill-opacity="0.26"></circle>
+<circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="4.5" fill="#FFFFFF" style="filter:drop-shadow(0 0 7px {{ c.lineColor }})"></circle>
 </svg>
 </div>
 </sc-for>
@@ -1266,8 +1270,8 @@ class Component extends DCLogic {
       const BL = mixW(B, 0.45);                  // 어두운 배경 위 글자용
       const CL = x.change >= 0 ? up : down;      // 등락색 (상승 빨강 / 하락 파랑)
 
-      // 미니 차트 — 시안처럼 우측을 크게 차지한다
-      const sp = x.spark || [], W = 120, H = 90, PX = 5, PY = 10, N = Math.max(2, sp.length);
+      // 차트 — 카드 장식의 일부로 우측 아래를 넓게 쓴다 (값은 실제 시세 그대로)
+      const sp = x.spark || [], W = 128, H = 118, PX = 6, PY = 12, N = Math.max(2, sp.length);
       const pts = sp.map((v, i) => [PX + i * ((W - PX * 2) / (N - 1)), (H - PY) - (v / 100) * (H - PY * 2)]);
       const xy = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1));
       const last = pts[pts.length - 1] || [W - PX, H / 2];
@@ -1282,21 +1286,23 @@ class Component extends DCLogic {
         priceText: x.price.toLocaleString('ko-KR'),
         changeText: (x.change >= 0 ? '▲ ' : '▼ ') + Math.abs(x.change).toFixed(2) + '%',
 
-        brand: B,
-        cardStyle: 'position:relative;overflow:hidden;flex:none;width:286px;height:306px;border-radius:30px;padding:17px 18px 15px;cursor:pointer;display:flex;flex-direction:column;scroll-snap-align:center;background:radial-gradient(120% 85% at 22% -14%,' + B + '4A 0%,rgba(9,14,30,0) 60%),linear-gradient(155deg,#0E1730 0%,#0A1024 48%,#05070F 100%);box-shadow:0 24px 46px -14px rgba(0,0,0,0.75),0 0 34px -8px ' + B + '99',
-        glowStyle: 'position:absolute;right:-40px;top:-60px;width:190px;height:190px;border-radius:999px;filter:blur(38px);opacity:0.40;background:' + B,
-        gridStyle: 'position:absolute;left:0;right:0;bottom:0;height:62%;opacity:0.5;pointer-events:none;background-image:linear-gradient(' + B + '33 1px,transparent 1px),linear-gradient(90deg,' + B + '33 1px,transparent 1px);background-size:22px 22px',
-        sheenStyle: 'position:absolute;left:-50%;top:-30%;width:55%;height:180%;transform:rotate(20deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.13) 50%,rgba(255,255,255,0) 100%);pointer-events:none',
+        brand: B, brandLight: BL,
+        // 카드 몸체 — 반투명 블루 글래스 위에 브랜드 광원
+        cardStyle: 'position:relative;overflow:hidden;flex:none;width:306px;height:348px;border-radius:32px;padding:20px;cursor:pointer;display:flex;flex-direction:column;scroll-snap-align:center;background:radial-gradient(95% 60% at 26% -6%,' + B + '5C 0%,rgba(10,16,34,0) 62%),radial-gradient(70% 50% at 100% 100%,' + B + '2B 0%,rgba(5,7,15,0) 70%),linear-gradient(158deg,#101B38 0%,#0A1126 44%,#05070F 100%);box-shadow:0 28px 54px -16px rgba(0,0,0,0.8),0 0 42px -10px ' + B + 'A6',
+        glowStyle: 'position:absolute;left:-30px;top:-70px;width:210px;height:200px;border-radius:999px;filter:blur(42px);opacity:0.45;background:' + B,
+        gridStyle: 'position:absolute;left:0;right:0;bottom:0;height:58%;opacity:0.45;pointer-events:none;background-image:linear-gradient(' + B + '2B 1px,transparent 1px),linear-gradient(90deg,' + B + '2B 1px,transparent 1px);background-size:26px 26px',
+        sheenStyle: 'position:absolute;left:-55%;top:-40%;width:62%;height:200%;transform:rotate(22deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.16) 48%,rgba(255,255,255,0) 100%);pointer-events:none',
 
-        artStyle: 'position:relative;width:76px;height:76px;flex:none;border-radius:22px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:' + (logos[x.code] ? 'url(' + logos[x.code] + ') center/cover no-repeat' : '#101a33') + ';box-shadow:0 12px 24px -8px rgba(0,0,0,0.9),0 0 26px -6px ' + B + ',inset 0 0 0 2px rgba(255,255,255,0.30),inset 0 3px 6px rgba(255,255,255,0.22)',
-        shelfStyle: 'position:relative;height:9px;margin:7px 0 0 -4px;width:84px;flex:none',
-        catStyle: 'font-size:11px;font-weight:800;letter-spacing:0.22em;color:' + BL + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 10px ' + B + '80',
-        catBarStyle: 'position:relative;height:7px;margin-top:10px',
-        nameStyle: 'position:relative;font-size:25px;font-weight:800;color:#FFFFFF;margin-top:13px;letter-spacing:-0.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 12px rgba(0,0,0,0.6)',
-        descStyle: 'position:relative;font-size:13.5px;font-weight:600;color:#A8C4EC;line-height:1.5;margin-top:6px;height:21px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis',
-        priceStyle: 'font-size:30px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.03em;line-height:1;text-shadow:0 2px 14px rgba(0,0,0,0.6)',
-        changeStyle: 'display:inline-flex;align-items:center;margin-top:10px;padding:6px 15px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:#FFFFFF;background:' + CL + '3D;box-shadow:inset 0 0 0 2px ' + CL + ',0 0 16px -4px ' + CL,
-        chartStyle: 'position:absolute;right:14px;bottom:16px;pointer-events:none',
+        // 로고 — 배경판 없이 카드 위에 떠 있는 오브젝트. 후광 + 받침 그림자.
+        artStyle: 'position:relative;width:104px;height:104px;flex:none;display:flex;align-items:center;justify-content:center;background:' + (logos[x.code] ? 'url(' + logos[x.code] + ') center/contain no-repeat' : 'none') + ';filter:drop-shadow(0 0 18px ' + B + 'B3)' + (br.dark ? ' drop-shadow(0 0 9px rgba(255,255,255,0.75))' : '') + ' drop-shadow(0 16px 16px rgba(0,0,0,0.55))',
+        podStyle: 'position:absolute;left:26px;top:117px;width:92px;height:14px;border-radius:999px;filter:blur(7px);opacity:0.55;background:radial-gradient(closest-side,' + B + ' 0%,rgba(0,0,0,0) 100%);pointer-events:none',
+        catStyle: 'font-size:11.5px;font-weight:800;letter-spacing:0.26em;color:' + BL + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 12px ' + B,
+        catBarStyle: 'position:relative;height:7px;margin-top:11px',
+        nameStyle: 'position:relative;font-size:30px;font-weight:800;color:#FFFFFF;margin-top:22px;letter-spacing:-0.035em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 16px rgba(0,0,0,0.65),0 0 22px ' + B + '4D',
+        descStyle: 'position:relative;font-size:13.5px;font-weight:600;color:#92AEDA;line-height:1.5;margin-top:9px;height:21px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis',
+        priceStyle: 'font-size:' + (x.price >= 1000000 ? 29 : 35) + 'px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.035em;line-height:1;text-shadow:0 3px 18px rgba(0,0,0,0.7)',
+        changeStyle: 'display:inline-flex;align-items:center;margin-top:13px;padding:8px 18px;border-radius:999px;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:#FFFFFF;background:linear-gradient(180deg,' + CL + 'E6 0%,' + CL + '99 100%);box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.45),inset 0 0 0 2px ' + CL + ',0 8px 18px -6px ' + CL + 'CC,0 0 22px -6px ' + CL,
+        chartStyle: 'position:absolute;right:16px;bottom:18px;pointer-events:none',
 
         pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
       };
