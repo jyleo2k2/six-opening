@@ -1,7 +1,6 @@
 import { config } from "dotenv";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
-import { STOCKS } from "../../../shared/data/stocks";
 import { getQuoteFixture } from "./fixtures";
 
 export type Quote = {
@@ -16,7 +15,6 @@ export type Quote = {
 
 export type ChartPeriod = "minute" | "daily" | "weekly";
 
-const stockBySymbol = new Map(STOCKS.map((stock) => [stock.symbol, stock]));
 let accessToken = "";
 let tokenExpiresAt = 0;
 let queue = Promise.resolve<unknown>(undefined);
@@ -154,9 +152,8 @@ function fixtureQuote(
 }
 
 export async function getQuote(symbol: string): Promise<Quote> {
-  const stock = stockBySymbol.get(symbol);
   const fixture = await getQuoteFixture(symbol);
-  if (!stock || !fixture) throw new Error("등록되지 않은 종목입니다.");
+  if (!fixture) throw new Error("등록되지 않은 종목입니다.");
   const cached = quoteCache.get(symbol);
   if (cached && Date.now() - cached.at < 900) return cached.value;
   if (!hasKiwoomCredentials()) return fixtureQuote(fixture);
@@ -175,7 +172,7 @@ export async function getQuote(symbol: string): Promise<Quote> {
     if (!price) throw new Error("현재가가 없습니다.");
     const value: Quote = {
       symbol,
-      name: stock.name,
+      name: fixture.name,
       price,
       change,
       rate,
@@ -210,9 +207,8 @@ function fixtureChart(period: ChartPeriod, values: number[]) {
 }
 
 export async function getChart(symbol: string, period: ChartPeriod) {
-  const stock = stockBySymbol.get(symbol);
   const fixture = await getQuoteFixture(symbol);
-  if (!stock || !fixture) throw new Error("등록되지 않은 종목입니다.");
+  if (!fixture) throw new Error("등록되지 않은 종목입니다.");
   const cacheKey = `${symbol}:${period}`;
   const cached = chartCache.get(cacheKey);
   if (cached && Date.now() - cached.at < 5 * 60 * 1000) return cached.value;

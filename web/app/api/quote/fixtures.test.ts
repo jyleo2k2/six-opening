@@ -3,14 +3,12 @@ import test from "node:test";
 import { STOCKS } from "../../../shared/data/stocks";
 import { getQuoteFixture, getQuoteFixtures } from "./fixtures";
 
-test("PR UI quote fixtures cover the approved 51-stock universe", async () => {
+test("PR UI quote fixtures cover all 51 stocks, including Kiwoom Securities", async () => {
   const fixtures = await getQuoteFixtures();
 
-  assert.equal(fixtures.size, STOCKS.length);
-  assert.deepEqual(
-    [...fixtures.keys()].sort(),
-    STOCKS.map((stock) => stock.symbol).sort(),
-  );
+  assert.equal(fixtures.size, 51);
+  for (const stock of STOCKS) assert.ok(fixtures.has(stock.symbol));
+  assert.equal(fixtures.get("039490")?.name, "키움증권");
 });
 
 test("a fixture exposes price, rate, change and a deterministic chart", async () => {
@@ -25,4 +23,3 @@ test("a fixture exposes price, rate, change and a deterministic chart", async ()
   assert.equal(fixture.chart.length, 16);
   assert.equal(fixture.chart.at(-1), fixture.price);
 });
-

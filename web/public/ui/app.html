@@ -1180,40 +1180,16 @@ class Component extends DCLogic {
     };
     this.liveRefreshTick();
     this.liveRefreshTimer = setInterval(this.liveRefreshTick, 5000);
-    this.shellMessage = e => {
-      if (e.origin !== location.origin || e.source !== parent || !e.data || e.data.source !== 'kiwoom-shell' || e.data.type !== 'navigate') return;
-      const targets = { home:'home', stock:'explore', order:'buy', archive:'archive' };
-      const next = targets[e.data.target];
-      if (!next) return;
-      if (next === 'buy' && !this.state.code) {
-        const first = this.uni().stocks[0];
-        this.set({ code:first ? first.code : null, screen:first ? 'buy' : 'explore', buyStep:1, draft:this.blankDraft(), showPad:false, doneKind:'buy' });
-      } else {
-        this.set({ screen:next });
-      }
-    };
-    window.addEventListener('message', this.shellMessage);
-    this.notifyShell();
   }
   componentWillUnmount(){
     if (this.liveRefreshTimer) clearInterval(this.liveRefreshTimer);
-    if (this.shellMessage) window.removeEventListener('message', this.shellMessage);
   }
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
-    if (!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) {
-      this.notifyShell();
-      if (this.liveRefreshTick) this.liveRefreshTick();
+    if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
+      this.liveRefreshTick();
     }
-  }
-  notifyShell(){
-    if (parent === window) return;
-    const st = this.stock();
-    parent.postMessage({
-      source:'kiwoom-prototype', type:'context', screen:this.state.screen,
-      stock:st ? { id:'KRX:' + st.code, name:st.name, unitPrice:st.price } : null
-    }, location.origin);
   }
   persist(next){
     try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq })); } catch(e){}

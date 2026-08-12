@@ -23,3 +23,31 @@ body {
 }
 
 button, input { font: inherit; }
+
+.prototype-chat-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.prototype-chat-overlay > main {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.prototype-chat-overlay > main > div:first-child {
+  display: none;
+}
+
+.prototype-chat-overlay > main > button,
+.prototype-chat-overlay > main > aside,
+.prototype-chat-overlay > main > section {
+  pointer-events: auto;
+}
+
+.prototype-chat-overlay > main > button {
+  left: min(calc(50% + 140px), calc(100% - 44px));
+  bottom: 80px;
+}

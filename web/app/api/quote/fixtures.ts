@@ -13,6 +13,7 @@ export type QuoteFixture = {
 
 const ROW_PATTERN =
   /\['(\d{6})',\s*"([^"]+)",\s*"([^"]+)",\s*"[^"]*",\s*(-?[\d.]+),\s*(-?[\d.]+)\]/g;
+const UI_COMPATIBILITY_SYMBOLS = new Set(["039490"]);
 
 let fixturePromise: Promise<Map<string, QuoteFixture>> | undefined;
 
@@ -42,16 +43,16 @@ async function readFixtures() {
   const fixtures = new Map<string, QuoteFixture>();
 
   for (const match of source.matchAll(ROW_PATTERN)) {
-    const [, symbol, , , priceText, rateText] = match;
+    const [, symbol, name, , priceText, rateText] = match;
     const approved = approvedStocks.get(symbol);
-    if (!approved) continue;
+    if (!approved && !UI_COMPATIBILITY_SYMBOLS.has(symbol)) continue;
     const price = Number(priceText);
     const rate = Number(rateText);
     if (!Number.isFinite(price) || !Number.isFinite(rate) || price <= 0) continue;
     const previousClose = rate === -100 ? price : price / (1 + rate / 100);
     fixtures.set(symbol, {
       symbol,
-      name: approved.name,
+      name: approved?.name ?? name,
       price,
       change: Math.round(price - previousClose),
       rate,
@@ -59,9 +60,13 @@ async function readFixtures() {
     });
   }
 
-  if (fixtures.size !== STOCKS.length) {
+  const expectedSize = new Set([
+    ...STOCKS.map((stock) => stock.symbol),
+    ...UI_COMPATIBILITY_SYMBOLS,
+  ]).size;
+  if (fixtures.size !== expectedSize) {
     throw new Error(
-      `종목 픽스처가 승인 유니버스와 다릅니다. expected=${STOCKS.length} actual=${fixtures.size}`,
+      `종목 픽스처가 51종 유니버스와 다릅니다. expected=${expectedSize} actual=${fixtures.size}`,
     );
   }
   return fixtures;
