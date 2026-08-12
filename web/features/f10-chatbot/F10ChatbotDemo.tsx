@@ -258,12 +258,14 @@ export function F10ChatbotDemo() {
         body: JSON.stringify({
           message: question,
           context: chatContext,
-          ...(explainTurn && explainChoiceId
+          // 버튼을 눌렀으면 choiceId를 보내고, 직접 타이핑했으면 진행 중인 단계만 보내
+          // 서버가 구어체("ㅇㅇ", "몰라"…)를 해석하게 한다.
+          ...(explainTurn && explainTurn.stage !== "example"
             ? {
                 explain: {
                   scriptId: explainTurn.scriptId,
                   stage: explainTurn.stage,
-                  choiceId: explainChoiceId,
+                  ...(explainChoiceId ? { choiceId: explainChoiceId } : {}),
                 },
               }
             : {}),

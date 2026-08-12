@@ -7,7 +7,13 @@ import type { ChatResponse } from "../../../shared/types/chatbot";
 import { findExplainScript } from "../../../shared/data/chatbot-knowledge";
 import type { ChatActionPayload, ChatRequest } from "./contracts";
 import { sanitizeActionPayload } from "./contracts";
-import { advanceExplain, startExplain } from "./explain";
+import {
+  advanceExplain,
+  reaskExplain,
+  resolveTextReply,
+  startExplain,
+  type ExplainStep,
+} from "./explain";
 import { generateChatAnswer } from "./openai";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
@@ -87,6 +93,42 @@ function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal) {
   });
 }
 
+/**
+ * 4단계 설명 경로를 결정한다.
+ * - `"invalid"` = 위조되었거나 이어 갈 수 없는 응답
+ * - `ExplainStep` = 새로 시작하거나 다음 단계로 진행 (되묻기 포함)
+ * - `null` = 4단계와 무관 (기존 라우팅으로)
+ */
+function resolveExplainStep(
+  request: ChatRequest,
+  routed: ReturnType<typeof routeMessage>,
+): ExplainStep | "invalid" | null {
+  const protectedRoute =
+    routed.route === "refusal" ||
+    routed.route === "safety" ||
+    routed.route === "outOfScope";
+  if (protectedRoute) return null;
+
+  if (request.explain) {
+    const script = findExplainScript(request.explain.scriptId);
+    if (!script) return "invalid";
+
+    // 버튼을 누르지 않고 타이핑했으면 구어체를 해석한다.
+    const choiceId =
+      request.explain.choiceId ??
+      resolveTextReply(script, request.explain.stage, request.message);
+    if (!choiceId) {
+      // 새 질문으로 보이면 일반 라우팅으로 넘기고, 그 밖에는 선택지를 다시 보여준다.
+      return routed.explainScript || routed.route !== "fallback"
+        ? null
+        : reaskExplain(script, request.explain.stage);
+    }
+    return advanceExplain(script, { ...request.explain, choiceId }) ?? "invalid";
+  }
+
+  return routed.explainScript ? startExplain(routed.explainScript) : null;
+}
+
 export async function createChatOutcome(
   request: ChatRequest,
   session: ChatSession,
@@ -94,19 +136,7 @@ export async function createChatOutcome(
 ): Promise<ChatOutcome> {
   const onStatus = dependencies.onStatus ?? (() => undefined);
   const routed = routeMessage(request.message, request.context);
-  const protectedRoute = routed.route === "refusal" || routed.route === "safety" || routed.route === "outOfScope";
-  const newExplainTurn = !request.explain && !protectedRoute && routed.explainScript
-    ? startExplain(routed.explainScript)
-    : null;
-  const continuedExplainTurn = !protectedRoute && request.explain
-    ? (() => {
-        const script = findExplainScript(request.explain!.scriptId);
-        return script ? advanceExplain(script, request.explain!) : null;
-      })()
-    : null;
-  const invalidExplainContinuation = Boolean(
-    request.explain && !protectedRoute && !continuedExplainTurn,
-  );
+  const explainStep = resolveExplainStep(request, routed);
   let response: ChatResponse = {
     text: routed.text,
     suggestedQuestions: routed.suggestedQuestions,
@@ -119,19 +149,15 @@ export async function createChatOutcome(
 
   onStatus("질문을 안전하게 확인하는 중");
 
-  if (invalidExplainContinuation) {
+  if (explainStep === "invalid") {
     response = {
       text: "그 설명 단계는 이어 갈 수 없어. 궁금한 용어를 다시 물어봐 줘. 🐻",
     };
-  } else if (newExplainTurn ?? continuedExplainTurn) {
+  } else if (explainStep) {
     onStatus("단계별 설명 준비 완료");
-    const explainReply = newExplainTurn ?? continuedExplainTurn!;
-    response = { text: explainReply.text };
-    if (explainReply.kind === "turn") {
-      explainAction = {
-        kind: "explain",
-        turn: explainReply.turn,
-      };
+    response = { text: explainStep.text };
+    if (explainStep.kind === "turn") {
+      explainAction = { kind: "explain", turn: explainStep.turn };
     }
   } else if (routed.route === "tool" && routed.tool) {
     onStatus("허용된 내 자료를 확인하는 중");

@@ -63,6 +63,32 @@ async function main() {
   assert.equal(forgedTransition.action, undefined);
   assert.equal(modelCalls, 0);
 
+  // 버튼 대신 "ㅇㅇ"라고 타이핑해도 알아듣는다.
+  const typedYes = await createChatOutcome(
+    { message: "ㅇㅇ", context, explain: { scriptId: "term:per", stage: "detail" } },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(typedYes.response.text, "좋아, 이제 알겠네!");
+  assert.equal(modelCalls, 0);
+
+  // "몰라"는 예시 단계로 내려간다.
+  const typedNo = await createChatOutcome(
+    { message: "몰라", context, explain: { scriptId: "term:per", stage: "detail" } },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(typedNo.response.text.startsWith("그럼 예를 들어볼게."), true);
+
+  // 알아듣지 못하면 추측하지 않고 선택지를 다시 보여준다.
+  const unclear = await createChatOutcome(
+    { message: "냠냠", context, explain: { scriptId: "term:per", stage: "detail" } },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(isExplainAction(unclear.action), true);
+  assert.equal(modelCalls, 0);
+
   const refusal = await createChatOutcome(
     { message: "뭐 사면 돼?", context },
     session,

@@ -23,13 +23,85 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
   { id: "order", kind: "glossary", triggers: ["주문"], answer: "주문은 주식을 사고팔겠다고 거래소에 알리는 과정이야. 주문을 넣었다고 바로 거래가 끝나는 것은 아니야.", status: reviewed },
   { id: "execution", kind: "glossary", triggers: ["체결"], answer: "체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태야. 체결된 뒤에 보유 수량이 바뀌어.", status: reviewed },
   { id: "current-price", kind: "glossary", triggers: ["현재가"], answer: "현재가는 지금 화면에 표시된 최근 거래 가격이야. 시간이 지나면 달라질 수 있어.", status: reviewed },
-  { id: "market-order", kind: "glossary", triggers: ["시장가"], answer: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이야. 주문을 넣는 순간의 가격과 조금 달라질 수 있어.", status: reviewed },
-  { id: "limit-order", kind: "glossary", triggers: ["지정가"], answer: "지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이야. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어.", status: reviewed },
+  { id: "market-order", kind: "glossary", triggers: ["시장가"], answer: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이야. 주문을 넣는 순간의 가격과 조금 달라질 수 있어.",
+    explainScript: {
+        id: "term:market-order",
+        brief: "시장가는 지금 시장에 나와 있는 값으로 바로 주문하는 방법이야.",
+        check: {
+          question: "시장가 주문은 값을 누가 정할까?",
+          choices: [
+            { id: "market", label: "지금 시장" },
+            { id: "me", label: "내가 직접" },
+            { id: "bear", label: "키웅이" },
+          ],
+          answerId: "market",
+        },
+        detail:
+          "시장가는 내가 값을 정하지 않고 지금 시장에 나와 있는 값을 그대로 받아. 그래서 주문을 넣는 순간과 조금 달라질 수 있어.",
+        example:
+          "가게에 붙은 값표를 그대로 보고 고르는 것과 비슷해. 값을 깎지 않는 대신 기다리지 않아도 돼.",
+      },
+    status: reviewed },
+  { id: "limit-order", kind: "glossary", triggers: ["지정가"], answer: "지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이야. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어.",
+    explainScript: {
+        id: "term:limit-order",
+        brief: "지정가는 내가 정한 값에만 주문이 되도록 하는 방법이야.",
+        check: {
+          question: "지정가 주문은 값을 누가 정할까?",
+          choices: [
+            { id: "me", label: "내가 직접" },
+            { id: "market", label: "지금 시장" },
+            { id: "company", label: "회사" },
+          ],
+          answerId: "me",
+        },
+        detail:
+          "지정가는 내가 원하는 값을 미리 적어 두는 방법이야. 그 값에 거래할 상대가 없으면 주문이 바로 끝나지 않아.",
+        example:
+          "친구에게 이만큼이면 바꾸겠다고 미리 말해 두는 것과 비슷해. 친구가 동의해야 바꿀 수 있어.",
+      },
+    status: reviewed },
   { id: "quantity", kind: "glossary", triggers: ["수량", "몇 주"], answer: "수량은 사고팔 주식의 개수야. 한 주 가격과 곱하면 대략의 거래 금액을 확인할 수 있어.", status: reviewed },
   { id: "estimated-amount", kind: "glossary", triggers: ["예상 금액"], answer: "예상 금액은 주문 수량과 가격으로 계산한 돈이야. 주문을 확정하기 전 최종 금액을 다시 확인해 줘.", status: reviewed },
   { id: "evaluation-amount", kind: "glossary", triggers: ["평가금액"], answer: "평가금액은 지금 가지고 있는 주식이 현재 가격으로 얼마인지 보여주는 금액이야. 아직 팔지 않았다면 가격에 따라 바뀔 수 있어.", status: reviewed },
-  { id: "unrealized-profit", kind: "glossary", triggers: ["평가손익"], answer: "평가손익은 아직 가진 주식의 값이 산 뒤보다 얼마나 달라졌는지 보여줘. 아직 팔지 않은 변화라서 계속 바뀔 수 있어.", status: reviewed },
-  { id: "realized-profit", kind: "glossary", triggers: ["실현손익"], answer: "실현손익은 주식을 팔아 거래가 끝난 뒤 기록되는 결과야. 평가손익과 달리 이미 끝난 거래의 기록이야.", status: reviewed },
+  { id: "unrealized-profit", kind: "glossary", triggers: ["평가손익"], answer: "평가손익은 아직 가진 주식의 값이 산 뒤보다 얼마나 달라졌는지 보여줘. 아직 팔지 않은 변화라서 계속 바뀔 수 있어.",
+    explainScript: {
+        id: "term:unrealized-profit",
+        brief: "평가손익은 아직 팔지 않은 주식의 값이 얼마나 달라졌는지 보여줘.",
+        check: {
+          question: "평가손익은 언제 볼 수 있을까?",
+          choices: [
+            { id: "holding", label: "아직 가지고 있을 때" },
+            { id: "after", label: "팔고 난 뒤에" },
+            { id: "first", label: "처음 살 때만" },
+          ],
+          answerId: "holding",
+        },
+        detail:
+          "평가손익은 지금 가진 주식을 오늘 값으로 계산한 결과야. 아직 거래가 끝나지 않아서 숫자가 계속 바뀌어.",
+        example:
+          "서랍에 넣어 둔 카드의 요즘 값을 적어 둔 쪽지와 비슷해. 아직 바꾸지 않았으니 숫자는 계속 달라져.",
+      },
+    status: reviewed },
+  { id: "realized-profit", kind: "glossary", triggers: ["실현손익"], answer: "실현손익은 주식을 팔아 거래가 끝난 뒤 기록되는 결과야. 평가손익과 달리 이미 끝난 거래의 기록이야.",
+    explainScript: {
+        id: "term:realized-profit",
+        brief: "실현손익은 주식을 팔아서 거래가 끝난 뒤에 남는 결과야.",
+        check: {
+          question: "실현손익은 언제 정해질까?",
+          choices: [
+            { id: "after", label: "팔고 난 뒤에" },
+            { id: "holding", label: "아직 가지고 있을 때" },
+            { id: "order", label: "주문을 넣을 때" },
+          ],
+          answerId: "after",
+        },
+        detail:
+          "실현손익은 거래가 이미 끝나서 더 이상 바뀌지 않아. 평가손익과 달리 지나간 기록이야.",
+        example:
+          "친구와 카드를 바꾸고 나서 적어 둔 결과표와 비슷해. 바꾼 뒤에는 숫자가 그대로 남아.",
+      },
+    status: reviewed },
   { id: "return", kind: "glossary", triggers: ["수익률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이야. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아.", status: reviewed },
   { id: "average-price", kind: "glossary", triggers: ["평균 매수가", "평균매수가"], answer: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이야.", status: reviewed },
   { id: "sector", kind: "glossary", triggers: ["업종"], answer: "업종은 비슷한 일을 하는 회사들을 묶은 이름이야. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어.", status: reviewed },
@@ -58,11 +130,65 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
     },
     status: reviewed,
   },
-  { id: "pbr", kind: "glossary", triggers: ["pbr", "주가순자산비율"], answer: "PBR은 회사가 가진 자산과 주가를 비교해 보는 숫자야. 이 숫자 하나만으로 좋고 나쁜 회사를 정할 수는 없어.", status: reviewed },
-  { id: "eps", kind: "glossary", triggers: ["eps", "주당순이익"], answer: "EPS는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자야. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자야.", status: reviewed },
+  { id: "pbr", kind: "glossary", triggers: ["pbr", "주가순자산비율"], answer: "PBR은 회사가 가진 자산과 주가를 비교해 보는 숫자야. 이 숫자 하나만으로 좋고 나쁜 회사를 정할 수는 없어.",
+    explainScript: {
+        id: "term:pbr",
+        brief: "PBR은 회사 값이 회사가 가진 재산에 비해 높은지 보는 숫자야.",
+        check: {
+          question: "PBR은 회사 값을 무엇과 비교할까?",
+          choices: [
+            { id: "asset", label: "회사가 가진 재산" },
+            { id: "staff", label: "직원 수" },
+            { id: "age", label: "회사 나이" },
+          ],
+          answerId: "asset",
+        },
+        detail:
+          "PBR은 회사 전체 값을 회사가 가진 재산으로 나눈 값이야. 재산에는 건물과 기계, 남아 있는 돈이 함께 들어가.",
+        example:
+          "가진 물건이 똑같은 가게가 두 곳 있다고 해 보자. 한 곳이 세 배 비싸면 그 가게의 PBR이 더 커.",
+      },
+    status: reviewed },
+  { id: "eps", kind: "glossary", triggers: ["eps", "주당순이익"], answer: "EPS는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자야. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자야.",
+    explainScript: {
+        id: "term:eps",
+        brief: "EPS는 회사가 번 돈을 주식 한 조각 몫으로 나눈 값이야.",
+        check: {
+          question: "EPS는 회사가 번 돈을 무엇으로 나눌까?",
+          choices: [
+            { id: "shares", label: "전체 주식 수" },
+            { id: "staff", label: "직원 수" },
+            { id: "stores", label: "가게 수" },
+          ],
+          answerId: "shares",
+        },
+        detail:
+          "회사가 한 해에 번 돈을 전체 주식 수로 나누면 EPS가 나와. 조각 하나가 얼마씩 벌었는지 보는 숫자야.",
+        example:
+          "피자 한 판을 여덟 조각으로 나누면 한 조각 몫이 정해지지. EPS도 번 돈을 조각 수로 나눈 몫이야.",
+      },
+    status: reviewed },
   { id: "etf", kind: "glossary", triggers: ["etf"], answer: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이야. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어.", status: reviewed },
   { id: "index", kind: "glossary", triggers: ["지수"], answer: "지수는 여러 주식의 가격 움직임을 한눈에 보기 위해 만든 숫자야. 시장 전체나 특정 업종의 흐름을 살펴볼 때 써.", status: reviewed },
-  { id: "diversification", kind: "glossary", triggers: ["분산투자", "분산 투자"], answer: "분산투자는 한 곳에만 담지 않고 여러 곳에 나누어 보는 방법이야. 결과를 보장하지는 않지만 한 종목에만 의존하는 정도는 줄일 수 있어.", status: reviewed },
+  { id: "diversification", kind: "glossary", triggers: ["분산투자", "분산 투자"], answer: "분산투자는 한 곳에만 담지 않고 여러 곳에 나누어 보는 방법이야. 결과를 보장하지는 않지만 한 종목에만 의존하는 정도는 줄일 수 있어.",
+    explainScript: {
+        id: "term:diversification",
+        brief: "분산투자는 한 곳에 몰아 두지 않고 여러 곳에 나눠 두는 방법이야.",
+        check: {
+          question: "여러 곳에 나눠 두면 무엇이 달라질까?",
+          choices: [
+            { id: "steady", label: "한 곳이 나빠져도 덜 흔들려" },
+            { id: "always", label: "언제나 돈이 늘어나" },
+            { id: "free", label: "수수료가 사라져" },
+          ],
+          answerId: "steady",
+        },
+        detail:
+          "여러 곳에 나눠 두면 한 곳이 나빠져도 전체가 한꺼번에 흔들리지 않아. 대신 한 곳이 아주 잘돼도 전체는 그만큼 크게 달라지지 않아.",
+        example:
+          "달걀을 한 바구니에 다 담지 않는 것과 같아. 바구니 하나를 떨어뜨려도 남은 달걀은 무사해.",
+      },
+    status: reviewed },
   { id: "chart", kind: "glossary", triggers: ["차트"], answer: "차트는 과거 가격 변화를 그림으로 보여줘. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니야.", status: reviewed },
   { id: "volume", kind: "glossary", triggers: ["거래량"], answer: "거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자야. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어.", status: reviewed },
   { id: "volatility", kind: "glossary", triggers: ["변동성"], answer: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해. 가격은 늘 움직일 수 있다는 점을 기억하면 돼.", status: reviewed },

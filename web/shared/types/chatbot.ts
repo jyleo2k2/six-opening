@@ -42,12 +42,18 @@ export type ExplainTurn = {
   choices: readonly ExplainChoice[];
 };
 
-/** 아이가 보내는 응답. example 단계는 응답을 받지 않는다. */
+/**
+ * 아이가 보내는 응답. example 단계는 응답을 받지 않는다.
+ * `choiceId`가 없으면 버튼 대신 직접 타이핑한 경우이며 서버가 message를 해석한다.
+ */
 export type ExplainReply = {
   scriptId: string;
   stage: Exclude<ExplainStage, "example">;
-  choiceId: string;
+  choiceId?: string;
 };
+
+/** 선택지 id가 확정된 응답. 전이 함수는 이것만 받는다. */
+export type ResolvedExplainReply = ExplainReply & { choiceId: string };
 
 export type ChatResponse = {
   text: string;
