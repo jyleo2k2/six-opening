@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "대만 이야기",
+  "headline": "대만 증시 이틀째 상승 마감",
+  "home_summary": {
+    "text": "대만 증시가 이틀째 올랐어. 전자기기주와 일부 반도체 관련주가 상승했어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "대만 타이베이 증시가 이틀째 오른 채 마감했어. 자취안 지수는 0.43% 오른 4만5120.72였어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "전자기기주와 석유화학주는 올랐어. 방직주와 금융주는 내렸어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 같은 날 오른 종목과 내린 종목이 함께 있었어.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    { "text": "대만 증시가 이틀째 올랐어", "source_ids": ["S3"] },
+    { "text": "전자기기주는 올랐어", "source_ids": ["S3"] },
+    { "text": "오른 종목과 내린 종목이 있었어", "source_ids": ["S3"] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

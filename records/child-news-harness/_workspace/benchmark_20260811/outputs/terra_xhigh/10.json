@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "기아현대 이야기",
+  "headline": "7월 국내 자동차 판매를 살펴봤어",
+  "home_summary": {
+    "text": "7월 국내에서 기아가 현대차보다 많이 팔았어. 수출을 합친 판매량은 현대차가 더 많았어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "7월 국내 판매량은 기아 5만4604대, 현대차 4만8113대였어. 수출을 포함한 총판매량은 현대차 31만8454대, 기아 29만8037대였어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "기아의 1분기 영업이익은 2조2000억원이었어. 현대차 자동차부문은 같은 기간 1조8000억원이었어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 한 달의 국내 판매량만으로 앞으로의 판매 결과는 알 수 없어. 수출을 포함한 전체 판매량은 국내 판매량과 달라.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    { "text": "기아의 국내 판매가 더 많았어", "source_ids": ["S3"] },
+    { "text": "현대차 총판매량이 더 많았어", "source_ids": ["S3"] },
+    { "text": "앞으로 판매는 알 수 없어", "source_ids": [] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

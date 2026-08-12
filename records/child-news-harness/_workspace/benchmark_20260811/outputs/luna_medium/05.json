@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "산업 이야기",
+  "headline": "AI 기업에 돈이 흘러가",
+  "home_summary": {"text": "중국이 AI 기업 대출 방식을 바꿨어. 미국에는 칩 담보 금융도 나왔어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "중국이 시장 금리를 반영하는 대출 방식을 내놓았어. AI 기업 자금 유입을 돕기 위한 변화야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "11일까지 첨단기술과 바이오 등 21건의 대출이 이 방식으로 이뤄졌어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 AI 투자 경쟁이 커지면 거품 위험이 생길 수 있다는 경고도 나왔어.", "epistemic": "unknown", "source_ids": ["S3"]}
+  ],
+  "takeaways": [
+    {"text": "중국이 대출 방식을 바꿨어", "source_ids": ["S3"]},
+    {"text": "첨단산업 대출 21건이 나왔어", "source_ids": ["S3"]},
+    {"text": "거품 위험 경고도 나왔어", "source_ids": ["S3"]}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

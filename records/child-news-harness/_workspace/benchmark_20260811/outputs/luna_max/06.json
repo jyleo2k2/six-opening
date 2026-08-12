@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "전기요금 이야기",
+  "headline": "에어컨 송풍이 전기를 덜 쓰는 까닭",
+  "home_summary": {
+    "text": "전기요금은 사용량에 따라 크게 달라져. 한전은 AI 알림 서비스도 운영하고 있어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "누진제는 전기를 많이 쓸수록 단가가 오르는 방식이야. 7~8월 주택용 누진제 구간이 한시적으로 완화됐어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "에어컨 전력 대부분은 실외기 압축기에서 나와. 송풍 모드에서는 압축기가 멈춰 전력 소비가 30~50% 줄 수 있어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 집마다 사용량과 누진 구간이 달라 실제 요금은 다를 수 있어.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    { "text": "누진제는 많이 쓸수록 비싸져", "source_ids": ["S3"] },
+    { "text": "한전이 AI 알림을 보내고 있어", "source_ids": ["S3"] },
+    { "text": "송풍은 압축기가 멈춰", "source_ids": ["S3"] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

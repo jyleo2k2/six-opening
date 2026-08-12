@@ -1,0 +1,48 @@
+{
+  "decision": "publish",
+  "category": "조선 이야기",
+  "headline": "한화의 미국 조선 사업 제안",
+  "home_summary": {
+    "text": "한화가 오스탈 USA 사업을 사겠다고 제안했어. 미국 정부 승인과 계약은 아직 남았어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "한화는 오스탈 USA의 사업과 운영 조직을 인수하겠다고 제안했어. 인수는 사업을 사들여 운영권을 얻는 일이야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "제안 금액은 10억5000만 달러에서 12억 달러로 알려졌어. 오스탈 이사회는 한화에 4주간 사업을 살펴볼 기회를 줬어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 미국 정부 승인과 정식 계약 절차가 남아 있어. 거래가 성사될지는 아직 알 수 없어.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    {
+      "text": "한화가 사업 인수를 제안했어",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "4주간 살펴볼 기회를 받았어",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "성사 여부는 아직 몰라",
+      "source_ids": []
+    }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

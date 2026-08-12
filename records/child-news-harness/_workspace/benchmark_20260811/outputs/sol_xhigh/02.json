@@ -1,0 +1,48 @@
+{
+  "decision": "publish",
+  "category": "기업 이야기",
+  "headline": "롯데렌탈 매각 발표",
+  "home_summary": {
+    "text": "롯데그룹이 롯데렌탈을 TPG에 팔기로 했어. 받는 돈은 1조3105억원이야.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "롯데그룹은 롯데렌탈 지분 61.2% 전량을 TPG에 팔기로 했어. 받는 돈은 1조3105억원이야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "호텔롯데와 부산롯데호텔이 가진 기존 주식만 넘기는 방식이야. 새 주식은 만들지 않아.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 거래가 정확히 언제 끝날지는 기사에 나오지 않았어. 끝나는 시점은 아직 알 수 없어.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    {
+      "text": "지분 61.2%를 팔기로 했어",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "기존 주식만 넘겨",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "끝나는 시점은 아직 몰라",
+      "source_ids": []
+    }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

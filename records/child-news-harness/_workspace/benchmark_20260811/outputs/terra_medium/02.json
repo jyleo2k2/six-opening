@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "렌터카 이야기",
+  "headline": "롯데렌탈의 새 인수자가 정해졌어",
+  "home_summary": {"text": "롯데렌탈 지분 61.2%를 TPG에 넘기기로 했어. 매각대금은 1조3105억원이야.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "롯데그룹은 롯데렌탈 지분 61.2% 전량을 TPG에 매각한다고 밝혔어. 매각대금은 1조3105억원이야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "이번 거래는 새 주식을 만들지 않고 기존 주식을 넘기는 방식이야. TPG는 국내에 별도 렌터카 사업이 없다고 기사에 나와 있어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 거래가 끝나는 정확한 시점은 기사에서 알 수 없어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "TPG가 인수자로 정해졌어", "source_ids": ["S3"]},
+    {"text": "기존 주식을 넘기는 거래야", "source_ids": ["S3"]},
+    {"text": "거래 종료 시점은 미정이야", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "대만증시 이야기",
+  "headline": "대만 증시가 이틀째 올랐어",
+  "home_summary": {"text": "대만 자취안 지수가 0.43% 올랐어. 전자기기와 석유화학 업종도 올랐어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "대만 자취안 지수는 11일 0.43% 올라 마감했어. 2거래일 연속 오른 거야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "전자기기와 석유화학 업종은 올랐어. 반면 금융주와 건설주는 내렸어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 업종마다 움직임이 달라 앞으로의 흐름은 알 수 없어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "자취안 지수가 0.43% 올랐어", "source_ids": ["S3"]},
+    {"text": "전자기기 업종은 올랐어", "source_ids": ["S3"]},
+    {"text": "업종별 움직임이 달랐어", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

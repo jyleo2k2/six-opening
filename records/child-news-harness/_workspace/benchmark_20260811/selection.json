@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "date_kst": "2026-08-11",
+  "mix": { "경제": 3, "섹터": 3, "종목": 4 },
+  "note": "종목 4건은 유니버스 51종 안에서만 골랐다. N0730과 N0444는 주가 급등·평가 논조가 섞인 스트레스 테스트용이다.",
+  "selections": [
+    {
+      "candidate_id": "N0349",
+      "bucket": "경제",
+      "scope": "economy",
+      "publisher": "경향신문",
+      "reason": "폭염이라는 아이가 겪는 현상과 경제 손실 숫자가 직접 연결된다"
+    },
+    {
+      "candidate_id": "N0165",
+      "bucket": "경제",
+      "scope": "company",
+      "publisher": "오토데일리",
+      "reason": "회사가 팔린다는 개념과 1.3조원이라는 구체적 금액이 있다"
+    },
+    {
+      "candidate_id": "N0730",
+      "bucket": "경제",
+      "scope": "market",
+      "publisher": "헤럴드경제",
+      "reason": "주가 급등·상한가 표현이 많아 투자 권유 필터의 스트레스 테스트가 된다"
+    },
+    {
+      "candidate_id": "N0460",
+      "bucket": "섹터",
+      "scope": "industry",
+      "publisher": "뉴시스",
+      "reason": "반도체 위탁생산과 AI 서버 수요 연결이 화면 예시와 같은 소재다"
+    },
+    {
+      "candidate_id": "N0803",
+      "bucket": "섹터",
+      "scope": "industry",
+      "publisher": "한국경제",
+      "reason": "AI에 돈이 몰리는 큰 흐름을 국가 정책 단위로 설명할 수 있다"
+    },
+    {
+      "candidate_id": "N0432",
+      "bucket": "섹터",
+      "scope": "economy",
+      "publisher": "서울경제",
+      "reason": "전기요금과 AI 알림 서비스라 아이 생활과 바로 이어진다"
+    },
+    {
+      "candidate_id": "N0696",
+      "bucket": "종목",
+      "scope": "company",
+      "publisher": "이데일리",
+      "reason": "현대차 파업과 생산 차질 7만대라는 인과가 뚜렷하다"
+    },
+    {
+      "candidate_id": "N0668",
+      "bucket": "종목",
+      "scope": "company",
+      "publisher": "소셜밸류",
+      "reason": "한국타이어 영업이익 증감률과 공장 증설이 함께 나온다"
+    },
+    {
+      "candidate_id": "N0812",
+      "bucket": "종목",
+      "scope": "company",
+      "publisher": "아주경제",
+      "reason": "한화에어로스페이스·한국항공우주 두 유니버스 종목이 연결된다"
+    },
+    {
+      "candidate_id": "N0444",
+      "bucket": "종목",
+      "scope": "company",
+      "publisher": "경향신문",
+      "reason": "칼럼이라 평가·논조가 섞여 있어 훈계 금지 규칙의 스트레스 테스트가 된다"
+    }
+  ]
+}

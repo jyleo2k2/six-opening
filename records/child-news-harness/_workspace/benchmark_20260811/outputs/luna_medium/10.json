@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "회사 이야기",
+  "headline": "기아가 국내 판매 1위",
+  "home_summary": {"text": "기아가 7월 국내 판매에서 현대차를 앞섰어. 수출 포함 판매는 현대차가 많아.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "기아의 7월 국내 판매량은 5만4604대로 현대차보다 많았어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "수출을 포함한 7월 총판매량은 현대차 31만8454대, 기아 29만8037대였어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 이런 판매 흐름이 앞으로도 같을지는 알 수 없어. 두 회사의 경쟁 결과도 정해지지 않았어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "기아가 국내 판매를 앞섰어", "source_ids": ["S3"]},
+    {"text": "수출 포함 판매는 현대차가 많아", "source_ids": ["S3"]},
+    {"text": "앞으로의 결과는 몰라", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

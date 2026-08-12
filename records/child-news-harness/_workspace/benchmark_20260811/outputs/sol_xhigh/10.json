@@ -1,0 +1,48 @@
+{
+  "decision": "publish",
+  "category": "자동차 이야기",
+  "headline": "기아가 7월 국내 판매 앞서",
+  "home_summary": {
+    "text": "기아는 7월 국내에서 5만4604대를 팔았어. 현대차는 4만8113대를 팔았어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "기아의 7월 국내 판매는 5만4604대였어. 현대차의 4만8113대보다 많았어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "수출을 더한 7월 전체 판매는 현대차가 31만8454대였어. 기아는 29만8037대였어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 한 달 판매량만으로 다음 달 결과는 알 수 없어. 두 회사의 판매량은 달마다 달라질 수 있어.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    {
+      "text": "기아 국내 판매 5만4604대",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "전체 판매는 현대차가 앞서",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "다음 달 결과는 아직 몰라",
+      "source_ids": []
+    }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

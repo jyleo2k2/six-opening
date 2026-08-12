@@ -1,0 +1,48 @@
+{
+  "decision": "publish",
+  "category": "날씨 이야기",
+  "headline": "폭염에 낮아진 유럽 강물",
+  "home_summary": {
+    "text": "유럽의 강물 수위가 크게 낮아졌어. 물류와 산업 생산에 차질이 생겼어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "유럽은 올여름 폭염과 가뭄을 겪었어. 라인강과 다뉴브강 수위가 크게 낮아졌어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "낮은 수위로 물류와 산업 생산에 차질이 생겼어. 루마니아는 원자로 1기의 가동을 멈췄어. 원자로는 원자력으로 열을 만드는 시설이야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 폭염과 가뭄이 언제까지 이어질지는 아직 알 수 없어. 강물 수위도 계속 달라질 수 있어.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    {
+      "text": "유럽 강물 수위가 낮아졌어",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "물류와 생산에 차질이 생겼어",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "가뭄이 언제 끝날지는 몰라",
+      "source_ids": []
+    }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

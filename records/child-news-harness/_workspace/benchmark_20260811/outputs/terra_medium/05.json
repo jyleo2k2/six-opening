@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "AI금융 이야기",
+  "headline": "AI 반도체에 돈을 빌려주는 방식",
+  "home_summary": {"text": "AI 반도체를 담보로 돈을 빌려주는 방식을 소개했어. 중국도 일부 기업에 새 대출 방식을 썼어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "금융회사는 데이터센터 업체에 AI 반도체를 담보로 돈을 빌려주는 방식을 검토하고 있어. AI 반도체 임대 사업도 언급됐어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "중국은 일부 첨단기술 기업에 DR 연동 대출을 하고 있어. DR은 자금시장 상황을 반영해 정해지는 금리야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 이런 금융 방식의 자세한 운영은 공개되지 않았어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "AI 칩을 담보로 돈을 빌려줘", "source_ids": ["S3"]},
+    {"text": "중국은 새 대출 방식을 썼어", "source_ids": ["S3"]},
+    {"text": "자세한 운영은 공개되지 않았어", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

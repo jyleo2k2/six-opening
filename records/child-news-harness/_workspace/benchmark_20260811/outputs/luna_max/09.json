@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "방산 이야기",
+  "headline": "한화가 오스탈 USA 인수 추진",
+  "home_summary": {
+    "text": "한화가 오스탈 USA 인수를 추진하고 있어. KAI 지분도 15%를 넘겼어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "한화가 오스탈 USA 인수를 위한 조건부 제안을 했어. 제안 금액은 10억5000만 달러에서 12억 달러 수준이야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "한화시스템이 KAI 지분 4.98%를 확보해 그룹 전체 지분이 15%를 넘겼어. 지분이 15%를 넘으면서 기업결합 신고 대상이 됐어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 오스탈 USA 거래는 미국 정부 승인과 정식 계약 절차가 남아 있어.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    { "text": "오스탈 USA 인수를 제안했어", "source_ids": ["S3"] },
+    { "text": "KAI 지분이 15%를 넘었어", "source_ids": ["S3"] },
+    { "text": "미국 승인 절차가 남았어", "source_ids": ["S3"] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "금융 이야기",
+  "headline": "중국과 미국의 AI 자금 지원",
+  "home_summary": {
+    "text": "중국은 일부 기업에 새 대출을 허용했어. 미국은 AI 반도체 금융 플랫폼을 내놨어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "중국 금융당국이 시장 상황을 반영하는 DR 연동 대출을 일부 기업에 허용했어. DR은 자금시장 상황에 따라 정해지는 금리야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "미국 금융회사들은 AI 반도체를 빌려주거나 담보로 돈을 빌려주는 플랫폼을 내놨어. 계획된 자금 규모는 5000억달러야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 금융회사들이 이 플랫폼에서 어떻게 수익을 낼지는 공개되지 않았어.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    { "text": "중국이 일부 기업에 대출을 허용했어", "source_ids": ["S3"] },
+    { "text": "AI 반도체를 담보로 쓸 수 있어", "source_ids": ["S3"] },
+    { "text": "수익 방식은 공개되지 않았어", "source_ids": ["S3"] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

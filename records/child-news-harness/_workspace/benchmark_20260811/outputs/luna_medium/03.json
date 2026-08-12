@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "시장 이야기",
+  "headline": "코스닥 급등에 적자주도 올라",
+  "home_summary": {"text": "코스닥이 하루 만에 6.97% 올랐어. 상한가 11곳 중 8곳은 적자였어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "코스닥지수가 전날보다 6.97% 오른 854.47로 마감했어. 상한가 종목은 11곳이었어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "상한가 11곳 중 8곳은 올해 1분기 영업적자를 기록한 기업이었어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 이런 급등이 계속될지는 알 수 없어. 일부 종목에는 관리종목 지정 우려 공시도 나왔어.", "epistemic": "unknown", "source_ids": ["S3"]}
+  ],
+  "takeaways": [
+    {"text": "코스닥이 6.97% 올랐어", "source_ids": ["S3"]},
+    {"text": "상한가 11곳 중 8곳은 적자야", "source_ids": ["S3"]},
+    {"text": "급등이 계속될지는 몰라", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

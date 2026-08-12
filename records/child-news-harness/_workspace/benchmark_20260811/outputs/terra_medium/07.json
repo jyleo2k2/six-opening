@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "자동차 이야기",
+  "headline": "현대차 노조가 부분파업을 정했어",
+  "home_summary": {"text": "현대차 노조가 부분파업을 정했어. 파업 시간은 날짜마다 4시간 또는 6시간이야.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "현대차 노조는 12일과 13일에 각각 4시간 부분파업을 정했어. 14일과 18일에는 각각 6시간 파업하기로 했어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "지난달 부분파업으로 4만2510대의 생산 차질이 발생했어. 이번 파업은 아반떼와 투싼 생산 일정에도 영향을 줄 수 있다고 기사에 나왔어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 노사 교섭이 언제 다시 열릴지는 정해지지 않았어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "부분파업 일정이 정해졌어", "source_ids": ["S3"]},
+    {"text": "지난달 생산 차질이 있었어", "source_ids": ["S3"]},
+    {"text": "교섭 재개 시점은 미정이야", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}
