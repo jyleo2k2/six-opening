@@ -212,13 +212,13 @@ export function F10ChatbotDemo() {
 
     const state = action.state as Record<string, unknown>;
     return (
-      ["per", "etf", "diversification"].includes(String(state.topicId)) &&
+      /^(term|stock):.+$/.test(String(state.topicId)) &&
       typeof state.currentNodeId === "string" &&
       action.options.every((option) => {
         if (!option || typeof option !== "object") return false;
         const candidate = option as Record<string, unknown>;
         return (
-          ["simpler", "example", "detail", "understood"].includes(String(candidate.id)) &&
+          ["simpler", "example", "detail", "offerings", "touchpoint", "sector", "understood"].includes(String(candidate.id)) &&
           typeof candidate.label === "string"
         );
       })

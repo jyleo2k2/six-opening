@@ -116,11 +116,11 @@ export async function POST(request: NextRequest) {
 
       send("status", "무슨 질문인지 보는 중");
       const shouldUseGuidedDialogue =
-        routed.route === "faq" || routed.route === "fallback";
+        routed.route === "faq" || routed.route === "context" || routed.route === "fallback";
       const guidedTurn = shouldUseGuidedDialogue
         ? guidedDialogue
           ? advanceGuidedDialogue(guidedDialogue.state, guidedDialogue.optionId)
-          : startGuidedDialogue(message)
+          : startGuidedDialogue(message, context)
         : null;
 
       if (guidedDialogue && shouldUseGuidedDialogue && !guidedTurn) {
