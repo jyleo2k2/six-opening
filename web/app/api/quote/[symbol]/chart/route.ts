@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-import { getChart, type ChartPeriod } from "../../kiwoom";
+import { after, NextResponse } from "next/server";
+import { getChart, refreshStoredChart, type ChartPeriod } from "../../kiwoom";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +18,11 @@ export async function GET(
       );
     }
     const period = requestedPeriod as ChartPeriod;
+    const points = await getChart(symbol, period);
+    // 응답을 먼저 보내고 보관 DB의 최신 구간을 뒤에서 채운다.
+    if (period !== "minute") after(() => refreshStoredChart(symbol, period));
     return NextResponse.json(
-      { symbol, period, points: await getChart(symbol, period) },
+      { symbol, period, points },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
