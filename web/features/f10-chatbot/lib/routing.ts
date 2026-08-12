@@ -1,4 +1,8 @@
-import { findChatbotKnowledge } from "../../../shared/data/chatbot-knowledge";
+import {
+  CHAT_PRIVACY_ANSWER,
+  TRADE_VISIBILITY_ANSWER,
+  findChatbotKnowledge,
+} from "../../../shared/data/chatbot-knowledge";
 import { STOCKS } from "../../../shared/data/stocks";
 import type {
   ChatContext,
@@ -140,6 +144,7 @@ const SELECTION_PATTERNS = [
   "추천해",
   "추천좀",
   "추천ᄀ",
+  "친구가사라",
 ];
 const PREDICTION_PATTERNS = [
   "오를까",
@@ -178,6 +183,9 @@ const PREDICTION_PATTERNS = [
   "손절가알려",
   "손절가정해",
   "손절가찍",
+  "요즘뭐가올라",
+  "요즘어떤게올라",
+  "요즘오르는종목",
 ];
 const VAGUE_FORECAST_PATTERNS = ["어때", "어떨", "괜찮을까", "잘갈까"];
 const FUTURE_PATTERNS = [
@@ -417,7 +425,7 @@ const CRISIS_PATTERNS = [
   "내가없어졌으면",
   "모든게끝났으면",
 ];
-const FAMILY_MEMBER_PATTERNS = ["엄마", "아빠", "부모님", "부모", "가족"];
+const FAMILY_MEMBER_PATTERNS = ["엄마", "아빠", "부모님", "부모", "보호자", "가족"];
 const FAMILY_DATA_PATTERNS = [
   "수익률",
   "성향",
@@ -794,6 +802,40 @@ const STOCK_FINANCIAL_PATTERNS = [
   "재무",
   "2024",
 ];
+const CHAT_PRIVACY_PATTERNS = [
+  "너랑한얘기",
+  "나눈얘기",
+  "키웅이랑한채팅",
+  "키웅이한테",
+  "채팅",
+  "대화",
+  "물어본",
+  "질문",
+  "엄마한테말안하면",
+  "아빠한테말안하면",
+  "부모한테말안하면",
+  "보호자한테말안하면",
+];
+const TRADE_VISIBILITY_PATTERNS = [
+  "내가뭐샀",
+  "내가뭘샀",
+  "내가산거",
+  "내가판거",
+  "내가산주식",
+  "내보유종목",
+  "내주문",
+  "내거래기록",
+  "내거래내역",
+  "내매수기록",
+  "내매도기록",
+  "내주문기록",
+];
+const FAMILY_COMPARISON_PATTERNS = [
+  "가족비교",
+  "부모비교",
+  "엄마랑비교",
+  "아빠랑비교",
+];
 
 export function normalizeChatInput(input: string) {
   return input.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}%]+/gu, "");
@@ -930,6 +972,20 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 }
 
 function findRecommendationKind(message: string): RecommendationKind | null {
+  const asksForSelectionCriteria =
+    includesAny(message, ["종목고를때", "주식고를때", "회사고를때", "투자기준"]) &&
+    !includesAny(message, [
+      "추천",
+      "골라",
+      "정해",
+      "대신",
+      "뭐가좋",
+      "뭐살",
+      "뭘살",
+      "사줘",
+    ]);
+  if (asksForSelectionCriteria) return null;
+
   const selection = includesAny(message, SELECTION_PATTERNS);
   const prediction =
     includesAny(message, PREDICTION_PATTERNS) ||
@@ -1485,12 +1541,25 @@ function getContextReply(message: string, context: ChatContext): ChatReply | nul
     return reply(
       "context",
       "service_help",
-      `지금 화면의 ${context.quantity}주와 1주 ${formatWon(context.unitPrice)}을 곱하면 예상 금액은 ${formatWon(total)}이야. 실제 주문 전에는 화면의 최종 금액을 한 번 더 확인해 줘.`,
+      `지금 화면의 ${context.quantity}주와 1주 ${formatWon(context.unitPrice)}을 곱하면 예상 금액은 ${formatWon(total)}이에요. 실제 주문 전에는 화면의 최종 금액을 한 번 더 확인하면 돼요.`,
       ["현재 주문 수량 확인", "표시 가격으로 계산"],
       { uiAction: { type: "open_screen", target: "order" } },
     );
   }
 
+  return null;
+}
+
+function getPrivacyReply(message: string): ChatReply | null {
+  if (includesAny(message, FAMILY_COMPARISON_PATTERNS)) return null;
+  if (!includesAny(message, FAMILY_MEMBER_PATTERNS)) return null;
+
+  if (includesAny(message, TRADE_VISIBILITY_PATTERNS)) {
+    return reply("safety", "safety", TRADE_VISIBILITY_ANSWER, ["거래 기록 공개 범위 안내"]);
+  }
+  if (includesAny(message, CHAT_PRIVACY_PATTERNS)) {
+    return reply("safety", "safety", CHAT_PRIVACY_ANSWER, ["챗봇 대화 공개 범위 안내"]);
+  }
   return null;
 }
 
@@ -1501,7 +1570,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "safety",
       "safety",
-      "알려줘서 고마워. 지금은 투자 화면을 닫고 쉬면서, 계속 힘들면 믿을 수 있는 어른에게 지금 마음을 말해 줘.",
+      "알려줘서 고마워요. 지금은 투자 화면을 닫고 쉬면서, 계속 힘들면 믿을 수 있는 어른에게 지금 마음을 말해 줘요.",
       ["안전 상태 확인"],
     );
   }
@@ -1510,10 +1579,13 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "safety",
       "safety",
-      "지금 혼자 있지 말고 가까운 보호자·교사처럼 믿을 수 있는 어른에게 바로 알려 줘. 급하게 다칠 위험이 있으면 112나 119에 도움을 요청해 줘.",
+      "지금 혼자 있지 말고 가까운 보호자·교사처럼 믿을 수 있는 어른에게 바로 알려 줘요. 급하게 다칠 위험이 있으면 112나 119에 도움을 요청해 줘요.",
       ["긴급 도움 안내"],
     );
   }
+
+  const privacyReply = getPrivacyReply(message);
+  if (privacyReply) return privacyReply;
 
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);
@@ -1522,7 +1594,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "safety",
       "safety",
-      "그 요청은 여기서 도와줄 수 없어. 투자 화면이나 금융 기초가 궁금하면 다시 물어봐 줘.",
+      "그 요청은 여기서 도와줄 수 없어요. 투자 화면이나 금융 기초가 궁금하면 다시 물어봐 주세요.",
       ["안전 안내"],
     );
   }
@@ -1539,7 +1611,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "outOfScope",
       "safety",
-      "나는 이 서비스의 사용법과 투자 기초 이야기만 도와줄 수 있어. 화면이나 금융 용어가 궁금하면 물어봐 줘. 🐻",
+      "저는 이 서비스의 사용법과 투자 기초 이야기만 도와줄 수 있어요. 화면이나 금융 용어가 궁금하면 물어봐 주세요. 🐻",
       ["도메인 안내"],
     );
   }
@@ -1597,7 +1669,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   return reply(
     "fallback",
     "general_allowed",
-    "나는 투자 기초와 서비스 사용법을 도와줄 수 있어. 예를 들어 ‘PER이 뭐야?’, ‘주문 전에 뭘 확인해?’처럼 물어봐 줘. 🐻",
+    "저는 투자 기초와 서비스 사용법을 도와줄 수 있어요. 예를 들어 ‘PER이 뭐예요?’, ‘주문 전에 뭘 확인해요?’처럼 물어봐 주세요. 🐻",
     ["허용 질문 확인"],
   );
 }
@@ -1608,14 +1680,14 @@ export const PROACTIVE_SCRIPTS: Record<
 > = {
   switch: {
     label: "매수·매도 취소 반복",
-    text: "확인 화면을 여러 번 바꿔 봤네. 매수와 매도의 차이를 같이 볼까?",
+    text: "확인 화면을 여러 번 바꿔 봤네요. 매수와 매도의 차이를 같이 볼까요?",
   },
   dwell: {
     label: "주문·상세 화면 5분 초과 체류",
-    text: "이 화면을 오래 살펴보고 있네. 어디에서 막혔는지 같이 찾아볼까?",
+    text: "이 화면을 오래 살펴보고 있네요. 어디에서 막혔는지 같이 찾아볼까요?",
   },
   lossRevisit: {
     label: "손실 실현 종목 반복 조회",
-    text: "방금 본 종목을 다시 살펴보고 있네. 어떤 점이 신경 쓰이는지 같이 찾아볼까?",
+    text: "방금 본 종목을 다시 살펴보고 있네요. 어떤 점이 신경 쓰이는지 같이 찾아볼까요?",
   },
 };

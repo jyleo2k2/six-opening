@@ -25,6 +25,42 @@ assert.deepEqual(
     },
   },
 );
+// 공통 guided 설명은 직전 서버 답변 한 건만 쉬운 재설명 입력으로 돌려보낼 수 있다.
+assert.deepEqual(
+  parseChatRequest({
+    message: "더 쉽게 볼래요",
+    context: { screen: "home" },
+    explain: {
+      scriptId: "flow:guided",
+      stage: "brief",
+      choiceId: "simpler",
+      previousAnswer: "주식은 회사의 작은 조각이라고 생각하면 돼요.",
+    },
+  }),
+  {
+    message: "더 쉽게 볼래요",
+    context: { screen: "home" },
+    explain: {
+      scriptId: "flow:guided",
+      stage: "brief",
+      choiceId: "simpler",
+      previousAnswer: "주식은 회사의 작은 조각이라고 생각하면 돼요.",
+    },
+  },
+);
+assert.equal(
+  parseChatRequest({
+    message: "더 쉽게 볼래요",
+    context: { screen: "home" },
+    explain: {
+      scriptId: "flow:guided",
+      stage: "brief",
+      choiceId: "simpler",
+      previousAnswer: "가".repeat(801),
+    },
+  }),
+  null,
+);
 assert.equal(parseChatRequest({ message: "", context: { screen: "home" } }), null);
 assert.equal(parseChatRequest({ message: "안녕", context: { screen: "admin" } }), null);
 assert.equal(parseChatRequest({ message: "안녕", context: { screen: "order", quantity: -1 } }), null);

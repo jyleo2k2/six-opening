@@ -8,6 +8,13 @@ assert.equal(filterGeneratedText("목표가는 10,000원이야."), false);
 assert.equal(filterGeneratedText("삼성전자를 사는 게 좋아."), false);
 assert.equal(filterGeneratedText("삼성전자를 사·는 게 좋아."), false);
 assert.equal(filterGeneratedText("앞으로 오를 가능성이 높아."), false);
+assert.equal(filterGeneratedText("엄마에게 숨기지 마."), false);
+assert.equal(filterGeneratedText("보호자에게 솔직하게 말해."), false);
+assert.equal(filterGeneratedText("어른에게 먼저 말해."), false);
+assert.equal(filterGeneratedText("어른에게 말해."), false);
+assert.equal(filterGeneratedText("주문 수량을 확인하는 게 좋아요."), true);
+assert.equal(filterGeneratedText("화면에서 확인하면 돼요."), true);
+assert.equal(filterGeneratedText("주문 수량을 확인해야 해요."), true);
 
 assert.deepEqual(gateChatOutput({ text: "PER은 이익과 주가를 비교하는 숫자야.", source: "model" }), {
   ok: true,

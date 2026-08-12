@@ -72,6 +72,14 @@ const NEGATIVE = lexicon([
   "다시", "다시설명", "다시말해줘", "다시알려줘",
 ]);
 
+/**
+ * 선택지 라벨 대조용. 라벨은 해요체지만 아이는 반말로 고쳐 칠 수 있으므로
+ * ("들어가지 않아요" 버튼을 보고 "들어가지 않아"라고 침) 끝의 "요"를 떼고 견준다.
+ */
+export function normalizeChoiceLabel(input: string) {
+  return normalizeReply(input).replace(/요$/u, "");
+}
+
 /** 새 질문으로 보이면 응답이 아니라 새 대화로 넘긴다. */
 export function looksLikeNewQuestion(input: string) {
   return /[?？]|뭐|무엇|왜|어떻게|어디|누가|언제|알려\s*줘|설명/.test(input);

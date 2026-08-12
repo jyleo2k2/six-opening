@@ -10,6 +10,7 @@ import { sanitizeActionPayload } from "./contracts";
 import {
   advanceExplain,
   findCommonExplainScript,
+  GUIDED_SCRIPT_ID,
   reaskExplain,
   resolveTextReply,
   startExplain,
@@ -30,7 +31,7 @@ import {
 import { runReadOnlyTool, type ToolExecution } from "./tools";
 
 export const CHAT_FALLBACK =
-  "답변을 안전하게 확인하지 못했어. 금융 용어나 화면 사용법을 다시 짧게 물어봐 줘. 🐻";
+  "답변을 안전하게 확인하지 못했어요. 금융 용어나 화면 사용법을 다시 짧게 물어봐 주세요. 🐻";
 
 export type ChatOutcome = {
   response: ChatResponse;
@@ -106,13 +107,14 @@ function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal) {
 /**
  * DAPIE 설명 경로를 결정한다.
  * - `"invalid"` = 위조되었거나 이어 갈 수 없는 응답
+ * - `"simpler"` = 직전 guided 답변을 모델로 한 번 더 쉽게 설명
  * - `ExplainStep` = 새로 시작하거나 다음 단계로 진행 (되묻기 포함)
  * - `null` = 진행 중인 DAPIE 전이와 무관 (기존 라우팅으로)
  */
 function resolveExplainStep(
   request: ChatRequest,
   routed: ReturnType<typeof routeMessage>,
-): ExplainStep | "invalid" | null {
+): ExplainStep | "invalid" | "simpler" | null {
   const protectedRoute =
     routed.route === "refusal" ||
     routed.route === "safety" ||
@@ -135,6 +137,17 @@ function resolveExplainStep(
       return looksLikeNewQuestion(request.message) || routed.route !== "fallback"
         ? null
         : reaskExplain(script, request.explain.stage);
+    }
+    if (choiceId === "ask" && looksLikeNewQuestion(request.message)) {
+      return routed.explainScript ? startExplain(routed.explainScript) : null;
+    }
+    if (
+      script.id === GUIDED_SCRIPT_ID &&
+      request.explain.stage === "brief" &&
+      choiceId === "simpler" &&
+      request.explain.previousAnswer
+    ) {
+      return "simpler";
     }
     return advanceExplain(script, { ...request.explain, choiceId }) ?? "invalid";
   }
@@ -169,10 +182,11 @@ function dapieFeedback(
   intent: ChatIntent,
   source: ChatOutputSource,
 ) {
-  if (source === "tool") return "네가 볼 수 있는 자료를 확인했어";
-  if (route === "context") return "지금 화면을 잘 살펴봤네";
-  if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어";
-  return "궁금한 지점을 잘 짚었어";
+  if (source === "tool") return "볼 수 있는 자료를 확인했어요";
+  if (route === "context") return "지금 화면을 잘 살펴봤네요";
+  if (intent === "service_help") return "어디서 확인할지 잘 물어봤어요";
+  if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어요";
+  return "궁금한 지점을 잘 짚었어요";
 }
 
 export async function createChatOutcome(
@@ -194,6 +208,7 @@ export async function createChatOutcome(
   let failure: ChatOutcome["failure"];
   let explainAction: ChatActionPayload | undefined;
   let stockExploreAction: ChatActionPayload | undefined;
+  let simplerFallbackText: string | undefined;
 
   onStatus("질문을 안전하게 확인하는 중");
 
@@ -235,8 +250,51 @@ export async function createChatOutcome(
     }
   } else if (explainStep === "invalid") {
     response = {
-      text: "그 설명 단계는 이어 갈 수 없어. 궁금한 용어를 다시 물어봐 줘. 🐻",
+      text: "그 설명 단계는 이어 갈 수 없어요. 궁금한 용어를 다시 물어봐 주세요. 🐻",
     };
+  } else if (explainStep === "simpler") {
+    const script = findCommonExplainScript(GUIDED_SCRIPT_ID)!;
+    const fallbackStep = advanceExplain(script, {
+      scriptId: GUIDED_SCRIPT_ID,
+      stage: "brief",
+      choiceId: "simpler",
+    })!;
+    simplerFallbackText = fallbackStep.text;
+    if (fallbackStep.kind === "turn") {
+      explainAction = { kind: "explain", turn: fallbackStep.turn };
+    }
+
+    onStatus("더 쉬운 설명을 준비하는 중");
+    const timed = createTimedSignal(
+      dependencies.requestSignal,
+      dependencies.timeoutMs ?? 8_000,
+    );
+    try {
+      response = {
+        text: await raceWithAbort(
+          (dependencies.generateAnswer ?? generateChatAnswer)(
+            `방금 답을 초등학교 4학년도 알 수 있게, 어려운 낱말 없이 2문장으로 다시 설명해 줘.\n\n방금 답:\n${request.explain?.previousAnswer}`,
+            request.context,
+            timed.signal,
+          ),
+          timed.signal,
+        ),
+      };
+      source = "model";
+    } catch (error) {
+      const aborted = timed.signal.aborted;
+      failure = aborted ? "timeout" : "model_error";
+      response = { text: fallbackStep.text };
+      source = "fixed";
+      if (!aborted) {
+        console.error(
+          "F10 simpler model call failed",
+          error instanceof Error ? error.name : "unknown",
+        );
+      }
+    } finally {
+      timed.cleanup();
+    }
   } else if (explainStep) {
     onStatus("단계별 설명 준비 완료");
     response = { text: explainStep.text };
@@ -319,10 +377,13 @@ export async function createChatOutcome(
     source,
     allowedNumbers: allowedContextNumbers(request),
   });
-  const standardAction = gate.ok
+  const useSimplerFallback =
+    explainStep === "simpler" && !gate.ok && simplerFallbackText;
+  const safeOutput = gate.ok || Boolean(useSimplerFallback);
+  const standardAction = safeOutput
     ? sanitizeActionPayload(response)
     : undefined;
-  const outputAction = gate.ok
+  const outputAction = safeOutput
     ? stockExploreAction
       ? { ...standardAction, ...stockExploreAction }
       : explainAction
@@ -330,7 +391,9 @@ export async function createChatOutcome(
         : standardAction
     : undefined;
   const gatedResponse: ChatResponse = {
-    text: gate.ok
+    text: useSimplerFallback
+      ? useSimplerFallback
+      : gate.ok
       ? gate.text
       : gate.reason === "prohibited"
         ? SAFE_REFUSAL
@@ -338,7 +401,7 @@ export async function createChatOutcome(
     ...(standardAction ?? {}),
   };
 
-  onStatus(gate.ok ? "안전 점검 통과" : "안전한 답변으로 바꿨어");
+  onStatus(gate.ok ? "안전 점검 통과" : "안전한 답변으로 바꿨어요");
   return {
     response: gatedResponse,
     ...(outputAction ? { action: outputAction } : {}),

@@ -96,7 +96,7 @@ export function createReadOnlyToolRunner(
       if (!stock || stock.status !== "reviewed") {
         return unavailable(
           tool,
-          "이 종목 설명은 아직 사실 검수 중이야. 검수가 끝나기 전에는 회사 정보를 지어내서 말하지 않을게.",
+          "이 종목 설명은 아직 사실 검수 중이에요. 검수가 끝나기 전에는 회사 정보를 지어내서 말하지 않을게요.",
           "stock",
         );
       }
@@ -105,7 +105,7 @@ export function createReadOnlyToolRunner(
         tool,
         status: "ok",
         response: {
-          text: `${stock.companySummary} 일상에서는 ${stock.everydayTouchpoints[0]} 만날 수 있어.`,
+          text: `${stock.companySummary} 일상에서는 ${stock.everydayTouchpoints[0]} 만날 수 있어요.`,
           uiAction: { type: "open_screen", target: "stock" },
         },
         evidence: [stock.id],
@@ -117,7 +117,7 @@ export function createReadOnlyToolRunner(
       if (!summary) {
         return unavailable(
           tool,
-          "아직 연결된 투자 기록이 없어. 거래 기능이 연결되면 네가 남긴 이유만 되짚어 줄게.",
+          "아직 연결된 투자 기록이 없어요. 거래 기능이 연결되면 남긴 이유만 되짚어 줄게요.",
           "archive",
         );
       }
@@ -125,7 +125,7 @@ export function createReadOnlyToolRunner(
         tool,
         status: "ok",
         response: {
-          text: `네 투자 기록은 ${summary.recordCount}개야.${summary.latestReasonLabel ? ` 가장 최근에는 “${summary.latestReasonLabel}”라고 이유를 남겼어.` : ""}`,
+          text: `투자 기록은 ${summary.recordCount}개예요.${summary.latestReasonLabel ? ` 가장 최근에는 “${summary.latestReasonLabel}”라고 이유를 남겼어요.` : ""}`,
           uiAction: { type: "open_screen", target: "archive" },
         },
         evidence: [`trade-record-count:${summary.recordCount}`],
@@ -137,7 +137,7 @@ export function createReadOnlyToolRunner(
       if (!profile || profile.observationState === "initial") {
         return unavailable(
           tool,
-          "아직 관찰 초기라 투자 성향을 단정할 수 없어. 기록이 쌓이면 기간을 표시해서 네 행동 특징을 설명해 줄게.",
+          "아직 관찰 초기라 투자 성향을 단정할 수 없어요. 기록이 쌓이면 기간을 표시해서 행동 특징을 설명해 줄게요.",
           "archive",
         );
       }
@@ -145,7 +145,7 @@ export function createReadOnlyToolRunner(
         tool,
         status: "ok",
         response: {
-          text: `${profile.periodLabel}의 성향은 “${profile.typeLabel ?? "관찰 중"}”으로 정리됐어. 이건 실력 점수가 아니라 그 기간에 보인 행동 특징이야.`,
+          text: `${profile.periodLabel}의 성향은 “${profile.typeLabel ?? "관찰 중"}”으로 정리됐어요. 이건 실력 점수가 아니라 그 기간에 보인 행동 특징이에요.`,
           uiAction: { type: "open_screen", target: "archive" },
         },
         evidence: [`behavior-profile:${profile.periodLabel}`],
@@ -156,7 +156,7 @@ export function createReadOnlyToolRunner(
     if (!archive) {
       return unavailable(
         tool,
-        "아직 저장된 시즌 기록이 없어. 시즌 기록이 생기면 네 기록만 찾아서 보여 줄게.",
+        "아직 저장된 시즌 기록이 없어요. 시즌 기록이 생기면 기록만 찾아서 보여 줄게요.",
         "archive",
       );
     }
@@ -164,7 +164,7 @@ export function createReadOnlyToolRunner(
       tool,
       status: "ok",
       response: {
-        text: `네 아카이브에는 시즌 기록이 ${archive.seasonCount}개 있어.${archive.latestSeasonLabel ? ` 가장 최근 기록은 ${archive.latestSeasonLabel}이야.` : ""}`,
+        text: `아카이브에는 시즌 기록이 ${archive.seasonCount}개 있어요.${archive.latestSeasonLabel ? ` 가장 최근 기록은 ${archive.latestSeasonLabel}이에요.` : ""}`,
         uiAction: { type: "open_screen", target: "archive" },
       },
       evidence: [`archive-season-count:${archive.seasonCount}`],
