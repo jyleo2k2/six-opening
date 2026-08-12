@@ -19,6 +19,7 @@ async function main() {
   assert.equal(faqStream.includes("event: text"), true);
   assert.equal(faqStream.includes("event: action"), true);
   assert.equal(faqStream.includes('"target":"order"'), true);
+  assert.equal(faqStream.includes('"scriptId":"flow:guided"'), true);
 
   const guidedResponse = await POST(
     request({

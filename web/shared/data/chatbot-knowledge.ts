@@ -36,6 +36,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           ],
           answerId: "market",
         },
+        adjust: {
+          explanation: "값을 내가 적지 않는 주문부터 생각해 보자.",
+          question: "그럼 주문 값은 누가 정할까?",
+          choices: [
+            { id: "market", label: "지금 시장" },
+            { id: "me", label: "내가 직접" },
+          ],
+          answerId: "market",
+        },
         detail:
           "시장가는 내가 값을 정하지 않고 지금 시장에 나와 있는 값을 그대로 받아. 그래서 주문을 넣는 순간과 조금 달라질 수 있어.",
         example:
@@ -52,6 +61,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
             { id: "me", label: "내가 직접" },
             { id: "market", label: "지금 시장" },
             { id: "company", label: "회사" },
+          ],
+          answerId: "me",
+        },
+        adjust: {
+          explanation: "주문할 때 원하는 값을 직접 적어 두는 모습을 떠올려 보자.",
+          question: "그 값을 적는 사람은 누구일까?",
+          choices: [
+            { id: "me", label: "나" },
+            { id: "market", label: "지금 시장" },
           ],
           answerId: "me",
         },
@@ -77,6 +95,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           ],
           answerId: "holding",
         },
+        adjust: {
+          explanation: "거래가 아직 끝나지 않은 상태부터 생각해 보자.",
+          question: "주식을 아직 가지고 있다면 결과는 어떤 상태일까?",
+          choices: [
+            { id: "moving", label: "계속 움직이는 중" },
+            { id: "finished", label: "이미 끝난 상태" },
+          ],
+          answerId: "moving",
+        },
         detail:
           "평가손익은 지금 가진 주식을 오늘 값으로 계산한 결과야. 아직 거래가 끝나지 않아서 숫자가 계속 바뀌어.",
         example:
@@ -95,6 +122,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
             { id: "order", label: "주문을 넣을 때" },
           ],
           answerId: "after",
+        },
+        adjust: {
+          explanation: "주식을 팔아 거래가 끝난 장면부터 생각해 보자.",
+          question: "끝난 거래의 결과는 어떻게 남을까?",
+          choices: [
+            { id: "fixed", label: "그대로 기록돼" },
+            { id: "moving", label: "계속 바뀌어" },
+          ],
+          answerId: "fixed",
         },
         detail:
           "실현손익은 거래가 이미 끝나서 더 이상 바뀌지 않아. 평가손익과 달리 지나간 기록이야.",
@@ -125,6 +161,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
         ],
         answerId: "profit-and-price",
       },
+      adjust: {
+        explanation: "PER에는 회사가 번 돈과 시장에서 정해진 주가가 함께 들어가.",
+        question: "그럼 직원 수는 PER 비교에 들어갈까?",
+        choices: [
+          { id: "no", label: "들어가지 않아" },
+          { id: "yes", label: "들어가" },
+        ],
+        answerId: "no",
+      },
       detail: "같은 업종의 회사끼리 PER을 함께 보면 이익에 비해 주가가 어떻게 보이는지 비교하는 데 도움이 돼.",
       example: "같은 업종의 두 회사가 비슷한 이익을 냈는데 한 회사의 주가가 더 높다면 PER도 다르게 보일 수 있어.",
     },
@@ -143,6 +188,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           ],
           answerId: "asset",
         },
+        adjust: {
+          explanation: "회사의 건물·기계·남은 돈을 한 묶음으로 생각해 보자.",
+          question: "이 묶음은 무엇을 뜻할까?",
+          choices: [
+            { id: "asset", label: "회사가 가진 재산" },
+            { id: "staff", label: "직원 수" },
+          ],
+          answerId: "asset",
+        },
         detail:
           "PBR은 회사 전체 값을 회사가 가진 재산으로 나눈 값이야. 재산에는 건물과 기계, 남아 있는 돈이 함께 들어가.",
         example:
@@ -158,6 +212,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           choices: [
             { id: "shares", label: "전체 주식 수" },
             { id: "staff", label: "직원 수" },
+            { id: "stores", label: "가게 수" },
+          ],
+          answerId: "shares",
+        },
+        adjust: {
+          explanation: "회사가 번 돈을 주식 조각마다 나눈다고 생각해 보자.",
+          question: "돈을 나눌 때 무엇의 수가 필요할까?",
+          choices: [
+            { id: "shares", label: "전체 주식 수" },
             { id: "stores", label: "가게 수" },
           ],
           answerId: "shares",
@@ -182,6 +245,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
             { id: "free", label: "수수료가 사라져" },
           ],
           answerId: "steady",
+        },
+        adjust: {
+          explanation: "달걀을 여러 바구니에 나눠 담은 모습을 떠올려 보자.",
+          question: "바구니 하나를 떨어뜨려도 나머지 달걀은 남을까?",
+          choices: [
+            { id: "remain", label: "나머지는 남아" },
+            { id: "all", label: "모두 깨져" },
+          ],
+          answerId: "remain",
         },
         detail:
           "여러 곳에 나눠 두면 한 곳이 나빠져도 전체가 한꺼번에 흔들리지 않아. 대신 한 곳이 아주 잘돼도 전체는 그만큼 크게 달라지지 않아.",

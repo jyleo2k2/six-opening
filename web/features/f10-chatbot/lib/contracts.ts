@@ -35,7 +35,7 @@ export type StandardChatActionPayload = Pick<
 export type ExplainActionPayload = {
   kind: "explain";
   turn: ExplainTurn;
-};
+} & Pick<ChatResponse, "suggestedQuestions" | "uiAction">;
 
 export type ChatActionPayload =
   | StandardChatActionPayload
@@ -72,7 +72,7 @@ function parseExplainReply(value: unknown): ExplainReply | null | undefined {
   const { scriptId, stage, choiceId } = value;
   if (
     typeof scriptId !== "string" ||
-    !/^(term|stock|sector):\S{1,80}$/.test(scriptId) ||
+    !/^(term|stock|sector|flow):\S{1,80}$/.test(scriptId) ||
     scriptId.length > MAX_EXPLAIN_ID_LENGTH ||
     typeof stage !== "string" ||
     !EXPLAIN_STAGES.includes(stage as (typeof EXPLAIN_STAGES)[number]) ||

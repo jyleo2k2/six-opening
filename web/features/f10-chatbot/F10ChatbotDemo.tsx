@@ -309,7 +309,19 @@ export function F10ChatbotDemo() {
               setMessages((current) => {
                 const last = current.at(-1);
                 if (!last || last.role !== "assistant") return current;
-                return [...current.slice(0, -1), { ...last, explainTurn: value.turn }];
+                return [
+                  ...current.slice(0, -1),
+                  {
+                    ...last,
+                    explainTurn: value.turn,
+                    ...(Array.isArray(value.suggestedQuestions)
+                      ? { suggestedQuestions: value.suggestedQuestions }
+                      : {}),
+                    ...(isAllowedUiAction(value.uiAction)
+                      ? { uiAction: value.uiAction }
+                      : {}),
+                  },
+                ];
               });
               continue;
             }

@@ -9,12 +9,15 @@ import type { ChatActionPayload, ChatRequest } from "./contracts";
 import { sanitizeActionPayload } from "./contracts";
 import {
   advanceExplain,
+  findCommonExplainScript,
   reaskExplain,
   resolveTextReply,
   startExplain,
+  startGuidedExplain,
   type ExplainStep,
 } from "./explain";
 import { generateChatAnswer } from "./openai";
+import { looksLikeNewQuestion } from "./colloquial";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
 import { runReadOnlyTool, type ToolExecution } from "./tools";
@@ -94,10 +97,10 @@ function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal) {
 }
 
 /**
- * 4단계 설명 경로를 결정한다.
+ * DAPIE 설명 경로를 결정한다.
  * - `"invalid"` = 위조되었거나 이어 갈 수 없는 응답
  * - `ExplainStep` = 새로 시작하거나 다음 단계로 진행 (되묻기 포함)
- * - `null` = 4단계와 무관 (기존 라우팅으로)
+ * - `null` = 진행 중인 DAPIE 전이와 무관 (기존 라우팅으로)
  */
 function resolveExplainStep(
   request: ChatRequest,
@@ -110,7 +113,9 @@ function resolveExplainStep(
   if (protectedRoute) return null;
 
   if (request.explain) {
-    const script = findExplainScript(request.explain.scriptId);
+    const script =
+      findExplainScript(request.explain.scriptId) ??
+      findCommonExplainScript(request.explain.scriptId);
     if (!script) return "invalid";
 
     // 버튼을 누르지 않고 타이핑했으면 구어체를 해석한다.
@@ -118,8 +123,9 @@ function resolveExplainStep(
       request.explain.choiceId ??
       resolveTextReply(script, request.explain.stage, request.message);
     if (!choiceId) {
-      // 새 질문으로 보이면 일반 라우팅으로 넘기고, 그 밖에는 선택지를 다시 보여준다.
-      return routed.explainScript || routed.route !== "fallback"
+      // 새 전용 설명 질문이면 해당 스크립트를 시작하고, 그 밖의 새 질문은 일반 라우팅으로 넘긴다.
+      if (routed.explainScript) return startExplain(routed.explainScript);
+      return looksLikeNewQuestion(request.message) || routed.route !== "fallback"
         ? null
         : reaskExplain(script, request.explain.stage);
     }
@@ -127,6 +133,18 @@ function resolveExplainStep(
   }
 
   return routed.explainScript ? startExplain(routed.explainScript) : null;
+}
+
+function dapieFeedback(
+  route: ChatRoute,
+  intent: ChatIntent,
+  source: ChatOutputSource,
+) {
+  if (source === "tool") return "네가 볼 수 있는 자료를 확인했어";
+  if (route === "context") return "지금 화면을 잘 살펴봤네";
+  if (intent === "service_help") return "어디서 확인할지 잘 물어봤어";
+  if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어";
+  return "궁금한 지점을 잘 짚었어";
 }
 
 export async function createChatOutcome(
@@ -208,6 +226,21 @@ export async function createChatOutcome(
     }
   }
 
+  const protectedRoute =
+    routed.route === "refusal" ||
+    routed.route === "safety" ||
+    routed.route === "outOfScope";
+  if (explainStep === null && !protectedRoute) {
+    const guided = startGuidedExplain(
+      response.text,
+      dapieFeedback(routed.route, routed.intent, source),
+    );
+    response = { ...response, text: guided.text };
+    if (guided.kind === "turn") {
+      explainAction = { kind: "explain", turn: guided.turn };
+    }
+  }
+
   onStatus("답변을 안전하게 점검하는 중");
   const gate = gateChatOutput({
     text: response.text,
@@ -217,7 +250,11 @@ export async function createChatOutcome(
   const standardAction = gate.ok
     ? sanitizeActionPayload(response)
     : undefined;
-  const outputAction = gate.ok ? explainAction ?? standardAction : undefined;
+  const outputAction = gate.ok
+    ? explainAction
+      ? { ...standardAction, ...explainAction }
+      : standardAction
+    : undefined;
   const gatedResponse: ChatResponse = {
     text: gate.ok
       ? gate.text

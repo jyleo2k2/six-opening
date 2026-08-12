@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { SAFE_REFUSAL } from "../../../shared/llm/filter";
+import { CHATBOT_KNOWLEDGE } from "../../../shared/data/chatbot-knowledge";
+import { gateChatOutput, SAFE_REFUSAL } from "../../../shared/llm/filter";
 import { isExplainAction } from "./contracts";
 import { CHAT_FALLBACK, createChatOutcome } from "./orchestrator";
+import { advanceExplain } from "./explain";
 import type { ChatSession } from "./session";
 
 const session: ChatSession = {
@@ -31,6 +33,7 @@ async function main() {
   assert.equal(faq.route, "faq");
   assert.equal(modelCalls, 0);
   assert.equal(isExplainAction(faq.action), true);
+  assert.equal(faq.response.text.startsWith("궁금한 걸 잘 짚었어 —"), true);
   if (!isExplainAction(faq.action)) throw new Error("explain action missing");
 
   const continued = await createChatOutcome(
@@ -46,7 +49,7 @@ async function main() {
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(continued.response.text.includes("같은 업종"), true);
+  assert.equal(continued.response.text.includes("PER에는 회사가 번 돈"), true);
   assert.equal(isExplainAction(continued.action), true);
   assert.equal(modelCalls, 0);
 
@@ -63,13 +66,22 @@ async function main() {
   assert.equal(forgedTransition.action, undefined);
   assert.equal(modelCalls, 0);
 
-  // 버튼 대신 "ㅇㅇ"라고 타이핑해도 알아듣는다.
+  // 버튼 대신 작은 질문의 선택지 라벨을 타이핑해도 알아듣는다.
   const typedYes = await createChatOutcome(
-    { message: "ㅇㅇ", context, explain: { scriptId: "term:per", stage: "detail" } },
+    {
+      message: "들어가지 않아",
+      context,
+      explain: { scriptId: "term:per", stage: "detail" },
+    },
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(typedYes.response.text, "좋아, 이제 알겠네!");
+  assert.equal(typedYes.response.text.includes("맞아, 그 단서를 잘 연결했어."), true);
+  assert.equal(typedYes.response.text.includes("같은 업종"), true);
+  assert.equal(isExplainAction(typedYes.action), true);
+  if (isExplainAction(typedYes.action)) {
+    assert.equal(typedYes.action.turn.stage, "followup");
+  }
   assert.equal(modelCalls, 0);
 
   // "몰라"는 예시 단계로 내려간다.
@@ -95,7 +107,157 @@ async function main() {
     { generateAnswer: noModel },
   );
   assert.equal(refusal.route, "refusal");
+  assert.equal(isExplainAction(refusal.action), false);
   assert.equal(modelCalls, 0);
+
+  // 전용 진단 스크립트가 없는 용어·FAQ도 공통 DAPIE 유도 턴으로 이어진다.
+  const genericTerm = await createChatOutcome(
+    { message: "주식이 뭐야?", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(isExplainAction(genericTerm.action), true);
+  if (isExplainAction(genericTerm.action)) {
+    assert.equal(genericTerm.action.turn.scriptId, "flow:guided");
+  }
+
+  const serviceHelp = await createChatOutcome(
+    { message: "매수 어떻게 해?", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(isExplainAction(serviceHelp.action), true);
+  if (isExplainAction(serviceHelp.action)) {
+    assert.equal(serviceHelp.action.uiAction?.target, "order");
+  }
+
+  const ownRecords = await createChatOutcome(
+    { message: "내 거래 기록 보여줘", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(ownRecords.source, "tool");
+  assert.equal(isExplainAction(ownRecords.action), true);
+  if (isExplainAction(ownRecords.action)) {
+    assert.equal(ownRecords.action.uiAction?.target, "archive");
+  }
+
+  const screenAmount = await createChatOutcome(
+    {
+      message: "예상 금액이 얼마야?",
+      context: { screen: "order", quantity: 10, unitPrice: 12_500 },
+    },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(screenAmount.route, "context");
+  assert.equal(isExplainAction(screenAmount.action), true);
+
+  const stockFacts = await createChatOutcome(
+    { message: "이 회사는 뭐 하는 회사야?", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(stockFacts.source, "tool");
+  assert.equal(stockFacts.gate, "passed");
+  assert.equal(isExplainAction(stockFacts.action), true);
+
+  const simpler = await createChatOutcome(
+    {
+      message: "더 쉽게 볼래",
+      context,
+      explain: {
+        scriptId: "flow:guided",
+        stage: "brief",
+        choiceId: "simpler",
+      },
+    },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(simpler.response.text.includes("헷갈린 단어"), true);
+  assert.equal(isExplainAction(simpler.action), true);
+
+  const interruptedByQuestion = await createChatOutcome(
+    {
+      message: "주가와 회사 이익은 어떻게 달라?",
+      context,
+      explain: { scriptId: "flow:guided", stage: "detail" },
+    },
+    session,
+    {
+      generateAnswer: async () =>
+        "주가는 시장에서 거래된 가격이야. 회사 이익은 회사가 번 돈을 계산한 결과야.",
+    },
+  );
+  assert.equal(interruptedByQuestion.source, "model");
+  assert.equal(isExplainAction(interruptedByQuestion.action), true);
+
+  const interruptedByScriptedQuestion = await createChatOutcome(
+    {
+      message: "PER이 뭐야?",
+      context,
+      explain: { scriptId: "flow:guided", stage: "detail" },
+    },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(isExplainAction(interruptedByScriptedQuestion.action), true);
+  if (isExplainAction(interruptedByScriptedQuestion.action)) {
+    assert.equal(interruptedByScriptedQuestion.action.turn.scriptId, "term:per");
+  }
+
+  // 사전·FAQ의 모든 승인 항목은 전용 진단 또는 공통 유도 DAPIE 턴을 제공한다.
+  for (const entry of CHATBOT_KNOWLEDGE) {
+    if (entry.explainScript && entry.explainScript.check.kind !== "guiding") {
+      const script = entry.explainScript;
+      const adjust = script.adjust;
+      assert.ok(adjust, `${entry.id}에 오답 조정 질문이 없어`);
+      const wrongChoice = script.check.choices.find(
+        (choice) => choice.id !== script.check.answerId,
+      );
+      assert.ok(wrongChoice);
+      const adjusted = advanceExplain(script, {
+        scriptId: script.id,
+        stage: "brief",
+        choiceId: wrongChoice.id,
+      });
+      assert.equal(adjusted?.kind, "turn");
+      if (adjusted?.kind === "turn") {
+        assert.equal(gateChatOutput({ text: adjusted.text, source: "fixed" }).ok, true);
+        assert.equal(gateChatOutput({ text: adjusted.turn.prompt, source: "fixed" }).ok, true);
+      }
+      const smallerWrong = adjust.choices.find(
+        (choice) => choice.id !== adjust.answerId,
+      );
+      assert.ok(smallerWrong);
+      const exampleRetry = advanceExplain(script, {
+        scriptId: script.id,
+        stage: "detail",
+        choiceId: smallerWrong.id,
+      });
+      assert.equal(exampleRetry?.kind, "turn");
+      assert.equal(
+        gateChatOutput({ text: exampleRetry?.text ?? "", source: "fixed" }).ok,
+        true,
+      );
+    }
+    const outcome = await createChatOutcome(
+      { message: entry.triggers[0], context },
+      session,
+      { generateAnswer: noModel },
+    );
+    assert.equal(isExplainAction(outcome.action), true, `${entry.id}에 DAPIE action이 없어`);
+    if (isExplainAction(outcome.action)) {
+      assert.equal(
+        gateChatOutput({ text: outcome.action.turn.prompt, source: "fixed" }).ok,
+        true,
+      );
+      for (const choice of outcome.action.turn.choices) {
+        assert.equal(gateChatOutput({ text: choice.label, source: "fixed" }).ok, true);
+      }
+    }
+  }
 
   const model = await createChatOutcome(
     {
@@ -107,6 +269,7 @@ async function main() {
   );
   assert.equal(model.gate, "passed");
   assert.equal(model.source, "model");
+  assert.equal(isExplainAction(model.action), true);
 
   const blocked = await createChatOutcome(
     { message: "조금 더 설명해 줘", context },
@@ -134,7 +297,8 @@ async function main() {
     },
   );
   assert.equal(timedOut.failure, "timeout");
-  assert.equal(timedOut.response.text, CHAT_FALLBACK);
+  assert.equal(timedOut.response.text.includes(CHAT_FALLBACK), true);
+  assert.equal(isExplainAction(timedOut.action), true);
 
   console.log("chat orchestrator tests passed");
 }

@@ -96,7 +96,6 @@ export function createReadOnlyToolRunner(
             text: [
               approvedEducation.companySummary,
               approvedEducation.businessModel,
-              approvedEducation.industryRole,
               approvedEducation.financialSummary,
             ].join(" "),
             uiAction: { type: "open_screen", target: "stock" },
