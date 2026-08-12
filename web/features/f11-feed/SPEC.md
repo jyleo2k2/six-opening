@@ -12,16 +12,18 @@
 
 ## 2. 소유권과 파일 책임
 
-> ⚠ **코드 위치 주의.** 이 명세는 `web/features/f11-feed/`에 있지만 실제 화면 코드는 독립 데모 앱인 `mock-stock/`에 있다. F2·F3·F0도 같은 상태다(PR #11에서 분리). 두 앱을 합칠 때 이 표를 함께 옮긴다.
+코드는 2026-08-13에 `mock-stock/`에서 `web/`으로 이관했고 `mock-stock/`은 삭제했다.
 
 | 위치 | 책임 |
 |---|---|
-| `mock-stock/features/f11-feed/FeedScreen.tsx` | 피드 목록·카드·코멘트 UI |
-| `mock-stock/app/feed/page.tsx` | `/feed` 라우트 |
-| `mock-stock/shared/store/use-family-feed-store.ts` | 열람 계정·가족 거래·코멘트 상태 |
-| `mock-stock/shared/engine/comment-filter.ts` | 부모→자녀 코멘트 게이트 (순수 함수) |
-| `mock-stock/shared/engine/trade-markers.ts` | 차트 매매 지점 좌표·라벨 계산 (순수 함수) |
-| `mock-stock/features/f2-trade/StockDetailScreen.tsx` | 차트 마커 렌더 (계산은 engine이 소유) |
+| `web/features/f11-feed/FeedScreen.tsx` | 피드 목록·카드·코멘트 UI |
+| `web/shared/store/use-family-feed-store.ts` | 열람 계정·가족 거래·코멘트 상태 |
+| `web/shared/store/use-investment-store.ts` | 본인 거래 (⚠ §7.2 참조 — 화면 연결 때 교체 예정) |
+| `web/shared/engine/comment-filter.ts` | 부모→자녀 코멘트 게이트 (순수 함수) |
+| `web/shared/engine/trade-markers.ts` | 차트 매매 지점 좌표·라벨 계산 (순수 함수) |
+| `web/shared/types/trade.ts` | `Trade`·`TradeComment`·`FamilyMember` 계약 |
+
+> ⚠ **아직 라우트에 연결되지 않았다.** `/feed` 라우트와 차트 마커 렌더는 F11 화면 작업에서 붙인다. 화면 정본이 `web/public/ui/app.html`(iframe)이므로 피드는 F10 챗봇과 같은 React 오버레이 방식으로 얹는다.
 
 ## 3. 피드 카드
 
@@ -104,6 +106,7 @@ type TradeComment = {
 
 | 우선순위 | 항목 | 완료 조건 |
 |---:|---|---|
+| 0 | **화면 재연결** | `mock-stock` 삭제로 `/feed` 라우트와 차트 마커 렌더가 사라졌다. `FeedScreen`을 React 오버레이로 얹고, 본인 거래 소스를 `use-investment-store`에서 app.html의 `localStorage` 키 `kw_proto_v1` 어댑터로 바꾼다 — 지금은 저장소가 둘로 갈려 있다 |
 | 1 | 실제 세션·가족 권한 | 지금은 클라이언트 상태의 열람 전환이다. 서버 세션이 생기면 같은 팀 구성원만 조회하도록 막고 타 가족 접근을 테스트한다 |
 | 2 | 코멘트 서버 저장 | 현재 `localStorage`. 저장소가 생기면 작성자 본인만 삭제 가능하도록 서버에서 검증한다 |
 | 3 | 피드 알림 정책 | 코멘트 즉시 푸시 여부 미정 — 일간 푸시 금지 원칙(§21)과 충돌 소지 |
@@ -116,4 +119,4 @@ type TradeComment = {
 - 부모 계정으로 훈계·추천 코멘트를 쓰면 차단되고 안내가 뜬다
 - 자녀 계정의 같은 문구는 통과한다
 - 종목 차트에 가족 매매 지점이 뜨고 탭하면 해당 피드 카드로 간다
-- `mock-stock`의 `npm test`와 `npm run build`가 통과한다
+- `web`의 `npm test`와 `npm run build`가 통과한다
