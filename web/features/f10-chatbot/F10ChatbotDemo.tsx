@@ -1,14 +1,19 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import {
-  PROACTIVE_SCRIPTS,
-  ProactiveSignal,
-  routeMessage,
-} from "./lib/routing";
+import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
+import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
+import type { ChatUiAction } from "../../shared/types/chatbot";
+import { isAllowedUiAction, type ChatActionPayload } from "./lib/contracts";
+import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
-type Message = { role: "assistant" | "user"; text: string };
+type Message = {
+  role: "assistant" | "user";
+  text: string;
+  suggestedQuestions?: string[];
+  uiAction?: ChatUiAction;
+};
 
 const COPY = {
   service: "\ud0a4\uc6c0 \uac00\uc871 \ubaa8\uc758\ud22c\uc790 \ub9ac\uadf8",
@@ -19,10 +24,10 @@ const COPY = {
   current: "\ud604\uc7ac \ud654\uba74",
   orderQuantity: "\uc8fc\ubb38 \uc218\ub7c9",
   expectedAmount: "\uc608\uc0c1 \uae08\uc561 125,000\uc6d0",
-  signalDemo: "\uc120\uc81c \ub3c4\uc6c0 \ub370\ubaa8",
-  signalDescription:
-    "\uc2e4\uc81c \uc8fc\ubb38 UI \uc774\ubca4\ud2b8\uc640 \uc5f0\uacb0\ud558\uae30 \uc804, 6\uac00\uc9c0 \ub3c4\uc6c0 \uc2e0\ud638\ub97c \uc5ec\uae30\uc5d0\uc11c \ud655\uc778\ud560 \uc218 \uc788\uc5b4.",
-  allSignalsMuted: "\uc774\ubc88 \uc138\uc158\uc5d0\uc11c \ubaa8\ub4e0 \uc2e0\ud638\ub97c \ub2eb\uc558\uc5b4.",
+  orderPractice: "주문 확인 연습",
+  orderPracticeDescription: "매수와 매도 확인을 취소한 행동은 도움 신호 판정에만 사용돼.",
+  cancelBuy: "매수 확인 취소",
+  cancelSell: "매도 확인 취소",
   proactive: "\ud0a4\uc6c5\uc774\uc758 \uc120\uc81c \ub3c4\uc6c0",
   explain: "\uc0c1\ud669 \uc124\uba85",
   askDirectly: "\uc9c1\uc811 \uc9c8\ubb38",
@@ -36,6 +41,7 @@ const COPY = {
   status: "\ucc98\ub9ac \uc0c1\ud0dc",
   input: "\uad81\uae08\ud55c \uac83\uc744 \uc785\ub825\ud574 \uc918",
   send: "\ubcf4\ub0b4\uae30",
+  relatedScreen: "관련 화면 보기",
   avatar: "\uacf0",
 } as const;
 
@@ -51,13 +57,13 @@ const SCREENS: Record<
   },
   stock: {
     label: "\uc885\ubaa9 \uc0c1\uc138",
-    title: "\ud0a4\uc6c0\ud14c\ud06c",
+    title: "삼성전자",
     description: "\uae30\uc5c5 \uc815\ubcf4\uc640 \uacf5\uac1c\ub41c \uacfc\uac70 \ub370\uc774\ud130\ub97c \uc0b4\ud3b4\ubcf4\ub294 \ud654\uba74\uc774\uc57c.",
     chips: ["\uc774 \ud68c\uc0ac\ub294 \ubb50 \ud558\ub294 \ud68c\uc0ac\uc57c?", "PER\uc774 \ubb50\uc57c?", "\uc2dc\uc7a5\uac00\uac00 \ubb50\uc57c?"],
   },
   order: {
     label: "\uc8fc\ubb38",
-    title: "\ud0a4\uc6c0\ud14c\ud06c \ub9e4\uc218",
+    title: "삼성전자 매수",
     description: "\uc218\ub7c9\uacfc \uc608\uc0c1 \uae08\uc561\uc744 \ud655\uc778\ud558\uace0 \ub124 \uc0dd\uac01\uc744 \uae30\ub85d\ud558\ub294 \ud654\uba74\uc774\uc57c.",
     chips: ["\uc2dc\uc7a5\uac00\uac00 \ubb50\uc57c?", "\uc8fc\ubb38 \uc804\uc5d0 \ubb58 \ud655\uc778\ud574?", "\uc218\uc775\ub960\uc774 \ubb50\uc57c?"],
   },
@@ -69,20 +75,54 @@ const SCREENS: Record<
   },
 };
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({
+  message,
+  onAction,
+  onQuestion,
+}: {
+  message: Message;
+  onAction: (action: ChatUiAction) => void;
+  onQuestion: (question: string) => void;
+}) {
   const userMessage = message.role === "user";
+  const uiAction = message.uiAction;
 
   return (
     <div className={userMessage ? "flex justify-end" : "flex justify-start"}>
-      <p
-        className={
-          userMessage
-            ? "max-w-[84%] rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
-            : "max-w-[84%] rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
-        }
-      >
-        {message.text}
-      </p>
+      <div className="max-w-[84%]">
+        <p
+          className={
+            userMessage
+              ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
+              : "rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
+          }
+        >
+          {message.text}
+        </p>
+        {!userMessage && uiAction && (
+          <button
+            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
+            onClick={() => onAction(uiAction)}
+            type="button"
+          >
+            {COPY.relatedScreen}
+          </button>
+        )}
+        {!userMessage && Boolean(message.suggestedQuestions?.length) && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {message.suggestedQuestions?.map((question) => (
+              <button
+                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                key={question}
+                onClick={() => onQuestion(question)}
+                type="button"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -94,27 +134,79 @@ export function F10ChatbotDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
   const [isLoading, setIsLoading] = useState(false);
-  const [signal, setSignal] = useState<ProactiveSignal | null>(null);
-  const [mutedSignals, setMutedSignals] = useState<ProactiveSignal[]>([]);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
+  const signal = useChatBehaviorStore((state) => state.activeSignal);
+  const recordBehaviorEvent = useChatBehaviorStore((state) => state.recordEvent);
+  const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
+  const muteActiveSignal = useChatBehaviorStore((state) => state.muteActiveSignal);
 
   const currentScreen = SCREENS[screen];
   const chatContext = useMemo(
     () => ({
       screen,
-      stockName: screen === "stock" ? "\ud0a4\uc6c5\ud14c\ud06c" : undefined,
+      stockId: screen === "stock" || screen === "order" ? ("KRX:005930" as const) : undefined,
+      stockName: screen === "stock" || screen === "order" ? "삼성전자" : undefined,
       quantity: screen === "order" ? 10 : undefined,
       unitPrice: screen === "order" ? 12500 : undefined,
     }),
     [screen],
   );
-  const visibleSignals = useMemo(
-    () =>
-      (Object.keys(PROACTIVE_SCRIPTS) as ProactiveSignal[]).filter(
-        (key) => !mutedSignals.includes(key),
-      ),
-    [mutedSignals],
-  );
+
+  useEffect(() => {
+    const enteredAt = Date.now();
+    const stockId = screen === "stock" || screen === "order" ? "KRX:005930" : undefined;
+    const lastEntry = lastScreenEntryRef.current;
+    if (!lastEntry || lastEntry.screen !== screen || enteredAt - lastEntry.at > 1_000) {
+      recordBehaviorEvent({ type: "screen_entered", screen, stockId, at: enteredAt });
+      lastScreenEntryRef.current = { screen, at: enteredAt };
+    }
+
+    if (screen !== "stock" && screen !== "order") return;
+
+    let accumulatedVisibleMs = 0;
+    let visibleStartedAt = document.visibilityState === "visible" ? enteredAt : null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let completed = false;
+
+    const completeDwell = () => {
+      if (completed) return;
+      completed = true;
+      recordBehaviorEvent({
+        type: "screen_dwell_completed",
+        screen,
+        stockId,
+        durationMs: PROACTIVE_LIMITS.dwellMs + 1,
+        at: Date.now(),
+      });
+    };
+
+    const schedule = () => {
+      if (completed || visibleStartedAt === null) return;
+      const remaining = PROACTIVE_LIMITS.dwellMs - accumulatedVisibleMs;
+      timer = setTimeout(completeDwell, Math.max(1, remaining + 1));
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        if (visibleStartedAt !== null) {
+          accumulatedVisibleMs += Date.now() - visibleStartedAt;
+          visibleStartedAt = null;
+        }
+        if (timer) clearTimeout(timer);
+      } else {
+        visibleStartedAt = Date.now();
+        schedule();
+      }
+    };
+
+    schedule();
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [recordBehaviorEvent, screen]);
 
   useEffect(() => {
     const element = messagesRef.current;
@@ -122,29 +214,21 @@ export function F10ChatbotDemo() {
   }, [isOpen, messages]);
 
   async function ask(question: string) {
-    const reply = routeMessage(question, chatContext);
-    const history = messages.slice(-8);
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
+      { role: "assistant", text: "" },
     ]);
     setIsOpen(true);
     setInput("");
-    setStatus(reply.steps.at(-1) ?? "\ub2f5\ubcc0 \uc900\ube44 \uc644\ub8cc");
-
-    if (reply.route !== "fallback") {
-      setMessages((current) => [...current, { role: "assistant", text: reply.text }]);
-      return;
-    }
-
+    setStatus("질문을 보내는 중");
     setIsLoading(true);
-    setMessages((current) => [...current, { role: "assistant", text: "" }]);
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, context: chatContext, history }),
+        body: JSON.stringify({ message: question, context: chatContext }),
       });
 
       if (!response.ok || !response.body) throw new Error("Chat request failed");
@@ -165,21 +249,41 @@ export function F10ChatbotDemo() {
           const type = item.match(/^event: (.+)$/m)?.[1];
           const data = item.match(/^data: (.+)$/m)?.[1];
           if (!type || !data) continue;
-          const value = JSON.parse(data) as string;
+          const value = JSON.parse(data) as unknown;
 
-          if (type === "status") {
+          if (type === "status" && typeof value === "string") {
             setStatus(value);
           }
-          if (type === "text") {
+          if (type === "text" && typeof value === "string") {
             setMessages((current) => {
               const last = current.at(-1);
               if (!last || last.role !== "assistant") return current;
               return [...current.slice(0, -1), { ...last, text: `${last.text}${value}` }];
             });
           }
+          if (type === "action" && value && typeof value === "object") {
+            const action = value as ChatActionPayload;
+            setMessages((current) => {
+              const last = current.at(-1);
+              if (!last || last.role !== "assistant") return current;
+              return [
+                ...current.slice(0, -1),
+                {
+                  ...last,
+                  ...(Array.isArray(action.suggestedQuestions)
+                    ? { suggestedQuestions: action.suggestedQuestions }
+                    : {}),
+                  ...(isAllowedUiAction(action.uiAction)
+                    ? { uiAction: action.uiAction }
+                    : {}),
+                },
+              ];
+            });
+          }
         }
       }
     } catch {
+      setStatus("연결을 다시 확인해 줘");
       setMessages((current) => {
         const last = current.at(-1);
         if (!last || last.role !== "assistant") return current;
@@ -200,8 +304,23 @@ export function F10ChatbotDemo() {
 
   function dismissSignal() {
     if (!signal) return;
-    setMutedSignals((current) => [...current, signal]);
-    setSignal(null);
+    muteActiveSignal(Date.now());
+  }
+
+  function handleUiAction(action: ChatUiAction) {
+    setScreen(action.target);
+    setIsOpen(false);
+    setStatus(`${SCREENS[action.target].label} 화면으로 이동했어`);
+  }
+
+  function recordOrderCancellation(side: "buy" | "sell") {
+    recordBehaviorEvent({
+      type: "order_confirmation_cancelled",
+      stockId: "KRX:005930",
+      side,
+      at: Date.now(),
+    });
+    setStatus(`${side === "buy" ? "매수" : "매도"} 확인을 취소했어`);
   }
 
   return (
@@ -252,30 +371,28 @@ export function F10ChatbotDemo() {
                   {COPY.expectedAmount}
                 </span>
               </div>
-            </div>
-          )}
-
-          <section className="mt-6 rounded-2xl bg-bg p-4">
-            <p className="text-xs font-semibold text-navy">{COPY.signalDemo}</p>
-            <p className="mt-1 text-xs leading-5 text-ink/70">
-              실제 주문 UI 이벤트와 연결하기 전, 3가지 불안행동 신호를 여기에서 확인할 수 있어.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {visibleSignals.map((key) => (
+              <p className="mt-4 text-xs font-semibold text-navy">{COPY.orderPractice}</p>
+              <p className="mt-1 text-xs leading-5 text-ink/70">
+                {COPY.orderPracticeDescription}
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
                 <button
-                  className="rounded-full border border-navy/20 bg-white px-3 py-2 text-xs font-medium text-navy"
-                  key={key}
-                  onClick={() => setSignal(key)}
+                  className="rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
+                  onClick={() => recordOrderCancellation("buy")}
                   type="button"
                 >
-                  {PROACTIVE_SCRIPTS[key].label}
+                  {COPY.cancelBuy}
                 </button>
-              ))}
-              {visibleSignals.length === 0 && (
-                <p className="text-xs text-ink/70">{COPY.allSignalsMuted}</p>
-              )}
+                <button
+                  className="rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
+                  onClick={() => recordOrderCancellation("sell")}
+                  type="button"
+                >
+                  {COPY.cancelSell}
+                </button>
+              </div>
             </div>
-          </section>
+          )}
         </section>
       </div>
 
@@ -304,7 +421,7 @@ export function F10ChatbotDemo() {
             <button
               className="rounded-xl bg-navy px-2 py-3 text-white"
               onClick={() => {
-                setSignal(null);
+                acceptActiveSignal();
                 setIsOpen(true);
               }}
               type="button"
@@ -355,10 +472,21 @@ export function F10ChatbotDemo() {
             {messages.length === 0 && (
               <MessageBubble
                 message={{ role: "assistant", text: COPY.greeting }}
+                onAction={handleUiAction}
+                onQuestion={(question) => {
+                  if (!isLoading) void ask(question);
+                }}
               />
             )}
             {messages.map((message, index) => (
-              <MessageBubble key={index} message={message} />
+              <MessageBubble
+                key={index}
+                message={message}
+                onAction={handleUiAction}
+                onQuestion={(question) => {
+                  if (!isLoading) void ask(question);
+                }}
+              />
             ))}
           </div>
 

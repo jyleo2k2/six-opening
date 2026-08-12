@@ -5,6 +5,7 @@ export type ChatbotKnowledgeEntry = {
   kind: ChatbotKnowledgeKind;
   triggers: readonly string[];
   answer: string;
+  actionTarget?: "home" | "stock" | "order" | "archive";
   status: "draft" | "reviewed";
 };
 
@@ -45,7 +46,19 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
   { id: "risk", kind: "glossary", triggers: ["위험"], answer: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이야. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해.", status: reviewed },
   { id: "reason", kind: "faq", triggers: ["투자 근거", "고른 이유", "기록"], answer: "기록에서는 고른 이유와 확신도를 남길 수 있어. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거야.", status: reviewed },
   { id: "confidence", kind: "faq", triggers: ["확신도", "확신"], answer: "확신도는 내 생각이 얼마나 또렷한지 표시하는 방법이야. 정답은 없고, 나중에 행동과 생각을 돌아보기 위한 기록이야.", status: reviewed },
-  { id: "archive", kind: "faq", triggers: ["아카이브"], answer: "아카이브에서는 네가 남긴 거래와 생각을 다시 볼 수 있어. 점수표가 아니라 네 투자 스타일을 관찰하는 기록이야.", status: reviewed },
+  { id: "archive", kind: "faq", triggers: ["아카이브"], answer: "아카이브에서는 네가 남긴 거래와 생각을 다시 볼 수 있어. 점수표가 아니라 네 투자 스타일을 관찰하는 기록이야.", actionTarget: "archive", status: reviewed },
+  { id: "stock-search", kind: "faq", triggers: ["종목 검색", "회사 찾기", "종목 찾기"], answer: "종목 화면의 검색창에 회사 이름을 입력하거나 업종 칩을 눌러 찾아볼 수 있어. 이 서비스가 제공하는 종목 안에서만 검색돼.", actionTarget: "stock", status: reviewed },
+  { id: "buy-flow", kind: "faq", triggers: ["매수 어떻게", "사는 방법", "매수 방법"], answer: "종목 상세에서 매수를 누르고 수량과 예상 금액을 확인해. 고른 이유·확신도·예상 보유기간을 기록한 뒤 주문 확인을 누르면 돼.", actionTarget: "order", status: reviewed },
+  { id: "sell-flow", kind: "faq", triggers: ["매도 어떻게", "파는 방법", "매도 방법"], answer: "보유 종목에서 매도를 누르고 수량과 파는 이유를 확인해. 주문 내용을 마지막으로 확인한 뒤 체결하면 기록에 남아.", actionTarget: "order", status: reviewed },
+  { id: "order-check", kind: "faq", triggers: ["주문 전에", "주문 확인", "뭘 확인"], answer: "주문 전에는 종목 이름, 매수·매도 구분, 수량과 예상 금액을 확인해. 네가 남긴 이유도 맞는지 한 번 더 보면 돼.", actionTarget: "order", status: reviewed },
+  { id: "portfolio", kind: "faq", triggers: ["포트폴리오", "보유 종목", "내가 가진 주식"], answer: "홈의 포트폴리오에서 가진 종목과 남은 모의투자 금액을 볼 수 있어. 화면의 수치는 가격에 따라 달라질 수 있어.", actionTarget: "home", status: reviewed },
+  { id: "family-comparison", kind: "faq", triggers: ["가족 비교", "부모 비교", "엄마랑 비교", "아빠랑 비교"], answer: "아카이브의 가족 비교에서는 서로 동의한 경우에만 투자 스타일을 나란히 볼 수 있어. 누가 더 잘했는지 점수를 매기는 기능은 아니야.", actionTarget: "archive", status: reviewed },
+  { id: "league-rule", kind: "faq", triggers: ["리그 규칙", "가족 리그", "모의투자 리그"], answer: "가족 리그에서는 각자 받은 모의투자금으로 투자하고 기록을 남겨. 실제 돈을 주문하는 서비스가 아니야.", actionTarget: "home", status: reviewed },
+  { id: "stock-universe", kind: "faq", triggers: ["지원 종목", "종목 목록", "몇 개 종목"], answer: "이 데모에서는 정해진 국내 종목 51개만 살펴볼 수 있어. 종목 화면에서 이름이나 업종으로 찾아봐.", actionTarget: "stock", status: reviewed },
+  { id: "trade-history", kind: "faq", triggers: ["거래 내역", "지난 주문", "체결 내역", "지난 기록"], answer: "지난 거래와 그때 남긴 생각은 아카이브에서 다시 볼 수 있어. 다른 가족의 원문 기록은 볼 수 없어.", actionTarget: "archive", status: reviewed },
+  { id: "price-location", kind: "faq", triggers: ["현재가 어디", "가격 어디", "주가 어디"], answer: "종목 상세 화면에서 현재가와 가격 변화를 볼 수 있어. 현재가는 계속 바뀔 수 있으니 화면에 표시된 시각도 함께 확인해.", actionTarget: "stock", status: reviewed },
+  { id: "cash-balance", kind: "faq", triggers: ["남은 돈", "잔액", "모의투자금"], answer: "홈의 포트폴리오에서 남은 모의투자금을 확인할 수 있어. 가족이 함께 쓰는 돈이 아니라 계정마다 따로 관리돼.", actionTarget: "home", status: reviewed },
+  { id: "chatbot-role", kind: "faq", triggers: ["키웅이가 뭘", "챗봇이 뭘", "뭘 도와줘"], answer: "나는 금융 기초, 화면 사용법, 검수된 회사 정보와 네 기록을 쉽게 설명해 줘. 종목을 골라 주거나 언제 사고팔지 정해 주지는 않아. 🐻", status: reviewed },
 ];
 
 function normalize(value: string) {
@@ -54,7 +67,17 @@ function normalize(value: string) {
 
 export function findChatbotKnowledge(query: string) {
   const normalized = normalize(query);
-  return CHATBOT_KNOWLEDGE.find(
-    (entry) => entry.status === "reviewed" && entry.triggers.some((trigger) => normalized.includes(normalize(trigger))),
-  );
+  return CHATBOT_KNOWLEDGE.filter((entry) => entry.status === "reviewed")
+    .map((entry) => ({
+      entry,
+      matchLength: Math.max(
+        0,
+        ...entry.triggers
+          .map(normalize)
+          .filter((trigger) => normalized.includes(trigger))
+          .map((trigger) => trigger.length),
+      ),
+    }))
+    .filter(({ matchLength }) => matchLength > 0)
+    .sort((left, right) => right.matchLength - left.matchLength)[0]?.entry;
 }

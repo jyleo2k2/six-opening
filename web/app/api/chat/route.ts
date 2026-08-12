@@ -1,122 +1,85 @@
 import { NextRequest } from "next/server";
-import { filterGeneratedText, SAFE_REFUSAL, takeCompleteSentences } from "../../../shared/llm/filter";
-import { streamChatAnswer } from "../../../features/f10-chatbot/lib/openai";
-import type { ConversationMessage } from "../../../features/f10-chatbot/lib/openai";
-import { ChatContext, routeMessage } from "../../../features/f10-chatbot/lib/routing";
+import {
+  parseChatRequest,
+  sanitizeActionPayload,
+  type ChatActionPayload,
+} from "../../../features/f10-chatbot/lib/contracts";
+import {
+  CHAT_FALLBACK,
+  createChatOutcome,
+} from "../../../features/f10-chatbot/lib/orchestrator";
+import { resolveChatSession } from "../../../features/f10-chatbot/lib/session";
 
 export const runtime = "nodejs";
 
 const encoder = new TextEncoder();
-const FALLBACK = "키웅이가 잠깐 낮잠 중이야! 조금 있다 다시 물어봐 줘 🐻";
-const MAX_HISTORY_MESSAGES = 8;
-const MAX_HISTORY_TEXT_LENGTH = 500;
 
-function event(type: "status" | "text" | "done", value: string) {
+type ChatEvent = "status" | "text" | "action" | "done";
+
+function event(type: ChatEvent, value: string | ChatActionPayload) {
   return encoder.encode(`event: ${type}\ndata: ${JSON.stringify(value)}\n\n`);
 }
 
-function isChatContext(value: unknown): value is ChatContext {
-  if (!value || typeof value !== "object") return false;
-  const context = value as Record<string, unknown>;
-  return ["home", "stock", "order", "archive"].includes(String(context.screen));
-}
-
-function parseHistory(value: unknown): ConversationMessage[] | null {
-  if (value === undefined) return [];
-  if (!Array.isArray(value)) return null;
-
-  const recent = value.slice(-MAX_HISTORY_MESSAGES);
-  if (
-    !recent.every(
-      (entry) =>
-        entry &&
-        typeof entry === "object" &&
-        ["assistant", "user"].includes(String((entry as Record<string, unknown>).role)) &&
-        typeof (entry as Record<string, unknown>).text === "string",
-    )
-  ) {
-    return null;
-  }
-
-  return recent
-    .map((entry) => entry as ConversationMessage)
-    .map(({ role, text }) => ({ role, text: text.trim().slice(0, MAX_HISTORY_TEXT_LENGTH) }))
-    .filter(({ text }) => text.length > 0);
+function logChatResult(value: Record<string, unknown>) {
+  console.info(JSON.stringify({ event: "f10_chat", ...value }));
 }
 
 export async function POST(request: NextRequest) {
-  let body: { message?: unknown; context?: unknown; history?: unknown };
+  const requestId = crypto.randomUUID();
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
+    logChatResult({ requestId, result: "invalid_json" });
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const history = parseHistory(body.history);
-  if (typeof body.message !== "string" || !isChatContext(body.context) || !history) {
+  const chatRequest = parseChatRequest(body);
+  if (!chatRequest) {
+    logChatResult({ requestId, result: "invalid_payload" });
     return Response.json({ error: "Invalid chat payload" }, { status: 400 });
   }
 
-  const message = body.message.trim().slice(0, 500);
-  const context = body.context;
-
+  const session = resolveChatSession();
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (type: "status" | "text" | "done", value: string) => controller.enqueue(event(type, value));
-      const routed = routeMessage(message, context);
-
-      send("status", "무슨 질문인지 보는 중");
-      if (routed.route !== "fallback") {
-        send("status", routed.steps.at(-1) ?? "안전 점검 통과!");
-        send("text", routed.text);
-        send("done", "");
-        controller.close();
-        return;
-      }
+      const send = (type: ChatEvent, value: string | ChatActionPayload) => {
+        if (!request.signal.aborted) controller.enqueue(event(type, value));
+      };
 
       try {
-        send("status", "답변을 준비하는 중");
-        const response = await streamChatAnswer(message, context, history);
-        let buffer = "";
-        let sentSentences = 0;
+        const outcome = await createChatOutcome(chatRequest, session, {
+          requestSignal: request.signal,
+          onStatus: (status) => send("status", status),
+        });
 
-        for await (const chunk of response) {
-          if (chunk.type !== "response.output_text.delta") continue;
-
-          buffer += chunk.delta;
-          const sentences = takeCompleteSentences(buffer);
-          buffer = sentences.remainder;
-
-          for (const sentence of sentences.complete) {
-            if (sentSentences >= 3) break;
-            if (!filterGeneratedText(sentence)) {
-              send("text", SAFE_REFUSAL);
-              send("done", "");
-              controller.close();
-              return;
-            }
-            send("text", sentence);
-            sentSentences += 1;
-          }
-
-          if (sentSentences >= 3) break;
-        }
-
-        const finalText = buffer.trim();
-        if (finalText && sentSentences < 3) {
-          if (!filterGeneratedText(finalText)) {
-            send("text", SAFE_REFUSAL);
-          } else {
-            send("text", finalText);
-          }
-        }
-        send("status", "안전 점검 통과!");
-      } catch {
-        send("text", FALLBACK);
+        send("text", outcome.response.text);
+        const action = sanitizeActionPayload(outcome.response);
+        if (action) send("action", action);
+        send("done", "");
+        logChatResult({
+          requestId,
+          route: outcome.route,
+          intent: outcome.intent,
+          source: outcome.source,
+          tool: outcome.tool ?? null,
+          toolStatus: outcome.toolStatus ?? null,
+          gate: outcome.gate,
+          gateReason: outcome.gateReason ?? null,
+          failure: outcome.failure ?? null,
+          result: "completed",
+        });
+      } catch (error) {
+        send("text", CHAT_FALLBACK);
+        send("done", "");
+        logChatResult({
+          requestId,
+          result: "orchestration_error",
+          error: error instanceof Error ? error.name : "unknown",
+        });
+      } finally {
+        if (!request.signal.aborted) controller.close();
       }
-
-      send("done", "");
-      controller.close();
     },
   });
 
@@ -125,6 +88,7 @@ export async function POST(request: NextRequest) {
       "Cache-Control": "no-store",
       Connection: "keep-alive",
       "Content-Type": "text/event-stream; charset=utf-8",
+      "X-Accel-Buffering": "no",
     },
   });
 }
