@@ -1,3 +1,5 @@
+import type { ExplainScript } from "../types/chatbot";
+
 export type ChatbotKnowledgeKind = "glossary" | "faq";
 
 export type ChatbotKnowledgeEntry = {
@@ -5,6 +7,7 @@ export type ChatbotKnowledgeEntry = {
   kind: ChatbotKnowledgeKind;
   triggers: readonly string[];
   answer: string;
+  explainScript?: ExplainScript;
   actionTarget?: "home" | "stock" | "order" | "archive";
   status: "draft" | "reviewed";
 };
@@ -34,7 +37,27 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
   { id: "revenue", kind: "glossary", triggers: ["매출"], answer: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모야. 매출이 모두 회사의 이익은 아니야.", status: reviewed },
   { id: "operating-profit", kind: "glossary", triggers: ["영업이익"], answer: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과야. 회사의 공개된 과거 성적을 볼 때 쓰는 말이야.", status: reviewed },
   { id: "dividend", kind: "glossary", triggers: ["배당"], answer: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해. 모든 회사가 배당하는 것은 아니야.", status: reviewed },
-  { id: "per", kind: "glossary", triggers: ["per", "주가수익비율"], answer: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자야. 같은 업종 회사끼리 함께 보면 이해하기 쉬워.", status: reviewed },
+  {
+    id: "per",
+    kind: "glossary",
+    triggers: ["per", "퍼", "주가수익비율", "비싼지", "싼지", "비싼회사"],
+    answer: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자야. 같은 업종 회사끼리 함께 보면 이해하기 쉬워.",
+    explainScript: {
+      id: "term:per",
+      brief: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자야.",
+      check: {
+        question: "PER은 무엇을 비교하는 숫자일까?",
+        choices: [
+          { id: "profit-and-price", label: "회사가 번 이익과 주가" },
+          { id: "employee-count", label: "회사의 직원 수와 주가" },
+        ],
+        answerId: "profit-and-price",
+      },
+      detail: "같은 업종의 회사끼리 PER을 함께 보면 이익에 비해 주가가 어떻게 보이는지 비교하는 데 도움이 돼.",
+      example: "같은 업종의 두 회사가 비슷한 이익을 냈는데 한 회사의 주가가 더 높다면 PER도 다르게 보일 수 있어.",
+    },
+    status: reviewed,
+  },
   { id: "pbr", kind: "glossary", triggers: ["pbr", "주가순자산비율"], answer: "PBR은 회사가 가진 자산과 주가를 비교해 보는 숫자야. 이 숫자 하나만으로 좋고 나쁜 회사를 정할 수는 없어.", status: reviewed },
   { id: "eps", kind: "glossary", triggers: ["eps", "주당순이익"], answer: "EPS는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자야. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자야.", status: reviewed },
   { id: "etf", kind: "glossary", triggers: ["etf"], answer: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이야. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어.", status: reviewed },
@@ -80,4 +103,10 @@ export function findChatbotKnowledge(query: string) {
     }))
     .filter(({ matchLength }) => matchLength > 0)
     .sort((left, right) => right.matchLength - left.matchLength)[0]?.entry;
+}
+
+export function findExplainScript(id: string) {
+  return CHATBOT_KNOWLEDGE.find(
+    (entry) => entry.status === "reviewed" && entry.explainScript?.id === id,
+  )?.explainScript;
 }

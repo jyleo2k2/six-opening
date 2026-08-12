@@ -4,9 +4,10 @@ import {
   type ChatOutputSource,
 } from "../../../shared/llm/filter";
 import type { ChatResponse } from "../../../shared/types/chatbot";
+import { findExplainScript } from "../../../shared/data/chatbot-knowledge";
 import type { ChatActionPayload, ChatRequest } from "./contracts";
 import { sanitizeActionPayload } from "./contracts";
-import { advanceGuidedDialogue, startGuidedDialogue } from "./dialogue-engine";
+import { advanceExplain, startExplain } from "./explain";
 import { generateChatAnswer } from "./openai";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
@@ -93,28 +94,18 @@ export async function createChatOutcome(
 ): Promise<ChatOutcome> {
   const onStatus = dependencies.onStatus ?? (() => undefined);
   const routed = routeMessage(request.message, request.context);
-  const canStartGuidedDialogue =
-    routed.route !== "refusal" &&
-    routed.route !== "safety" &&
-    routed.route !== "outOfScope" &&
-    (routed.intent === "financial_concept" ||
-      routed.intent === "stock_facts" ||
-      routed.intent === "general_allowed");
-  const newGuidedTurn = canStartGuidedDialogue
-    ? startGuidedDialogue(request.message, request.context)
+  const protectedRoute = routed.route === "refusal" || routed.route === "safety" || routed.route === "outOfScope";
+  const newExplainTurn = !request.explain && !protectedRoute && routed.explainScript
+    ? startExplain(routed.explainScript)
     : null;
-  const continuedGuidedTurn =
-    !newGuidedTurn &&
-    routed.route === "fallback" &&
-    request.guidedDialogue
-      ? advanceGuidedDialogue(request.guidedDialogue, request.message)
-      : null;
-  const guidedTurn = newGuidedTurn ?? continuedGuidedTurn;
-  const invalidGuidedContinuation = Boolean(
-    request.guidedDialogue &&
-      routed.route === "fallback" &&
-      !newGuidedTurn &&
-      !continuedGuidedTurn,
+  const continuedExplainTurn = !protectedRoute && request.explain
+    ? (() => {
+        const script = findExplainScript(request.explain!.scriptId);
+        return script ? advanceExplain(script, request.explain!) : null;
+      })()
+    : null;
+  const invalidExplainContinuation = Boolean(
+    request.explain && !protectedRoute && !continuedExplainTurn,
   );
   let response: ChatResponse = {
     text: routed.text,
@@ -124,21 +115,22 @@ export async function createChatOutcome(
   let source: ChatOutputSource = "fixed";
   let toolExecution: ToolExecution | undefined;
   let failure: ChatOutcome["failure"];
-  let guidedAction: ChatActionPayload | undefined;
+  let explainAction: ChatActionPayload | undefined;
 
   onStatus("질문을 안전하게 확인하는 중");
 
-  if (invalidGuidedContinuation) {
+  if (invalidExplainContinuation) {
     response = {
-      text: "그 설명 단계는 이어 갈 수 없어. 궁금한 종목이나 용어를 다시 물어봐 줘. 🐻",
+      text: "그 설명 단계는 이어 갈 수 없어. 궁금한 용어를 다시 물어봐 줘. 🐻",
     };
-  } else if (guidedTurn) {
+  } else if (newExplainTurn ?? continuedExplainTurn) {
     onStatus("단계별 설명 준비 완료");
-    response = { text: guidedTurn.text };
-    if (guidedTurn.state) {
-      guidedAction = {
-        kind: "guided_dialogue",
-        state: guidedTurn.state,
+    const explainReply = newExplainTurn ?? continuedExplainTurn!;
+    response = { text: explainReply.text };
+    if (explainReply.kind === "turn") {
+      explainAction = {
+        kind: "explain",
+        turn: explainReply.turn,
       };
     }
   } else if (routed.route === "tool" && routed.tool) {
@@ -199,7 +191,7 @@ export async function createChatOutcome(
   const standardAction = gate.ok
     ? sanitizeActionPayload(response)
     : undefined;
-  const outputAction = gate.ok ? guidedAction ?? standardAction : undefined;
+  const outputAction = gate.ok ? explainAction ?? standardAction : undefined;
   const gatedResponse: ChatResponse = {
     text: gate.ok
       ? gate.text
