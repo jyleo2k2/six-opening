@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "코스닥 이야기",
+  "headline": "코스닥에서 여러 종목이 크게 움직였어",
+  "home_summary": {"text": "코스닥에서 11개 회사가 가격제한폭까지 올랐어. 그중 8곳은 1분기 영업적자였어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "코스닥에서 11개 회사가 가격제한폭까지 올랐어. 이 가운데 8곳은 올해 1분기 영업적자를 기록했어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "일부 회사에는 특허 등록과 유상증자 결정 같은 소식이 있었어. 우주센터 건립 추진 기대가 언급된 회사들도 있었어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 가격이 크게 움직인 이유가 모두 같지는 않아.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "11개 회사가 크게 올랐어", "source_ids": ["S3"]},
+    {"text": "8곳은 영업적자였어", "source_ids": ["S3"]},
+    {"text": "가격 변동 이유는 제각각이야", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

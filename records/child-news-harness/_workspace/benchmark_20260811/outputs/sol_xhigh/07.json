@@ -1,0 +1,48 @@
+{
+  "decision": "publish",
+  "category": "자동차 이야기",
+  "headline": "현대차 노조 부분파업 결정",
+  "home_summary": {
+    "text": "현대차 노조가 부분파업을 정했어. 지난달엔 4만2510대 생산에 차질이 났어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "현대차 노조는 11일 회의를 열고 부분파업을 결정했어. 12·13일에는 4시간, 14·18일에는 6시간씩이야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "노조는 지난달에도 모두 60시간 부분파업을 했어. 이때 자동차 4만2510대의 생산에 차질이 생겼어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 회사와 노조가 다시 협상할 시점은 아직 정해지지 않았어. 앞으로의 생산 차질 규모도 알 수 없어.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    {
+      "text": "추가 부분파업을 정했어",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "4만2510대 생산에 차질",
+      "source_ids": ["S3"]
+    },
+    {
+      "text": "협상 재개 시점은 몰라",
+      "source_ids": []
+    }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

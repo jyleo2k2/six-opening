@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "생활 이야기",
+  "headline": "전기요금 알림 서비스 시작",
+  "home_summary": {"text": "한전이 AI 전기요금 알림을 시작했어. 예상 요금이 크게 오르면 알려줘.", "source_ids": ["S2", "S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "한전이 AI로 예상 전기요금을 알려주는 서비스를 단계적으로 시행하고 있어.", "epistemic": "fact", "source_ids": ["S2", "S3"]},
+    {"role": "business_link", "text": "예상 요금이 지난해 같은 달보다 30% 이상 오르면 카카오톡으로 경고를 보내.", "epistemic": "fact", "source_ids": ["S2", "S3"]},
+    {"role": "unknown", "text": "다만 알림은 예상 요금이라 실제 요금과 다를 수 있어. 집마다 전기 사용량도 달라.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "AI가 전기요금을 예측해", "source_ids": ["S2"]},
+    {"text": "30% 이상 오르면 알려줘", "source_ids": ["S2"]},
+    {"text": "실제 요금과 다를 수 있어", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

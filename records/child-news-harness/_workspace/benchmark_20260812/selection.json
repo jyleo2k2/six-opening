@@ -1,0 +1,78 @@
+{
+  "schema_version": 2,
+  "date_kst": "2026-08-12",
+  "mix": { "경제": 3, "섹터": 3, "기업": 4 },
+  "note": "Luna medium 용어 설명 개선 검증용 신규 기사 10건. 같은 사건을 중복하지 않고 생활경제·물류·무역·조선·자동차·통신·디지털 전환·생활가전·생성형 AI·항공 합병으로 주제를 분산했다.",
+  "selections": [
+    {
+      "candidate_id": "N0110",
+      "bucket": "경제",
+      "scope": "economy",
+      "publisher": "뉴시스",
+      "reason": "청년 고용률과 실업률을 실제 숫자로 설명하며 아이의 미래 일자리와 연결할 수 있다"
+    },
+    {
+      "candidate_id": "N0295",
+      "bucket": "경제",
+      "scope": "economy",
+      "publisher": "KBS",
+      "reason": "가뭄이 강 수위와 물류 운송에 미치는 영향을 구체적인 생활경제 사례로 설명할 수 있다"
+    },
+    {
+      "candidate_id": "N0240",
+      "bucket": "경제",
+      "scope": "economy",
+      "publisher": "뉴시스",
+      "reason": "관세와 수입 신고 제도를 기업의 실제 절차와 연결해 풀어볼 수 있다"
+    },
+    {
+      "candidate_id": "N0206",
+      "bucket": "섹터",
+      "scope": "industry",
+      "publisher": "뉴스1",
+      "reason": "세계 선박 수주량과 한국·중국 점유율을 통해 조선업 경쟁을 설명할 수 있다"
+    },
+    {
+      "candidate_id": "N0415",
+      "bucket": "섹터",
+      "scope": "industry",
+      "publisher": "연합뉴스",
+      "reason": "중국 자동차의 내수와 수출 변화를 전기차 산업 흐름과 함께 볼 수 있다"
+    },
+    {
+      "candidate_id": "N0727",
+      "bucket": "섹터",
+      "scope": "industry",
+      "publisher": "머니투데이",
+      "reason": "로봇청소기의 구체적인 기능과 가격을 통해 생활가전 기술 경쟁을 이해할 수 있다"
+    },
+    {
+      "candidate_id": "N0466",
+      "bucket": "기업",
+      "scope": "company",
+      "publisher": "EBN",
+      "reason": "KT의 매출과 영업이익 변화에서 일회성 이익과 본업 성과의 차이를 설명할 수 있다"
+    },
+    {
+      "candidate_id": "N0499",
+      "bucket": "기업",
+      "scope": "company",
+      "publisher": "전자신문",
+      "reason": "40억원 계약과 우체국 자동화가 실제 업무를 어떻게 바꾸는지 설명할 수 있다"
+    },
+    {
+      "candidate_id": "N0464",
+      "bucket": "기업",
+      "scope": "company",
+      "publisher": "아주경제",
+      "reason": "생성형 AI 서비스 이용자 수와 집계 기준의 차이를 함께 설명할 수 있다"
+    },
+    {
+      "candidate_id": "N0085",
+      "bucket": "기업",
+      "scope": "company",
+      "publisher": "MBN",
+      "reason": "대한항공과 아시아나항공의 합병 절차와 통합 시점을 아이 눈높이로 설명할 수 있다"
+    }
+  ]
+}

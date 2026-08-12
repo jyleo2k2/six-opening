@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "한화 이야기",
+  "headline": "한화가 미국 조선소 인수를 제안했어",
+  "home_summary": {"text": "한화가 오스탈 USA 인수를 위한 제안을 했어. 오스탈 이사회는 4주 실사 기회를 줬어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "한화는 오스탈 USA의 사업과 운영 조직 인수를 위한 제안을 했어. 제안 금액은 10억5000만 달러에서 12억 달러 수준이야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "오스탈 이사회는 한화에 4주간 실사 기회를 줬어. 실사는 회사를 자세히 살펴보는 절차야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 미국 정부 승인과 정식 계약 절차가 남아 있어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "한화가 인수를 제안했어", "source_ids": ["S3"]},
+    {"text": "4주간 실사 기회를 받았어", "source_ids": ["S3"]},
+    {"text": "승인과 계약 절차가 남았어", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

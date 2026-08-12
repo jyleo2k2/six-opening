@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "회사 이야기",
+  "headline": "롯데렌탈 새 주인 정해져",
+  "home_summary": {"text": "롯데렌탈 지분 61.2%가 TPG에 넘어가. 매각대금은 1조3105억원이야.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "롯데그룹이 롯데렌탈 지분 61.2%를 TPG에 팔기로 했어. 매각대금은 1조3105억원이야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "롯데그룹은 이번 매각으로 현금 유동성을 확보해 재무구조 개선에 쓰기로 했어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 미국 정부 승인과 정식 계약 절차가 남아 있어. 최종 조건은 아직 정해지지 않았어.", "epistemic": "unknown", "source_ids": ["S3"]}
+  ],
+  "takeaways": [
+    {"text": "롯데렌탈 지분이 팔려", "source_ids": ["S3"]},
+    {"text": "매각대금은 1조3105억원이야", "source_ids": ["S3"]},
+    {"text": "승인 절차가 남아 있어", "source_ids": ["S3"]}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

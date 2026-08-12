@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "유럽 이야기",
+  "headline": "폭염에 유럽 강 수위 낮아져",
+  "home_summary": {
+    "text": "폭염과 가뭄으로 유럽 강 수위가 낮아졌어. 물류와 산업 생산에도 차질이 생겼어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "유럽에 폭염과 가뭄이 이어졌어. 라인강과 다뉴브강의 물이 크게 줄었어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "강 수위가 낮아지면서 물류와 산업 생산에 차질이 생겼어. 독일 화학업체들도 영향을 받았어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 폭염이 유럽 경제에 미친 전체 영향은 아직 확정되지 않았어.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    { "text": "폭염과 가뭄으로 강물이 줄었어", "source_ids": ["S3"] },
+    { "text": "물류와 생산에 차질이 생겼어", "source_ids": ["S3"] },
+    { "text": "경제 영향은 아직 몰라", "source_ids": [] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "회사 이야기",
+  "headline": "현대차 파업에 생산 차질",
+  "home_summary": {"text": "현대차 노조가 파업 시간을 늘렸어. 누적 7만대 생산 차질이 예상돼.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "현대차 노조가 12일과 13일에는 4시간, 14일과 18일에는 6시간 파업하기로 했어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "지난달 생산 차질 4만2510대에 이어 누적 7만대 이상이 차질을 빚을 수 있어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 노사 교섭 재개 시점은 아직 잡히지 않았어. 파업 일정도 바뀔 수 있어.", "epistemic": "unknown", "source_ids": ["S3"]}
+  ],
+  "takeaways": [
+    {"text": "파업 시간이 늘어났어", "source_ids": ["S3"]},
+    {"text": "생산 차질 7만대가 예상돼", "source_ids": ["S3"]},
+    {"text": "교섭 일정은 아직 몰라", "source_ids": ["S3"]}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

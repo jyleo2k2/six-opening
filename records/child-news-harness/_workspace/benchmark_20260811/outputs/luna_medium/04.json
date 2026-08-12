@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "시장 이야기",
+  "headline": "대만 증시 이틀째 올라",
+  "home_summary": {"text": "대만 증시가 이틀째 올랐어. 반도체 부품주도 강세를 보였어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "대만 타이베이 증시가 전날보다 0.43% 올라 이틀째 상승 마감했어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "반도체와 전자제품에 들어가는 수동부품주가 일제히 강세를 보였어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 시장 전체 흐름이 계속될지는 알 수 없어. 이날 597개 종목은 내렸어.", "epistemic": "unknown", "source_ids": ["S3"]}
+  ],
+  "takeaways": [
+    {"text": "대만 증시가 0.43% 올랐어", "source_ids": ["S3"]},
+    {"text": "반도체 부품주가 강세였어", "source_ids": ["S3"]},
+    {"text": "597개 종목은 내렸어", "source_ids": ["S3"]}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "노사 이야기",
+  "headline": "현대차 노조 파업 시간 늘려",
+  "home_summary": {
+    "text": "현대차 노조가 부분파업을 결정했어. 지난달 생산 차질은 4만2510대였어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "현대차 노조가 12·13일 4시간, 14·18일 6시간 부분파업을 결정했어. 지난달 부분파업으로 4만2510대의 생산 차질이 생겼어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "현대차는 아반떼와 투싼 등 신차 생산 계획을 세워 둔 상태야. 노사는 교섭 재개 시점도 잡지 못했어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 노사 협상이 언제 다시 열릴지는 아직 확인되지 않았어.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    { "text": "부분파업 시간이 늘었어", "source_ids": ["S3"] },
+    { "text": "지난달 4만2510대 차질", "source_ids": ["S3"] },
+    { "text": "교섭 재개 시점은 미정이야", "source_ids": ["S3"] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

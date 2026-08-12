@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "증시 이야기",
+  "headline": "코스닥에서 여러 종목이 올랐어",
+  "home_summary": {
+    "text": "코스닥지수가 6.97% 올라 854.47로 마감했어. 11개 회사가 가격제한폭까지 올랐어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "코스닥지수가 6.97% 올라 854.47로 마감했어. 11개 회사가 가격제한폭까지 올랐어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "그 11개 회사 가운데 8곳은 올해 1분기에 영업적자를 기록했어. 일부 회사에는 관리종목 지정 우려 공시가 나왔어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 가격이 움직이는 폭은 계속 달라질 수 있어. 앞으로 시장이 어떻게 움직일지는 아직 알 수 없어.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    { "text": "코스닥지수가 6.97% 올랐어", "source_ids": ["S3"] },
+    { "text": "8곳이 1분기 적자였어", "source_ids": ["S3"] },
+    { "text": "가격 변화는 알 수 없어", "source_ids": [] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

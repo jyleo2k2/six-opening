@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "렌터카 이야기",
+  "headline": "롯데렌탈 지분 TPG에 매각",
+  "home_summary": {
+    "text": "롯데렌탈 지분 61.2%를 TPG에 넘기기로 했어. 매각대금은 1조3105억원이야.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "롯데그룹이 롯데렌탈 지분 61.2%를 TPG에 넘기기로 했어. 매각대금은 1조3105억원이야.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "롯데그룹은 유동성 확보와 재무구조 개선을 위해 매각을 추진했어. TPG는 국내에 별도 렌터카 사업이 없어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 새 주인이 된 뒤의 운영 방식은 이 기사에서 확인되지 않아.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    { "text": "TPG가 지분을 사기로 했어", "source_ids": ["S3"] },
+    { "text": "매각대금은 1조3105억원이야", "source_ids": ["S3"] },
+    { "text": "다음 운영 방식은 몰라", "source_ids": [] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "회사 이야기",
+  "headline": "한국타이어 실적 늘어",
+  "home_summary": {"text": "한국타이어가 2분기 매출과 영업이익을 늘렸어. 타이어 매출은 분기 최대야.", "source_ids": ["S1", "S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "한국타이어의 2분기 매출은 5조6824억원, 영업이익은 5590억원이었어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "타이어 부문 매출은 2조8073억원으로 분기 기준 가장 컸어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 다음 분기 실적은 아직 발표되지 않았어. 공장 증설 결과도 지켜봐야 해.", "epistemic": "unknown", "source_ids": ["S3"]}
+  ],
+  "takeaways": [
+    {"text": "영업이익은 5590억원이야", "source_ids": ["S3"]},
+    {"text": "타이어 매출은 분기 최대야", "source_ids": ["S3"]},
+    {"text": "다음 실적은 아직 몰라", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

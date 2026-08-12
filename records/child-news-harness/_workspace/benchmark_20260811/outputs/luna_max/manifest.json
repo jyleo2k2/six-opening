@@ -1,0 +1,16 @@
+{
+  "label": "luna_max",
+  "model": "gpt-5.6-luna",
+  "files": [
+    { "file": "01.json", "valid": true, "errors": [] },
+    { "file": "02.json", "valid": true, "errors": [] },
+    { "file": "03.json", "valid": true, "errors": [] },
+    { "file": "04.json", "valid": true, "errors": [] },
+    { "file": "05.json", "valid": true, "errors": [] },
+    { "file": "06.json", "valid": true, "errors": [] },
+    { "file": "07.json", "valid": true, "errors": [] },
+    { "file": "08.json", "valid": true, "errors": [] },
+    { "file": "09.json", "valid": true, "errors": [] },
+    { "file": "10.json", "valid": true, "errors": [] }
+  ]
+}

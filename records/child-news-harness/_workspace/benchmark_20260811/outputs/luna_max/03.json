@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "코스닥 이야기",
+  "headline": "코스닥 오른 날 적자 기업도 포함",
+  "home_summary": {
+    "text": "코스닥이 6.97% 올랐어. 가격제한폭까지 오른 11곳 중 8곳은 적자였어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "코스닥지수가 전날보다 6.97% 오른 854.47로 마감했어. 가격제한폭까지 오른 11곳 중 8곳은 올해 1분기 영업적자였어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "일부 기업은 주가나 시가총액이 상장 유지 기준에 못 미친다는 공시가 나왔어. 그중 일부는 가격제한폭까지 올랐어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 각 종목이 오른 정확한 이유는 하나로 확인되지 않아.",
+      "epistemic": "unknown",
+      "source_ids": ["S3"]
+    }
+  ],
+  "takeaways": [
+    { "text": "코스닥지수가 6.97% 올랐어", "source_ids": ["S3"] },
+    { "text": "11곳 중 8곳은 1분기 적자", "source_ids": ["S3"] },
+    { "text": "종목별 이유는 달랐어", "source_ids": ["S3"] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

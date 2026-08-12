@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "전기요금 이야기",
+  "headline": "여름 전기요금 구간이 바뀌었어",
+  "home_summary": {"text": "여름엔 전기요금 누진 구간이 완화됐어. 한전은 예상 요금 알림도 시행 중이야.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "정부는 7~8월 두 달 동안 주택용 전기요금 누진제 구간을 완화했어. 1단계 기준은 300㎾h로 늘었어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "한전은 6월 10일부터 AI 기반 사전 알림 서비스를 단계적으로 시행하고 있어. 예상 요금이 크게 늘면 카카오톡 알림을 보내는 방식이야.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 집마다 전기 사용량이 달라 요금도 달라질 수 있어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "여름엔 누진 구간이 완화돼", "source_ids": ["S3"]},
+    {"text": "한전이 요금 알림을 보내", "source_ids": ["S3"]},
+    {"text": "집마다 요금이 달라질 수 있어", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}

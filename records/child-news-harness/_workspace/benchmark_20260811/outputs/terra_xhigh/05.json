@@ -1,0 +1,39 @@
+{
+  "decision": "publish",
+  "category": "AI자금 이야기",
+  "headline": "AI에 돈을 빌려주는 새 방식",
+  "home_summary": {
+    "text": "중국은 새 대출 방식을 냈어. 미국은 AI 반도체 담보대출 방안을 냈어.",
+    "source_ids": ["S3"]
+  },
+  "paragraphs": [
+    {
+      "role": "what_happened",
+      "text": "중국은 DR 연동 대출을 일부 기업에 허용했어. DR은 자금시장 상황을 반영하는 금리야. 11일까지 21건의 대출이 첨단기술 등 업종에 이뤄졌어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "business_link",
+      "text": "미국에서는 금융회사가 AI 반도체를 담보로 데이터센터 업체에 돈을 빌려주는 방안이 나왔어. AI 반도체를 빌려 주고 사용료를 받는 방식도 거론됐어.",
+      "epistemic": "fact",
+      "source_ids": ["S3"]
+    },
+    {
+      "role": "unknown",
+      "text": "다만 금융회사가 어떤 방식으로 수익을 낼지는 공개되지 않았어. 이 방안이 어떻게 운영될지는 아직 알 수 없어.",
+      "epistemic": "unknown",
+      "source_ids": []
+    }
+  ],
+  "takeaways": [
+    { "text": "21건의 새 대출이 이뤄졌어", "source_ids": ["S3"] },
+    { "text": "AI 반도체 담보대출안이 나왔어", "source_ids": ["S3"] },
+    { "text": "수익 방식은 공개되지 않았어", "source_ids": [] }
+  ],
+  "safety": {
+    "contains_investment_advice": false,
+    "contains_price_forecast": false,
+    "contains_unsourced_claim": false
+  }
+}

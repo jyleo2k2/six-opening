@@ -1,0 +1,17 @@
+{
+  "decision": "publish",
+  "category": "유럽경제 이야기",
+  "headline": "유럽 폭염이 물류에도 닿았어",
+  "home_summary": {"text": "유럽의 폭염과 가뭄으로 강물 수위가 낮아졌어. 물류와 산업 생산에 차질이 생겼어.", "source_ids": ["S3"]},
+  "paragraphs": [
+    {"role": "what_happened", "text": "유럽에서 폭염과 가뭄이 이어졌어. 라인강과 다뉴브강의 수위가 낮아졌어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "business_link", "text": "강을 이용한 물류와 산업 생산에 차질이 생겼어. 라인강 주변 독일 화학업체도 영향을 받고 있어.", "epistemic": "fact", "source_ids": ["S3"]},
+    {"role": "unknown", "text": "다만 폭염과 가뭄이 얼마나 이어질지는 기사에서 알 수 없어.", "epistemic": "unknown", "source_ids": []}
+  ],
+  "takeaways": [
+    {"text": "강물 수위가 낮아졌어", "source_ids": ["S3"]},
+    {"text": "물류와 생산에 차질이 났어", "source_ids": ["S3"]},
+    {"text": "이어질 기간은 알 수 없어", "source_ids": []}
+  ],
+  "safety": {"contains_investment_advice": false, "contains_price_forecast": false, "contains_unsourced_claim": false}
+}
