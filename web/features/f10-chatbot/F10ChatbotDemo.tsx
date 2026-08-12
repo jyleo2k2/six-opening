@@ -48,6 +48,7 @@ const COPY = {
   input: "\uad81\uae08\ud55c \uac83\uc744 \uc785\ub825\ud574 \uc918",
   send: "\ubcf4\ub0b4\uae30",
   relatedScreen: "관련 화면 보기",
+  openArchive: "아카이브에서 보기",
   avatar: "\uacf0",
 } as const;
 
@@ -113,7 +114,7 @@ function MessageBubble({
             onClick={() => onAction(uiAction)}
             type="button"
           >
-            {COPY.relatedScreen}
+            {uiAction.target === "archive" ? COPY.openArchive : COPY.relatedScreen}
           </button>
         )}
         {!userMessage && Boolean(message.suggestedQuestions?.length) && (
