@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { SAFE_REFUSAL } from "../../../shared/llm/filter";
+import { isGuidedDialogueAction } from "./contracts";
 import { CHAT_FALLBACK, createChatOutcome } from "./orchestrator";
 import type { ChatSession } from "./session";
 
@@ -29,6 +30,34 @@ async function main() {
   );
   assert.equal(faq.route, "faq");
   assert.equal(modelCalls, 0);
+  assert.equal(isGuidedDialogueAction(faq.action), true);
+  if (!isGuidedDialogueAction(faq.action)) throw new Error("guided action missing");
+
+  const continued = await createChatOutcome(
+    { message: "응", context, guidedDialogue: faq.action.state },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(continued.response.text.includes("EPS"), true);
+  assert.equal(isGuidedDialogueAction(continued.action), true);
+  assert.equal(modelCalls, 0);
+
+  const forgedTransition = await createChatOutcome(
+    {
+      message: "응",
+      context,
+      guidedDialogue: {
+        topicId: "term:per",
+        explainedNodeIds: ["main"],
+        pendingNodeId: "forged",
+      },
+    },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(forgedTransition.response.text.includes("이어 갈 수 없어"), true);
+  assert.equal(forgedTransition.action, undefined);
+  assert.equal(modelCalls, 0);
 
   const refusal = await createChatOutcome(
     { message: "뭐 사면 돼?", context },
@@ -39,7 +68,10 @@ async function main() {
   assert.equal(modelCalls, 0);
 
   const model = await createChatOutcome(
-    { message: "주가와 회사 이익은 어떻게 달라?", context },
+    {
+      message: "주가와 회사 이익은 어떻게 달라?",
+      context: { screen: "home" },
+    },
     session,
     { generateAnswer: async () => "주가는 시장에서 거래된 가격이야. 회사 이익은 회사가 번 돈을 계산한 결과야." },
   );

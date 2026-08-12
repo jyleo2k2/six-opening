@@ -20,6 +20,20 @@ async function main() {
   assert.equal(faqStream.includes("event: action"), true);
   assert.equal(faqStream.includes('"target":"order"'), true);
 
+  const guidedResponse = await POST(
+    request({
+      message: "PER이 뭐야?",
+      context: {
+        screen: "stock",
+        stockId: "KRX:005930",
+        stockName: "삼성전자",
+      },
+    }),
+  );
+  const guidedStream = await guidedResponse.text();
+  assert.equal(guidedStream.includes('"kind":"guided_dialogue"'), true);
+  assert.equal(guidedStream.includes('"topicId":"term:per"'), true);
+
   const refusalResponse = await POST(
     request({ message: "뭐 사면 돼?", context: { screen: "stock" } }),
   );

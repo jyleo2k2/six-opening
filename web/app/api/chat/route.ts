@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import {
   parseChatRequest,
-  sanitizeActionPayload,
   type ChatActionPayload,
 } from "../../../features/f10-chatbot/lib/contracts";
 import {
@@ -54,8 +53,7 @@ export async function POST(request: NextRequest) {
         });
 
         send("text", outcome.response.text);
-        const action = sanitizeActionPayload(outcome.response);
-        if (action) send("action", action);
+        if (outcome.action) send("action", outcome.action);
         send("done", "");
         logChatResult({
           requestId,

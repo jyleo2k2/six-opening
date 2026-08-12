@@ -4,8 +4,9 @@ import {
   type ChatOutputSource,
 } from "../../../shared/llm/filter";
 import type { ChatResponse } from "../../../shared/types/chatbot";
-import type { ChatRequest } from "./contracts";
+import type { ChatActionPayload, ChatRequest } from "./contracts";
 import { sanitizeActionPayload } from "./contracts";
+import { advanceGuidedDialogue, startGuidedDialogue } from "./dialogue-engine";
 import { generateChatAnswer } from "./openai";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
@@ -16,6 +17,7 @@ export const CHAT_FALLBACK =
 
 export type ChatOutcome = {
   response: ChatResponse;
+  action?: ChatActionPayload;
   route: ChatRoute;
   intent: ChatIntent;
   source: ChatOutputSource;
@@ -91,6 +93,29 @@ export async function createChatOutcome(
 ): Promise<ChatOutcome> {
   const onStatus = dependencies.onStatus ?? (() => undefined);
   const routed = routeMessage(request.message, request.context);
+  const canStartGuidedDialogue =
+    routed.route !== "refusal" &&
+    routed.route !== "safety" &&
+    routed.route !== "outOfScope" &&
+    (routed.intent === "financial_concept" ||
+      routed.intent === "stock_facts" ||
+      routed.intent === "general_allowed");
+  const newGuidedTurn = canStartGuidedDialogue
+    ? startGuidedDialogue(request.message, request.context)
+    : null;
+  const continuedGuidedTurn =
+    !newGuidedTurn &&
+    routed.route === "fallback" &&
+    request.guidedDialogue
+      ? advanceGuidedDialogue(request.guidedDialogue, request.message)
+      : null;
+  const guidedTurn = newGuidedTurn ?? continuedGuidedTurn;
+  const invalidGuidedContinuation = Boolean(
+    request.guidedDialogue &&
+      routed.route === "fallback" &&
+      !newGuidedTurn &&
+      !continuedGuidedTurn,
+  );
   let response: ChatResponse = {
     text: routed.text,
     suggestedQuestions: routed.suggestedQuestions,
@@ -99,10 +124,24 @@ export async function createChatOutcome(
   let source: ChatOutputSource = "fixed";
   let toolExecution: ToolExecution | undefined;
   let failure: ChatOutcome["failure"];
+  let guidedAction: ChatActionPayload | undefined;
 
   onStatus("질문을 안전하게 확인하는 중");
 
-  if (routed.route === "tool" && routed.tool) {
+  if (invalidGuidedContinuation) {
+    response = {
+      text: "그 설명 단계는 이어 갈 수 없어. 궁금한 종목이나 용어를 다시 물어봐 줘. 🐻",
+    };
+  } else if (guidedTurn) {
+    onStatus("단계별 설명 준비 완료");
+    response = { text: guidedTurn.text };
+    if (guidedTurn.state) {
+      guidedAction = {
+        kind: "guided_dialogue",
+        state: guidedTurn.state,
+      };
+    }
+  } else if (routed.route === "tool" && routed.tool) {
     onStatus("허용된 내 자료를 확인하는 중");
     try {
       toolExecution = await (dependencies.runTool ?? runReadOnlyTool)(
@@ -157,18 +196,23 @@ export async function createChatOutcome(
     source,
     allowedNumbers: allowedContextNumbers(request),
   });
+  const standardAction = gate.ok
+    ? sanitizeActionPayload(response)
+    : undefined;
+  const outputAction = gate.ok ? guidedAction ?? standardAction : undefined;
   const gatedResponse: ChatResponse = {
     text: gate.ok
       ? gate.text
       : gate.reason === "prohibited"
         ? SAFE_REFUSAL
         : CHAT_FALLBACK,
-    ...sanitizeActionPayload(response),
+    ...(standardAction ?? {}),
   };
 
   onStatus(gate.ok ? "안전 점검 통과" : "안전한 답변으로 바꿨어");
   return {
     response: gatedResponse,
+    ...(outputAction ? { action: outputAction } : {}),
     route: routed.route,
     intent: routed.intent,
     source,
