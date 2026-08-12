@@ -55,13 +55,13 @@ const SCREENS: Record<
   },
   stock: {
     label: "\uc885\ubaa9 \uc0c1\uc138",
-    title: "\ud0a4\uc6c0\ud14c\ud06c",
+    title: "\uc0bc\uc131\uc804\uc790",
     description: "\uae30\uc5c5 \uc815\ubcf4\uc640 \uacf5\uac1c\ub41c \uacfc\uac70 \ub370\uc774\ud130\ub97c \uc0b4\ud3b4\ubcf4\ub294 \ud654\uba74\uc774\uc57c.",
     chips: ["\uc774 \ud68c\uc0ac\ub294 \ubb50 \ud558\ub294 \ud68c\uc0ac\uc57c?", "PER\uc774 \ubb50\uc57c?", "\uc2dc\uc7a5\uac00\uac00 \ubb50\uc57c?"],
   },
   order: {
     label: "\uc8fc\ubb38",
-    title: "\ud0a4\uc6c0\ud14c\ud06c \ub9e4\uc218",
+    title: "\uc0bc\uc131\uc804\uc790 \ub9e4\uc218",
     description: "\uc218\ub7c9\uacfc \uc608\uc0c1 \uae08\uc561\uc744 \ud655\uc778\ud558\uace0 \ub124 \uc0dd\uac01\uc744 \uae30\ub85d\ud558\ub294 \ud654\uba74\uc774\uc57c.",
     chips: ["\uc2dc\uc7a5\uac00\uac00 \ubb50\uc57c?", "\uc8fc\ubb38 \uc804\uc5d0 \ubb58 \ud655\uc778\ud574?", "\uc218\uc775\ub960\uc774 \ubb50\uc57c?"],
   },
@@ -107,7 +107,7 @@ export function F10ChatbotDemo() {
   const chatContext = useMemo(
     () => ({
       screen,
-      stockName: screen === "stock" ? "\ud0a4\uc6c5\ud14c\ud06c" : undefined,
+      stockName: screen === "stock" ? "\uc0bc\uc131\uc804\uc790" : undefined,
       quantity: screen === "order" ? 10 : undefined,
       unitPrice: screen === "order" ? 12500 : undefined,
     }),

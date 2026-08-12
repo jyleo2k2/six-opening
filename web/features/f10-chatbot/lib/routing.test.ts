@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { detectAnxietySignals, routeMessage } from "./routing";
 
-const stockContext = { screen: "stock" as const, stockName: "키움테크" };
+const stockContext = { screen: "stock" as const, stockName: "삼성전자" };
 const orderContext = { screen: "order" as const, quantity: 10, unitPrice: 12500 };
 
 assert.equal(routeMessage("PER이 뭐야?", stockContext).route, "faq");
