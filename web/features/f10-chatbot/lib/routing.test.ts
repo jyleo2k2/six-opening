@@ -17,6 +17,17 @@ assert.deepEqual(routeMessage("이 회사는 뭐 하는 회사야?", stockContex
   stockId: "KRX:005930",
   topic: "company",
 });
+assert.deepEqual(
+  routeMessage("이 회사는 뭐 하는 회사야?", {
+    screen: "stock",
+    stockId: "KRX:000660",
+    stockName: "SK하이닉스",
+  }).stockFact,
+  {
+    stockId: "KRX:000660",
+    topic: "company",
+  },
+);
 assert.deepEqual(routeMessage("우리은행이 뭐임", { screen: "home" }).stockFact, {
   stockId: "KRX:316140",
   topic: "company",

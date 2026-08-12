@@ -1152,7 +1152,7 @@ class Component extends DCLogic {
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
     for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
-    this.setState(s => Object.assign({}, s, saved ? { acc:saved.acc, records:saved.records, sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq } : {}, { reasonOrder: order }));
+    this.setState(s => Object.assign({}, s, saved ? { acc:saved.acc, records:saved.records, sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq } : {}, { reasonOrder: order }), () => this.notifyChatContext());
     this.liveRefreshTimer = null;
     this.liveRefreshBusy = false;
     this.liveRefreshTick = () => {
@@ -1187,6 +1187,9 @@ class Component extends DCLogic {
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
+    if (!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) {
+      this.notifyChatContext();
+    }
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
     }
@@ -1260,6 +1263,24 @@ class Component extends DCLogic {
   uni(){ return (typeof window !== 'undefined' && window.KW_UNIVERSE) || { sectors:[], stocks:[] }; }
   me(){ return this.state.acc[this.state.account]; }
   stock(){ return this.uni().stocks.filter(s => s.code === this.state.code)[0] || null; }
+  notifyChatContext(){
+    if (window.parent === window) return;
+    const screen = this.state.screen;
+    const chatScreen = screen === 'archive'
+      ? 'archive'
+      : ['detail', 'chart', 'news'].indexOf(screen) >= 0
+        ? 'stock'
+        : ['buy', 'sell', 'done'].indexOf(screen) >= 0
+          ? 'order'
+          : 'home';
+    const stock = this.stock();
+    const context = { screen: chatScreen };
+    if (stock && (chatScreen === 'stock' || chatScreen === 'order')) {
+      context.stockId = 'KRX:' + stock.code;
+      context.stockName = stock.name;
+    }
+    window.parent.postMessage({ type:'kiwoom:chat-context', context:context }, window.location.origin);
+  }
   sectorOf(id){ return this.uni().sectors.filter(s => s.id === id)[0] || { accent:'#8E93A8', emoji:'📦', name:'' }; }
   totalAsset(){
     const m = this.me();
