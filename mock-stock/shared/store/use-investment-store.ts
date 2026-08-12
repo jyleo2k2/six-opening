@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { Holding, ReasonRecord, Trade, TradeSide } from "@/shared/types";
+import type { FamilyMember, Holding, ReasonRecord, Trade, TradeSide } from "@/shared/types";
 
 type Store = {
   cash: number;
@@ -10,7 +10,7 @@ type Store = {
   trades: Trade[];
   detailEvents: { symbol: string; type: "view" | "tab"; at: string }[];
   recordDetailEvent: (symbol: string, type: "view" | "tab") => void;
-  executeTrade: (symbol: string, side: TradeSide, quantity: number, price: number, record: ReasonRecord) => void;
+  executeTrade: (symbol: string, side: TradeSide, quantity: number, price: number, record: ReasonRecord, member?: FamilyMember) => void;
 };
 
 const initialHoldings: Holding[] = [
@@ -27,7 +27,7 @@ export const useInvestmentStore = create<Store>()(persist((set) => ({
   recordDetailEvent: (symbol, type) => set((state) => ({
     detailEvents: [...state.detailEvents, { symbol, type, at: new Date().toISOString() }].slice(-100),
   })),
-  executeTrade: (symbol, side, quantity, price, record) => set((state) => {
+  executeTrade: (symbol, side, quantity, price, record, member = "child") => set((state) => {
     const current = state.holdings.find((holding) => holding.symbol === symbol);
     let holdings = state.holdings;
     if (side === "buy") {
@@ -43,7 +43,7 @@ export const useInvestmentStore = create<Store>()(persist((set) => ({
         ? state.holdings.map((holding) => holding.symbol === symbol ? { ...holding, quantity: nextQuantity } : holding)
         : state.holdings.filter((holding) => holding.symbol !== symbol);
     }
-    const trade: Trade = { ...record, id: crypto.randomUUID(), symbol, quantity, price, tradedAt: new Date().toISOString() };
+    const trade: Trade = { ...record, id: crypto.randomUUID(), member, symbol, quantity, price, tradedAt: new Date().toISOString() };
     return {
       cash: state.cash + (side === "buy" ? -price * quantity : price * quantity),
       holdings,
