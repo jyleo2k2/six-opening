@@ -1279,7 +1279,13 @@ class Component extends DCLogic {
     const logos = u.logos || {};
     const mixW = (hx, w) => { const n = parseInt(hx.slice(1), 16); const c = [(n>>16)&255,(n>>8)&255,n&255].map(v => Math.round(v + (255 - v) * w)); return '#' + c.map(v => v.toString(16).padStart(2,'0')).join(''); };
     const rgbOf = (hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); };
-    const list = u.stocks.filter(x => x.sector === s.sectorId).map((x, ci) => {
+    // 'rank' 는 섹터가 아니라 그날 등락률 순으로 보는 모드다. 도트가 넘치지 않게 상위 10곳만.
+    const isRank = s.sectorId === 'rank';
+    const RANK_COUNT = 10;
+    const baseList = isRank
+      ? u.stocks.slice().sort((a, b) => b.change - a.change).slice(0, RANK_COUNT)
+      : u.stocks.filter(x => x.sector === s.sectorId);
+    const list = baseList.map((x, ci) => {
       const sec = this.sectorOf(x.sector);
       const active = ci === s.cardIndex;
       // 게임형 수집 카드 — 로고에서 뽑은 브랜드 색으로 프레임·글로우·차트를 물들인다
@@ -1484,14 +1490,17 @@ class Component extends DCLogic {
       pickChild: () => this.set({ account:'child' }),
       pickParent: () => this.set({ account:'parent' }),
 
-      sectorChips: u.sectors.map(x => ({
+      // 맨 앞은 섹터가 아니라 '오늘 많이 오른 순' 보기다
+      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순', emoji: '🔥' }].concat(u.sectors).map(x => ({
         name: x.name, emoji: x.emoji,
         style: 'display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:' + (x.id === s.sectorId ? '700' : '500') + ';white-space:nowrap;cursor:pointer;' + (x.id === s.sectorId
           ? 'color:#fff;background:linear-gradient(180deg,#FF7FB4 0%,#F5327F 100%);box-shadow:0 6px 14px -4px rgba(245,50,127,0.5),0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)'
           : 'color:#5C6280;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(240,240,250,0.78) 100%);box-shadow:0 5px 12px -5px rgba(70,50,120,0.28),inset 0 1.5px 1px rgba(255,255,255,0.95),inset 0 0 0 1px rgba(120,110,180,0.10)'),
         pick: () => this.set({ sectorId: x.id, cardIndex: 0 })
       })),
-      sectorTitle: this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
+      sectorTitle: isRank
+        ? '오늘 많이 오른 순 ' + list.length + '곳'
+        : this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
       cards: list,
       cardDots: list.map((x, i) => ({
         style: 'width:' + (i === s.cardIndex ? '18px' : '6px') + ';height:6px;border-radius:999px;transition:width .18s ease;background:' + (i === s.cardIndex ? '#FF3D8D' : '#D6D0E5') + (i === s.cardIndex ? ';box-shadow:0 0 9px rgba(255,61,141,0.42)' : '')
