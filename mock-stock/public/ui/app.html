@@ -132,20 +132,37 @@ a:hover{color:#01185A}
 <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
 <div onClick="{{ c.pick }}" style="{{ c.cardStyle }}">
 <div style="{{ c.glowStyle }}"></div>
+<div style="{{ c.gridStyle }}"></div>
 <div style="{{ c.sheenStyle }}"></div>
+<div style="{{ c.cTL }}"></div>
+<div style="{{ c.cTR }}"></div>
+<div style="{{ c.cBL }}"></div>
+<div style="{{ c.cBR }}"></div>
+<div style="position:relative;display:flex;align-items:flex-start;gap:13px">
 <div style="{{ c.artStyle }}">
 <sc-if value="{{ c.noLogo }}" hint-placeholder-val="{{ true }}">
-<span style="font-size:38px;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.2))">{{ c.emoji }}</span>
+<span style="font-size:30px">{{ c.emoji }}</span>
 </sc-if>
 </div>
-<div style="position:relative;font-size:18px;font-weight:800;color:#01185A;margin-top:11px;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</div>
-<div style="position:relative;font-size:13.5px;font-weight:500;color:#7E849B;line-height:1.55;margin-top:6px;height:58px;overflow:hidden">{{ c.desc }}</div>
-<div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:8px">
+<div style="flex:1;min-width:0;padding-top:10px">
+<div style="{{ c.catStyle }}">{{ c.category }}</div>
+<div style="{{ c.catBarStyle }}"><div style="{{ c.catBarFill }}"></div></div>
+</div>
+</div>
+<div style="{{ c.nameStyle }}">{{ c.name }}</div>
+<div style="{{ c.descStyle }}">{{ c.desc }}</div>
+<div style="position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto">
 <div style="min-width:0">
-<div style="font-size:24px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.02em;line-height:1.1">{{ c.priceText }}</div>
+<div style="{{ c.priceStyle }}">{{ c.priceText }}</div>
 <div style="{{ c.changeStyle }}">{{ c.changeText }}</div>
 </div>
-<svg width="72" height="30" viewBox="0 0 72 30" preserveAspectRatio="none" style="display:block;flex:none;margin-bottom:2px"><polyline points="{{ c.spark }}" fill="none" stroke="{{ c.lineColor }}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"></polyline></svg>
+<svg width="96" height="56" viewBox="0 0 96 56" style="display:block;flex:none;overflow:visible">
+<path d="{{ c.sparkArea }}" fill="{{ c.lineColor }}" fill-opacity="0.16"></path>
+<polyline points="{{ c.sparkLine }}" fill="none" stroke="{{ c.lineColor }}" stroke-width="6" stroke-opacity="0.18" stroke-linejoin="round" stroke-linecap="round"></polyline>
+<polyline points="{{ c.sparkLine }}" fill="none" stroke="{{ c.lineColor }}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"></polyline>
+<circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="6.5" fill="{{ c.lineColor }}" fill-opacity="0.32"></circle>
+<circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="3" fill="#FFFFFF"></circle>
+</svg>
 </div>
 </div>
 </sc-for>
@@ -1227,24 +1244,50 @@ class Component extends DCLogic {
 
     const cards = st === null && !s.code ? [] : [];
     const logos = u.logos || {};
+    const mixW = (hx, w) => { const n = parseInt(hx.slice(1), 16); const c = [(n>>16)&255,(n>>8)&255,n&255].map(v => Math.round(v + (255 - v) * w)); return '#' + c.map(v => v.toString(16).padStart(2,'0')).join(''); };
     const list = u.stocks.filter(x => x.sector === s.sectorId).map(x => {
       const sec = this.sectorOf(x.sector);
-      // 카드 색은 그 회사 로고의 배경색을 그대로 쓴다 — 로고와 카드가 이어져 보이게
-      const tn = (u.tints || {})[x.code] || {};
-      const tBg = tn.bg || '#F4F5FB';
-      const tAc = tn.accent || sec.accent;
+      // 게임형 수집 카드 — 로고에서 뽑은 브랜드 색으로 프레임·글로우·차트를 물들인다
+      const br = (u.brands || {})[x.code] || {};
+      const B = br.color || sec.accent;          // 브랜드 색
+      const BL = mixW(B, 0.45);                  // 어두운 배경 위 글자용
+      const CL = x.change >= 0 ? up : down;      // 등락색 (상승 빨강 / 하락 파랑)
+      const corner = (pos) => 'position:absolute;width:30px;height:30px;pointer-events:none;opacity:0.85;' + pos;
+
+      // 미니 차트 — 선 + 면 + 끝점
+      const sp = x.spark || [], W = 96, H = 56, PX = 4, PY = 9, N = Math.max(2, sp.length);
+      const pts = sp.map((v, i) => [PX + i * ((W - PX * 2) / (N - 1)), (H - PY) - (v / 100) * (H - PY * 2)]);
+      const xy = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1));
+      const last = pts[pts.length - 1] || [W - PX, H / 2];
+
       return {
-        name: x.name, desc: x.desc, emoji: sec.emoji,
+        name: x.name, desc: x.desc, emoji: sec.emoji, category: br.cat || sec.name,
         logo: logos[x.code] || '', hasLogo: !!logos[x.code], noLogo: !logos[x.code],
-        spark: this.polyline(x.spark, 72, 30),
-        lineColor: x.change >= 0 ? up : down,
+        sparkLine: xy.join(' '),
+        sparkArea: 'M' + xy.join(' L ') + ' L ' + (W - PX) + ',' + H + ' L ' + PX + ',' + H + ' Z',
+        endX: last[0].toFixed(1), endY: last[1].toFixed(1),
+        lineColor: CL,
         priceText: x.price.toLocaleString('ko-KR'),
         changeText: (x.change >= 0 ? '▲ ' : '▼ ') + Math.abs(x.change).toFixed(2) + '%',
-        changeStyle: 'font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:3px;color:' + (x.change >= 0 ? up : down),
-        glowStyle: 'position:absolute;right:-40px;top:-46px;width:150px;height:150px;border-radius:999px;filter:blur(30px);opacity:0.30;background:' + tAc,
-        cardStyle: 'position:relative;overflow:hidden;flex:none;width:230px;border-radius:32px;padding:18px 18px 16px;cursor:pointer;display:flex;flex-direction:column;scroll-snap-align:center;background:linear-gradient(160deg,#FFFFFF 0%,#FDFDFF 34%,' + tBg + ' 100%);box-shadow:0 18px 34px rgba(35,25,80,0.14),0 3px 7px rgba(35,25,80,0.06),inset 0 2px 1px rgba(255,255,255,1),inset 0 -12px 22px rgba(70,60,120,0.05),inset 0 0 0 1px rgba(255,255,255,0.8)',
-        sheenStyle: 'position:absolute;left:-40%;top:-30%;width:70%;height:180%;transform:rotate(18deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.55) 50%,rgba(255,255,255,0) 100%);opacity:0.5;pointer-events:none',
-        artStyle: 'position:relative;height:84px;border-radius:22px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:' + (logos[x.code] ? 'url(' + logos[x.code] + ') center/contain no-repeat,' : '') + tBg + ';box-shadow:inset 0 0 0 1.5px ' + tAc + '1F',
+
+        cardStyle: 'position:relative;overflow:hidden;flex:none;width:238px;height:332px;border-radius:30px;padding:18px;cursor:pointer;display:flex;flex-direction:column;scroll-snap-align:center;background:radial-gradient(130% 90% at 18% -12%,' + B + '3D 0%,rgba(9,14,30,0) 62%),linear-gradient(160deg,#0C1428 0%,#080D1B 52%,#05070F 100%);box-shadow:0 22px 42px -14px rgba(0,0,0,0.7),0 0 26px -10px ' + B + ',inset 0 0 0 1.5px ' + B + '4D,inset 0 1px 0 rgba(255,255,255,0.10)',
+        glowStyle: 'position:absolute;right:-46px;top:-54px;width:172px;height:172px;border-radius:999px;filter:blur(34px);opacity:0.34;background:' + B,
+        gridStyle: 'position:absolute;left:0;right:0;bottom:0;height:56%;opacity:0.22;pointer-events:none;background-image:linear-gradient(' + B + '2E 1px,transparent 1px),linear-gradient(90deg,' + B + '2E 1px,transparent 1px);background-size:24px 24px',
+        sheenStyle: 'position:absolute;left:-45%;top:-30%;width:60%;height:180%;transform:rotate(18deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.10) 50%,rgba(255,255,255,0) 100%);pointer-events:none',
+        cTL: corner('left:11px;top:11px;border-top:2px solid ' + B + ';border-left:2px solid ' + B + ';border-top-left-radius:16px'),
+        cTR: corner('right:11px;top:11px;border-top:2px solid ' + B + ';border-right:2px solid ' + B + ';border-top-right-radius:16px'),
+        cBL: corner('left:11px;bottom:11px;border-bottom:2px solid ' + B + ';border-left:2px solid ' + B + ';border-bottom-left-radius:16px'),
+        cBR: corner('right:11px;bottom:11px;border-bottom:2px solid ' + B + ';border-right:2px solid ' + B + ';border-bottom-right-radius:16px'),
+
+        artStyle: 'position:relative;width:64px;height:64px;flex:none;border-radius:19px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:' + (logos[x.code] ? 'url(' + logos[x.code] + ') center/cover no-repeat' : '#101a33') + ';box-shadow:0 10px 20px -8px rgba(0,0,0,0.85),0 0 18px -7px ' + B + ',inset 0 0 0 1.5px rgba(255,255,255,0.24)',
+        catStyle: 'font-size:10.5px;font-weight:800;letter-spacing:0.18em;color:' + BL + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis',
+        catBarStyle: 'position:relative;height:4px;border-radius:999px;margin-top:9px;background:rgba(255,255,255,0.09);overflow:hidden',
+        catBarFill: 'position:absolute;left:0;top:0;bottom:0;width:42%;border-radius:999px;background:linear-gradient(90deg,' + B + ' 0%,' + B + '00 100%)',
+        nameStyle: 'position:relative;font-size:20px;font-weight:800;color:#FFFFFF;margin-top:15px;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 8px rgba(0,0,0,0.55)',
+        descStyle: 'position:relative;font-size:13px;font-weight:500;color:#9DB4D8;line-height:1.55;margin-top:7px;height:40px;overflow:hidden',
+        priceStyle: 'font-size:27px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.02em;line-height:1.05;text-shadow:0 2px 10px rgba(0,0,0,0.55)',
+        changeStyle: 'display:inline-flex;align-items:center;margin-top:9px;padding:5px 12px;border-radius:999px;font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:#FFFFFF;background:' + CL + '33;box-shadow:inset 0 0 0 1.5px ' + CL,
+
         pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
       };
     });

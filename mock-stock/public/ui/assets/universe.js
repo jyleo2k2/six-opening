@@ -101,6 +101,61 @@
    * 예: '005930': 'assets/logos/005930.png'
    * 등록되지 않은 종목은 섹터 이모지로 대체됩니다. */
   // 로고에서 뽑은 색 — 카드 배경을 로고 배경과 같게 맞춘다
+  // 카드 카테고리 라벨 + 로고에서 뽑은 브랜드 색 (게임형 카드용)
+  const brands = {
+    '000120': { cat: 'LOGISTICS', color: '#f6a531' },
+    '000270': { cat: 'MOBILITY', color: '#6c59cf' },
+    '000660': { cat: 'TECH', color: '#f6313d' },
+    '003230': { cat: 'FOOD', color: '#f68331' },
+    '003490': { cat: 'AVIATION', color: '#3183f6' },
+    '004170': { cat: 'RETAIL', color: '#f63136' },
+    '004370': { cat: 'FOOD', color: '#f63138' },
+    '005380': { cat: 'MOBILITY', color: '#4f83d9' },
+    '005930': { cat: 'TECH', color: '#4352e4' },
+    '009540': { cat: 'SHIPBUILDING', color: '#3474f3' },
+    '010140': { cat: 'SHIPBUILDING', color: '#4459e4' },
+    '010950': { cat: 'ENERGY', color: '#44e47c' },
+    '011200': { cat: 'SHIPPING', color: '#f6313f' },
+    '012330': { cat: 'AUTO TECH', color: '#597fcf' },
+    '012450': { cat: 'AEROSPACE', color: '#f68531' },
+    '015760': { cat: 'ENERGY', color: '#f64031' },
+    '020560': { cat: 'AVIATION', color: '#f63135' },
+    '021240': { cat: 'LIVING', color: '#31baf6' },
+    '035900': { cat: 'MUSIC', color: '#35a4f3' },
+    '036570': { cat: 'GAMING', color: '#4e86da' },
+    '039490': { cat: 'FINANCE', color: '#f6319d' },
+    '041510': { cat: 'MUSIC', color: '#e74162' },
+    '042660': { cat: 'SHIPBUILDING', color: '#cf8759' },
+    '047050': { cat: 'GLOBAL TRADE', color: '#5999cf' },
+    '047810': { cat: 'AEROSPACE', color: '#3f86e9' },
+    '051900': { cat: 'BEAUTY', color: '#f03871' },
+    '055550': { cat: 'FINANCE', color: '#347df4' },
+    '064350': { cat: 'MOBILITY', color: '#527dd6' },
+    '066570': { cat: 'TECH', color: '#ef3962' },
+    '078930': { cat: 'HOLDINGS', color: '#37abf1' },
+    '079550': { cat: 'DEFENSE', color: '#31b5f6' },
+    '086280': { cat: 'LOGISTICS', color: '#4980de' },
+    '086790': { cat: 'FINANCE', color: '#53d5c4' },
+    '089860': { cat: 'MOBILITY', color: '#f63a31' },
+    '090430': { cat: 'BEAUTY', color: '#528ed6' },
+    '096770': { cat: 'ENERGY', color: '#f63149' },
+    '097950': { cat: 'FOOD', color: '#f63139' },
+    '105560': { cat: 'FINANCE', color: '#f6ba31' },
+    '122870': { cat: 'MUSIC', color: '#5B87E8' },
+    '180640': { cat: 'AVIATION', color: '#31a8f6' },
+    '251270': { cat: 'GAMING', color: '#f6d931' },
+    '259960': { cat: 'GAMING', color: '#5B87E8' },
+    '263750': { cat: 'GAMING', color: '#528dd6' },
+    '271560': { cat: 'FOOD', color: '#f63631' },
+    '278470': { cat: 'BEAUTY TECH', color: '#f6314b' },
+    '282330': { cat: 'RETAIL', color: '#5ecf59' },
+    '316140': { cat: 'FINANCE', color: '#44a2e4' },
+    '329180': { cat: 'SHIPBUILDING', color: '#3f7de9' },
+    '352820': { cat: 'MUSIC', color: '#8259cf' },
+    '402340': { cat: 'TECH INVEST', color: '#f6314c' },
+    '483650': { cat: 'BEAUTY', color: '#5B87E8' }
+  };
+
   const tints = {
     '000120': { bg: '#e1e1fb', accent: '#5b5ae2' },
     '000270': { bg: '#f1eafa', accent: '#955ae2' },
@@ -247,5 +302,5 @@
     bank: { headline:'은행이 번 돈이 지난해보다 늘었어', body:['은행은 사람들 돈을 맡아 주고, 필요한 사람에게 빌려주면서 그 차이로 돈을 벌어.','금리가 높으면 빌려주고 받는 이자가 커져서 은행이 버는 돈도 늘어. 대신 돈을 못 갚는 사람이 늘면 손해가 나기도 해.','은행은 번 돈의 일부를 주주에게 나눠 주는 편이야. 이걸 배당이라고 해.'], points:['금리가 높으면 더 벌어','못 갚는 사람이 늘면 손해야','배당을 주는 편이야'] }
   };
 
-  window.KW_UNIVERSE = { sectors: sectors, stocks: stocks, logos: logos, candles: candles, newsDetail: newsDetail, tints: tints };
+  window.KW_UNIVERSE = { sectors: sectors, stocks: stocks, logos: logos, candles: candles, newsDetail: newsDetail, tints: tints, brands: brands };
 })();
