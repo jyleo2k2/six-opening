@@ -20,6 +20,7 @@ const MAX_LABEL_LENGTH = 60;
 const MAX_QUANTITY = 1_000_000;
 const MAX_UNIT_PRICE = 1_000_000_000;
 const MAX_EXPLAIN_ID_LENGTH = 80;
+const MAX_PREVIOUS_ANSWER_LENGTH = 800;
 const CLIENT_IDENTITY_FIELDS = [
   "userId",
   "familyId",
@@ -27,10 +28,12 @@ const CLIENT_IDENTITY_FIELDS = [
   "targetUserId",
 ] as const;
 
+type ChatExplainReply = ExplainReply & { previousAnswer?: string };
+
 export type ChatRequest = {
   message: string;
   context: ChatContext;
-  explain?: ExplainReply;
+  explain?: ChatExplainReply;
   stockExplore?: StockExploreReply;
 };
 
@@ -78,11 +81,11 @@ function optionalPositiveInteger(value: unknown, maximum: number) {
   return Number(value);
 }
 
-function parseExplainReply(value: unknown): ExplainReply | null | undefined {
+function parseExplainReply(value: unknown): ChatExplainReply | null | undefined {
   if (value === undefined) return undefined;
   if (!isRecord(value)) return null;
 
-  const { scriptId, stage, choiceId } = value;
+  const { scriptId, stage, choiceId, previousAnswer } = value;
   if (
     typeof scriptId !== "string" ||
     !/^(term|stock|sector|flow):\S{1,80}$/.test(scriptId) ||
@@ -99,10 +102,25 @@ function parseExplainReply(value: unknown): ExplainReply | null | undefined {
     return null;
   }
 
+  const parsedPreviousAnswer = optionalString(
+    previousAnswer,
+    MAX_PREVIOUS_ANSWER_LENGTH,
+  );
+  if (
+    parsedPreviousAnswer === null ||
+    (parsedPreviousAnswer !== undefined &&
+      (scriptId !== "flow:guided" || stage !== "brief"))
+  ) {
+    return null;
+  }
+
   return {
     scriptId,
     stage: stage as ExplainReply["stage"],
     ...(choiceId ? { choiceId: choiceId as string } : {}),
+    ...(parsedPreviousAnswer
+      ? { previousAnswer: parsedPreviousAnswer }
+      : {}),
   };
 }
 

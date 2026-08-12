@@ -298,6 +298,14 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
   ) {
     const explainTurn = explainAction?.turn;
     const stockExploreTurn = stockExploreAction?.turn;
+    const previousMessage = messages.at(-1);
+    const previousAnswer =
+      explainTurn?.scriptId === "flow:guided" &&
+      explainTurn.stage === "brief" &&
+      (!explainChoiceId || explainChoiceId === "simpler") &&
+      previousMessage?.role === "assistant"
+        ? previousMessage.text
+        : undefined;
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
@@ -325,6 +333,7 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
                   scriptId: explainTurn.scriptId,
                   stage: explainTurn.stage,
                   ...(explainChoiceId ? { choiceId: explainChoiceId } : {}),
+                  ...(previousAnswer ? { previousAnswer } : {}),
                 },
               }
             : {}),

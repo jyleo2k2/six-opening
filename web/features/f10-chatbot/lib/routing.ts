@@ -1,4 +1,8 @@
-import { findChatbotKnowledge } from "../../../shared/data/chatbot-knowledge";
+import {
+  CHAT_PRIVACY_ANSWER,
+  TRADE_VISIBILITY_ANSWER,
+  findChatbotKnowledge,
+} from "../../../shared/data/chatbot-knowledge";
 import { STOCKS } from "../../../shared/data/stocks";
 import type {
   ChatContext,
@@ -140,6 +144,7 @@ const SELECTION_PATTERNS = [
   "추천해",
   "추천좀",
   "추천ᄀ",
+  "친구가사라",
 ];
 const PREDICTION_PATTERNS = [
   "오를까",
@@ -178,6 +183,9 @@ const PREDICTION_PATTERNS = [
   "손절가알려",
   "손절가정해",
   "손절가찍",
+  "요즘뭐가올라",
+  "요즘어떤게올라",
+  "요즘오르는종목",
 ];
 const VAGUE_FORECAST_PATTERNS = ["어때", "어떨", "괜찮을까", "잘갈까"];
 const FUTURE_PATTERNS = [
@@ -417,7 +425,7 @@ const CRISIS_PATTERNS = [
   "내가없어졌으면",
   "모든게끝났으면",
 ];
-const FAMILY_MEMBER_PATTERNS = ["엄마", "아빠", "부모님", "부모", "가족"];
+const FAMILY_MEMBER_PATTERNS = ["엄마", "아빠", "부모님", "부모", "보호자", "가족"];
 const FAMILY_DATA_PATTERNS = [
   "수익률",
   "성향",
@@ -794,6 +802,40 @@ const STOCK_FINANCIAL_PATTERNS = [
   "재무",
   "2024",
 ];
+const CHAT_PRIVACY_PATTERNS = [
+  "너랑한얘기",
+  "나눈얘기",
+  "키웅이랑한채팅",
+  "키웅이한테",
+  "채팅",
+  "대화",
+  "물어본",
+  "질문",
+  "엄마한테말안하면",
+  "아빠한테말안하면",
+  "부모한테말안하면",
+  "보호자한테말안하면",
+];
+const TRADE_VISIBILITY_PATTERNS = [
+  "내가뭐샀",
+  "내가뭘샀",
+  "내가산거",
+  "내가판거",
+  "내가산주식",
+  "내보유종목",
+  "내주문",
+  "내거래기록",
+  "내거래내역",
+  "내매수기록",
+  "내매도기록",
+  "내주문기록",
+];
+const FAMILY_COMPARISON_PATTERNS = [
+  "가족비교",
+  "부모비교",
+  "엄마랑비교",
+  "아빠랑비교",
+];
 
 export function normalizeChatInput(input: string) {
   return input.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}%]+/gu, "");
@@ -930,6 +972,20 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 }
 
 function findRecommendationKind(message: string): RecommendationKind | null {
+  const asksForSelectionCriteria =
+    includesAny(message, ["종목고를때", "주식고를때", "회사고를때", "투자기준"]) &&
+    !includesAny(message, [
+      "추천",
+      "골라",
+      "정해",
+      "대신",
+      "뭐가좋",
+      "뭐살",
+      "뭘살",
+      "사줘",
+    ]);
+  if (asksForSelectionCriteria) return null;
+
   const selection = includesAny(message, SELECTION_PATTERNS);
   const prediction =
     includesAny(message, PREDICTION_PATTERNS) ||
@@ -1494,6 +1550,19 @@ function getContextReply(message: string, context: ChatContext): ChatReply | nul
   return null;
 }
 
+function getPrivacyReply(message: string): ChatReply | null {
+  if (includesAny(message, FAMILY_COMPARISON_PATTERNS)) return null;
+  if (!includesAny(message, FAMILY_MEMBER_PATTERNS)) return null;
+
+  if (includesAny(message, TRADE_VISIBILITY_PATTERNS)) {
+    return reply("safety", "safety", TRADE_VISIBILITY_ANSWER, ["거래 기록 공개 범위 안내"]);
+  }
+  if (includesAny(message, CHAT_PRIVACY_PATTERNS)) {
+    return reply("safety", "safety", CHAT_PRIVACY_ANSWER, ["챗봇 대화 공개 범위 안내"]);
+  }
+  return null;
+}
+
 export function routeMessage(input: string, context: ChatContext): ChatReply {
   const message = normalizeChatInput(input);
 
@@ -1514,6 +1583,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       ["긴급 도움 안내"],
     );
   }
+
+  const privacyReply = getPrivacyReply(message);
+  if (privacyReply) return privacyReply;
 
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);

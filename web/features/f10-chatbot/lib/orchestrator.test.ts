@@ -285,6 +285,7 @@ async function main() {
     );
   }
 
+  const simplerModelCallsBefore = modelCalls;
   const simpler = await createChatOutcome(
     {
       message: "더 쉽게 볼래",
@@ -293,13 +294,43 @@ async function main() {
         scriptId: "flow:guided",
         stage: "brief",
         choiceId: "simpler",
+        previousAnswer: "주식은 회사의 작은 조각이라고 생각하면 돼요.",
       },
     },
     session,
-    { generateAnswer: noModel },
+    {
+      generateAnswer: async (message) => {
+        modelCalls += 1;
+        assert.equal(message.includes("초등학교 4학년"), true);
+        assert.equal(message.includes("주식은 회사의 작은 조각"), true);
+        return "주식은 회사를 작게 나눈 조각이에요. 그 조각을 가지면 회사의 일부를 가진 거예요.";
+      },
+    },
   );
-  assert.equal(simpler.response.text.includes("헷갈린 단어"), true);
+  assert.equal(simpler.response.text.includes("회사를 작게 나눈 조각"), true);
+  assert.equal(simpler.source, "model");
+  assert.equal(modelCalls, simplerModelCallsBefore + 1);
   assert.equal(isExplainAction(simpler.action), true);
+  if (isExplainAction(simpler.action)) {
+    assert.equal(simpler.action.turn.stage, "detail");
+  }
+
+  const simplerBlocked = await createChatOutcome(
+    {
+      message: "더 쉽게 볼래",
+      context,
+      explain: {
+        scriptId: "flow:guided",
+        stage: "brief",
+        choiceId: "simpler",
+        previousAnswer: "회사가 하는 일을 살펴보는 방법이에요.",
+      },
+    },
+    session,
+    { generateAnswer: async () => "지금 이 종목을 사는 게 좋아요." },
+  );
+  assert.equal(simplerBlocked.response.text.includes("헷갈린 단어나 문장"), true);
+  assert.equal(isExplainAction(simplerBlocked.action), true);
 
   const interruptedByQuestion = await createChatOutcome(
     {
@@ -329,6 +360,36 @@ async function main() {
   if (isExplainAction(interruptedByScriptedQuestion.action)) {
     assert.equal(interruptedByScriptedQuestion.action.turn.scriptId, "term:per");
   }
+
+  // "직접 물어볼게요" 선택과 새 질문을 함께 보내면 선택 문구가 아니라 새 질문을 처리한다.
+  const askWithQuestion = await createChatOutcome(
+    {
+      message: "물타기가 뭐야?",
+      context,
+      explain: { scriptId: "flow:guided", stage: "detail", choiceId: "ask" },
+    },
+    session,
+    { generateAnswer: async () => "물타기는 같은 주식을 더 사서 평균 매수가를 바꾸는 행동이에요." },
+  );
+  assert.equal(askWithQuestion.source, "model");
+  assert.equal(askWithQuestion.response.text.includes("평균 매수가"), true);
+  assert.equal(askWithQuestion.response.text.includes("헷갈린 말을 그대로"), false);
+
+  const privacyModelCallsBefore = modelCalls;
+  for (const [message, expected] of [
+    ["너랑 나눈 얘기 엄마도 봐?", "우리가 나눈 얘기는 엄마한테 안 보여요."],
+    ["내가 뭐 샀는지 엄마도 봐?", "거래 기록은 가족끼리 볼 수 있어요."],
+    ["엄마한테 말 안 하면 안 돼?", "우리가 나눈 얘기는 엄마한테 안 보여요."],
+  ] as const) {
+    const privacy = await createChatOutcome(
+      { message, context },
+      session,
+      { generateAnswer: noModel },
+    );
+    assert.equal(privacy.response.text, expected);
+    assert.equal(isExplainAction(privacy.action), false);
+  }
+  assert.equal(modelCalls, privacyModelCallsBefore);
 
   // 사전의 모든 승인 용어는 전용 DAPIE, 서비스 FAQ는 직답을 제공한다.
   for (const entry of CHATBOT_KNOWLEDGE) {

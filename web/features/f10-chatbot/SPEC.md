@@ -200,7 +200,12 @@ type ChatRequest = {
     quantity?: number;
     unitPrice?: number;
   };
-  explain?: { scriptId: string; stage: "brief" | "detail" | "followup"; choiceId?: string };
+  explain?: {
+    scriptId: string;
+    stage: "brief" | "detail" | "followup";
+    choiceId?: string;
+    previousAnswer?: string;
+  };
   stockExplore?: {
     stockId: `KRX:${string}`;
     shownTopics: Array<"company" | "business" | "industry" | "financial">;
@@ -213,6 +218,7 @@ type ChatRequest = {
 - 화면과 선택 필드는 런타임 스키마로 검증한다.
 - iframe 기반 프로토타입은 화면·종목이 바뀔 때 부모에 채팅 맥락을 전달한다. 부모는 동일 출처·해당 iframe·필드 스키마를 확인한 값만 챗봇 요청에 사용한다.
 - 본인 식별자는 요청 본문에서 받지 않고 서버 세션에서 확정한다.
+- `flow:guided`의 `brief` 단계에서 “더 쉽게”를 고른 경우에만 직전 서버 답변 한 건을 `previousAnswer`로 다시 보낸다. 대화 이력 전체는 보내지 않으며, 서버는 최대 800자로 검증한 뒤 Luna를 1회만 호출한다.
 
 ### 5.2 SSE 이벤트
 

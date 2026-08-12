@@ -14,6 +14,11 @@ export type ChatbotKnowledgeEntry = {
 
 const reviewed = "reviewed" as const;
 
+export const CHAT_PRIVACY_ANSWER =
+  "우리가 나눈 얘기는 엄마한테 안 보여요.";
+export const TRADE_VISIBILITY_ANSWER =
+  "거래 기록은 가족끼리 볼 수 있어요.";
+
 function termScript(
   id: string,
   script: Omit<ExplainScript, "id">,
@@ -833,9 +838,12 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
   { id: "stock-search", kind: "faq", triggers: ["종목 검색", "회사 찾기", "종목 찾기"], answer: "종목 화면의 검색창에 회사 이름을 입력하거나 업종 칩을 눌러 찾아볼 수 있어요. 이 서비스가 제공하는 종목 안에서만 검색돼요.", actionTarget: "stock", status: reviewed },
   { id: "buy-flow", kind: "faq", triggers: ["매수 어떻게", "사는 방법", "매수 방법"], answer: "종목 상세에서 매수를 누르고 수량과 예상 금액을 확인해요. 고른 이유·확신도·예상 보유기간을 기록한 뒤 주문 확인을 누르면 돼요.", actionTarget: "order", status: reviewed },
   { id: "sell-flow", kind: "faq", triggers: ["매도 어떻게", "파는 방법", "매도 방법"], answer: "보유 종목에서 매도를 누르고 수량과 파는 이유를 확인해요. 주문 내용을 마지막으로 확인한 뒤 체결하면 기록에 남아요.", actionTarget: "order", status: reviewed },
-  { id: "order-check", kind: "faq", triggers: ["주문 전에", "주문 확인", "뭘 확인"], answer: "주문 전에는 종목 이름, 매수·매도 구분, 수량과 예상 금액을 확인해요. 남긴 이유도 맞는지 한 번 더 보면 돼요.", actionTarget: "order", status: reviewed },
+  { id: "order-check", kind: "faq", triggers: ["주문 전에", "주문 확인", "주문 전 확인"], answer: "주문 전에는 종목 이름, 매수·매도 구분, 수량과 예상 금액을 확인해요. 남긴 이유도 맞는지 한 번 더 보면 돼요.", actionTarget: "order", status: reviewed },
+  { id: "stock-pick-criteria", kind: "faq", triggers: ["종목 고를 때", "주식 고를 때", "회사 고를 때", "투자 기준"], answer: "회사가 무슨 일을 하는지, 어떻게 돈을 버는지, 최근에 무슨 일이 있었는지를 봐요.", actionTarget: "stock", status: reviewed },
   { id: "portfolio", kind: "faq", triggers: ["포트폴리오", "보유 종목", "내가 가진 주식"], answer: "홈의 포트폴리오에서 가진 종목과 남은 모의투자 금액을 볼 수 있어요. 화면의 수치는 가격에 따라 달라질 수 있어요.", actionTarget: "home", status: reviewed },
   { id: "family-comparison", kind: "faq", triggers: ["가족 비교", "부모 비교", "엄마랑 비교", "아빠랑 비교"], answer: "아카이브의 가족 비교에서는 서로 동의한 경우에만 투자 스타일을 나란히 볼 수 있어요. 누가 더 잘했는지 점수를 매기는 기능은 아니에요.", actionTarget: "archive", status: reviewed },
+  { id: "privacy-chat", kind: "faq", triggers: ["너랑 한 얘기 엄마", "너랑 나눈 얘기 엄마", "키웅이랑 한 채팅", "채팅을 볼 수", "대화 엄마", "엄마한테 말"], answer: CHAT_PRIVACY_ANSWER, status: reviewed },
+  { id: "privacy-trade", kind: "faq", triggers: ["내가 뭐 샀는지 엄마", "내가 산 주식을 확인", "내 거래 기록 엄마", "내 거래 내역 가족", "내 매수 기록 부모"], answer: TRADE_VISIBILITY_ANSWER, status: reviewed },
   { id: "league-rule", kind: "faq", triggers: ["리그 규칙", "가족 리그", "모의투자 리그"], answer: "가족 리그에서는 각자 받은 모의투자금으로 투자하고 기록을 남겨요. 실제 돈을 주문하는 서비스가 아니에요.", actionTarget: "home", status: reviewed },
   { id: "stock-universe", kind: "faq", triggers: ["지원 종목", "종목 목록", "몇 개 종목"], answer: "이 데모에서는 정해진 국내 종목 51개만 살펴볼 수 있어요. 종목 화면에서 이름이나 업종으로 찾아봐요.", actionTarget: "stock", status: reviewed },
   { id: "trade-history", kind: "faq", triggers: ["거래 내역", "지난 주문", "체결 내역", "지난 기록"], answer: "지난 거래와 그때 남긴 생각은 아카이브에서 다시 볼 수 있어요. 다른 가족의 원문 기록은 볼 수 없어요.", actionTarget: "archive", status: reviewed },

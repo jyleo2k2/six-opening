@@ -21,5 +21,9 @@ assert.equal(findChatbotKnowledge("평가 손익이 뭐야?")?.id, "unrealized-p
 assert.equal(findChatbotKnowledge("차트는 미래를 알려줘?")?.id, "chart");
 assert.equal(findChatbotKnowledge("매수 어떻게 해?")?.id, "buy-flow");
 assert.equal(findChatbotKnowledge("가족 비교는 어디서 해?")?.actionTarget, "archive");
+assert.equal(findChatbotKnowledge("너랑 한 얘기 엄마도 봐?")?.id, "privacy-chat");
+assert.equal(findChatbotKnowledge("내가 뭐 샀는지 엄마도 봐?")?.id, "privacy-trade");
+assert.equal(findChatbotKnowledge("종목 고를 때 뭘 확인해?")?.id, "stock-pick-criteria");
+assert.equal(findChatbotKnowledge("주문 전에 뭘 확인해?")?.id, "order-check");
 
 console.log("chatbot knowledge tests passed");
