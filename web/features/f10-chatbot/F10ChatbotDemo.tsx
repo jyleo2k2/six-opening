@@ -1,14 +1,21 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import {
-  PROACTIVE_SCRIPTS,
-  ProactiveSignal,
-  routeMessage,
-} from "./lib/routing";
+import { PROACTIVE_SCRIPTS } from "./lib/routing";
+import type { ProactiveSignal } from "./lib/routing";
+import type {
+  GuidedDialogueOption,
+  GuidedDialogueState,
+} from "./lib/dialogue-engine";
 
 type Screen = "home" | "stock" | "order" | "archive";
 type Message = { role: "assistant" | "user"; text: string };
+type GuidedAction = {
+  kind: "guided_options";
+  state: GuidedDialogueState;
+  options: GuidedDialogueOption[];
+};
+type GuidedRequest = GuidedDialogueState & { optionId: GuidedDialogueOption["id"] };
 
 const COPY = {
   service: "\ud0a4\uc6c0 \uac00\uc871 \ubaa8\uc758\ud22c\uc790 \ub9ac\uadf8",
@@ -94,6 +101,7 @@ export function F10ChatbotDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
   const [isLoading, setIsLoading] = useState(false);
+  const [guidedAction, setGuidedAction] = useState<GuidedAction | null>(null);
   const [signal, setSignal] = useState<ProactiveSignal | null>(null);
   const [mutedSignals, setMutedSignals] = useState<ProactiveSignal[]>([]);
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -121,8 +129,7 @@ export function F10ChatbotDemo() {
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
-  async function ask(question: string) {
-    const reply = routeMessage(question, chatContext);
+  async function ask(question: string, guidedDialogue?: GuidedRequest) {
     const history = messages.slice(-8);
     setMessages((current) => [
       ...current,
@@ -130,13 +137,8 @@ export function F10ChatbotDemo() {
     ]);
     setIsOpen(true);
     setInput("");
-    setStatus(reply.steps.at(-1) ?? "\ub2f5\ubcc0 \uc900\ube44 \uc644\ub8cc");
-
-    if (reply.route !== "fallback") {
-      setMessages((current) => [...current, { role: "assistant", text: reply.text }]);
-      return;
-    }
-
+    setStatus("답변을 준비하는 중");
+    setGuidedAction(null);
     setIsLoading(true);
     setMessages((current) => [...current, { role: "assistant", text: "" }]);
 
@@ -144,7 +146,12 @@ export function F10ChatbotDemo() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, context: chatContext, history }),
+        body: JSON.stringify({
+          message: question,
+          context: chatContext,
+          history,
+          guidedDialogue,
+        }),
       });
 
       if (!response.ok || !response.body) throw new Error("Chat request failed");
@@ -165,17 +172,20 @@ export function F10ChatbotDemo() {
           const type = item.match(/^event: (.+)$/m)?.[1];
           const data = item.match(/^data: (.+)$/m)?.[1];
           if (!type || !data) continue;
-          const value = JSON.parse(data) as string;
+          const value: unknown = JSON.parse(data);
 
-          if (type === "status") {
+          if (type === "status" && typeof value === "string") {
             setStatus(value);
           }
-          if (type === "text") {
+          if (type === "text" && typeof value === "string") {
             setMessages((current) => {
               const last = current.at(-1);
               if (!last || last.role !== "assistant") return current;
               return [...current.slice(0, -1), { ...last, text: `${last.text}${value}` }];
             });
+          }
+          if (type === "action" && isGuidedAction(value)) {
+            setGuidedAction(value);
           }
         }
       }
@@ -191,6 +201,28 @@ export function F10ChatbotDemo() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function isGuidedAction(value: unknown): value is GuidedAction {
+    if (!value || typeof value !== "object") return false;
+    const action = value as Record<string, unknown>;
+    if (action.kind !== "guided_options" || !action.state || !Array.isArray(action.options)) {
+      return false;
+    }
+
+    const state = action.state as Record<string, unknown>;
+    return (
+      ["per", "etf", "diversification"].includes(String(state.topicId)) &&
+      typeof state.currentNodeId === "string" &&
+      action.options.every((option) => {
+        if (!option || typeof option !== "object") return false;
+        const candidate = option as Record<string, unknown>;
+        return (
+          ["simpler", "example", "detail", "understood"].includes(String(candidate.id)) &&
+          typeof candidate.label === "string"
+        );
+      })
+    );
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -371,17 +403,34 @@ export function F10ChatbotDemo() {
               {COPY.recommended}
             </p>
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-              {currentScreen.chips.map((question) => (
-                <button
-                  className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
-                  key={question}
-                  disabled={isLoading}
-                  onClick={() => void ask(question)}
-                  type="button"
-                >
-                  {question}
-                </button>
-              ))}
+              {guidedAction
+                ? guidedAction.options.map((option) => (
+                    <button
+                      className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                      key={option.id}
+                      disabled={isLoading}
+                      onClick={() =>
+                        void ask(option.label, {
+                          ...guidedAction.state,
+                          optionId: option.id,
+                        })
+                      }
+                      type="button"
+                    >
+                      {option.label}
+                    </button>
+                  ))
+                : currentScreen.chips.map((question) => (
+                    <button
+                      className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                      key={question}
+                      disabled={isLoading}
+                      onClick={() => void ask(question)}
+                      type="button"
+                    >
+                      {question}
+                    </button>
+                  ))}
             </div>
 
             <form className="flex gap-2" onSubmit={submit}>

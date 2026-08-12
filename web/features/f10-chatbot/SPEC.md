@@ -109,6 +109,14 @@ flowchart LR
 type ChatResponse = {
   text: string;
   suggestedQuestions?: string[];
+  guidedDialogue?: {
+    topicId: "per" | "etf" | "diversification";
+    currentNodeId: string;
+    options: Array<{
+      id: "simpler" | "example" | "detail" | "understood";
+      label: string;
+    }>;
+  };
   uiAction?: {
     type: "open_screen";
     target: "home" | "stock" | "order" | "archive";
@@ -119,6 +127,15 @@ type ChatResponse = {
 - 답변은 반말·쉬운 말·비유·이모지를 사용하고 최대 3문장이다.
 - `uiAction`은 서버 허용 목록의 화면만 제안한다.
 - 모델이 URL을 만들거나 화면을 직접 이동시키지 않는다. 사용자가 버튼을 눌러야 실행한다.
+
+### 3.3 DAPIE 단계형 설명 대화
+
+- 1차 적용 주제는 `PER`, `ETF`, `분산투자`다.
+- 승인된 설명 노드는 `핵심 설명 → 쉬운 설명·예시·상세 설명 → 이해 완료`로 연결한다.
+- 각 턴은 현재 노드의 설명과 다음 선택지를 함께 반환하며, 자유 입력창은 항상 유지한다.
+- 클라이언트가 보낸 `topicId`, `currentNodeId`, `optionId`는 신뢰하지 않고 서버가 그래프의 허용 전이인지 검증한다.
+- 단계형 설명은 고정된 승인 문구를 사용하고, LLM은 그래프 선택이나 전이에 관여하지 않는다.
+- 이해 여부를 시험하거나 점수화하지 않으며 사용자가 언제든 다른 질문으로 대화를 전환할 수 있다.
 
 ## 4. 질문 목적별 실행 경계
 
@@ -151,6 +168,11 @@ type ChatRequest = {
     stockName?: string;
     quantity?: number;
     unitPrice?: number;
+  };
+  guidedDialogue?: {
+    topicId: "per" | "etf" | "diversification";
+    currentNodeId: string;
+    optionId: "simpler" | "example" | "detail" | "understood";
   };
 };
 ```
@@ -380,6 +402,7 @@ type SectorEducationContent = {
 - Luna Responses API 스트리밍
 - 문장 단위 금지 표현 필터와 최대 3문장 제한
 - `switch`, `dwell`, `lossRevisit` 3종 감지 함수와 데모 UI
+- `PER`, `ETF`, `분산투자`의 DAPIE식 설명 그래프와 서버 검증 전이
 
 남은 작업은 안전 게이트를 먼저, 기능 확장을 나중에 진행한다.
 
