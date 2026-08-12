@@ -142,3 +142,36 @@ Tracker.events[]
 | `onScroll` + `scrollHeight` 계산 | `ScrollView` 의 `onScroll` (`contentOffset` / `contentSize`) |
 | 프레임 `onPointerDown` + `closest('[data-section]')` | 루트 `View` 의 `onTouchStart` + 섹션 `View` 별 `onTouchStart` |
 | 아코디언 `상세보기` 토글 | 같은 구조 그대로 (`useState` + `trackSectionOpen/Close`) |
+
+## F9 SPEC 대응표
+
+기준 문서는 `web/features/f9-archive/SPEC.md` §4다. 두 구현은 **매수 전에 연 차트·기업정보·뉴스**를 원천 데이터로 함께 쓰지만, 현재 데모의 세션 유형을 F9 유형으로 그대로 복사할 수는 없다.
+
+### 정확히 대응
+
+| 데모 | F9 §4 | 대응 규칙 |
+|---|---|---|
+| 매수 `decision.meta.sections_opened` (0~3) | `axes.viewedTabs` (0~3) | `choice === 'buy'`인 결정만 사용한다. 같은 차트·기업정보·뉴스 3개 중 매수 전에 연 개수다. |
+| `decision.meta.sections_list`의 `chart` / `company` / `news` | 차트 / 기업정보 / 뉴스 탭 | 코드와 한글 명칭만 변환하고 탭 집합은 그대로 사용한다. |
+
+### 이름만 다름
+
+| 데모 명칭 | F9 명칭 | 대응 규칙 |
+|---|---|---|
+| 이름형 | 직관형 | 개념상 대응한다. 이관할 때 기존 `decision_style`을 복사하지 말고 원본 매수별 `sections_opened <= 1`로 다시 판정한다. 데모의 이름형 원천 기준은 0개뿐이라 1개 열람 건은 재분류가 필요하다. |
+| 정보형 | 근거형 | 개념상 대응한다. 원본 매수별 `sections_opened >= 2`로 다시 판정한다. 데모의 정보 열람 건은 1개부터 포함하므로 1개 열람 건은 제외해야 한다. |
+
+따라서 이 두 행은 명칭의 개념 대응표일 뿐, 현재 데모의 0.7/0.3 세션 컷오프까지 같다는 뜻은 아니다.
+
+### 한쪽에만 존재
+
+| 소유 | 항목 | 설명 |
+|---|---|---|
+| 데모만 | `name_only_buy_rate`, `informed_buy_rate`, `info_use_rate` | 매수 또는 전체 결정에서 정보 사용 비율을 계산하는 세션 집계다. F9 축에는 비율 컷오프가 없다. |
+| 데모만 | `avg_sections_before_buy`, `first_section`, `top_section`과 섹션별 열람 통계 | 평균·선호 순서·체류시간 집계다. F9의 `viewedTabs` 단일 값과 같은 출력 계약이 아니다. |
+| 데모만 | `decision_style`의 혼합형과 0.7/0.3 컷오프 | F9 판단 근거 축은 직관형/근거형의 1/2개 컷오프만 사용한다. |
+| 데모만 | `confidence_index`, `exploration_index` | 속도·상세 진입·스크롤 깊이·정보 열람을 가중 합산한 데모 지표다. |
+| 데모만 | `behavior_type`의 즉단형·탐색형·신중형·산만형 | 확신도·탐색도 기준 4유형이다. F9 사분면과 축이 다르다. |
+| F9만 | `axes.tradedCompanies`와 집중러/분산러 | 시즌 거래 기업 수 3/4개 컷오프다. 데모 요약에는 거래 기업 수 축이 없다. |
+| F9만 | 직관형 집중러·직관형 분산러·근거형 집중러·근거형 분산러 | 판단 근거와 포트폴리오 폭을 조합한 F9 전용 4유형이다. |
+| F9만 | `sampleSize`, `reasonDistribution`, `confidencePattern`, `observationState` | F9 엔진 출력 계약이며 데모 세션 요약에는 같은 필드가 없다. |
