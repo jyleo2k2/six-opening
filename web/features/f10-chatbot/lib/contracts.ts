@@ -13,6 +13,7 @@ import {
   type StockFactTopic,
 } from "../../../shared/types/chatbot";
 import { STOCKS } from "../../../shared/data/stocks";
+import { findNextStockExploreTopic } from "./stock-explore";
 
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_LABEL_LENGTH = 60;
@@ -130,9 +131,7 @@ function parseStockExploreReply(
     return null;
   }
 
-  const nextTopic = STOCK_FACT_TOPICS.find(
-    (topic) => !shownTopics.includes(topic),
-  );
+  const nextTopic = findNextStockExploreTopic(shownTopics);
   const allowedChoices = nextTopic
     ? [nextTopic, "done"]
     : ["ask-other", "done"];

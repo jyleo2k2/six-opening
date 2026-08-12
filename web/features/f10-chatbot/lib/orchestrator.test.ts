@@ -164,7 +164,7 @@ async function main() {
   assert.equal(isStockExploreAction(stockFacts.action), true);
   assert.equal(stockFacts.response.text.startsWith("궁금한 회사를 잘 짚었어 —"), true);
 
-  // 51종 모두 네 주제를 한 번씩만 제공하고 마지막에는 다른 종목 전환을 제안한다.
+  // 51종 모두 회사·사업·업종 세 주제만 한 번씩 제공하고 실적은 추천하지 않는다.
   for (const stock of STOCKS) {
     const stockContext = {
       screen: "stock" as const,
@@ -178,7 +178,7 @@ async function main() {
     );
     const seenTexts = new Set<string>();
 
-    for (let turnIndex = 0; turnIndex < 4; turnIndex += 1) {
+    for (let turnIndex = 0; turnIndex < 3; turnIndex += 1) {
       assert.equal(outcome.source, "tool", `${stock.name} ${turnIndex + 1}번째 주제가 Tool 응답이 아니야`);
       assert.equal(outcome.gate, "passed", `${stock.name} ${turnIndex + 1}번째 주제가 게이트를 통과하지 못했어`);
       assert.equal(isStockExploreAction(outcome.action), true, `${stock.name} 탐색 action이 없어`);
@@ -189,9 +189,10 @@ async function main() {
       const { turn } = outcome.action;
       assert.equal(new Set(turn.shownTopics).size, turn.shownTopics.length);
       assert.equal(turn.shownTopics.length, turnIndex + 1);
-      if (turnIndex === 3) {
+      assert.equal(turn.choices.some((choice) => choice.id === "financial"), false);
+      if (turnIndex === 2) {
         assert.equal(turn.choices[0]?.id, "ask-other");
-        assert.equal(turn.prompt.includes("모두 살펴봤어"), true);
+        assert.equal(turn.prompt.includes("회사·사업·업종 정보는 모두 살펴봤어"), true);
         break;
       }
 
@@ -210,7 +211,23 @@ async function main() {
         { generateAnswer: noModel },
       );
     }
-    assert.equal(seenTexts.size, 4, `${stock.name} 네 주제가 모두 제공되지 않았어`);
+    assert.equal(seenTexts.size, 3, `${stock.name} 세 주제가 모두 제공되지 않았어`);
+  }
+
+  const directFinancial = await createChatOutcome(
+    { message: "2024년 실적 알려줘", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(directFinancial.source, "tool");
+  assert.equal(isStockExploreAction(directFinancial.action), true);
+  if (isStockExploreAction(directFinancial.action)) {
+    assert.deepEqual(directFinancial.action.turn.shownTopics, ["financial"]);
+    assert.equal(directFinancial.action.turn.choices[0]?.id, "ask-other");
+    assert.equal(
+      directFinancial.action.turn.prompt.includes("2024년 실적을 살펴봤어"),
+      true,
+    );
   }
 
   const simpler = await createChatOutcome(

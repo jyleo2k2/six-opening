@@ -126,6 +126,30 @@ assert.equal(
   }),
   null,
 );
+assert.notEqual(
+  parseChatRequest({
+    message: "다른 종목 볼래",
+    context: { screen: "stock" },
+    stockExplore: {
+      stockId: "KRX:316140",
+      shownTopics: ["company", "business", "industry"],
+      choiceId: "ask-other",
+    },
+  }),
+  null,
+);
+assert.notEqual(
+  parseChatRequest({
+    message: "다른 종목 볼래",
+    context: { screen: "stock" },
+    stockExplore: {
+      stockId: "KRX:316140",
+      shownTopics: ["financial"],
+      choiceId: "ask-other",
+    },
+  }),
+  null,
+);
 assert.equal(
   parseChatRequest({
     message: "계속",
