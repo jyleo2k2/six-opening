@@ -15,7 +15,7 @@ export type ChatUiAction = {
   target: ChatScreen;
 };
 
-export const EXPLAIN_STAGES = ["brief", "detail", "example"] as const;
+export const EXPLAIN_STAGES = ["brief", "detail", "example", "followup"] as const;
 
 export type ExplainStage = (typeof EXPLAIN_STAGES)[number];
 
@@ -24,8 +24,16 @@ export type ExplainChoice = { id: string; label: string };
 /** 사전 저작·검수된 정적 데이터. 런타임 생성 금지. */
 export type ExplainScript = {
   id: string;
+  feedback?: string;
   brief: string;
   check: {
+    kind?: "diagnosis" | "guiding";
+    question: string;
+    choices: readonly ExplainChoice[];
+    answerId: string;
+  };
+  adjust?: {
+    explanation: string;
     question: string;
     choices: readonly ExplainChoice[];
     answerId: string;

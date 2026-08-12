@@ -65,6 +65,19 @@ assert.equal(
   }),
   null,
 );
+// 공통 유도형 DAPIE의 후속 단계는 허용한다.
+assert.deepEqual(
+  parseChatRequest({
+    message: "여기까지 볼래",
+    context: { screen: "home" },
+    explain: { scriptId: "flow:guided", stage: "followup", choiceId: "done" },
+  }),
+  {
+    message: "여기까지 볼래",
+    context: { screen: "home" },
+    explain: { scriptId: "flow:guided", stage: "followup", choiceId: "done" },
+  },
+);
 assert.equal(
   parseChatRequest({
     message: "응",
