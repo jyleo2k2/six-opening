@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<!-- saved from url=(0233)file:///Users/iphonejjun/Downloads/%E1%84%8B%E1%85%A7%E1%86%BC%E1%84%8B%E1%85%AE%E1%86%BC%E1%84%8F%E1%85%B5%E1%84%8B%E1%85%AE%E1%86%B7_%E1%84%89%E1%85%A5%E1%84%87%E1%85%B5%E1%84%89%E1%85%B3%E1%84%80%E1%85%A2%E1%84%8B%E1%85%AD_11.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영웅키움 서비스 개요</title>
+<style>
+  :root {
+    --navy: #16233f;
+    --navy-light: #24365c;
+    --accent: #3a6cf0;
+    --paper: #ffffff;
+    --bg: #f4f6fb;
+    --text: #1c2230;
+    --muted: #5b6478;
+    --line: #e2e6ef;
+    --highlight: #fff176;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px 80px; }
+
+  .hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+    color: #fff;
+    padding: 64px 24px 48px;
+    margin-bottom: 8px;
+  }
+  .hero-inner { max-width: 880px; margin: 0 auto; }
+  .hero .eyebrow {
+    font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+    color: #9fb3e8; margin-bottom: 12px; font-weight: 600;
+  }
+  .hero h1 { font-size: 34px; margin: 0 0 12px; font-weight: 800; }
+  .hero p { font-size: 15px; color: #cdd8f2; margin: 0; }
+
+  section { background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+    padding: 32px 36px; margin: 20px 0; box-shadow: 0 1px 2px rgba(20,30,60,.04);
+    border-top: 4px solid var(--sc, var(--accent)); }
+
+  h2 {
+    font-size: 20px; color: var(--sc, var(--navy)); margin: 0 0 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::before {
+    content: ""; width: 5px; height: 20px; background: var(--sc, var(--accent)); border-radius: 3px;
+    display: inline-block;
+  }
+
+
+  h3 { font-size: 16px; color: var(--navy-light); margin: 22px 0 8px; }
+  h3:first-child { margin-top: 0; }
+
+  ul { margin: 8px 0; padding-left: 20px; }
+  li { margin: 6px 0; color: var(--text); }
+  li strong, p strong { color: var(--navy); }
+
+  .goal-list li { list-style: none; padding: 10px 14px; margin: 8px 0;
+    background: #f0f4ff; border-radius: 8px; border-left: 3px solid var(--accent);
+    padding-left: 16px; }
+  .goal-list { padding-left: 0; }
+
+  .pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 10px; }
+  .pain-card { background: #f8f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .pain-card .tag { display: inline-block; font-size: 12px; font-weight: 700; color: #fff;
+    background: var(--navy-light); padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+  @media (max-width: 640px) { .pain-grid { grid-template-columns: 1fr; } }
+
+  .copy-swap { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: #fbfbfd; border: 1px dashed var(--line); border-radius: 10px; padding: 18px 20px; margin: 12px 0 4px; }
+  .copy-swap .bad { color: #b1465a; text-decoration: line-through; font-weight: 600; }
+  .copy-swap .arrow { color: var(--muted); }
+  .copy-swap .good { color: #1f7a4d; font-weight: 800; }
+
+  .func-block { border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; margin: 16px 0; }
+  .func-block .num { display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; background: var(--accent); color: #fff; border-radius: 50%;
+    font-size: 13px; font-weight: 700; margin-right: 8px; }
+  .func-title { font-size: 17px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+  .func-reason { font-size: 13.5px; color: var(--muted); margin-bottom: 14px; }
+  .func-reason b { color: var(--accent); font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 10px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--navy); color: #fff; font-weight: 600; }
+  tr:nth-child(even) td { background: #f8f9fc; }
+
+  .stat-list li { margin: 10px 0; }
+  .stat-list b { color: var(--navy); }
+
+  .qna { border-bottom: 1px solid var(--line); padding: 20px 0; }
+  .qna:last-child { border-bottom: none; padding-bottom: 0; }
+  .qna:first-child { padding-top: 0; }
+  .q-label { display: inline-block; font-size: 12px; font-weight: 800; color: #fff;
+    background: var(--navy); padding: 2px 8px; border-radius: 4px; margin-right: 8px; vertical-align: middle; }
+  .q-text {
+    font-weight: 700; font-size: 15.5px; color: var(--text);
+    background: linear-gradient(to bottom, transparent 60%, var(--highlight) 60%);
+    padding: 2px 2px;
+    display: inline;
+  }
+  .a-wrap { margin-top: 10px; padding-left: 4px; color: var(--text); font-size: 14.5px; }
+  .a-wrap .a-label { font-weight: 800; color: var(--accent); margin-right: 6px; }
+
+  .footer-note { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 30px; }
+
+  .keypoint { background: #f0f4ff; border: 1px solid #d6e0fb; border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0; padding: 14px 18px; margin: 14px 0 4px; font-size: 14.5px; }
+  .keypoint .kp-label { display: block; font-size: 11.5px; font-weight: 800; letter-spacing: .08em;
+    color: var(--accent); margin-bottom: 4px; }
+
+  .role-line { background: #f0f4ff; border-radius: 10px; padding: 12px 16px; margin: 4px 0 14px;
+    font-size: 14.5px; color: var(--navy); }
+
+  /* ── 챗봇 상세 ── */
+  .principle { margin: 20px 0 6px; padding: 3px 0 3px 12px; border-left: 3px solid var(--accent); }
+  .principle .p-kicker { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; color: var(--accent); }
+  .principle .p-title { font-size: 15.5px; font-weight: 800; color: var(--navy); }
+
+  .turn-flow { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 14px 0 6px; }
+  .turn-step { background: #f0f4ff; border: 1px solid #d6e0fb; border-radius: 10px; padding: 12px 14px; }
+  .turn-step .ts-num { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: .06em; }
+  .turn-step .ts-name { font-size: 14.5px; font-weight: 800; color: var(--navy); margin: 2px 0 4px; }
+  .turn-step .ts-desc { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  @media (max-width: 640px) { .turn-flow { grid-template-columns: 1fr; } }
+
+  .chat { background: #f8f9fc; border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin: 14px 0; }
+  .chat .situation { font-size: 12.5px; color: var(--muted); background: #fff; border: 1px dashed var(--line);
+    border-radius: 8px; padding: 9px 12px; margin-bottom: 14px; }
+  .msg { display: flex; gap: 10px; margin: 9px 0; align-items: flex-start; }
+  .msg.child { flex-direction: row-reverse; }
+  .msg .who { flex: 0 0 auto; font-size: 11px; font-weight: 800; color: #fff; background: var(--navy-light);
+    border-radius: 20px; padding: 3px 9px; margin-top: 5px; white-space: nowrap; }
+  .msg.child .who { background: #8a93a8; }
+  .msg .bubble { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px 13px;
+    font-size: 14px; max-width: 78%; }
+  .msg.child .bubble { background: #eef0f6; border-color: #dfe3ee; }
+  .msg .bubble .anno { display: block; margin-top: 6px; font-size: 11.5px; font-weight: 700; color: var(--accent); }
+  .msg .bubble .anno.warn { color: #b1465a; }
+
+  .kv-table th { width: 22%; }
+  .vs-table th:first-child { width: 18%; }
+  .vs-table td.bad-col { color: var(--muted); }
+  .vs-table td.good-col { color: var(--text); font-weight: 600; background: #f0f4ff !important; }
+
+  .evidence { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 12px 0; }
+  .ev { background: #f8f9fc; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .ev .ev-k { font-size: 11.5px; color: var(--muted); }
+  .ev .ev-v { font-size: 15px; font-weight: 800; color: var(--navy); margin-top: 2px; }
+  .ev .ev-v .from { color: #a4abbd; font-weight: 600; }
+  .cite { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .cite a { color: var(--accent); }
+
+  /* ── 2×2 성향 매트릭스 ── */
+  .matrix-block { display: grid; grid-template-columns: 62px 1fr 1fr; gap: 8px; margin: 14px 0 6px; align-items: stretch; }
+  .mx-col-head, .mx-row-head { display: grid; place-items: center;
+    font-size: 12.5px; font-weight: 800; color: var(--navy-light); background: #eef1f7;
+    border-radius: 8px; padding: 7px 6px; text-align: center; line-height: 1.4; }
+  .mx-col-head span { display: block; font-weight: 600; color: var(--muted); font-size: 11px; margin-top: 1px; }
+  .mx-row-head small { display: block; font-weight: 600; color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .quad { border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px; background: #fff; }
+  .quad .q-name { font-size: 14.5px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+  .quad .q-desc { font-size: 12.5px; color: var(--text); line-height: 1.55; }
+  .quad .q-need { display: block; margin-top: 7px; font-size: 11.5px; font-weight: 700; color: var(--accent); }
+  .quad.q1 { background: #eef4ff; border-color: #cfdefb; }
+  .quad.q2 { background: #eefaf3; border-color: #c9e9d8; }
+  .quad.q3 { background: #fdf6ea; border-color: #f0e0c2; }
+  .quad.q4 { background: #fbeff1; border-color: #f0d3da; }
+  .mx-axis-note { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
+  @media (max-width: 640px) {
+    .matrix-block { grid-template-columns: 1fr; }
+    .mx-corner, .mx-col-head, .mx-row-head { display: none; }
+  }
+
+  .chartmock { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 10px; margin: 12px 0 4px; }
+  .chartmock .cm-title { font-size: 13px; font-weight: 800; color: var(--navy); margin-bottom: 2px; }
+  .chartmock .cm-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 10px; }
+  .chartmock .cm-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .chartmock .cm-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .chartmock .cm-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .chartmock .cm-legend i.pin-key { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+
+  /* ── 종목 선정 파이프라인 · 50종목 표 ── */
+  .pipe { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0 8px; }
+  .pipe-step { background: #f0f4ff; border: 1px solid #d6e0fb; border-radius: 10px; padding: 11px 12px; text-align: center; }
+  .pipe-step .ps-n { font-size: 19px; font-weight: 800; color: var(--accent); line-height: 1.2; }
+  .pipe-step .ps-l { font-size: 11.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  @media (max-width: 640px) { .pipe { grid-template-columns: 1fr 1fr; } }
+
+  .idx-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  .idx-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: #f8f9fc; }
+  .idx-card .ic-tag { font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--accent); }
+  .idx-card .ic-name { font-size: 14.5px; font-weight: 800; color: var(--navy); margin: 2px 0 6px; }
+  .idx-card ul { margin: 4px 0 0; padding-left: 16px; }
+  .idx-card li { font-size: 12.5px; margin: 3px 0; color: var(--text); }
+  @media (max-width: 640px) { .idx-pair { grid-template-columns: 1fr; } }
+
+  .stock-table { font-size: 12.5px; table-layout: fixed; }
+  .stock-table th, .stock-table td { padding: 6px 7px; word-break: keep-all; }
+  .stock-table th:nth-child(1) { width: 4.5%; text-align: right; }
+  .stock-table th:nth-child(2) { width: 17%; }
+  .stock-table th:nth-child(3) { width: 10%; }
+  .stock-table th:nth-child(4) { width: 11%; }
+  .stock-table th:nth-child(5) { width: 5.5%; }
+  .stock-table th:nth-child(6) { width: 25%; }
+  .stock-table th:nth-child(7), .stock-table th:nth-child(8), .stock-table th:nth-child(9)
+    { width: 7.5%; text-align: right; white-space: nowrap; }
+  .stock-table th:nth-child(10) { width: 6%; }
+  .stock-table td.rk { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .stock-table td.score { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stock-table td .code { display: block; color: var(--muted); font-size: 10.5px;
+    font-variant-numeric: tabular-nums; font-weight: 400; }
+  .stock-table td.touch { color: var(--text); }
+  .mode-auto { font-size: 11px; color: var(--muted); }
+  .mode-manual { font-size: 11px; font-weight: 800; color: #b5417a; background: #fbeef4;
+    border: 1px solid #f0d3e2; border-radius: 20px; padding: 1px 7px; }
+  .stock-table tr:has(.mode-manual) td { background: #fdf7fa !important; }
+  .sec-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+  .sec-chip { font-size: 12px; color: var(--muted); background: #f0f4ff; border: 1px solid #d6e0fb;
+    border-radius: 20px; padding: 2px 10px; }
+  .sec-chip b { color: var(--navy); }
+  .type-table { font-size: 13px; table-layout: fixed; }
+  .type-table th, .type-table td { padding: 6px 9px; word-break: keep-all; }
+  .type-table th:nth-child(1) { width: 7%; }
+  .type-table th:nth-child(2) { width: 17%; }
+  .type-table th:nth-child(3) { width: 30%; }
+  .type-table th:nth-child(4) { width: 9%; text-align: right; }
+  .type-table th:nth-child(5) { width: 37%; }
+  .type-table td.score { text-align: right; font-variant-numeric: tabular-nums; }
+  .g-badge { display: inline-block; min-width: 20px; text-align: center; font-size: 11px; font-weight: 800;
+    border-radius: 5px; padding: 1px 6px; }
+  .g5 { background: #16233f; color: #fff; }
+  .g4 { background: #3a6cf0; color: #fff; }
+  .g3 { background: #86b0f7; color: #16233f; }
+  .g2 { background: #c3d8fb; color: #16233f; }
+  .g1 { background: #e6ecf5; color: #5b6478; }
+
+  /* ── 트리거 표 ── */
+  .trig-table th:first-child { width: 26%; }
+  .trig-table .tt-tag { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .06em;
+    color: #b1465a; background: #fbeff1; border: 1px solid #f0d3da; border-radius: 20px;
+    padding: 1px 8px; margin-bottom: 5px; }
+  .trig-table ol { margin: 4px 0 0; padding-left: 18px; }
+  .trig-table ol li { margin: 3px 0; font-size: 13px; }
+  .trig-table .cond { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px;
+    background: #f0f4ff; border-radius: 4px; padding: 1px 6px; color: var(--navy); }
+
+  /* ── 거래내역 피드 (인스타형) ── */
+  .feed { background: #f4f6fb; border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin: 12px 0 4px; }
+  .feed-item { background: #fff; border: 1px solid var(--line); border-radius: 14px; margin: 0 0 12px; overflow: hidden; }
+  .feed-item:last-child { margin-bottom: 0; }
+
+  .fi-top { display: flex; align-items: center; gap: 9px; padding: 11px 13px 10px; }
+  .fi-avatar { width: 32px; height: 32px; border-radius: 50%; flex: 0 0 auto; color: #fff;
+    font-size: 11.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .fi-avatar.child { background: #0f8a68; }
+  .fi-avatar.parent { background: var(--navy); }
+  .fi-id { line-height: 1.35; }
+  .fi-id .fi-name { font-size: 13.5px; font-weight: 800; color: var(--navy); }
+  .fi-id .fi-meta { font-size: 11.5px; color: var(--muted); }
+  .fi-top .fi-time { margin-left: auto; font-size: 11.5px; color: var(--muted); }
+
+  .fi-media { position: relative; height: 148px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; overflow: hidden; }
+  .fi-media .fm-name { font-size: 21px; font-weight: 800; color: #fff; letter-spacing: -.01em;
+    text-shadow: 0 1px 8px rgba(0,0,0,.18); }
+  .fi-media .fm-sub { font-size: 11.5px; color: rgba(255,255,255,.86); margin-top: 2px; }
+  .fi-media .fm-badge { position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center;
+    gap: 5px; background: rgba(255,255,255,.94); border-radius: 20px; padding: 4px 11px 4px 5px;
+    font-size: 11.5px; font-weight: 800; color: var(--navy); }
+  .fi-media .fm-badge i { width: 18px; height: 18px; border-radius: 5px; color: #fff; font-size: 10.5px;
+    display: inline-flex; align-items: center; justify-content: center; font-style: normal; }
+  .fi-media .fm-badge i.buy { background: #0f8a68; }
+  .fi-media .fm-badge i.sell { background: #b1465a; }
+  .fi-media .fm-spark { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; }
+  .fi-media .fm-note { position: absolute; left: 10px; top: 10px; font-size: 10px; color: rgba(255,255,255,.92);
+    background: rgba(0,0,0,.16); border-radius: 20px; padding: 2px 9px; }
+  .fi-media .fm-logo { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .13; }
+  .fi-media .fm-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+
+  .fi-actions { display: flex; gap: 14px; padding: 9px 13px 0; font-size: 11.5px; color: var(--muted); }
+  .fi-actions span { display: inline-flex; align-items: center; gap: 5px; }
+  .fi-body { padding: 8px 13px 13px; }
+  .fi-reason { font-size: 13.5px; color: var(--text); margin: 0; }
+  .fi-reason b { color: var(--navy); font-weight: 800; margin-right: 6px; }
+  .fi-reason .rtag { font-size: 11px; font-weight: 800; color: var(--muted); display: block; margin-bottom: 3px; }
+  .fi-comment { display: flex; gap: 7px; margin: 9px 0 0; font-size: 13px; }
+  .fi-comment .fc-who { font-weight: 800; color: var(--navy); white-space: nowrap; }
+  .fi-input { display: flex; align-items: center; gap: 8px; margin-top: 11px; padding-top: 10px;
+    border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  .fi-input .fi-btn { margin-left: auto; background: #0f8a68; color: #fff; border-radius: 6px;
+    padding: 3px 11px; font-size: 11.5px; font-weight: 700; }
+
+  .axis-head { display: flex; align-items: center; gap: 8px; margin: 22px 0 4px; }
+  .axis-head .ax-n { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px;
+    background: var(--navy); color: #fff; border-radius: 6px; font-size: 12px; font-weight: 800; flex: 0 0 auto; }
+  .axis-head .ax-t { font-size: 14.5px; font-weight: 800; color: var(--navy); }
+  @media (max-width: 640px) {
+    .stock-table { font-size: 11px; }
+    .stock-table th, .stock-table td { padding: 4px 4px; }
+    .stock-table th:nth-child(4), .stock-table td:nth-child(4),
+    .stock-table th:nth-child(7), .stock-table td:nth-child(7),
+    .stock-table th:nth-child(8), .stock-table td:nth-child(8) { display: none; }
+  }
+  /* ── 파트별 색상 ── */
+  .sec-goal   { --sc: #16233f; }   /* 목표        네이비 */
+  .sec-target { --sc: #5b46c9; }   /* 타겟        바이올렛 */
+  .sec-pain   { --sc: #d03b3b; }   /* 페인포인트   레드 */
+  .sec-copy   { --sc: #0f8a68; }   /* 카피 재정의  그린 */
+  .sec-func   { --sc: #3a6cf0; }   /* 3대 핵심기능 브랜드 블루 */
+  .sec-sum    { --sc: #b5800c; }   /* 기여 요약    앰버 */
+  .sec-why    { --sc: #b5417a; }   /* 왜 지금      마젠타 */
+  .sec-qna    { --sc: #4a5878; }   /* 예상 질문    슬레이트 */
+
+  .sec-goal .goal-list li { background: #eef0f5; border-left-color: var(--sc); }
+  .sec-pain .pain-card .tag { background: var(--sc); }
+  .sec-why .keypoint { background: #fdf0f6; border-color: #f3d4e4; border-left-color: var(--sc); }
+  .sec-why .keypoint .kp-label { color: var(--sc); }
+  .sec-why .stat-list b { color: var(--sc); }
+  .sec-qna .q-label { background: var(--sc); }
+  .sec-qna .a-wrap .a-label { color: var(--sc); }
+  .sec-target p strong { color: var(--sc); }
+  section h3 { color: var(--sc, var(--navy-light)); }
+  section th { background: var(--sc, var(--navy)); }
+
+  /* ── 기능별 색상 ── */
+  .fb1 { --fc: #3a6cf0; }  /* 모의투자      블루 */
+  .fb2 { --fc: #0f8a68; }  /* 가족 아카이브  그린 */
+  .fb3 { --fc: #6d4aca; }  /* 아이친화적 챗봇 바이올렛 */
+  .func-block { border-left: 4px solid var(--fc, var(--accent)); }
+  .func-block .num { background: var(--fc, var(--accent)); }
+  .func-block .func-reason b { color: var(--fc, var(--accent)); }
+  .func-block h3 { color: var(--fc, var(--navy-light)); }
+  .func-block th { background: var(--fc, var(--navy)); }
+  .fb2 .axis-head .ax-n { background: var(--fc); }
+  .fb2 .role-line, .fb3 .role-line { background: #f2f7f5; }
+  .fb3 .role-line { background: #f3f1fb; }
+  .fb3 .principle { border-left-color: var(--fc); }
+  .fb3 .principle .p-kicker { color: var(--fc); }
+  .fb3 .turn-step { background: #f4f2fc; border-color: #ded7f5; }
+  .fb3 .turn-step .ts-num { color: var(--fc); }
+  .fb3 .msg .bubble .anno { color: var(--fc); }
+  .fb3 .vs-table td.good-col { background: #f4f2fc !important; }
+  .fb3 .cite a { color: var(--fc); }
+  .fb1 .pipe-step { background: #eef3ff; border-color: #d6e0fb; }
+  .fb1 .pipe-step .ps-n { color: var(--fc); }
+  .fb1 .idx-card .ic-tag { color: var(--fc); }
+  .fb2 .fi-who.child { background: var(--fc); }
+  .fb2 .fi-input .fi-btn { background: var(--fc); }
+  .fb2 .fi-comment { border-left-color: #bfe3d3; background: #f6fbf9; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Kiwoom Securities · Family Investment Program</div>
+    <h1>영웅키움 서비스 개요</h1>
+    <p>가족과 함께 만드는 미성년 투자 경험 — 목표부터 예상 질문 대응까지</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section class="sec-goal">
+    <h2>목표</h2>
+    <ul class="goal-list">
+      <li>미성년 실거래계좌 개설 증진</li>
+      <li>키움증권에 대한 미성년의 친밀도 쌓기 (잠재고객 유치)</li>
+    </ul>
+  </section>
+
+  <section class="sec-target">
+    <h2>타겟</h2>
+    <p>자녀와 함께 투자 경험을 쌓고 싶어하는 <strong>키움증권 부모 고객</strong></p>
+  </section>
+
+  <section class="sec-pain">
+    <h2>페인포인트</h2>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <span class="tag">고객측 (부모)</span>
+        <ul>
+          <li>자산 격차가 갈수록 벌어지는 흐름 속에서 경제교육은 더 이상 선택이 아니라고 느끼지만, 아이에게 곧바로 실제 돈을 맡기기엔 부담이 커 <strong>'안전하게 시작할 방법'</strong>을 찾고 있음</li>
+          <li>본인도 투자 전문가가 아니라서 자녀에게 무엇을·어떻게 가르쳐야 할지 막막하고, 함께 시작할 계기와 틀이 없음</li>
+          <li>자녀가 실제로 스스로 판단하며 배우고 있는지 확인할 도구가 없음</li>
+        </ul>
+      </div>
+      <div class="pain-card">
+        <span class="tag">회사측 (키움증권)</span>
+        <ul>
+          <li>미성년 계좌 상당수가 개설 후 방치되거나 부모 대리 운용에 그쳐 실사용으로 전환되지 않음</li>
+          <li>토스·카카오페이증권 등이 저연령층 접점을 빠르게 넓히는 상황에서, "자녀가 처음 투자를 경험한 증권사"라는 지위를 선점하지 못하면 향후 주계좌 이관 경쟁에서 밀릴 위험</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec-copy">
+    <h2>핵심 카피 재정의</h2>
+    <div class="copy-swap">
+      <span class="bad">'좋은 투자습관을 길러준다'</span>
+      <span class="arrow">→</span>
+      <span class="good">'안전한 투자 경험을 제공한다'</span>
+    </div>
+    <p style="margin-top:14px;">"좋은 습관"은 교육적 훈계 프레임이라 아이도 부모도 부담스럽고, 서비스의 성공 여부를 판단할 기준도 모호해짐. "안전한 경험"은 훨씬 구체적임 — 화이트리스트, 부모 참여, 아이친화적 챗봇 전부 "안전장치"라는 하나의 목적으로 재해석됨</p>
+  </section>
+
+  <section class="sec-func">
+    <h2>3대 핵심 기능</h2>
+
+    <div class="func-block fb1">
+      <div class="func-title"><span class="num">1</span>모의투자</div>
+      <div class="func-reason"><b>존재이유</b> 실계좌 전환 전 경험을 쌓는 단계</div>
+      <ul>
+        <li>가족(부모+자녀) 단위로 참여하는 분기별 모의투자</li>
+        <li>종목 선정: <strong>아이의 흥미 유발</strong>을 1차 기준으로 삼되, 사람이 손으로 고르지 않고 <strong>재현 가능한 산출 절차</strong>로 확정함 — 아래 파이프라인을 돌리면 언제 다시 실행해도 같은 결과가 나오며, 여기서 벗어난 <strong>수기 편입 2종목만 따로 표시</strong>됨</li>
+      </ul>
+
+      <h3 style="font-size:14.5px; margin:20px 0 4px;">화이트리스트 산출 절차</h3>
+      <div class="pipe">
+        <div class="pipe-step"><div class="ps-n">2,710</div><div class="ps-l">KRX 전체<br>(거래 종목)</div></div>
+        <div class="pipe-step"><div class="ps-n">300</div><div class="ps-l">시가총액 상위<br>우선주·스팩·리츠 제외</div></div>
+        <div class="pipe-step"><div class="ps-n">173</div><div class="ps-l">13개 섹터 편입분<br>전수 라벨링</div></div>
+        <div class="pipe-step"><div class="ps-n">172</div><div class="ps-l">지표 A·B로<br>전부 채점</div></div>
+        <div class="pipe-step" style="background:#16233f;border-color:#16233f"><div class="ps-n" style="color:#fff">51</div><div class="ps-l" style="color:#cdd8f2">섹터별 균등 선발 49<br>+ 수기 편입 2</div></div>
+      </div>
+      <ul>
+        <li>후보 172개를 두 개의 지표로 채점하고, <strong>종합점수 = (지표 A + 지표 B) ÷ 2</strong>로 합산함</li>
+      </ul>
+
+      <div class="idx-pair">
+        <div class="idx-card">
+          <div class="ic-tag">지표 A</div>
+          <div class="ic-name">대표성·우량주 (0~1)</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-bottom:4px;">100% 시장 데이터 — 사람의 판단 없음</div>
+          <ul>
+            <li>규모 — 시가총액</li>
+            <li>섹터 대표성 — <strong>섹터 내</strong> 시총 순위</li>
+            <li>유동성 — 120일 평균 거래대금</li>
+            <li>수익성 — ROE + 배당수익률</li>
+            <li><strong>안정성 — 변동성 + 최대낙폭</strong></li>
+          </ul>
+        </div>
+        <div class="idx-card">
+          <div class="ic-tag">지표 B</div>
+          <div class="ic-name">접점등급 (0~1)</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-bottom:4px;">"아이가 이 회사를 얼마나 가까이서 만나는가"</div>
+          <ul>
+            <li><span class="g-badge g5">5</span> 아이가 직접 산다 — 과자, 게임, 아이돌</li>
+            <li><span class="g-badge g4">4</span> 아이가 매일 쓴다 — 폰·TV, 자동차, 정수기</li>
+            <li><span class="g-badge g3">3</span> 아이가 따라간다 — 편의점, 비행기, 택배</li>
+            <li><span class="g-badge g2">2</span> 부모만 거래한다 — 은행, 전기요금, 주유소</li>
+            <li><span class="g-badge g1">1</span> 존재를 모른다 — 조선, 방산, 반도체 장비</li>
+          </ul>
+        </div>
+      </div>
+      <ul>
+        <li><strong>안정성(지표 A)와 흥미(지표 B)이 같이 반영됨</strong></li>
+        <li>접점등급은 회사가 아니라 <strong>11개 접점유형</strong>에 부여됨. 회사는 유형에 배정만 되므로 <strong>같은 유형이면 반드시 같은 점수</strong>가 나옴</li>
+        <li>마지막에 <strong>13개 섹터에서 한 종목씩 돌아가며 뽑는 방식</strong>으로 50개를 채움 — 섹터 개입은 이 단계에서 딱 한 번만 일어나고, 그 결과 모든 섹터가 3~5종목을 가짐. 이 강제가 없으면 은행·금융이 12종목, 조선·물류가 0종목이 됨</li>
+      </ul>
+
+      <h3 style="font-size:14.5px; margin:20px 0 4px;">11개 접점유형</h3>
+      <table class="type-table">
+        <tbody><tr><th>등급</th><th>접점유형</th><th>판정 문구</th><th>지표 B</th><th>예시 종목</th></tr>
+        <tr><td><span class="g-badge g5">5</span></td><td><strong>아동식음료</strong></td><td>아이가 용돈으로 직접 산다</td><td class="score">1.00</td><td style="font-size:12.5px;">삼양식품 · 오리온 · 농심</td></tr>
+        <tr><td><span class="g-badge g5">5</span></td><td><strong>게임·콘텐츠</strong></td><td>아이가 직접 플레이하거나 본다</td><td class="score">1.00</td><td style="font-size:12.5px;">크래프톤 · 하이브 · NC</td></tr>
+        <tr><td><span class="g-badge g4">4</span></td><td><strong>가정용품</strong></td><td>집에서 아이가 매일 손댄다</td><td class="score">0.75</td><td style="font-size:12.5px;">삼성전자 · LG전자 · 코웨이</td></tr>
+        <tr><td><span class="g-badge g4">4</span></td><td><strong>완성차</strong></td><td>아이가 매일 탄다</td><td class="score">0.75</td><td style="font-size:12.5px;">기아 · 현대차</td></tr>
+        <tr><td><span class="g-badge g3">3</span></td><td><strong>방문시설</strong></td><td>아이가 보호자와 함께 간다</td><td class="score">0.50</td><td style="font-size:12.5px;">신세계 · BGF리테일</td></tr>
+        <tr><td><span class="g-badge g3">3</span></td><td><strong>여객운송</strong></td><td>아이가 직접 탄다</td><td class="score">0.50</td><td style="font-size:12.5px;">대한항공 · 현대로템</td></tr>
+        <tr><td><span class="g-badge g3">3</span></td><td><strong>배송·방문</strong></td><td>아이가 집에서 받는다</td><td class="score">0.50</td><td style="font-size:12.5px;">CJ대한통운</td></tr>
+        <tr><td><span class="g-badge g2">2</span></td><td><strong>성인소비재</strong></td><td>집·동네에 있지만 아이는 쓸 수 없다</td><td class="score">0.25</td><td style="font-size:12.5px;">KT&amp;G · 하이트진로 <span style="color:var(--muted)">(최종 미포함)</span></td></tr>
+        <tr><td><span class="g-badge g2">2</span></td><td><strong>금융·공공요금</strong></td><td>부모만 거래하고 매달 청구된다</td><td class="score">0.25</td><td style="font-size:12.5px;">KB금융 · 한국전력 · 키움증권</td></tr>
+        <tr><td><span class="g-badge g2">2</span></td><td><strong>주유·지주</strong></td><td>간판은 보이지만 거래는 없다</td><td class="score">0.25</td><td style="font-size:12.5px;">S-Oil · GS · 한진칼</td></tr>
+        <tr><td><span class="g-badge g1">1</span></td><td><strong>B2B산업재</strong></td><td>아이 생활에 등장하지 않는다</td><td class="score">0.00</td><td style="font-size:12.5px;">SK하이닉스 · HD현대중공업</td></tr>
+      </tbody></table>
+      <h3 style="font-size:14.5px; margin:22px 0 4px;">최종 화이트리스트 51종목</h3>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 10px;">종합점수 순 · 지표 A/B는 172개 후보 내 상대 점수 · <span class="mode-manual">수기</span> 2종목은 자동 산출 결과에 기획 판단으로 추가한 것</p>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 8px;">섹터별 종목 수</p>
+      <div class="sec-chips"><span class="sec-chip">식품 <b>4</b></span> <span class="sec-chip">게임 <b>4</b></span> <span class="sec-chip">엔터 <b>4</b></span> <span class="sec-chip">자동차 <b>3</b></span> <span class="sec-chip">반도체·전자 <b>4</b></span> <span class="sec-chip">화장품 <b>4</b></span> <span class="sec-chip">유통 <b>4</b></span> <span class="sec-chip">항공 <b>3</b></span> <span class="sec-chip">방산 <b>4</b></span> <span class="sec-chip">은행·금융 <b>5</b></span> <span class="sec-chip">에너지 <b>4</b></span> <span class="sec-chip">물류 <b>4</b></span> <span class="sec-chip">조선 <b>4</b></span></div>
+      <table class="stock-table">
+        <tbody><tr><th>#</th><th>종목</th><th>섹터</th><th>접점유형</th><th>등급</th><th>아이가 아는 접점</th><th>지표 A</th><th>지표 B</th><th>종합</th><th>편입</th></tr>
+        <tr><td class="rk">1</td><td><strong>삼양식품</strong><span class="code">003230</span></td><td>식품</td><td>아동식음료</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 용돈으로 직접 산다</td><td class="score">0.727</td><td class="score">1.00</td><td class="score"><strong>0.864</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">2</td><td><strong>크래프톤</strong><span class="code">259960</span></td><td>게임</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 직접 플레이하거나 본다</td><td class="score">0.708</td><td class="score">1.00</td><td class="score"><strong>0.854</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">3</td><td><strong>오리온</strong><span class="code">271560</span></td><td>식품</td><td>아동식음료</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 용돈으로 직접 산다</td><td class="score">0.669</td><td class="score">1.00</td><td class="score"><strong>0.835</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">4</td><td><strong>NC</strong><span class="code">036570</span></td><td>게임</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 직접 플레이하거나 본다</td><td class="score">0.626</td><td class="score">1.00</td><td class="score"><strong>0.813</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">5</td><td><strong>하이브</strong><span class="code">352820</span></td><td>엔터</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 직접 플레이하거나 본다</td><td class="score">0.611</td><td class="score">1.00</td><td class="score"><strong>0.806</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">6</td><td><strong>기아</strong><span class="code">000270</span></td><td>자동차</td><td>완성차</td><td><span class="g-badge g4">4</span></td><td class="touch">아이가 매일 탄다</td><td class="score">0.860</td><td class="score">0.75</td><td class="score"><strong>0.805</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">7</td><td><strong>삼성전자</strong><span class="code">005930</span></td><td>반도체·전자</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.827</td><td class="score">0.75</td><td class="score"><strong>0.789</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">8</td><td><strong>현대차</strong><span class="code">005380</span></td><td>자동차</td><td>완성차</td><td><span class="g-badge g4">4</span></td><td class="touch">아이가 매일 탄다</td><td class="score">0.811</td><td class="score">0.75</td><td class="score"><strong>0.781</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">9</td><td><strong>에이피알</strong><span class="code">278470</span></td><td>화장품</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.770</td><td class="score">0.75</td><td class="score"><strong>0.760</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">10</td><td><strong>CJ제일제당</strong><span class="code">097950</span></td><td>식품</td><td>아동식음료</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 용돈으로 직접 산다</td><td class="score">0.506</td><td class="score">1.00</td><td class="score"><strong>0.753</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">11</td><td><strong>넷마블</strong><span class="code">251270</span></td><td>게임</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 직접 플레이하거나 본다</td><td class="score">0.497</td><td class="score">1.00</td><td class="score"><strong>0.748</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">12</td><td><strong>코웨이</strong><span class="code">021240</span></td><td>유통</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.740</td><td class="score">0.75</td><td class="score"><strong>0.745</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">13</td><td><strong>농심</strong><span class="code">004370</span></td><td>식품</td><td>아동식음료</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 용돈으로 직접 산다</td><td class="score">0.473</td><td class="score">1.00</td><td class="score"><strong>0.736</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">14</td><td><strong>LG전자</strong><span class="code">066570</span></td><td>반도체·전자</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.684</td><td class="score">0.75</td><td class="score"><strong>0.717</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">15</td><td><strong>에스엠</strong><span class="code">041510</span></td><td>엔터</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 직접 플레이하거나 본다</td><td class="score">0.417</td><td class="score">1.00</td><td class="score"><strong>0.709</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">16</td><td><strong>JYP Ent.</strong><span class="code">035900</span></td><td>엔터</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 직접 플레이하거나 본다</td><td class="score">0.388</td><td class="score">1.00</td><td class="score"><strong>0.694</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">17</td><td><strong>더블유게임즈</strong><span class="code">192080</span></td><td>게임</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">아이가 직접 플레이하거나 본다</td><td class="score">0.375</td><td class="score">1.00</td><td class="score"><strong>0.688</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">18</td><td><strong>아모레퍼시픽</strong><span class="code">090430</span></td><td>화장품</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.618</td><td class="score">0.75</td><td class="score"><strong>0.684</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">19</td><td><strong>달바글로벌</strong><span class="code">483650</span></td><td>화장품</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.554</td><td class="score">0.75</td><td class="score"><strong>0.652</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">20</td><td><strong>LG생활건강</strong><span class="code">051900</span></td><td>화장품</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.541</td><td class="score">0.75</td><td class="score"><strong>0.646</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">21</td><td><strong>대한항공</strong><span class="code">003490</span></td><td>항공</td><td>여객운송</td><td><span class="g-badge g3">3</span></td><td class="touch">아이가 직접 탄다</td><td class="score">0.791</td><td class="score">0.50</td><td class="score"><strong>0.646</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">22</td><td><strong>와이지엔터테인먼트</strong><span class="code">122870</span></td><td>엔터</td><td>게임·콘텐츠</td><td><span class="g-badge g5">5</span></td><td class="touch">블랙핑크·베이비몬스터 — 아이가 노래와 춤을 따라 한다</td><td class="score">0.221</td><td class="score">1.00</td><td class="score"><strong>0.610</strong></td><td><span class="mode-manual">수기</span></td></tr>
+        <tr><td class="rk">23</td><td><strong>현대로템</strong><span class="code">064350</span></td><td>방산</td><td>여객운송</td><td><span class="g-badge g3">3</span></td><td class="touch">아이가 직접 탄다</td><td class="score">0.700</td><td class="score">0.50</td><td class="score"><strong>0.600</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">24</td><td><strong>롯데렌탈</strong><span class="code">089860</span></td><td>유통</td><td>가정용품</td><td><span class="g-badge g4">4</span></td><td class="touch">집에서 아이가 매일 손댄다</td><td class="score">0.370</td><td class="score">0.75</td><td class="score"><strong>0.560</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">25</td><td><strong>KB금융</strong><span class="code">105560</span></td><td>은행·금융</td><td>금융·공공요금</td><td><span class="g-badge g2">2</span></td><td class="touch">부모만 거래하고 매달 청구된다</td><td class="score">0.864</td><td class="score">0.25</td><td class="score"><strong>0.557</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">26</td><td><strong>신한지주</strong><span class="code">055550</span></td><td>은행·금융</td><td>금융·공공요금</td><td><span class="g-badge g2">2</span></td><td class="touch">부모만 거래하고 매달 청구된다</td><td class="score">0.843</td><td class="score">0.25</td><td class="score"><strong>0.547</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">27</td><td><strong>하나금융지주</strong><span class="code">086790</span></td><td>은행·금융</td><td>금융·공공요금</td><td><span class="g-badge g2">2</span></td><td class="touch">부모만 거래하고 매달 청구된다</td><td class="score">0.839</td><td class="score">0.25</td><td class="score"><strong>0.544</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">28</td><td><strong>한국전력</strong><span class="code">015760</span></td><td>에너지</td><td>금융·공공요금</td><td><span class="g-badge g2">2</span></td><td class="touch">부모만 거래하고 매달 청구된다</td><td class="score">0.825</td><td class="score">0.25</td><td class="score"><strong>0.538</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">29</td><td><strong>신세계</strong><span class="code">004170</span></td><td>유통</td><td>방문시설</td><td><span class="g-badge g3">3</span></td><td class="touch">아이가 보호자와 함께 간다</td><td class="score">0.572</td><td class="score">0.50</td><td class="score"><strong>0.536</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">30</td><td><strong>우리금융지주</strong><span class="code">316140</span></td><td>은행·금융</td><td>금융·공공요금</td><td><span class="g-badge g2">2</span></td><td class="touch">부모만 거래하고 매달 청구된다</td><td class="score">0.810</td><td class="score">0.25</td><td class="score"><strong>0.530</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">31</td><td><strong>BGF리테일</strong><span class="code">282330</span></td><td>유통</td><td>방문시설</td><td><span class="g-badge g3">3</span></td><td class="touch">아이가 보호자와 함께 간다</td><td class="score">0.559</td><td class="score">0.50</td><td class="score"><strong>0.530</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">32</td><td><strong>S-Oil</strong><span class="code">010950</span></td><td>에너지</td><td>주유·지주</td><td><span class="g-badge g2">2</span></td><td class="touch">간판은 보이지만 거래는 없다</td><td class="score">0.664</td><td class="score">0.25</td><td class="score"><strong>0.457</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">33</td><td><strong>GS</strong><span class="code">078930</span></td><td>에너지</td><td>주유·지주</td><td><span class="g-badge g2">2</span></td><td class="touch">간판은 보이지만 거래는 없다</td><td class="score">0.658</td><td class="score">0.25</td><td class="score"><strong>0.454</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">34</td><td><strong>키움증권</strong><span class="code">039490</span></td><td>은행·금융</td><td>금융·공공요금</td><td><span class="g-badge g2">2</span></td><td class="touch">부모만 거래하고 매달 청구된다</td><td class="score">0.647</td><td class="score">0.25</td><td class="score"><strong>0.449</strong></td><td><span class="mode-manual">수기</span></td></tr>
+        <tr><td class="rk">35</td><td><strong>SK이노베이션</strong><span class="code">096770</span></td><td>에너지</td><td>주유·지주</td><td><span class="g-badge g2">2</span></td><td class="touch">간판은 보이지만 거래는 없다</td><td class="score">0.646</td><td class="score">0.25</td><td class="score"><strong>0.448</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">36</td><td><strong>CJ대한통운</strong><span class="code">000120</span></td><td>물류</td><td>배송·방문</td><td><span class="g-badge g3">3</span></td><td class="touch">아이가 집에서 받는다</td><td class="score">0.340</td><td class="score">0.50</td><td class="score"><strong>0.420</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">37</td><td><strong>HD현대중공업</strong><span class="code">329180</span></td><td>조선</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.827</td><td class="score">0.00</td><td class="score"><strong>0.414</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">38</td><td><strong>HD한국조선해양</strong><span class="code">009540</span></td><td>조선</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.804</td><td class="score">0.00</td><td class="score"><strong>0.402</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">39</td><td><strong>한화에어로스페이스</strong><span class="code">012450</span></td><td>방산</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.795</td><td class="score">0.00</td><td class="score"><strong>0.397</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">40</td><td><strong>SK하이닉스</strong><span class="code">000660</span></td><td>반도체·전자</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.788</td><td class="score">0.00</td><td class="score"><strong>0.394</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">41</td><td><strong>현대모비스</strong><span class="code">012330</span></td><td>자동차</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.772</td><td class="score">0.00</td><td class="score"><strong>0.386</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">42</td><td><strong>HMM</strong><span class="code">011200</span></td><td>물류</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.772</td><td class="score">0.00</td><td class="score"><strong>0.386</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">43</td><td><strong>현대글로비스</strong><span class="code">086280</span></td><td>물류</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.768</td><td class="score">0.00</td><td class="score"><strong>0.384</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">44</td><td><strong>아시아나항공</strong><span class="code">020560</span></td><td>항공</td><td>여객운송</td><td><span class="g-badge g3">3</span></td><td class="touch">아이가 직접 탄다</td><td class="score">0.244</td><td class="score">0.50</td><td class="score"><strong>0.372</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">45</td><td><strong>한진칼</strong><span class="code">180640</span></td><td>항공</td><td>주유·지주</td><td><span class="g-badge g2">2</span></td><td class="touch">간판은 보이지만 거래는 없다</td><td class="score">0.493</td><td class="score">0.25</td><td class="score"><strong>0.371</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">46</td><td><strong>LIG디펜스앤에어로스페이스</strong><span class="code">079550</span></td><td>방산</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.742</td><td class="score">0.00</td><td class="score"><strong>0.371</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">47</td><td><strong>SK스퀘어</strong><span class="code">402340</span></td><td>반도체·전자</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.734</td><td class="score">0.00</td><td class="score"><strong>0.367</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">48</td><td><strong>한화오션</strong><span class="code">042660</span></td><td>조선</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.724</td><td class="score">0.00</td><td class="score"><strong>0.362</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">49</td><td><strong>삼성중공업</strong><span class="code">010140</span></td><td>조선</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.691</td><td class="score">0.00</td><td class="score"><strong>0.346</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">50</td><td><strong>포스코인터내셔널</strong><span class="code">047050</span></td><td>물류</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.656</td><td class="score">0.00</td><td class="score"><strong>0.328</strong></td><td><span class="mode-auto">자동</span></td></tr>
+        <tr><td class="rk">51</td><td><strong>한국항공우주</strong><span class="code">047810</span></td><td>방산</td><td>B2B산업재</td><td><span class="g-badge g1">1</span></td><td class="touch">아이 생활에 등장하지 않는다</td><td class="score">0.648</td><td class="score">0.00</td><td class="score"><strong>0.324</strong></td><td><span class="mode-auto">자동</span></td></tr>
+      </tbody></table>
+      <ul style="margin-top:14px;">
+        <li><strong>등급 5~4가 22종목(43%)</strong> — "아이가 아는 회사"가 절반 가까이를 차지하면서도, 조선·방산·물류처럼 <strong>아이가 모르지만 한국 경제를 설명하는 데 빠질 수 없는 산업</strong>이 함께 들어옴</li>
+        <li>13개 섹터가 <strong>3~5종목씩</strong> 나눠 가짐</li>
+        <li><strong>수기 편입 2종목</strong>
+          <ul>
+            <li><strong>와이지엔터테인먼트</strong> — 접점등급 5(블랙핑크·베이비몬스터)로 아이 인지도는 최상위지만 지표 A가 0.221로 낮아 자동 선발에서 밀림</li>
+            <li><strong>키움증권</strong> — 수기 추가</li>
+          </ul>
+        </li>
+<li>기존 키움 모의투자와의 차별점: 기존 서비스는 만 14세 미만 참여가 원천적으로 불가능하고 개인 단위 경쟁이었음. 이 서비스는 연령 제한을 없애고 <strong>가족 단위</strong>로 설계해, 기존 서비스가 다루지 못하던 세그먼트(초중등 자녀)를 겨냥함</li>
+      </ul>
+    </div>
+
+    <div class="func-block fb2">
+      <div class="func-title"><span class="num">2</span>가족 아카이브 — AI 투자성향분석</div>
+      <div class="func-reason"><b>존재이유</b> 부모와 자녀가 함께한 기록을 남기는 아카이브로서, 가족이 투자 경험에 대한 긍정적 추억을 쌓게 하는 것 — 키움 브랜드에 대한 긍정적 인상으로 이어지며, 동시에 자녀의 투자성향을 알고 싶어하는 부모의 니즈를 직접 충족함</div>
+      <table>
+        <tbody><tr><th>축</th><th>데이터 소스</th><th>산출물</th></tr>
+        <tr><td><strong>① 매매지점 차트</strong></td><td>부모·자녀의 실거래 내역(매수·매도 시점)</td><td><strong>종목별 차트 위에 부모와 자녀의 매수/매도 지점을 함께 표시</strong></td></tr>
+        <tr><td><strong>② 투자성향 분석</strong></td><td>거래 데이터(거래한 기업 개수) + 행동 데이터(매수 전 탭 열람 수)</td><td><strong>4가지 투자성향 유형 분류</strong></td></tr>
+        <tr><td><strong>③ 거래내역 피드</strong></td><td>거래 이벤트 + 거래이유 + 가족 코멘트</td><td><strong>부모·자녀 거래가 한 줄로 흐르는 피드 · 서로 코멘트 작성 가능</strong></td></tr>
+      </tbody></table>
+      <p style="font-size:13.5px;margin:8px 0 0;">①은 <strong>결과를 겹쳐 보고</strong>, ②는 <strong>과정을 유형으로 요약</strong>하고, ③은 <strong>그 위에 대화를 얹음</strong>. 세 축이 함께 있어야 "기록"이 아니라 <strong>"함께 만든 아카이브"</strong>가 됨</p>
+
+      <div class="axis-head"><span class="ax-n">1</span><span class="ax-t">매매지점 차트 — 같은 차트 위에 가족의 판단을 겹쳐 놓음</span></div>
+      <div class="chartmock">
+        <div class="cm-title">삼양식품 · 2026년 3분기</div>
+        <div class="cm-sub">일봉 차트 위에 부모와 자녀의 매수(B)·매도(S) 지점을 함께 표시</div>
+        <svg viewBox="0 0 660 218" width="100%" height="218" role="img" aria-label="일봉 차트 위에 부모와 자녀의 매수 B, 매도 S 지점이 핀으로 표시된 예시 화면">
+          <line x1="38" y1="153.2" x2="638" y2="153.2" stroke="#eff1f6" stroke-width="1"></line>
+          <text x="34" y="156.7" font-size="9.5" fill="#a4abbd" text-anchor="end">38,000</text>
+          <line x1="38" y1="124.1" x2="638" y2="124.1" stroke="#eff1f6" stroke-width="1"></line>
+          <text x="34" y="127.6" font-size="9.5" fill="#a4abbd" text-anchor="end">42,000</text>
+          <line x1="38" y1="94.9" x2="638" y2="94.9" stroke="#eff1f6" stroke-width="1"></line>
+          <text x="34" y="98.4" font-size="9.5" fill="#a4abbd" text-anchor="end">46,000</text>
+          <line x1="38" y1="65.7" x2="638" y2="65.7" stroke="#eff1f6" stroke-width="1"></line>
+          <text x="34" y="69.2" font-size="9.5" fill="#a4abbd" text-anchor="end">50,000</text>
+          <line x1="56.5" y1="101.4" x2="56.5" y2="112.4" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="50.0" y="105.1" width="13.0" height="4.4" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="77.5" y1="106.5" x2="77.5" y2="118.9" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="71.0" y="109.5" width="13.0" height="5.8" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="98.5" y1="110.9" x2="98.5" y2="122.6" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="92.0" y="115.3" width="13.0" height="5.1" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="119.5" y1="118.2" x2="119.5" y2="136.5" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="113.0" y="120.4" width="13.0" height="10.9" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="140.5" y1="120.4" x2="140.5" y2="134.3" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="134.0" y="125.5" width="13.0" height="5.8" fill="#d6403e"></rect>
+          <line x1="161.5" y1="122.6" x2="161.5" y2="141.6" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="155.0" y="125.5" width="13.0" height="11.7" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="182.5" y1="133.5" x2="182.5" y2="149.6" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="176.0" y="137.2" width="13.0" height="8.8" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="203.5" y1="143.8" x2="203.5" y2="156.2" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="197.0" y="145.9" width="13.0" height="5.8" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="224.5" y1="148.9" x2="224.5" y2="157.6" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="218.0" y="151.8" width="13.0" height="2.2" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="245.5" y1="143.0" x2="245.5" y2="156.2" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="239.0" y="148.9" width="13.0" height="5.1" fill="#d6403e"></rect>
+          <line x1="266.5" y1="135.7" x2="266.5" y2="151.8" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="260.0" y="140.1" width="13.0" height="8.8" fill="#d6403e"></rect>
+          <line x1="287.5" y1="137.9" x2="287.5" y2="148.9" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="281.0" y="140.1" width="13.0" height="4.4" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="308.5" y1="129.9" x2="308.5" y2="147.4" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="302.0" y="135.0" width="13.0" height="9.5" fill="#d6403e"></rect>
+          <line x1="329.5" y1="118.2" x2="329.5" y2="137.2" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="323.0" y="124.8" width="13.0" height="10.2" fill="#d6403e"></rect>
+          <line x1="350.5" y1="112.4" x2="350.5" y2="128.4" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="344.0" y="116.8" width="13.0" height="8.0" fill="#d6403e"></rect>
+          <line x1="371.5" y1="113.8" x2="371.5" y2="126.2" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="365.0" y="116.8" width="13.0" height="4.4" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="392.5" y1="102.2" x2="392.5" y2="124.1" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="386.0" y="108.0" width="13.0" height="13.1" fill="#d6403e"></rect>
+          <line x1="413.5" y1="92.7" x2="413.5" y2="110.2" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="407.0" y="97.8" width="13.0" height="10.2" fill="#d6403e"></rect>
+          <line x1="434.5" y1="81.7" x2="434.5" y2="100.7" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="428.0" y="88.3" width="13.0" height="9.5" fill="#d6403e"></rect>
+          <line x1="455.5" y1="85.4" x2="455.5" y2="99.2" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="449.0" y="88.3" width="13.0" height="5.1" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="476.5" y1="75.9" x2="476.5" y2="96.3" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="470.0" y="81.7" width="13.0" height="11.7" fill="#d6403e"></rect>
+          <line x1="497.5" y1="65.7" x2="497.5" y2="83.9" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="491.0" y="72.2" width="13.0" height="9.5" fill="#d6403e"></rect>
+          <line x1="518.5" y1="68.6" x2="518.5" y2="83.2" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="512.0" y="72.2" width="13.0" height="5.8" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="539.5" y1="75.2" x2="539.5" y2="94.1" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="533.0" y="78.1" width="13.0" height="9.5" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <line x1="560.5" y1="73.7" x2="560.5" y2="90.5" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="554.0" y="78.8" width="13.0" height="8.8" fill="#d6403e"></rect>
+          <line x1="581.5" y1="62.8" x2="581.5" y2="81.0" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="575.0" y="68.6" width="13.0" height="10.2" fill="#d6403e"></rect>
+          <line x1="602.5" y1="56.2" x2="602.5" y2="71.5" stroke="#d6403e" stroke-width="1.3"></line>
+          <rect x="596.0" y="62.8" width="13.0" height="5.8" fill="#d6403e"></rect>
+          <line x1="623.5" y1="59.1" x2="623.5" y2="69.3" stroke="#2f6ad9" stroke-width="1.3"></line>
+          <rect x="617.0" y="62.8" width="13.0" height="2.2" fill="#fff" stroke="#2f6ad9" stroke-width="1.3"></rect>
+          <polygon points="219.5,169.6216216216216 229.5,169.6216216216216 224.5,161.6216216216216" fill="#0f8a68"></polygon><rect x="213.5" y="169.6" width="22" height="22" rx="6" fill="#0f8a68"></rect><text x="224.5" y="185.6" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">B</text><text x="224.5" y="203.6" font-size="10.5" fill="#5b6478" text-anchor="middle">자녀 매수 · 10/14</text>
+          <polygon points="324.5,149.18918918918916 334.5,149.18918918918916 329.5,141.18918918918916" fill="#16233f"></polygon><rect x="318.5" y="149.2" width="22" height="22" rx="6" fill="#16233f"></rect><text x="329.5" y="165.2" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">B</text><text x="329.5" y="183.2" font-size="10.5" fill="#5b6478" text-anchor="middle">부모 매수 · 10/21</text>
+          <polygon points="492.5,55.67567567567569 502.5,55.67567567567569 497.5,61.67567567567569" fill="#0f8a68"></polygon><rect x="486.5" y="31.7" width="22" height="22" rx="6" fill="#0f8a68"></rect><text x="497.5" y="47.7" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">S</text><text x="497.5" y="25.7" font-size="10.5" fill="#5b6478" text-anchor="middle">자녀 매도 · 11/08</text>
+          <polygon points="597.5,46.18918918918922 607.5,46.18918918918922 602.5,52.18918918918922" fill="#16233f"></polygon><rect x="591.5" y="22.2" width="22" height="22" rx="6" fill="#16233f"></rect><text x="602.5" y="38.2" font-size="12" font-weight="700" fill="#fff" text-anchor="middle">S</text><text x="602.5" y="16.2" font-size="10.5" fill="#5b6478" text-anchor="middle">부모 매도 · 11/22</text>
+        </svg>
+        <div class="cm-legend">
+          <span><i style="background:#d6403e"></i>상승</span>
+          <span><i style="background:#2f6ad9"></i>하락</span>
+          <span><i class="pin-key" style="background:#0f8a68"></i>자녀</span>
+          <span><i class="pin-key" style="background:#16233f"></i>부모</span>
+          <span style="margin-left:6px;">B = 매수 · S = 매도</span>
+        </div>
+      </div>
+      <ul>
+        <li>단순 수익률 비교가 아니라 <strong>"같은 종목을 두고 우리 둘이 언제, 왜 다르게 판단했나"</strong>가 한 장에 보임 — 점을 누르면 그때 입력했던 <strong>거래이유</strong>가 그대로 뜸</li>
+        <li>이 화면 자체가 <strong>가족의 대화 소재</strong>가 됨. "너는 왜 여기서 팔았어?"라는 질문이 자연스럽게 나오는 구조이며, 이것이 이 기능이 리포트가 아니라 <strong>아카이브</strong>인 이유</li>
+        <li>부모 입장에서는 아이의 판단을 <strong>평가하지 않고도 확인</strong>할 수 있음 — 잘잘못이 아니라 시점의 차이로 보이기 때문</li>
+      </ul>
+
+      <div class="axis-head"><span class="ax-n">2</span><span class="ax-t">투자성향 분석 — 거래·행동 데이터를 두 축으로 나눠 4가지 유형 분류</span></div>
+      <p style="font-size:14px; margin:6px 0;">두 축 모두 <strong>주관적 설문이 아니라 실제 기록에서 기계적으로 산출</strong>됨. 아이에게 성향 검사를 시키지 않고, 이미 한 행동으로만 판정함.</p>
+      <table class="kv-table">
+        <tbody><tr><th>축</th><th>측정 대상</th><th>판정 기준</th></tr>
+        <tr>
+          <td><strong>판단 근거</strong><br><span style="font-size:12px;color:var(--muted)">직관형 ↔ 근거형</span></td>
+          <td>매수 전 <strong>뉴스 · 기업정보 · 차트</strong> 3개 탭의 열람 수 <span style="font-size:12.5px;color:var(--muted)">(행동 데이터)</span></td>
+          <td><strong>직관형</strong> — 3개 중 1개만 열람했거나 아예 열람하지 않음<br>
+              <strong>근거형</strong> — 3개 중 2개 이상 열람</td>
+        </tr>
+        <tr>
+          <td><strong>포트폴리오 폭</strong><br><span style="font-size:12px;color:var(--muted)">집중러 ↔ 분산러</span></td>
+          <td>해당 시즌에 <strong>거래한 기업 개수</strong> <span style="font-size:12.5px;color:var(--muted)">(거래 데이터)</span></td>
+          <td><strong>집중러</strong> — 3개 이하<br>
+              <strong>분산러</strong> — 4개 이상</td>
+        </tr>
+      </tbody></table>
+
+      <div class="matrix-block">
+        <div class="mx-corner"></div>
+        <div class="mx-col-head"><div>직관형<span>탭 0~1개 열람</span></div></div>
+        <div class="mx-col-head"><div>근거형<span>탭 2개 이상 열람</span></div></div>
+
+        <div class="mx-row-head"><div>집중러<small>3개 이하</small></div></div>
+        <div class="quad q4">
+          <div class="q-name">직관형 집중러</div>
+          <div class="q-desc">마음에 든 회사 한둘에 몰아넣는 유형. 결정이 빠르고 확신이 강하지만, <strong>고른 이유의 기록이 얇고</strong> 그 종목이 흔들리면 전체가 흔들림</div>
+        </div>
+        <div class="quad q1">
+          <div class="q-name">근거형 집중러</div>
+          <div class="q-desc">찾아볼 건 다 찾아보고 <strong>확신이 선 소수에 집중</strong>. 근거는 촘촘하지만 포트폴리오가 한쪽으로 쏠려 있음</div>
+        </div>
+
+        <div class="mx-row-head"><div>분산러<small>4개 이상</small></div></div>
+        <div class="quad q3">
+          <div class="q-name">직관형 분산러</div>
+          <div class="q-desc">여러 종목에 조금씩 담되 각각을 깊이 보지는 않음. 폭은 넓지만 <strong>왜 샀는지 설명하기 어려운</strong> 종목이 섞임</div>
+        </div>
+        <div class="quad q2">
+          <div class="q-name">근거형 분산러</div>
+          <div class="q-desc">찾아보고 나서 <strong>여러 종목에 나눠 담음</strong>. 근거와 분산을 모두 챙긴 유형이지만, 관심이 흩어져 있을 수도 있음</div>
+        </div>
+      </div>
+      <p class="mx-axis-note">두 축 모두 <strong>좋고 나쁨의 축이 아님</strong> — 네 유형 중 정답은 없고, "우리 아이는 이렇게 결정하는구나"를 이름으로 확인하는 것이 목적임</p>
+      <ul>
+        <li>부모가 얻는 것: 자녀의 투자성향을 알고 싶어하는 니즈를 직접 충족함</li>
+        <li>기준이 <strong>탭 열람 수와 거래 기업 수라는 두 개의 숫자</strong>뿐이라, 부모가 결과를 납득하기 쉽고 "왜 이렇게 나왔는지"를 그 자리에서 설명할 수 있음</li>
+        <li>유형은 고정 낙인이 아니라 <strong>분기마다 다시 산출</strong>되며, 유형이 이동하는 것 자체가 성장 기록으로 남음</li>
+      </ul>
+
+      <div class="axis-head"><span class="ax-n">3</span><span class="ax-t">거래내역 피드 — 부모·자녀 거래가 한 줄로 흐르고, 서로 코멘트를 남김</span></div>
+      <p style="font-size:14px; margin:6px 0;">①과 ②가 <strong>보는 화면</strong>이라면, ③은 <strong>쓰는 화면</strong>임. 부모와 자녀의 거래가 시간순 한 줄로 섞여 흐르고, 각 거래에 <strong>거래이유</strong>가 붙어 있으며, 그 아래에 서로 코멘트를 남길 수 있음.</p>
+      <div class="feed">
+        <div class="feed-item">
+          <div class="fi-top">
+            <span class="fi-avatar child">아이</span>
+            <span class="fi-id"><span class="fi-name">자녀</span><br><span class="fi-meta">하이브 · 엔터</span></span>
+            <span class="fi-time">11/12 09:12</span>
+          </div>
+          <div class="fi-media" style="background:#1c1c22">
+            <svg class="fm-logo" viewBox="0 0 320 148" preserveAspectRatio="xMidYMid meet"><text x="160" y="104" font-size="76" font-weight="800" letter-spacing="6" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif">HYBE</text></svg>
+            <span class="fm-note">로고 이미지 자리</span>
+            <span class="fm-badge"><i class="buy">B</i>2주 매수 · 231,000원</span>
+            <span class="fm-inner"><span class="fm-name">하이브</span><span class="fm-sub">BTS·뉴진스</span></span>
+            <svg class="fm-spark" viewBox="0 0 320 44" preserveAspectRatio="none"><polyline fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="2" stroke-linejoin="round" points="0,32 40,24 80,30 120,18 160,24 200,12 240,18 280,8 320,14"></polyline></svg>
+          </div>
+          <div class="fi-actions"><span>♡ 2</span><span>💬 1</span></div>
+          <div class="fi-body">
+            <p class="fi-reason"><span class="rtag">거래이유</span>뉴진스 컴백한다고 친구가 알려줬어</p>
+            <div class="fi-comment"><span class="fc-who">아빠</span><span>뉴진스 좋아하는 건 알겠는데, 이 회사가 돈을 어떻게 버는지도 같이 볼까?</span></div>
+
+          </div>
+        </div>
+        <div class="feed-item">
+          <div class="fi-top">
+            <span class="fi-avatar parent">부모</span>
+            <span class="fi-id"><span class="fi-name">부모</span><br><span class="fi-meta">LG전자 · 반도체·전자</span></span>
+            <span class="fi-time">11/19 13:40</span>
+          </div>
+          <div class="fi-media" style="background:#a50034">
+            <svg class="fm-logo" viewBox="0 0 320 148" preserveAspectRatio="xMidYMid meet"><circle cx="160" cy="74" r="50" fill="none" stroke="#fff" stroke-width="7"></circle><text x="160" y="94" font-size="48" font-weight="800" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif">LG</text></svg>
+            <span class="fm-note">로고 이미지 자리</span>
+            <span class="fm-badge"><i class="buy">B</i>5주 매수 · 92,400원</span>
+            <span class="fm-inner"><span class="fm-name">LG전자</span><span class="fm-sub">그램·스탠바이미</span></span>
+            <svg class="fm-spark" viewBox="0 0 320 44" preserveAspectRatio="none"><polyline fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="2" stroke-linejoin="round" points="0,20 40,26 80,22 120,30 160,26 200,34 240,28 280,32 320,26"></polyline></svg>
+          </div>
+          <div class="fi-actions"><span>♡ 2</span><span>💬 1</span></div>
+          <div class="fi-body">
+            <p class="fi-reason"><span class="rtag">거래이유</span>가전 실적이 바닥을 지났다고 판단해 담아둠</p>
+            <div class="fi-comment"><span class="fc-who">딸</span><span>아빠 그램 우리집에도 있잖아!</span></div>
+
+          </div>
+        </div>
+        <div class="feed-item">
+          <div class="fi-top">
+            <span class="fi-avatar child">아이</span>
+            <span class="fi-id"><span class="fi-name">자녀</span><br><span class="fi-meta">농심 · 식품</span></span>
+            <span class="fi-time">11/26 15:02</span>
+          </div>
+          <div class="fi-media" style="background:#e35205">
+            <svg class="fm-logo" viewBox="0 0 320 148" preserveAspectRatio="xMidYMid meet"><text x="160" y="106" font-size="82" font-weight="800" letter-spacing="4" fill="#fff" text-anchor="middle" font-family="system-ui, sans-serif">농심</text></svg>
+            <span class="fm-note">로고 이미지 자리</span>
+            <span class="fm-badge"><i class="sell">S</i>3주 매도 · 418,500원</span>
+            <span class="fm-inner"><span class="fm-name">농심</span><span class="fm-sub">신라면·새우깡</span></span>
+            <svg class="fm-spark" viewBox="0 0 320 44" preserveAspectRatio="none"><polyline fill="none" stroke="#fff" stroke-opacity="0.4" stroke-width="2" stroke-linejoin="round" points="0,34 40,30 80,36 120,26 160,20 200,26 240,14 280,10 320,16"></polyline></svg>
+          </div>
+          <div class="fi-actions"><span>♡ 2</span><span>💬 0</span></div>
+          <div class="fi-body">
+            <p class="fi-reason"><span class="rtag">거래이유</span>많이 오른 것 같아서 팔았어</p>
+
+            <div class="fi-input">이 거래에 코멘트 남기기…<span class="fi-btn">등록</span></div>
+          </div>
+        </div>
+      </div>
+      <ul>
+        <li><strong>왜 피드 형태인가</strong> — 리포트는 분기에 한 번 열어보고 닫지만, 피드는 <strong>거래가 생길 때마다 갱신</strong>됨. 부모를 앱으로 불러들이는 주기가 "분기"에서 "아이가 거래할 때마다"로 짧아짐</li>
+        <li><strong>코멘트는 부모와 자녀의 상호교류 · 커뮤니케이션의 장</strong> — 각자의 거래에 서로 말을 걸 수 있는 공간임. 아이는 부모의 거래에도 코멘트를 달 수 있어 <strong>한쪽이 가르치는 구조가 아니라 양방향 대화</strong>가 되고, 이 주고받은 말들이 그대로 가족의 기록으로 쌓임</li>
+        <li>부모·자녀 거래가 <strong>한 줄에 섞여</strong> 흐르는 것이 중요함. 각자 따로 보면 두 개의 계좌지만, 섞여 있으면 <strong>같이 한 일</strong>이 됨 — 아카이브라는 정체성이 여기서 나옴</li>
+        <li>남겨진 코멘트와 거래이유는 그대로 쌓여, 분기 리포트와 ①매매지점 차트의 말풍선 내용으로 재사용됨</li>
+        <li>분기별로 누적되는 리포트가 매 시즌 부모를 다시 앱으로 불러들이는 계기가 되며, 시간이 지날수록 "우리 가족만의 투자 기록"이라는 자산으로 쌓임</li>
+      </ul>
+    </div>
+
+    <div class="func-block fb3">
+      <div class="func-title"><span class="num">3</span>아이친화적 챗봇</div>
+      <div class="func-reason"><b>존재이유</b> 아이가 투자 과정에서 부딪히는 개념을 그 순간 이해하도록 도우며, 매일 접하는 과정에서 자연스럽게 앱에 대한 친밀도를 쌓고 투자 이해도를 높이는 것</div>
+      <div class="role-line">정답을 알려주는 선생님이 아니라, <strong>아이가 스스로 생각하는 힘을 기를 수 있도록 방향을 제시해주는 학습 친구</strong></div>
+      <ul>
+        <li>왜 챗봇이 필요한가: 부모가 상시 옆에서 보조하기 어렵고(직장·집안일 등), 서비스의 목표 자체가 "부모가 대신 판단해주는 것"이 아니라 <strong>아이가 스스로 판단하는 경험</strong>이기 때문에, 부모가 없을 때도 개념적 궁금증을 채워줄 존재가 필요함</li>
+      </ul>
+
+      <p style="margin:14px 0 0; font-size:14px;">이 챗봇은 <strong>아이용 챗봇</strong>이지, 성인용 챗봇에 존댓말과 이모지만 입힌 것이 아님. 차별점은 두 축으로 설계됨 — <strong>언제 말을 거는가(발화 시점)</strong>와 <strong>어떻게 말하는가(응답 구조)</strong>.</p>
+
+      <!-- 원칙 1 -->
+      <div class="principle">
+        <div class="p-kicker">설계 원칙 ①  언제 말하는가</div>
+        <div class="p-title">묻기를 기다리지 않고, 헤매는 순간을 감지해 먼저 말을 건다</div>
+      </div>
+      <ul>
+        <li><strong>아이는 자기가 무엇을 모르는지 모름.</strong> 저연령일수록 메타인지가 덜 발달해 "이 단어를 몰라서 막혔다"를 스스로 인식하고 질문으로 옮기지 못함</li>
+        <li>그래서 <strong>행동 데이터를 상시 관찰하는 트리거</strong>가 질문을 대신함</li>
+      </ul>
+
+      <h3 style="font-size:14.5px; margin:16px 0 4px;">트리거 조건</h3>
+      <table class="trig-table">
+        <tbody><tr><th>트리거</th><th>판정 조건</th></tr>
+        <tr>
+          <td><span class="tt-tag">트리거 1</span><br><strong>매수·매도 반복 전환</strong></td>
+          <td>매수/매도 버튼을 눌렀다가 <span class="cond">"매수하시겠습니까?"</span> 확인창에서 <span class="cond">"아니요"</span>를 눌러 <strong>취소하기를 3회 연속 반복</strong><br>
+          <span style="font-size:12.5px;color:var(--muted)">→ 사고 싶은데 확신이 없어 손가락이 되돌아오는 상태</span></td>
+        </tr>
+        <tr>
+          <td><span class="tt-tag">트리거 2</span><br><strong>주문·상세 화면에 오래 머묾</strong></td>
+          <td>주문/상세 화면에서의 <strong>체류시간이 5분 초과</strong><br>
+          <span style="font-size:12.5px;color:var(--muted)">→ 읽고는 있으나 다음 단계로 나아가지 못하는 상태</span></td>
+        </tr>
+        <tr>
+          <td><span class="tt-tag">트리거 3</span><br><strong>손실을 실현한 종목을<br>여러 차례 다시 조회함</strong></td>
+          <td>
+            <ol>
+              <li><strong>관찰 시작 조건</strong> — 해당 종목에서 <span class="cond">-10% 이상</span>의 손실을 실현한 경우</li>
+              <li><strong>관찰 구간</strong> — 손실 매도 체결 직후부터 <span class="cond">5분간</span></li>
+              <li><strong>트리거 판정</strong> — 5분 이내 해당 종목 상세화면 <span class="cond">4회 이상 재진입</span></li>
+            </ol>
+            <span style="font-size:12.5px;color:var(--muted)">→ 판 뒤에도 미련이 남아 자꾸 확인하는 상태. <strong>감정적으로 가장 취약한 순간</strong>이라 개입 우선순위가 가장 높음</span>
+          </td>
+        </tr>
+      </tbody></table>
+      <ul>
+        <li>세 조건 모두 <strong>횟수·시간으로 딱 떨어지게 정의</strong>돼 있어 "어느 정도면 헤매는 건가"를 사람이 매번 판단하지 않아도 됨 — 구현·QA·튜닝이 모두 숫자 하나만 바꾸면 되는 구조</li>
+        <li>LLM은 트리거 발동 순간에만 소환되어 문구를 생성 — 상시 대기가 아닌 <strong>정해진 조건에서만 반응하는 관찰형 장치</strong> (비용·안전성 통제 목적)</li>
+      </ul>
+
+      <!-- 원칙 2 -->
+      <div class="principle">
+        <div class="p-kicker">설계 원칙 ②  어떻게 말하는가</div>
+        <div class="p-title">DAPIE의 단계적 설명 대화 프레임을 채택한다</div>
+      </div>
+      <p style="font-size:14px; margin:8px 0;">KAIST가 CHI 2023에서 발표한 <strong>DAPIE</strong>는 아이의 '왜·어떻게' 질문에 대해, 긴 설명을 <strong>한 번에 주지 않고 여러 턴으로 쪼개 되물으며 전달</strong>하는 대화 프레임임. 이 서비스는 챗봇의 응답 형식을 이 프레임에 맞춤.</p>
+
+      <h3 style="font-size:14.5px; margin:16px 0 4px;">한 번의 응답 = 3단 구조</h3>
+      <div class="turn-flow">
+        <div class="turn-step">
+          <div class="ts-num">STEP 1</div>
+          <div class="ts-name">피드백</div>
+          <div class="ts-desc">아이가 방금 한 말·행동을 구체적으로 짚어 반응. "잘했어" 같은 뭉뚱그린 칭찬이 아니라 <b>무엇이 맞았는지/어긋났는지</b>를 지목</div>
+        </div>
+        <div class="turn-step">
+          <div class="ts-num">STEP 2</div>
+          <div class="ts-name">설명</div>
+          <div class="ts-desc">한 턴에 <b>개념 하나만</b>. 다음 단계로 나아가는 확장이거나, 아이가 막혔을 때 눈높이를 낮춘 조정 둘 중 하나</div>
+        </div>
+        <div class="turn-step">
+          <div class="ts-num">STEP 3</div>
+          <div class="ts-name">질문</div>
+          <div class="ts-desc"><b>반드시 질문으로 끝냄.</b> 아이의 응답이 다음 턴의 입력이 되므로 대화가 끊기지 않고, 이해 여부가 매 턴 측정됨</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:14.5px; margin:18px 0 4px;">질문은 세 가지 역할 중 하나를 맡음</h3>
+      <table class="kv-table">
+        <tbody><tr><th>역할</th><th>목적</th><th>투자 맥락 예시</th></tr>
+        <tr><td><strong>유도</strong><br><span style="font-size:12px;color:var(--muted)">Guiding</span></td>
+            <td>범위를 좁혀 다음에 볼 것을 예고하고, 아이가 스스로 방향을 고르게 함</td>
+            <td>"이 회사가 돈을 어떻게 버는지부터 볼까, 아니면 가격이 왜 오르내리는지부터 볼까?"</td></tr>
+        <tr><td><strong>진단</strong><br><span style="font-size:12px;color:var(--muted)">Diagnosis</span></td>
+            <td>빈칸 채우기·예측·스스로 설명하기로 <strong>방금 배운 걸 적용시켜 이해 여부를 확인</strong></td>
+            <td>"라면이 해외에서 잘 팔렸다는 뉴스가 나오면, 이 회사 주식을 사고 싶은 사람은 늘까 줄까?"</td></tr>
+        <tr><td><strong>선지식 확인</strong><br><span style="font-size:12px;color:var(--muted)">Eliciting Prior Knowledge</span></td>
+            <td>이미 아는 것을 먼저 물어 <strong>설명의 시작 지점을 아이에게 맞춤</strong></td>
+            <td>"'주주'라는 말 들어본 적 있어?"</td></tr>
+      </tbody></table>
+
+      <h3 style="font-size:14.5px; margin:18px 0 4px;">설명 문장에 적용되는 규칙</h3>
+      <ul>
+        <li><strong>용어 치환</strong> — 어려운 단어를 쉬운 말로 바꿔서 말함 ("시가총액" → "이 회사 전체를 사려면 드는 돈")</li>
+        <li><strong>구체적 예시</strong> — 새 개념은 반드시 아이가 아는 사물로 한 번 더 보여줌. 화이트리스트가 <em>아이가 아는 브랜드</em>로 구성된 것이 여기서 다시 활용됨</li>
+        <li><strong>비유·의인화</strong> — "회사의 주인이 여러 명인데, 너도 그중 한 명이 되는 거야"</li>
+        <li><strong>문장 길이 통제</strong> — 너무 짧아 맥락이 사라지지도, 길어서 놓치지도 않는 중간 길이 유지</li>
+        <li><strong>인과 연결어 명시</strong> — "그래서", "왜냐하면"을 생략하지 않아 앞 턴과 뒤 턴이 원인-결과로 이어지는 게 눈에 보이게 함</li>
+      </ul>
+
+      <h3 style="font-size:14.5px; margin:18px 0 4px;">아이가 틀렸을 때 — 정답을 주지 않고 아래로 내려감</h3>
+      <p style="font-size:14px; margin:6px 0;">오답 시 정답을 알려주고 넘어가는 대신, <strong>더 쉬운 설명과 더 작은 질문으로 분기(조정)한 뒤 원래 흐름으로 복귀</strong>함. 기존에 세운 <strong>"정답 제공 금지, 항상 스스로 생각하도록 유도"</strong> 원칙이 이 분기 구조로 구현됨 — 원칙이 문구가 아니라 대화 구조로 강제되는 것이 핵심.</p>
+
+      <!-- 예시 대화 -->
+      <div class="chat">
+        <div class="situation"><strong>트리거 2 발동</strong> · 아이가 삼양식품 주문·상세 화면에서 체류시간 5분을 초과함</div>
+
+        <div class="msg"><span class="who">챗봇</span><div class="bubble">불닭 만드는 회사 계속 보고 있네! 혹시 가격이 자꾸 바뀌는 게 궁금해서 그래?
+          <span class="anno">선지식 확인 — 아이가 묻기 전에 먼저</span></div></div>
+
+        <div class="msg child"><span class="who">아이</span><div class="bubble">응 왜 자꾸 바뀌는지 모르겠어</div></div>
+
+        <div class="msg"><span class="who">챗봇</span><div class="bubble">궁금한 걸 잘 찾아냈어. 주식 가격은 그 회사를 사고 싶어 하는 사람이 많아지면 올라가.<br>
+          그럼 불닭볶음면이 외국에서 엄청 잘 팔렸다는 뉴스가 나오면, 이 회사를 사고 싶은 사람은 늘까 줄까?
+          <span class="anno">피드백 → 설명(개념 1개) → 진단 질문</span></div></div>
+
+        <div class="msg child"><span class="who">아이</span><div class="bubble">줄어들 것 같아</div></div>
+
+        <div class="msg"><span class="who">챗봇</span><div class="bubble">음, 같이 한 번만 더 생각해보자. 라면이 많이 팔리면 회사가 버는 돈은 어떻게 될까?
+          <span class="anno warn">오답 — 정답 대신 더 작은 질문으로 조정 분기</span></div></div>
+
+        <div class="msg child"><span class="who">아이</span><div class="bubble">많아져!</div></div>
+
+        <div class="msg"><span class="who">챗봇</span><div class="bubble">맞아, 돈을 잘 버는 회사의 주인이 되고 싶은 사람은 많아지겠지. 그래서 좋은 뉴스가 나오면 가격이 오르는 거야.<br>
+          그럼 지금 네가 이 회사를 사고 싶은 이유는 뭐야?
+          <span class="anno">피드백 → 설명(원래 흐름 복귀) → 유도 질문 · 답변은 '거래이유'로 기록되어 ②가족 아카이브로 흘러감</span></div></div>
+      </div>
+
+      <h3 style="font-size:14.5px; margin:18px 0 4px;">그래서 일반 챗봇과 무엇이 다른가</h3>
+      <table class="vs-table">
+        <tbody><tr><th></th><th>일반 챗봇</th><th>영웅키움 아이친화적 챗봇</th></tr>
+        <tr><td><strong>발화 시점</strong></td><td class="bad-col">사용자가 물어야 반응</td><td class="good-col">행동 데이터 트리거로 먼저 말을 검</td></tr>
+        <tr><td><strong>응답 형태</strong></td><td class="bad-col">완성된 답을 한 덩어리로 제공</td><td class="good-col">피드백 → 설명 → 질문 3단, 여러 턴에 나눠 전달</td></tr>
+        <tr><td><strong>대화 종료</strong></td><td class="bad-col">답을 주면 끝. 다음은 사용자 몫</td><td class="good-col">질문으로 끝나 다음 턴이 자동으로 이어짐</td></tr>
+        <tr><td><strong>오답 처리</strong></td><td class="bad-col">정답을 알려주고 종료</td><td class="good-col">정답 대신 더 쉬운 질문으로 분기 후 복귀</td></tr>
+        <tr><td><strong>어휘 기준</strong></td><td class="bad-col">성인 기준, 요청 시에만 쉽게</td><td class="good-col">치환·예시·비유·의인화가 기본값</td></tr>
+        <tr><td><strong>이해 확인</strong></td><td class="bad-col">확인하지 않음</td><td class="good-col">매 턴 진단 질문으로 측정</td></tr>
+        <tr><td><strong>데이터 환류</strong></td><td class="bad-col">대화 로그만 남음</td><td class="good-col">행동데이터를 입력으로 받고, 답변은 거래이유로 ②아카이브에 축적</td></tr>
+      </tbody></table>
+
+      <h3 style="font-size:14.5px; margin:18px 0 4px;">이 프레임을 채택하는 근거 (DAPIE 원논문 실험 결과)</h3>
+      <div class="evidence">
+        <div class="ev"><div class="ev-k">이해도 점수 (12점)</div><div class="ev-v"><span class="from">5.13 →</span> 7.43</div></div>
+        <div class="ev"><div class="ev-k">시선 이탈 비율</div><div class="ev-v"><span class="from">29% →</span> 11.9%</div></div>
+        <div class="ev"><div class="ev-k">평균 체류시간</div><div class="ev-v"><span class="from">2.8분 →</span> 7.0분</div></div>
+        <div class="ev"><div class="ev-k">평균 대화 턴 수</div><div class="ev-v"><span class="from">7턴 →</span> 20턴</div></div>
+        <div class="ev"><div class="ev-k">재이용 의향 (4점)</div><div class="ev-v"><span class="from">2.31 →</span> 3.38</div></div>
+      </div>
+      <p style="font-size:13.5px; margin:8px 0 0;">문장을 한 줄씩 읽어주는 기존 방식(대조군) 대비 수치임. <strong>체류시간·턴 수가 2.5~3배로 늘었다는 점</strong>은 이 서비스의 KPI(부모·자녀의 앱 체류시간)와 직접 연결되는 지표임.</p>
+      <p class="cite">⚠️ 다만 원 실험은 <strong>만 5~7세 대상(N=16)</strong>이며, 이 서비스의 주 타깃인 초중등 자녀에 그대로 적용하려면 어휘 난이도와 질문 밀도를 상향 조정하는 검증이 별도로 필요함<br>
+      출처: Lee, Kim, Kim, Yun, Kim. <em>DAPIE: Interactive Step-by-Step Explanatory Dialogues to Answer Children's Why and How Questions</em>, CHI 2023, KAIST — <a href="https://dl.acm.org/doi/10.1145/3544548.3581369">dl.acm.org/doi/10.1145/3544548.3581369</a></p>
+    </div>
+  </section>
+
+  <section class="sec-sum">
+    <h2>기능별 목적 기여 요약</h2>
+    <table>
+      <tbody><tr><th>기능</th><th>존재이유</th></tr>
+      <tr><td>① 모의투자</td><td>키움에서의 투자 경험 제공</td></tr>
+      <tr><td>② 가족 아카이브(AI 투자성향분석)</td><td>가족의 긍정적 추억 기능을 통한 키움 친밀도 강화 + 자녀 투자성향을 알고 싶어하는 부모 니즈 충족 + 투자 행동을 소재로 한 부모·자녀 커뮤니케이션의 장 마련</td></tr>
+      <tr><td>③ 아이친화적 챗봇</td><td><strong>아이가 스스로 생각하는 힘을 기르도록 방향을 제시해주는 학습 친구</strong> — 아이가 묻기 전에 먼저 다가가는 <strong>"먼저 말 거는" 챗봇</strong>이라는 점, 그리고 답을 한 덩어리로 주지 않고 <strong>피드백→설명→질문 3단으로 쪼개 되묻는</strong> 아동용 대화 프레임(DAPIE)을 쓴다는 점이 핵심</td></tr>
+    </tbody></table>
+  </section>
+
+  <section class="sec-why">
+    <h2>왜 지금 키움이 해야 하는가</h2>
+
+    <h3>경쟁사들은 이미 미성년 고객 선점에 들어갔음</h3>
+    <ul>
+      <li>토스증권은 부모 화면에서 본인 계좌와 자녀 계좌를 함께 관리하고, 만 14세 이상은 본인 명의로 직접 거래까지 가능한 '자녀 계좌 만들기' 서비스를 운영 중이며, 계좌개설 유도 이벤트도 상시 진행함</li>
+      <li>미래에셋증권은 미성년 신규고객에게 현금·수수료 우대 혜택을 제공하는 이벤트를 운영</li>
+      <li>신한투자증권은 부모와 자녀가 함께 쓰는 '우리아이 자산관리 서비스'를 추진 중</li>
+      <li>한국투자증권·NH투자증권·퍼핀 등도 각자 미성년 특화 상품·이벤트를 운영 중</li>
+    </ul>
+
+    <h3>미성년 계좌는 지금 "열풍" 수준으로 늘고 있음</h3>
+    <ul class="stat-list">
+      <li>한국투자·미래에셋·신한투자증권 3사 기준, 미성년자 계좌 수가 1년 사이 <b>3배 가까이 증가</b>(1월 11,873좌 → 12월 34,590좌) — 증여세 비과세 한도(10년 합산 2천만원) 혜택과 증시 호황이 맞물린 결과</li>
+      <li>예탁결제원 기준 시가총액 상위 200개사 중 88개사의 미성년 주주가 <b>72만8,344명</b>, 보유주식 가치 약 <b>2조9,761억원</b></li>
+      <li>미성년 증권계좌가 단순 용돈통장을 넘어 조기 금융교육·장기 자산관리·증여 전략이 결합된 새로운 투자 문화로 자리잡는 중</li>
+    </ul>
+
+    <h3>한 번 만든 증권계좌는 좀처럼 옮기지 않음</h3>
+    <ul>
+      <li>증권계좌는 앱만 새로 깔면 되는 것이 아니라, <strong>보유 주식과 현금을 실제로 이동시켜야</strong> 갈아탈 수 있음(타사 대체출고·계좌 이관 신청 등). 절차적 번거로움과 심리적 부담이 함께 걸림</li>
+      <li>그래서 <strong>수수료 파격 이벤트 같은 큰 계기가 없으면 쓰던 증권사를 계속 씀</strong> — 은행·카드와 달리 "여러 개를 병행"하기보다 하나를 주계좌로 오래 유지하는 성향이 강함</li>
+      <li>즉 이 시장의 승부처는 <strong>"쓰던 고객을 빼앗아 오기"가 아니라 "처음 선택될 때 선택받기"</strong>임</li>
+    </ul>
+    <div class="keypoint">
+      <span class="kp-label">그래서 청소년 시기 유입이 결정적</span>
+      아직 주거래 증권사가 없는 미성년·청소년기는 <strong>전환 비용이 사실상 0인 유일한 구간</strong>임. 이 시기를 놓치면 이후에는 이미 다른 증권사에 자산이 들어가 있는 고객을 <strong>훨씬 비싼 비용(현금성 이벤트·수수료 면제)으로</strong> 끌어와야 함
+    </div>
+
+    <h3>시사점</h3>
+    <p>경쟁사들은 이미 미성년 계좌를 "미래 고객 선점"의 격전지로 보고 현금성 이벤트·전용 UX·가족 연동 서비스까지 붙이고 있음. 지금 계좌를 만드는 이 아이들이 성인이 됐을 때 첫 주계좌로 키움을 고를 이유를 지금 만들어두지 않으면, 이 세대는 <strong>이미 다른 증권사에 자산이 묶인 채</strong> 성인이 됨 — 그때는 옮겨오게 하는 비용이 지금 선점하는 비용보다 훨씬 커짐</p>
+  </section>
+
+  <section class="sec-qna">
+    <h2>예상 질문 대응</h2>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">잠재고객이라면서, 고등학교 시기(입시 등으로 서비스 이탈 가능성) 공백은 어떻게 되는가?</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>아동기에 형성된 브랜드 친밀도는 이후 이용이 뜸해지는 공백기를 거쳐도, 성인이 되어 첫 선택을 할 때 재소환되는 경향이 있다는 것이 브랜드 임프린팅 관점의 핵심 논지임. 고등학교 시기 이용이 줄더라도, "어릴 때 이미 경험해본 곳"이라는 인지 자체가 성인 전환 시점의 선택지에 남는 것이 이 서비스 투자의 핵심 논리임</div>
+    </div>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">모의투자인데 왜 흥미 유발을 1차 기준으로 종목을 고르는가?</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>아이들이 실생활에서 접하는 브랜드(과자·게임·아이돌·가전 등)를 기준으로 종목을 고르면, 화면 속 종목이 "낯선 회사명 목록"이 아니라 "내가 아는 것들"이 됨 — 이게 그 자체로 흥미 유도 장치가 됨. 안정성이 빠진 것이 아니라, <strong>지표 A(규모·섹터대표성·유동성·수익성·안정성)와 지표 B(접점등급)가 같은 점수판 위에서 반씩 겨루는 구조</strong>임. 실제로 흥미만 높고 규모·안정성이 부족한 종목은 상위에 오르지 못하고, 반대로 SK하이닉스처럼 우량하지만 아이 접점이 없는 종목도 섹터 정원 안에서만 들어옴</div>
+    </div>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">경쟁(가족 리그) 서비스인데 왜 챗봇(도우미)이 별도로 필요한가?</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>챗봇의 역할은 경쟁을 돕는 것이 아니라 아이가 투자 개념 자체를 이해하도록 돕는 것임. 부모가 상시 곁에서 보조하기 어렵고, 서비스 목표가 "아이가 스스로 판단하는 경험"이기 때문에 부모 부재 시에도 개념적 궁금증을 채워줄 존재가 필요함. 실제 설문조사에서도 "이용 의사는 있지만, 개념에 대한 간단한 설명 기능이 있었으면 한다"는 의견이 확인됨</div>
+    </div>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">그냥 GPT를 붙이면 되는 것 아닌가? 왜 별도 설계가 필요한가?</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>범용 챗봇은 <strong>아이가 먼저 질문할 수 있다</strong>는 전제 위에 서 있음. 그런데 저연령 아동은 자기가 무엇을 모르는지 인식하지 못해 질문 자체를 못 하고, 막히면 그냥 앱을 닫음. 그래서 이 서비스는 ① 행동 데이터로 <strong>헤매는 순간을 감지해 먼저 말을 걸고</strong>, ② 답을 한 덩어리로 주는 대신 <strong>피드백→설명→질문 3단으로 쪼개 되묻는</strong> 아동 대상 검증 프레임(DAPIE, CHI 2023)을 적용함. 특히 오답 시 정답을 알려주지 않고 더 쉬운 질문으로 분기하는 구조라, "정답 제공 금지"라는 원칙이 프롬프트 문구가 아니라 <strong>대화 구조 자체로 강제</strong>됨</div>
+    </div>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">결국 AI 활용능력으로 승패가 갈리는 경쟁 서비스 아닌가?</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>질문의 전제가 어긋남 — 고객이 직접 체감하는 AI 요소는 아이친화적 챗봇 하나뿐이고, 모의투자·투자성향분석은 AI가 백엔드에서 데이터를 가공하는 정도임. "AI 기술 경연"으로 상정한 질문 자체가 이 서비스의 설계 목적(계좌개설·친밀도)과는 결이 다름</div>
+    </div>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">아이가 학교에 있는 시간에는 투자를 어떻게 하나?</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>통상 학교에 있는 오전 9시~오후 3시(장 운영시간)는 아이가 거래 서비스를 이용할 수 없고, 챗봇 이용이나 종목 탐색만 가능하도록 제한함. 모의투자이기 때문에 24시간 거래 예약은 가능하도록 하여, 학교에 있는 동안 살펴본 종목을 다음날 아침 시가로 거래되도록 예약 주문을 넣을 수 있게 함</div>
+    </div>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">결국 이 서비스가 성공했는지 무엇으로 증명할 건가? (KPI)</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>회사 입장에서는 단기적으로 '미성년 계좌 신설률' 증진이 목표임 — 이 서비스 참여 조건에 계좌 개설이 포함되기 때문임. 또한 분기별로 가족 아카이브와 자녀 리포트가 생성되는 구조인 만큼, 부모 유저의 앱 방문 빈도와 체류시간을 늘리는 것을 중장기 목표로 삼음</div>
+    </div>
+
+    <div class="qna">
+      <div><span class="q-label">Q</span><span class="q-text">이 서비스는 교육/학습으로 봐야 하는가, 경쟁으로 봐야 하는가?</span></div>
+      <div class="a-wrap"><span class="a-label">A</span>둘 중 어느 쪽에도 치우치지 않음 — 가족 단위 참여 동기를 자극하는 정도의 경쟁 구조를 갖춘, 키움 플랫폼 내 체험·경험형 서비스임
+        <ul>
+          <li><strong>교육 측면 기대효과</strong>: 아이가 판단-행동-회고 루프를 반복 경험하며 투자에 대한 막연한 두려움 대신 실질적 감각을 얻음 (부수 효과, KPI는 아님)</li>
+          <li><strong>경쟁 측면 기대효과</strong>: 가족 단위 순위·리포트가 반복 참여를 유도해 앱 재방문·체류시간을 늘림 (회사 목표에 직접 연결되는 효과 축)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">영웅키움 서비스 개요 · 내부 기획 참고용</div>
+</div>
+
+
+
+</body></html>
