@@ -8,15 +8,13 @@ import { getQuote } from "@/app/api/quote/kiwoom";
 
 export const dynamic = "force-dynamic";
 
-let baseText: string | null = null;
 let codes: string[] = [];
 const warm: Record<string, { price: number; rate: number }> = {};
 let polling = false;
 
+// 매 요청 읽는다. universe.js를 고쳤을 때 서버를 재시작해야 하는 함정을 없앤다(30KB, 비용 무시 가능).
 async function loadBase(): Promise<string> {
-  if (baseText) return baseText;
   const text = await readFile(path.join(process.cwd(), "public", "ui", "assets", "universe.js"), "utf8");
-  baseText = text;
   codes = Array.from(text.matchAll(/\['(\d{6})'/g)).map((match) => match[1]);
   return text;
 }
