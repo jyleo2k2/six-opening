@@ -3,6 +3,16 @@ import { filterGeneratedText, SAFE_REFUSAL, takeCompleteSentences } from "../../
 import { streamChatAnswer } from "../../../features/f10-chatbot/lib/openai";
 import type { ConversationMessage } from "../../../features/f10-chatbot/lib/openai";
 import { ChatContext, routeMessage } from "../../../features/f10-chatbot/lib/routing";
+import {
+  advanceGuidedDialogue,
+  isGuidedOptionId,
+  isGuidedTopicId,
+  startGuidedDialogue,
+} from "../../../features/f10-chatbot/lib/dialogue-engine";
+import type {
+  GuidedDialogueState,
+  GuidedDialogueTurn,
+} from "../../../features/f10-chatbot/lib/dialogue-engine";
 
 export const runtime = "nodejs";
 
@@ -11,7 +21,9 @@ const FALLBACK = "키웅이가 잠깐 낮잠 중이야! 조금 있다 다시 물
 const MAX_HISTORY_MESSAGES = 8;
 const MAX_HISTORY_TEXT_LENGTH = 500;
 
-function event(type: "status" | "text" | "done", value: string) {
+type ChatEvent = "status" | "text" | "action" | "done";
+
+function event(type: ChatEvent, value: unknown) {
   return encoder.encode(`event: ${type}\ndata: ${JSON.stringify(value)}\n\n`);
 }
 
@@ -44,8 +56,39 @@ function parseHistory(value: unknown): ConversationMessage[] | null {
     .filter(({ text }) => text.length > 0);
 }
 
+function parseGuidedDialogue(value: unknown) {
+  if (value === undefined) return undefined;
+  if (!value || typeof value !== "object") return null;
+
+  const guided = value as Record<string, unknown>;
+  if (
+    !isGuidedTopicId(guided.topicId) ||
+    typeof guided.currentNodeId !== "string" ||
+    !isGuidedOptionId(guided.optionId)
+  ) {
+    return null;
+  }
+
+  return {
+    state: {
+      topicId: guided.topicId,
+      currentNodeId: guided.currentNodeId.slice(0, 80),
+    } satisfies GuidedDialogueState,
+    optionId: guided.optionId,
+  };
+}
+
+function guidedAction(turn: GuidedDialogueTurn) {
+  if (!turn.state) return null;
+  return {
+    kind: "guided_options" as const,
+    state: turn.state,
+    options: turn.options,
+  };
+}
+
 export async function POST(request: NextRequest) {
-  let body: { message?: unknown; context?: unknown; history?: unknown };
+  let body: { message?: unknown; context?: unknown; history?: unknown; guidedDialogue?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -53,7 +96,13 @@ export async function POST(request: NextRequest) {
   }
 
   const history = parseHistory(body.history);
-  if (typeof body.message !== "string" || !isChatContext(body.context) || !history) {
+  const guidedDialogue = parseGuidedDialogue(body.guidedDialogue);
+  if (
+    typeof body.message !== "string" ||
+    !isChatContext(body.context) ||
+    !history ||
+    guidedDialogue === null
+  ) {
     return Response.json({ error: "Invalid chat payload" }, { status: 400 });
   }
 
@@ -62,10 +111,35 @@ export async function POST(request: NextRequest) {
 
   const stream = new ReadableStream({
     async start(controller) {
-      const send = (type: "status" | "text" | "done", value: string) => controller.enqueue(event(type, value));
+      const send = (type: ChatEvent, value: unknown) => controller.enqueue(event(type, value));
       const routed = routeMessage(message, context);
 
       send("status", "무슨 질문인지 보는 중");
+      const shouldUseGuidedDialogue =
+        routed.route === "faq" || routed.route === "fallback";
+      const guidedTurn = shouldUseGuidedDialogue
+        ? guidedDialogue
+          ? advanceGuidedDialogue(guidedDialogue.state, guidedDialogue.optionId)
+          : startGuidedDialogue(message)
+        : null;
+
+      if (guidedDialogue && shouldUseGuidedDialogue && !guidedTurn) {
+        send("text", "그 설명 단계는 이어 갈 수 없어. 궁금한 용어를 다시 물어봐 줘! 🐻");
+        send("done", "");
+        controller.close();
+        return;
+      }
+
+      if (guidedTurn) {
+        send("status", "단계별 설명 준비 완료");
+        send("text", filterGeneratedText(guidedTurn.text) ? guidedTurn.text : SAFE_REFUSAL);
+        const action = guidedAction(guidedTurn);
+        if (action) send("action", action);
+        send("done", "");
+        controller.close();
+        return;
+      }
+
       if (routed.route !== "fallback") {
         send("status", routed.steps.at(-1) ?? "안전 점검 통과!");
         send("text", routed.text);
