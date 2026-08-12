@@ -23,7 +23,7 @@ import type { ChatSession } from "./session";
 import { runReadOnlyTool, type ToolExecution } from "./tools";
 
 export const CHAT_FALLBACK =
-  "답변을 안전하게 확인하지 못했어. 금융 용어나 화면 사용법을 다시 짧게 물어봐 줘. 🐻";
+  "답변을 안전하게 확인하지 못했어요. 금융 용어나 화면 사용법을 다시 짧게 물어봐 주세요. 🐻";
 
 export type ChatOutcome = {
   response: ChatResponse;
@@ -140,11 +140,11 @@ function dapieFeedback(
   intent: ChatIntent,
   source: ChatOutputSource,
 ) {
-  if (source === "tool") return "네가 볼 수 있는 자료를 확인했어";
-  if (route === "context") return "지금 화면을 잘 살펴봤네";
-  if (intent === "service_help") return "어디서 확인할지 잘 물어봤어";
-  if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어";
-  return "궁금한 지점을 잘 짚었어";
+  if (source === "tool") return "볼 수 있는 자료를 확인했어요";
+  if (route === "context") return "지금 화면을 잘 살펴봤네요";
+  if (intent === "service_help") return "어디서 확인할지 잘 물어봤어요";
+  if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어요";
+  return "궁금한 지점을 잘 짚었어요";
 }
 
 export async function createChatOutcome(
@@ -169,7 +169,7 @@ export async function createChatOutcome(
 
   if (explainStep === "invalid") {
     response = {
-      text: "그 설명 단계는 이어 갈 수 없어. 궁금한 용어를 다시 물어봐 줘. 🐻",
+      text: "그 설명 단계는 이어 갈 수 없어요. 궁금한 용어를 다시 물어봐 주세요. 🐻",
     };
   } else if (explainStep) {
     onStatus("단계별 설명 준비 완료");
@@ -264,7 +264,7 @@ export async function createChatOutcome(
     ...(standardAction ?? {}),
   };
 
-  onStatus(gate.ok ? "안전 점검 통과" : "안전한 답변으로 바꿨어");
+  onStatus(gate.ok ? "안전 점검 통과" : "안전한 답변으로 바꿨어요");
   return {
     response: gatedResponse,
     ...(outputAction ? { action: outputAction } : {}),

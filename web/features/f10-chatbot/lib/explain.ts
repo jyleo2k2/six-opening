@@ -8,55 +8,56 @@ import type {
 import {
   looksLikeNewQuestion,
   matchColloquialIntent,
+  normalizeChoiceLabel,
   normalizeReply,
 } from "./colloquial";
 
-const CONFIRM_PROMPT = "이제 알겠어?";
+const CONFIRM_PROMPT = "이제 알겠어요?";
 const CONFIRM_CHOICES: readonly ExplainChoice[] = [
-  { id: "yes", label: "알겠어" },
-  { id: "no", label: "모르겠어" },
+  { id: "yes", label: "알겠어요" },
+  { id: "no", label: "모르겠어요" },
 ];
 const GUIDED_CHOICES: readonly ExplainChoice[] = [
-  { id: "understood", label: "이해했어" },
-  { id: "simpler", label: "더 쉽게 볼래" },
+  { id: "understood", label: "이해했어요" },
+  { id: "simpler", label: "더 쉽게 볼래요" },
 ];
 const GUIDED_DETAIL_CHOICES: readonly ExplainChoice[] = [
-  { id: "ask", label: "직접 물어볼게" },
-  { id: "done", label: "여기까지 볼래" },
+  { id: "ask", label: "직접 물어볼게요" },
+  { id: "done", label: "여기까지 볼래요" },
 ];
-const FOLLOWUP_PROMPT = "다음에는 어떻게 할까?";
+const FOLLOWUP_PROMPT = "다음에는 어떻게 할까요?";
 const FOLLOWUP_CHOICES: readonly ExplainChoice[] = [
-  { id: "ask", label: "다른 것도 물어볼래" },
-  { id: "done", label: "여기까지 볼래" },
+  { id: "ask", label: "다른 것도 물어볼래요" },
+  { id: "done", label: "여기까지 볼래요" },
 ];
 
 export const GUIDED_SCRIPT_ID = "flow:guided";
 
 const GUIDED_SCRIPT: ExplainScript = {
   id: GUIDED_SCRIPT_ID,
-  feedback: "궁금한 지점을 잘 짚었어",
-  brief: "함께 한 조각씩 살펴보자.",
+  feedback: "궁금한 지점을 잘 짚었어요",
+  brief: "함께 한 조각씩 살펴볼까요.",
   check: {
     kind: "guiding",
-    question: "설명을 이해했어, 아니면 더 쉽게 다시 볼까?",
+    question: "설명을 이해했어요, 아니면 더 쉽게 다시 볼까요?",
     choices: GUIDED_CHOICES,
     answerId: "understood",
   },
   detail:
-    "괜찮아 — 헷갈린 단어나 문장을 그대로 적어 주면 한 조각씩 다시 설명할게.",
-  example: "궁금한 말을 그대로 적어 줘도 돼.",
+    "괜찮아요 — 헷갈린 단어나 문장을 그대로 적어 주면 한 조각씩 다시 설명할게요.",
+  example: "궁금한 말을 그대로 적어 줘도 돼요.",
 };
 
 /** 논문 §3.2.2의 Feedback 서브턴. 각 전이의 첫 고정 문장이며 3문장 예산에 포함된다. */
 const FEEDBACK = {
-  correct: "맞아, 그 단서를 잘 연결했어.",
-  wrong: "음, 그건 아니야.",
-  understood: "좋아, 이제 알겠네!",
-  example: "그럼 예를 들어볼게.",
+  correct: "맞아요, 그 단서를 잘 연결했어요.",
+  wrong: "음, 그건 아니에요.",
+  understood: "좋아요, 이제 알겠네요!",
+  example: "그럼 예를 들어볼게요.",
 } as const;
 
 /** 타이핑을 알아듣지 못했을 때. 추측하지 않고 선택지를 다시 보여준다. */
-export const EXPLAIN_REASK = "아래에서 하나만 골라 줄래?";
+export const EXPLAIN_REASK = "아래에서 하나만 골라 줄래요?";
 
 export type ExplainStep =
   | { kind: "turn"; text: string; turn: ExplainTurn }
@@ -89,7 +90,7 @@ export function startExplain(script: ExplainScript): ExplainStep {
   return turnStep(
     script,
     "brief",
-    `${script.feedback ?? "궁금한 걸 잘 짚었어"} — ${script.brief}`,
+    `${script.feedback ?? "궁금한 걸 잘 짚었어요"} — ${script.brief}`,
     script.check.question,
     script.check.choices,
   );
@@ -138,10 +139,14 @@ export function resolveTextReply(
   const normalized = normalizeReply(message);
   if (!normalized) return null;
 
-  const labelMatch = stageChoices(script, stage).find(
-    (choice) => normalizeReply(choice.label) === normalized,
+  // 라벨은 해요체지만 아이는 반말로 칠 수 있다("들어가지 않아요" 버튼 → "들어가지 않아").
+  // 끝의 "요"를 떼고 견주되, 두 선택지가 같아지면 추측하지 않고 되묻는다.
+  const target = normalizeChoiceLabel(message);
+  const labelMatches = stageChoices(script, stage).filter(
+    (choice) => normalizeChoiceLabel(choice.label) === target,
   );
-  if (labelMatch) return labelMatch.id;
+  if (labelMatches.length === 1) return labelMatches[0].id;
+  if (labelMatches.length > 1) return null;
 
   if (stage !== "detail" || script.check.kind === "guiding") return null;
   const intent = matchColloquialIntent(message);
@@ -167,7 +172,7 @@ export function advanceExplain(
       return followupExplain(
         script,
         script.check.kind === "guiding"
-          ? `${FEEDBACK.understood} 방금 본 핵심을 기준으로 다음 질문을 이어갈 수 있어.`
+          ? `${FEEDBACK.understood} 방금 본 핵심을 기준으로 다음 질문을 이어갈 수 있어요.`
           : `${FEEDBACK.correct} ${script.detail}`,
       );
     }
@@ -176,7 +181,7 @@ export function advanceExplain(
         script,
         "detail",
         script.detail,
-        "어떻게 이어갈까?",
+        "어떻게 이어갈까요?",
         GUIDED_DETAIL_CHOICES,
       );
     }
@@ -211,8 +216,8 @@ export function advanceExplain(
     }
     if (script.check.kind === "guiding") {
       return reply.choiceId === "ask"
-        ? { kind: "end", text: "좋아, 헷갈린 말을 그대로 적어 줄래?" }
-        : { kind: "end", text: "좋아, 궁금한 게 생기면 다시 불러 줘." };
+        ? { kind: "end", text: "좋아요, 헷갈린 말을 그대로 적어 줄래요?" }
+        : { kind: "end", text: "좋아요, 궁금한 게 생기면 다시 불러 주세요." };
     }
     if (script.adjust) {
       if (reply.choiceId === script.adjust.answerId) {
@@ -243,8 +248,8 @@ export function advanceExplain(
       return null;
     }
     return reply.choiceId === "ask"
-      ? { kind: "end", text: "좋아, 다음에 궁금한 걸 그대로 적어 줄래?" }
-      : { kind: "end", text: "좋아, 궁금한 게 생기면 다시 불러 줘." };
+      ? { kind: "end", text: "좋아요, 다음에 궁금한 걸 그대로 적어 줄래요?" }
+      : { kind: "end", text: "좋아요, 궁금한 게 생기면 다시 불러 주세요." };
   }
 
   return null;
@@ -264,7 +269,7 @@ export function reaskExplain(
       : stage === "followup"
         ? FOLLOWUP_PROMPT
         : script.check.kind === "guiding"
-          ? "어떻게 이어갈까?"
+          ? "어떻게 이어갈까요?"
           : script.adjust
             ? script.adjust.question
             : CONFIRM_PROMPT,

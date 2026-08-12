@@ -31,7 +31,7 @@ const COPY = {
   orderQuantity: "\uc8fc\ubb38 \uc218\ub7c9",
   expectedAmount: "\uc608\uc0c1 \uae08\uc561 125,000\uc6d0",
   orderPractice: "주문 확인 연습",
-  orderPracticeDescription: "매수와 매도 확인을 취소한 행동은 도움 신호 판정에만 사용돼.",
+  orderPracticeDescription: "매수와 매도 확인을 취소한 행동은 도움 신호 판정에만 사용돼요.",
   cancelBuy: "매수 확인 취소",
   cancelSell: "매도 확인 취소",
   proactive: "\ud0a4\uc6c5\uc774\uc758 \uc120\uc81c \ub3c4\uc6c0",
@@ -347,13 +347,13 @@ export function F10ChatbotDemo() {
         }
       }
     } catch {
-      setStatus("연결을 다시 확인해 줘");
+      setStatus("연결을 다시 확인해 주세요");
       setMessages((current) => {
         const last = current.at(-1);
         if (!last || last.role !== "assistant") return current;
         return [
           ...current.slice(0, -1),
-          { role: "assistant", text: "키웅이가 잠깐 낮잠 중이야! 조금 있다 다시 물어봐 줘 🐻" },
+          { role: "assistant", text: "키웅이가 잠깐 낮잠 중이에요! 조금 있다 다시 물어봐 주세요 🐻" },
         ];
       });
     } finally {
@@ -374,7 +374,7 @@ export function F10ChatbotDemo() {
   function handleUiAction(action: ChatUiAction) {
     setScreen(action.target);
     setIsOpen(false);
-    setStatus(`${SCREENS[action.target].label} 화면으로 이동했어`);
+    setStatus(`${SCREENS[action.target].label} 화면으로 이동했어요`);
   }
 
   function recordOrderCancellation(side: "buy" | "sell") {
@@ -384,7 +384,7 @@ export function F10ChatbotDemo() {
       side,
       at: Date.now(),
     });
-    setStatus(`${side === "buy" ? "매수" : "매도"} 확인을 취소했어`);
+    setStatus(`${side === "buy" ? "매수" : "매도"} 확인을 취소했어요`);
   }
 
   return (
