@@ -40,8 +40,11 @@ rem Falls back to 3000 when this folder is not a registered worktree.
 set "PORT=3000"
 for /f "usebackq delims=" %%p in (`node "%REPO_DIR%scripts\dev-port.mjs" "%REPO_DIR%." 2^>nul`) do set "PORT=%%p"
 
+set "APP_URL=http://localhost:%PORT%"
 echo Starting the development server...
-echo Open http://localhost:%PORT% in your browser.
+echo The browser will open automatically at %APP_URL% when the server is ready.
+start "" /b powershell.exe -NoProfile -NonInteractive -WindowStyle Hidden -Command ^
+  "$url = '%APP_URL%'; for ($attempt = 0; $attempt -lt 120; $attempt++) { try { $null = Invoke-WebRequest -UseBasicParsing -Uri $url -TimeoutSec 1; Start-Process $url; exit 0 } catch {} Start-Sleep -Milliseconds 500 }"
 call npm run dev -- -p %PORT%
 
 pause
