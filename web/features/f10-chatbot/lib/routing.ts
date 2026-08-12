@@ -1485,7 +1485,7 @@ function getContextReply(message: string, context: ChatContext): ChatReply | nul
     return reply(
       "context",
       "service_help",
-      `지금 화면의 ${context.quantity}주와 1주 ${formatWon(context.unitPrice)}을 곱하면 예상 금액은 ${formatWon(total)}이야. 실제 주문 전에는 화면의 최종 금액을 한 번 더 확인해 줘.`,
+      `지금 화면의 ${context.quantity}주와 1주 ${formatWon(context.unitPrice)}을 곱하면 예상 금액은 ${formatWon(total)}이에요. 실제 주문 전에는 화면의 최종 금액을 한 번 더 확인하면 돼요.`,
       ["현재 주문 수량 확인", "표시 가격으로 계산"],
       { uiAction: { type: "open_screen", target: "order" } },
     );
@@ -1501,7 +1501,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "safety",
       "safety",
-      "알려줘서 고마워. 지금은 투자 화면을 닫고 쉬면서, 계속 힘들면 믿을 수 있는 어른에게 지금 마음을 말해 줘.",
+      "알려줘서 고마워요. 지금은 투자 화면을 닫고 쉬면서, 계속 힘들면 믿을 수 있는 어른에게 지금 마음을 말해 줘요.",
       ["안전 상태 확인"],
     );
   }
@@ -1510,7 +1510,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "safety",
       "safety",
-      "지금 혼자 있지 말고 가까운 보호자·교사처럼 믿을 수 있는 어른에게 바로 알려 줘. 급하게 다칠 위험이 있으면 112나 119에 도움을 요청해 줘.",
+      "지금 혼자 있지 말고 가까운 보호자·교사처럼 믿을 수 있는 어른에게 바로 알려 줘요. 급하게 다칠 위험이 있으면 112나 119에 도움을 요청해 줘요.",
       ["긴급 도움 안내"],
     );
   }
@@ -1522,7 +1522,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "safety",
       "safety",
-      "그 요청은 여기서 도와줄 수 없어. 투자 화면이나 금융 기초가 궁금하면 다시 물어봐 줘.",
+      "그 요청은 여기서 도와줄 수 없어요. 투자 화면이나 금융 기초가 궁금하면 다시 물어봐 주세요.",
       ["안전 안내"],
     );
   }
@@ -1539,7 +1539,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     return reply(
       "outOfScope",
       "safety",
-      "나는 이 서비스의 사용법과 투자 기초 이야기만 도와줄 수 있어. 화면이나 금융 용어가 궁금하면 물어봐 줘. 🐻",
+      "저는 이 서비스의 사용법과 투자 기초 이야기만 도와줄 수 있어요. 화면이나 금융 용어가 궁금하면 물어봐 주세요. 🐻",
       ["도메인 안내"],
     );
   }
@@ -1597,7 +1597,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   return reply(
     "fallback",
     "general_allowed",
-    "나는 투자 기초와 서비스 사용법을 도와줄 수 있어. 예를 들어 ‘PER이 뭐야?’, ‘주문 전에 뭘 확인해?’처럼 물어봐 줘. 🐻",
+    "저는 투자 기초와 서비스 사용법을 도와줄 수 있어요. 예를 들어 ‘PER이 뭐예요?’, ‘주문 전에 뭘 확인해요?’처럼 물어봐 주세요. 🐻",
     ["허용 질문 확인"],
   );
 }
@@ -1608,14 +1608,14 @@ export const PROACTIVE_SCRIPTS: Record<
 > = {
   switch: {
     label: "매수·매도 취소 반복",
-    text: "확인 화면을 여러 번 바꿔 봤네. 매수와 매도의 차이를 같이 볼까?",
+    text: "확인 화면을 여러 번 바꿔 봤네요. 매수와 매도의 차이를 같이 볼까요?",
   },
   dwell: {
     label: "주문·상세 화면 5분 초과 체류",
-    text: "이 화면을 오래 살펴보고 있네. 어디에서 막혔는지 같이 찾아볼까?",
+    text: "이 화면을 오래 살펴보고 있네요. 어디에서 막혔는지 같이 찾아볼까요?",
   },
   lossRevisit: {
     label: "손실 실현 종목 반복 조회",
-    text: "방금 본 종목을 다시 살펴보고 있네. 어떤 점이 신경 쓰이는지 같이 찾아볼까?",
+    text: "방금 본 종목을 다시 살펴보고 있네요. 어떤 점이 신경 쓰이는지 같이 찾아볼까요?",
   },
 };

@@ -40,7 +40,7 @@ const per: ExplainScript = {
 // ① 시작하면 피드백·1줄 설명·이해 확인 질문이 함께 나온다.
 const first = startExplain(per);
 assert.equal(first.kind, "turn");
-assert.equal(first.text, `궁금한 걸 잘 짚었어 — ${per.brief}`);
+assert.equal(first.text, `궁금한 걸 잘 짚었어요 — ${per.brief}`);
 assert.deepEqual(first.kind === "turn" ? first.turn : null, {
   scriptId: "term:per",
   stage: "brief",
@@ -55,7 +55,7 @@ const correct = advanceExplain(per, {
   choiceId: "expensive",
 });
 assert.equal(correct?.kind, "turn");
-assert.equal(correct?.text, `맞아, 그 단서를 잘 연결했어. ${per.detail}`);
+assert.equal(correct?.text, `맞아요, 그 단서를 잘 연결했어요. ${per.detail}`);
 assert.equal(correct?.kind === "turn" ? correct.turn.stage : null, "followup");
 
 // ③ 오답이면 추가 설명과 확인 질문으로 내려간다.
@@ -65,7 +65,7 @@ const wrong = advanceExplain(per, {
   choiceId: "cheap",
 });
 assert.equal(wrong?.kind, "turn");
-assert.equal(wrong?.text, `음, 그건 아니야. ${per.adjust?.explanation}`);
+assert.equal(wrong?.text, `음, 그건 아니에요. ${per.adjust?.explanation}`);
 assert.deepEqual(
   wrong?.kind === "turn" ? wrong.turn.choices : null,
   per.adjust?.choices,
@@ -87,7 +87,7 @@ const example = advanceExplain(per, {
   choiceId: "yes",
 });
 assert.equal(example?.kind, "turn");
-assert.equal(example?.text, `그럼 예를 들어볼게. ${per.example}`);
+assert.equal(example?.text, `그럼 예를 들어볼게요. ${per.example}`);
 assert.equal(example?.kind === "turn" ? example.turn.stage : null, "detail");
 
 // 후속 질문은 직접 질문 또는 명시적 종료만 허용한다.
@@ -97,7 +97,7 @@ assert.deepEqual(
     stage: "followup",
     choiceId: "done",
   }),
-  { kind: "end", text: "좋아, 궁금한 게 생기면 다시 불러 줘." },
+  { kind: "end", text: "좋아요, 궁금한 게 생기면 다시 불러 주세요." },
 );
 
 // 위조 차단 — 다른 스크립트, 없는 선택지, 응답할 수 없는 단계.
@@ -153,6 +153,20 @@ assert.equal(resolveTextReply(per, "detail", "ㅇㅇ"), null);
 assert.equal(resolveTextReply(per, "detail", "몰라"), "unsure");
 assert.equal(resolveTextReply(per, "detail", "모르겠어"), "unsure");
 assert.equal(resolveTextReply(per, "detail", "냠냠"), null);
+// 라벨이 해요체여도 아이가 반말로 치면 알아듣는다 (그 반대도).
+const politePer: ExplainScript = {
+  ...per,
+  adjust: {
+    ...per.adjust!,
+    choices: [
+      { id: "no", label: "들어가지 않아요" },
+      { id: "yes", label: "들어가요" },
+    ],
+  },
+};
+assert.equal(resolveTextReply(politePer, "detail", "들어가지 않아"), "no");
+assert.equal(resolveTextReply(politePer, "detail", "들어가지 않아요"), "no");
+assert.equal(resolveTextReply(politePer, "detail", "들어가요"), "yes");
 // 새 질문은 응답으로 삼지 않는다.
 assert.equal(resolveTextReply(per, "detail", "PBR은 뭐야?"), null);
 // 이해 확인 단계는 선택지 라벨이 정확히 맞을 때만 받는다.
@@ -171,7 +185,7 @@ assert.deepEqual(reask.kind === "turn" ? reask.turn.choices : null, [
 // 전용 스크립트가 없는 답변도 공통 유도형 DAPIE 턴을 사용한다.
 const guided = startGuidedExplain("주식은 회사의 작은 조각이야.");
 assert.equal(guided.kind, "turn");
-assert.equal(guided.text.includes("궁금한 지점을 잘 짚었어"), true);
+assert.equal(guided.text.includes("궁금한 지점을 잘 짚었어요"), true);
 assert.equal(guided.kind === "turn" ? guided.turn.scriptId : null, "flow:guided");
 const guidedScript = findCommonExplainScript("flow:guided");
 assert.ok(guidedScript);

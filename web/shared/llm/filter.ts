@@ -15,7 +15,7 @@ const PROHIBITED_OUTPUT_PATTERNS = [
 ];
 
 export const SAFE_REFUSAL =
-  "특정 종목을 고르거나 사고팔 시점을 정해 줄 수는 없어. 대신 회사 정보와 확인할 기준은 함께 볼 수 있어. 🐻";
+  "특정 종목을 고르거나 사고팔 시점을 정해 줄 수는 없어요. 대신 회사 정보와 확인할 기준은 함께 볼 수 있어요. 🐻";
 
 export type ChatOutputSource = "fixed" | "tool" | "model";
 
