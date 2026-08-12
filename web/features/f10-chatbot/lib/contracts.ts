@@ -7,7 +7,12 @@ import {
   type ExplainReply,
   type ExplainTurn,
   EXPLAIN_STAGES,
+  STOCK_FACT_TOPICS,
+  type StockExploreReply,
+  type StockExploreTurn,
+  type StockFactTopic,
 } from "../../../shared/types/chatbot";
+import { STOCKS } from "../../../shared/data/stocks";
 
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_LABEL_LENGTH = 60;
@@ -25,6 +30,7 @@ export type ChatRequest = {
   message: string;
   context: ChatContext;
   explain?: ExplainReply;
+  stockExplore?: StockExploreReply;
 };
 
 export type StandardChatActionPayload = Pick<
@@ -37,9 +43,15 @@ export type ExplainActionPayload = {
   turn: ExplainTurn;
 } & Pick<ChatResponse, "suggestedQuestions" | "uiAction">;
 
+export type StockExploreActionPayload = {
+  kind: "stock-explore";
+  turn: StockExploreTurn;
+} & Pick<ChatResponse, "suggestedQuestions" | "uiAction">;
+
 export type ChatActionPayload =
   | StandardChatActionPayload
-  | ExplainActionPayload;
+  | ExplainActionPayload
+  | StockExploreActionPayload;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -93,6 +105,46 @@ function parseExplainReply(value: unknown): ExplainReply | null | undefined {
   };
 }
 
+function parseStockExploreReply(
+  value: unknown,
+): StockExploreReply | null | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return null;
+
+  const { stockId, shownTopics, choiceId } = value;
+  if (
+    typeof stockId !== "string" ||
+    !/^KRX:\d{6}$/.test(stockId) ||
+    !STOCKS.some((stock) => stock.id === stockId) ||
+    !Array.isArray(shownTopics) ||
+    shownTopics.length < 1 ||
+    shownTopics.length > STOCK_FACT_TOPICS.length ||
+    !shownTopics.every(
+      (topic): topic is StockFactTopic =>
+        typeof topic === "string" &&
+        STOCK_FACT_TOPICS.includes(topic as StockFactTopic),
+    ) ||
+    new Set(shownTopics).size !== shownTopics.length ||
+    typeof choiceId !== "string"
+  ) {
+    return null;
+  }
+
+  const nextTopic = STOCK_FACT_TOPICS.find(
+    (topic) => !shownTopics.includes(topic),
+  );
+  const allowedChoices = nextTopic
+    ? [nextTopic, "done"]
+    : ["ask-other", "done"];
+  if (!allowedChoices.includes(choiceId)) return null;
+
+  return {
+    stockId: stockId as `KRX:${string}`,
+    shownTopics,
+    choiceId: choiceId as StockExploreReply["choiceId"],
+  };
+}
+
 export function parseChatRequest(value: unknown): ChatRequest | null {
   if (!isRecord(value) || hasClientIdentity(value)) return null;
   if (typeof value.message !== "string" || !isRecord(value.context)) return null;
@@ -122,7 +174,14 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
   }
 
   const explain = parseExplainReply(value.explain);
-  if (explain === null) return null;
+  const stockExplore = parseStockExploreReply(value.stockExplore);
+  if (
+    explain === null ||
+    stockExplore === null ||
+    (explain !== undefined && stockExplore !== undefined)
+  ) {
+    return null;
+  }
 
   return {
     message,
@@ -134,6 +193,7 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
       ...(unitPrice ? { unitPrice } : {}),
     },
     ...(explain ? { explain } : {}),
+    ...(stockExplore ? { stockExplore } : {}),
   };
 }
 
@@ -154,6 +214,37 @@ export function isExplainAction(
       (choice) =>
         isRecord(choice) &&
         typeof choice.id === "string" &&
+        typeof choice.label === "string",
+    )
+  );
+}
+
+export function isStockExploreAction(
+  value: unknown,
+): value is StockExploreActionPayload {
+  if (!isRecord(value) || value.kind !== "stock-explore") return false;
+  const turn = value.turn;
+  if (!isRecord(turn)) return false;
+  return (
+    typeof turn.stockId === "string" &&
+    /^KRX:\d{6}$/.test(turn.stockId) &&
+    Array.isArray(turn.shownTopics) &&
+    turn.shownTopics.length > 0 &&
+    turn.shownTopics.length <= STOCK_FACT_TOPICS.length &&
+    new Set(turn.shownTopics).size === turn.shownTopics.length &&
+    turn.shownTopics.every(
+      (topic) =>
+        typeof topic === "string" &&
+        STOCK_FACT_TOPICS.includes(topic as StockFactTopic),
+    ) &&
+    typeof turn.prompt === "string" &&
+    Array.isArray(turn.choices) &&
+    turn.choices.length > 0 &&
+    turn.choices.every(
+      (choice) =>
+        isRecord(choice) &&
+        typeof choice.id === "string" &&
+        [...STOCK_FACT_TOPICS, "ask-other", "done"].includes(choice.id) &&
         typeof choice.label === "string",
     )
   );

@@ -3,12 +3,20 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
-import type { ChatUiAction, ExplainChoice, ExplainTurn } from "../../shared/types/chatbot";
+import type {
+  ChatUiAction,
+  ExplainChoice,
+  ExplainTurn,
+  StockExploreChoiceId,
+  StockExploreTurn,
+} from "../../shared/types/chatbot";
 import {
   isAllowedUiAction,
   isExplainAction,
+  isStockExploreAction,
   type ExplainActionPayload,
   type StandardChatActionPayload,
+  type StockExploreActionPayload,
 } from "./lib/contracts";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
@@ -18,6 +26,7 @@ type Message = {
   text: string;
   suggestedQuestions?: string[];
   explainTurn?: ExplainTurn;
+  stockExploreTurn?: StockExploreTurn;
   uiAction?: ChatUiAction;
 };
 
@@ -87,11 +96,18 @@ function MessageBubble({
   onAction,
   onQuestion,
   onExplainChoice,
+  onStockExploreChoice,
+  actionsDisabled,
 }: {
   message: Message;
   onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
   onExplainChoice: (choice: ExplainChoice) => void;
+  onStockExploreChoice: (
+    question: string,
+    choiceId: StockExploreChoiceId,
+  ) => void;
+  actionsDisabled: boolean;
 }) {
   const userMessage = message.role === "user";
   const uiAction = message.uiAction;
@@ -111,6 +127,7 @@ function MessageBubble({
         {!userMessage && uiAction && (
           <button
             className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
+            disabled={actionsDisabled}
             onClick={() => onAction(uiAction)}
             type="button"
           >
@@ -122,6 +139,7 @@ function MessageBubble({
             {message.suggestedQuestions?.map((question) => (
               <button
                 className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                disabled={actionsDisabled}
                 key={question}
                 onClick={() => onQuestion(question)}
                 type="button"
@@ -137,8 +155,27 @@ function MessageBubble({
             {message.explainTurn.choices.map((choice) => (
               <button
                 className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                disabled={actionsDisabled}
                 key={choice.id}
                 onClick={() => onExplainChoice(choice)}
+                type="button"
+              >
+                {choice.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {!userMessage && message.stockExploreTurn && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <p className="w-full text-xs text-ink/70">
+              {message.stockExploreTurn.prompt}
+            </p>
+            {message.stockExploreTurn.choices.map((choice) => (
+              <button
+                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy disabled:opacity-50"
+                disabled={actionsDisabled}
+                key={choice.id}
+                onClick={() => onStockExploreChoice(choice.label, choice.id)}
                 type="button"
               >
                 {choice.label}
@@ -160,6 +197,8 @@ export function F10ChatbotDemo() {
   const [isLoading, setIsLoading] = useState(false);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
+  const [stockExploreAction, setStockExploreAction] =
+    useState<StockExploreActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
@@ -239,8 +278,13 @@ export function F10ChatbotDemo() {
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
-  async function ask(question: string, explainChoiceId?: string) {
+  async function ask(
+    question: string,
+    explainChoiceId?: string,
+    stockExploreChoiceId?: StockExploreChoiceId,
+  ) {
     const explainTurn = explainAction?.turn;
+    const stockExploreTurn = stockExploreAction?.turn;
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
@@ -250,6 +294,7 @@ export function F10ChatbotDemo() {
     setInput("");
     setStatus("질문을 보내는 중");
     setExplainAction(null);
+    setStockExploreAction(null);
     setIsLoading(true);
 
     try {
@@ -267,6 +312,15 @@ export function F10ChatbotDemo() {
                   scriptId: explainTurn.scriptId,
                   stage: explainTurn.stage,
                   ...(explainChoiceId ? { choiceId: explainChoiceId } : {}),
+                },
+              }
+            : {}),
+          ...(stockExploreTurn && stockExploreChoiceId
+            ? {
+                stockExplore: {
+                  stockId: stockExploreTurn.stockId,
+                  shownTopics: stockExploreTurn.shownTopics,
+                  choiceId: stockExploreChoiceId,
                 },
               }
             : {}),
@@ -314,6 +368,28 @@ export function F10ChatbotDemo() {
                   {
                     ...last,
                     explainTurn: value.turn,
+                    ...(Array.isArray(value.suggestedQuestions)
+                      ? { suggestedQuestions: value.suggestedQuestions }
+                      : {}),
+                    ...(isAllowedUiAction(value.uiAction)
+                      ? { uiAction: value.uiAction }
+                      : {}),
+                  },
+                ];
+              });
+              continue;
+            }
+
+            if (isStockExploreAction(value)) {
+              setStockExploreAction(value);
+              setMessages((current) => {
+                const last = current.at(-1);
+                if (!last || last.role !== "assistant") return current;
+                return [
+                  ...current.slice(0, -1),
+                  {
+                    ...last,
+                    stockExploreTurn: value.turn,
                     ...(Array.isArray(value.suggestedQuestions)
                       ? { suggestedQuestions: value.suggestedQuestions }
                       : {}),
@@ -543,6 +619,10 @@ export function F10ChatbotDemo() {
                 onExplainChoice={(choice) => {
                   if (!isLoading) void ask(choice.label, choice.id);
                 }}
+                onStockExploreChoice={(question, choiceId) => {
+                  if (!isLoading) void ask(question, undefined, choiceId);
+                }}
+                actionsDisabled={isLoading}
               />
             )}
             {messages.map((message, index) => (
@@ -556,6 +636,10 @@ export function F10ChatbotDemo() {
                 onExplainChoice={(choice) => {
                   if (!isLoading) void ask(choice.label, choice.id);
                 }}
+                onStockExploreChoice={(question, choiceId) => {
+                  if (!isLoading) void ask(question, undefined, choiceId);
+                }}
+                actionsDisabled={isLoading || index !== messages.length - 1}
               />
             ))}
           </div>

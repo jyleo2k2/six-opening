@@ -54,6 +54,7 @@ async function main() {
     "approved_stock_facts",
     { screen: "stock", stockId: "KRX:003490", stockName: "대한항공" },
     session,
+    "financial",
   );
   assert.equal(aviationStock.status, "ok");
   assert.equal(aviationStock.response.text.includes("16조 1,166억 원"), true);
@@ -63,6 +64,7 @@ async function main() {
     "approved_stock_facts",
     { screen: "stock", stockId: "KRX:483650", stockName: "달바글로벌" },
     session,
+    "financial",
   );
   assert.equal(cosmeticsStock.status, "ok");
   assert.equal(cosmeticsStock.response.text.includes("3,091억 원"), true);
@@ -71,10 +73,20 @@ async function main() {
     "approved_stock_facts",
     { screen: "stock", stockId: "KRX:259960", stockName: "크래프톤" },
     session,
+    "financial",
   );
   assert.equal(reviewedStock.status, "ok");
   assert.equal(reviewedStock.response.text.includes("2조 7,098억원"), true);
   assert.ok(reviewedStock.evidence.every((source) => source.startsWith("https://")));
+
+  const kiwoomBusiness = await runTool(
+    "approved_stock_facts",
+    { screen: "stock", stockId: "KRX:039490", stockName: "키움증권" },
+    session,
+    "business",
+  );
+  assert.equal(kiwoomBusiness.status, "ok");
+  assert.equal(kiwoomBusiness.response.text.includes("주문을 중개"), true);
 
   console.log("read-only chat tool tests passed");
 }

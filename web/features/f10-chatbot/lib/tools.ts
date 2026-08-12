@@ -1,16 +1,10 @@
 import { STOCKS } from "../../../shared/data/stocks";
-import { findAviationAndCosmeticsEducation } from "../../../shared/data/aviation-cosmetics-education";
-import { findAutomotiveAndShipbuildingEducation } from "../../../shared/data/automotive-shipbuilding-education";
-import { findDefenseEducation } from "../../../shared/data/defense-education";
-import { findEntertainmentAndRetailEducation } from "../../../shared/data/entertainment-retail-education";
-import { findFinancialEducation } from "../../../shared/data/financial-education";
-import { findFoodAndEnergyEducation } from "../../../shared/data/food-energy-education";
-import { findGameEducation } from "../../../shared/data/game-education";
-import { findLogisticsAndSemiconductorEducation } from "../../../shared/data/logistics-semiconductor-education";
+import { findApprovedStockEducation } from "../../../shared/data/stock-education";
 import type {
   ChatContext,
   ChatResponse,
   ReadOnlyChatToolName,
+  StockFactTopic,
 } from "../../../shared/types/chatbot";
 import type { ChatSession } from "./session";
 
@@ -74,30 +68,24 @@ export function createReadOnlyToolRunner(
     tool: ReadOnlyChatToolName,
     context: ChatContext,
     session: ChatSession,
+    stockFactTopic: StockFactTopic = "company",
   ): Promise<ToolExecution> {
     if (tool === "approved_stock_facts") {
       const approvedEducation = context.stockId
-        ? [
-            findAviationAndCosmeticsEducation(context.stockId),
-            findGameEducation(context.stockId),
-            findLogisticsAndSemiconductorEducation(context.stockId),
-            findDefenseEducation(context.stockId),
-            findFoodAndEnergyEducation(context.stockId),
-            findEntertainmentAndRetailEducation(context.stockId),
-            findFinancialEducation(context.stockId),
-            findAutomotiveAndShipbuildingEducation(context.stockId),
-          ].find(Boolean)
+        ? findApprovedStockEducation(context.stockId)
         : undefined;
       if (approvedEducation) {
+        const textByTopic: Record<StockFactTopic, string> = {
+          company: approvedEducation.companySummary,
+          business: approvedEducation.businessModel,
+          industry: approvedEducation.industryRole,
+          financial: approvedEducation.financialSummary,
+        };
         return {
           tool,
           status: "ok",
           response: {
-            text: [
-              approvedEducation.companySummary,
-              approvedEducation.businessModel,
-              approvedEducation.financialSummary,
-            ].join(" "),
+            text: textByTopic[stockFactTopic],
             uiAction: { type: "open_screen", target: "stock" },
           },
           evidence: approvedEducation.sources.map((source) => source.url),

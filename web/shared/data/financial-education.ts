@@ -32,6 +32,15 @@ export const FINANCIAL_EDUCATION: readonly FinancialEducation[] = [
     financialSummary: "2024년 연결 기준 당기순이익은 3조 6,505억원이야.", financialSnapshot: { period: "2024", netProfitKrwMillion: 3650515 },
     sources: [{ title: "SK스퀘어 2024 지속가능경영보고서", url: "https://www.sksquare.com/assets/download/report/2024_SK_square_ESG_Report_en.pdf", checkedAt }], status: "reviewed",
   },
+  {
+    stockId: "KRX:039490", companySummary: "키움증권은 앱과 컴퓨터에서 국내외 주식 등 금융상품 거래를 중개하고 기업금융·자산관리 서비스를 하는 증권사야.", businessModel: "고객의 주식·금융상품 주문을 중개해 수수료를 받고, 금융상품 판매·기업금융·자기자본 운용 등에서도 수익을 얻어.", industryRole: "투자자의 주문을 거래소에 연결하고, 기업의 자금 조달과 금융상품 거래를 돕는 증권사야.",
+    elementaryExplanation: "키움증권은 사람들이 앱이나 컴퓨터로 주식 주문을 내면 거래소에 연결해 주는 회사야.", middleSchoolExplanation: "키움증권은 온라인으로 국내외 주식과 금융상품 주문을 중개하고 기업금융·자산관리 서비스를 제공하는 증권사야.",
+    financialSummary: "2024년 연결 기준 영업이익은 1조 982억원, 당기순이익은 8,349억원이야.", financialSnapshot: { period: "2024", netProfitKrwMillion: 834900 },
+    sources: [
+      { title: "키움증권 2024년 사업보고서", url: "https://kind.krx.co.kr/external/2025/03/20/001853/20250320007484/11011.htm", checkedAt },
+      { title: "키움증권 회사 개요", url: "https://www3.kiwoom.com/h/ir/introduce/VOutlineView", checkedAt },
+    ], status: "reviewed",
+  },
 ];
 export function findFinancialEducation(stockId: string) {
   return FINANCIAL_EDUCATION.find((education) => education.stockId === stockId);
