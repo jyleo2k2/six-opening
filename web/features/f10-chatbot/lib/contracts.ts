@@ -5,11 +5,14 @@ import {
   type ChatScreen,
   type ChatUiAction,
 } from "../../../shared/types/chatbot";
+import type { GuidedDialogueState } from "./dialogue-engine";
 
 const MAX_MESSAGE_LENGTH = 500;
 const MAX_LABEL_LENGTH = 60;
 const MAX_QUANTITY = 1_000_000;
 const MAX_UNIT_PRICE = 1_000_000_000;
+const MAX_GUIDED_NODE_IDS = 8;
+const MAX_GUIDED_ID_LENGTH = 80;
 const CLIENT_IDENTITY_FIELDS = [
   "userId",
   "familyId",
@@ -20,12 +23,22 @@ const CLIENT_IDENTITY_FIELDS = [
 export type ChatRequest = {
   message: string;
   context: ChatContext;
+  guidedDialogue?: GuidedDialogueState;
 };
 
-export type ChatActionPayload = Pick<
+export type StandardChatActionPayload = Pick<
   ChatResponse,
   "suggestedQuestions" | "uiAction"
 >;
+
+export type GuidedDialogueActionPayload = {
+  kind: "guided_dialogue";
+  state: GuidedDialogueState;
+};
+
+export type ChatActionPayload =
+  | StandardChatActionPayload
+  | GuidedDialogueActionPayload;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -49,6 +62,41 @@ function optionalPositiveInteger(value: unknown, maximum: number) {
     return null;
   }
   return Number(value);
+}
+
+function parseGuidedDialogue(
+  value: unknown,
+): GuidedDialogueState | null | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return null;
+
+  const { topicId, explainedNodeIds, pendingNodeId } = value;
+  if (
+    typeof topicId !== "string" ||
+    !/^(term|stock):\S{1,80}$/.test(topicId) ||
+    !Array.isArray(explainedNodeIds) ||
+    explainedNodeIds.length < 1 ||
+    explainedNodeIds.length > MAX_GUIDED_NODE_IDS ||
+    !explainedNodeIds.every(
+      (nodeId) =>
+        typeof nodeId === "string" &&
+        nodeId.length > 0 &&
+        nodeId.length <= MAX_GUIDED_ID_LENGTH &&
+        nodeId.trim() === nodeId,
+    ) ||
+    typeof pendingNodeId !== "string" ||
+    pendingNodeId.length < 1 ||
+    pendingNodeId.length > MAX_GUIDED_ID_LENGTH ||
+    pendingNodeId.trim() !== pendingNodeId
+  ) {
+    return null;
+  }
+
+  return {
+    topicId: topicId as GuidedDialogueState["topicId"],
+    explainedNodeIds,
+    pendingNodeId,
+  };
 }
 
 export function parseChatRequest(value: unknown): ChatRequest | null {
@@ -79,6 +127,9 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
     return null;
   }
 
+  const guidedDialogue = parseGuidedDialogue(value.guidedDialogue);
+  if (guidedDialogue === null) return null;
+
   return {
     message,
     context: {
@@ -88,7 +139,16 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
       ...(quantity ? { quantity } : {}),
       ...(unitPrice ? { unitPrice } : {}),
     },
+    ...(guidedDialogue ? { guidedDialogue } : {}),
   };
+}
+
+export function isGuidedDialogueAction(
+  value: unknown,
+): value is GuidedDialogueActionPayload {
+  if (!isRecord(value) || value.kind !== "guided_dialogue") return false;
+  const state = parseGuidedDialogue(value.state);
+  return state !== undefined && state !== null;
 }
 
 export function isAllowedUiAction(value: unknown): value is ChatUiAction {
@@ -98,7 +158,7 @@ export function isAllowedUiAction(value: unknown): value is ChatUiAction {
 
 export function sanitizeActionPayload(
   response: ChatResponse,
-): ChatActionPayload | undefined {
+): StandardChatActionPayload | undefined {
   const suggestedQuestions = response.suggestedQuestions
     ?.filter((question) => typeof question === "string")
     .map((question) => question.trim().slice(0, 80))

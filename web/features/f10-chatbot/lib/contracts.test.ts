@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   isAllowedUiAction,
+  isGuidedDialogueAction,
   parseChatRequest,
   sanitizeActionPayload,
 } from "./contracts";
@@ -34,6 +35,40 @@ assert.equal(
 assert.equal(
   parseChatRequest({ message: "내 기록", context: { screen: "archive", targetUserId: "parent" } }),
   null,
+);
+
+const guidedDialogue = {
+  topicId: "term:per" as const,
+  explainedNodeIds: ["main"],
+  pendingNodeId: "related:eps",
+};
+assert.deepEqual(
+  parseChatRequest({
+    message: "응",
+    context: { screen: "stock" },
+    guidedDialogue,
+  }),
+  {
+    message: "응",
+    context: { screen: "stock" },
+    guidedDialogue,
+  },
+);
+assert.equal(
+  parseChatRequest({
+    message: "응",
+    context: { screen: "stock" },
+    guidedDialogue: { ...guidedDialogue, explainedNodeIds: [] },
+  }),
+  null,
+);
+assert.equal(
+  isGuidedDialogueAction({ kind: "guided_dialogue", state: guidedDialogue }),
+  true,
+);
+assert.equal(
+  isGuidedDialogueAction({ kind: "guided_dialogue", state: { ...guidedDialogue, pendingNodeId: "" } }),
+  false,
 );
 
 assert.equal(isAllowedUiAction({ type: "open_screen", target: "archive" }), true);

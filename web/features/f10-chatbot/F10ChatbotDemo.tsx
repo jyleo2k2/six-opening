@@ -4,7 +4,12 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
 import type { ChatUiAction } from "../../shared/types/chatbot";
-import { isAllowedUiAction, type ChatActionPayload } from "./lib/contracts";
+import {
+  isAllowedUiAction,
+  isGuidedDialogueAction,
+  type GuidedDialogueActionPayload,
+  type StandardChatActionPayload,
+} from "./lib/contracts";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
@@ -134,6 +139,8 @@ export function F10ChatbotDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
   const [isLoading, setIsLoading] = useState(false);
+  const [guidedAction, setGuidedAction] =
+    useState<GuidedDialogueActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
@@ -214,6 +221,7 @@ export function F10ChatbotDemo() {
   }, [isOpen, messages]);
 
   async function ask(question: string) {
+    const guidedDialogue = guidedAction?.state;
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
@@ -222,13 +230,18 @@ export function F10ChatbotDemo() {
     setIsOpen(true);
     setInput("");
     setStatus("질문을 보내는 중");
+    setGuidedAction(null);
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: question, context: chatContext }),
+        body: JSON.stringify({
+          message: question,
+          context: chatContext,
+          ...(guidedDialogue ? { guidedDialogue } : {}),
+        }),
       });
 
       if (!response.ok || !response.body) throw new Error("Chat request failed");
@@ -262,7 +275,12 @@ export function F10ChatbotDemo() {
             });
           }
           if (type === "action" && value && typeof value === "object") {
-            const action = value as ChatActionPayload;
+            if (isGuidedDialogueAction(value)) {
+              setGuidedAction(value);
+              continue;
+            }
+
+            const action = value as StandardChatActionPayload;
             setMessages((current) => {
               const last = current.at(-1);
               if (!last || last.role !== "assistant") return current;
