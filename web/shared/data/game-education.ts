@@ -18,7 +18,8 @@ export type GameEducation = {
     operatingProfitKrwMillion: number;
   };
   sources: readonly GameEducationSource[];
-  status: "reviewed";
+  /** 사람 검수를 마친 항목만 reviewed다. draft는 사실은 맞지만 아동 적합성 판단이 남았다. */
+  status: "draft" | "reviewed";
 };
 
 const checkedAt = "2026-08-12";
@@ -68,19 +69,21 @@ export const GAME_EDUCATION: readonly GameEducation[] = [
     status: "reviewed",
   },
   {
-    stockId: "KRX:263750",
-    companySummary: "펄어비스는 PC·모바일·콘솔에서 즐기는 게임을 개발하고 서비스하는 회사야.",
-    businessModel: "게임 서비스와 게임 이용, 게임 안 디지털 상품·서비스에서 돈을 벌어.",
-    industryRole: "자체 게임 IP를 만들고 여러 플랫폼과 지역에 서비스하는 게임 개발·퍼블리싱 회사야.",
-    elementaryExplanation: "펄어비스는 컴퓨터와 휴대폰 등 게임기로 즐기는 게임을 만들고 운영해.",
-   middleSchoolExplanation: "펄어비스는 자체 게임 IP를 바탕으로 PC·모바일·콘솔 게임을 개발·서비스하며 게임 서비스와 게임 안 디지털 상품·서비스에서 수입을 얻어.",
-    financialSummary: "2024년 연결 기준 매출은 3,424억원, 영업손실은 1,227억원이야.",
-   financialSnapshot: { period: "2024", revenueKrwMillion: 342400, operatingProfitKrwMillion: -122700 },
+    // ⚠ 더블유게임즈는 소셜 카지노 게임 회사다. 아래 문구는 사실대로 적었을 뿐
+    // 아동용으로 검수된 것이 아니다. status를 draft로 두었고, 화이트리스트
+    // 적합성과 접점등급 5 배정을 사람이 판단하기 전까지 reviewed로 올리지 않는다.
+    stockId: "KRX:192080",
+    companySummary: "더블유게임즈는 스마트폰으로 하는 카지노 게임을 만들어 여러 나라에 서비스하는 회사야.",
+    businessModel: "게임 안에서 쓰는 디지털 아이템을 팔아서 돈을 벌어.",
+    industryRole: "직접 만든 게임을 자회사와 함께 해외 이용자에게 서비스하는 게임 개발·퍼블리싱 회사야.",
+    elementaryExplanation: "더블유게임즈는 어른들이 즐기는 카드·슬롯 같은 카지노 게임을 휴대폰 앱으로 만들어.",
+    middleSchoolExplanation: "더블유게임즈는 소셜 카지노 장르의 모바일 게임을 개발·서비스하고, 게임 안 디지털 아이템 판매로 수입을 얻어. 매출의 대부분이 해외에서 나와.",
+    financialSummary: "2024년 연결 기준 매출은 6,241억원, 영업이익은 2,072억원이야.",
+    financialSnapshot: { period: "2024", revenueKrwMillion: 624100, operatingProfitKrwMillion: 207200 },
     sources: [
-      { title: "Pearl Abyss 4Q24 Earnings Presentation", url: "https://www.pearlabyss.com/en-US/IR/Data/Performance", checkedAt },
-      { title: "Pearl Abyss Q4 2024 and Annual Earnings Presentation", url: "https://www.pearlabyss.com/en-US/Board/Detail?_boardNo=14093", checkedAt },
+      { title: "더블유게임즈 2024 사업보고서", url: "https://dart.fss.or.kr/dsab007/main.do?option=corp&textCrpNm=더블유게임즈", checkedAt },
     ],
-    status: "reviewed",
+    status: "draft",
   },
 ];
 
