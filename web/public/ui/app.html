@@ -205,10 +205,11 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </sc-for>
 </div>
-<div style="position:relative;flex:none;display:flex;justify-content:center;gap:5px;padding:0 0 14px">
+<div style="position:relative;flex:none;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 0 14px">
 <sc-for list="{{ cardDots }}" as="d" hint-placeholder-count="8">
 <div style="{{ d.style }}"></div>
 </sc-for>
+<span style="margin-left:8px;font-size:11.5px;font-weight:700;color:#A8A6C4;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cardCountText }}</span>
 </div>
 </div>
 
@@ -838,42 +839,48 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </sc-if>
 
 <sc-if value="{{ isRanking }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
-<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
-<div onClick="{{ goHome }}" style="{{ backBtnStyle }}">‹</div>
-<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">랭킹</div>
-<div style="width:38px"></div>
-</div>
-<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column">
 
-<div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:30px;padding:20px;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(170,80,125,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
-<div style="font-size:13.5px;font-weight:700;color:#D5327A">우리 가족 순위</div>
-<div style="display:flex;align-items:flex-end;gap:9px;margin-top:8px">
-<span style="font-size:44px;font-weight:800;color:#01185A;line-height:1;font-variant-numeric:tabular-nums">{{ myRankText }}</span>
-<span style="font-size:16px;font-weight:600;color:#7E849B;padding-bottom:5px;white-space:nowrap">/ 42가족</span>
+<div style="{{ rkHeadStyle }}">
+<div onClick="{{ goHome }}" style="{{ rkBackStyle }}">‹</div>
+<div style="{{ rkTitleStyle }}"><span style="font-size:20px;line-height:1">🏆</span><span>랭킹</span></div>
+<div style="{{ rkSegWrap }}">
+<div onClick="{{ pickWeek }}" style="{{ rkSegWeek }}">이번 주</div>
+<div onClick="{{ pickSeason }}" style="{{ rkSegSeason }}">시즌 전체</div>
 </div>
-<div style="font-size:14px;font-weight:500;color:#5C6280;margin-top:11px;line-height:1.6">가족 성적은 <b style="color:#01185A">구성원 수익률의 평균</b>이에요.</div>
+<div style="{{ rkConeStyle }}"></div>
+<div style="{{ rkGroundStyle }}"></div>
+<sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+<div style="{{ p.pedStyle }}">
+<div style="{{ p.pedTopStyle }}"></div>
+<div style="{{ p.ribLStyle }}"></div>
+<div style="{{ p.ribRStyle }}"></div>
+<div style="{{ p.medStyle }}">{{ p.rank }}</div>
 </div>
-
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:28px;padding:8px 18px 12px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<sc-for list="{{ leagueRows }}" as="r" hint-placeholder-count="6">
-<div style="{{ r.rowStyle }}">
-<div style="{{ r.rankStyle }}">{{ r.rank }}</div>
-<div style="flex:1;min-width:0"><div style="{{ r.nameStyle }}">{{ r.name }}</div></div>
-<div style="{{ r.pnlStyle }}">{{ r.pnl }}</div>
+</sc-for>
+<sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+<div style="{{ p.slotStyle }}">
+<div style="{{ p.crownStyle }}">{{ p.crown }}</div>
+<div style="{{ p.nameStyle }}">{{ p.name }}</div>
+<div style="{{ p.pillStyle }}">
+<div style="{{ p.pctStyle }}">{{ p.pct }}</div>
+<div style="{{ p.stepStyle }}">{{ p.step }}</div>
+</div>
+<div style="{{ p.avStyle }}">{{ p.emoji }}</div>
 </div>
 </sc-for>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="font-size:16px;font-weight:800;color:#01185A">시즌 3 상은 세 가지야</div>
-<div style="display:flex;gap:9px;margin-top:13px">
-<div style="flex:1;background:linear-gradient(157deg,#F6F6FC 0%,#EFEFF7 100%);border-radius:18px;padding:13px 8px;text-align:center"><div style="font-size:24px">🏆</div><div style="font-size:12.5px;font-weight:600;color:#01185A;margin-top:7px">가족 종합</div></div>
-<div style="flex:1;background:linear-gradient(157deg,#F6F6FC 0%,#EFEFF7 100%);border-radius:18px;padding:13px 8px;text-align:center"><div style="font-size:24px">🧒</div><div style="font-size:12.5px;font-weight:600;color:#01185A;margin-top:7px">개인 부문</div></div>
-<div style="flex:1;background:linear-gradient(157deg,#FFF7FB 0%,#FDE9F2 100%);border-radius:18px;padding:13px 8px;text-align:center;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)"><div style="font-size:24px">🧭</div><div style="font-size:12.5px;font-weight:700;color:#D5327A;margin-top:7px">행동 부문</div></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 16px 4px;display:flex;flex-direction:column;gap:13px">
+<sc-for list="{{ rankRows }}" as="r" hint-placeholder-count="5">
+<div style="{{ r.rowStyle }}">
+<div style="{{ r.rankStyle }}">{{ r.rank }}</div>
+<div style="{{ r.plateStyle }}">{{ r.emoji }}</div>
+<div style="{{ r.nameStyle }}">{{ r.name }}</div>
+<div style="{{ r.badgeStyle }}">{{ r.step }}</div>
+<div style="{{ r.pctStyle }}">{{ r.pct }}</div>
 </div>
-<div style="font-size:13.5px;font-weight:500;color:#7E849B;line-height:1.7;margin-top:13px;text-wrap:pretty">수익률 1등만 상을 받지는 않아. 분산투자상·진득이상·질문왕처럼 <b style="color:#01185A">어떻게 투자했는지</b>로 주는 상도 있어.</div>
-</div>
+</sc-for>
 </div>
 
 <div style="{{ navStyle }}">
@@ -1031,7 +1038,8 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </sc-if>
 
-<img src="assets/statusbar.svg" width="402" height="59" alt="" style="position:absolute;left:0;top:0;display:block;z-index:3;pointer-events:none">
+<img src="assets/statusbar.svg" width="402" height="59" alt="" style="{{ statusDark }}">
+<img src="assets/statusbar-w.svg" width="402" height="59" alt="" style="{{ statusLight }}">
 <div style="position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;z-index:3;pointer-events:none"><div style="width:140px;height:5px;border-radius:999px;background:#1A2233;opacity:0.85"></div></div>
 </div>
 <div style="position:absolute;left:24px;top:23px;width:402px;height:874px;border-radius:40px;pointer-events:none;z-index:4;opacity:0.18;mix-blend-mode:overlay;background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNjAnIGhlaWdodD0nMTYwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzE2MCcgaGVpZ2h0PScxNjAnIGZpbHRlcj0ndXJsKCNuKScvPjwvc3ZnPg==)"></div>
@@ -1128,6 +1136,134 @@ const NEWS = {
   bank:'은행이 번 돈이 지난해보다 늘었대.'
 };
 
+// ── 랭킹 화면 ────────────────────────────────────────────────────────────────
+// 가족마다 마스코트와 색을 하나씩 갖는다. 시상대에 서든 목록에 있든 같은 색을 쓴다.
+const RK_FAMS = {
+  '별빛 가족':   { emoji:'🐻', a:'#FFE6D6', b:'#F8C9A6' },
+  '초록곰 가족': { emoji:'🐸', a:'#DFF6E4', b:'#B6E7C2' },
+  '바다별 가족': { emoji:'🐧', a:'#DCEBFF', b:'#B6D6FA' },
+  '우리 가족':   { emoji:'🐮', a:'#FFFFFF', b:'#FFE6F1' },
+  '달토끼 가족': { emoji:'🐰', a:'#F5EEFF', b:'#DED0F7' },
+  '해바라기 가족': { emoji:'🦁', a:'#FFF4D6', b:'#FBE1A2' },
+  '구름섬 가족': { emoji:'🐨', a:'#EDF1F7', b:'#D2DCE8' },
+  '무지개 가족': { emoji:'🐼', a:'#F7ECFF', b:'#E2CBF7' },
+  '밤톨 가족':   { emoji:'🦊', a:'#FFE9DA', b:'#F9CBA6' }
+};
+const RK_LEAGUES = {
+  week: [
+    { name:'별빛 가족',   pct:'+6.8%' },
+    { name:'초록곰 가족', pct:'+5.1%' },
+    { name:'바다별 가족', pct:'+3.4%' },
+    { name:'우리 가족',   pct:'+2.5%', me:true, step:'▲ 2계단' },
+    { name:'달토끼 가족', pct:'+1.2%' },
+    { name:'해바라기 가족', pct:'-0.4%' },
+    { name:'구름섬 가족', pct:'-1.6%' },
+    { name:'무지개 가족', pct:'-2.3%' }
+  ],
+  season: [
+    { name:'바다별 가족', pct:'+18.4%' },
+    { name:'우리 가족',   pct:'+14.2%', me:true, step:'▲ 6계단' },
+    { name:'별빛 가족',   pct:'+12.9%' },
+    { name:'무지개 가족', pct:'+9.6%' },
+    { name:'초록곰 가족', pct:'+7.7%' },
+    { name:'밤톨 가족',   pct:'+5.1%' },
+    { name:'달토끼 가족', pct:'+2.8%' },
+    { name:'구름섬 가족', pct:'+1.3%' }
+  ]
+};
+// 시상대 세 칸의 좌표는 시안(402×874) 기준 절대값이다.
+const RK_POD = {
+  1: { slot:'left:137px;bottom:96px;width:128px', av:76, avR:24, emo:44, nameFs:'14.5px', pctFs:'13px',
+       pedL:136.6, pedT:328, pedW:128.8, pedH:64, medR:13.7, medT:19.3, medFs:'15px', medCol:'#7A5200',
+       medBg:'radial-gradient(circle at 50% 20%,#FFF3C4 0%,#FFD44E 42%,#E39C00 100%)' },
+  2: { slot:'left:14.8px;bottom:78px;width:120px', av:56, avR:18, emo:31, nameFs:'13px', pctFs:'12px',
+       pedL:22, pedT:346, pedW:105.6, pedH:46, medR:10.8, medT:14.2, medFs:'13px', medCol:'#4E566B',
+       medBg:'radial-gradient(circle at 50% 20%,#FBFCFF 0%,#D5DAE7 44%,#98A1B7 100%)' },
+  3: { slot:'left:267.2px;bottom:64px;width:120px', av:56, avR:18, emo:31, nameFs:'13px', pctFs:'12px',
+       pedL:274.4, pedT:360, pedW:105.6, pedH:32, medR:10.8, medT:12.2, medFs:'13px', medCol:'#5E3512',
+       medBg:'radial-gradient(circle at 50% 20%,#F8DDBE 0%,#DFA76A 44%,#A9631F 100%)' }
+};
+const PED_FACE = 'linear-gradient(180deg,#FFD873 0%,#F5B333 46%,#DC8F12 100%)';
+
+function rkPodium(tab){
+  // 화면 왼쪽부터 2등 · 1등 · 3등 순으로 그린다.
+  return [2, 1, 3].map(rank => {
+    const row = (RK_LEAGUES[tab] || RK_LEAGUES.week)[rank - 1];
+    const f = RK_FAMS[row.name] || { emoji:'🐣', a:'#FFFFFF', b:'#E9E9F0' };
+    const g = RK_POD[rank];
+    const ring = row.me
+      ? '0 0 0 3px #F5327F,0 0 18px rgba(245,50,127,0.55)'
+      : (rank === 1 ? '0 0 0 3px #FFC940,0 0 20px rgba(255,201,64,0.5)' : '0 0 0 2px rgba(255,255,255,0.26)');
+    const ribW = g.medR * 1.02, ribH = g.medR * 2.0, ribTop = g.medT + g.medR * 0.85;
+    const rib = 'position:absolute;top:' + ribTop + 'px;left:50%;width:' + ribW + 'px;height:' + ribH
+      + 'px;border-radius:2px;background:linear-gradient(180deg,#4E86DC 0%,#2A5BA8 100%);'
+      + 'clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);transform-origin:50% 0;';
+    return {
+      rank: rank, name: row.name, pct: row.pct, emoji: f.emoji,
+      crown: rank === 1 ? '👑' : '',
+      step: row.step || '',
+      slotStyle: 'position:absolute;' + g.slot + ';display:flex;flex-direction:column;align-items:center;pointer-events:none',
+      crownStyle: rank === 1
+        ? 'font-size:23px;line-height:1;margin-bottom:2px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.35))'
+        : 'display:none',
+      nameStyle: 'font-size:' + g.nameFs + ';font-weight:' + (rank === 1 ? 800 : 700) + ';color:#fff;white-space:nowrap;'
+        + 'max-width:100%;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 7px rgba(0,4,25,0.45)',
+      pillStyle: 'margin-top:5px;display:flex;flex-direction:column;align-items:center;padding:'
+        + (row.me ? '3px 12px 5px' : '2px 10px 3px') + ';border-radius:' + (row.me ? '13px' : '999px')
+        + ';background:rgba(1,14,52,0.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)',
+      pctStyle: 'font-size:' + g.pctFs + ';font-weight:800;color:#FFE6F4;font-variant-numeric:tabular-nums;white-space:nowrap',
+      stepStyle: row.step
+        ? 'margin-top:3px;display:flex;align-items:center;justify-content:center;padding:0 9px;height:16px;border-radius:999px;'
+          + 'background:rgba(245,50,127,0.92);font-size:10.5px;font-weight:800;color:#fff;white-space:nowrap;'
+          + 'box-shadow:0 3px 8px rgba(224,29,107,0.45)'
+        : 'display:none',
+      avStyle: 'margin-top:8px;width:' + g.av + 'px;height:' + g.av + 'px;border-radius:' + g.avR + 'px;display:flex;'
+        + 'align-items:center;justify-content:center;font-size:' + g.emo + 'px;line-height:1;'
+        + 'background:linear-gradient(153deg,' + f.a + ' 0%,' + f.b + ' 100%);'
+        + 'box-shadow:' + ring + ',0 14px 26px rgba(0,8,35,0.42)',
+      pedStyle: 'position:absolute;left:' + g.pedL + 'px;top:' + g.pedT + 'px;width:' + g.pedW + 'px;height:' + g.pedH
+        + 'px;border-radius:7px 7px 5px 5px;background:' + PED_FACE + ';box-shadow:inset 0 1px 0 rgba(255,255,255,0.55),'
+        + 'inset 0 -11px 18px rgba(150,88,0,0.30),inset 9px 0 15px rgba(255,236,180,0.30),0 12px 22px rgba(0,6,30,0.38)',
+      pedTopStyle: 'position:absolute;left:-4px;right:-4px;top:-7px;height:13px;border-radius:7px;'
+        + 'background:linear-gradient(180deg,#FFEDB4 0%,#FCCB63 100%);box-shadow:0 2px 0 rgba(186,116,8,0.35)',
+      ribLStyle: rib + 'margin-left:-' + (g.medR * 1.04) + 'px;transform:rotate(-16deg)',
+      ribRStyle: rib + 'margin-left:' + (g.medR * 0.02) + 'px;transform:rotate(16deg)',
+      medStyle: 'position:absolute;left:50%;top:' + g.medT + 'px;margin-left:-' + g.medR + 'px;width:' + (g.medR * 2)
+        + 'px;height:' + (g.medR * 2) + 'px;border-radius:999px;display:flex;align-items:center;justify-content:center;'
+        + 'font-size:' + g.medFs + ';font-weight:900;color:' + g.medCol + ';background:' + g.medBg
+        + ';box-shadow:0 4px 8px rgba(0,6,30,0.42),inset 0 1px 0 rgba(255,255,255,0.85)'
+    };
+  });
+}
+
+function rkRows(tab, upC, downC){
+  return (RK_LEAGUES[tab] || RK_LEAGUES.week).slice(3).map((row, i) => {
+    const f = RK_FAMS[row.name] || { emoji:'🐣', a:'#FFFFFF', b:'#E9E9F0' };
+    const me = !!row.me, neg = row.pct.charAt(0) === '-';
+    return {
+      rank: i + 4, name: row.name, pct: row.pct, emoji: f.emoji, step: row.step || '',
+      rowStyle: 'flex:none;height:64px;display:flex;align-items:center;padding:0 18px 0 10px;border-radius:28px;' + (me
+        ? 'background:linear-gradient(180deg,#FF7FB8 0%,#F5327F 62%,#E01D6B 100%);'
+          + 'box-shadow:0 14px 26px -8px rgba(224,29,107,0.42),inset 0 1px 0 rgba(255,255,255,0.35)'
+        : 'background:linear-gradient(180deg,#FFFFFF 0%,#FFFFFF 55%,#F2F3FA 100%);'
+          + 'box-shadow:0 8px 18px rgba(35,25,80,0.08),inset 0 0 0 1px rgba(255,255,255,0.9)'),
+      rankStyle: 'flex:none;width:32px;text-align:center;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:'
+        + (me ? '#fff' : '#A9AEC4'),
+      plateStyle: 'flex:none;margin-left:2px;width:44px;height:44px;border-radius:15px;display:flex;align-items:center;'
+        + 'justify-content:center;font-size:23px;line-height:1;background:linear-gradient(153deg,#FFFFFF 0%,' + f.a + ' 100%);'
+        + 'box-shadow:0 4px 10px rgba(35,25,80,0.13),inset 0 0 0 1px rgba(255,255,255,0.8)',
+      nameStyle: 'flex:1;min-width:0;margin-left:15px;font-size:15.5px;font-weight:' + (me ? 800 : 600) + ';color:'
+        + (me ? '#fff' : '#5C6280') + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis',
+      badgeStyle: row.step
+        ? 'flex:none;margin-right:11px;display:flex;align-items:center;padding:0 10px;height:20px;border-radius:999px;'
+          + 'background:#fff;font-size:11.5px;font-weight:800;color:#F5327F;white-space:nowrap;box-shadow:0 3px 8px rgba(120,10,60,0.2)'
+        : 'display:none',
+      pctStyle: 'flex:none;font-size:15.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:'
+        + (me ? '#fff' : (neg ? downC : upC))
+    };
+  });
+}
+
 const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
 const glass = 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)';
 const CTA_ON = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%),radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)";
@@ -1141,7 +1277,7 @@ class Component extends DCLogic {
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'day',
     sellStep: 1, sellDraft: { qty:0, reason:null, change:null, memo:'', memoSaved:false }, doneKind: 'buy', arcTab: 'report', sellPick: 'all',
-    schoolLock: true, forceSchool: 'auto',
+    schoolLock: true, forceSchool: 'auto', rankTab: 'week',
     reasonOrder: [0,1,2,3,4,5]
   };
 
@@ -1303,6 +1439,12 @@ class Component extends DCLogic {
   navItem(on){
     return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#A9AEC4');
   }
+  // 랭킹 화면의 이번 주 / 시즌 전체 토글
+  rkSeg(on){
+    return 'flex:1;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:13.5px;cursor:pointer;' + (on
+      ? 'font-weight:700;color:#01185A;background:linear-gradient(180deg,#FFFFFF 0%,#EFF1F9 100%);box-shadow:0 3px 8px rgba(0,0,0,0.22)'
+      : 'font-weight:600;color:rgba(255,255,255,0.7)');
+  }
   // 종목 고르기 화면 네비 (밝은 배경)
   navItemX(on){
     return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#A8A6C4');
@@ -1312,6 +1454,7 @@ class Component extends DCLogic {
     const s = this.state, m = this.me(), st = this.stock(), u = this.uni();
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
+    const rankTab = s.rankTab || 'week';
     const band = BANDS.filter(b => s.draft.conf <= b.max)[0] || BANDS[3];
     const reason = REASONS.filter(r => r.code === s.draft.reason)[0];
     const plan = PLANS.filter(p => p.code === s.draft.plan)[0];
@@ -1343,7 +1486,12 @@ class Component extends DCLogic {
     const logos = u.logos || {};
     const mixW = (hx, w) => { const n = parseInt(hx.slice(1), 16); const c = [(n>>16)&255,(n>>8)&255,n&255].map(v => Math.round(v + (255 - v) * w)); return '#' + c.map(v => v.toString(16).padStart(2,'0')).join(''); };
     const rgbOf = (hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); };
-    const list = u.stocks.filter(x => x.sector === s.sectorId).map((x, ci) => {
+    // 'rank' 는 섹터가 아니라 그날 등락률 순으로 51종 전체를 보는 모드다.
+    const isRank = s.sectorId === 'rank';
+    const baseList = isRank
+      ? u.stocks.slice().sort((a, b) => b.change - a.change)
+      : u.stocks.filter(x => x.sector === s.sectorId);
+    const list = baseList.map((x, ci) => {
       const sec = this.sectorOf(x.sector);
       const active = ci === s.cardIndex;
       // 게임형 수집 카드 — 로고에서 뽑은 브랜드 색으로 프레임·글로우·차트를 물들인다
@@ -1408,6 +1556,9 @@ class Component extends DCLogic {
         pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
       };
     });
+
+    // 보유 카드의 사러/팔러 가기 버튼이 이 값을 쓰므로 그보다 먼저 선언해야 한다.
+    const locked = !this.canTrade();
 
     const holdingCards = m.holdings.map(h => {
       const x = u.stocks.filter(y => y.code === h.code)[0];
@@ -1478,7 +1629,6 @@ class Component extends DCLogic {
       : s.sellStep === 4 ? (planMatch === true || !!s.sellDraft.change)
       : true;
     const prog2 = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.sellStep ? '#F5327F' : '#DDDFEC');
-    const locked = !this.canTrade();
     const devChip = on => 'flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:12.5px;font-weight:' + (on ? '800' : '600') + ';cursor:pointer;' + (on ? 'color:#fff;background:#01185A' : 'color:#6E7488;background:#F1F2F8');
     const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:999px;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap;' + (on
       ? 'color:#fff;background:linear-gradient(180deg,#0A2E7A 0%,#01185A 100%);box-shadow:0 6px 12px -4px rgba(1,24,90,0.4)'
@@ -1548,18 +1698,32 @@ class Component extends DCLogic {
       pickChild: () => this.set({ account:'child' }),
       pickParent: () => this.set({ account:'parent' }),
 
-      sectorChips: u.sectors.map(x => ({
+      // 맨 앞은 섹터가 아니라 '오늘 많이 오른 순' 보기다
+      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순', emoji: '🔥' }].concat(u.sectors).map(x => ({
         name: x.name, emoji: x.emoji,
         style: 'display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:' + (x.id === s.sectorId ? '700' : '500') + ';white-space:nowrap;cursor:pointer;' + (x.id === s.sectorId
           ? 'color:#fff;background:linear-gradient(180deg,#FF7FB4 0%,#F5327F 100%);box-shadow:0 6px 14px -4px rgba(245,50,127,0.5),0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)'
           : 'color:#5C6280;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(240,240,250,0.78) 100%);box-shadow:0 5px 12px -5px rgba(70,50,120,0.28),inset 0 1.5px 1px rgba(255,255,255,0.95),inset 0 0 0 1px rgba(120,110,180,0.10)'),
         pick: () => this.set({ sectorId: x.id, cardIndex: 0 })
       })),
-      sectorTitle: this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
+      // 등락률 순 보기에서는 칩이 이미 무슨 목록인지 말해주므로 제목을 비운다
+      sectorTitle: isRank ? '' : this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
       cards: list,
-      cardDots: list.map((x, i) => ({
-        style: 'width:' + (i === s.cardIndex ? '18px' : '6px') + ';height:6px;border-radius:999px;transition:width .18s ease;background:' + (i === s.cardIndex ? '#FF3D8D' : '#D6D0E5') + (i === s.cardIndex ? ';box-shadow:0 0 9px rgba(255,61,141,0.42)' : '')
-      })),
+      // 종목이 많으면 도트가 화면을 넘친다. 현재 위치 주변만 창처럼 보여주고 양끝은 작게 흘린다.
+      cardDots: (() => {
+        const total = list.length, MAX = 9;
+        const start = total <= MAX ? 0 : Math.min(Math.max(0, s.cardIndex - Math.floor(MAX / 2)), total - MAX);
+        const shown = Math.min(MAX, total);
+        return Array.from({ length: shown }, (_, k) => {
+          const i = start + k;
+          const on = i === s.cardIndex;
+          const fadeL = total > MAX && k === 0 && start > 0;
+          const fadeR = total > MAX && k === shown - 1 && start + shown < total;
+          const w = on ? 18 : (fadeL || fadeR) ? 4 : 6;
+          return { style: 'width:' + w + 'px;height:' + (on ? 6 : w === 4 ? 4 : 6) + 'px;border-radius:999px;transition:width .18s ease;background:' + (on ? '#FF3D8D' : (fadeL || fadeR) ? '#E3DFEE' : '#D6D0E5') + (on ? ';box-shadow:0 0 9px rgba(255,61,141,0.42)' : '') };
+        });
+      })(),
+      cardCountText: list.length > 9 ? (Math.min(s.cardIndex + 1, list.length)) + ' / ' + list.length : '',
 
       // 페이지 전체가 하나의 밝은 배경 — 카드 영역에서 어두워지는 경계를 만들지 않는다
       exploreBgStyle: 'position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(circle at 18% 7%,rgba(225,219,255,0.34) 0%,rgba(225,219,255,0) 32%),radial-gradient(circle at 88% 92%,rgba(255,226,239,0.25) 0%,rgba(255,226,239,0) 30%),linear-gradient(180deg,#FAF9FD 0%,#F5F3FB 52%,#FAF8FC 100%)',
@@ -1791,25 +1955,31 @@ class Component extends DCLogic {
       detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened').length,
 
       isRanking: s.screen === 'ranking',
+      // 랭킹 화면만 상단이 남색이라 상태바 아이콘을 흰색으로 바꾼다.
+      statusDark: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:' + (s.screen === 'ranking' ? 'none' : 'block'),
+      statusLight: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:' + (s.screen === 'ranking' ? 'block' : 'none'),
       goRanking: () => this.set({ screen:'ranking' }),
       navRanking: this.navItem(s.screen === 'ranking'),
-      myRankText: '4위',
-      leagueRows: [
-        { rank:1, name:'별빛 가족', pnl:'+6.8%', me:false },
-        { rank:2, name:'초록곰 가족', pnl:'+5.1%', me:false },
-        { rank:3, name:'바다별 가족', pnl:'+3.4%', me:false },
-        { rank:4, name:'우리 가족', pnl:'+2.5%', me:true },
-        { rank:5, name:'달토끼 가족', pnl:'+1.2%', me:false },
-        { rank:6, name:'해바라기 가족', pnl:'-0.4%', me:false }
-      ].map(r => ({
-        rank: r.rank, name: r.name, pnl: r.pnl,
-        rowStyle: 'display:flex;align-items:center;gap:12px;padding:12px 0;' + (r.rank < 6 ? 'border-bottom:1px solid #F0F1F7;' : ''),
-        rankStyle: 'width:28px;height:28px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;' + (r.me
-          ? 'color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)'
-          : 'color:#8E93A8;background:#F1F2F8'),
-        nameStyle: 'font-size:16px;font-weight:' + (r.me ? '800' : '500') + ';color:' + (r.me ? '#01185A' : '#5C6280'),
-        pnlStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (r.pnl.charAt(0) === '-' ? down : up)
-      })),
+      rkHeadStyle: 'flex:none;position:relative;height:416px;border-radius:0 0 48px 48px;overflow:hidden;'
+        + 'background:radial-gradient(125% 100% at 50% 8%,#2A5FC4 0%,#123B8E 38%,#0B2A6B 68%,#01185A 100%)',
+      rkBackStyle: 'position:absolute;left:18px;top:65px;width:38px;height:38px;border-radius:999px;background:rgba(255,255,255,0.14);'
+        + 'display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;line-height:1;padding-bottom:3px;'
+        + 'box-sizing:border-box;cursor:pointer',
+      rkTitleStyle: 'position:absolute;left:0;right:0;top:65px;height:38px;display:flex;align-items:center;justify-content:center;gap:7px;'
+        + 'font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em',
+      rkSegWrap: 'position:absolute;left:78px;top:117px;width:246px;height:40px;box-sizing:border-box;border-radius:20px;'
+        + 'background:rgba(0,0,0,0.26);display:flex;padding:4px;gap:6px;box-shadow:inset 0 1px 3px rgba(0,0,0,0.3)',
+      rkSegWeek: this.rkSeg(rankTab === 'week'),
+      rkSegSeason: this.rkSeg(rankTab === 'season'),
+      pickWeek: () => this.setState({ rankTab:'week' }),
+      pickSeason: () => this.setState({ rankTab:'season' }),
+      rkConeStyle: 'position:absolute;left:135px;top:150px;width:132px;height:192px;pointer-events:none;filter:blur(7px);'
+        + 'clip-path:polygon(34% 0%,66% 0%,100% 100%,0% 100%);'
+        + 'background:linear-gradient(180deg,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0.07) 56%,rgba(255,255,255,0) 100%)',
+      rkGroundStyle: 'position:absolute;left:26px;top:383px;width:350px;height:12px;border-radius:999px;filter:blur(2px);'
+        + 'background:radial-gradient(closest-side,rgba(0,0,0,0.42) 0%,rgba(0,0,0,0) 78%)',
+      podium: rkPodium(rankTab),
+      rankRows: rkRows(rankTab, up, down),
 
       isSell: s.screen === 'sell',
       isSell1: s.sellStep === 1, isSell2: s.sellStep === 2, isSell3: s.sellStep === 3,
