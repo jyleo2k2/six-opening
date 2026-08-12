@@ -1271,16 +1271,17 @@ class Component extends DCLogic {
       const CL = x.change >= 0 ? up : down;      // 등락색 (상승 빨강 / 하락 파랑)
 
       // 차트 — 카드 장식의 일부로 우측 아래를 넓게 쓴다 (값은 실제 시세 그대로)
-      const sp = x.spark || [], W = 128, H = 118, PX = 6, PY = 12, N = Math.max(2, sp.length);
-      const pts = sp.map((v, i) => [PX + i * ((W - PX * 2) / (N - 1)), (H - PY) - (v / 100) * (H - PY * 2)]);
+      // 오른쪽 여백은 끝점 발광(r=11)이 잘리지 않을 만큼 둔다.
+      const sp = x.spark || [], W = 128, H = 118, PL = 6, PR = 17, PY = 14, N = Math.max(2, sp.length);
+      const pts = sp.map((v, i) => [PL + i * ((W - PL - PR) / (N - 1)), (H - PY) - (v / 100) * (H - PY * 2)]);
       const xy = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1));
-      const last = pts[pts.length - 1] || [W - PX, H / 2];
+      const last = pts[pts.length - 1] || [W - PR, H / 2];
 
       return {
         name: x.name, desc: x.desc, emoji: sec.emoji, category: br.cat || sec.name,
         logo: logos[x.code] || '', hasLogo: !!logos[x.code], noLogo: !logos[x.code],
         sparkLine: xy.join(' '),
-        sparkArea: 'M' + xy.join(' L ') + ' L ' + (W - PX) + ',' + H + ' L ' + PX + ',' + H + ' Z',
+        sparkArea: 'M' + xy.join(' L ') + ' L ' + (W - PR) + ',' + (H - 4) + ' L ' + PL + ',' + (H - 4) + ' Z',
         endX: last[0].toFixed(1), endY: last[1].toFixed(1),
         lineColor: CL,
         priceText: x.price.toLocaleString('ko-KR'),
@@ -1302,7 +1303,7 @@ class Component extends DCLogic {
         descStyle: 'position:relative;font-size:13.5px;font-weight:600;color:#92AEDA;line-height:1.5;margin-top:9px;height:21px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis',
         priceStyle: 'font-size:' + (x.price >= 1000000 ? 29 : 35) + 'px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.035em;line-height:1;text-shadow:0 3px 18px rgba(0,0,0,0.7)',
         changeStyle: 'display:inline-flex;align-items:center;margin-top:13px;padding:8px 18px;border-radius:999px;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:#FFFFFF;background:linear-gradient(180deg,' + CL + 'E6 0%,' + CL + '99 100%);box-shadow:inset 0 1.5px 0 rgba(255,255,255,0.45),inset 0 0 0 2px ' + CL + ',0 8px 18px -6px ' + CL + 'CC,0 0 22px -6px ' + CL,
-        chartStyle: 'position:absolute;right:16px;bottom:18px;pointer-events:none',
+        chartStyle: 'position:absolute;right:19px;bottom:22px;pointer-events:none',
 
         pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
       };
