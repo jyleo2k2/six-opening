@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ReasonForm } from "@/features/f3-reason";
+import { TradingViewChart, type ChartPoint, type ChartType } from "@/features/f2-trade/TradingViewLineChart";
 import { stockBySymbol } from "@/shared/data/stocks";
 import { useLiveQuotes } from "@/shared/data/use-live-quotes";
-import { buildTradeMarkers, chartBounds, symbolTrades } from "@/shared/engine/trade-markers";
+import { symbolTrades } from "@/shared/engine/trade-markers";
 import { useFamilyFeedStore } from "@/shared/store/use-family-feed-store";
 import { useInvestmentStore } from "@/shared/store/use-investment-store";
-import type { FamilyMember, ReasonRecord, Trade, TradeSide } from "@/shared/types";
-import { Button, Card, ConfettiBurst, LoadingScreen, PhoneShell, PriceText, ScreenHeader } from "@/shared/ui";
+import type { ReasonRecord, TradeSide } from "@/shared/types";
+import { Button, Card, ConfettiBurst, PhoneShell, PriceText, ScreenHeader } from "@/shared/ui";
 
 type Step = "detail" | "quantity" | "reason" | "complete";
 type ChartPeriod = "minute" | "daily" | "weekly";
@@ -20,52 +21,49 @@ const chartPeriods: { value: ChartPeriod; label: string }[] = [
   { value: "weekly", label: "주 차트" },
 ];
 
-const clientChartCache = new Map<string, number[]>();
+const chartTypes: { value: ChartType; label: string }[] = [
+  { value: "line", label: "선 차트" },
+  { value: "candlestick", label: "캔들 차트" },
+];
 
-function fixtureChart(values: number[], period: ChartPeriod) {
-  if (period === "minute") return values.slice(-6);
-  if (period === "weekly") return values.filter((_, index) => index % 2 === 0 || index === values.length - 1);
-  return values;
+const clientChartCache = new Map<string, ChartPoint[]>();
+const chartPreloadPromises = new Map<string, Promise<ChartPoint[] | undefined>>();
+
+function fixtureChart(values: number[], period: ChartPeriod): ChartPoint[] {
+  const selected = period === "minute" ? values.slice(-6) : period === "weekly" ? values.filter((_, index) => index % 2 === 0 || index === values.length - 1) : values;
+  const interval = period === "minute" ? 60 : period === "weekly" ? 7 * 24 * 60 * 60 : 24 * 60 * 60;
+  const lastTime = Math.floor(Date.now() / 1000 / interval) * interval;
+  return selected.map((close, index) => {
+    const open = selected[index - 1] ?? close;
+    return { time: lastTime - (selected.length - 1 - index) * interval, open, high: Math.max(open, close), low: Math.min(open, close), close, volume: 0, price: close };
+  });
 }
 
-/** 가족 매매 지점 마커. 좌표·라벨 계산은 shared/engine/trade-markers가 소유한다. */
-const MEMBER_MARKER: Record<FamilyMember, string> = {
-  child: "fill-magenta",
-  parent: "fill-navy",
-};
-
-function LineChart({ values, positive, trades, viewer, onSelectTrade }: {
-  values: number[];
-  positive: boolean;
-  trades: Trade[];
-  viewer: FamilyMember;
-  onSelectTrade: (trade: Trade) => void;
-}) {
-  const width = 330;
-  const height = 150;
-  const { min, range } = chartBounds(values, trades);
-  const points = values.map((value, index) => `${index / (values.length - 1) * width},${height - (value - min) / range * (height - 18) - 9}`).join(" ");
-  const markers = buildTradeMarkers({ trades, viewer, min, range, width, height });
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="h-40 w-full" role="img" aria-label="최근 가격 흐름과 가족 매매 지점 차트">
-      <line x1="0" y1="35" x2={width} y2="35" className="stroke-gray" strokeDasharray="4 4"/>
-      <line x1="0" y1="80" x2={width} y2="80" className="stroke-gray" strokeDasharray="4 4"/>
-      <line x1="0" y1="125" x2={width} y2="125" className="stroke-gray" strokeDasharray="4 4"/>
-      <polyline points={points} fill="none" className={positive ? "stroke-up" : "stroke-down"} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-      {markers.map((marker) => (
-        <g key={marker.id} className="cursor-pointer" onClick={() => onSelectTrade(trades.find((trade) => trade.id === marker.id)!)} role="button" aria-label={marker.label}>
-          <title>{marker.label}</title>
-          <polygon points={marker.points} className={MEMBER_MARKER[marker.member]} stroke="white" strokeWidth="1.5"/>
-        </g>
-      ))}
-    </svg>
-  );
+function preloadChart(symbol: string, period: ChartPeriod) {
+  const cacheKey = `${symbol}:${period}`;
+  const cached = clientChartCache.get(cacheKey);
+  if (cached) return Promise.resolve(cached);
+  const pending = chartPreloadPromises.get(cacheKey);
+  if (pending) return pending;
+  const request = fetch(`/api/quote/${symbol}/chart?period=${period}`, { cache: "no-store" })
+    .then((response) => response.ok ? response.json() : null)
+    .then((data) => {
+      if (!Array.isArray(data?.points)) return undefined;
+      const points = data.points.filter((point: ChartPoint) => Number.isFinite(point.time) && Number.isFinite(point.open) && Number.isFinite(point.high) && Number.isFinite(point.low) && Number.isFinite(point.close));
+      if (!points.length) return undefined;
+      clientChartCache.set(cacheKey, points);
+      return points;
+    })
+    .catch(() => undefined)
+    .finally(() => chartPreloadPromises.delete(cacheKey));
+  chartPreloadPromises.set(cacheKey, request);
+  return request;
 }
 
 export function StockDetailScreen({ symbol }: { symbol: string }) {
   const router = useRouter();
   const stock = stockBySymbol.get(symbol);
-  const { quotes, loading: quoteLoading, loadedCount, totalCount } = useLiveQuotes([symbol]);
+  const { quotes } = useLiveQuotes([symbol]);
   const liveQuote = quotes[symbol];
   const quote = liveQuote ?? (stock ? { symbol, name: stock.name, price: stock.price, change: stock.change, rate: stock.rate, updatedAt: new Date().toISOString(), source: "fixture" as const } : undefined);
   const cash = useInvestmentStore((state) => state.cash);
@@ -82,8 +80,13 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
   const [side, setSide] = useState<TradeSide>("buy");
   const [quantity, setQuantity] = useState(1);
   const [completedRecord, setCompletedRecord] = useState<ReasonRecord>();
-  const [chart, setChart] = useState<number[]>(stock?.chart ?? []);
+  const [charts, setCharts] = useState<Record<ChartPeriod, ChartPoint[]>>(() => ({
+    minute: stock ? fixtureChart(stock.chart, "minute") : [],
+    daily: stock ? fixtureChart(stock.chart, "daily") : [],
+    weekly: stock ? fixtureChart(stock.chart, "weekly") : [],
+  }));
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>("daily");
+  const [chartType, setChartType] = useState<ChartType>("line");
 
   useEffect(() => {
     if (!stock) return;
@@ -95,22 +98,19 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
   useEffect(() => {
     if (!stock) return;
     let cancelled = false;
-    const cacheKey = `${symbol}:${chartPeriod}`;
-    setChart(clientChartCache.get(cacheKey) ?? fixtureChart(stock.chart, chartPeriod));
-    fetch(`/api/quote/${symbol}/chart?period=${chartPeriod}`, { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : null)
-      .then((data) => {
-        if (!cancelled && Array.isArray(data?.points) && data.points.length) {
-          const values = data.points.map((point: { price: number }) => point.price);
-          clientChartCache.set(cacheKey, values);
-          setChart(values);
-        }
-      })
-      .catch(() => undefined);
+    const immediate = Object.fromEntries(chartPeriods.map(({ value }) => [value, clientChartCache.get(`${symbol}:${value}`) ?? fixtureChart(stock.chart, value)])) as Record<ChartPeriod, ChartPoint[]>;
+    setCharts(immediate);
+    for (const { value: period } of chartPeriods) {
+      preloadChart(symbol, period).then((points) => {
+        if (!cancelled && points) setCharts((current) => ({ ...current, [period]: points }));
+      });
+    }
     return () => { cancelled = true; };
-  }, [chartPeriod, stock, symbol]);
+  }, [stock, symbol]);
 
   const currentPrice = quote?.price ?? 0;
+  const chart = charts[chartPeriod];
+  const chartValues = chart.map((point) => point.close);
   const maxQuantity = side === "buy" ? Math.floor(cash / currentPrice) : holding?.quantity ?? 0;
   const total = currentPrice * quantity;
   const holdingValue = (holding?.quantity ?? 0) * currentPrice;
@@ -118,7 +118,6 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
   const holdingRate = holding ? (currentPrice - holding.averagePrice) / holding.averagePrice * 100 : 0;
 
   if (!stock || !quote) return <PhoneShell><ScreenHeader title="기업 정보" onBack={() => router.back()} /><p className="p-8 text-center">등록되지 않은 기업이야.</p></PhoneShell>;
-  if (quoteLoading) return <PhoneShell><LoadingScreen loaded={loadedCount} total={totalCount} message={`${stock.name} 시세를 확인하고 있어`} /></PhoneShell>;
 
   const startOrder = (nextSide: TradeSide) => {
     setSide(nextSide);
@@ -173,7 +172,10 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
       <section className="space-y-4 px-4 py-5">
         <Card>
           <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-xl bg-bg text-[11px] font-extrabold text-navy">{stock.logo}</span><div><p className="text-2xl font-extrabold tabular-nums">{currentPrice.toLocaleString()}원</p><p className="mt-1 text-xs"><PriceText value={quote.change} rate={quote.rate} /> 오늘</p></div></div>
-          <LineChart values={chart.length > 1 ? chart : stock.chart} positive={(chart.at(-1) ?? 0) >= (chart[0] ?? 0)} trades={chartTrades} viewer={viewer} onSelectTrade={(trade) => router.push(`/feed?trade=${trade.id}`)} />
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            {chartTypes.map((type) => <button key={type.value} type="button" onClick={() => setChartType(type.value)} aria-pressed={chartType === type.value} className={`rounded-full border px-3 py-2 text-xs font-bold ${chartType === type.value ? "border-navy bg-navy text-white" : "border-gray bg-white text-ink"}`}>{type.label}</button>)}
+          </div>
+          <TradingViewChart key={`${chartPeriod}:${chartType}`} points={chart} livePrice={currentPrice} positive={currentPrice >= (chartValues[0] ?? currentPrice)} period={chartPeriod} chartType={chartType} trades={chartTrades} viewer={viewer} onSelectTrade={(trade) => router.push(`/feed?trade=${trade.id}`)} />
           <div className="grid grid-cols-3 gap-2">
             {chartPeriods.map((period) => <button key={period.value} type="button" onClick={() => setChartPeriod(period.value)} className={`rounded-full border px-3 py-2 text-xs font-bold ${chartPeriod === period.value ? "border-magenta bg-magenta text-white" : "border-gray bg-white text-ink"}`}>{period.label}</button>)}
           </div>
