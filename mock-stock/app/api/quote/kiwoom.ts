@@ -61,20 +61,25 @@ function first(data: Record<string, unknown>, keys: string[]) {
 
 export async function getQuote(symbol: string): Promise<Quote> {
   const stock = stockBySymbol.get(symbol);
-  if (!stock) throw new Error("등록되지 않은 종목입니다.");
+  const name = stock?.name ?? symbol;
   const cached = quoteCache.get(symbol);
   if (cached && Date.now() - cached.at < 900) return cached.value;
-  if (!credentialsAvailable()) return { symbol, name: stock.name, price: stock.price, change: stock.change, rate: stock.rate, updatedAt: new Date().toISOString(), source: "fixture" };
+  if (!credentialsAvailable()) {
+    if (stock) return { symbol, name, price: stock.price, change: stock.change, rate: stock.rate, updatedAt: new Date().toISOString(), source: "fixture" };
+    throw new Error("등록되지 않은 종목입니다.");
+  }
   try {
     const data = await enqueue(() => post("/api/dostk/stkinfo", { stk_cd: symbol }, "ka10001")) as Record<string, unknown>;
-    const change = numeric(first(data, ["pred_pre", "change", "prdy_vrss"])) ?? stock.change;
-    const price = numeric(first(data, ["cur_prc", "stck_prpr", "price"]), true) ?? stock.price;
-    const rate = numeric(first(data, ["flu_rt", "change_rate", "prdy_ctrt"])) ?? (price - change ? change / (price - change) * 100 : stock.rate);
-    const value: Quote = { symbol, name: stock.name, price, change, rate, updatedAt: new Date().toISOString(), source: "kiwoom" };
+    const change = numeric(first(data, ["pred_pre", "change", "prdy_vrss"])) ?? stock?.change ?? 0;
+    const price = numeric(first(data, ["cur_prc", "stck_prpr", "price"]), true) ?? stock?.price ?? 0;
+    const rate = numeric(first(data, ["flu_rt", "change_rate", "prdy_ctrt"])) ?? (price - change ? change / (price - change) * 100 : stock?.rate ?? 0);
+    if (!price) throw new Error("no price");
+    const value: Quote = { symbol, name, price, change, rate, updatedAt: new Date().toISOString(), source: "kiwoom" };
     quoteCache.set(symbol, { value, at: Date.now() });
     return value;
   } catch {
-    return { symbol, name: stock.name, price: stock.price, change: stock.change, rate: stock.rate, updatedAt: new Date().toISOString(), source: "fixture" };
+    if (stock) return { symbol, name, price: stock.price, change: stock.change, rate: stock.rate, updatedAt: new Date().toISOString(), source: "fixture" };
+    throw new Error("시세를 불러오지 못했습니다.");
   }
 }
 
