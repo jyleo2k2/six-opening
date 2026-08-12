@@ -1,0 +1,37 @@
+name: 캔들 적재
+
+# 장 마감(KST 15:30) 뒤에 51종 일봉·주봉을 보관 DB에 이어붙인다.
+# cron 은 항상 UTC 다 — 07:00 UTC = 16:00 KST. 평일만 돈다.
+# 배포 없이 도는 경로다. Vercel Cron 은 프로덕션 배포 URL 로 GET 을 보내는 방식이라
+# 배포 전까지는 쓸 수 없다.
+on:
+  schedule:
+    - cron: "0 7 * * 1-5"
+  workflow_dispatch:
+
+concurrency:
+  group: candles
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run seed:candles
+        env:
+          KIWOOM_APP_KEY: ${{ secrets.KIWOOM_APP_KEY }}
+          KIWOOM_SECRET_KEY: ${{ secrets.KIWOOM_SECRET_KEY }}
+          KIWOOM_ENV: ${{ vars.KIWOOM_ENV || 'real' }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
