@@ -1,0 +1,48 @@
+---
+name: child-news-pipeline
+description: 오늘 시황 또는 선정 51개 기업 뉴스 역할 파이프라인 프로토타입을 수집·선별·어린이용 편집·독립 검수할 때 사용한다.
+---
+
+# 어린이 뉴스 역할 파이프라인 프로토타입
+
+## 목적
+
+뉴스 수를 채우는 것보다 화면에 잘못된 뉴스가 나오지 않는 것을 우선한다. 저장 가능한 결과는 `관련성 선별 → 어린이용 편집 → 독립 출고 검수`를 모두 통과한 기사뿐이다.
+
+## 역할과 입력 격리
+
+1. `news-relevance-selector`
+   - 원문 전체와 51개 기업 목록을 받는다.
+   - 오늘 시황 또는 직접적인 중요 회사 사건만 통과시킨다.
+   - 중심 문장과 주변 문장을 분리한다.
+2. `child-news-editor`
+   - 선별자가 고른 문장만 받는다.
+   - 중심 사건을 먼저 쓰고 모든 어려운 용어를 쉬운 말로 처리한다.
+3. `news-publication-reviewer`
+   - 원문 전체와 실제 노출문만 받는다.
+   - 선별·편집 역할의 자체 점수나 통과 선언은 보지 않고 처음부터 판정한다.
+
+역할은 순서대로 실행한다. 한 단계가 탈락·시간 초과·파싱 오류면 즉시 `rejected`로 끝낸다.
+
+## 재시도 규칙
+
+- 편집 결과의 형식·근거·용어 처리가 실패하면, 실패 이유만 전달해 Luna `high`로 한 번 재편집할 수 있다.
+- 독립 검수에서 기사 자격·주체·중요성 불일치가 나오면 재작성하지 않고 탈락시킨다.
+- 문안 초점·근거·용어처럼 편집으로만 고칠 수 있는 문제는 한 번 재편집한 뒤 다시 독립 검수한다.
+- 최대 두 번의 편집 후에도 실패하면 탈락한다. 다른 모델로 자동 전환하지 않는다.
+
+## 출고 조건
+
+- 서버가 모든 검수 boolean과 이슈 배열을 직접 확인한다.
+- 모든 검사가 `true`, 이슈가 0개이고 선별자·검수자의 주체와 사건 유형이 일치해야 `ready_for_storage`다.
+- `ready_for_storage`가 아닌 결과는 DB에 넣지 않는다.
+- 통과 기사가 부족하면 부족한 수만 반환한다. 일상 기사로 목표 개수를 채우지 않는다.
+
+## 구현 위치
+
+- 프로토타입 설명: `web/features/f2-trade/prototypes/child-news-role-pipeline/README.md`
+- 런타임 계약·프롬프트·오케스트레이터: `web/features/f2-trade/prototypes/child-news-role-pipeline/`
+- 기본 서버 실행기: `web/features/f2-trade/prototypes/child-news-role-pipeline/server.ts`의 `runOpenAiNewsRole`
+- 회귀 테스트: `web/features/f2-trade/prototypes/child-news-role-pipeline/pipeline.test.ts`
+
+수동 검증에서 역할 에이전트를 사용할 때도 같은 입력 격리와 출고 조건을 유지한다.

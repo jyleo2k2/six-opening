@@ -1,0 +1,838 @@
+import { filterGeneratedText } from "../../../../shared/llm/filter";
+import {
+  REVIEW_CHECK_NAMES,
+  type ChildNewsDraft,
+  type EditorRoleRequest,
+  type NewsPipelineResult,
+  type NewsRoleRequest,
+  type NewsRoleRunner,
+  type NewsSourceArticle,
+  type NewsSourceUnit,
+  type NewsUniverseCompany,
+  type PublicationReview,
+  type ReadyNews,
+  type RejectedNews,
+  type SelectorAccept,
+  type SelectorReject,
+  parseChildNewsDraft,
+  parsePublicationReview,
+  parseSelectorResult,
+} from "./contracts";
+
+const DEFAULT_ROLE_TIMEOUT_MS = 45_000;
+const MAX_SOURCE_UNIT_LENGTH = 700;
+const MAX_EDITOR_ATTEMPTS = 2;
+
+type GateIssue = { code: string; message: string };
+
+export type NewsPipelineDependencies = {
+  runRole: NewsRoleRunner;
+  universe: NewsUniverseCompany[];
+  timeoutMs?: number;
+  maxEditorAttempts?: 1 | 2;
+};
+
+const ROUTINE_TITLE_RULES: Array<{ pattern: RegExp; message: string }> = [
+  {
+    pattern:
+      /(?:공개\s*채용|채용\s*(?:설명회|박람회|접수)|(?:신입|경력|인재).{0,12}(?:채용|모집))/u,
+    message: "채용·채용행사는 회사의 중요 사업 사건으로 게시하지 않습니다.",
+  },
+  {
+    pattern:
+      /(?:기부|봉사활동|사회공헌|후원\s*(?:확대|전달)|(?:소방|병원).{0,16}(?:지원|기증)|(?:구급차|재활장비).{0,12}기증)/u,
+    message: "기부·후원·사회공헌은 주가 관련 회사 뉴스 범위에서 제외합니다.",
+  },
+  {
+    pattern:
+      /(?:(?:사내|임직원).{0,20}(?:AI|인공지능).{0,20}(?:행사|교육|경진대회|해커톤|캠페인)|(?:AI|인공지능).{0,12}(?:경진대회|해커톤|아이디어대회))/iu,
+    message: "사내 AI 행사·교육은 회사의 중요 사업 사건으로 게시하지 않습니다.",
+  },
+];
+
+function normalizeText(value: string) {
+  return value.normalize("NFKC").toLocaleLowerCase("ko-KR").trim();
+}
+
+function compactText(value: string) {
+  return normalizeText(value).replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+function unique(values: readonly string[]) {
+  return [...new Set(values)];
+}
+
+function hasDuplicates(values: readonly string[]) {
+  return new Set(values).size !== values.length;
+}
+
+function sameSet(left: readonly string[], right: readonly string[]) {
+  if (left.length !== right.length) return false;
+  const rightSet = new Set(right);
+  return left.every((value) => rightSet.has(value));
+}
+
+function splitLongPiece(text: string) {
+  if (text.length <= MAX_SOURCE_UNIT_LENGTH) return [text];
+
+  const chunks: string[] = [];
+  let current = "";
+  for (const word of text.split(/\s+/u)) {
+    if (word.length > MAX_SOURCE_UNIT_LENGTH) {
+      if (current) chunks.push(current);
+      current = "";
+      for (let index = 0; index < word.length; index += MAX_SOURCE_UNIT_LENGTH) {
+        chunks.push(word.slice(index, index + MAX_SOURCE_UNIT_LENGTH));
+      }
+      continue;
+    }
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > MAX_SOURCE_UNIT_LENGTH) {
+      chunks.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+function splitSourceText(text: string) {
+  return text
+    .replace(/\r/gu, "")
+    .split(/\n+/u)
+    .flatMap((paragraph) => paragraph.split(/(?<=[.!?。！？])\s+/u))
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .flatMap(splitLongPiece);
+}
+
+/** 기존 S3 본문 덩어리도 선별자가 문장 단위로 포함·제외할 수 있게 쪼갠다. */
+export function atomizeSourceUnits(
+  sourceUnits: readonly NewsSourceUnit[],
+): NewsSourceUnit[] {
+  return sourceUnits.flatMap((unit) => {
+    const parts = splitSourceText(unit.text);
+    if (parts.length <= 1) {
+      return [{ ...unit, text: parts[0] ?? "" }];
+    }
+    return parts.map((text, index) => ({
+      id: `${unit.id}.${index + 1}`,
+      originId: unit.originId ?? unit.id,
+      text,
+    }));
+  });
+}
+
+function validateArticle(article: NewsSourceArticle): GateIssue[] {
+  const issues: GateIssue[] = [];
+  const required: Array<[string, string]> = [
+    ["articleId", article.articleId],
+    ["runDateKst", article.runDateKst],
+    ["title", article.title],
+    ["publisher", article.publisher],
+    ["publishedAt", article.publishedAt],
+    ["sourceUrl", article.sourceUrl],
+  ];
+  for (const [name, value] of required) {
+    if (!value.trim()) issues.push({ code: "INVALID_INPUT", message: `${name}이 비어 있습니다.` });
+  }
+  if (article.scope !== "market" && article.scope !== "company") {
+    issues.push({ code: "INVALID_INPUT", message: "scope는 market 또는 company여야 합니다." });
+  }
+  if (article.sourceUnits.length === 0) {
+    issues.push({ code: "INVALID_INPUT", message: "원문 근거 문장이 없습니다." });
+  }
+  const ids = article.sourceUnits.map((unit) => unit.id);
+  if (hasDuplicates(ids)) {
+    issues.push({ code: "INVALID_INPUT", message: "원문 근거 id가 중복됩니다." });
+  }
+  for (const unit of article.sourceUnits) {
+    if (!unit.id.trim() || !unit.text.trim()) {
+      issues.push({ code: "INVALID_INPUT", message: "비어 있는 원문 근거가 있습니다." });
+      break;
+    }
+  }
+  return issues;
+}
+
+function validateUniverse(universe: readonly NewsUniverseCompany[]): GateIssue[] {
+  if (universe.length !== 51) {
+    return [
+      {
+        code: "INVALID_INPUT",
+        message: `선정 기업 목록은 정확히 51개여야 합니다. 현재 ${universe.length}개입니다.`,
+      },
+    ];
+  }
+  const stockIds = universe.map((company) => company.stockId);
+  if (hasDuplicates(stockIds)) {
+    return [{ code: "INVALID_INPUT", message: "선정 기업 stockId가 중복됩니다." }];
+  }
+  if (
+    universe.some(
+      (company) => !company.stockId.trim() || !company.name.trim(),
+    )
+  ) {
+    return [{ code: "INVALID_INPUT", message: "선정 기업 식별자나 이름이 비어 있습니다." }];
+  }
+  return [];
+}
+
+function reject(
+  articleId: string,
+  stage: RejectedNews["stage"],
+  issues: readonly GateIssue[],
+  editorAttempts = 0,
+): RejectedNews {
+  return {
+    status: "rejected",
+    articleId,
+    stage,
+    reasonCodes: unique(issues.map((issue) => issue.code)),
+    reasons: issues.map((issue) => issue.message),
+    editorAttempts,
+  };
+}
+
+function prefilterArticle(article: NewsSourceArticle): GateIssue[] {
+  if (article.scope !== "company") return [];
+  const rule = ROUTINE_TITLE_RULES.find(({ pattern }) => pattern.test(article.title));
+  return rule
+    ? [{ code: "ROUTINE_OR_PROMOTIONAL", message: rule.message }]
+    : [];
+}
+
+function validateSelectorReject(
+  result: SelectorReject,
+  article: NewsSourceArticle,
+): GateIssue[] {
+  const issues: GateIssue[] = [];
+  if (result.articleId !== article.articleId) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "선별 결과의 articleId가 다릅니다." });
+  }
+  if (
+    result.primaryStockIds.length > 0 ||
+    result.includedSourceIds.length > 0 ||
+    result.difficultTerms.length > 0 ||
+    result.focusStatement.trim() ||
+    result.anchorSourceId.trim()
+  ) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "탈락 결과에 통과용 필드가 남아 있습니다." });
+  }
+  if (result.reasonCodes.length === 0 || result.reasons.length === 0) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "탈락 근거가 없습니다." });
+  }
+  return issues;
+}
+
+function companyNames(company: NewsUniverseCompany) {
+  return unique([company.name, ...(company.aliases ?? [])]).filter(
+    (name) => compactText(name).length >= 2,
+  );
+}
+
+function textMentionsCompany(text: string, company: NewsUniverseCompany) {
+  const normalized = compactText(text);
+  return companyNames(company).some((name) =>
+    normalized.includes(compactText(name)),
+  );
+}
+
+function validateSelectorAccept(
+  result: SelectorAccept,
+  article: NewsSourceArticle,
+  universe: readonly NewsUniverseCompany[],
+): GateIssue[] {
+  const issues: GateIssue[] = [];
+  const sourceIds = article.sourceUnits.map((unit) => unit.id);
+  const sourceIdSet = new Set(sourceIds);
+  const universeById = new Map(universe.map((company) => [company.stockId, company]));
+
+  if (result.articleId !== article.articleId) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "선별 결과의 articleId가 다릅니다." });
+  }
+  if (result.kind !== article.scope) {
+    issues.push({ code: "OUTSIDE_ALLOWED_SCOPE", message: "후보 범위와 선별 범위가 일치하지 않습니다." });
+  }
+  if (!result.focusStatement.trim()) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "중심 사건이 비어 있습니다." });
+  }
+  if (
+    result.includedSourceIds.length === 0 ||
+    hasDuplicates(result.includedSourceIds) ||
+    hasDuplicates(result.excludedSourceIds) ||
+    result.includedSourceIds.some((id) => !sourceIdSet.has(id)) ||
+    result.excludedSourceIds.some((id) => !sourceIdSet.has(id)) ||
+    !sameSet(
+      unique([...result.includedSourceIds, ...result.excludedSourceIds]),
+      sourceIds,
+    ) ||
+    result.includedSourceIds.some((id) => result.excludedSourceIds.includes(id))
+  ) {
+    issues.push({
+      code: "INVALID_SOURCE_PARTITION",
+      message: "모든 근거 문장은 포함 또는 제외 중 정확히 한 곳에 있어야 합니다.",
+    });
+  }
+  if (!result.includedSourceIds.includes(result.anchorSourceId)) {
+    issues.push({ code: "INVALID_ANCHOR", message: "중심 근거가 포함 근거에 없습니다." });
+  }
+  if (result.reasonCodes.length > 0) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "통과 결과에 탈락 코드가 남아 있습니다." });
+  }
+
+  if (result.kind === "market") {
+    if (
+      result.eventType !== "observed_market_move" ||
+      result.primaryStockIds.length > 0
+    ) {
+      issues.push({
+        code: "NOT_TODAYS_MARKET",
+        message: "시장 뉴스는 관측된 오늘 시황이어야 하며 개별 종목을 주체로 두지 않습니다.",
+      });
+    }
+  } else {
+    if (
+      result.eventType === "observed_market_move" ||
+      result.primaryStockIds.length === 0 ||
+      hasDuplicates(result.primaryStockIds) ||
+      result.primaryStockIds.some((id) => !universeById.has(id))
+    ) {
+      issues.push({
+        code: "NO_SELECTED_COMPANY",
+        message: "회사 뉴스의 실제 주체는 선정 기업 목록에 있어야 합니다.",
+      });
+    } else {
+      const lead = [article.title, ...article.sourceUnits.slice(0, 2).map((unit) => unit.text)].join(" ");
+      if (
+        !result.primaryStockIds.some((id) => {
+          const company = universeById.get(id);
+          return company ? textMentionsCompany(lead, company) : false;
+        })
+      ) {
+        issues.push({
+          code: "COMPANY_NOT_PRIMARY_SUBJECT",
+          message: "선정 기업이 제목이나 기사 앞부분의 주체로 확인되지 않습니다.",
+        });
+      }
+    }
+  }
+
+  const includedSet = new Set(result.includedSourceIds);
+  const unitById = new Map(article.sourceUnits.map((unit) => [unit.id, unit]));
+  const normalizedTerms = result.difficultTerms.map((item) => compactText(item.term));
+  if (normalizedTerms.some((term) => !term) || hasDuplicates(normalizedTerms)) {
+    issues.push({ code: "INVALID_TERM_AUDIT", message: "어려운 용어가 비어 있거나 중복됩니다." });
+  }
+  for (const item of result.difficultTerms) {
+    if (
+      item.sourceIds.length === 0 ||
+      item.sourceIds.some((id) => !includedSet.has(id)) ||
+      !item.sourceIds.some((id) => {
+        const unit = unitById.get(id);
+        return unit ? compactText(unit.text).includes(compactText(item.term)) : false;
+      })
+    ) {
+      issues.push({
+        code: "INVALID_TERM_AUDIT",
+        message: `어려운 용어 '${item.term}'의 포함 근거가 올바르지 않습니다.`,
+      });
+    }
+  }
+
+  return issues;
+}
+
+function extractNumbers(text: string) {
+  return text.match(/\d[\d,.]*%?/gu)?.map((value) => value.replace(/[,%]/gu, "")) ?? [];
+}
+
+function visibleDraftText(draft: ChildNewsDraft, includeTerms = true) {
+  return [
+    draft.headline.text,
+    draft.homeSummary.text,
+    ...draft.body.map((block) => block.text),
+    ...(includeTerms ? draft.termTreatments.map((item) => item.easyText) : []),
+  ].join("\n");
+}
+
+function validateDraft(
+  draft: ChildNewsDraft,
+  article: NewsSourceArticle,
+  selection: SelectorAccept,
+  universe: readonly NewsUniverseCompany[],
+): GateIssue[] {
+  const issues: GateIssue[] = [];
+  const allowedIds = new Set(selection.includedSourceIds);
+  const citedBlocks = [draft.headline, draft.homeSummary, ...draft.body];
+  const visibleText = visibleDraftText(draft);
+
+  if (draft.articleId !== article.articleId) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "편집 결과의 articleId가 다릅니다." });
+  }
+  if (!draft.headline.text.trim() || draft.headline.text.length > 60) {
+    issues.push({ code: "INVALID_DRAFT_SHAPE", message: "제목은 1~60자여야 합니다." });
+  }
+  if (!draft.homeSummary.text.trim() || draft.homeSummary.text.length > 180) {
+    issues.push({ code: "INVALID_DRAFT_SHAPE", message: "홈 요약은 1~180자여야 합니다." });
+  }
+  if (
+    draft.body.length < 2 ||
+    draft.body.length > 3 ||
+    draft.body[0]?.role !== "core_event" ||
+    hasDuplicates(draft.body.map((block) => block.role)) ||
+    draft.body.some((block) => !block.text.trim() || block.text.length > 280)
+  ) {
+    issues.push({
+      code: "INVALID_DRAFT_SHAPE",
+      message: "본문은 중심 사건부터 시작하는 서로 다른 역할의 2~3개 짧은 문단이어야 합니다.",
+    });
+  }
+  if (
+    !draft.headline.sourceIds.includes(selection.anchorSourceId) ||
+    !draft.homeSummary.sourceIds.includes(selection.anchorSourceId) ||
+    !draft.body[0]?.sourceIds.includes(selection.anchorSourceId)
+  ) {
+    issues.push({
+      code: "ANCHOR_MISSING_FROM_HOME",
+      message: "제목·홈 요약·첫 문단이 모두 중심 사건을 근거로 해야 합니다.",
+    });
+  }
+  if (
+    citedBlocks.some(
+      (block) =>
+        block.sourceIds.length === 0 ||
+        hasDuplicates(block.sourceIds) ||
+        block.sourceIds.some((id) => !allowedIds.has(id)),
+    )
+  ) {
+    issues.push({
+      code: "UNSELECTED_FACT_USED",
+      message: "편집자가 선별되지 않은 원문 사실을 사용했습니다.",
+    });
+  }
+
+  if (selection.kind === "company") {
+    const universeById = new Map(universe.map((company) => [company.stockId, company]));
+    const lead = `${draft.headline.text} ${draft.homeSummary.text}`;
+    if (
+      selection.primaryStockIds.some((id) => {
+        const company = universeById.get(id);
+        return !company || !textMentionsCompany(lead, company);
+      })
+    ) {
+      issues.push({
+        code: "PRIMARY_SUBJECT_MISSING_FROM_HOME",
+        message: "제목과 홈 요약에 모든 중심 기업이 분명히 드러나야 합니다.",
+      });
+    }
+  }
+
+  const expectedTerms = selection.difficultTerms.map((item) => compactText(item.term));
+  const treatedTerms = draft.termTreatments.map((item) => compactText(item.term));
+  if (
+    hasDuplicates(treatedTerms) ||
+    !sameSet(expectedTerms, treatedTerms) ||
+    draft.termTreatments.some(
+      (item) => !item.easyText.trim() || item.easyText.trim().length < 4,
+    )
+  ) {
+    issues.push({
+      code: "UNEXPLAINED_TERM",
+      message: "선별된 어려운 용어를 모두 쉬운 말로 처리하지 않았습니다.",
+    });
+  }
+  const articleTextOnly = compactText(visibleDraftText(draft, false));
+  for (const treatment of draft.termTreatments) {
+    if (
+      treatment.treatment === "replaced" &&
+      articleTextOnly.includes(compactText(treatment.term))
+    ) {
+      issues.push({
+        code: "UNEXPLAINED_TERM",
+        message: `바꿨다고 표시한 '${treatment.term}'이 노출문에 남아 있습니다.`,
+      });
+    }
+  }
+
+  const selectedSourceText = article.sourceUnits
+    .filter((unit) => allowedIds.has(unit.id))
+    .map((unit) => unit.text)
+    .join(" ");
+  const allowedNumbers = new Set(extractNumbers(selectedSourceText));
+  if (extractNumbers(visibleText).some((number) => !allowedNumbers.has(number))) {
+    issues.push({
+      code: "UNSUPPORTED_NUMBER",
+      message: "선별 근거에 없는 숫자가 노출문에 추가됐습니다.",
+    });
+  }
+
+  // 공통 챗 필터는 관측된 "주가 상승/하락"도 전망으로 본다. 오늘 시황일 때만
+  // 해당 과거 변동 표현을 중립 표식으로 바꿔 공통 필터에 넣고, 원문은 아래
+  // 뉴스 전용 규칙으로 미래 방향·조언을 별도 차단한다.
+  const commonFilterInput =
+    selection.eventType === "observed_market_move"
+      ? visibleText.replace(
+          /((?:주가|가격|수익률).{0,12})(?:상승|하락|올랐|내렸)/gu,
+          "$1변동",
+        )
+      : visibleText;
+  if (!filterGeneratedText(commonFilterInput)) {
+    issues.push({
+      code: "INVESTMENT_SAFETY",
+      message: "공통 LLM 금지 표현 필터를 통과하지 못했습니다.",
+    });
+  }
+  if (
+    /(?:호재|악재|긍정적|부정적|(?:매수|매도|보유).{0,12}(?:추천|해야|하자|시점|기회)|(?:사라|팔아|추천해)|목표가|(?:수익률|주가|가격).{0,16}(?:예상|전망|오를\s*것|내릴\s*것|상승할|하락할)|(?:앞으로|향후|전망|예상|가능성).{0,20}(?:상승|하락|오를|내릴)|(?:상승|하락|오를|내릴).{0,8}(?:전망|예상|가능성))/u.test(
+      visibleText,
+    )
+  ) {
+    issues.push({
+      code: "SENTIMENT_OR_ADVICE",
+      message: "긍정·부정 라벨, 투자 지시 또는 주가 전망이 포함됐습니다.",
+    });
+  }
+
+  return issues;
+}
+
+function assessReview(
+  review: PublicationReview,
+  article: NewsSourceArticle,
+  selection: SelectorAccept,
+  universe: readonly NewsUniverseCompany[],
+) {
+  const issues: GateIssue[] = [];
+  const sourceIds = new Set(article.sourceUnits.map((unit) => unit.id));
+  const universeIds = new Set(universe.map((company) => company.stockId));
+  let semanticFailure = false;
+
+  if (review.articleId !== article.articleId) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "검수 결과의 articleId가 다릅니다." });
+    semanticFailure = true;
+  }
+  if (
+    review.primaryStockIds.some((id) => !universeIds.has(id)) ||
+    review.anchorSourceIds.length === 0 ||
+    review.anchorSourceIds.some((id) => !sourceIds.has(id)) ||
+    review.issues.some((issue) => issue.sourceIds.some((id) => !sourceIds.has(id)))
+  ) {
+    issues.push({ code: "INVALID_ROLE_OUTPUT", message: "검수 결과가 존재하지 않는 id를 참조합니다." });
+    semanticFailure = true;
+  }
+  for (const check of REVIEW_CHECK_NAMES) {
+    if (!review.checks[check]) {
+      issues.push({ code: `REVIEW_${check}`, message: `독립 검수 실패: ${check}` });
+    }
+  }
+  issues.push(
+    ...review.issues.map((issue) => ({
+      code: issue.code || "REVIEW_ISSUE",
+      message: issue.explanation,
+    })),
+  );
+
+  if (
+    review.independentKind !== selection.kind ||
+    review.eventType !== selection.eventType ||
+    !sameSet(review.primaryStockIds, selection.primaryStockIds) ||
+    !review.anchorSourceIds.some((id) =>
+      selection.includedSourceIds.includes(id),
+    )
+  ) {
+    issues.push({
+      code: "REVIEW_DISAGREEMENT",
+      message: "선별자와 독립 검수자가 기사 주체 또는 중심 사건에 합의하지 못했습니다.",
+    });
+    semanticFailure = true;
+  }
+  if (
+    !review.checks.allowedScope ||
+    !review.checks.primarySubject ||
+    !review.checks.directMateriality
+  ) {
+    semanticFailure = true;
+  }
+
+  return { passed: issues.length === 0, semanticFailure, issues };
+}
+
+async function invokeRole(
+  runRole: NewsRoleRunner,
+  request: NewsRoleRequest,
+  timeoutMs: number,
+) {
+  const controller = new AbortController();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_, rejectPromise) => {
+    timeout = setTimeout(() => {
+      controller.abort();
+      rejectPromise(new Error(`${request.role} timed out`));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([runRole(request, controller.signal), timeoutPromise]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
+function editorRequest(
+  article: NewsSourceArticle,
+  selection: SelectorAccept,
+  universe: readonly NewsUniverseCompany[],
+  reasoningEffort: "medium" | "high",
+  revisionReasons: string[],
+): EditorRoleRequest {
+  const selectedIds = new Set(selection.primaryStockIds);
+  const includedIds = new Set(selection.includedSourceIds);
+  return {
+    role: "child_news_editor",
+    reasoningEffort,
+    article: {
+      articleId: article.articleId,
+      runDateKst: article.runDateKst,
+      scope: article.scope,
+      publisher: article.publisher,
+      publishedAt: article.publishedAt,
+    },
+    selection: {
+      kind: selection.kind,
+      primaryStockIds: selection.primaryStockIds,
+      eventType: selection.eventType,
+      focusStatement: selection.focusStatement,
+      anchorSourceId: selection.anchorSourceId,
+      difficultTerms: selection.difficultTerms,
+    },
+    selectedCompanies: universe.filter((company) => selectedIds.has(company.stockId)),
+    sourceUnits: article.sourceUnits.filter((unit) => includedIds.has(unit.id)),
+    revisionReasons,
+  };
+}
+
+export async function processNewsCandidate(
+  inputArticle: NewsSourceArticle,
+  dependencies: NewsPipelineDependencies,
+): Promise<NewsPipelineResult> {
+  const article = {
+    ...inputArticle,
+    sourceUnits: atomizeSourceUnits(inputArticle.sourceUnits),
+  };
+  const inputIssues = [
+    ...validateArticle(article),
+    ...validateUniverse(dependencies.universe),
+  ];
+  if (inputIssues.length > 0) {
+    return reject(article.articleId, "input", inputIssues);
+  }
+
+  const prefilterIssues = prefilterArticle(article);
+  if (prefilterIssues.length > 0) {
+    return reject(article.articleId, "prefilter", prefilterIssues);
+  }
+
+  const timeoutMs = dependencies.timeoutMs ?? DEFAULT_ROLE_TIMEOUT_MS;
+  let rawSelection: unknown;
+  try {
+    rawSelection = await invokeRole(
+      dependencies.runRole,
+      {
+        role: "relevance_selector",
+        reasoningEffort: "high",
+        article,
+        universe: dependencies.universe,
+      },
+      timeoutMs,
+    );
+  } catch (error) {
+    return reject(article.articleId, "selector", [
+      {
+        code: "ROLE_ERROR",
+        message: error instanceof Error ? error.message : "관련성 선별 호출에 실패했습니다.",
+      },
+    ]);
+  }
+
+  const selection = parseSelectorResult(rawSelection);
+  if (!selection) {
+    return reject(article.articleId, "selector", [
+      { code: "INVALID_ROLE_OUTPUT", message: "관련성 선별 결과 스키마가 올바르지 않습니다." },
+    ]);
+  }
+  if (selection.decision === "reject") {
+    const invalidReject = validateSelectorReject(selection, article);
+    if (invalidReject.length > 0) {
+      return reject(article.articleId, "selector", invalidReject);
+    }
+    return reject(
+      article.articleId,
+      "selector",
+      selection.reasons.map((message, index) => ({
+        code: selection.reasonCodes[index] ?? selection.reasonCodes[0] ?? "SELECTOR_REJECTED",
+        message,
+      })),
+    );
+  }
+
+  const selectionIssues = validateSelectorAccept(
+    selection,
+    article,
+    dependencies.universe,
+  );
+  if (selectionIssues.length > 0) {
+    return reject(article.articleId, "selector", selectionIssues);
+  }
+
+  const maxAttempts = Math.min(
+    dependencies.maxEditorAttempts ?? MAX_EDITOR_ATTEMPTS,
+    MAX_EDITOR_ATTEMPTS,
+  );
+  let revisionReasons: string[] = [];
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    let rawDraft: unknown;
+    try {
+      rawDraft = await invokeRole(
+        dependencies.runRole,
+        editorRequest(
+          article,
+          selection,
+          dependencies.universe,
+          attempt === 1 ? "medium" : "high",
+          revisionReasons,
+        ),
+        timeoutMs,
+      );
+    } catch (error) {
+      return reject(
+        article.articleId,
+        "editor",
+        [
+          {
+            code: "ROLE_ERROR",
+            message: error instanceof Error ? error.message : "어린이용 편집 호출에 실패했습니다.",
+          },
+        ],
+        attempt,
+      );
+    }
+
+    const draft = parseChildNewsDraft(rawDraft);
+    if (!draft) {
+      return reject(
+        article.articleId,
+        "editor",
+        [{ code: "INVALID_ROLE_OUTPUT", message: "어린이용 편집 결과 스키마가 올바르지 않습니다." }],
+        attempt,
+      );
+    }
+
+    const draftIssues = validateDraft(
+      draft,
+      article,
+      selection,
+      dependencies.universe,
+    );
+    if (draftIssues.length > 0) {
+      if (attempt < maxAttempts) {
+        revisionReasons = draftIssues.map((issue) => issue.message);
+        continue;
+      }
+      return reject(article.articleId, "editor", draftIssues, attempt);
+    }
+
+    let rawReview: unknown;
+    try {
+      rawReview = await invokeRole(
+        dependencies.runRole,
+        {
+          role: "publication_reviewer",
+          reasoningEffort: "high",
+          article,
+          universe: dependencies.universe,
+          draft,
+        },
+        timeoutMs,
+      );
+    } catch (error) {
+      return reject(
+        article.articleId,
+        "reviewer",
+        [
+          {
+            code: "ROLE_ERROR",
+            message: error instanceof Error ? error.message : "독립 출고 검수 호출에 실패했습니다.",
+          },
+        ],
+        attempt,
+      );
+    }
+
+    const review = parsePublicationReview(rawReview);
+    if (!review) {
+      return reject(
+        article.articleId,
+        "reviewer",
+        [{ code: "INVALID_ROLE_OUTPUT", message: "독립 검수 결과 스키마가 올바르지 않습니다." }],
+        attempt,
+      );
+    }
+    const assessment = assessReview(
+      review,
+      article,
+      selection,
+      dependencies.universe,
+    );
+    if (assessment.passed) {
+      return {
+        status: "ready_for_storage",
+        article,
+        selection,
+        draft,
+        review,
+        editorAttempts: attempt,
+      };
+    }
+    if (assessment.semanticFailure || attempt >= maxAttempts) {
+      return reject(article.articleId, "reviewer", assessment.issues, attempt);
+    }
+    revisionReasons = assessment.issues.map((issue) => issue.message);
+  }
+
+  return reject(article.articleId, "editor", [
+    { code: "EDITOR_ATTEMPTS_EXHAUSTED", message: "편집 재시도 횟수를 모두 사용했습니다." },
+  ], maxAttempts);
+}
+
+export async function runNewsPipeline(
+  candidates: readonly NewsSourceArticle[],
+  dependencies: NewsPipelineDependencies & { maxReady?: number },
+) {
+  const readyForStorage: ReadyNews[] = [];
+  const rejected: RejectedNews[] = [];
+  const maxReady = Math.max(1, Math.floor(dependencies.maxReady ?? 10));
+  let nextIndex = 0;
+
+  for (; nextIndex < candidates.length; nextIndex += 1) {
+    if (readyForStorage.length >= maxReady) break;
+    const result = await processNewsCandidate(candidates[nextIndex], dependencies);
+    if (result.status === "ready_for_storage") readyForStorage.push(result);
+    else rejected.push(result);
+  }
+
+  return {
+    readyForStorage,
+    rejected,
+    unprocessedArticleIds: candidates.slice(nextIndex).map((article) => article.articleId),
+  };
+}
+
+export function isReadyForStorage(
+  result: NewsPipelineResult,
+): result is ReadyNews {
+  return result.status === "ready_for_storage";
+}

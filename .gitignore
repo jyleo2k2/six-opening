@@ -26,10 +26,14 @@ Thumbs.db
 # AI 하네스 — 개인 설정은 무시하고 공용 Git 세션 스킬만 추적
 .claude/*
 !.claude/settings.json
+!.claude/agents/
+!.claude/agents/**
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/git-session-manager/
 !.claude/skills/git-session-manager/**
+!.claude/skills/child-news-pipeline/
+!.claude/skills/child-news-pipeline/**
 
 .agents/*
 !.agents/skills/
