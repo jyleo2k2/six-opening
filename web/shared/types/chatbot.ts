@@ -15,10 +15,45 @@ export type ChatUiAction = {
   target: ChatScreen;
 };
 
+export const EXPLAIN_STAGES = ["brief", "detail", "example"] as const;
+
+export type ExplainStage = (typeof EXPLAIN_STAGES)[number];
+
+export type ExplainChoice = { id: string; label: string };
+
+/** 사전 저작·검수된 정적 데이터. 런타임 생성 금지. */
+export type ExplainScript = {
+  id: string;
+  brief: string;
+  check: {
+    question: string;
+    choices: readonly ExplainChoice[];
+    answerId: string;
+  };
+  detail: string;
+  example: string;
+};
+
+/** 서버가 내보내는 진행 중 턴. 아이는 choices 중 하나를 눌러 응답한다. */
+export type ExplainTurn = {
+  scriptId: string;
+  stage: ExplainStage;
+  prompt: string;
+  choices: readonly ExplainChoice[];
+};
+
+/** 아이가 보내는 응답. example 단계는 응답을 받지 않는다. */
+export type ExplainReply = {
+  scriptId: string;
+  stage: Exclude<ExplainStage, "example">;
+  choiceId: string;
+};
+
 export type ChatResponse = {
   text: string;
   suggestedQuestions?: string[];
   uiAction?: ChatUiAction;
+  explain?: ExplainTurn;
 };
 
 export const READ_ONLY_CHAT_TOOLS = [
