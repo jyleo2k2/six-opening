@@ -1317,6 +1317,16 @@ class Component extends DCLogic {
     this.liveRefreshTick();
     this.liveRefreshTimer = setInterval(this.liveRefreshTick, 5000);
 
+    // 가족 기록(F11) 오버레이에서 종목을 고르면 그 상세 화면으로 옮긴다.
+    this.receiveOpenStock = (event) => {
+      if (event.origin !== window.location.origin) return;
+      const data = event.data;
+      if (!data || data.type !== 'kiwoom:open-stock' || !/^\d{6}$/.test(String(data.symbol))) return;
+      const stock = (this.uni().stocks || []).filter(x => x.code === data.symbol)[0];
+      if (stock) this.set({ code: stock.code, screen: 'detail' });
+    };
+    window.addEventListener('message', this.receiveOpenStock);
+
     // 캔들은 /api/quote/{종목}/chart 가 준다 (보관 DB → 키움 → 픽스처 순).
     // 월봉 API 는 없으므로 주봉을 달 단위로 묶는다.
     this.candleCache = {};
@@ -1351,6 +1361,7 @@ class Component extends DCLogic {
   }
   componentWillUnmount(){
     if (this.liveRefreshTimer) clearInterval(this.liveRefreshTimer);
+    if (this.receiveOpenStock) window.removeEventListener('message', this.receiveOpenStock);
   }
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
