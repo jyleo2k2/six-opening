@@ -195,10 +195,11 @@ a:hover{color:#01185A}
 </div>
 </sc-for>
 </div>
-<div style="position:relative;flex:none;display:flex;justify-content:center;gap:5px;padding:0 0 14px">
+<div style="position:relative;flex:none;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 0 14px">
 <sc-for list="{{ cardDots }}" as="d" hint-placeholder-count="8">
 <div style="{{ d.style }}"></div>
 </sc-for>
+<span style="margin-left:8px;font-size:11.5px;font-weight:700;color:#A8A6C4;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cardCountText }}</span>
 </div>
 </div>
 
@@ -1279,11 +1280,10 @@ class Component extends DCLogic {
     const logos = u.logos || {};
     const mixW = (hx, w) => { const n = parseInt(hx.slice(1), 16); const c = [(n>>16)&255,(n>>8)&255,n&255].map(v => Math.round(v + (255 - v) * w)); return '#' + c.map(v => v.toString(16).padStart(2,'0')).join(''); };
     const rgbOf = (hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); };
-    // 'rank' 는 섹터가 아니라 그날 등락률 순으로 보는 모드다. 도트가 넘치지 않게 상위 10곳만.
+    // 'rank' 는 섹터가 아니라 그날 등락률 순으로 51종 전체를 보는 모드다.
     const isRank = s.sectorId === 'rank';
-    const RANK_COUNT = 10;
     const baseList = isRank
-      ? u.stocks.slice().sort((a, b) => b.change - a.change).slice(0, RANK_COUNT)
+      ? u.stocks.slice().sort((a, b) => b.change - a.change)
       : u.stocks.filter(x => x.sector === s.sectorId);
     const list = baseList.map((x, ci) => {
       const sec = this.sectorOf(x.sector);
@@ -1502,9 +1502,21 @@ class Component extends DCLogic {
         ? '오늘 많이 오른 순 ' + list.length + '곳'
         : this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
       cards: list,
-      cardDots: list.map((x, i) => ({
-        style: 'width:' + (i === s.cardIndex ? '18px' : '6px') + ';height:6px;border-radius:999px;transition:width .18s ease;background:' + (i === s.cardIndex ? '#FF3D8D' : '#D6D0E5') + (i === s.cardIndex ? ';box-shadow:0 0 9px rgba(255,61,141,0.42)' : '')
-      })),
+      // 종목이 많으면 도트가 화면을 넘친다. 현재 위치 주변만 창처럼 보여주고 양끝은 작게 흘린다.
+      cardDots: (() => {
+        const total = list.length, MAX = 9;
+        const start = total <= MAX ? 0 : Math.min(Math.max(0, s.cardIndex - Math.floor(MAX / 2)), total - MAX);
+        const shown = Math.min(MAX, total);
+        return Array.from({ length: shown }, (_, k) => {
+          const i = start + k;
+          const on = i === s.cardIndex;
+          const fadeL = total > MAX && k === 0 && start > 0;
+          const fadeR = total > MAX && k === shown - 1 && start + shown < total;
+          const w = on ? 18 : (fadeL || fadeR) ? 4 : 6;
+          return { style: 'width:' + w + 'px;height:' + (on ? 6 : w === 4 ? 4 : 6) + 'px;border-radius:999px;transition:width .18s ease;background:' + (on ? '#FF3D8D' : (fadeL || fadeR) ? '#E3DFEE' : '#D6D0E5') + (on ? ';box-shadow:0 0 9px rgba(255,61,141,0.42)' : '') };
+        });
+      })(),
+      cardCountText: list.length > 9 ? (Math.min(s.cardIndex + 1, list.length)) + ' / ' + list.length : '',
 
       // 페이지 전체가 하나의 밝은 배경 — 카드 영역에서 어두워지는 경계를 만들지 않는다
       exploreBgStyle: 'position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(circle at 18% 7%,rgba(225,219,255,0.34) 0%,rgba(225,219,255,0) 32%),radial-gradient(circle at 88% 92%,rgba(255,226,239,0.25) 0%,rgba(255,226,239,0) 30%),linear-gradient(180deg,#FAF9FD 0%,#F5F3FB 52%,#FAF8FC 100%)',
