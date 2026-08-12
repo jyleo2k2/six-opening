@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { findDevPort } from "./dev-port.mjs";
+import { findDevPort, findReservedDevPorts } from "./dev-port.mjs";
 
 function makeTempDir(name) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
@@ -64,4 +64,17 @@ test("레지스트리가 깨져 있어도 기본 포트로 떨어진다", () => 
   fs.mkdirSync(gitDir, { recursive: true });
   fs.writeFileSync(path.join(gitDir, "six-opening-sessions.json"), "{ not json", "utf8");
   assert.equal(findDevPort(root), 3000);
+  assert.deepEqual(findReservedDevPorts(root), []);
+});
+
+test("활성 세션 포트만 중복 없이 예약 목록으로 돌려준다", () => {
+  const root = makeTempDir("devport-reserved");
+  writeRegistry(path.join(root, ".git"), [
+    { worktree: root, port: 3100, status: "active" },
+    { worktree: `${root}-other`, port: 3101, status: "starting" },
+    { worktree: `${root}-duplicate`, port: 3101, status: "active" },
+    { worktree: `${root}-released`, port: 3102, status: "released" },
+  ]);
+
+  assert.deepEqual(findReservedDevPorts(root), [3100, 3101]);
 });
