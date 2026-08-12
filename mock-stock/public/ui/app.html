@@ -1287,6 +1287,10 @@ class Component extends DCLogic {
       const B = br.color || sec.accent;          // 브랜드 색
       const BL = mixW(B, 0.45);                  // 어두운 배경 위 글자용
       const CL = x.change >= 0 ? up : down;      // 등락색 (상승 빨강 / 하락 파랑)
+      // 후광은 등락색 한 계열로만 간다 — 안쪽은 밝게 타고 바깥은 같은 색의 옅은 톤으로 사라진다
+      const CN = mixW(CL, 0.30);                 // 네온 심지
+      const CM = mixW(CL, 0.42);                 // 중간 번짐
+      const CF = mixW(CL, 0.60);                 // 바깥 안개
 
       // 차트 — 우하단 넓은 영역. 값과 방향은 실제 시세 그대로.
       const sp = x.spark || [], W = 127, H = 104, PL = 5, PR = 15, PY = 12, N = Math.max(2, sp.length);
@@ -1312,15 +1316,15 @@ class Component extends DCLogic {
         brand: B,
         // 카드 바깥 래퍼 — 카드는 손대지 않고 뒤쪽에만 후광 레이어를 깐다
         slideStyle: 'position:relative;isolation:isolate;flex:none;scroll-snap-align:center;opacity:' + (active ? '1' : '0.72') + ';transition:opacity 300ms ease',
-        // 주 후광 — 기업 대표색 인디고·코발트. 가장자리는 배경으로 완전히 사라진다.
-        auraMain: 'position:absolute;z-index:-2;left:50%;top:50%;width:142%;height:132%;transform:translate(-50%,-50%);pointer-events:none;filter:blur(30px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(32,40,116,0.30) 0%,rgba(' + rgbOf(B) + ',0.24) 26%,rgba(104,91,214,0.15) 48%,rgba(147,129,232,0.07) 64%,rgba(147,129,232,0) 79%)',
-        // 좁은 반사광 — 카드 테두리 네온이 주변 공간에 반사되는 느낌
-        auraNeon: 'position:absolute;z-index:-1;left:-10px;top:-10px;right:-10px;bottom:-10px;border-radius:44px;pointer-events:none;filter:blur(5px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at 50% 44%,rgba(' + rgbOf(B) + ',0.18) 0%,rgba(' + rgbOf(B) + ',0.08) 48%,rgba(' + rgbOf(B) + ',0) 72%);box-shadow:0 0 14px rgba(' + rgbOf(B) + ',0.30),0 0 34px rgba(' + rgbOf(B) + ',0.17)',
-        // 등락색은 차트가 있는 우하단에만 아주 약하게
-        auraTrend: 'position:absolute;z-index:-1;right:-8%;bottom:4%;width:52%;height:42%;pointer-events:none;filter:blur(22px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(' + rgbOf(CL) + ',0.16) 0%,rgba(' + rgbOf(CL) + ',0.07) 42%,rgba(' + rgbOf(CL) + ',0) 74%)',
+        // 주 후광 — 등락색 한 계열로만. 바깥으로 갈수록 같은 색의 옅은 톤이 되어 흰 배경에 사라진다.
+        auraMain: 'position:absolute;z-index:-2;left:50%;top:50%;width:162%;height:152%;transform:translate(-50%,-50%);pointer-events:none;filter:blur(46px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(' + rgbOf(CL) + ',0.30) 0%,rgba(' + rgbOf(CL) + ',0.22) 20%,rgba(' + rgbOf(CM) + ',0.15) 38%,rgba(' + rgbOf(CM) + ',0.09) 52%,rgba(' + rgbOf(CF) + ',0.05) 66%,rgba(' + rgbOf(CF) + ',0.02) 78%,rgba(' + rgbOf(CF) + ',0) 88%)',
+        // 좁은 반사광 — 네온관의 블룸. 가장자리에서 밝게 타고 여러 단계로 번져 흰 배경에 녹아든다.
+        auraNeon: 'position:absolute;z-index:-1;left:-14px;top:-14px;right:-14px;bottom:-14px;border-radius:48px;pointer-events:none;filter:blur(9px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at 50% 46%,rgba(' + rgbOf(CN) + ',0.34) 0%,rgba(' + rgbOf(CL) + ',0.20) 44%,rgba(' + rgbOf(CL) + ',0.08) 66%,rgba(' + rgbOf(CL) + ',0) 82%);box-shadow:0 0 9px rgba(' + rgbOf(CN) + ',0.60),0 0 22px rgba(' + rgbOf(CL) + ',0.38),0 0 46px rgba(' + rgbOf(CL) + ',0.22),0 0 84px rgba(' + rgbOf(CL) + ',0.11)',
+        // 차트 쪽을 조금 더 밝게 — 빛이 한쪽으로 치우쳐 자연스럽게 보이도록
+        auraTrend: 'position:absolute;z-index:-1;right:-10%;bottom:2%;width:56%;height:46%;pointer-events:none;filter:blur(26px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(' + rgbOf(CN) + ',0.18) 0%,rgba(' + rgbOf(CL) + ',0.10) 38%,rgba(' + rgbOf(CM) + ',0.04) 60%,rgba(' + rgbOf(CM) + ',0) 80%)',
 
         // 카드 몸체 — 좌상단 브랜드 광원, 중앙은 깊게, 우하단은 검정에 가깝게
-        cardStyle: 'position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + CL + 'B3',
+        cardStyle: 'position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 26px 50px -20px rgba(52,42,98,0.40),0 0 40px -14px ' + CL + 'B3',
         sheenStyle: 'position:absolute;left:-20%;top:-20%;right:-20%;bottom:-20%;pointer-events:none;background:linear-gradient(122deg,rgba(255,255,255,0) 34%,rgba(255,255,255,0.075) 50%,rgba(255,255,255,0) 63%)',
         // 격자는 차트 주변에서만 아주 옅게
         gridStyle: 'position:absolute;left:150px;top:212px;width:140px;height:112px;pointer-events:none;opacity:0.4;background-image:linear-gradient(' + B + '26 1px,transparent 1px),linear-gradient(90deg,' + B + '26 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%);mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%)',
