@@ -6,7 +6,14 @@ import {
 import type { ChatResponse } from "../../../shared/types/chatbot";
 import type { ChatActionPayload, ChatRequest } from "./contracts";
 import { sanitizeActionPayload } from "./contracts";
-import { advanceGuidedDialogue, startGuidedDialogue } from "./dialogue-engine";
+import {
+  advanceExplain,
+  reaskExplain,
+  resolveTextReply,
+  startExplain,
+  type ExplainStep,
+} from "./explain";
+import { findExplainScript, getExplainScript } from "./explain-scripts";
 import { generateChatAnswer } from "./openai";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
@@ -86,6 +93,45 @@ function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal) {
   });
 }
 
+/**
+ * 4단계 설명 경로를 결정한다.
+ * - `"invalid"` = 위조되었거나 이어 갈 수 없는 응답
+ * - `ExplainStep` = 새로 시작하거나 다음 단계로 진행
+ * - `null` = 4단계와 무관 (기존 라우팅으로)
+ */
+function resolveExplainStep(
+  request: ChatRequest,
+  routed: ReturnType<typeof routeMessage>,
+): ExplainStep | "invalid" | null {
+  if (request.explain) {
+    const script = getExplainScript(request.explain.scriptId);
+    if (!script) return "invalid";
+
+    const choiceId =
+      request.explain.choiceId ??
+      resolveTextReply(script, request.explain.stage, request.message);
+    if (!choiceId) {
+      // 타이핑을 알아듣지 못했다. 새 질문처럼 보이면 일반 라우팅으로 넘긴다.
+      return findExplainScript(request.message) || routed.route !== "fallback"
+        ? null
+        : reaskExplain(script, request.explain.stage);
+    }
+    return (
+      advanceExplain(script, { ...request.explain, choiceId }) ?? "invalid"
+    );
+  }
+
+  const startable =
+    routed.route !== "refusal" &&
+    routed.route !== "safety" &&
+    routed.route !== "outOfScope" &&
+    (routed.intent === "financial_concept" || routed.intent === "stock_facts");
+  if (!startable) return null;
+
+  const script = findExplainScript(request.message);
+  return script ? startExplain(script) : null;
+}
+
 export async function createChatOutcome(
   request: ChatRequest,
   session: ChatSession,
@@ -93,29 +139,7 @@ export async function createChatOutcome(
 ): Promise<ChatOutcome> {
   const onStatus = dependencies.onStatus ?? (() => undefined);
   const routed = routeMessage(request.message, request.context);
-  const canStartGuidedDialogue =
-    routed.route !== "refusal" &&
-    routed.route !== "safety" &&
-    routed.route !== "outOfScope" &&
-    (routed.intent === "financial_concept" ||
-      routed.intent === "stock_facts" ||
-      routed.intent === "general_allowed");
-  const newGuidedTurn = canStartGuidedDialogue
-    ? startGuidedDialogue(request.message, request.context)
-    : null;
-  const continuedGuidedTurn =
-    !newGuidedTurn &&
-    routed.route === "fallback" &&
-    request.guidedDialogue
-      ? advanceGuidedDialogue(request.guidedDialogue, request.message)
-      : null;
-  const guidedTurn = newGuidedTurn ?? continuedGuidedTurn;
-  const invalidGuidedContinuation = Boolean(
-    request.guidedDialogue &&
-      routed.route === "fallback" &&
-      !newGuidedTurn &&
-      !continuedGuidedTurn,
-  );
+  const explainStep = resolveExplainStep(request, routed);
   let response: ChatResponse = {
     text: routed.text,
     suggestedQuestions: routed.suggestedQuestions,
@@ -124,22 +148,19 @@ export async function createChatOutcome(
   let source: ChatOutputSource = "fixed";
   let toolExecution: ToolExecution | undefined;
   let failure: ChatOutcome["failure"];
-  let guidedAction: ChatActionPayload | undefined;
+  let explainAction: ChatActionPayload | undefined;
 
   onStatus("질문을 안전하게 확인하는 중");
 
-  if (invalidGuidedContinuation) {
+  if (explainStep === "invalid") {
     response = {
       text: "그 설명 단계는 이어 갈 수 없어. 궁금한 종목이나 용어를 다시 물어봐 줘. 🐻",
     };
-  } else if (guidedTurn) {
+  } else if (explainStep) {
     onStatus("단계별 설명 준비 완료");
-    response = { text: guidedTurn.text };
-    if (guidedTurn.state) {
-      guidedAction = {
-        kind: "guided_dialogue",
-        state: guidedTurn.state,
-      };
+    response = { text: explainStep.text };
+    if (explainStep.kind === "turn") {
+      explainAction = { kind: "explain", turn: explainStep.turn };
     }
   } else if (routed.route === "tool" && routed.tool) {
     onStatus("허용된 내 자료를 확인하는 중");
@@ -199,7 +220,7 @@ export async function createChatOutcome(
   const standardAction = gate.ok
     ? sanitizeActionPayload(response)
     : undefined;
-  const outputAction = gate.ok ? guidedAction ?? standardAction : undefined;
+  const outputAction = gate.ok ? explainAction ?? standardAction : undefined;
   const gatedResponse: ChatResponse = {
     text: gate.ok
       ? gate.text

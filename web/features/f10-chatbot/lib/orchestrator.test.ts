@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { SAFE_REFUSAL } from "../../../shared/llm/filter";
-import { isGuidedDialogueAction } from "./contracts";
+import { isExplainAction } from "./contracts";
 import { CHAT_FALLBACK, createChatOutcome } from "./orchestrator";
 import type { ChatSession } from "./session";
 
@@ -23,34 +23,56 @@ async function main() {
     return "호출되면 안 돼.";
   };
 
-  const faq = await createChatOutcome(
+  const started = await createChatOutcome(
     { message: "PER이 뭐야?", context },
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(faq.route, "faq");
   assert.equal(modelCalls, 0);
-  assert.equal(isGuidedDialogueAction(faq.action), true);
-  if (!isGuidedDialogueAction(faq.action)) throw new Error("guided action missing");
+  assert.equal(isExplainAction(started.action), true);
+  if (!isExplainAction(started.action)) throw new Error("explain action missing");
+  assert.equal(started.action.turn.stage, "brief");
 
-  const continued = await createChatOutcome(
-    { message: "응", context, guidedDialogue: faq.action.state },
+  // 오답 → 추가 설명 단계로 내려간다.
+  const wrong = await createChatOutcome(
+    { message: "낮은 편이야", context, explain: { scriptId: "term:per", stage: "brief", choiceId: "low" } },
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(continued.response.text.includes("EPS"), true);
-  assert.equal(isGuidedDialogueAction(continued.action), true);
+  assert.equal(isExplainAction(wrong.action), true);
+  if (!isExplainAction(wrong.action)) throw new Error("detail turn missing");
+  assert.equal(wrong.action.turn.stage, "detail");
+
+  // 버튼 대신 "ㅇㅇ"라고 타이핑해도 알아듣는다.
+  const typedYes = await createChatOutcome(
+    { message: "ㅇㅇ", context, explain: { scriptId: "term:per", stage: "detail" } },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(typedYes.response.text, "좋아, 이제 알겠네!");
+
+  // "몰라"는 예시 단계로 내려간다.
+  const typedNo = await createChatOutcome(
+    { message: "몰라", context, explain: { scriptId: "term:per", stage: "detail" } },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(typedNo.response.text.startsWith("그럼 예를 들어볼게."), true);
+
+  // 알아듣지 못하면 추측하지 않고 선택지를 다시 보여준다.
+  const unclear = await createChatOutcome(
+    { message: "냠냠", context, explain: { scriptId: "term:per", stage: "detail" } },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(isExplainAction(unclear.action), true);
   assert.equal(modelCalls, 0);
 
   const forgedTransition = await createChatOutcome(
     {
       message: "응",
       context,
-      guidedDialogue: {
-        topicId: "term:per",
-        explainedNodeIds: ["main"],
-        pendingNodeId: "forged",
-      },
+      explain: { scriptId: "term:per", stage: "brief", choiceId: "forged" },
     },
     session,
     { generateAnswer: noModel },

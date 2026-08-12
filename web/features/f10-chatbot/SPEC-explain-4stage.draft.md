@@ -147,7 +147,24 @@ export type ChatRequest = {
 - 문장 수 상한(①=1, ③④≤2)도 같은 테스트에서 강제한다.
 - 런타임에는 `sanitizeExplainTurn`이 `scriptId` 허용 목록 존재 여부만 확인한다.
 
-### 5.3 모델 호출
+### 5.3 버튼 대신 타이핑했을 때 (구어체 처리)
+
+선택지 버튼이 주 경로지만 입력창은 계속 열려 있으므로, 아이가 `ㅇㅇ`·`웅`·`몰라`처럼
+직접 칠 수 있다. `lib/colloquial.ts`가 LLM 없이 판정한다.
+
+1. 이모지를 낱말로 치환 (👍 → `응`)
+2. NFKC 정규화·소문자·기호 제거
+3. 3회 이상 반복을 2회로 축약 (`응응응응` → `응응`)
+4. 사전 **정확 일치**만 허용 — 부분 일치는 쓰지 않는다
+
+- `몰라`·`모르겠어`·`헷갈려`는 부정이 아니라 **"모르겠어" 선택지**로 매핑해 ④ 예시로 내려간다.
+- `ㅋㅋ`·`ㄱㅊ`·`글쎄`는 의도적으로 판정하지 않는다.
+- ⚠ **NFKC는 호환 자모 `ㅇ`(U+3147)을 조합용 자모 `ᄋ`(U+1100)으로 바꾼다.** 사전 상수도
+  반드시 같은 `normalizeReply()`를 통과시켜 만들어야 초성체가 매칭된다.
+- 판정 실패 시 추측하지 않는다. 새 질문처럼 보이면 일반 라우팅으로, 그 밖에는 같은 단계를
+  유지한 채 선택지를 다시 보여준다(`reaskExplain`).
+
+### 5.4 모델 호출
 
 4단계 응답은 **전부 사전 저작 텍스트**다. 스크립트가 매칭되면 Luna를 호출하지 않는다.
 SPEC §10.3의 "51종·13섹터 모두 OpenAI 호출 없이 기본 답변 가능"을 이 경로가 달성한다.
@@ -156,16 +173,21 @@ SPEC §10.3의 "51종·13섹터 모두 OpenAI 호출 없이 기본 답변 가능
 
 | 위치 | 책임 | 상태 |
 |---|---|---|
-| `shared/types/chatbot.ts` | 위 타입 4종 | 확장 |
-| `shared/data/explain-scripts.ts` | 249개 승인 스크립트 | 신규 |
-| `shared/data/explain-scripts.test.ts` | 전 필드 게이트·문장 수 검증 | 신규 |
-| `features/f10-chatbot/lib/explain.ts` | 전이 순수 함수 + 응답 검증 | 신규 |
-| `features/f10-chatbot/lib/routing.ts` | 매칭 시 `scriptId` 반환 | 수정 |
-| `features/f10-chatbot/lib/contracts.ts` | `ExplainReply` 파싱·검증 | 수정 |
-| `features/f10-chatbot/lib/orchestrator.ts` | `explain` 경로 분기 | 수정 |
-| `features/f10-chatbot/F10ChatbotDemo.tsx` | 선택지 버튼 렌더링 | 수정 |
+| `shared/types/chatbot.ts` | `ExplainScript`·`ExplainTurn`·`ExplainReply` 등 | 완료 |
+| `features/f10-chatbot/lib/explain.ts` | 전이 순수 함수 + 응답 검증 + 되묻기 | 완료 |
+| `features/f10-chatbot/lib/colloquial.ts` | 구어체 긍정·부정 판정 | 완료 |
+| `features/f10-chatbot/lib/explain-scripts.ts` | 스크립트 데이터 + 주제 매칭 | **8개 저작, 84개 목표** |
+| `features/f10-chatbot/lib/contracts.ts` | `ExplainReply` 파싱·검증 | 완료 |
+| `features/f10-chatbot/lib/orchestrator.ts` | `explain` 경로 분기 | 완료 |
+| `features/f10-chatbot/F10ChatbotDemo.tsx` | 선택지 버튼 렌더링 | 완료 |
 
 새 런타임 의존성 없음. `docs/기술스택.md` 수정 없음.
+
+### 6.1 제거된 병렬 구현
+
+`dialogue-engine.ts`·`explanation-graph.ts`는 같은 논문의 **Guiding question**(§4.2.2)을
+자연어 "응/아니"로 구현한 별개 설계였다. 4단계로 단일화하면서 제거했고, 주제 매칭 로직만
+`explain-scripts.ts`로 옮겼다. Guiding question이 필요해지면 이 스펙을 먼저 고친다.
 
 ## 7. 저작·검수
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {
   isAllowedUiAction,
-  isGuidedDialogueAction,
+  isExplainAction,
   parseChatRequest,
   sanitizeActionPayload,
 } from "./contracts";
@@ -37,39 +37,55 @@ assert.equal(
   null,
 );
 
-const guidedDialogue = {
-  topicId: "term:per" as const,
-  explainedNodeIds: ["main"],
-  pendingNodeId: "related:eps",
+const explainReply = {
+  scriptId: "term:per",
+  stage: "brief" as const,
+  choiceId: "high",
 };
+
+assert.deepEqual(
+  parseChatRequest({ message: "높은 편이야", context: { screen: "stock" }, explain: explainReply }),
+  { message: "높은 편이야", context: { screen: "stock" }, explain: explainReply },
+);
+// choiceId 없이 타이핑한 경우도 허용한다.
 assert.deepEqual(
   parseChatRequest({
-    message: "응",
+    message: "ㅇㅇ",
     context: { screen: "stock" },
-    guidedDialogue,
+    explain: { scriptId: "term:per", stage: "detail" },
   }),
-  {
-    message: "응",
-    context: { screen: "stock" },
-    guidedDialogue,
-  },
+  { message: "ㅇㅇ", context: { screen: "stock" }, explain: { scriptId: "term:per", stage: "detail" } },
 );
+// example 단계는 응답을 받지 않는다.
 assert.equal(
   parseChatRequest({
     message: "응",
     context: { screen: "stock" },
-    guidedDialogue: { ...guidedDialogue, explainedNodeIds: [] },
+    explain: { ...explainReply, stage: "example" },
   }),
   null,
 );
 assert.equal(
-  isGuidedDialogueAction({ kind: "guided_dialogue", state: guidedDialogue }),
-  true,
+  parseChatRequest({
+    message: "응",
+    context: { screen: "stock" },
+    explain: { ...explainReply, scriptId: "javascript:alert(1)" },
+  }),
+  null,
 );
 assert.equal(
-  isGuidedDialogueAction({ kind: "guided_dialogue", state: { ...guidedDialogue, pendingNodeId: "" } }),
-  false,
+  isExplainAction({
+    kind: "explain",
+    turn: {
+      scriptId: "term:per",
+      stage: "brief",
+      prompt: "PER이 크면 어떨까?",
+      choices: [{ id: "high", label: "높은 편이야" }],
+    },
+  }),
+  true,
 );
+assert.equal(isExplainAction({ kind: "explain", turn: { scriptId: "term:per", stage: "brief", prompt: "?", choices: [] } }), false);
 
 assert.equal(isAllowedUiAction({ type: "open_screen", target: "archive" }), true);
 assert.equal(isAllowedUiAction({ type: "open_url", target: "https://example.com" }), false);

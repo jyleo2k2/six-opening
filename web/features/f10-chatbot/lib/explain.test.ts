@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { gateChatOutput } from "../../../shared/llm/filter";
 import type { ExplainScript } from "../../../shared/types/chatbot";
-import { advanceExplain, startExplain } from "./explain";
+import { advanceExplain, reaskExplain, resolveTextReply, startExplain } from "./explain";
 
 const per: ExplainScript = {
   id: "term:per",
@@ -115,5 +115,27 @@ for (const turn of [first, wrong].map((step) =>
     assert.equal(gateChatOutput({ text: choice.label, source: "fixed" }).ok, true);
   }
 }
+
+// 타이핑 응답 해석 — 확인 단계는 구어체를 받는다.
+assert.equal(resolveTextReply(per, "detail", "ㅇㅇ"), "yes");
+assert.equal(resolveTextReply(per, "detail", "웅"), "yes");
+assert.equal(resolveTextReply(per, "detail", "몰라"), "no");
+assert.equal(resolveTextReply(per, "detail", "알겠어"), "yes");
+assert.equal(resolveTextReply(per, "detail", "모르겠어"), "no");
+assert.equal(resolveTextReply(per, "detail", "냠냠"), null);
+// 새 질문은 응답으로 삼지 않는다.
+assert.equal(resolveTextReply(per, "detail", "PBR은 뭐야?"), null);
+// 이해 확인 단계는 선택지 라벨이 정확히 맞을 때만 받는다.
+assert.equal(resolveTextReply(per, "brief", "비싼 편이야"), "expensive");
+assert.equal(resolveTextReply(per, "brief", "ㅇㅇ"), null);
+
+// 되묻기는 단계를 유지하고 선택지를 그대로 다시 준다.
+const reask = reaskExplain(per, "detail");
+assert.equal(reask.kind, "turn");
+assert.equal(reask.kind === "turn" ? reask.turn.stage : null, "detail");
+assert.deepEqual(reask.kind === "turn" ? reask.turn.choices : null, [
+  { id: "yes", label: "알겠어" },
+  { id: "no", label: "모르겠어" },
+]);
 
 console.log("explain ok");
