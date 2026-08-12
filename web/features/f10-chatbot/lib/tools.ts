@@ -1,5 +1,12 @@
 import { STOCKS } from "../../../shared/data/stocks";
 import { findAviationAndCosmeticsEducation } from "../../../shared/data/aviation-cosmetics-education";
+import { findAutomotiveAndShipbuildingEducation } from "../../../shared/data/automotive-shipbuilding-education";
+import { findDefenseEducation } from "../../../shared/data/defense-education";
+import { findEntertainmentAndRetailEducation } from "../../../shared/data/entertainment-retail-education";
+import { findFinancialEducation } from "../../../shared/data/financial-education";
+import { findFoodAndEnergyEducation } from "../../../shared/data/food-energy-education";
+import { findGameEducation } from "../../../shared/data/game-education";
+import { findLogisticsAndSemiconductorEducation } from "../../../shared/data/logistics-semiconductor-education";
 import type {
   ChatContext,
   ChatResponse,
@@ -69,23 +76,32 @@ export function createReadOnlyToolRunner(
     session: ChatSession,
   ): Promise<ToolExecution> {
     if (tool === "approved_stock_facts") {
-      const aviationAndCosmeticsEducation = context.stockId
-        ? findAviationAndCosmeticsEducation(context.stockId)
+      const approvedEducation = context.stockId
+        ? [
+            findAviationAndCosmeticsEducation(context.stockId),
+            findGameEducation(context.stockId),
+            findLogisticsAndSemiconductorEducation(context.stockId),
+            findDefenseEducation(context.stockId),
+            findFoodAndEnergyEducation(context.stockId),
+            findEntertainmentAndRetailEducation(context.stockId),
+            findFinancialEducation(context.stockId),
+            findAutomotiveAndShipbuildingEducation(context.stockId),
+          ].find(Boolean)
         : undefined;
-      if (aviationAndCosmeticsEducation) {
+      if (approvedEducation) {
         return {
           tool,
           status: "ok",
           response: {
             text: [
-              aviationAndCosmeticsEducation.companySummary,
-              aviationAndCosmeticsEducation.businessModel,
-              aviationAndCosmeticsEducation.industryRole,
-              aviationAndCosmeticsEducation.financialSummary,
+              approvedEducation.companySummary,
+              approvedEducation.businessModel,
+              approvedEducation.industryRole,
+              approvedEducation.financialSummary,
             ].join(" "),
             uiAction: { type: "open_screen", target: "stock" },
           },
-          evidence: aviationAndCosmeticsEducation.sources.map((source) => source.url),
+          evidence: approvedEducation.sources.map((source) => source.url),
         };
       }
 

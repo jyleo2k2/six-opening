@@ -44,7 +44,7 @@ async function main() {
 
   const draftStock = await runTool(
     "approved_stock_facts",
-    { screen: "stock", stockId: "KRX:005930", stockName: "삼성전자" },
+    { screen: "stock", stockId: "KRX:007070", stockName: "GS리테일" },
     session,
   );
   assert.equal(draftStock.status, "unavailable");
@@ -66,6 +66,15 @@ async function main() {
   );
   assert.equal(cosmeticsStock.status, "ok");
   assert.equal(cosmeticsStock.response.text.includes("3,091억 원"), true);
+
+  const reviewedStock = await runTool(
+    "approved_stock_facts",
+    { screen: "stock", stockId: "KRX:259960", stockName: "크래프톤" },
+    session,
+  );
+  assert.equal(reviewedStock.status, "ok");
+  assert.equal(reviewedStock.response.text.includes("2조 7,098억원"), true);
+  assert.ok(reviewedStock.evidence.every((source) => source.startsWith("https://")));
 
   console.log("read-only chat tool tests passed");
 }
