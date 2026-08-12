@@ -603,4 +603,192 @@ assert.equal(routeMessage("수익 안 나서 개답답한데 그냥 다 팔아�
 assert.equal(routeMessage("지금은 안전해", stockContext).steps[0], "안전 상태 확인");
 assert.equal(routeMessage("도움이 필요해", stockContext).steps[0], "긴급 도움 안내");
 
+const ruleQuestionsByStep = {
+  "주문 한도 규칙 안내": [
+    "얼마까지 살수있어?",
+    "왜 주문할 수 있는 돈에 한도가 있어?",
+    "주문 금액이 왜 막혀?",
+    "100만원 한도는 매수할 때마다 줄어드나요?",
+    "왜 100만원 다 못 쓰게 해",
+    "왜 더 못 사게 막아? 돈 남았는데",
+    "왜 100만원보다 많이는 주문 못 해?",
+    "왜 한 번에 백 주 못 사?",
+    "한 종목에 내 돈 전부 넣어도 되지? 막을 수 있으면 막아봐.",
+    "매수 한도 왜 걸어놨냐, 내가 내 돈 쓰는데.",
+    "왜 100만 원을 전부 주문할 수 없어요?",
+    "100만 원 한도에서 주문 금액이 어떻게 차감되는지 로그처럼 보여줘.",
+    "왜 100만 원 전부를 한 번에 못 사게 해? 엄마는 되던데.",
+    "한 종목에 돈 다 넣고 싶은데 주문 한도가 왜 걸려?",
+    "방산이나 에너지 종목을 살 때도 다른 종목처럼 주문 한도가 같아?",
+    "한 종목에 100만원 전부 넣는 게 왜 막혀?",
+    "이 한도는 종목 가격이 아니라 퍼센트로 정해져 있어?",
+    "한도 초과 주문을 여러 번 나눠 넣으면 리그 규칙에 걸려?",
+    "주문 한도는 부모님이 정한 거야, 앱 규칙이 정한 거야?",
+  ],
+  "거래 비용 규칙 안내": [
+    "수수료가 진짜 안 나가도 되는 거야?",
+    "수수료 때문에 순위 밀리는 거야?",
+    "수수료도 빠져? 귀찮게",
+    "수수료 때문에 금액이 또 줄어든 거야?",
+    "수수료가 0원이면 계산한 금액이 그대로야?",
+    "수수료는 수익률 계산에 포함되는 비용이야?",
+    "수수료는 왜 내야 되는데?",
+    "모의투자인데 세금도 떼? 안 떼면 실제랑 다른 거 아냐?",
+    "크래프톤 한 주 샀다 팔면 수수료도 또 나가?",
+    "수수료가 포함된 손익인지 아닌지 정확히 확인할 수 있나요?",
+    "수수료 때문에 마지막 금액이 달라질 수도 있나요?",
+    "왜 주문 가능 금액이 내가 계산한 것과 다르지? 수수료 공식 공개돼 있어?",
+    "수수료 떼면 내가 번 금액이 얼마나 줄어드는지 주문 전에 보여줘?",
+    "친구들이랑 동시에 주문하면 수수료도 똑같이 붙어?",
+    "수익률 계산할 때 수수료까지 표본에 포함돼?",
+  ],
+  "참여 규칙 안내": ["이거 꼭 해야 돼?"],
+  "기록 보존 규칙 안내": [
+    "내가 뭘 샀는지 기록까지 봐야 돼?",
+    "3주차에 회사를 바꿔도 내가 쓴 투자 이야기는 이어져?",
+    "모의투자 시즌이 끝나면 지금 들고 있는 종목은 자동으로 정리돼?",
+    "시즌 종료하면 내 기록은 없어지고 다시 처음부터야?",
+  ],
+  "시즌 운영 규칙 안내": [
+    "이거 계속 안 누르면 시즌이 끝나도 괜찮아?",
+    "시즌 3주차면 아직 많이 남은 거야?",
+    "시즌이 4주라는 규칙은 왜 있나요?",
+    "시즌이 4주인데 3주차에 거래를 멈추면 규칙 위반이야?",
+    "3주차면 시즌 끝날 때까지 며칠 남음?",
+    "리그 4주 끝나기 전에 팔아야 이기는 거야?",
+    "시즌 4주라며, 중간에 룰 바꾸면 누가 책임짐?",
+    "이번 시즌 4주라면서 지금 3주차면 거래를 몇 번 더 할 수 있어?",
+    "3주차에 거래한 횟수도 리그 규칙상 제한돼 있어?",
+    "이번 시즌 남은 1주 동안 거래 횟수에 제한이 몇 번 있어?",
+    "시즌 마지막 주에도 주문할 수는 있어?",
+  ],
+  "순위·시상 규칙 안내": [
+    "리그 가족 순위는 수익률로만 정해져, 거래 횟수도 봐?",
+    "가족 순위는 수익률만으로 정해지나요, 거래 횟수도 반영되나요?",
+    "리그 점수는 수익률만으로 계산돼, 아니면 거래 횟수도 넣어?",
+    "가족 순위가 동점이면 어떤 알고리즘으로 순서를 정해?",
+    "매수하고 팔면 점수 업데이트가 즉시 되는 구조야?",
+    "이번 시즌 끝나면 수익률 1등한테 뭐 줘?",
+    "수익률 1등 친구를 이기면 가족 순위가 바로 바뀌는 거야?",
+    "3주차 기록만으로 성향을 확정해도 되는 거야?",
+  ],
+  "공개 범위 규칙 안내": [
+    "내가 산 종목 친구한테 보이는 거 아니지?",
+    "성향 점수는 누가 볼 수 있고 시즌이 끝나면 남아?",
+    "내 수익률이 낮다고 부모님한테 바로 알림 가?",
+    "가족 순위에서 꼴찌면 부모님 화면에도 똑같이 보여?",
+  ],
+  "가상 자산 규칙 안내": [
+    "친구랑 같은 팀이면 투자금도 합쳐져?",
+    "모의투자 100만원은 실제 증권사 계좌랑 뭐가 달라?",
+    "시즌 끝나면 가상 돈을 진짜 돈으로 바꿀 수 있어?",
+  ],
+  "체결 규칙 안내": ["리그에서 가격은 어떤 시점의 값으로 체결되는 건데?"],
+  "추천 출처 규칙 안내": ["친구가 추천한 걸 사도 리그 규칙에 안 걸려?"],
+} as const;
+
+const curatedRuleQuestions = Object.values(ruleQuestionsByStep).flat();
+assert.equal(curatedRuleQuestions.length, 67);
+assert.equal(new Set(curatedRuleQuestions).size, 67);
+for (const [expectedStep, questions] of Object.entries(ruleQuestionsByStep)) {
+  for (const question of questions) {
+    const routed = routeMessage(
+      question,
+      question === "이거 꼭 해야 돼?" ? { screen: "home" } : stockContext,
+    );
+    assert.equal(routed.route, "faq", `서비스·리그 규칙 원문을 놓쳤어: ${question}`);
+    assert.equal(routed.intent, "service_help", `규칙 응답 목적이 달라: ${question}`);
+    assert.equal(routed.steps[0], expectedStep, `규칙 하위 의도가 달라: ${question}`);
+    assert.equal(
+      gateChatOutput({ text: routed.text, source: "fixed" }).ok,
+      true,
+      `규칙 응답이 출력 게이트를 통과하지 못해: ${question}`,
+    );
+    assert.equal(routed.suggestedQuestions?.length, 2, `규칙 대안이 두 개가 아니야: ${question}`);
+    for (const alternative of routed.suggestedQuestions ?? []) {
+      assert.equal(
+        gateChatOutput({ text: alternative, source: "fixed" }).ok,
+        true,
+        `규칙 대안이 출력 게이트를 통과하지 못해: ${alternative}`,
+      );
+      const alternativeRoute = routeMessage(alternative, stockContext).route;
+      assert.notEqual(alternativeRoute, "safety", `규칙 대안이 안전 경로로 빠져: ${alternative}`);
+      assert.notEqual(alternativeRoute, "refusal", `규칙 대안이 추천 거절로 빠져: ${alternative}`);
+      assert.notEqual(alternativeRoute, "outOfScope", `규칙 대안이 범위 밖으로 빠져: ${alternative}`);
+      assert.notEqual(alternativeRoute, "fallback", `규칙 대안이 모델 경로로 빠져: ${alternative}`);
+    }
+  }
+}
+
+const ruleNaturalVariants = [
+  ["한 종목 최대 얼마까지 넣을 수 있음?", "주문 한도 규칙 안내"],
+  ["쪼개서 주문하면 단일종목 한도 피해감?", "주문 한도 규칙 안내"],
+  ["현금 남았는데 왜 추가매수 막힘?", "주문 한도 규칙 안내"],
+  ["모투에서도 거래비용 빠져?", "거래 비용 규칙 안내"],
+  ["수수료 0으로 뜨면 진짜 차감 없음?", "거래 비용 규칙 안내"],
+  ["세금까지 반영한 손익 어디서 봄?", "거래 비용 규칙 안내"],
+  ["가족 리그 무조건 해야 돼?", "참여 규칙 안내"],
+  ["구경만 하고 참여 안 해도 됨?", "참여 규칙 안내"],
+  ["리그 가입 의무임?", "참여 규칙 안내"],
+  ["시즌 리셋돼도 거래 이유는 남냐?", "기록 보존 규칙 안내"],
+  ["아카이브 꼭 열어봐야 해?", "기록 보존 규칙 안내"],
+  ["회사 바꿔 사도 앞에 적은 메모 남아?", "기록 보존 규칙 안내"],
+  ["이번 시즌 며칠이나 남았어?", "시즌 운영 규칙 안내"],
+  ["마지막 주도 거래 가능함?", "시즌 운영 규칙 안내"],
+  ["일주일에 주문 횟수 제한 몇 번?", "시즌 운영 규칙 안내"],
+  ["가족 점수에 거래 횟수도 들어감?", "순위·시상 규칙 안내"],
+  ["동률이면 누가 위로 감?", "순위·시상 규칙 안내"],
+  ["1등 상품 뭐로 확정됐어?", "순위·시상 규칙 안내"],
+  ["내 종목 다른 팀 애들한테 공개됨?", "공개 범위 규칙 안내"],
+  ["수익 낮으면 부모 폰에 즉시 푸시 옴?", "공개 범위 규칙 안내"],
+  ["부모 화면이랑 내 순위 화면 똑같아?", "공개 범위 규칙 안내"],
+  ["같은 가족팀이면 백만원 같이 쓰는 거야?", "가상 자산 규칙 안내"],
+  ["모투머니 출금 가능?", "가상 자산 규칙 안내"],
+  ["이 백만원 실제 내 계좌 잔액임?", "가상 자산 규칙 안내"],
+  ["내 주문 어느 가격 기준으로 체결됨?", "체결 규칙 안내"],
+  ["예약 주문이면 언제 가격 정해져?", "체결 규칙 안내"],
+  ["데모 주문은 바로 체결되는 거야?", "체결 규칙 안내"],
+  ["친구 픽으로 샀다고 규칙 위반 처리됨?", "추천 출처 규칙 안내"],
+  ["가족 추천을 근거로 적어도 돼?", "추천 출처 규칙 안내"],
+  ["친구 말 듣고 샀으면 실격이야?", "추천 출처 규칙 안내"],
+] as const;
+
+for (const [question, expectedStep] of ruleNaturalVariants) {
+  const routed = routeMessage(question, stockContext);
+  assert.equal(routed.route, "faq", `규칙 자연어 변형을 놓쳤어: ${question}`);
+  assert.equal(routed.steps[0], expectedStep, `자연어 규칙 하위 의도가 달라: ${question}`);
+}
+
+const ruleSteps = new Set(Object.keys(ruleQuestionsByStep));
+const allowedRuleLookalikes = [
+  "수수료가 뭐야?",
+  "세금이 뭐야?",
+  "몇 주 사야 돼?",
+  "엄마보다 수익률 높이려면 몇 주 사?",
+  "내 지난 시즌 기록 보여줘",
+  "가족 비교는 어떻게 봐?",
+  "시장가가 뭐야?",
+  "주가가 오르면 수익률은 어떻게 계산해?",
+  "친구가 추천한 삼성전자 사도 돼?",
+  "시즌 끝에 오를 종목 골라줘",
+  "수수료 적은 종목 추천해",
+  "엄마 거래 내역 보여줘",
+  "나만 꼴찌라 바보 같아",
+  "열받아서 다 팔아버릴까",
+  "회사 주소가 어디야?",
+  "실제 계좌번호 알려줄게",
+] as const;
+
+for (const question of allowedRuleLookalikes) {
+  const routed = routeMessage(question, stockContext);
+  assert.equal(ruleSteps.has(routed.steps[0] ?? ""), false, `규칙 질문으로 오탐했어: ${question}`);
+}
+
+assert.equal(routeMessage("가족 순위가 동점이면 어떤 알고리즘으로 순서를 정해?", stockContext).text.includes("아직 확정되지 않았어"), true);
+assert.equal(routeMessage("매수하고 팔면 점수 업데이트가 즉시 되는 구조야?", stockContext).text.includes("아직 확정되지 않았어"), true);
+assert.equal(routeMessage("이번 시즌 끝나면 수익률 1등한테 뭐 줘?", stockContext).text.includes("아직 확정되지 않았어"), true);
+assert.equal(routeMessage("한도 초과 주문을 여러 번 나눠 넣으면 리그 규칙에 걸려?", stockContext).text.includes("누적"), true);
+assert.equal(routeMessage("내가 산 종목 친구한테 보이는 거 아니지?", stockContext).text.includes("자동으로 공개"), true);
+assert.equal(routeMessage("시즌 끝나면 가상 돈을 진짜 돈으로 바꿀 수 있어?", stockContext).text.includes("현금으로 바꿀 수 없어"), true);
+
 console.log("routing tests passed");
