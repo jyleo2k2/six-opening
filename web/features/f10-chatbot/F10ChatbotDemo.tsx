@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
-import type { ChatUiAction } from "../../shared/types/chatbot";
+import type { ChatUiAction, ExplainChoice, ExplainTurn } from "../../shared/types/chatbot";
 import {
   isAllowedUiAction,
   isExplainAction,
@@ -17,7 +17,7 @@ type Message = {
   role: "assistant" | "user";
   text: string;
   suggestedQuestions?: string[];
-  explainChoices?: ExplainActionPayload["choices"];
+  explainTurn?: ExplainTurn;
   uiAction?: ChatUiAction;
 };
 
@@ -90,7 +90,7 @@ function MessageBubble({
   message: Message;
   onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
-  onExplainChoice: (choice: ExplainActionPayload["choices"][number]) => void;
+  onExplainChoice: (choice: ExplainChoice) => void;
 }) {
   const userMessage = message.role === "user";
   const uiAction = message.uiAction;
@@ -130,9 +130,10 @@ function MessageBubble({
             ))}
           </div>
         )}
-        {!userMessage && Boolean(message.explainChoices?.length) && (
+        {!userMessage && message.explainTurn && (
           <div className="mt-2 flex flex-wrap gap-2">
-            {message.explainChoices?.map((choice) => (
+            <p className="w-full text-xs text-ink/70">{message.explainTurn.prompt}</p>
+            {message.explainTurn.choices.map((choice) => (
               <button
                 className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
                 key={choice.id}
@@ -257,7 +258,15 @@ export function F10ChatbotDemo() {
         body: JSON.stringify({
           message: question,
           context: chatContext,
-          ...(explainTurn && explainChoiceId ? { explainTurn, explainChoiceId } : {}),
+          ...(explainTurn && explainChoiceId
+            ? {
+                explain: {
+                  scriptId: explainTurn.scriptId,
+                  stage: explainTurn.stage,
+                  choiceId: explainChoiceId,
+                },
+              }
+            : {}),
         }),
       });
 
@@ -297,7 +306,7 @@ export function F10ChatbotDemo() {
               setMessages((current) => {
                 const last = current.at(-1);
                 if (!last || last.role !== "assistant") return current;
-                return [...current.slice(0, -1), { ...last, explainChoices: value.choices }];
+                return [...current.slice(0, -1), { ...last, explainTurn: value.turn }];
               });
               continue;
             }

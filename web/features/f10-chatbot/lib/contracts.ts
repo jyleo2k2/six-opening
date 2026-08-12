@@ -2,7 +2,7 @@ import {
   CHAT_SCREENS,
   type ChatContext,
   type ChatResponse,
-  type ExplainChoice,
+  type ExplainReply,
   type ExplainTurn,
   type ChatScreen,
   type ChatUiAction,
@@ -26,8 +26,7 @@ export type ChatRequest = {
   message: string;
   context: ChatContext;
   guidedDialogue?: GuidedDialogueState;
-  explainTurn?: ExplainTurn;
-  explainChoiceId?: string;
+  explain?: ExplainReply;
 };
 
 export type StandardChatActionPayload = Pick<
@@ -47,7 +46,6 @@ export type ChatActionPayload =
 
 export type ExplainActionPayload = {
   kind: "explain";
-  choices: readonly ExplainChoice[];
   turn: ExplainTurn;
 };
 
@@ -110,7 +108,7 @@ function parseGuidedDialogue(
   };
 }
 
-function parseExplainTurn(value: unknown): ExplainTurn | null | undefined {
+function parseExplainReply(value: unknown): ExplainReply | null | undefined {
   if (value === undefined) return undefined;
   if (!isRecord(value)) return null;
   if (
@@ -118,7 +116,34 @@ function parseExplainTurn(value: unknown): ExplainTurn | null | undefined {
     !/^term:\S{1,80}$/.test(value.scriptId) ||
     (value.stage !== "brief" && value.stage !== "detail")
   ) return null;
-  return { scriptId: value.scriptId as ExplainTurn["scriptId"], stage: value.stage };
+  const choiceId = optionalString(value.choiceId, MAX_GUIDED_ID_LENGTH);
+  if (!choiceId) return null;
+  return {
+    scriptId: value.scriptId,
+    stage: value.stage,
+    choiceId,
+  };
+}
+
+function parseExplainTurn(value: unknown): ExplainTurn | null | undefined {
+  if (!isRecord(value)) return null;
+  if (
+    typeof value.scriptId !== "string" ||
+    (value.stage !== "brief" && value.stage !== "detail") ||
+    typeof value.prompt !== "string" ||
+    !value.prompt.trim() ||
+    !Array.isArray(value.choices) ||
+    !value.choices.length ||
+    !value.choices.every(
+      (choice) =>
+        isRecord(choice) &&
+        typeof choice.id === "string" &&
+        choice.id.length > 0 &&
+        typeof choice.label === "string" &&
+        choice.label.trim().length > 0,
+    )
+  ) return null;
+  return value as ExplainTurn;
 }
 
 export function parseChatRequest(value: unknown): ChatRequest | null {
@@ -151,13 +176,8 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
 
   const guidedDialogue = parseGuidedDialogue(value.guidedDialogue);
   if (guidedDialogue === null) return null;
-  const explainTurn = parseExplainTurn(value.explainTurn);
-  const explainChoiceId = optionalString(value.explainChoiceId, MAX_GUIDED_ID_LENGTH);
-  if (
-    explainTurn === null ||
-    explainChoiceId === null ||
-    Boolean(explainTurn) !== Boolean(explainChoiceId)
-  ) return null;
+  const explain = parseExplainReply(value.explain);
+  if (explain === null) return null;
 
   return {
     message,
@@ -169,7 +189,7 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
       ...(unitPrice ? { unitPrice } : {}),
     },
     ...(guidedDialogue ? { guidedDialogue } : {}),
-    ...(explainTurn && explainChoiceId ? { explainTurn, explainChoiceId } : {}),
+    ...(explain ? { explain } : {}),
   };
 }
 
@@ -182,21 +202,9 @@ export function isGuidedDialogueAction(
 }
 
 export function isExplainAction(value: unknown): value is ExplainActionPayload {
-  if (!isRecord(value) || value.kind !== "explain" || !Array.isArray(value.choices)) return false;
+  if (!isRecord(value) || value.kind !== "explain") return false;
   const turn = parseExplainTurn(value.turn);
-  return (
-    turn !== undefined &&
-    turn !== null &&
-    value.choices.length > 0 &&
-    value.choices.every(
-      (choice) =>
-        isRecord(choice) &&
-        typeof choice.id === "string" &&
-        choice.id.length > 0 &&
-        typeof choice.label === "string" &&
-        choice.label.length > 0,
-    )
-  );
+  return turn !== undefined && turn !== null;
 }
 
 export function isAllowedUiAction(value: unknown): value is ChatUiAction {

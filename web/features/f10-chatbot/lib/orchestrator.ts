@@ -95,17 +95,17 @@ export async function createChatOutcome(
   const onStatus = dependencies.onStatus ?? (() => undefined);
   const routed = routeMessage(request.message, request.context);
   const protectedRoute = routed.route === "refusal" || routed.route === "safety" || routed.route === "outOfScope";
-  const newExplainTurn = !request.explainTurn && !protectedRoute && routed.explainScript
+  const newExplainTurn = !request.explain && !protectedRoute && routed.explainScript
     ? startExplain(routed.explainScript)
     : null;
-  const continuedExplainTurn = !protectedRoute && request.explainTurn && request.explainChoiceId
+  const continuedExplainTurn = !protectedRoute && request.explain
     ? (() => {
-        const script = findExplainScript(request.explainTurn!.scriptId);
-        return script ? advanceExplain(script, request.explainTurn!, request.explainChoiceId!) : null;
+        const script = findExplainScript(request.explain!.scriptId);
+        return script ? advanceExplain(script, request.explain!) : null;
       })()
     : null;
   const invalidExplainContinuation = Boolean(
-    request.explainTurn && request.explainChoiceId && !protectedRoute && !continuedExplainTurn,
+    request.explain && !protectedRoute && !continuedExplainTurn,
   );
   let response: ChatResponse = {
     text: routed.text,
@@ -127,11 +127,10 @@ export async function createChatOutcome(
     onStatus("단계별 설명 준비 완료");
     const explainReply = newExplainTurn ?? continuedExplainTurn!;
     response = { text: explainReply.text };
-    if (explainReply.turn && explainReply.choices) {
+    if (explainReply.kind === "turn") {
       explainAction = {
         kind: "explain",
         turn: explainReply.turn,
-        choices: explainReply.choices,
       };
     }
   } else if (routed.route === "tool" && routed.tool) {

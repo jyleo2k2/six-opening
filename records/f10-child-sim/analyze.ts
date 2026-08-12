@@ -209,7 +209,9 @@ for (const persona of [...new Set(rows.map((r) => r.persona))].sort()) {
   w();
 }
 
-writeFileSync(resolve(HERE, "REPORT.md"), lines.join("\n"), "utf8");
+const REPORT = resolve(HERE, "..", "..", "docs", "F10_아이질문_시뮬레이션_커버리지리포트.md");
+
+writeFileSync(REPORT, lines.join("\n"), "utf8");
 writeFileSync(resolve(HERE, "questions.json"), JSON.stringify(rows, null, 2), "utf8");
 
 console.log(`질문 ${rows.length}개 / 페르소나 ${new Set(rows.map((r) => r.persona)).size}종`);
@@ -220,4 +222,5 @@ console.log(`오탐            ${falseBlocks.length}건 (${pct(falseBlocks.lengt
 console.log(`지식 사전 구멍  ${knowledgeGaps.length}건 (${pct(knowledgeGaps.length)})`);
 console.log(`미사용 엔트리   ${deadEntries.length}/${CHATBOT_KNOWLEDGE.length}`);
 console.log(`\nintent 분포: ${JSON.stringify(intentCounts)}`);
-console.log("\n→ records/f10-child-sim/REPORT.md, questions.json");
+console.log("\n→ docs/F10_아이질문_시뮬레이션_커버리지리포트.md");
+console.log("→ records/f10-child-sim/questions.json");

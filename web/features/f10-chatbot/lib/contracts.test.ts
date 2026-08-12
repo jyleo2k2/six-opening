@@ -34,22 +34,25 @@ assert.equal(
   null,
 );
 
-const explainTurn = { scriptId: "term:per" as const, stage: "brief" as const };
+const explain = { scriptId: "term:per", stage: "brief" as const, choiceId: "profit-and-price" };
 assert.deepEqual(
   parseChatRequest({
     message: "회사가 번 이익과 주가",
     context: { screen: "stock" },
-    explainTurn,
-    explainChoiceId: "profit-and-price",
-  })?.explainTurn,
-  explainTurn,
+    explain,
+  })?.explain,
+  explain,
 );
-assert.equal(parseChatRequest({ message: "알겠어", context: { screen: "stock" }, explainTurn }), null);
+assert.equal(parseChatRequest({ message: "알겠어", context: { screen: "stock" }, explain: { ...explain, choiceId: "" } }), null);
 assert.equal(
   isExplainAction({
     kind: "explain",
-    turn: explainTurn,
-    choices: [{ id: "profit-and-price", label: "회사가 번 이익과 주가" }],
+    turn: {
+      scriptId: "term:per",
+      stage: "brief",
+      prompt: "PER은 무엇을 비교하는 숫자일까?",
+      choices: [{ id: "profit-and-price", label: "회사가 번 이익과 주가" }],
+    },
   }),
   true,
 );

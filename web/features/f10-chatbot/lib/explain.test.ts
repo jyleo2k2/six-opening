@@ -6,28 +6,45 @@ import { advanceExplain, startExplain } from "./explain";
 const per = findExplainScript("term:per");
 assert.ok(per);
 
-const started = startExplain(per);
-assert.equal(started.turn?.stage, "brief");
-assert.equal(started.choices?.length, 2);
-assert.equal(gateChatOutput({ text: started.text, source: "fixed" }).ok, true);
+const first = startExplain(per);
+assert.equal(first.kind, "turn");
+if (first.kind !== "turn") throw new Error("first turn missing");
+assert.equal(first.text, per.brief);
+assert.equal(first.turn.prompt, per.check.question);
+assert.equal(gateChatOutput({ text: first.text, source: "fixed" }).ok, true);
 
-for (const choice of started.choices ?? []) {
-  assert.equal(gateChatOutput({ text: choice.label, source: "fixed" }).ok, true);
+const correct = advanceExplain(per, {
+  scriptId: "term:per",
+  stage: "brief",
+  choiceId: "profit-and-price",
+});
+assert.deepEqual(correct, { kind: "end", text: "맞았어! 바로 그거야." });
+
+const detail = advanceExplain(per, {
+  scriptId: "term:per",
+  stage: "brief",
+  choiceId: "employee-count",
+});
+assert.equal(detail?.kind, "turn");
+assert.equal(detail?.text.includes("같은 업종"), true);
+if (detail?.kind !== "turn") throw new Error("detail turn missing");
+assert.equal(detail.turn.stage, "detail");
+assert.equal(advanceExplain(per, { scriptId: "term:per", stage: "detail", choiceId: "yes" })?.text, "좋아, 잘 이해했어.");
+assert.equal(advanceExplain(per, { scriptId: "term:per", stage: "detail", choiceId: "no" })?.text, `그럼 예를 들어볼게. ${per.example}`);
+
+assert.equal(advanceExplain(per, { scriptId: "term:per", stage: "brief", choiceId: "forged" }), null);
+assert.equal(advanceExplain(per, { scriptId: "term:forged", stage: "brief", choiceId: "profit-and-price" }), null);
+
+for (const text of [
+  first.text,
+  first.turn.prompt,
+  ...first.turn.choices.map((choice) => choice.label),
+  detail.text,
+  detail.turn.prompt,
+  ...detail.turn.choices.map((choice) => choice.label),
+  correct!.text,
+]) {
+  assert.equal(gateChatOutput({ text, source: "fixed" }).ok, true);
 }
-
-const correct = advanceExplain(per, started.turn!, "profit-and-price");
-assert.equal(correct?.text, "맞았어! 바로 그거야.");
-
-const detail = advanceExplain(per, started.turn!, "employee-count");
-assert.equal(detail?.turn?.stage, "detail");
-assert.equal(gateChatOutput({ text: detail?.text ?? "", source: "fixed" }).ok, true);
-for (const choice of detail?.choices ?? []) {
-  assert.equal(gateChatOutput({ text: choice.label, source: "fixed" }).ok, true);
-}
-
-assert.equal(advanceExplain(per, detail!.turn!, "understood")?.text, "좋아, 잘 이해했어.");
-assert.equal(advanceExplain(per, detail!.turn!, "not-yet")?.text, per.example);
-assert.equal(advanceExplain(per, started.turn!, "forged"), null);
-assert.equal(advanceExplain(per, { ...started.turn!, scriptId: "term:forged" }, "profit-and-price"), null);
 
 console.log("four-stage explain tests passed");

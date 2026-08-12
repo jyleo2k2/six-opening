@@ -170,8 +170,7 @@ type ChatRequest = {
     quantity?: number;
     unitPrice?: number;
   };
-  explainTurn?: { scriptId: `term:${string}`; stage: "brief" | "detail" };
-  explainChoiceId?: string;
+  explain?: { scriptId: string; stage: "brief" | "detail"; choiceId: string };
 };
 ```
 

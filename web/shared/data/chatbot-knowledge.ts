@@ -46,11 +46,12 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
       id: "term:per",
       brief: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자야.",
       check: {
-        prompt: "PER은 무엇을 비교하는 숫자일까?",
+        question: "PER은 무엇을 비교하는 숫자일까?",
         choices: [
-          { id: "profit-and-price", label: "회사가 번 이익과 주가", correct: true },
-          { id: "employee-count", label: "회사의 직원 수와 주가", correct: false },
+          { id: "profit-and-price", label: "회사가 번 이익과 주가" },
+          { id: "employee-count", label: "회사의 직원 수와 주가" },
         ],
+        answerId: "profit-and-price",
       },
       detail: "같은 업종의 회사끼리 PER을 함께 보면 이익에 비해 주가가 어떻게 보이는지 비교하는 데 도움이 돼.",
       example: "같은 업종의 두 회사가 비슷한 이익을 냈는데 한 회사의 주가가 더 높다면 PER도 다르게 보일 수 있어.",

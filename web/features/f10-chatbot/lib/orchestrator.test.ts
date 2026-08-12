@@ -34,7 +34,15 @@ async function main() {
   if (!isExplainAction(faq.action)) throw new Error("explain action missing");
 
   const continued = await createChatOutcome(
-    { message: "회사의 직원 수와 주가", context, explainTurn: faq.action.turn, explainChoiceId: "employee-count" },
+    {
+      message: "회사의 직원 수와 주가",
+      context,
+      explain: {
+        scriptId: faq.action.turn.scriptId,
+        stage: "brief",
+        choiceId: "employee-count",
+      },
+    },
     session,
     { generateAnswer: noModel },
   );
@@ -46,8 +54,7 @@ async function main() {
     {
       message: "응",
       context,
-      explainTurn: { scriptId: "term:per", stage: "brief" },
-      explainChoiceId: "forged",
+      explain: { scriptId: "term:per", stage: "brief", choiceId: "forged" },
     },
     session,
     { generateAnswer: noModel },
