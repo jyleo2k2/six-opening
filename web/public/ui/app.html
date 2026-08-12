@@ -24,9 +24,9 @@ a{color:#F5327F;text-decoration:none}
 a:hover{color:#01185A}
 ::-webkit-scrollbar{width:0;height:0}
 html.runtime body{background:#F6F7FA;overflow:hidden}
-html.runtime x-dc>div{padding:0!important;display:flex!important;justify-content:center!important;align-items:center!important;min-height:100dvh!important}
-html.runtime x-dc>div>div:first-child{transform:scale(var(--runtime-scale,.9));transform-origin:center center}
-html.runtime x-dc>div>div:nth-child(2){display:none!important}
+html.runtime x-dc>div,html.runtime .sc-host>div{padding:0!important;display:flex!important;justify-content:center!important;align-items:center!important;flex-wrap:nowrap!important;height:100dvh!important}
+html.runtime x-dc>div>div:first-child,html.runtime .sc-host>div>div:first-child{transform:scale(var(--runtime-scale,.9));transform-origin:center center}
+html.runtime x-dc>div>div:nth-child(2),html.runtime .sc-host>div>div:nth-child(2){display:none!important}
 </style>
 <script>
 if(new URLSearchParams(location.search).get('runtime')==='1'){
