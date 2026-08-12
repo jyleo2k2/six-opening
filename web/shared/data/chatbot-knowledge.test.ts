@@ -5,6 +5,16 @@ assert.ok(CHATBOT_KNOWLEDGE.filter((entry) => entry.kind === "glossary").length 
 assert.ok(CHATBOT_KNOWLEDGE.filter((entry) => entry.kind === "faq").length >= 15);
 assert.equal(new Set(CHATBOT_KNOWLEDGE.map((entry) => entry.id)).size, CHATBOT_KNOWLEDGE.length);
 assert.ok(CHATBOT_KNOWLEDGE.every((entry) => entry.answer.split(/[.!?]/).filter(Boolean).length <= 3));
+assert.ok(
+  CHATBOT_KNOWLEDGE.filter((entry) => entry.kind === "glossary").every(
+    (entry) => entry.explainScript?.id === `term:${entry.id}`,
+  ),
+);
+assert.ok(
+  CHATBOT_KNOWLEDGE.filter((entry) => entry.kind === "faq").every(
+    (entry) => entry.explainScript === undefined,
+  ),
+);
 assert.equal(findChatbotKnowledge("PER이 뭐야?")?.id, "per");
 assert.equal(findChatbotKnowledge("이 회사 비싼지 어떻게 알아?")?.id, "per");
 assert.equal(findChatbotKnowledge("평가 손익이 뭐야?")?.id, "unrealized-profit");

@@ -171,7 +171,6 @@ function dapieFeedback(
 ) {
   if (source === "tool") return "네가 볼 수 있는 자료를 확인했어";
   if (route === "context") return "지금 화면을 잘 살펴봤네";
-  if (intent === "service_help") return "어디서 확인할지 잘 물어봤어";
   if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어";
   return "궁금한 지점을 잘 짚었어";
 }
@@ -297,7 +296,13 @@ export async function createChatOutcome(
     routed.route === "refusal" ||
     routed.route === "safety" ||
     routed.route === "outOfScope";
-  if (explainStep === null && stockExploreStep === null && !protectedRoute) {
+  const directServiceHelp = routed.intent === "service_help";
+  if (
+    explainStep === null &&
+    stockExploreStep === null &&
+    !protectedRoute &&
+    !directServiceHelp
+  ) {
     const guided = startGuidedExplain(
       response.text,
       dapieFeedback(routed.route, routed.intent, source),
