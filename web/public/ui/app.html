@@ -1316,6 +1316,38 @@ class Component extends DCLogic {
     };
     this.liveRefreshTick();
     this.liveRefreshTimer = setInterval(this.liveRefreshTick, 5000);
+
+    // 캔들은 /api/quote/{종목}/chart 가 준다 (보관 DB → 키움 → 픽스처 순).
+    // 월봉 API 는 없으므로 주봉을 달 단위로 묶는다.
+    this.candleCache = {};
+    this.candleLoading = {};
+    this.loadCandles = (code, tf) => {
+      const key = code + ':' + tf;
+      if (!code || this.candleCache[key] || this.candleLoading[key]) return;
+      this.candleLoading[key] = true;
+      fetch('/api/quote/' + encodeURIComponent(code) + '/chart?period=' + (tf === 'day' ? 'daily' : 'weekly'), { cache:'no-store' })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          const points = (data && data.points) || [];
+          if (!points.length) return;
+          const bars = tf === 'month' ? this.groupByMonth(points) : points;
+          this.candleCache[key] = bars.slice(-26).map(p => ({ o:p.open, h:p.high, l:p.low, c:p.close }));
+          this.forceUpdate();
+        })
+        .catch(() => {})
+        .finally(() => { delete this.candleLoading[key]; });
+    };
+  }
+  groupByMonth(points){
+    const months = new Map();
+    points.forEach(p => {
+      const kst = new Date((p.time + 9 * 3600) * 1000);
+      const key = kst.getUTCFullYear() + '-' + kst.getUTCMonth();
+      const bar = months.get(key);
+      if (!bar) months.set(key, { open:p.open, high:p.high, low:p.low, close:p.close });
+      else { bar.high = Math.max(bar.high, p.high); bar.low = Math.min(bar.low, p.low); bar.close = p.close; }
+    });
+    return Array.from(months.values());
   }
   componentWillUnmount(){
     if (this.liveRefreshTimer) clearInterval(this.liveRefreshTimer);
@@ -1329,6 +1361,7 @@ class Component extends DCLogic {
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
     }
+    if (this.state.code && this.loadCandles) this.loadCandles(this.state.code, this.state.tf);
   }
   persist(next){
     try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq })); } catch(e){}
@@ -1596,8 +1629,9 @@ class Component extends DCLogic {
     const ND = (u.newsDetail || {});
     const nd = (st && ND[st.sector]) || { headline:'', body:[], points:[] };
     let candleBars = [];
-    if (st && u.candles) {
-      const bars = u.candles(st.code, s.tf, st.price);
+    const bars = st ? (this.candleCache && this.candleCache[st.code + ':' + s.tf]) : null;
+    if (st) this.loadCandles && this.loadCandles(st.code, s.tf);
+    if (bars && bars.length) {
       const hi = Math.max.apply(null, bars.map(b => b.h));
       const lo = Math.min.apply(null, bars.map(b => b.l));
       const span = (hi - lo) || 1;

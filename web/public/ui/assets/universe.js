@@ -263,26 +263,8 @@
     '483650': 'assets/logos/483650.png'
   };
 
-  // 캔들 데이터 (API 연동 전 임시) — tf: 'day' | 'week' | 'month'
-  function candles(code, tf, base) {
-    let s = 0;
-    const key = code + tf;
-    for (let i = 0; i < key.length; i++) s = (s * 31 + key.charCodeAt(i)) % 100000;
-    const rand = () => ((s = (s * 1103515245 + 12345) % 2147483648) / 2147483648);
-    const vol = tf === 'day' ? 0.012 : tf === 'week' ? 0.032 : 0.062;
-    const out = [];
-    let c = base * (1 - vol * 6);
-    for (let i = 0; i < 26; i++) {
-      const o = c;
-      const drift = (rand() - 0.46) * vol * 2;
-      c = o * (1 + drift);
-      const hi = Math.max(o, c) * (1 + rand() * vol * 0.7);
-      const lo = Math.min(o, c) * (1 - rand() * vol * 0.7);
-      out.push({ o: o, h: hi, l: lo, c: c });
-    }
-    const k = base / out[out.length - 1].c;
-    return out.map(b => ({ o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k }));
-  }
+  // 캔들은 여기서 만들지 않는다. app.html 이 /api/quote/{종목}/chart 에서 받는다
+  // (보관 DB → 키움 → 픽스처 순). 이전의 시드 난수 생성기는 실제 시세가 아니어서 걷어냈다.
 
   // 섹터별 상세 시황 — 어린이 눈높이로 다시 쓴 분석
   const newsDetail = {
@@ -301,5 +283,5 @@
     bank: { headline:'은행이 번 돈이 지난해보다 늘었어', body:['은행은 사람들 돈을 맡아 주고, 필요한 사람에게 빌려주면서 그 차이로 돈을 벌어.','금리가 높으면 빌려주고 받는 이자가 커져서 은행이 버는 돈도 늘어. 대신 돈을 못 갚는 사람이 늘면 손해가 나기도 해.','은행은 번 돈의 일부를 주주에게 나눠 주는 편이야. 이걸 배당이라고 해.'], points:['금리가 높으면 더 벌어','못 갚는 사람이 늘면 손해야','배당을 주는 편이야'] }
   };
 
-  window.KW_UNIVERSE = { sectors: sectors, stocks: stocks, logos: logos, candles: candles, newsDetail: newsDetail, tints: tints, brands: brands };
+  window.KW_UNIVERSE = { sectors: sectors, stocks: stocks, logos: logos, newsDetail: newsDetail, tints: tints, brands: brands };
 })();
