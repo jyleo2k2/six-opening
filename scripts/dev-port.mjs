@@ -24,27 +24,42 @@ function samePath(left, right) {
   return path.resolve(left).toLowerCase() === path.resolve(right).toLowerCase();
 }
 
-export function findDevPort(root) {
+function readSessions(root) {
   const gitDir = commonGitDir(root);
-  if (!gitDir) return DEFAULT_PORT;
+  if (!gitDir) return [];
 
   const registry = path.join(gitDir, REGISTRY_FILE);
-  if (!fs.existsSync(registry)) return DEFAULT_PORT;
+  if (!fs.existsSync(registry)) return [];
 
-  let sessions = [];
   try {
-    sessions = JSON.parse(fs.readFileSync(registry, "utf8")).sessions ?? [];
+    return JSON.parse(fs.readFileSync(registry, "utf8")).sessions ?? [];
   } catch {
-    return DEFAULT_PORT;
+    return [];
   }
+}
 
-  const session = sessions.find(
+export function findDevPort(root) {
+  const session = readSessions(root).find(
     (entry) =>
       ["starting", "active"].includes(entry.status) &&
       entry.worktree &&
       samePath(entry.worktree, root),
   );
   return Number.isInteger(session?.port) ? session.port : DEFAULT_PORT;
+}
+
+export function findReservedDevPorts(root) {
+  return [
+    ...new Set(
+      readSessions(root)
+        .filter(
+          (entry) =>
+            ["starting", "active"].includes(entry.status) &&
+            Number.isInteger(entry.port),
+        )
+        .map((entry) => entry.port),
+    ),
+  ].sort((left, right) => left - right);
 }
 
 const entry = process.argv[1] ? pathToFileURL(path.resolve(process.argv[1])).href : "";
