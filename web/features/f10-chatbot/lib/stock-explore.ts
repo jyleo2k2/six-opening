@@ -1,10 +1,15 @@
 import { STOCKS } from "../../../shared/data/stocks";
 import {
-  STOCK_FACT_TOPICS,
   type StockExploreReply,
   type StockExploreTurn,
   type StockFactTopic,
 } from "../../../shared/types/chatbot";
+
+export const STOCK_EXPLORE_TOPICS = [
+  "company",
+  "business",
+  "industry",
+] as const satisfies readonly StockFactTopic[];
 
 export type StockExploreStep =
   | {
@@ -36,6 +41,13 @@ function findStock(stockId: string) {
   return STOCKS.find((stock) => stock.id === stockId);
 }
 
+export function findNextStockExploreTopic(
+  shownTopics: readonly StockFactTopic[],
+) {
+  if (shownTopics.includes("financial")) return undefined;
+  return STOCK_EXPLORE_TOPICS.find((topic) => !shownTopics.includes(topic));
+}
+
 export function startStockExplore(
   stockId: `KRX:${string}`,
   topic: StockFactTopic,
@@ -49,9 +61,7 @@ export function advanceStockExplore(
 ): StockExploreStep | null {
   if (!findStock(reply.stockId)) return null;
 
-  const nextTopic = STOCK_FACT_TOPICS.find(
-    (topic) => !reply.shownTopics.includes(topic),
-  );
+  const nextTopic = findNextStockExploreTopic(reply.shownTopics);
   if (reply.choiceId === "done") {
     return { kind: "end", text: "좋아, 여기까지 볼게. 궁금한 종목이 생기면 이름을 말해 줘." };
   }
@@ -76,9 +86,7 @@ export function createStockExploreTurn(
   const stock = findStock(stockId);
   if (!stock) return null;
 
-  const nextTopic = STOCK_FACT_TOPICS.find(
-    (topic) => !shownTopics.includes(topic),
-  );
+  const nextTopic = findNextStockExploreTopic(shownTopics);
   if (nextTopic) {
     return {
       stockId,
@@ -94,7 +102,9 @@ export function createStockExploreTurn(
   return {
     stockId,
     shownTopics,
-    prompt: `${stock.name}에 저장된 정보는 모두 살펴봤어. 다른 종목도 알아볼까?`,
+    prompt: shownTopics.includes("financial")
+      ? `${stock.name}의 2024년 실적을 살펴봤어. 다른 종목도 알아볼까?`
+      : `${stock.name}의 회사·사업·업종 정보는 모두 살펴봤어. 다른 종목도 알아볼까?`,
     choices: [
       { id: "ask-other", label: "다른 종목 물어볼래" },
       { id: "done", label: "여기까지 볼래" },
