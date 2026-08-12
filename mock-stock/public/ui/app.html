@@ -129,23 +129,12 @@ a:hover{color:#01185A}
 </div>
 
 <div style="{{ stageStyle }}">
-<div style="{{ stageBrand }}"></div>
-<div style="{{ stageChange }}"></div>
-<div style="{{ stageAura }}"></div>
-<div style="{{ stageRing }}"></div>
-<div style="{{ stageGrid }}"></div>
-<svg width="402" height="100%" viewBox="0 0 402 420" preserveAspectRatio="none" style="{{ stageDust }}">
-<circle cx="64" cy="96" r="1.6" fill="#FFFFFF" fill-opacity="0.10"></circle>
-<circle cx="332" cy="150" r="1.4" fill="{{ stageDustColor }}" fill-opacity="0.12"></circle>
-<circle cx="46" cy="292" r="1.2" fill="{{ stageDustColor }}" fill-opacity="0.10"></circle>
-<circle cx="358" cy="330" r="1.7" fill="#FFFFFF" fill-opacity="0.08"></circle>
-<circle cx="118" cy="58" r="1.1" fill="{{ stageDustColor }}" fill-opacity="0.09"></circle>
-</svg>
-<div style="{{ stageVignette }}"></div>
-<div style="{{ stageFloor }}"></div>
-<div style="{{ stageBounce }}"></div>
-<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:18px;padding:6px 46px 14px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
+<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:33px;padding:2px 46px 6px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
 <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
+<div style="{{ c.slideStyle }}">
+<div style="{{ c.auraMain }}"></div>
+<div style="{{ c.auraNeon }}"></div>
+<div style="{{ c.auraTrend }}"></div>
 <div onClick="{{ c.pick }}" style="{{ c.cardStyle }}">
 <div style="{{ c.gridStyle }}"></div>
 <div style="{{ c.sheenStyle }}"></div>
@@ -202,6 +191,7 @@ a:hover{color:#01185A}
 <circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="10" fill="{{ c.lineColor }}" fill-opacity="0.24"></circle>
 <circle cx="{{ c.endX }}" cy="{{ c.endY }}" r="4.2" fill="#FFFFFF" style="filter:drop-shadow(0 0 7px {{ c.lineColor }})"></circle>
 </svg>
+</div>
 </div>
 </sc-for>
 </div>
@@ -1249,9 +1239,9 @@ class Component extends DCLogic {
   navItem(on){
     return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#A9AEC4');
   }
-  // 어두운 스테이지 위에 놓이는 네비 (종목 고르기 화면)
+  // 종목 고르기 화면 네비 (밝은 배경)
   navItemX(on){
-    return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#7F8CA8');
+    return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#A8A6C4');
   }
 
   renderVals(){
@@ -1288,8 +1278,10 @@ class Component extends DCLogic {
     const cards = st === null && !s.code ? [] : [];
     const logos = u.logos || {};
     const mixW = (hx, w) => { const n = parseInt(hx.slice(1), 16); const c = [(n>>16)&255,(n>>8)&255,n&255].map(v => Math.round(v + (255 - v) * w)); return '#' + c.map(v => v.toString(16).padStart(2,'0')).join(''); };
-    const list = u.stocks.filter(x => x.sector === s.sectorId).map(x => {
+    const rgbOf = (hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); };
+    const list = u.stocks.filter(x => x.sector === s.sectorId).map((x, ci) => {
       const sec = this.sectorOf(x.sector);
+      const active = ci === s.cardIndex;
       // 게임형 수집 카드 — 로고에서 뽑은 브랜드 색으로 프레임·글로우·차트를 물들인다
       const br = (u.brands || {})[x.code] || {};
       const B = br.color || sec.accent;          // 브랜드 색
@@ -1318,6 +1310,14 @@ class Component extends DCLogic {
         priceText: priceText,
         changeText: (x.change >= 0 ? '▲ ' : '▼ ') + Math.abs(x.change).toFixed(2) + '%',
         brand: B,
+        // 카드 바깥 래퍼 — 카드는 손대지 않고 뒤쪽에만 후광 레이어를 깐다
+        slideStyle: 'position:relative;isolation:isolate;flex:none;scroll-snap-align:center;opacity:' + (active ? '1' : '0.72') + ';transition:opacity 300ms ease',
+        // 주 후광 — 기업 대표색 인디고·코발트. 가장자리는 배경으로 완전히 사라진다.
+        auraMain: 'position:absolute;z-index:-2;left:50%;top:50%;width:142%;height:132%;transform:translate(-50%,-50%);pointer-events:none;filter:blur(30px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(32,40,116,0.30) 0%,rgba(' + rgbOf(B) + ',0.24) 26%,rgba(104,91,214,0.15) 48%,rgba(147,129,232,0.07) 64%,rgba(147,129,232,0) 79%)',
+        // 좁은 반사광 — 카드 테두리 네온이 주변 공간에 반사되는 느낌
+        auraNeon: 'position:absolute;z-index:-1;left:-10px;top:-10px;right:-10px;bottom:-10px;border-radius:44px;pointer-events:none;filter:blur(5px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at 50% 44%,rgba(' + rgbOf(B) + ',0.18) 0%,rgba(' + rgbOf(B) + ',0.08) 48%,rgba(' + rgbOf(B) + ',0) 72%);box-shadow:0 0 14px rgba(' + rgbOf(B) + ',0.30),0 0 34px rgba(' + rgbOf(B) + ',0.17)',
+        // 등락색은 차트가 있는 우하단에만 아주 약하게
+        auraTrend: 'position:absolute;z-index:-1;right:-8%;bottom:4%;width:52%;height:42%;pointer-events:none;filter:blur(22px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(' + rgbOf(CL) + ',0.16) 0%,rgba(' + rgbOf(CL) + ',0.07) 42%,rgba(' + rgbOf(CL) + ',0) 74%)',
 
         // 카드 몸체 — 좌상단 브랜드 광원, 중앙은 깊게, 우하단은 검정에 가깝게
         cardStyle: 'position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + CL + 'B3',
@@ -1340,14 +1340,6 @@ class Component extends DCLogic {
         pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
       };
     });
-
-    // 카드 스테이지 — 지금 보이는 카드의 색을 배경 조명에 반영한다.
-    // 색만 background-color로 바꾸고 모양은 마스크로 고정해야 전환이 부드럽다(그라데이션은 보간되지 않는다).
-    const stCur = list[Math.max(0, Math.min(s.cardIndex, list.length - 1))] || {};
-    const stB = stCur.brand || '#5B87E8';
-    const stC = stCur.lineColor || up;
-    const stMask = (shape) => '-webkit-mask-image:' + shape + ';mask-image:' + shape;
-    const stLayer = (color, op, shape) => 'position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;opacity:' + op + ';background-color:' + color + ';transition:background-color 420ms ease;' + stMask(shape);
 
     const holdingCards = m.holdings.map(h => {
       const x = u.stocks.filter(y => y.code === h.code)[0];
@@ -1498,26 +1490,15 @@ class Component extends DCLogic {
       sectorTitle: this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
       cards: list,
       cardDots: list.map((x, i) => ({
-        style: 'width:' + (i === s.cardIndex ? '18px' : '6px') + ';height:6px;border-radius:999px;transition:width .18s ease;background:' + (i === s.cardIndex ? '#F5327F' : 'rgba(255,255,255,0.22)') + (i === s.cardIndex ? ';box-shadow:0 0 10px -1px #F5327F' : '')
+        style: 'width:' + (i === s.cardIndex ? '18px' : '6px') + ';height:6px;border-radius:999px;transition:width .18s ease;background:' + (i === s.cardIndex ? '#FF3D8D' : '#D6D0E5') + (i === s.cardIndex ? ';box-shadow:0 0 9px rgba(255,61,141,0.42)' : '')
       })),
 
-      // 상단은 밝게 두고 아래로 갈수록 어두워진다 — 스테이지와 직선으로 갈리지 않게
-      exploreBgStyle: 'position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2F1F8 0%,#EDEEF7 52%,#E4E6F2 100%)',
-      // 스테이지 본체 — 화면 좌우 전체를 쓰고, 위쪽 경계는 부드럽게 페이드인
-      stageStyle: 'position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(180deg,rgba(23,23,42,0) 0%,rgba(23,23,42,0.55) 4%,#17172A 11%,#0B1022 46%,#050816 100%)',
-      stageBrand: stLayer(stB, '0.20', 'radial-gradient(circle at 50% 38%,#000 0%,rgba(0,0,0,0.40) 32%,rgba(0,0,0,0) 62%)'),
-      stageChange: stLayer(stC, '0.12', 'radial-gradient(circle at 50% 76%,#000 0%,rgba(0,0,0,0) 48%)'),
-      // 카드 뒤 넓은 방사형 광원
-      stageAura: 'position:absolute;left:50%;top:45%;width:430px;height:340px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;opacity:0.26;filter:blur(26px);background-color:' + stB + ';transition:background-color 420ms ease;' + stMask('radial-gradient(ellipse at center,#000 0%,rgba(0,0,0,0.45) 36%,rgba(0,0,0,0) 72%)'),
-      stageRing: 'position:absolute;left:50%;top:44%;width:322px;height:322px;transform:translate(-50%,-50%);border-radius:999px;pointer-events:none;border:1px solid rgba(255,255,255,0.055);box-shadow:0 0 0 24px rgba(255,255,255,0.022)',
-      stageGrid: 'position:absolute;left:-12%;right:-12%;bottom:0;height:36%;pointer-events:none;opacity:0.10;background-image:linear-gradient(rgba(255,255,255,0.55) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.55) 1px,transparent 1px);background-size:34px 30px;transform:perspective(300px) rotateX(62deg);transform-origin:bottom center;' + stMask('linear-gradient(180deg,rgba(0,0,0,0) 0%,#000 58%)'),
-      stageVignette: 'position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;background:radial-gradient(120% 78% at 50% 44%,rgba(0,0,0,0) 42%,rgba(0,0,0,0.42) 100%)',
-      // 카드 바닥 — 흐릿한 타원 그림자 + 아주 약한 반사광
-      stageFloor: 'position:absolute;left:50%;bottom:52px;width:262px;height:30px;transform:translateX(-50%);border-radius:50%;pointer-events:none;filter:blur(9px);background:radial-gradient(closest-side,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0) 100%)',
-      stageBounce: 'position:absolute;left:50%;bottom:44px;width:180px;height:12px;transform:translateX(-50%);border-radius:50%;pointer-events:none;opacity:0.16;filter:blur(7px);background-color:' + stC + ';transition:background-color 420ms ease',
-      stageDust: 'position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none',
-      stageDustColor: stB,
-      navStyleX: 'flex:none;display:flex;padding-bottom:14px;background:linear-gradient(180deg,rgba(5,8,22,0) 0%,#050816 36%)',
+      // 페이지 전체가 하나의 밝은 배경 — 카드 영역에서 어두워지는 경계를 만들지 않는다
+      exploreBgStyle: 'position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(circle at 18% 7%,rgba(225,219,255,0.34) 0%,rgba(225,219,255,0) 32%),radial-gradient(circle at 88% 92%,rgba(255,226,239,0.25) 0%,rgba(255,226,239,0) 30%),linear-gradient(180deg,#FAF9FD 0%,#F5F3FB 52%,#FAF8FC 100%)',
+      // 캐러셀 영역은 투명 — 별도 배경을 두지 않는다
+      stageStyle: 'position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:transparent',
+      // 하단 내비 — 밝은 배경에 이어지는 반투명 글래스
+      navStyleX: 'flex:none;display:flex;padding-bottom:14px;background:linear-gradient(180deg,rgba(250,248,252,0) 0%,rgba(252,251,254,0.86) 34%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.9)',
       navHomeX: this.navItemX(false), navTradeX: this.navItemX(true), navArchiveX: this.navItemX(false), navRankingX: this.navItemX(false),
       cardsRef: (el) => { this.cardsEl = el; },
       cardsScroll: (e) => {
