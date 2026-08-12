@@ -29,16 +29,6 @@ const chartTypes: { value: ChartType; label: string }[] = [
 const clientChartCache = new Map<string, ChartPoint[]>();
 const chartPreloadPromises = new Map<string, Promise<ChartPoint[] | undefined>>();
 
-function fixtureChart(values: number[], period: ChartPeriod): ChartPoint[] {
-  const selected = period === "minute" ? values.slice(-6) : period === "weekly" ? values.filter((_, index) => index % 2 === 0 || index === values.length - 1) : values;
-  const interval = period === "minute" ? 60 : period === "weekly" ? 7 * 24 * 60 * 60 : 24 * 60 * 60;
-  const lastTime = Math.floor(Date.now() / 1000 / interval) * interval;
-  return selected.map((close, index) => {
-    const open = selected[index - 1] ?? close;
-    return { time: lastTime - (selected.length - 1 - index) * interval, open, high: Math.max(open, close), low: Math.min(open, close), close, volume: 0, price: close };
-  });
-}
-
 function preloadChart(symbol: string, period: ChartPeriod) {
   const cacheKey = `${symbol}:${period}`;
   const cached = clientChartCache.get(cacheKey);
@@ -81,10 +71,11 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
   const [quantity, setQuantity] = useState(1);
   const [completedRecord, setCompletedRecord] = useState<ReasonRecord>();
   const [charts, setCharts] = useState<Record<ChartPeriod, ChartPoint[]>>(() => ({
-    minute: stock ? fixtureChart(stock.chart, "minute") : [],
-    daily: stock ? fixtureChart(stock.chart, "daily") : [],
-    weekly: stock ? fixtureChart(stock.chart, "weekly") : [],
+    minute: [],
+    daily: [],
+    weekly: [],
   }));
+  const [chartErrors, setChartErrors] = useState<Record<ChartPeriod, boolean>>({ minute: false, daily: false, weekly: false });
   const [chartPeriod, setChartPeriod] = useState<ChartPeriod>("daily");
   const [chartType, setChartType] = useState<ChartType>("line");
 
@@ -98,11 +89,14 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
   useEffect(() => {
     if (!stock) return;
     let cancelled = false;
-    const immediate = Object.fromEntries(chartPeriods.map(({ value }) => [value, clientChartCache.get(`${symbol}:${value}`) ?? fixtureChart(stock.chart, value)])) as Record<ChartPeriod, ChartPoint[]>;
+    const immediate = Object.fromEntries(chartPeriods.map(({ value }) => [value, clientChartCache.get(`${symbol}:${value}`) ?? []])) as Record<ChartPeriod, ChartPoint[]>;
     setCharts(immediate);
+    setChartErrors({ minute: false, daily: false, weekly: false });
     for (const { value: period } of chartPeriods) {
       preloadChart(symbol, period).then((points) => {
-        if (!cancelled && points) setCharts((current) => ({ ...current, [period]: points }));
+        if (cancelled) return;
+        if (points) setCharts((current) => ({ ...current, [period]: points }));
+        else setChartErrors((current) => ({ ...current, [period]: true }));
       });
     }
     return () => { cancelled = true; };
@@ -175,7 +169,9 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
           <div className="mt-4 grid grid-cols-2 gap-2">
             {chartTypes.map((type) => <button key={type.value} type="button" onClick={() => setChartType(type.value)} aria-pressed={chartType === type.value} className={`rounded-full border px-3 py-2 text-xs font-bold ${chartType === type.value ? "border-navy bg-navy text-white" : "border-gray bg-white text-ink"}`}>{type.label}</button>)}
           </div>
-          <TradingViewChart key={`${chartPeriod}:${chartType}`} points={chart} livePrice={currentPrice} positive={currentPrice >= (chartValues[0] ?? currentPrice)} period={chartPeriod} chartType={chartType} trades={chartTrades} viewer={viewer} onSelectTrade={(trade) => router.push(`/feed?trade=${trade.id}`)} />
+          {chart.length > 0
+            ? <TradingViewChart key={`${chartPeriod}:${chartType}`} points={chart} livePrice={currentPrice} positive={currentPrice >= (chartValues[0] ?? currentPrice)} period={chartPeriod} chartType={chartType} trades={chartTrades} viewer={viewer} onSelectTrade={(trade) => router.push(`/feed?trade=${trade.id}`)} />
+            : <div role="status" className="flex h-56 items-center justify-center text-sm opacity-60">{chartErrors[chartPeriod] ? "차트 데이터를 불러오지 못했어." : "차트를 불러오는 중이야…"}</div>}
           <div className="grid grid-cols-3 gap-2">
             {chartPeriods.map((period) => <button key={period.value} type="button" onClick={() => setChartPeriod(period.value)} className={`rounded-full border px-3 py-2 text-xs font-bold ${chartPeriod === period.value ? "border-magenta bg-magenta text-white" : "border-gray bg-white text-ink"}`}>{period.label}</button>)}
           </div>

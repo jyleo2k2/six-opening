@@ -1,5 +1,6 @@
 import { stockBySymbol } from "@/shared/data/stocks";
 import type { Quote } from "@/shared/types";
+import { chartRetentionCutoff, readStoredCandles, syncStoredCandles } from "./stock-candles";
 
 const baseUrl = (process.env.KIWOOM_ENV ?? "real").toLowerCase() === "mock" ? "https://mockapi.kiwoom.com" : "https://api.kiwoom.com";
 let accessToken = "";
@@ -18,6 +19,7 @@ export type ChartPoint = {
   price: number;
 };
 const chartCache = new Map<string, { value: ChartPoint[]; at: number }>();
+const chartRefreshes = new Map<string, Promise<void>>();
 export type ChartPeriod = "minute" | "daily" | "weekly";
 
 function credentialsAvailable() {
@@ -118,35 +120,6 @@ function findRows(value: unknown): Record<string, unknown>[] {
   return [];
 }
 
-function periodSeconds(period: ChartPeriod) {
-  if (period === "minute") return 60;
-  if (period === "weekly") return 7 * 24 * 60 * 60;
-  return 24 * 60 * 60;
-}
-
-function currentBucket(period: ChartPeriod) {
-  const seconds = periodSeconds(period);
-  return Math.floor(Date.now() / 1000 / seconds) * seconds;
-}
-
-function fixtureChart(period: ChartPeriod, values: number[]): ChartPoint[] {
-  const selected = period === "minute" ? values.slice(-6) : period === "weekly" ? values.filter((_, index) => index % 2 === 0 || index === values.length - 1) : values;
-  const lastTime = currentBucket(period);
-  const interval = periodSeconds(period);
-  return selected.map((close, index) => {
-    const open = selected[index - 1] ?? close;
-    return {
-      time: lastTime - (selected.length - 1 - index) * interval,
-      open,
-      high: Math.max(open, close),
-      low: Math.min(open, close),
-      close,
-      volume: 0,
-      price: close,
-    };
-  });
-}
-
 function koreaTimestamp(year: number, month: number, day: number, hour = 0, minute = 0, second = 0) {
   return Math.floor((Date.UTC(year, month - 1, day, hour, minute, second) - 9 * 60 * 60 * 1000) / 1000);
 }
@@ -179,12 +152,72 @@ function chartRowTimestamp(row: Record<string, unknown>, period: ChartPeriod) {
   );
 }
 
-function chartCutoffTimestamp(period: ChartPeriod) {
-  const cutoff = new Date();
-  if (period === "minute") cutoff.setUTCDate(cutoff.getUTCDate() - 14);
-  else if (period === "daily") cutoff.setUTCDate(cutoff.getUTCDate() - 365);
-  else cutoff.setUTCFullYear(cutoff.getUTCFullYear() - 3);
-  return Math.floor(cutoff.getTime() / 1000);
+async function fetchKiwoomChart(symbol: string, period: ChartPeriod, stopAtTimestamp?: number) {
+  const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()).replaceAll("-", "");
+  const request = period === "minute"
+    ? { apiId: "ka10080", body: { stk_cd: symbol, tic_scope: "1", upd_stkpc_tp: "1" } }
+    : period === "weekly"
+      ? { apiId: "ka10082", body: { stk_cd: symbol, base_dt: date, upd_stkpc_tp: "1" } }
+      : { apiId: "ka10081", body: { stk_cd: symbol, base_dt: date, upd_stkpc_tp: "1" } };
+  const rows: Record<string, unknown>[] = [];
+  const seenContinuationKeys = new Set<string>();
+  const cutoffTimestamp = chartRetentionCutoff(period);
+  let continuation: Continuation | undefined;
+  do {
+    const page = await enqueue(() => requestPage("/api/dostk/chart", request.body, request.apiId, continuation));
+    const pageRows = findRows(page.data);
+    rows.push(...pageRows);
+    const reachedStop = pageRows.some((row) => {
+      const timestamp = chartRowTimestamp(row, period);
+      return timestamp != null && timestamp <= (stopAtTimestamp ?? cutoffTimestamp);
+    });
+    if (reachedStop) break;
+    if (page.contYn.toUpperCase() !== "Y" || !page.nextKey || seenContinuationKeys.has(page.nextKey)) break;
+    seenContinuationKeys.add(page.nextKey);
+    continuation = { contYn: "Y", nextKey: page.nextKey };
+  } while (continuation);
+  const points = rows.map((row) => {
+    const close = numeric(first(row, ["cur_prc", "stck_prpr", "close_pric", "close"]), true) ?? 0;
+    const open = numeric(first(row, ["open_pric", "open", "stck_oprc"]), true) ?? close;
+    const high = numeric(first(row, ["high_pric", "high", "stck_hgpr"]), true) ?? Math.max(open, close);
+    const low = numeric(first(row, ["low_pric", "low", "stck_lwpr"]), true) ?? Math.min(open, close);
+    return {
+      time: chartRowTimestamp(row, period),
+      open,
+      high: Math.max(high, open, close),
+      low: Math.min(low, open, close),
+      close,
+      volume: numeric(first(row, ["trde_qty", "volume", "acml_vol"]), true) ?? 0,
+      price: close,
+    };
+  }).filter((point): point is ChartPoint => point.time != null && point.time >= cutoffTimestamp && point.close > 0).sort((a, b) => a.time - b.time).filter((point, index, sortedRows) => index === sortedRows.length - 1 || point.time !== sortedRows[index + 1].time);
+  if (!points.length) throw new Error("차트 데이터가 없습니다.");
+  return points;
+}
+
+function mergeChartPoints(...groups: ChartPoint[][]) {
+  const byTime = new Map<number, ChartPoint>();
+  for (const points of groups) for (const point of points) byTime.set(point.time, point);
+  return [...byTime.values()].sort((a, b) => a.time - b.time);
+}
+
+export function refreshStoredChart(symbol: string, period: Exclude<ChartPeriod, "minute">) {
+  const cacheKey = `${symbol}:${period}`;
+  const pending = chartRefreshes.get(cacheKey);
+  if (pending) return pending;
+  if (!credentialsAvailable()) return Promise.resolve();
+
+  const refresh = (async () => {
+    const cutoff = chartRetentionCutoff(period);
+    const stored = await readStoredCandles(symbol, period, cutoff);
+    const latestStoredTime = stored.points.at(-1)?.time;
+    const fresh = await fetchKiwoomChart(symbol, period, latestStoredTime);
+    const points = mergeChartPoints(stored.points, fresh).filter((point) => point.time >= cutoff);
+    await syncStoredCandles(stored.stockId, period, fresh, cutoff);
+    chartCache.set(cacheKey, { value: points, at: Date.now() });
+  })().catch(() => undefined).finally(() => chartRefreshes.delete(cacheKey));
+  chartRefreshes.set(cacheKey, refresh);
+  return refresh;
 }
 
 export async function getChart(symbol: string, period: ChartPeriod) {
@@ -193,50 +226,34 @@ export async function getChart(symbol: string, period: ChartPeriod) {
   const cacheKey = `${symbol}:${period}`;
   const cached = chartCache.get(cacheKey);
   if (cached && Date.now() - cached.at < 5 * 60 * 1000) return cached.value;
-  if (!credentialsAvailable()) return fixtureChart(period, stock.chart);
-  try {
-    const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()).replaceAll("-", "");
-    const request = period === "minute"
-      ? { apiId: "ka10080", body: { stk_cd: symbol, tic_scope: "1", upd_stkpc_tp: "1" } }
-      : period === "weekly"
-        ? { apiId: "ka10082", body: { stk_cd: symbol, base_dt: date, upd_stkpc_tp: "1" } }
-        : { apiId: "ka10081", body: { stk_cd: symbol, base_dt: date, upd_stkpc_tp: "1" } };
-    const rows: Record<string, unknown>[] = [];
-    const seenContinuationKeys = new Set<string>();
-    const cutoffTimestamp = chartCutoffTimestamp(period);
-    let continuation: Continuation | undefined;
-    do {
-      const page = await enqueue(() => requestPage("/api/dostk/chart", request.body, request.apiId, continuation));
-      const pageRows = findRows(page.data);
-      rows.push(...pageRows);
-      const reachedCutoff = pageRows.some((row) => {
-        const timestamp = chartRowTimestamp(row, period);
-        return timestamp != null && timestamp <= cutoffTimestamp;
-      });
-      if (reachedCutoff) break;
-      if (page.contYn.toUpperCase() !== "Y" || !page.nextKey || seenContinuationKeys.has(page.nextKey)) break;
-      seenContinuationKeys.add(page.nextKey);
-      continuation = { contYn: "Y", nextKey: page.nextKey };
-    } while (continuation);
-    const points = rows.map((row) => {
-      const close = numeric(first(row, ["cur_prc", "stck_prpr", "close_pric", "close"]), true) ?? 0;
-      const open = numeric(first(row, ["open_pric", "open", "stck_oprc"]), true) ?? close;
-      const high = numeric(first(row, ["high_pric", "high", "stck_hgpr"]), true) ?? Math.max(open, close);
-      const low = numeric(first(row, ["low_pric", "low", "stck_lwpr"]), true) ?? Math.min(open, close);
-      return {
-        time: chartRowTimestamp(row, period),
-        open,
-        high: Math.max(high, open, close),
-        low: Math.min(low, open, close),
-        close,
-        volume: numeric(first(row, ["trde_qty", "volume", "acml_vol"]), true) ?? 0,
-        price: close,
-      };
-    }).filter((point): point is ChartPoint => point.time != null && point.time >= cutoffTimestamp && point.close > 0).sort((a, b) => a.time - b.time).filter((point, index, sortedRows) => index === sortedRows.length - 1 || point.time !== sortedRows[index + 1].time);
-    if (!points.length) throw new Error("차트 데이터가 없습니다.");
+
+  if (period === "minute") {
+    if (!credentialsAvailable()) throw new Error("키움 API 설정이 없어 분봉을 불러올 수 없습니다.");
+    const points = await fetchKiwoomChart(symbol, period);
     chartCache.set(cacheKey, { value: points, at: Date.now() });
     return points;
-  } catch {
-    return fixtureChart(period, stock.chart);
   }
+
+  const cutoff = chartRetentionCutoff(period);
+  try {
+    const stored = await readStoredCandles(symbol, period, cutoff);
+    if (stored.points.length) {
+      chartCache.set(cacheKey, { value: stored.points, at: Date.now() });
+      return stored.points;
+    }
+  } catch {
+    // Supabase가 설정되지 않았거나 일시 장애여도 키움 직접 조회는 계속한다.
+  }
+
+  if (credentialsAvailable()) {
+    try {
+      const points = await fetchKiwoomChart(symbol, period);
+      chartCache.set(cacheKey, { value: points, at: Date.now() });
+      return points;
+    } catch {
+      // 키움 장애 시 아래 픽스처로 폴백한다.
+    }
+  }
+
+  throw new Error("실제 차트 데이터를 불러오지 못했습니다.");
 }
