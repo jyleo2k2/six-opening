@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
 import type {
+  ChatContext,
   ChatUiAction,
   ExplainChoice,
   ExplainTurn,
@@ -21,6 +22,9 @@ import {
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
+type F10ChatbotDemoProps = {
+  context?: ChatContext;
+};
 type Message = {
   role: "assistant" | "user";
   text: string;
@@ -188,8 +192,8 @@ function MessageBubble({
   );
 }
 
-export function F10ChatbotDemo() {
-  const [screen, setScreen] = useState<Screen>("stock");
+export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
+  const [screen, setScreen] = useState<Screen>(context?.screen ?? "stock");
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -208,19 +212,28 @@ export function F10ChatbotDemo() {
 
   const currentScreen = SCREENS[screen];
   const chatContext = useMemo(
-    () => ({
-      screen,
-      stockId: screen === "stock" || screen === "order" ? ("KRX:005930" as const) : undefined,
-      stockName: screen === "stock" || screen === "order" ? "삼성전자" : undefined,
-      quantity: screen === "order" ? 10 : undefined,
-      unitPrice: screen === "order" ? 12500 : undefined,
-    }),
-    [screen],
+    () =>
+      context ?? {
+        screen,
+        stockId:
+          screen === "stock" || screen === "order"
+            ? ("KRX:005930" as const)
+            : undefined,
+        stockName:
+          screen === "stock" || screen === "order" ? "삼성전자" : undefined,
+        quantity: screen === "order" ? 10 : undefined,
+        unitPrice: screen === "order" ? 12500 : undefined,
+      },
+    [context, screen],
   );
 
   useEffect(() => {
+    if (context) setScreen(context.screen);
+  }, [context]);
+
+  useEffect(() => {
     const enteredAt = Date.now();
-    const stockId = screen === "stock" || screen === "order" ? "KRX:005930" : undefined;
+    const stockId = chatContext.stockId;
     const lastEntry = lastScreenEntryRef.current;
     if (!lastEntry || lastEntry.screen !== screen || enteredAt - lastEntry.at > 1_000) {
       recordBehaviorEvent({ type: "screen_entered", screen, stockId, at: enteredAt });
@@ -271,7 +284,7 @@ export function F10ChatbotDemo() {
       if (timer) clearTimeout(timer);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [recordBehaviorEvent, screen]);
+  }, [chatContext.stockId, recordBehaviorEvent, screen]);
 
   useEffect(() => {
     const element = messagesRef.current;
@@ -454,9 +467,10 @@ export function F10ChatbotDemo() {
   }
 
   function recordOrderCancellation(side: "buy" | "sell") {
+    if (!chatContext.stockId) return;
     recordBehaviorEvent({
       type: "order_confirmation_cancelled",
-      stockId: "KRX:005930",
+      stockId: chatContext.stockId,
       side,
       at: Date.now(),
     });
