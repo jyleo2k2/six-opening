@@ -85,21 +85,6 @@ export const GAME_EDUCATION: readonly GameEducation[] = [
     ],
     status: "draft",
   },
-  {
-    stockId: "KRX:263750",
-    companySummary: "펄어비스는 PC·모바일·콘솔에서 즐기는 게임을 개발하고 서비스하는 회사예요.",
-    businessModel: "게임 서비스와 게임 이용, 게임 안 디지털 상품·서비스에서 돈을 벌어요.",
-    industryRole: "자체 게임 IP를 만들고 여러 플랫폼과 지역에 서비스하는 게임 개발·퍼블리싱 회사예요.",
-    elementaryExplanation: "펄어비스는 컴퓨터와 휴대폰 등 게임기로 즐기는 게임을 만들고 운영해요.",
-    middleSchoolExplanation: "펄어비스는 자체 게임 IP를 바탕으로 PC·모바일·콘솔 게임을 개발·서비스하며 게임 서비스와 게임 안 디지털 상품·서비스에서 수입을 얻어요.",
-    financialSummary: "2024년 연결 기준 매출은 3,424억원, 영업손실은 1,227억원이에요.",
-    financialSnapshot: { period: "2024", revenueKrwMillion: 342400, operatingProfitKrwMillion: -122700 },
-    sources: [
-      { title: "Pearl Abyss 4Q24 Earnings Presentation", url: "https://www.pearlabyss.com/en-US/IR/Data/Performance", checkedAt },
-      { title: "Pearl Abyss Q4 2024 and Annual Earnings Presentation", url: "https://www.pearlabyss.com/en-US/Board/Detail?_boardNo=14093", checkedAt },
-    ],
-    status: "reviewed",
-  },
 ];
 
 export function findGameEducation(stockId: string) {
