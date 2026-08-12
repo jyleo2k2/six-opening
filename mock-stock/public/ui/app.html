@@ -1498,9 +1498,8 @@ class Component extends DCLogic {
           : 'color:#5C6280;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(240,240,250,0.78) 100%);box-shadow:0 5px 12px -5px rgba(70,50,120,0.28),inset 0 1.5px 1px rgba(255,255,255,0.95),inset 0 0 0 1px rgba(120,110,180,0.10)'),
         pick: () => this.set({ sectorId: x.id, cardIndex: 0 })
       })),
-      sectorTitle: isRank
-        ? '오늘 많이 오른 순 ' + list.length + '곳'
-        : this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
+      // 등락률 순 보기에서는 칩이 이미 무슨 목록인지 말해주므로 제목을 비운다
+      sectorTitle: isRank ? '' : this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
       cards: list,
       // 종목이 많으면 도트가 화면을 넘친다. 현재 위치 주변만 창처럼 보여주고 양끝은 작게 흘린다.
       cardDots: (() => {
