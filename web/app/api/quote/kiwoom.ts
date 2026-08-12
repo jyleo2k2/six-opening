@@ -4,6 +4,7 @@ import path from "node:path";
 import { getQuoteFixture } from "./fixtures";
 import {
   chartRetentionCutoff,
+  readLatestCandles,
   readStoredCandles,
   syncStoredCandles,
 } from "./stock-candles";
@@ -186,12 +187,48 @@ function fixtureQuote(
   };
 }
 
+/**
+ * 키움 없이도 카드 시세를 보관 캔들의 최근 종가로 맞춘다.
+ *
+ * universe.js 픽스처 가격은 실제 시세와 크게 다를 수 있어서, 차트만 실데이터로
+ * 바꾸면 카드와 차트가 서로 다른 값을 보여준다. 같은 출처를 쓰게 한다.
+ */
+async function storedQuote(
+  symbol: string,
+  fixture: NonNullable<Awaited<ReturnType<typeof getQuoteFixture>>>,
+): Promise<Quote | null> {
+  try {
+    const [latest, previous] = await readLatestCandles(symbol, "daily", 2);
+    if (!latest?.close) return null;
+    const change = previous?.close ? latest.close - previous.close : 0;
+    return {
+      symbol,
+      name: fixture.name,
+      price: latest.close,
+      change,
+      rate: previous?.close ? (change / previous.close) * 100 : 0,
+      updatedAt: new Date(latest.time * 1000).toISOString(),
+      source: "fixture",
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function getQuote(symbol: string): Promise<Quote> {
+  loadDevelopmentEnvironment();
   const fixture = await getQuoteFixture(symbol);
   if (!fixture) throw new Error("등록되지 않은 종목입니다.");
   const cached = quoteCache.get(symbol);
   if (cached && Date.now() - cached.at < 900) return cached.value;
-  if (!hasKiwoomCredentials()) return fixtureQuote(fixture);
+  if (!hasKiwoomCredentials()) {
+    const stored = await storedQuote(symbol, fixture);
+    if (stored) {
+      quoteCache.set(symbol, { value: stored, at: Date.now() });
+      return stored;
+    }
+    return fixtureQuote(fixture);
+  }
 
   try {
     const data = (await enqueue(() =>
@@ -406,6 +443,7 @@ function mergeChartPoints(...groups: ChartPoint[][]) {
  * 분봉은 보관하지 않는다 — 14일치를 매일 쌓을 이유가 없고 항상 실시간으로 받는다.
  */
 export function refreshStoredChart(symbol: string, period: Exclude<ChartPeriod, "minute">) {
+  loadDevelopmentEnvironment();
   const cacheKey = `${symbol}:${period}`;
   const pending = chartRefreshes.get(cacheKey);
   if (pending) return pending;
@@ -433,6 +471,9 @@ export function refreshStoredChart(symbol: string, period: Exclude<ChartPeriod, 
  * 초당 1건 제한을 피하고, 최신 구간 반영은 `refreshStoredChart`가 응답 뒤에 처리한다.
  */
 export async function getChart(symbol: string, period: ChartPeriod): Promise<ChartPoint[]> {
+  // 보관 DB가 키움보다 먼저 오므로 여기서 .env를 먼저 읽어야 한다.
+  // 안 그러면 서버 기동 후 첫 요청만 Supabase 설정을 못 찾고 픽스처로 떨어진다.
+  loadDevelopmentEnvironment();
   const fixture = await getQuoteFixture(symbol);
   if (!fixture) throw new Error("등록되지 않은 종목입니다.");
   const cacheKey = `${symbol}:${period}`;

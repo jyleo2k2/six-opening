@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getChart, getQuote, hasKiwoomCredentials } from "../quote/kiwoom";
 import { getQuoteFixtures } from "../quote/fixtures";
+import { readLatestDailyCloses } from "../quote/stock-candles";
 
 type WarmQuote = {
   price: number;
@@ -93,11 +94,33 @@ export async function getUniverseSnapshot(
   const fixtureSparks = Object.fromEntries(
     Array.from(fixtures, ([symbol, fixture]) => [symbol, toSpark(fixture.chart)]),
   );
+
+  // 차트가 보관 캔들을 쓰므로 카드 시세도 같은 출처를 써야 한 화면에서 값이 어긋나지 않는다.
+  // 종목별 조회는 카드 51장을 채우는 데 요청이 51번 필요해서 한 번에 읽는다.
+  let storedQuotes: Record<string, WarmQuote> = {};
+  try {
+    storedQuotes = Object.fromEntries(
+      Array.from(await readLatestDailyCloses(), ([symbol, candle]) => [
+        symbol,
+        {
+          price: candle.close,
+          rate: candle.previousClose
+            ? ((candle.close - candle.previousClose) / candle.previousClose) * 100
+            : 0,
+          source: "fixture" as const,
+          updatedAt: new Date(candle.time * 1000).toISOString(),
+        },
+      ]),
+    );
+  } catch {
+    // Supabase 미설정·장애면 픽스처 시세를 그대로 쓴다.
+  }
+
   return {
     source: Object.values(warmQuotes).some((quote) => quote.source === "kiwoom")
       ? ("kiwoom" as const)
       : ("fixture" as const),
-    quotes: { ...fixtureQuotes, ...warmQuotes },
+    quotes: { ...fixtureQuotes, ...storedQuotes, ...warmQuotes },
     sparks: { ...fixtureSparks, ...sparks },
     updatedAt,
   };
