@@ -69,6 +69,18 @@ type UnsafeKind =
   | "impulsiveTrade"
   | "ethicalDistress";
 
+type RuleKind =
+  | "limit"
+  | "cost"
+  | "participation"
+  | "recordRetention"
+  | "season"
+  | "ranking"
+  | "visibility"
+  | "virtualMoney"
+  | "execution"
+  | "socialSource";
+
 const SELECTION_PATTERNS = [
   "종목사",
   "무슨종목",
@@ -531,6 +543,223 @@ const FRUSTRATION_PATTERNS = [
   "설명왜이렇게구림",
   "아씨또",
 ];
+const LIMIT_RULE_PATTERNS = [
+  "주문한도",
+  "매수한도",
+  "단일종목한도",
+  "내한도프리셋",
+  "프리셋한도",
+  "한도초과",
+  "주문가능금액",
+  "주문금액이왜막",
+  "주문금액왜막",
+  "얼마까지살수",
+  "얼마까지넣을수",
+  "100만원다못",
+  "100만원보다많이는주문못",
+  "백만원다못",
+  "한번에백주못사",
+  "한종목에내돈전부",
+  "한종목에돈다넣",
+  "한종목에100만원전부",
+  "한종목에백만원전부",
+  "현금남았는데왜추가매수",
+  "돈남았는데왜더못사",
+];
+const LIMIT_RULE_QUESTION_PATTERNS = [
+  "왜",
+  "얼마",
+  "계산",
+  "차감",
+  "줄어",
+  "막",
+  "못",
+  "남",
+  "같",
+  "퍼센트",
+  "정한",
+  "정했",
+  "나눠",
+  "쪼개",
+  "로그",
+  "초과",
+  "최대",
+  "풀",
+];
+const COST_RULE_PATTERNS = ["수수료", "세금", "거래비용", "주문비용"];
+const COST_RULE_QUESTION_PATTERNS = [
+  "왜",
+  "빠",
+  "나가",
+  "떼",
+  "0원",
+  "금액",
+  "주문",
+  "손익",
+  "수익률",
+  "순위",
+  "계산",
+  "공식",
+  "비용",
+  "실제",
+  "모의투자",
+  "모투",
+  "같",
+  "달라",
+  "포함",
+  "차감",
+  "내야",
+  "보여",
+  "반영",
+  "또나가",
+];
+const PARTICIPATION_RULE_PATTERNS = [
+  "리그참여",
+  "리그가입",
+  "참여안해도",
+  "참여해야",
+  "참여가의무",
+  "구경만하고",
+  "구경모드",
+  "무조건해야",
+];
+const RECORD_RETENTION_PATTERNS = [
+  "기록까지봐야",
+  "아카이브꼭",
+  "기록은남",
+  "기록도남",
+  "기록없어",
+  "기록은없어",
+  "기록도없어",
+  "기록사라",
+  "기록보존",
+  "거래이유는남",
+  "투자이야기는이어",
+  "적은메모남",
+  "다시처음부터",
+  "보유종목은자동으로정리",
+  "보유종목자동정리",
+  "들고있는종목은자동으로정리",
+];
+const SEASON_RULE_PATTERNS = [
+  "시즌",
+  "3주차",
+  "4주",
+  "마지막주",
+  "마지막거래일",
+  "거래횟수",
+  "주문횟수",
+];
+const SEASON_RULE_QUESTION_PATTERNS = [
+  "끝",
+  "종료일",
+  "어디",
+  "남",
+  "며칠",
+  "몇번",
+  "횟수",
+  "제한",
+  "규칙",
+  "룰",
+  "거래",
+  "주문",
+  "멈추",
+  "팔아야",
+  "정리",
+  "괜찮",
+  "바꾸",
+  "책임",
+  "가능",
+];
+const RANKING_RULE_PATTERNS = [
+  "가족순위",
+  "리그순위",
+  "리그점수",
+  "가족점수",
+  "수익률1등",
+  "동점",
+  "동률",
+  "점수업데이트",
+  "행동부문",
+  "시상",
+  "리워드",
+  "상품",
+];
+const RANKING_RULE_QUESTION_PATTERNS = [
+  "정해",
+  "계산",
+  "거래횟수",
+  "알고리즘",
+  "업데이트",
+  "갱신",
+  "바뀌",
+  "뭐줘",
+  "뭘줘",
+  "받",
+  "확정",
+  "어떻게",
+  "들어",
+  "반영",
+  "위로",
+];
+const VISIBILITY_RULE_PATTERNS = [
+  "친구한테보이",
+  "친구에게보이",
+  "친구한테공개",
+  "친구에게공개",
+  "다른팀",
+  "누가볼수",
+  "공개범위",
+  "자동공개",
+  "바로알림",
+  "즉시알림",
+  "부모폰에즉시푸시",
+  "부모님화면",
+  "부모화면",
+];
+const VIRTUAL_MONEY_RULE_PATTERNS = [
+  "투자금도합쳐",
+  "투자금이합쳐",
+  "백만원같이쓰",
+  "100만원같이쓰",
+  "실제증권사계좌랑뭐가달라",
+  "모의투자와실제계좌",
+  "모투와실제계좌",
+  "실제내계좌잔액",
+  "가상돈을진짜돈",
+  "가상돈진짜돈",
+  "모투머니출금",
+  "가상머니출금",
+  "현금으로바꿀",
+];
+const EXECUTION_RULE_PATTERNS = [
+  "어떤시점의값으로체결",
+  "어느가격기준으로체결",
+  "어느가격으로체결",
+  "어떤가격으로체결",
+  "언제체결",
+  "예약주문이면언제가격",
+  "데모주문은바로체결",
+  "체결가격",
+  "체결시점",
+];
+const SOCIAL_RULE_PATTERNS = [
+  "친구가추천",
+  "친구추천",
+  "친구픽",
+  "친구말듣고",
+  "가족추천",
+];
+const SOCIAL_RULE_QUESTION_PATTERNS = [
+  "리그규칙",
+  "규칙위반",
+  "위반처리",
+  "안걸려",
+  "걸려",
+  "실격",
+  "근거로적",
+  "이유로적",
+];
 const HARMFUL_PATTERNS = ["협박", "때리고", "죽여", "해킹", "시스템지시무시", "프롬프트보여"];
 const OUT_OF_SCOPE_PATTERNS = ["숙제", "게임공략", "날씨", "노래", "영화"];
 const RECORD_PATTERNS = ["내기록", "내거래", "지난거래", "왜골랐", "거래이유", "내보유기간"];
@@ -667,7 +896,14 @@ function findUnsafeKind(message: string): UnsafeKind | null {
         "닦달",
         "평가",
       ]));
-  if (familyPressure && !includesAny(message, SIZING_PATTERNS)) {
+  const familyVisibilityQuestion =
+    includesAny(message, FAMILY_MEMBER_PATTERNS) &&
+    includesAny(message, ["알림", "푸시", "화면", "공개", "보여"]);
+  if (
+    familyPressure &&
+    !familyVisibilityQuestion &&
+    !includesAny(message, SIZING_PATTERNS)
+  ) {
     return "familyPressure";
   }
 
@@ -734,6 +970,81 @@ function findRecommendationKind(message: string): RecommendationKind | null {
   if (prediction) return "prediction";
   if (risk) return "risk";
   if (selection) return "selection";
+  return null;
+}
+
+function findRuleKind(message: string, context: ChatContext): RuleKind | null {
+  const visibilityRule =
+    includesAny(message, VISIBILITY_RULE_PATTERNS) &&
+    includesAny(message, [
+      "종목",
+      "성향",
+      "점수",
+      "수익",
+      "순위",
+      "기록",
+      "공개",
+      "알림",
+      "푸시",
+      "화면",
+    ]);
+  if (visibilityRule) return "visibility";
+
+  if (includesAny(message, VIRTUAL_MONEY_RULE_PATTERNS)) return "virtualMoney";
+
+  const participationRule =
+    includesAny(message, PARTICIPATION_RULE_PATTERNS) ||
+    (context.screen === "home" &&
+      includesAny(message, ["이거꼭해야돼", "이거꼭해야해", "이거안해도돼"]));
+  if (participationRule) return "participation";
+
+  if (includesAny(message, RECORD_RETENTION_PATTERNS)) return "recordRetention";
+
+  const costRule =
+    includesAny(message, COST_RULE_PATTERNS) &&
+    includesAny(message, COST_RULE_QUESTION_PATTERNS) &&
+    !includesAny(message, ["종목추천", "종목골라", "어떤종목", "무슨종목"]);
+  if (costRule) return "cost";
+
+  const limitRule =
+    includesAny(message, LIMIT_RULE_PATTERNS) ||
+    (includesAny(message, ["돈남", "현금남", "잔액남"]) &&
+      includesAny(message, ["못사", "추가매수", "막"])) ||
+    ((message.includes("한도") || message.includes("주문가능금액")) &&
+      includesAny(message, LIMIT_RULE_QUESTION_PATTERNS)) ||
+    /(?:100만|백만).{0,12}(?:전부|다|보다많).{0,12}(?:못|막|할수없)/.test(message);
+  if (limitRule) return "limit";
+
+  const styleScoringRule =
+    message.includes("성향") &&
+    includesAny(message, ["3주차", "기록만으로", "확정", "계산"]);
+  const explicitRankingRecommendation =
+    includesAny(message, SELECTION_PATTERNS) ||
+    includesAny(message, PREDICTION_PATTERNS) ||
+    includesAny(message, TIMING_PATTERNS) ||
+    includesAny(message, SIZING_PATTERNS);
+  const rankingRule =
+    styleScoringRule ||
+    (includesAny(message, RANKING_RULE_PATTERNS) &&
+      includesAny(message, RANKING_RULE_QUESTION_PATTERNS) &&
+      !explicitRankingRecommendation);
+  if (rankingRule) return "ranking";
+
+  const seasonRule =
+    includesAny(message, SEASON_RULE_PATTERNS) &&
+    includesAny(message, SEASON_RULE_QUESTION_PATTERNS) &&
+    !includesAny(message, PREDICTION_PATTERNS) &&
+    !(includesAny(message, FUTURE_PATTERNS) &&
+      includesAny(message, FUTURE_OUTCOME_PATTERNS));
+  if (seasonRule) return "season";
+
+  if (includesAny(message, EXECUTION_RULE_PATTERNS)) return "execution";
+
+  const socialRule =
+    includesAny(message, SOCIAL_RULE_PATTERNS) &&
+    includesAny(message, SOCIAL_RULE_QUESTION_PATTERNS);
+  if (socialRule) return "socialSource";
+
   return null;
 }
 
@@ -992,6 +1303,173 @@ function recommendationReply(
   });
 }
 
+function ruleReply(kind: RuleKind, message: string): ChatReply {
+  let text: string;
+  let questions: string[];
+  let target: ChatUiAction["target"];
+  let step: string;
+
+  switch (kind) {
+    case "limit": {
+      step = "주문 한도 규칙 안내";
+      target = "order";
+      questions = ["내 한도 프리셋은 뭐야?", "주문 가능 금액은 어떻게 계산해?"];
+      if (includesAny(message, ["나눠", "쪼개", "여러번"])) {
+        text = "주문을 여러 번 나눠도 같은 종목에 넣은 금액을 누적으로 계산해. 단일 종목 한도를 넘는 주문은 나눈 횟수와 관계없이 차단돼.";
+      } else if (includesAny(message, ["부모님이정", "앱규칙이정", "누가정"])) {
+        text = "부모가 팀을 만들 때 입문형이나 성장형 프리셋을 고르고, 앱이 그 한도를 적용해. 주문마다 부모 승인을 받는 규칙은 없어.";
+      } else if (includesAny(message, ["엄마는되", "부모는되"])) {
+        text = "부모와 자녀에게 다른 한도 예외가 있다는 규칙은 아직 확정되지 않았어. 네 주문에는 현재 화면에 표시된 프리셋과 주문 가능 금액을 적용해.";
+      } else if (includesAny(message, ["퍼센트", "비율"])) {
+        text = "단일 종목 한도는 프리셋 비율로 정해져 있어. 입문형은 30%, 성장형은 40%이고 정확한 허용 금액은 주문 화면에서 확인할 수 있어.";
+      } else if (includesAny(message, ["로그", "차감", "매수할때마다", "매수때마다"])) {
+        text = "매수하면 사용할 수 있는 가상 현금이 줄고, 단일 종목 한도는 그 종목에 넣은 금액을 누적으로 계산해. 체결 금액과 남은 금액은 주문·거래 내역에서 확인할 수 있어.";
+      } else if (includesAny(message, ["방산", "에너지", "다른종목처럼"])) {
+        text = "현재 규칙에는 업종별 한도 예외가 없어. 허용된 모든 종목에 같은 입문형·성장형 프리셋을 적용해.";
+      } else if (includesAny(message, ["백주", "100주", "최대수량"])) {
+        text = "주문 수량의 예상 금액이 남은 가상 현금이나 단일 종목 한도를 넘으면 차단돼. 정확한 최대 수량은 주문 화면의 가격과 주문 가능 금액으로 확인해 줘.";
+      } else if (includesAny(message, ["얼마까지", "주문가능금액", "돈남았", "현금남았"])) {
+        text = "정확한 주문 가능 금액은 남은 가상 현금과 그 종목의 누적 한도를 함께 반영해 주문 화면에 표시돼. 현금이 남아도 단일 종목 한도에 닿으면 추가 주문이 막힐 수 있어.";
+      } else {
+        text = "가족 리그에서는 각자 가상 100만원을 쓰고, 한 종목에는 입문형 30% 또는 성장형 40% 한도가 적용돼. 그래서 한 종목에 전부 주문할 수는 없어.";
+      }
+      break;
+    }
+    case "cost": {
+      step = "거래 비용 규칙 안내";
+      target = "order";
+      questions = ["이번 주문 비용은 어떻게 확인해?", "수수료와 세금은 뭐가 달라?"];
+      if (message.includes("왜내야")) {
+        text = "수수료와 세금은 실제 거래에서 생기는 비용을 모의투자에서도 이해할 수 있게 안내하는 항목이야. 이번 주문에 적용되는 값은 주문 확인 화면에서 볼 수 있어.";
+      } else if (message.includes("0원")) {
+        text = "현재 주문 화면에 수수료와 세금이 0원으로 표시되면 이번 모의 주문에서는 그 비용이 차감되지 않아. 실제 주식 거래도 항상 무료라는 뜻은 아니야.";
+      } else if (includesAny(message, ["동시에", "친구들이랑"])) {
+        text = "같은 조건의 주문에는 같은 비용 규칙이 적용되지만 가격과 주문 금액이 다르면 실제 비용도 달라질 수 있어. 각자 주문 확인 화면의 금액을 기준으로 봐야 해.";
+      } else if (includesAny(message, ["샀다팔", "매수매도", "또나가"])) {
+        text = "매수와 매도는 각각 별도 주문이라 적용되는 비용도 주문마다 표시돼. 정확한 값은 매수·매도 확인 화면에서 각각 확인해 줘.";
+      } else if (includesAny(message, ["손익", "수익률", "순위", "번금액", "표본", "포함", "반영"])) {
+        text = "현재 수익률과 손익에 거래 비용이 반영됐는지는 손익 상세의 비용 항목으로 확인해야 해. 나는 화면에 없는 비용이나 순위 변동 원인을 추측하지 않아.";
+      } else if (includesAny(message, ["공식", "계산", "금액", "차감", "보여"])) {
+        text = "주문 확인 화면에서 가격×수량, 수수료, 세금과 최종 금액을 나눠 확인할 수 있어. 나는 화면에 없는 요율이나 공식을 새로 만들지 않아.";
+      } else {
+        text = "모의투자도 실제 수준의 수수료·세금 안내를 보여 주지만, 데모 계산은 현재 주문 화면의 값이 기준이야. 정확한 비용은 주문 확인 화면에서 확인해 줘.";
+      }
+      break;
+    }
+    case "participation": {
+      step = "참여 규칙 안내";
+      target = "home";
+      questions = ["구경 모드는 어떻게 써?", "리그 참여 규칙 알려줘"];
+      text = "가족 리그 참여는 선택이야. 계좌 없이도 튜토리얼과 구경 모드를 볼 수 있고, 참여를 고른 뒤에는 해당 시즌 규칙을 따르면 돼.";
+      break;
+    }
+    case "recordRetention": {
+      step = "기록 보존 규칙 안내";
+      target = "archive";
+      questions = ["시즌 끝나면 기록은 어떻게 돼?", "내 지난 시즌 기록 보여줘"];
+      if (includesAny(message, ["봐야", "아카이브꼭"])) {
+        text = "아카이브를 다시 보는 것은 선택이야. 다만 주문할 때 고른 이유와 확신도 같은 질문식 기록은 주문 흐름에 포함돼 있어.";
+      } else if (includesAny(message, ["자동으로정리", "자동정리", "보유종목"])) {
+        text = "시즌 마지막 거래일 종가로 결과를 확정한 뒤 가상 보유 자산은 리셋돼. 거래와 생각 기록은 시즌 아카이브에 남아.";
+      } else if (includesAny(message, ["이어", "회사바꿔", "메모남"])) {
+        text = "다른 회사를 거래해도 앞서 남긴 거래 이유와 생각은 없어지지 않아. 같은 시즌의 기록으로 이어져 아카이브에 남아.";
+      } else {
+        text = "시즌이 끝나면 가상 돈과 보유 자산은 초기화되지만 거래·성향·생각 기록은 아카이브에 남아. 다음 시즌에도 지난 기록을 다시 볼 수 있어.";
+      }
+      break;
+    }
+    case "season": {
+      step = "시즌 운영 규칙 안내";
+      target = "home";
+      questions = ["시즌 종료일은 어디서 봐?", "거래 횟수 제한이 있어?"];
+      if (includesAny(message, ["왜있", "왜4주", "4주라는규칙은왜"])) {
+        text = "4주는 가격의 오르내림을 한 번은 경험하면서도 집중하기에 너무 길지 않도록 정한 기간이야. 시즌이 나뉘어야 새 가족도 같은 출발점에서 시작할 수 있어.";
+      } else if (includesAny(message, ["룰바꾸", "규칙바꾸", "누가책임"])) {
+        text = "시즌 중 규칙 변경의 책임과 보상 기준은 아직 확정되지 않았어. 현재 시즌에 적용되는 확정 규칙과 변경 공지를 홈에서 확인해 줘.";
+      } else if (includesAny(message, ["며칠", "많이남", "기간남", "몇주남"])) {
+        text = "정확히 며칠 남았는지는 현재 날짜와 시즌 종료일을 기준으로 봐야 해. 홈의 시즌 진행바와 종료일을 확인해 줘.";
+      } else if (includesAny(message, ["거래횟수", "주문횟수", "몇번더", "제한이몇번"])) {
+        text = "현재 규칙에는 주간이나 시즌의 거래 횟수 상한이 따로 없어. 다만 시즌 종료일, 주문 가능 시간, 잔액과 단일 종목 한도는 적용돼.";
+      } else if (message.includes("멈추")) {
+        text = "현재 규칙에는 최소 거래 횟수가 없어서 중간에 거래를 멈추는 것 자체는 위반이 아니야. 남긴 기록은 시즌 아카이브에 계속 남아.";
+      } else if (includesAny(message, ["팔아야이기", "끝나기전에팔아야"])) {
+        text = "시즌 결과는 마지막 거래일 종가로 확정돼서 종료 전에 보유 종목을 반드시 정리하는 규칙은 없어. 가족 성적은 구성원 수익률 평균으로 계산해.";
+      } else if (includesAny(message, ["마지막주", "남은1주"])) {
+        text = "시즌 종료 전이면 마지막 주에도 주문할 수 있어. 주문 가능 시간, 잔액과 단일 종목 한도는 그대로 적용돼.";
+      } else if (message.includes("계속안누르면")) {
+        text = "주문 확인을 누르지 않으면 그 주문은 체결되지 않아. 주문하지 않은 것 자체가 리그 규칙 위반은 아니야.";
+      } else {
+        text = "시즌은 4주 동안 진행되고 정확한 남은 기간은 홈의 시즌 진행바에서 확인할 수 있어. 종료 뒤 가상 자산은 초기화되고 기록은 아카이브에 남아.";
+      }
+      break;
+    }
+    case "ranking": {
+      step = "순위·시상 규칙 안내";
+      target = "home";
+      questions = ["가족 순위는 어떻게 계산해?", "행동 부문 시상은 확정됐어?"];
+      if (includesAny(message, ["동점", "동률"])) {
+        text = "가족 순위가 같을 때의 동점 처리 기준은 아직 확정되지 않았어. 임의로 거래 횟수나 다른 점수를 붙이지 않아.";
+      } else if (includesAny(message, ["업데이트", "바로바뀌", "갱신"])) {
+        text = "순위가 즉시 바뀌는지와 갱신 주기는 아직 확정되지 않았어. 화면에 표시되는 마지막 갱신 시각을 기준으로 확인해야 해.";
+      } else if (includesAny(message, ["뭐줘", "뭘줘", "상품", "리워드", "시상"])) {
+        text = "수익률 1등만 상을 받는 구조는 아니지만 구체적인 리워드와 행동 부문 시상은 아직 확정되지 않았어. 확정 전 경품을 약속해서는 안 돼.";
+      } else if (message.includes("성향")) {
+        text = "3주차 성향은 지금까지의 행동으로 계산한 중간 결과야. 성향은 고정 성적이 아니고 시즌 기록이 쌓이면 다시 계산될 수 있어.";
+      } else {
+        text = "가족 순위는 구성원 수익률의 평균으로 계산하고 거래 횟수는 순위 점수에 넣지 않아. 행동 관련 시상은 순위와 별도야.";
+      }
+      break;
+    }
+    case "visibility": {
+      step = "공개 범위 규칙 안내";
+      target = "archive";
+      questions = ["내 공개 범위는 어디서 봐?", "가족 비교는 어떻게 봐?"];
+      if (includesAny(message, ["바로알림", "즉시알림", "즉시푸시"])) {
+        text = "수익률이 낮다는 이유만으로 부모에게 즉시 알림을 보내는 규칙은 없어. 가족 화면의 공개 범위와 위험행동 코칭 알림은 별도야.";
+      } else if (includesAny(message, ["부모님화면", "부모화면"])) {
+        text = "부모와 자녀 화면에 순위를 똑같이 보여 줄지는 아직 확정되지 않았어. 가족에게 보이는 항목은 상호 동의한 공개 범위 안에서만 확인해야 해.";
+      } else if (includesAny(message, ["성향", "누가볼수"])) {
+        text = "성향 결과는 서로 공개에 동의한 같은 가족 구성원이 비교 화면에서 볼 수 있고, 시즌 뒤에도 아카이브에 남아. 챗봇은 네 본인 결과만 조회해.";
+      } else {
+        text = "네 거래 종목은 친구나 다른 가족 팀에 자동으로 공개되지 않아. 같은 가족 팀에서는 서로 동의한 거래 기록만 가족 화면에서 확인할 수 있어.";
+      }
+      break;
+    }
+    case "virtualMoney": {
+      step = "가상 자산 규칙 안내";
+      target = "home";
+      questions = ["모의투자와 실제 계좌는 뭐가 달라?", "시즌 끝나면 가상 돈은 어떻게 돼?"];
+      if (includesAny(message, ["합쳐", "같이쓰"])) {
+        text = "같은 가족 팀이어도 투자금은 합치지 않아. 구성원마다 각자의 가상 100만원 지갑으로 따로 투자해.";
+      } else if (includesAny(message, ["진짜돈", "출금", "현금으로바꿀"])) {
+        text = "리그의 가상 돈은 현금으로 바꿀 수 없어. 시즌 리워드가 있다면 가상 투자금과는 별도이고, 세부 내용은 확정 안내만 확인해야 해.";
+      } else {
+        text = "모의투자 100만원은 실제 증권계좌 잔액과 연결되지 않은 가상 지갑이야. 실제 주식을 소유하거나 돈이 출금되는 주문이 아니야.";
+      }
+      break;
+    }
+    case "execution": {
+      step = "체결 규칙 안내";
+      target = "order";
+      questions = ["내 주문은 언제 체결돼?", "시장가와 지정가가 뭐야?"];
+      text = "현재 데모의 시장가 주문은 화면 값으로 바로 체결되고, 실서비스 설계의 장외 주문은 다음 거래일 예약 주문으로 처리돼. 먼저 주문 화면에서 즉시 주문인지 예약 주문인지 확인해 줘.";
+      break;
+    }
+    case "socialSource": {
+      step = "추천 출처 규칙 안내";
+      target = "order";
+      questions = ["투자 근거는 뭐야?", "주문 전에 뭘 확인해?"];
+      text = "친구나 가족의 추천을 거래 이유로 기록하는 것 자체는 리그 규칙 위반이 아니야. 다만 그 추천이 매수를 승인하거나 결과를 보장한다는 뜻은 아니야.";
+      break;
+    }
+  }
+
+  return reply("faq", "service_help", text, [step], {
+    suggestedQuestions: questions,
+    uiAction: { type: "open_screen", target },
+  });
+}
+
 function formatWon(value: number) {
   return `${value.toLocaleString("ko-KR")}원`;
 }
@@ -1048,6 +1526,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       ["안전 안내"],
     );
   }
+
+  const ruleKind = findRuleKind(message, context);
+  if (ruleKind) return ruleReply(ruleKind, message);
 
   const recommendationKind = findRecommendationKind(message);
   if (recommendationKind) {

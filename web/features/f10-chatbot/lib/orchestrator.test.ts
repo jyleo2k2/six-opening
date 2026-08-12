@@ -138,6 +138,33 @@ async function main() {
     assert.equal(modelCalls, 0);
   }
 
+  const ruleExamples = [
+    "한 종목 최대 얼마까지 살 수 있어?",
+    "모의투자 수수료도 주문 금액에서 빠져?",
+    "가족 리그 꼭 참여해야 돼?",
+    "시즌 끝나면 내 기록도 없어져?",
+    "마지막 주에도 주문할 수 있어?",
+    "가족 순위에 거래 횟수도 들어가?",
+    "내가 산 종목이 친구한테 공개돼?",
+    "같은 가족 팀이면 투자금이 합쳐져?",
+    "주문은 어느 가격으로 체결돼?",
+    "친구 추천을 이유로 적으면 규칙 위반이야?",
+  ] as const;
+  for (const message of ruleExamples) {
+    const ruleOutcome = await createChatOutcome(
+      { message, context },
+      session,
+      { generateAnswer: noModel },
+    );
+    assert.equal(ruleOutcome.route, "faq", `규칙 경로를 놓쳤어: ${message}`);
+    assert.equal(ruleOutcome.intent, "service_help", `규칙 응답 목적이 달라: ${message}`);
+    assert.equal(ruleOutcome.source, "fixed");
+    assert.equal(ruleOutcome.gate, "passed");
+    assert.equal(ruleOutcome.response.suggestedQuestions?.length, 2);
+    assert.equal(isExplainAction(ruleOutcome.action), false);
+    assert.equal(modelCalls, 0);
+  }
+
   // 모든 용어는 내용별 DAPIE 스크립트로 시작한다.
   const genericTerm = await createChatOutcome(
     { message: "주식이 뭐야?", context },
