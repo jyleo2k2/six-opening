@@ -16,6 +16,9 @@ web/out/
 web/next-env.d.ts
 *.tsbuildinfo
 
+# Local development logs
+*.log
+
 # OS·에디터
 .DS_Store
 Thumbs.db
