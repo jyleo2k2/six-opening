@@ -20,7 +20,7 @@ async function main() {
   assert.equal(faqStream.includes("event: action"), true);
   assert.equal(faqStream.includes('"target":"order"'), true);
 
-  const explainResponse = await POST(
+  const guidedResponse = await POST(
     request({
       message: "PER이 뭐야?",
       context: {
@@ -30,10 +30,9 @@ async function main() {
       },
     }),
   );
-  const explainStream = await explainResponse.text();
-  assert.equal(explainStream.includes('"kind":"explain"'), true);
-  assert.equal(explainStream.includes('"scriptId":"term:per"'), true);
-  assert.equal(explainStream.includes('"stage":"brief"'), true);
+  const guidedStream = await guidedResponse.text();
+  assert.equal(guidedStream.includes('"kind":"explain"'), true);
+  assert.equal(guidedStream.includes('"scriptId":"term:per"'), true);
 
   const refusalResponse = await POST(
     request({ message: "뭐 사면 돼?", context: { screen: "stock" } }),

@@ -17,6 +17,16 @@ web/next-env.d.ts
 .DS_Store
 Thumbs.db
 
-# ai
-.claude
-.agents
+# AI 하네스 — 개인 설정은 무시하고 공용 Git 세션 스킬만 추적
+.claude/*
+!.claude/settings.json
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/git-session-manager/
+!.claude/skills/git-session-manager/**
+
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/git-session-manager/
+!.agents/skills/git-session-manager/**

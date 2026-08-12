@@ -1,4 +1,5 @@
 import { STOCKS } from "../../../shared/data/stocks";
+import { findAviationAndCosmeticsEducation } from "../../../shared/data/aviation-cosmetics-education";
 import type {
   ChatContext,
   ChatResponse,
@@ -68,6 +69,26 @@ export function createReadOnlyToolRunner(
     session: ChatSession,
   ): Promise<ToolExecution> {
     if (tool === "approved_stock_facts") {
+      const aviationAndCosmeticsEducation = context.stockId
+        ? findAviationAndCosmeticsEducation(context.stockId)
+        : undefined;
+      if (aviationAndCosmeticsEducation) {
+        return {
+          tool,
+          status: "ok",
+          response: {
+            text: [
+              aviationAndCosmeticsEducation.companySummary,
+              aviationAndCosmeticsEducation.businessModel,
+              aviationAndCosmeticsEducation.industryRole,
+              aviationAndCosmeticsEducation.financialSummary,
+            ].join(" "),
+            uiAction: { type: "open_screen", target: "stock" },
+          },
+          evidence: aviationAndCosmeticsEducation.sources.map((source) => source.url),
+        };
+      }
+
       const stock = STOCKS.find((item) => item.id === context.stockId);
       if (!stock || stock.status !== "reviewed") {
         return unavailable(

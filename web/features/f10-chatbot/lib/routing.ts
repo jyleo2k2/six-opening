@@ -1,6 +1,7 @@
 import { findChatbotKnowledge } from "../../../shared/data/chatbot-knowledge";
 import type {
   ChatContext,
+  ExplainScript,
   ChatUiAction,
   ProactiveSignal,
   ReadOnlyChatToolName,
@@ -35,6 +36,7 @@ export type ChatReply = {
   suggestedQuestions?: string[];
   uiAction?: ChatUiAction;
   tool?: ReadOnlyChatToolName;
+  explainScript?: ExplainScript;
 };
 
 const RECOMMENDATION_PATTERNS = [
@@ -106,7 +108,7 @@ function reply(
   intent: ChatIntent,
   text: string,
   steps: readonly string[] = [],
-  extras: Partial<Pick<ChatReply, "suggestedQuestions" | "tool" | "uiAction">> = {},
+  extras: Partial<Pick<ChatReply, "suggestedQuestions" | "tool" | "uiAction" | "explainScript">> = {},
 ): ChatReply {
   return { route, intent, text, steps, ...extras };
 }
@@ -215,9 +217,12 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       knowledge.kind === "glossary" ? "financial_concept" : "service_help",
       knowledge.answer,
       [knowledge.kind === "glossary" ? "용어 사전 확인" : "사용법 FAQ 확인"],
-      knowledge.actionTarget
-        ? { uiAction: { type: "open_screen", target: knowledge.actionTarget } }
-        : {},
+      {
+        ...(knowledge.actionTarget
+          ? { uiAction: { type: "open_screen", target: knowledge.actionTarget } }
+          : {}),
+        ...(knowledge.explainScript ? { explainScript: knowledge.explainScript } : {}),
+      },
     );
   }
 

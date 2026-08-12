@@ -4,6 +4,7 @@ import {
   type ChatOutputSource,
 } from "../../../shared/llm/filter";
 import type { ChatResponse } from "../../../shared/types/chatbot";
+import { findExplainScript } from "../../../shared/data/chatbot-knowledge";
 import type { ChatActionPayload, ChatRequest } from "./contracts";
 import { sanitizeActionPayload } from "./contracts";
 import {
@@ -13,7 +14,6 @@ import {
   startExplain,
   type ExplainStep,
 } from "./explain";
-import { findExplainScript, getExplainScript } from "./explain-scripts";
 import { generateChatAnswer } from "./openai";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
@@ -96,40 +96,37 @@ function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal) {
 /**
  * 4단계 설명 경로를 결정한다.
  * - `"invalid"` = 위조되었거나 이어 갈 수 없는 응답
- * - `ExplainStep` = 새로 시작하거나 다음 단계로 진행
+ * - `ExplainStep` = 새로 시작하거나 다음 단계로 진행 (되묻기 포함)
  * - `null` = 4단계와 무관 (기존 라우팅으로)
  */
 function resolveExplainStep(
   request: ChatRequest,
   routed: ReturnType<typeof routeMessage>,
 ): ExplainStep | "invalid" | null {
+  const protectedRoute =
+    routed.route === "refusal" ||
+    routed.route === "safety" ||
+    routed.route === "outOfScope";
+  if (protectedRoute) return null;
+
   if (request.explain) {
-    const script = getExplainScript(request.explain.scriptId);
+    const script = findExplainScript(request.explain.scriptId);
     if (!script) return "invalid";
 
+    // 버튼을 누르지 않고 타이핑했으면 구어체를 해석한다.
     const choiceId =
       request.explain.choiceId ??
       resolveTextReply(script, request.explain.stage, request.message);
     if (!choiceId) {
-      // 타이핑을 알아듣지 못했다. 새 질문처럼 보이면 일반 라우팅으로 넘긴다.
-      return findExplainScript(request.message) || routed.route !== "fallback"
+      // 새 질문으로 보이면 일반 라우팅으로 넘기고, 그 밖에는 선택지를 다시 보여준다.
+      return routed.explainScript || routed.route !== "fallback"
         ? null
         : reaskExplain(script, request.explain.stage);
     }
-    return (
-      advanceExplain(script, { ...request.explain, choiceId }) ?? "invalid"
-    );
+    return advanceExplain(script, { ...request.explain, choiceId }) ?? "invalid";
   }
 
-  const startable =
-    routed.route !== "refusal" &&
-    routed.route !== "safety" &&
-    routed.route !== "outOfScope" &&
-    (routed.intent === "financial_concept" || routed.intent === "stock_facts");
-  if (!startable) return null;
-
-  const script = findExplainScript(request.message);
-  return script ? startExplain(script) : null;
+  return routed.explainScript ? startExplain(routed.explainScript) : null;
 }
 
 export async function createChatOutcome(
@@ -154,7 +151,7 @@ export async function createChatOutcome(
 
   if (explainStep === "invalid") {
     response = {
-      text: "그 설명 단계는 이어 갈 수 없어. 궁금한 종목이나 용어를 다시 물어봐 줘. 🐻",
+      text: "그 설명 단계는 이어 갈 수 없어. 궁금한 용어를 다시 물어봐 줘. 🐻",
     };
   } else if (explainStep) {
     onStatus("단계별 설명 준비 완료");

@@ -23,25 +23,45 @@ async function main() {
     return "호출되면 안 돼.";
   };
 
-  const started = await createChatOutcome(
+  const faq = await createChatOutcome(
     { message: "PER이 뭐야?", context },
     session,
     { generateAnswer: noModel },
   );
+  assert.equal(faq.route, "faq");
   assert.equal(modelCalls, 0);
-  assert.equal(isExplainAction(started.action), true);
-  if (!isExplainAction(started.action)) throw new Error("explain action missing");
-  assert.equal(started.action.turn.stage, "brief");
+  assert.equal(isExplainAction(faq.action), true);
+  if (!isExplainAction(faq.action)) throw new Error("explain action missing");
 
-  // 오답 → 추가 설명 단계로 내려간다.
-  const wrong = await createChatOutcome(
-    { message: "낮은 편이야", context, explain: { scriptId: "term:per", stage: "brief", choiceId: "low" } },
+  const continued = await createChatOutcome(
+    {
+      message: "회사의 직원 수와 주가",
+      context,
+      explain: {
+        scriptId: faq.action.turn.scriptId,
+        stage: "brief",
+        choiceId: "employee-count",
+      },
+    },
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(isExplainAction(wrong.action), true);
-  if (!isExplainAction(wrong.action)) throw new Error("detail turn missing");
-  assert.equal(wrong.action.turn.stage, "detail");
+  assert.equal(continued.response.text.includes("같은 업종"), true);
+  assert.equal(isExplainAction(continued.action), true);
+  assert.equal(modelCalls, 0);
+
+  const forgedTransition = await createChatOutcome(
+    {
+      message: "응",
+      context,
+      explain: { scriptId: "term:per", stage: "brief", choiceId: "forged" },
+    },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(forgedTransition.response.text.includes("이어 갈 수 없어"), true);
+  assert.equal(forgedTransition.action, undefined);
+  assert.equal(modelCalls, 0);
 
   // 버튼 대신 "ㅇㅇ"라고 타이핑해도 알아듣는다.
   const typedYes = await createChatOutcome(
@@ -50,6 +70,7 @@ async function main() {
     { generateAnswer: noModel },
   );
   assert.equal(typedYes.response.text, "좋아, 이제 알겠네!");
+  assert.equal(modelCalls, 0);
 
   // "몰라"는 예시 단계로 내려간다.
   const typedNo = await createChatOutcome(
@@ -66,19 +87,6 @@ async function main() {
     { generateAnswer: noModel },
   );
   assert.equal(isExplainAction(unclear.action), true);
-  assert.equal(modelCalls, 0);
-
-  const forgedTransition = await createChatOutcome(
-    {
-      message: "응",
-      context,
-      explain: { scriptId: "term:per", stage: "brief", choiceId: "forged" },
-    },
-    session,
-    { generateAnswer: noModel },
-  );
-  assert.equal(forgedTransition.response.text.includes("이어 갈 수 없어"), true);
-  assert.equal(forgedTransition.action, undefined);
   assert.equal(modelCalls, 0);
 
   const refusal = await createChatOutcome(

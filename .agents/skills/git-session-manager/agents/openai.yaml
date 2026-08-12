@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Session Manager"
+  short_description: "6인 병렬 Git 세션과 worktree 충돌을 예방·관리"
+  default_prompt: "Use $git-session-manager before editing to create or audit an isolated six-opening work session."

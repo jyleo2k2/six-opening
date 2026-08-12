@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
-import type { ChatUiAction, ExplainTurn } from "../../shared/types/chatbot";
+import type { ChatUiAction, ExplainChoice, ExplainTurn } from "../../shared/types/chatbot";
 import {
   isAllowedUiAction,
   isExplainAction,
@@ -17,8 +17,8 @@ type Message = {
   role: "assistant" | "user";
   text: string;
   suggestedQuestions?: string[];
-  uiAction?: ChatUiAction;
   explainTurn?: ExplainTurn;
+  uiAction?: ChatUiAction;
 };
 
 const COPY = {
@@ -85,12 +85,12 @@ function MessageBubble({
   message,
   onAction,
   onQuestion,
-  onChoice,
+  onExplainChoice,
 }: {
   message: Message;
   onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
-  onChoice: (turn: ExplainTurn, choiceId: string, label: string) => void;
+  onExplainChoice: (choice: ExplainChoice) => void;
 }) {
   const userMessage = message.role === "user";
   const uiAction = message.uiAction;
@@ -116,23 +116,6 @@ function MessageBubble({
             {COPY.relatedScreen}
           </button>
         )}
-        {!userMessage && message.explainTurn && (
-          <div className="mt-2">
-            <p className="text-xs font-semibold text-navy">{message.explainTurn.prompt}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {message.explainTurn.choices.map((choice) => (
-                <button
-                  className="rounded-full border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
-                  key={choice.id}
-                  onClick={() => onChoice(message.explainTurn!, choice.id, choice.label)}
-                  type="button"
-                >
-                  {choice.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
         {!userMessage && Boolean(message.suggestedQuestions?.length) && (
           <div className="mt-2 flex flex-wrap gap-2">
             {message.suggestedQuestions?.map((question) => (
@@ -143,6 +126,21 @@ function MessageBubble({
                 type="button"
               >
                 {question}
+              </button>
+            ))}
+          </div>
+        )}
+        {!userMessage && message.explainTurn && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <p className="w-full text-xs text-ink/70">{message.explainTurn.prompt}</p>
+            {message.explainTurn.choices.map((choice) => (
+              <button
+                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                key={choice.id}
+                onClick={() => onExplainChoice(choice)}
+                type="button"
+              >
+                {choice.label}
               </button>
             ))}
           </div>
@@ -240,13 +238,8 @@ export function F10ChatbotDemo() {
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
-  async function ask(question: string, reply?: { scriptId: string; stage: string; choiceId?: string }) {
-    const pending = explainAction?.turn;
-    const explain =
-      reply ??
-      (pending && pending.stage !== "example"
-        ? { scriptId: pending.scriptId, stage: pending.stage }
-        : undefined);
+  async function ask(question: string, explainChoiceId?: string) {
+    const explainTurn = explainAction?.turn;
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
@@ -265,7 +258,17 @@ export function F10ChatbotDemo() {
         body: JSON.stringify({
           message: question,
           context: chatContext,
-          ...(explain ? { explain } : {}),
+          // 버튼을 눌렀으면 choiceId를 보내고, 직접 타이핑했으면 진행 중인 단계만 보내
+          // 서버가 구어체("ㅇㅇ", "몰라"…)를 해석하게 한다.
+          ...(explainTurn && explainTurn.stage !== "example"
+            ? {
+                explain: {
+                  scriptId: explainTurn.scriptId,
+                  stage: explainTurn.stage,
+                  ...(explainChoiceId ? { choiceId: explainChoiceId } : {}),
+                },
+              }
+            : {}),
         }),
       });
 
@@ -524,14 +527,8 @@ export function F10ChatbotDemo() {
                 onQuestion={(question) => {
                   if (!isLoading) void ask(question);
                 }}
-                onChoice={(turn, choiceId, label) => {
-                  if (!isLoading) {
-                    void ask(label, {
-                      scriptId: turn.scriptId,
-                      stage: turn.stage,
-                      choiceId,
-                    });
-                  }
+                onExplainChoice={(choice) => {
+                  if (!isLoading) void ask(choice.label, choice.id);
                 }}
               />
             )}
@@ -543,14 +540,8 @@ export function F10ChatbotDemo() {
                 onQuestion={(question) => {
                   if (!isLoading) void ask(question);
                 }}
-                onChoice={(turn, choiceId, label) => {
-                  if (!isLoading) {
-                    void ask(label, {
-                      scriptId: turn.scriptId,
-                      stage: turn.stage,
-                      choiceId,
-                    });
-                  }
+                onExplainChoice={(choice) => {
+                  if (!isLoading) void ask(choice.label, choice.id);
                 }}
               />
             ))}
