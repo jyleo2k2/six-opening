@@ -50,6 +50,23 @@ async function main() {
   assert.equal(draftStock.status, "unavailable");
   assert.equal(draftStock.evidence.length, 0);
 
+  const aviationStock = await runTool(
+    "approved_stock_facts",
+    { screen: "stock", stockId: "KRX:003490", stockName: "대한항공" },
+    session,
+  );
+  assert.equal(aviationStock.status, "ok");
+  assert.equal(aviationStock.response.text.includes("16조 1,166억 원"), true);
+  assert.ok(aviationStock.evidence.every((source) => source.startsWith("https://")));
+
+  const cosmeticsStock = await runTool(
+    "approved_stock_facts",
+    { screen: "stock", stockId: "KRX:483650", stockName: "달바글로벌" },
+    session,
+  );
+  assert.equal(cosmeticsStock.status, "ok");
+  assert.equal(cosmeticsStock.response.text.includes("3,091억 원"), true);
+
   console.log("read-only chat tool tests passed");
 }
 
