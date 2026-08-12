@@ -1,0 +1,306 @@
+/* 영웅 키움 — 종목 유니버스 (임시 더미)
+ * 화이트리스트 확정 시 이 파일만 교체하면 됩니다.
+ * 이후 키움 REST API 연동 시: price/change/spark 를 실시간 응답으로 대체.
+ *   stocks[].code  → 종목코드 (API 조회키)
+ *   stocks[].price → 현재가, change → 등락률(%), spark → 스파크라인 포인트
+ */
+(function () {
+  const sectors = [
+    { id: 'semi',    name: '반도체',   emoji: '🔬', accent: '#5B7CFA' },
+    { id: 'game',    name: '게임',     emoji: '🎮', accent: '#8B5CF6' },
+    { id: 'food',    name: '식품',     emoji: '🍜', accent: '#F5824A' },
+    { id: 'auto',    name: '자동차',   emoji: '🚗', accent: '#2F9E7E' },
+    { id: 'enter',   name: '엔터',     emoji: '🎤', accent: '#E5468C' },
+    { id: 'beauty',  name: '화장품',   emoji: '💄', accent: '#E86AA6' },
+    { id: 'air',     name: '항공',     emoji: '✈️', accent: '#3EA8D6' },
+    { id: 'ship',    name: '조선',     emoji: '🚢', accent: '#2C7C9E' },
+    { id: 'defense', name: '방산',     emoji: '🛡️', accent: '#6B7A99' },
+    { id: 'energy',  name: '에너지',   emoji: '⚡', accent: '#E0A62B' },
+    { id: 'retail',  name: '유통',     emoji: '🛒', accent: '#C4643E' },
+    { id: 'logi',    name: '물류',     emoji: '📦', accent: '#7B8B5A' },
+    { id: 'bank',    name: '은행·금융', emoji: '🏦', accent: '#3F5FA8' }
+  ];
+
+  const raw = [
+    ['005930', "삼성전자",                 "semi",     "휴대폰이랑 반도체를 만들어",                          257000, 7.31],
+    ['000660', "SK하이닉스",               "semi",     "기억을 저장하는 반도체를 만들어",                      1517000, 6.46],
+    ['402340', "SK스퀘어",                "semi",     "반도체랑 통신 회사들을 갖고 있어",                     1032000, 9.21],
+    ['066570', "LG전자",                 "semi",     "TV랑 냉장고, 세탁기를 만들어",                       208000, 14.47],
+    ['259960', "크래프톤",                 "game",     "배틀그라운드 게임을 만들어",                          236500, -3.07],
+    ['036570', "NC",                   "game",     "리니지라는 게임을 만들어",                           249500, -2.35],
+    ['251270', "넷마블",                  "game",     "휴대폰으로 하는 게임을 만들어",                         40100, -1.11],
+    ['263750', "펄어비스",                 "game",     "검은사막 게임을 만들어",                             31700, -14.09],
+    ['003230', "삼양식품",                 "food",     "불닭볶음면을 만들어",                             1215000, -3.11],
+    ['271560', "오리온",                  "food",     "초코파이를 만들어",                               132600, -2.5],
+    ['097950', "CJ제일제당",               "food",     "햇반이랑 만두를 만들어",                            186800, -0.64],
+    ['004370', "농심",                   "food",     "신라면을 만들어",                                389000, -1.64],
+    ['005380', "현대차",                  "auto",     "자동차를 만들어",                                412500, 2.36],
+    ['000270', "기아",                   "auto",     "자동차를 만들어",                                136400, 1.56],
+    ['012330', "현대모비스",                "auto",     "자동차 부품을 만들어",                             506000, 2.12],
+    ['352820', "하이브",                  "enter",    "BTS가 있는 회사야",                             179900, -0.22],
+    ['041510', "에스엠",                  "enter",    "NCT랑 에스파가 있어",                             76000, -0.39],
+    ['035900', "JYP Ent.",             "enter",    "트와이스랑 스트레이키즈가 있어",                         45750, -1.72],
+    ['122870', "와이지엔터",                "enter",    "블랙핑크가 있는 회사야",                             42650, -1.5],
+    ['090430', "아모레퍼시픽",               "beauty",   "화장품을 만들어",                                137150, -0.11],
+    ['051900', "LG생활건강",               "beauty",   "화장품이랑 샴푸를 만들어",                           316500, -0.63],
+    ['278470', "에이피알",                 "beauty",   "집에서 쓰는 피부 기계를 만들어",                       391500, 1.56],
+    ['483650', "달바글로벌",                "beauty",   "얼굴에 바르는 화장품을 만들어",                        255500, 3.86],
+    ['003490', "대한항공",                 "air",      "비행기로 사람을 실어 날라",                           26700, 0.19],
+    ['020560', "아시아나항공",               "air",      "비행기를 타고 여행을 도와줘",                           7260, 1.97],
+    ['180640', "한진칼",                  "air",      "대한항공을 갖고 있는 회사야",                         120000, 1.78],
+    ['329180', "HD현대중공업",              "ship",     "배랑 엔진을 만들어",                              494000, -1.79],
+    ['009540', "HD한국조선해양",             "ship",     "아주 큰 배를 만들어",                             379500, -4.65],
+    ['042660', "한화오션",                 "ship",     "배랑 잠수함을 만들어",                              89600, 0.67],
+    ['010140', "삼성중공업",                "ship",     "바다에서 쓰는 큰 배를 만들어",                         22000, 0.92],
+    ['012450', "한화에어로스페이스",            "defense",  "비행기 엔진이랑 무기를 만들어",                       1134000, 3.28],
+    ['079550', "LIG디펜스앤에어로",           "defense",  "미사일 같은 걸 만들어",                            759000, -0.13],
+    ['047810', "한국항공우주",               "defense",  "전투기랑 헬기를 만들어",                            139200, 2.73],
+    ['064350', "현대로템",                 "defense",  "기차도 만들고 전차도 만들어",                         144000, 1.84],
+    ['015760', "한국전력",                 "energy",   "전기를 만들어서 보내줘",                             35800, 1.7],
+    ['010950', "S-Oil",                "energy",   "자동차에 넣는 기름을 만들어",                         143400, 1.27],
+    ['078930', "GS",                   "energy",   "기름이랑 편의점 회사를 갖고 있어",                       99400, 1.95],
+    ['096770', "SK이노베이션",              "energy",   "기름이랑 배터리를 만들어",                           125350, 1.01],
+    ['047050', "포스코인터내셔널",             "energy",   "외국에서 가스랑 곡식을 사고팔아",                        55900, -0.36],
+    ['004170', "신세계",                  "retail",   "신세계백화점을 운영해",                             400500, -6.53],
+    ['282330', "BGF리테일",               "retail",   "CU 편의점을 운영해",                             147900, -1.73],
+    ['021240', "코웨이",                  "retail",   "정수기랑 공기청정기를 빌려줘",                          96900, -0.72],
+    ['089860', "롯데렌탈",                 "retail",   "자동차를 빌려주는 회사야",                            43450, -3.44],
+    ['000120', "CJ대한통운",               "logi",     "택배를 배달해줘",                                 74400, -3.88],
+    ['011200', "HMM",                  "logi",     "큰 배로 짐을 실어 날라",                            21475, -0.81],
+    ['086280', "현대글로비스",               "logi",     "자동차를 배로 실어 날라",                           201500, 0],
+    ['105560', "KB금융",                 "bank",     "은행에서 돈을 맡아줘",                             166900, 0.18],
+    ['055550', "신한지주",                 "bank",     "은행이랑 카드를 운영해",                            105500, 0.96],
+    ['086790', "하나금융지주",               "bank",     "은행에서 돈을 빌려주기도 해",                         128800, 0.86],
+    ['316140', "우리금융지주",               "bank",     "은행을 운영하는 회사야",                             33350, -1.33],
+    ['039490', "키움증권",                 "bank",     "주식 사고파는 걸 도와주는 회사야",                      303000, 1],
+  ];
+
+  // 코드 기반 결정적 스파크라인 (API 연동 전 임시)
+  function spark(code, change) {
+    let s = 0;
+    for (let i = 0; i < code.length; i++) s = (s * 31 + code.charCodeAt(i)) % 100000;
+    const rand = () => ((s = (s * 1103515245 + 12345) % 2147483648) / 2147483648);
+    const pts = [];
+    let v = 50;
+    for (let i = 0; i < 16; i++) {
+      v += (rand() - 0.5) * 16 + (change > 0 ? -1.6 : 1.6);
+      pts.push(Math.max(6, Math.min(94, v)));
+    }
+    pts[pts.length - 1] = change > 0 ? Math.min(94, pts[0] + 22) : Math.max(6, pts[0] - 22);
+    return pts;
+  }
+
+  const stocks = raw.map(function (r) {
+    return {
+      code: r[0], name: r[1], sector: r[2], desc: r[3],
+      price: r[4], change: r[5], spark: spark(r[0], r[5])
+    };
+  });
+
+  /* 회사 로고 — 파일을 assets/logos/ 에 넣고 코드별로 등록하면 카드 상단에 뜹니다.
+   * 예: '005930': 'assets/logos/005930.png'
+   * 등록되지 않은 종목은 섹터 이모지로 대체됩니다. */
+  // 로고에서 뽑은 색 — 카드 배경을 로고 배경과 같게 맞춘다
+  // 카드 카테고리 라벨 + 로고에서 뽑은 브랜드 색 (게임형 카드용)
+  const brands = {
+    '000120': { cat: 'LOGISTICS', color: '#f6a531', dark: false },
+    '000270': { cat: 'MOBILITY', color: '#6c59cf', dark: true },
+    '000660': { cat: 'TECH', color: '#f6313d', dark: true },
+    '003230': { cat: 'FOOD', color: '#f68331', dark: false },
+    '003490': { cat: 'AVIATION', color: '#3183f6', dark: false },
+    '004170': { cat: 'RETAIL', color: '#f63136', dark: true },
+    '004370': { cat: 'FOOD', color: '#f63138', dark: true },
+    '005380': { cat: 'MOBILITY', color: '#4f83d9', dark: false },
+    '005930': { cat: 'TECH', color: '#4352e4', dark: true },
+    '009540': { cat: 'SHIPBUILDING', color: '#3474f3', dark: false },
+    '010140': { cat: 'SHIPBUILDING', color: '#4459e4', dark: true },
+    '010950': { cat: 'ENERGY', color: '#44e47c', dark: false },
+    '011200': { cat: 'SHIPPING', color: '#f6313f', dark: false },
+    '012330': { cat: 'AUTO TECH', color: '#597fcf', dark: true },
+    '012450': { cat: 'AEROSPACE', color: '#f68531', dark: false },
+    '015760': { cat: 'ENERGY', color: '#f64031', dark: false },
+    '020560': { cat: 'AVIATION', color: '#f63135', dark: true },
+    '021240': { cat: 'LIVING', color: '#31baf6', dark: false },
+    '035900': { cat: 'MUSIC', color: '#35a4f3', dark: false },
+    '036570': { cat: 'GAMING', color: '#4e86da', dark: true },
+    '039490': { cat: 'FINANCE', color: '#f6319d', dark: false },
+    '041510': { cat: 'MUSIC', color: '#e74162', dark: false },
+    '042660': { cat: 'SHIPBUILDING', color: '#cf8759', dark: true },
+    '047050': { cat: 'GLOBAL TRADE', color: '#5999cf', dark: false },
+    '047810': { cat: 'AEROSPACE', color: '#3f86e9', dark: false },
+    '051900': { cat: 'BEAUTY', color: '#f03871', dark: true },
+    '055550': { cat: 'FINANCE', color: '#347df4', dark: false },
+    '064350': { cat: 'MOBILITY', color: '#527dd6', dark: true },
+    '066570': { cat: 'TECH', color: '#ef3962', dark: true },
+    '078930': { cat: 'HOLDINGS', color: '#37abf1', dark: false },
+    '079550': { cat: 'DEFENSE', color: '#31b5f6', dark: false },
+    '086280': { cat: 'LOGISTICS', color: '#4980de', dark: false },
+    '086790': { cat: 'FINANCE', color: '#53d5c4', dark: false },
+    '089860': { cat: 'MOBILITY', color: '#f63a31', dark: false },
+    '090430': { cat: 'BEAUTY', color: '#528ed6', dark: false },
+    '096770': { cat: 'ENERGY', color: '#f63149', dark: true },
+    '097950': { cat: 'FOOD', color: '#f63139', dark: false },
+    '105560': { cat: 'FINANCE', color: '#f6ba31', dark: false },
+    '122870': { cat: 'MUSIC', color: '#5B87E8', dark: true },
+    '180640': { cat: 'AVIATION', color: '#31a8f6', dark: false },
+    '251270': { cat: 'GAMING', color: '#f6d931', dark: false },
+    '259960': { cat: 'GAMING', color: '#5B87E8', dark: true },
+    '263750': { cat: 'GAMING', color: '#528dd6', dark: true },
+    '271560': { cat: 'FOOD', color: '#f63631', dark: true },
+    '278470': { cat: 'BEAUTY TECH', color: '#f6314b', dark: false },
+    '282330': { cat: 'RETAIL', color: '#5ecf59', dark: false },
+    '316140': { cat: 'FINANCE', color: '#44a2e4', dark: false },
+    '329180': { cat: 'SHIPBUILDING', color: '#3f7de9', dark: false },
+    '352820': { cat: 'MUSIC', color: '#8259cf', dark: true },
+    '402340': { cat: 'TECH INVEST', color: '#f6314c', dark: false },
+    '483650': { cat: 'BEAUTY', color: '#5B87E8', dark: false }
+  };
+
+  const tints = {
+    '000120': { bg: '#e1e1fb', accent: '#5b5ae2' },
+    '000270': { bg: '#f1eafa', accent: '#955ae2' },
+    '000660': { bg: '#fde0e3', accent: '#e25a68' },
+    '003230': { bg: '#fdecdd', accent: '#e29a5a' },
+    '003490': { bg: '#d7eefd', accent: '#5aaae2' },
+    '004170': { bg: '#fde5e5', accent: '#e25a5d' },
+    '004370': { bg: '#fce8eb', accent: '#e25a74' },
+    '005380': { bg: '#d7e5fa', accent: '#5a92e2' },
+    '005930': { bg: '#e0d9fd', accent: '#765ae2' },
+    '009540': { bg: '#f5fafe', accent: '#5aa7e2' },
+    '010140': { bg: '#cfd0fd', accent: '#5a5de2' },
+    '010950': { bg: '#edfae0', accent: '#9ce25a' },
+    '011200': { bg: '#efe8fd', accent: '#895ae2' },
+    '012330': { bg: '#cddbfa', accent: '#5a83e2' },
+    '012450': { bg: '#fddcc8', accent: '#e28d5a' },
+    '015760': { bg: '#fdeeee', accent: '#e25c5a' },
+    '020560': { bg: '#fdd6d9', accent: '#e25a66' },
+    '021240': { bg: '#d5effd', accent: '#5ab3e2' },
+    '035900': { bg: '#c5defd', accent: '#5a98e2' },
+    '036570': { bg: '#eef2fe', accent: '#5a80e2' },
+    '039490': { bg: '#d9dcfb', accent: '#5a69e2' },
+    '041510': { bg: '#fedee3', accent: '#e25a6f' },
+    '042660': { bg: '#fde9d9', accent: '#e2955a' },
+    '047050': { bg: '#dcecf8', accent: '#5aa7e2' },
+    '047810': { bg: '#e7f1fd', accent: '#5a95e2' },
+    '051900': { bg: '#fcdfeb', accent: '#e25a91' },
+    '055550': { bg: '#cfe2fb', accent: '#5a96e2' },
+    '064350': { bg: '#d2e0f8', accent: '#5a8fe2' },
+    '066570': { bg: '#fbebf0', accent: '#e25a86' },
+    '078930': { bg: '#e1eaf9', accent: '#5a8ce2' },
+    '079550': { bg: '#e4f3fd', accent: '#5aace2' },
+    '086280': { bg: '#dde9fe', accent: '#5a8fe2' },
+    '086790': { bg: '#e2f5f1', accent: '#5ae2c7' },
+    '089860': { bg: '#feece7', accent: '#e27a5a' },
+    '090430': { bg: '#dae7f9', accent: '#5a94e2' },
+    '096770': { bg: '#fde1e6', accent: '#e25a74' },
+    '097950': { bg: '#efecfa', accent: '#7b5ae2' },
+    '105560': { bg: '#fdf0cf', accent: '#e2bb5a' },
+    '122870': { bg: '#f4e7fb', accent: '#b25ae2' },
+    '180640': { bg: '#d0e7fd', accent: '#5aa0e2' },
+    '251270': { bg: '#feefcd', accent: '#e2b85a' },
+    '259960': { bg: '#f3e7fd', accent: '#a75ae2' },
+    '263750': { bg: '#cbdefc', accent: '#5a8ee2' },
+    '271560': { bg: '#feecea', accent: '#e26a5a' },
+    '278470': { bg: '#fef1f0', accent: '#e2625a' },
+    '282330': { bg: '#f3fbeb', accent: '#a1e25a' },
+    '316140': { bg: '#d1e2f5', accent: '#5a9ae2' },
+    '329180': { bg: '#f5fbfc', accent: '#5ac3e2' },
+    '352820': { bg: '#efe7fb', accent: '#965ae2' },
+    '402340': { bg: '#fdebf1', accent: '#e25a89' },
+    '483650': { bg: '#f9ebe7', accent: '#e27c5a' }
+  };
+
+  const logos = {
+    '000120': 'assets/logos/000120.png',
+    '000270': 'assets/logos/000270.png',
+    '000660': 'assets/logos/000660.png',
+    '003230': 'assets/logos/003230.png',
+    '003490': 'assets/logos/003490.png',
+    '004170': 'assets/logos/004170.png',
+    '004370': 'assets/logos/004370.png',
+    '005380': 'assets/logos/005380.png',
+    '005930': 'assets/logos/005930.png',
+    '009540': 'assets/logos/009540.png',
+    '010140': 'assets/logos/010140.png',
+    '010950': 'assets/logos/010950.png',
+    '011200': 'assets/logos/011200.png',
+    '012330': 'assets/logos/012330.png',
+    '012450': 'assets/logos/012450.png',
+    '015760': 'assets/logos/015760.png',
+    '020560': 'assets/logos/020560.png',
+    '021240': 'assets/logos/021240.png',
+    '035900': 'assets/logos/035900.png',
+    '036570': 'assets/logos/036570.png',
+    '039490': 'assets/logos/039490.png',
+    '041510': 'assets/logos/041510.png',
+    '042660': 'assets/logos/042660.png',
+    '047050': 'assets/logos/047050.png',
+    '047810': 'assets/logos/047810.png',
+    '051900': 'assets/logos/051900.png',
+    '055550': 'assets/logos/055550.png',
+    '064350': 'assets/logos/064350.png',
+    '066570': 'assets/logos/066570.png',
+    '078930': 'assets/logos/078930.png',
+    '079550': 'assets/logos/079550.png',
+    '086280': 'assets/logos/086280.png',
+    '086790': 'assets/logos/086790.png',
+    '089860': 'assets/logos/089860.png',
+    '090430': 'assets/logos/090430.png',
+    '096770': 'assets/logos/096770.png',
+    '097950': 'assets/logos/097950.png',
+    '105560': 'assets/logos/105560.png',
+    '122870': 'assets/logos/122870.png',
+    '180640': 'assets/logos/180640.png',
+    '251270': 'assets/logos/251270.png',
+    '259960': 'assets/logos/259960.png',
+    '263750': 'assets/logos/263750.png',
+    '271560': 'assets/logos/271560.png',
+    '278470': 'assets/logos/278470.png',
+    '282330': 'assets/logos/282330.png',
+    '316140': 'assets/logos/316140.png',
+    '329180': 'assets/logos/329180.png',
+    '352820': 'assets/logos/352820.png',
+    '402340': 'assets/logos/402340.png',
+    '483650': 'assets/logos/483650.png'
+  };
+
+  // 캔들 데이터 (API 연동 전 임시) — tf: 'day' | 'week' | 'month'
+  function candles(code, tf, base) {
+    let s = 0;
+    const key = code + tf;
+    for (let i = 0; i < key.length; i++) s = (s * 31 + key.charCodeAt(i)) % 100000;
+    const rand = () => ((s = (s * 1103515245 + 12345) % 2147483648) / 2147483648);
+    const vol = tf === 'day' ? 0.012 : tf === 'week' ? 0.032 : 0.062;
+    const out = [];
+    let c = base * (1 - vol * 6);
+    for (let i = 0; i < 26; i++) {
+      const o = c;
+      const drift = (rand() - 0.46) * vol * 2;
+      c = o * (1 + drift);
+      const hi = Math.max(o, c) * (1 + rand() * vol * 0.7);
+      const lo = Math.min(o, c) * (1 - rand() * vol * 0.7);
+      out.push({ o: o, h: hi, l: lo, c: c });
+    }
+    const k = base / out[out.length - 1].c;
+    return out.map(b => ({ o: b.o * k, h: b.h * k, l: b.l * k, c: b.c * k }));
+  }
+
+  // 섹터별 상세 시황 — 어린이 눈높이로 다시 쓴 분석
+  const newsDetail = {
+    semi: { headline:'인공지능이 반도체를 더 많이 먹고 있어', body:['반도체는 컴퓨터의 뇌랑 기억을 맡는 부품이야. 요즘 인공지능이 똑똑해지면서 예전보다 훨씬 많은 반도체가 필요해졌어.','그래서 반도체를 만드는 회사들은 공장을 더 짓고, 기계도 더 사들이고 있어. 만드는 회사뿐 아니라 기계랑 재료를 파는 회사도 같이 바빠졌지.','다만 공장을 짓는 데는 시간이 오래 걸려서, 지금 좋다고 내년에도 계속 좋을지는 아무도 몰라.'], points:['인공지능 때문에 주문이 늘었어','공장이랑 기계에 돈을 많이 쓰고 있어','값이 오르내리는 폭이 큰 편이야'] },
+    game: { headline:'새 게임이 잘 되느냐에 달려 있어', body:['게임 회사는 새 게임 하나가 아주 크게 성공하면 돈을 많이 벌어. 반대로 기대했던 게임이 재미없다고 소문나면 금방 어려워지기도 해.','그래서 게임 회사 주가는 새 게임을 공개하는 날 앞뒤로 많이 움직여.','요즘은 한국뿐 아니라 외국에서도 같이 서비스하는 게임이 많아졌어.'], points:['새 게임 공개일이 제일 중요해','한 게임에 회사 전체가 걸릴 때가 있어','외국에서도 잘 되면 훨씬 커져'] },
+    food: { headline:'외국에서 한국 라면과 과자를 많이 사 가', body:['먹는 회사들은 갑자기 크게 오르내리지 않는 편이야. 사람은 언제나 밥을 먹으니까.','요즘 달라진 건 수출이야. 외국 사람들이 한국 라면이랑 과자를 좋아하게 되면서 바다 건너로 나가는 양이 늘었어.','대신 밀가루나 설탕 값이 오르면 회사가 쓰는 돈도 같이 늘어서 이익이 줄 수 있어.'], points:['수출이 늘고 있어','재료값이 오르면 이익이 줄어','천천히 움직이는 편이야'] },
+    auto: { headline:'전기차로 갈아타는 중이야', body:['자동차 회사들은 지금 기름차에서 전기차로 옮겨 가는 중이야. 새 공장을 짓고 새 기술을 배우느라 돈을 많이 쓰고 있어.','자동차는 비싼 물건이라, 사람들 주머니 사정이 안 좋아지면 안 사기도 해. 그래서 나라 경제 상황을 같이 봐야 해.','부품을 만드는 회사들도 자동차 회사가 잘 되면 같이 바빠져.'], points:['전기차 공장에 돈을 많이 쓰고 있어','경기가 나쁘면 차가 덜 팔려','부품 회사도 같이 움직여'] },
+    enter: { headline:'가수들의 해외 공연이 늘었어', body:['엔터 회사는 소속 가수가 인기를 얻으면 같이 잘 돼. 앨범, 콘서트, 굿즈가 다 돈이 되거든.','요즘은 한국 밖에서 여는 공연이 많아졌어. 큰 공연장을 채우면 한 번에 버는 돈이 커.','대신 인기 있는 팀이 활동을 쉬거나 멤버가 군대에 가면 잠시 조용해지기도 해.'], points:['월드투어가 큰 수입이야','한 팀에 기대는 정도가 커','활동 쉬는 기간이 있어'] },
+    beauty: { headline:'한국 화장품이 외국에서 인기야', body:['화장품 회사는 외국 사람들이 한국 화장품을 좋아하면서 수출이 늘었어. 특히 중국이랑 동남아, 미국에서 많이 사 가.','직접 브랜드를 파는 회사도 있고, 다른 회사 화장품을 대신 만들어 주는 회사도 있어. 둘은 돈 버는 방식이 달라.','유행이 빨리 바뀌는 편이라 새 제품을 계속 내야 해.'], points:['수출이 중요해','대신 만들어 주는 회사도 있어','유행이 빨리 바뀌어'] },
+    air: { headline:'여행 가는 사람이 늘어서 비행기가 꽉 찼어', body:['항공사는 사람들이 여행을 많이 다니면 잘 돼. 요즘은 비행기 자리가 거의 다 차서 표값도 잘 유지되고 있어.','대신 기름값이 오르면 비용이 확 늘어. 비행기는 기름을 아주 많이 쓰거든.','환율도 중요해. 외국에 내는 돈이 많아서 원화 값이 떨어지면 부담이 커져.'], points:['여행객이 늘면 좋아져','기름값에 아주 민감해','환율도 크게 영향을 줘'] },
+    ship: { headline:'외국에서 큰 배를 여러 척 주문했어', body:['조선 회사는 배를 주문받아서 몇 년에 걸쳐 만들어. 그래서 지금 주문을 많이 받아 두면 한동안 일감이 있어.','요즘은 가스를 실어 나르는 특수한 배 주문이 많아. 이런 배는 비싸서 회사에 남는 돈도 커.','배 만드는 데 쓰는 철값이 오르면 이익이 줄 수 있어.'], points:['주문을 미리 받아 둬','비싼 배일수록 이익이 커','철값이 오르면 부담이야'] },
+    defense: { headline:'다른 나라에 무기를 수출하기로 했어', body:['방산 회사는 나라를 지키는 데 쓰는 물건을 만들어. 원래는 우리나라 정부가 주로 사 줬는데, 요즘은 외국에도 많이 팔아.','수출 계약 하나가 아주 커서, 계약 소식이 나오면 회사가 크게 달라지기도 해.','세계 어딘가에서 다툼이 생기면 방산 회사에 관심이 쏠리는 편이야.'], points:['수출 계약 하나가 아주 커','정부가 주요 고객이야','세계 정세에 영향을 받아'] },
+    energy: { headline:'전기차 배터리를 더 많이 만들기로 했어', body:['에너지 회사는 전기를 만들거나, 전기를 담아 두는 배터리를 만들어.','전기차가 늘면 배터리도 많이 필요해져서 공장을 크게 짓고 있어. 다만 공장을 짓는 동안은 돈이 많이 나가.','배터리에 들어가는 리튬 같은 재료값이 오르내리면 회사 사정도 같이 흔들려.'], points:['전기차가 늘면 배터리도 늘어','공장 짓는 데 돈이 많이 들어','재료값이 자주 바뀌어'] },
+    retail: { headline:'편의점이랑 마트에 손님이 조금 늘었어', body:['유통 회사는 물건을 사다가 우리에게 파는 일을 해. 마트, 백화점, 편의점이 다 여기에 들어가.','사람들이 돈을 잘 쓰면 매출이 늘고, 아끼기 시작하면 바로 줄어. 그래서 경기를 보여 주는 창문 같은 회사야.','요즘은 온라인으로 사는 사람이 많아져서, 가게만 갖고 있는 회사는 좀 힘들어.'], points:['경기를 바로 보여 줘','온라인으로 옮겨 가는 중이야','편의점은 비교적 잘 버텨'] },
+    logi: { headline:'택배랑 배로 실어 나르는 짐이 많아졌어', body:['물류 회사는 물건을 옮겨 주는 일을 해. 택배, 트럭, 배, 창고가 다 여기에 들어가.','온라인 쇼핑이 늘면 택배가 늘어서 좋아져. 반대로 사람들이 물건을 덜 사면 옮길 짐도 줄어.','배로 짐을 나르는 회사는 운임이라는 값이 오르내릴 때마다 크게 흔들려.'], points:['온라인 쇼핑이 늘면 좋아져','운임이 오르내리면 크게 흔들려','기름값도 영향을 줘'] },
+    bank: { headline:'은행이 번 돈이 지난해보다 늘었어', body:['은행은 사람들 돈을 맡아 주고, 필요한 사람에게 빌려주면서 그 차이로 돈을 벌어.','금리가 높으면 빌려주고 받는 이자가 커져서 은행이 버는 돈도 늘어. 대신 돈을 못 갚는 사람이 늘면 손해가 나기도 해.','은행은 번 돈의 일부를 주주에게 나눠 주는 편이야. 이걸 배당이라고 해.'], points:['금리가 높으면 더 벌어','못 갚는 사람이 늘면 손해야','배당을 주는 편이야'] }
+  };
+
+  window.KW_UNIVERSE = { sectors: sectors, stocks: stocks, logos: logos, candles: candles, newsDetail: newsDetail, tints: tints, brands: brands };
+})();

@@ -12,7 +12,21 @@ import {
 } from "./lib/contracts";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
-type Screen = "home" | "stock" | "order" | "archive";
+export type F10Screen = "home" | "stock" | "order" | "archive";
+
+export type F10ScreenContext = {
+  screen: F10Screen;
+  stockId?: `KRX:${string}`;
+  stockName?: string;
+  quantity?: number;
+  unitPrice?: number;
+};
+
+type F10ChatbotDemoProps = {
+  context?: F10ScreenContext;
+  embedded?: boolean;
+  onNavigate?: (screen: F10Screen) => void;
+};
 type Message = {
   role: "assistant" | "user";
   text: string;
@@ -53,7 +67,7 @@ const COPY = {
 } as const;
 
 const SCREENS: Record<
-  Screen,
+  F10Screen,
   { label: string; title: string; description: string; chips: string[] }
 > = {
   home: {
@@ -151,8 +165,12 @@ function MessageBubble({
   );
 }
 
-export function F10ChatbotDemo() {
-  const [screen, setScreen] = useState<Screen>("stock");
+export function F10ChatbotDemo({
+  context,
+  embedded = false,
+  onNavigate,
+}: F10ChatbotDemoProps = {}) {
+  const [demoScreen, setDemoScreen] = useState<F10Screen>("stock");
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -161,27 +179,44 @@ export function F10ChatbotDemo() {
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
-  const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
+  const lastScreenEntryRef = useRef<{ screen: F10Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
   const recordBehaviorEvent = useChatBehaviorStore((state) => state.recordEvent);
   const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
   const muteActiveSignal = useChatBehaviorStore((state) => state.muteActiveSignal);
 
+  const screen = context?.screen ?? demoScreen;
   const currentScreen = SCREENS[screen];
   const chatContext = useMemo(
-    () => ({
-      screen,
-      stockId: screen === "stock" || screen === "order" ? ("KRX:005930" as const) : undefined,
-      stockName: screen === "stock" || screen === "order" ? "삼성전자" : undefined,
-      quantity: screen === "order" ? 10 : undefined,
-      unitPrice: screen === "order" ? 12500 : undefined,
-    }),
-    [screen],
+    () => {
+      const stockScreen = screen === "stock" || screen === "order";
+      const stockId = stockScreen
+        ? context?.stockId ?? (!embedded ? ("KRX:005930" as const) : undefined)
+        : undefined;
+      const stockName = stockScreen
+        ? context?.stockName ?? (!embedded ? "삼성전자" : undefined)
+        : undefined;
+
+      return {
+        screen,
+        stockId,
+        stockName,
+        quantity:
+          screen === "order"
+            ? context?.quantity ?? (!embedded ? 10 : undefined)
+            : undefined,
+        unitPrice:
+          screen === "order"
+            ? context?.unitPrice ?? (!embedded ? 12500 : undefined)
+            : undefined,
+      };
+    },
+    [context, embedded, screen],
   );
 
   useEffect(() => {
     const enteredAt = Date.now();
-    const stockId = screen === "stock" || screen === "order" ? "KRX:005930" : undefined;
+    const stockId = chatContext.stockId;
     const lastEntry = lastScreenEntryRef.current;
     if (!lastEntry || lastEntry.screen !== screen || enteredAt - lastEntry.at > 1_000) {
       recordBehaviorEvent({ type: "screen_entered", screen, stockId, at: enteredAt });
@@ -232,7 +267,7 @@ export function F10ChatbotDemo() {
       if (timer) clearTimeout(timer);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [recordBehaviorEvent, screen]);
+  }, [chatContext.stockId, recordBehaviorEvent, screen]);
 
   useEffect(() => {
     const element = messagesRef.current;
@@ -372,7 +407,8 @@ export function F10ChatbotDemo() {
   }
 
   function handleUiAction(action: ChatUiAction) {
-    setScreen(action.target);
+    if (onNavigate) onNavigate(action.target);
+    else setDemoScreen(action.target);
     setIsOpen(false);
     setStatus(`${SCREENS[action.target].label} 화면으로 이동했어`);
   }
@@ -380,7 +416,7 @@ export function F10ChatbotDemo() {
   function recordOrderCancellation(side: "buy" | "sell") {
     recordBehaviorEvent({
       type: "order_confirmation_cancelled",
-      stockId: "KRX:005930",
+      stockId: chatContext.stockId ?? "KRX:005930",
       side,
       at: Date.now(),
     });
@@ -388,7 +424,9 @@ export function F10ChatbotDemo() {
   }
 
   return (
-    <main className="min-h-dvh bg-bg px-4 py-6 text-ink">
+    <>
+      {!embedded && (
+      <main className="min-h-dvh bg-bg px-4 py-6 text-ink">
       <div className="mx-auto min-h-[720px] max-w-[430px] overflow-hidden rounded-[24px] bg-white shadow-lg">
         <header className="bg-navy px-5 pb-5 pt-4 text-white">
           <div className="flex items-center justify-between text-xs text-white/80">
@@ -403,7 +441,7 @@ export function F10ChatbotDemo() {
           className="flex gap-2 overflow-x-auto border-b border-gray/40 px-4 py-3"
           aria-label={COPY.navLabel}
         >
-          {(Object.keys(SCREENS) as Screen[]).map((key) => (
+          {(Object.keys(SCREENS) as F10Screen[]).map((key) => (
             <button
               className={
                 screen === key
@@ -411,7 +449,7 @@ export function F10ChatbotDemo() {
                   : "shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-semibold text-ink"
               }
               key={key}
-              onClick={() => setScreen(key)}
+              onClick={() => setDemoScreen(key)}
               type="button"
             >
               {SCREENS[key].label}
@@ -459,6 +497,8 @@ export function F10ChatbotDemo() {
           )}
         </section>
       </div>
+      </main>
+      )}
 
       {signal && (
         <aside
@@ -505,8 +545,17 @@ export function F10ChatbotDemo() {
 
       <button
         aria-label={COPY.openChat}
-        className="fixed bottom-5 left-1/2 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
+        className={
+          embedded
+            ? "fixed bottom-20 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
+            : "fixed bottom-5 left-1/2 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
+        }
         onClick={() => setIsOpen(true)}
+        style={
+          embedded
+            ? { left: "min(calc(50% + 140px), calc(100% - 44px))" }
+            : undefined
+        }
         type="button"
       >
         {COPY.avatar}
@@ -601,7 +650,7 @@ export function F10ChatbotDemo() {
           </div>
         </section>
       )}
-    </main>
+    </>
   );
 }
 

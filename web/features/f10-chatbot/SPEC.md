@@ -416,6 +416,7 @@ type SectorEducationContent = {
 - SSE `action` 이벤트와 허용 화면 `uiAction`을 구현했다. 모델 URL은 받지 않고 사용자가 버튼을 눌러야 이동한다.
 - `switch`·`dwell`·`lossRevisit` 판정, 발화 간 3분·동일 신호 10분·세션 최대 2회·신호 뮤트·30분 초기화를 `shared/engine` 순수 함수로 구현했다.
 - 화면 진입·가시 탭 체류·주문 확인 취소를 공용 zustand 이벤트 저장소에 연결했다. `trade_filled`와 종목 재진입 계약도 같은 저장소가 받는다.
+- 통합 앱 셸에서는 F10을 전 화면 오버레이로 재사용한다. 현재 화면·종목·표시 가격은 동일 출처 iframe의 검증된 `postMessage`만 받고, `uiAction`은 사용자가 누른 뒤 허용 화면 메시지로 되돌려 보낸다. 양방향 메시지는 `origin`과 `source`를 함께 확인한다.
 - 대화 원문 없이 요청 ID·목적·경로·Tool·필터·실패 결과만 구조화 로그로 남긴다.
 - 승인 금융 용어 8건은 내용별 진단·오답 조정·예시 복귀 DAPIE 전이를 사용한다.
 - 나머지 사전·FAQ와 화면 맥락·읽기 전용 Tool·허용 LLM·실패 안내는 공통 유도형 DAPIE 전이로 감싸고, `uiAction`을 같은 응답에 유지한다.
