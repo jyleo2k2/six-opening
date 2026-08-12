@@ -74,7 +74,8 @@ export async function getQuote(symbol: string): Promise<Quote> {
     const price = numeric(first(data, ["cur_prc", "stck_prpr", "price"]), true) ?? stock?.price ?? 0;
     const rate = numeric(first(data, ["flu_rt", "change_rate", "prdy_ctrt"])) ?? (price - change ? change / (price - change) * 100 : stock?.rate ?? 0);
     if (!price) throw new Error("no price");
-    const value: Quote = { symbol, name, price, change, rate, updatedAt: new Date().toISOString(), source: "kiwoom" };
+    const apiName = first(data, ["stk_nm", "stk_name", "hts_kor_isnm"]);
+    const value: Quote = { symbol, name: stock?.name ?? (apiName ? String(apiName) : name), price, change, rate, updatedAt: new Date().toISOString(), source: "kiwoom" };
     quoteCache.set(symbol, { value, at: Date.now() });
     return value;
   } catch {

@@ -21,22 +21,27 @@ async function loadBase(): Promise<string> {
   return text;
 }
 
+// 키움은 연속 호출에 민감하다. 실측상 1.1초 간격이면 실패가 잦고 2.6초면 안정적이다.
+const POLL_INTERVAL_MS = 2600;
+
 function startPolling() {
   if (polling) return;
   polling = true;
   let index = 0;
+  const retry: string[] = [];
   const tick = async () => {
-    if (codes.length) {
-      const code = codes[index % codes.length];
-      index += 1;
+    // 실패한 종목을 먼저 처리하고, 없으면 다음 종목으로 넘어간다.
+    const code = retry.shift() ?? codes[index++ % codes.length];
+    if (code) {
       try {
         const quote = await getQuote(code);
         warm[code] = { price: quote.price, rate: quote.rate };
       } catch {
-        // 미등록/미체결 종목은 base(universe.js)의 값을 그대로 둔다.
+        // 한 바퀴 안에 다시 시도한다. 끝내 못 받으면 base(universe.js) 값이 남는다.
+        if (!retry.includes(code)) retry.push(code);
       }
     }
-    setTimeout(tick, 1100);
+    setTimeout(tick, POLL_INTERVAL_MS);
   };
   tick();
 }
