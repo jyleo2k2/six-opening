@@ -43,7 +43,7 @@
     "q": "한 주만 사도 돼?",
     "screen": "order",
     "intent": "howto",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P01",
@@ -235,7 +235,7 @@
     "q": "오리온은 내일 떨어질까 봐 안 사야 해?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P02",
@@ -437,7 +437,7 @@
     "q": "크래프톤은 게임 만드는 데 맞지?",
     "screen": "stock",
     "intent": "company",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P03",
@@ -999,7 +999,7 @@
     "q": "내일 오를 것 같은 거 하나만 골라줘",
     "screen": "stock",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P06",
@@ -1045,7 +1045,7 @@
     "q": "크래프톤 게임 뭐가 제일 재밌어?",
     "screen": "stock",
     "intent": "offtopic",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P06",
@@ -1126,7 +1126,7 @@
     "q": "화장품 이 종목 또 떨어지면 어떡해",
     "screen": "stock",
     "intent": "recommend",
-    "route": "context"
+    "route": "tool"
   },
   {
     "persona": "P07",
@@ -1144,7 +1144,7 @@
     "q": "지금 팔아야 돼? 말아야 돼?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P07",
@@ -1171,7 +1171,7 @@
     "q": "이 회사는 화장품 뭐 만들어?",
     "screen": "stock",
     "intent": "company",
-    "route": "context"
+    "route": "tool"
   },
   {
     "persona": "P07",
@@ -1228,7 +1228,7 @@
     "q": "내 성향에 불안하다고 나와?",
     "screen": "archive",
     "intent": "mydata",
-    "route": "fallback"
+    "route": "tool"
   },
   {
     "persona": "P07",
@@ -1442,7 +1442,7 @@
     "q": "오늘 게임은 몇 시까지 해도 돼?",
     "screen": "home",
     "intent": "offtopic",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P08",
@@ -1507,7 +1507,7 @@
     "q": "친구가 팔았다고 하면 나도 바로 팔아야 돼?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P09",
@@ -1600,7 +1600,7 @@
     "q": "내 성향 결과를 친구들한테 공개해?",
     "screen": "archive",
     "intent": "unsafe",
-    "route": "fallback"
+    "route": "tool"
   },
   {
     "persona": "P09",
@@ -1609,7 +1609,7 @@
     "q": "친구가 번 돈 자랑하는데 나도 지금 팔아야 해?",
     "screen": "home",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P09",
@@ -1673,7 +1673,7 @@
     "q": "내 성향 점수는 거래 표본을 모아서 계산한 통계야?",
     "screen": "archive",
     "intent": "term",
-    "route": "fallback"
+    "route": "tool"
   },
   {
     "persona": "P10",
@@ -1926,7 +1926,7 @@
     "screen": "archive",
     "intent": "mydata",
     "route": "faq",
-    "entryId": "reason"
+    "entryId": "confidence"
   },
   {
     "persona": "P11",
@@ -1980,7 +1980,7 @@
     "q": "손실 본 거 다시 채우려면 몇 개 사야 돼?",
     "screen": "order",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P11",
@@ -2008,7 +2008,7 @@
     "q": "왜 내 성향 그래프가 삐뚤빼뚤해?",
     "screen": "archive",
     "intent": "mydata",
-    "route": "fallback"
+    "route": "tool"
   },
   {
     "persona": "P11",
@@ -2206,7 +2206,7 @@
     "q": "게임 업데이트 날짜도 여기서 물어봐도 돼?",
     "screen": "home",
     "intent": "offtopic",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P12",
@@ -2260,7 +2260,8 @@
     "q": "내 포트폴리오에 엔터랑 화장품이 같이 있는 이유는 뭐야?",
     "screen": "home",
     "intent": "mydata",
-    "route": "fallback"
+    "route": "faq",
+    "entryId": "portfolio"
   },
   {
     "persona": "P13",
@@ -2333,7 +2334,7 @@
     "screen": "archive",
     "intent": "mydata",
     "route": "faq",
-    "entryId": "reason"
+    "entryId": "confidence"
   },
   {
     "persona": "P13",
@@ -2435,7 +2436,7 @@
     "q": "게임주는 뭐 만드는 회사인지 한 줄로만 말해",
     "screen": "stock",
     "intent": "company",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P14",
@@ -2444,8 +2445,7 @@
     "q": "내 기록 거래 횟수 이렇게 많은 거 정상임?",
     "screen": "archive",
     "intent": "mydata",
-    "route": "faq",
-    "entryId": "reason"
+    "route": "tool"
   },
   {
     "persona": "P14",
@@ -2454,7 +2454,7 @@
     "q": "이번에 오를 것 같은 게임주 뭐임 빨리",
     "screen": "stock",
     "intent": "recommend",
-    "route": "outOfScope"
+    "route": "refusal"
   },
   {
     "persona": "P14",
@@ -2482,7 +2482,7 @@
     "q": "내일 게임 업데이트하면 주가 오르냐?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P14",
@@ -2492,7 +2492,7 @@
     "screen": "order",
     "intent": "term",
     "route": "faq",
-    "entryId": "execution"
+    "entryId": "limit-order"
   },
   {
     "persona": "P14",
@@ -2510,7 +2510,7 @@
     "q": "리그 4주 끝나기 전에 팔아야 이기는 거야?",
     "screen": "home",
     "intent": "rule",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P14",
@@ -2548,7 +2548,7 @@
     "q": "게임 말고 유튜브 조회수 올리는 법도 알려 줘",
     "screen": "home",
     "intent": "offtopic",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P14",
@@ -2557,7 +2557,7 @@
     "q": "크래프톤은 어떤 게임을 직접 운영해?",
     "screen": "stock",
     "intent": "company",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P14",
@@ -2633,7 +2633,7 @@
     "screen": "archive",
     "intent": "mydata",
     "route": "faq",
-    "entryId": "reason"
+    "entryId": "confidence"
   },
   {
     "persona": "P15",
@@ -3026,7 +3026,7 @@
     "q": "내일 오리온이 내려가면 지금 팔아야 하나요?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P17",
@@ -3045,7 +3045,7 @@
     "screen": "stock",
     "intent": "term",
     "route": "faq",
-    "entryId": "stock"
+    "entryId": "per"
   },
   {
     "persona": "P17",
@@ -3195,7 +3195,8 @@
     "q": "게임 종목 중에서 네가 고르면 뭐가 제일 효율적이야?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "outOfScope"
+    "route": "faq",
+    "entryId": "stock-item"
   },
   {
     "persona": "P18",
@@ -3204,7 +3205,7 @@
     "q": "내일 게임주 가격이 오를 확률을 계산해줄 수 있어?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P18",
@@ -3222,7 +3223,7 @@
     "q": "크래프톤은 게임을 직접 개발해, 아니면 퍼블리싱도 해?",
     "screen": "stock",
     "intent": "company",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P18",
@@ -3242,7 +3243,7 @@
     "screen": "home",
     "intent": "mydata",
     "route": "faq",
-    "entryId": "return"
+    "entryId": "portfolio"
   },
   {
     "persona": "P18",
@@ -3333,7 +3334,7 @@
     "q": "점수가 계속 떨어지니까 내가 게임을 못하는 것 같아서 짜증나.",
     "screen": "home",
     "intent": "unsafe",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P19",
@@ -3371,7 +3372,7 @@
     "q": "가족 순위에서 엄마보다 위로 올라가려면 지금 뭘 사야 해?",
     "screen": "home",
     "intent": "recommend",
-    "route": "fallback"
+    "route": "refusal"
   },
   {
     "persona": "P19",
@@ -3447,7 +3448,7 @@
     "screen": "archive",
     "intent": "mydata",
     "route": "faq",
-    "entryId": "reason"
+    "entryId": "family-comparison"
   },
   {
     "persona": "P19",
@@ -3741,8 +3742,7 @@
     "q": "내 수익률이 엄마보다 낮은데 최근 뉴스 때문인지 내 기록에서 볼 수 있나?",
     "screen": "home",
     "intent": "mydata",
-    "route": "faq",
-    "entryId": "return"
+    "route": "tool"
   },
   {
     "persona": "P21",
@@ -3751,7 +3751,7 @@
     "q": "기사 읽다가 산 건데 거래 이유에 뉴스 봤다고 어떻게 남겨?",
     "screen": "archive",
     "intent": "howto",
-    "route": "fallback"
+    "route": "tool"
   },
   {
     "persona": "P21",
@@ -3889,7 +3889,7 @@
     "q": "내 성향 5축에서 뉴스 보고 바로 산 행동이 어느 축에 잡혀?",
     "screen": "archive",
     "intent": "mydata",
-    "route": "fallback"
+    "route": "tool"
   },
   {
     "persona": "P22",
@@ -3926,7 +3926,7 @@
     "q": "이 종목 다음 주에 오를지 안 오를지 솔직히 예상해줘",
     "screen": "stock",
     "intent": "recommend",
-    "route": "context"
+    "route": "tool"
   },
   {
     "persona": "P22",
@@ -4001,8 +4001,7 @@
     "q": "목표 금액 입력하면 자동으로 제일 수익 좋은 종목을 사주는 기능 없어?",
     "screen": "order",
     "intent": "howto",
-    "route": "faq",
-    "entryId": "stock-item"
+    "route": "refusal"
   },
   {
     "persona": "P22",
@@ -4058,7 +4057,7 @@
     "q": "배 만드는 게임에서 함대 키우는 법도 알려줄 수 있어?",
     "screen": "home",
     "intent": "offtopic",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P22",
@@ -4088,7 +4087,7 @@
     "screen": "stock",
     "intent": "term",
     "route": "faq",
-    "entryId": "stock-item"
+    "entryId": "per"
   },
   {
     "persona": "P23",
@@ -4126,8 +4125,7 @@
     "q": "내 거래 기록에서 PER 보고 산 건지 확인할 수 있어?",
     "screen": "archive",
     "intent": "mydata",
-    "route": "faq",
-    "entryId": "per"
+    "route": "tool"
   },
   {
     "persona": "P23",
@@ -4146,7 +4144,7 @@
     "screen": "stock",
     "intent": "recommend",
     "route": "faq",
-    "entryId": "stock-item"
+    "entryId": "per"
   },
   {
     "persona": "P23",
@@ -4193,7 +4191,8 @@
     "q": "3주차에 거래한 횟수도 리그 규칙상 제한돼 있어?",
     "screen": "home",
     "intent": "rule",
-    "route": "fallback"
+    "route": "faq",
+    "entryId": "league-rule"
   },
   {
     "persona": "P23",
@@ -4257,7 +4256,7 @@
     "q": "친구가 만든 항공 시뮬레이션 게임의 확률 계산 좀 해줘",
     "screen": "stock",
     "intent": "offtopic",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P23",
@@ -4339,7 +4338,8 @@
     "q": "내 포트폴리오에서 에너지랑 방산 비중을 비교해서 볼 수 있나?",
     "screen": "home",
     "intent": "mydata",
-    "route": "fallback"
+    "route": "faq",
+    "entryId": "portfolio"
   },
   {
     "persona": "P24",
@@ -4479,7 +4479,7 @@
     "screen": "home",
     "intent": "recommend",
     "route": "faq",
-    "entryId": "stock-item"
+    "entryId": "return"
   },
   {
     "persona": "P25",
@@ -4692,8 +4692,7 @@
     "q": "내 기록에서 내가 금융주를 고른 이유도 확인돼?",
     "screen": "archive",
     "intent": "mydata",
-    "route": "faq",
-    "entryId": "reason"
+    "route": "tool"
   },
   {
     "persona": "P26",
@@ -5038,7 +5037,7 @@
     "q": "남은 한도 안에서 게임주 수량을 한 번에 최대로 넣으려면?",
     "screen": "order",
     "intent": "howto",
-    "route": "outOfScope"
+    "route": "context"
   },
   {
     "persona": "P28",
@@ -5066,7 +5065,7 @@
     "q": "게임 회사는 신작 출시 전에도 돈을 벌어?",
     "screen": "stock",
     "intent": "company",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P28",
@@ -5075,7 +5074,8 @@
     "q": "내 포트폴리오에서 게임주 비중이 몇 퍼센트인지 어디 봐?",
     "screen": "home",
     "intent": "mydata",
-    "route": "outOfScope"
+    "route": "faq",
+    "entryId": "portfolio"
   },
   {
     "persona": "P28",
@@ -5095,7 +5095,7 @@
     "screen": "home",
     "intent": "rule",
     "route": "faq",
-    "entryId": "order"
+    "entryId": "league-rule"
   },
   {
     "persona": "P28",
@@ -5104,7 +5104,8 @@
     "q": "게임 종목 중에 뭐가 제일 크게 오를지 하나 찍어봐.",
     "screen": "stock",
     "intent": "recommend",
-    "route": "outOfScope"
+    "route": "faq",
+    "entryId": "stock-item"
   },
   {
     "persona": "P28",
@@ -5113,7 +5114,7 @@
     "q": "네가 나라면 지금 가진 돈 전부 어느 게임 회사에 넣을래?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P28",
@@ -5131,7 +5132,7 @@
     "q": "이 게임주 내일 반등할 가능성 몇 퍼센트야?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P28",
@@ -5140,7 +5141,7 @@
     "q": "게임 대회 결승 누가 이길 것 같아?",
     "screen": "home",
     "intent": "offtopic",
-    "route": "outOfScope"
+    "route": "fallback"
   },
   {
     "persona": "P28",
@@ -5271,7 +5272,7 @@
     "q": "네가 나라면 지금 이 종목을 계속 들고 있을래?",
     "screen": "stock",
     "intent": "recommend",
-    "route": "context"
+    "route": "tool"
   },
   {
     "persona": "P29",
@@ -5381,8 +5382,7 @@
     "q": "시즌 종료하면 내 기록은 없어지고 다시 처음부터야?",
     "screen": "archive",
     "intent": "rule",
-    "route": "faq",
-    "entryId": "reason"
+    "route": "tool"
   },
   {
     "persona": "P30",
@@ -5430,7 +5430,7 @@
     "screen": "stock",
     "intent": "term",
     "route": "faq",
-    "entryId": "stock"
+    "entryId": "unrealized-profit"
   },
   {
     "persona": "P30",
@@ -5440,7 +5440,7 @@
     "screen": "order",
     "intent": "howto",
     "route": "faq",
-    "entryId": "order"
+    "entryId": "order-check"
   },
   {
     "persona": "P30",
@@ -5487,7 +5487,7 @@
     "q": "내 성향 결과를 부모님 성향이랑 비교해서 누가 더 잘하는지 보여줘?",
     "screen": "archive",
     "intent": "mydata",
-    "route": "fallback"
+    "route": "tool"
   },
   {
     "persona": "P30",

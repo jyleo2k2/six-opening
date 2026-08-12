@@ -1,0 +1,16 @@
+{
+  "label": "luna_medium",
+  "model": "gpt-5.6-luna",
+  "files": [
+    {"filename":"01.json","valid":true,"errors":[]},
+    {"filename":"02.json","valid":true,"errors":[]},
+    {"filename":"03.json","valid":true,"errors":[]},
+    {"filename":"04.json","valid":true,"errors":[]},
+    {"filename":"05.json","valid":true,"errors":[]},
+    {"filename":"06.json","valid":true,"errors":[]},
+    {"filename":"07.json","valid":true,"errors":[]},
+    {"filename":"08.json","valid":true,"errors":[]},
+    {"filename":"09.json","valid":true,"errors":[]},
+    {"filename":"10.json","valid":true,"errors":[]}
+  ]
+}
