@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsx shared/engine/comment-filter.test.ts && tsx shared/engine/trade-markers.test.ts"
   },
   "dependencies": {
     "next": "^16.3.0",
@@ -20,6 +21,7 @@
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.26",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   }
 }

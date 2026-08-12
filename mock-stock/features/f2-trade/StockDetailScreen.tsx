@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { ReasonForm } from "@/features/f3-reason";
 import { stockBySymbol } from "@/shared/data/stocks";
 import { useLiveQuotes } from "@/shared/data/use-live-quotes";
+import { buildTradeMarkers, chartBounds, symbolTrades } from "@/shared/engine/trade-markers";
+import { useFamilyFeedStore } from "@/shared/store/use-family-feed-store";
 import { useInvestmentStore } from "@/shared/store/use-investment-store";
-import type { ReasonRecord, TradeSide } from "@/shared/types";
+import type { FamilyMember, ReasonRecord, Trade, TradeSide } from "@/shared/types";
 import { Button, Card, ConfettiBurst, LoadingScreen, PhoneShell, PriceText, ScreenHeader } from "@/shared/ui";
 
 type Step = "detail" | "quantity" | "reason" | "complete";
@@ -26,14 +28,38 @@ function fixtureChart(values: number[], period: ChartPeriod) {
   return values;
 }
 
-function LineChart({ values, positive }: { values: number[]; positive: boolean }) {
+/** 가족 매매 지점 마커. 좌표·라벨 계산은 shared/engine/trade-markers가 소유한다. */
+const MEMBER_MARKER: Record<FamilyMember, string> = {
+  child: "fill-magenta",
+  parent: "fill-navy",
+};
+
+function LineChart({ values, positive, trades, viewer, onSelectTrade }: {
+  values: number[];
+  positive: boolean;
+  trades: Trade[];
+  viewer: FamilyMember;
+  onSelectTrade: (trade: Trade) => void;
+}) {
   const width = 330;
   const height = 150;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || 1;
+  const { min, range } = chartBounds(values, trades);
   const points = values.map((value, index) => `${index / (values.length - 1) * width},${height - (value - min) / range * (height - 18) - 9}`).join(" ");
-  return <svg viewBox={`0 0 ${width} ${height}`} className="h-40 w-full" role="img" aria-label="최근 가격 흐름 차트"><line x1="0" y1="35" x2={width} y2="35" className="stroke-gray" strokeDasharray="4 4"/><line x1="0" y1="80" x2={width} y2="80" className="stroke-gray" strokeDasharray="4 4"/><line x1="0" y1="125" x2={width} y2="125" className="stroke-gray" strokeDasharray="4 4"/><polyline points={points} fill="none" className={positive ? "stroke-up" : "stroke-down"} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+  const markers = buildTradeMarkers({ trades, viewer, min, range, width, height });
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-40 w-full" role="img" aria-label="최근 가격 흐름과 가족 매매 지점 차트">
+      <line x1="0" y1="35" x2={width} y2="35" className="stroke-gray" strokeDasharray="4 4"/>
+      <line x1="0" y1="80" x2={width} y2="80" className="stroke-gray" strokeDasharray="4 4"/>
+      <line x1="0" y1="125" x2={width} y2="125" className="stroke-gray" strokeDasharray="4 4"/>
+      <polyline points={points} fill="none" className={positive ? "stroke-up" : "stroke-down"} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+      {markers.map((marker) => (
+        <g key={marker.id} className="cursor-pointer" onClick={() => onSelectTrade(trades.find((trade) => trade.id === marker.id)!)} role="button" aria-label={marker.label}>
+          <title>{marker.label}</title>
+          <polygon points={marker.points} className={MEMBER_MARKER[marker.member]} stroke="white" strokeWidth="1.5"/>
+        </g>
+      ))}
+    </svg>
+  );
 }
 
 export function StockDetailScreen({ symbol }: { symbol: string }) {
@@ -46,6 +72,11 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
   const holdings = useInvestmentStore((state) => state.holdings);
   const executeTrade = useInvestmentStore((state) => state.executeTrade);
   const recordDetailEvent = useInvestmentStore((state) => state.recordDetailEvent);
+  const ownTrades = useInvestmentStore((state) => state.trades);
+  const viewer = useFamilyFeedStore((state) => state.viewer);
+  const familyTrades = useFamilyFeedStore((state) => state.familyTrades);
+  // 이 종목의 가족 전원 체결 지점. 미체결 주문은 넣지 않는다 (실시간 따라하기 방지).
+  const chartTrades = symbolTrades([...ownTrades, ...familyTrades], symbol);
   const holding = holdings.find((item) => item.symbol === symbol);
   const [step, setStep] = useState<Step>("detail");
   const [side, setSide] = useState<TradeSide>("buy");
@@ -142,7 +173,7 @@ export function StockDetailScreen({ symbol }: { symbol: string }) {
       <section className="space-y-4 px-4 py-5">
         <Card>
           <div className="flex items-center gap-3"><span className="flex h-12 w-12 items-center justify-center rounded-xl bg-bg text-[11px] font-extrabold text-navy">{stock.logo}</span><div><p className="text-2xl font-extrabold tabular-nums">{currentPrice.toLocaleString()}원</p><p className="mt-1 text-xs"><PriceText value={quote.change} rate={quote.rate} /> 오늘</p></div></div>
-          <LineChart values={chart.length > 1 ? chart : stock.chart} positive={(chart.at(-1) ?? 0) >= (chart[0] ?? 0)} />
+          <LineChart values={chart.length > 1 ? chart : stock.chart} positive={(chart.at(-1) ?? 0) >= (chart[0] ?? 0)} trades={chartTrades} viewer={viewer} onSelectTrade={(trade) => router.push(`/feed?trade=${trade.id}`)} />
           <div className="grid grid-cols-3 gap-2">
             {chartPeriods.map((period) => <button key={period.value} type="button" onClick={() => setChartPeriod(period.value)} className={`rounded-full border px-3 py-2 text-xs font-bold ${chartPeriod === period.value ? "border-magenta bg-magenta text-white" : "border-gray bg-white text-ink"}`}>{period.label}</button>)}
           </div>
