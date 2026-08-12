@@ -81,7 +81,15 @@ const knowledgeGaps = rows.filter((r) => INFO_INTENTS.includes(r.intent) && r.ro
 const entryHits = count(rows.map((r) => r.entryId).filter((v): v is string => Boolean(v)));
 const deadEntries = CHATBOT_KNOWLEDGE.filter((e) => !entryHits[e.id]);
 
-const ROUTES: ChatRoute[] = ["faq", "context", "refusal", "safety", "outOfScope", "fallback"];
+const ROUTES: ChatRoute[] = [
+  "faq",
+  "context",
+  "tool",
+  "refusal",
+  "safety",
+  "outOfScope",
+  "fallback",
+];
 const INTENTS = Object.keys(EXPECTED) as Intent[];
 
 const lines: string[] = [];
@@ -89,7 +97,7 @@ const w = (s = "") => lines.push(s);
 
 w("# F10 키웅이 — 아이 질문 시뮬레이션 커버리지 리포트");
 w();
-w(`생성일 2026-08-12 · 페르소나 ${new Set(rows.map((r) => r.persona)).size}종 · 질문 ${rows.length}개`);
+w(`생성일 2026-08-13 · 페르소나 ${new Set(rows.map((r) => r.persona)).size}종 · 질문 ${rows.length}개`);
 w();
 w("`web/features/f10-chatbot/lib/routing.ts`의 `routeMessage()`에 전량 통과시킨 결과다. LLM 호출은 없다.");
 w();
@@ -101,6 +109,7 @@ w("|---|---:|---:|---|");
 const ROUTE_MEANING: Record<ChatRoute, string> = {
   faq: "사전·FAQ가 즉답",
   context: "화면 맥락으로 즉답",
+  tool: "승인 데이터·본인 기록 조회",
   refusal: "추천·예측 고정 거절",
   safety: "위기·개인정보·유해 고정 응답",
   outOfScope: "도메인 밖 고정 응답",
