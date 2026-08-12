@@ -111,7 +111,7 @@ async function main() {
   assert.equal(isExplainAction(refusal.action), false);
   assert.equal(modelCalls, 0);
 
-  // 전용 진단 스크립트가 없는 용어·FAQ도 공통 DAPIE 유도 턴으로 이어진다.
+  // 모든 용어는 내용별 DAPIE 스크립트로 시작한다.
   const genericTerm = await createChatOutcome(
     { message: "주식이 뭐야?", context },
     session,
@@ -119,18 +119,18 @@ async function main() {
   );
   assert.equal(isExplainAction(genericTerm.action), true);
   if (isExplainAction(genericTerm.action)) {
-    assert.equal(genericTerm.action.turn.scriptId, "flow:guided");
+    assert.equal(genericTerm.action.turn.scriptId, "term:stock");
   }
 
+  // 서비스 사용법 FAQ는 승인 답변과 화면 액션만 바로 제공한다.
   const serviceHelp = await createChatOutcome(
     { message: "매수 어떻게 해?", context },
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(isExplainAction(serviceHelp.action), true);
-  if (isExplainAction(serviceHelp.action)) {
-    assert.equal(serviceHelp.action.uiAction?.target, "order");
-  }
+  assert.equal(isExplainAction(serviceHelp.action), false);
+  assert.equal(serviceHelp.action?.uiAction?.target, "order");
+  assert.equal(serviceHelp.response.text.includes("종목 상세에서 매수를 누르고"), true);
 
   const ownRecords = await createChatOutcome(
     { message: "내 거래 기록 보여줘", context },
@@ -152,7 +152,8 @@ async function main() {
     { generateAnswer: noModel },
   );
   assert.equal(screenAmount.route, "context");
-  assert.equal(isExplainAction(screenAmount.action), true);
+  assert.equal(isExplainAction(screenAmount.action), false);
+  assert.equal(screenAmount.action?.uiAction?.target, "order");
 
   const stockFacts = await createChatOutcome(
     { message: "이 회사는 뭐 하는 회사야?", context },
@@ -275,12 +276,24 @@ async function main() {
     assert.equal(interruptedByScriptedQuestion.action.turn.scriptId, "term:per");
   }
 
-  // 사전·FAQ의 모든 승인 항목은 전용 진단 또는 공통 유도 DAPIE 턴을 제공한다.
+  // 사전의 모든 승인 용어는 전용 DAPIE, 서비스 FAQ는 직답을 제공한다.
   for (const entry of CHATBOT_KNOWLEDGE) {
-    if (entry.explainScript && entry.explainScript.check.kind !== "guiding") {
+    if (entry.kind === "glossary") {
+      assert.ok(entry.explainScript, `${entry.id}에 전용 DAPIE 스크립트가 없어`);
       const script = entry.explainScript;
       const adjust = script.adjust;
       assert.ok(adjust, `${entry.id}에 오답 조정 질문이 없어`);
+      const correct = advanceExplain(script, {
+        scriptId: script.id,
+        stage: "brief",
+        choiceId: script.check.answerId,
+      });
+      assert.equal(correct?.kind, "turn");
+      assert.equal(
+        gateChatOutput({ text: correct?.text ?? "", source: "fixed" }).ok,
+        true,
+        `${entry.id} 정답 설명이 출력 게이트를 통과하지 못해`,
+      );
       const wrongChoice = script.check.choices.find(
         (choice) => choice.id !== script.check.answerId,
       );
@@ -315,8 +328,10 @@ async function main() {
       session,
       { generateAnswer: noModel },
     );
-    assert.equal(isExplainAction(outcome.action), true, `${entry.id}에 DAPIE action이 없어`);
-    if (isExplainAction(outcome.action)) {
+    if (entry.kind === "glossary") {
+      assert.equal(isExplainAction(outcome.action), true, `${entry.id}에 DAPIE action이 없어`);
+      if (!isExplainAction(outcome.action)) continue;
+      assert.equal(outcome.action.turn.scriptId, `term:${entry.id}`);
       assert.equal(
         gateChatOutput({ text: outcome.action.turn.prompt, source: "fixed" }).ok,
         true,
@@ -324,7 +339,11 @@ async function main() {
       for (const choice of outcome.action.turn.choices) {
         assert.equal(gateChatOutput({ text: choice.label, source: "fixed" }).ok, true);
       }
+      continue;
     }
+    assert.equal(isExplainAction(outcome.action), false, `${entry.id} 사용법 FAQ가 DAPIE로 시작해`);
+    assert.equal(outcome.response.text, entry.answer);
+    assert.equal(outcome.action?.uiAction?.target, entry.actionTarget);
   }
 
   const model = await createChatOutcome(

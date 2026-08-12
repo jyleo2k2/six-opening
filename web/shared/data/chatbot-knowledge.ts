@@ -14,15 +14,577 @@ export type ChatbotKnowledgeEntry = {
 
 const reviewed = "reviewed" as const;
 
+function termScript(
+  id: string,
+  script: Omit<ExplainScript, "id">,
+): ExplainScript {
+  return { id: `term:${id}`, ...script };
+}
+
+const GLOSSARY_EXPLAIN_SCRIPTS = {
+  stock: termScript("stock", {
+    brief: "주식은 회사의 작은 조각이야. 주식을 가지면 회사의 일부를 함께 가진 주주가 돼.",
+    check: {
+      question: "주식 한 주는 무엇을 뜻할까?",
+      choices: [
+        { id: "company-piece", label: "회사의 작은 조각" },
+        { id: "employee-name", label: "직원의 이름" },
+        { id: "order-paper", label: "주문서 한 장" },
+      ],
+      answerId: "company-piece",
+    },
+    adjust: {
+      explanation: "회사를 여러 작은 조각으로 나눈 모습을 떠올려 보자.",
+      question: "그 조각 하나를 가진 사람은 회사의 일부를 가진 걸까?",
+      choices: [
+        { id: "yes", label: "회사의 일부를 가져" },
+        { id: "no", label: "회사와 관계없어" },
+      ],
+      answerId: "yes",
+    },
+    detail: "회사는 필요한 돈을 모으려고 주식을 만들 수 있어. 사람들은 그 주식을 사고팔 수 있고, 가진 사람을 주주라고 불러.",
+    example: "피자 한 판을 여러 조각으로 나눈 모습을 떠올려 봐. 주식 한 주는 그중 한 조각처럼 회사의 일부를 나타내.",
+  }),
+  shareholder: termScript("shareholder", {
+    brief: "주주는 회사의 주식을 가진 사람이야.",
+    check: {
+      question: "누구를 주주라고 부를까?",
+      choices: [
+        { id: "stock-owner", label: "회사의 주식을 가진 사람" },
+        { id: "employee", label: "회사에서 일하는 모든 사람" },
+        { id: "customer", label: "물건을 산 모든 손님" },
+      ],
+      answerId: "stock-owner",
+    },
+    adjust: {
+      explanation: "회사에서 일하지 않아도 그 회사의 주식을 가지면 주주가 될 수 있어.",
+      question: "주주가 되려면 무엇을 가지고 있어야 할까?",
+      choices: [
+        { id: "stock", label: "그 회사의 주식" },
+        { id: "receipt", label: "그 회사의 영수증" },
+      ],
+      answerId: "stock",
+    },
+    detail: "주주는 가진 주식 수만큼 회사의 일부를 함께 가진 사람이야. 직원이나 손님이라는 이유만으로 주주가 되는 것은 아니야.",
+    example: "피자 조각을 가진 사람을 조각 주인이라고 부르는 것과 비슷해. 회사의 주식 조각을 가진 사람은 주주야.",
+  }),
+  "stock-item": termScript("stock-item", {
+    brief: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해.",
+    check: {
+      question: "거래 화면에서 종목 하나는 무엇을 가리킬까?",
+      choices: [
+        { id: "one-company", label: "회사나 상품 하나" },
+        { id: "all-market", label: "주식시장 전체" },
+        { id: "one-button", label: "주문 버튼 하나" },
+      ],
+      answerId: "one-company",
+    },
+    adjust: {
+      explanation: "검색 결과에서 회사 이름이 한 줄씩 나뉘는 모습을 떠올려 보자.",
+      question: "그 한 줄은 무엇을 구분할까?",
+      choices: [
+        { id: "one-item", label: "회사나 상품 하나" },
+        { id: "all-items", label: "모든 회사를 한꺼번에" },
+      ],
+      answerId: "one-item",
+    },
+    detail: "종목에는 구분을 위한 이름과 코드가 있어. 같은 시장에서도 회사나 상품이 다르면 서로 다른 종목이야.",
+    example: "도서관에서 책마다 제목과 번호가 있는 것과 비슷해. 거래 화면도 종목 이름과 코드로 회사를 구분해.",
+  }),
+  buy: termScript("buy", {
+    brief: "매수는 주식을 사는 거래야.",
+    check: {
+      question: "매수 주문이 체결되면 가진 주식은 어떻게 될까?",
+      choices: [
+        { id: "increase", label: "주식 수가 늘어" },
+        { id: "decrease", label: "주식 수가 줄어" },
+        { id: "disappear", label: "종목이 사라져" },
+      ],
+      answerId: "increase",
+    },
+    adjust: {
+      explanation: "매수는 물건을 사서 내 것으로 만드는 것과 같은 방향이야.",
+      question: "주식을 사면 내 보유 목록에 들어올까?",
+      choices: [
+        { id: "yes", label: "체결되면 들어와" },
+        { id: "no", label: "가지고 있던 것도 없어져" },
+      ],
+      answerId: "yes",
+    },
+    detail: "매수 주문을 냈다고 바로 주식을 가진 것은 아니야. 사고파는 조건이 맞아 체결되어야 보유 수량이 늘어.",
+    example: "가게에서 물건을 사겠다고 말한 것은 주문이고, 돈을 내고 물건을 받은 때가 체결이야. 주식 매수도 체결 뒤에 보유 목록에 들어와.",
+  }),
+  sell: termScript("sell", {
+    brief: "매도는 가지고 있던 주식을 파는 거래야.",
+    check: {
+      question: "매도 주문이 체결되면 가진 주식은 어떻게 될까?",
+      choices: [
+        { id: "decrease", label: "주식 수가 줄어" },
+        { id: "increase", label: "주식 수가 늘어" },
+        { id: "same", label: "언제나 그대로야" },
+      ],
+      answerId: "decrease",
+    },
+    adjust: {
+      explanation: "매도는 내가 가진 것을 다른 사람에게 파는 방향이야.",
+      question: "가지고 있던 주식을 팔면 내 보유 목록은 어떻게 될까?",
+      choices: [
+        { id: "less", label: "체결된 만큼 줄어" },
+        { id: "more", label: "체결된 만큼 늘어" },
+      ],
+      answerId: "less",
+    },
+    detail: "매도도 주문만으로 끝나지 않고 체결되어야 해. 체결된 수량만큼 보유 주식이 줄고 거래 결과가 기록돼.",
+    example: "가지고 있던 카드를 친구에게 팔면 내 카드 수가 줄어드는 것과 비슷해. 주식도 매도가 체결된 만큼 줄어.",
+  }),
+  order: termScript("order", {
+    brief: "주문은 주식을 사고팔겠다는 뜻을 거래소에 알리는 과정이야.",
+    check: {
+      question: "주문을 넣으면 거래가 언제나 바로 끝날까?",
+      choices: [
+        { id: "not-always", label: "조건이 맞아야 끝나" },
+        { id: "always", label: "언제나 바로 끝나" },
+        { id: "never", label: "절대 끝나지 않아" },
+      ],
+      answerId: "not-always",
+    },
+    adjust: {
+      explanation: "사고 싶은 사람과 팔고 싶은 사람의 조건이 맞아야 거래가 끝나.",
+      question: "주문은 거래 완료일까, 거래 요청일까?",
+      choices: [
+        { id: "request", label: "거래 요청" },
+        { id: "complete", label: "거래 완료" },
+      ],
+      answerId: "request",
+    },
+    detail: "주문에는 매수인지 매도인지, 수량과 가격 조건이 담겨. 조건이 맞아 체결되어야 실제 보유 수량이 바뀌어.",
+    example: "식당에서 음식을 부탁한 순간은 주문이고, 음식이 나온 순간은 완료에 가까워. 주식도 주문과 체결은 다른 단계야.",
+  }),
+  execution: termScript("execution", {
+    brief: "체결은 매수와 매도 조건이 맞아 거래가 완료된 상태야.",
+    check: {
+      question: "보유 수량은 보통 언제 바뀔까?",
+      choices: [
+        { id: "executed", label: "주문이 체결됐을 때" },
+        { id: "typed", label: "검색어를 적었을 때" },
+        { id: "opened", label: "화면을 열었을 때" },
+      ],
+      answerId: "executed",
+    },
+    adjust: {
+      explanation: "주문은 요청이고, 체결은 조건이 맞아 거래가 끝난 순간이야.",
+      question: "사고파는 거래가 실제로 끝난 상태는 무엇일까?",
+      choices: [
+        { id: "execution", label: "체결" },
+        { id: "search", label: "검색" },
+      ],
+      answerId: "execution",
+    },
+    detail: "사려는 가격과 팔려는 조건이 맞으면 주문이 체결돼. 체결 뒤에는 매수·매도 수량이 실제 기록에 반영돼.",
+    example: "중고 장터에서 사고 싶은 사람과 팔고 싶은 사람이 조건에 동의한 순간과 비슷해. 약속이 맞아 거래가 끝난 상태가 체결이야.",
+  }),
+  "current-price": termScript("current-price", {
+    brief: "현재가는 지금 화면에 표시된 최근 거래 가격이야.",
+    check: {
+      question: "현재가는 무엇을 보여줄까?",
+      choices: [
+        { id: "recent-price", label: "최근 거래된 가격" },
+        { id: "future-price", label: "내일 정해질 가격" },
+        { id: "fixed-price", label: "절대 바뀌지 않는 가격" },
+      ],
+      answerId: "recent-price",
+    },
+    adjust: {
+      explanation: "현재가는 가장 최근에 거래가 이루어진 값을 가리켜.",
+      question: "새 거래가 생기면 현재가는 달라질 수 있을까?",
+      choices: [
+        { id: "can-change", label: "달라질 수 있어" },
+        { id: "never-change", label: "바뀌지 않아" },
+      ],
+      answerId: "can-change",
+    },
+    detail: "현재가는 새 거래가 생길 때 달라질 수 있어. 미래 가격을 미리 정해 둔 숫자가 아니라 최근 거래 기록이야.",
+    example: "운동 경기의 현재 점수가 경기 중 계속 바뀌는 것과 비슷해. 화면을 본 시각에 따라 표시된 값이 다를 수 있어.",
+  }),
+  quantity: termScript("quantity", {
+    brief: "수량은 사고팔 주식의 개수야.",
+    check: {
+      question: "주식 수량은 무엇을 세는 숫자일까?",
+      choices: [
+        { id: "share-count", label: "사고팔 주식의 개수" },
+        { id: "company-age", label: "회사의 나이" },
+        { id: "price-change", label: "가격이 변한 폭" },
+      ],
+      answerId: "share-count",
+    },
+    adjust: {
+      explanation: "주문할 때 몇 주를 사고팔지 적는 칸을 떠올려 보자.",
+      question: "그 칸에 적는 것은 가격일까, 개수일까?",
+      choices: [
+        { id: "count", label: "주식의 개수" },
+        { id: "price", label: "한 주의 가격" },
+      ],
+      answerId: "count",
+    },
+    detail: "수량과 한 주 가격을 함께 보면 대략 필요한 금액을 계산할 수 있어. 수량은 돈의 크기가 아니라 주식 개수야.",
+    example: "연필을 몇 자루 살지 정하는 것과 비슷해. 연필 수가 수량이고, 한 자루 값은 가격이야.",
+  }),
+  "estimated-amount": termScript("estimated-amount", {
+    brief: "예상 금액은 주문 수량과 가격으로 미리 계산한 돈이야.",
+    check: {
+      question: "예상 금액을 계산할 때 무엇이 필요할까?",
+      choices: [
+        { id: "quantity-price", label: "수량과 주문 가격" },
+        { id: "company-age", label: "회사의 나이" },
+        { id: "employee-count", label: "직원 수" },
+      ],
+      answerId: "quantity-price",
+    },
+    adjust: {
+      explanation: "한 개의 값과 몇 개를 살지 알면 전체 값을 미리 계산할 수 있어.",
+      question: "전체 값을 알려면 개수와 무엇이 필요할까?",
+      choices: [
+        { id: "unit-price", label: "한 개의 가격" },
+        { id: "company-name", label: "회사 이름의 길이" },
+      ],
+      answerId: "unit-price",
+    },
+    detail: "예상 금액은 주문을 확정하기 전에 필요한 돈을 살펴보는 값이야. 시장가처럼 체결 가격이 달라질 수 있는 주문은 실제 결과와 차이가 날 수 있어.",
+    example: "연필 한 자루 값에 살 자루 수를 곱해 미리 필요한 돈을 보는 것과 같아. 주식도 수량과 가격으로 예상 금액을 계산해.",
+  }),
+  "evaluation-amount": termScript("evaluation-amount", {
+    brief: "평가금액은 가진 주식을 현재 가격으로 계산한 금액이야.",
+    check: {
+      question: "평가금액은 무엇을 현재 가격으로 계산할까?",
+      choices: [
+        { id: "holding", label: "지금 가진 주식" },
+        { id: "future-order", label: "내일 넣을 주문" },
+        { id: "employee", label: "회사의 직원 수" },
+      ],
+      answerId: "holding",
+    },
+    adjust: {
+      explanation: "보유 수량에 지금의 한 주 가격을 연결해 보자.",
+      question: "현재가가 바뀌면 평가금액도 바뀔 수 있을까?",
+      choices: [
+        { id: "can-change", label: "함께 바뀔 수 있어" },
+        { id: "fixed", label: "언제나 그대로야" },
+      ],
+      answerId: "can-change",
+    },
+    detail: "평가금액은 보유 수량과 현재가로 계산해. 아직 팔지 않은 주식의 현재 값이라 가격이 움직이면 함께 바뀔 수 있어.",
+    example: "가지고 있는 카드들을 오늘의 카드 값으로 다시 계산하는 것과 비슷해. 카드 값이 바뀌면 전체 평가금액도 달라져.",
+  }),
+  return: termScript("return", {
+    brief: "수익률은 처음 금액에 비해 지금 금액이 얼마나 달라졌는지 비율로 보는 값이야.",
+    check: {
+      question: "수익률은 무엇을 비교할까?",
+      choices: [
+        { id: "start-now", label: "처음 금액과 지금 금액" },
+        { id: "staff-store", label: "직원 수와 가게 수" },
+        { id: "name-length", label: "회사 이름의 길이" },
+      ],
+      answerId: "start-now",
+    },
+    adjust: {
+      explanation: "처음 출발한 금액에서 얼마나 달라졌는지를 생각해 보자.",
+      question: "수익률은 변화 금액을 처음 금액과 비교할까?",
+      choices: [
+        { id: "compare", label: "처음 금액과 비교해" },
+        { id: "not-compare", label: "처음 금액은 보지 않아" },
+      ],
+      answerId: "compare",
+    },
+    detail: "수익률은 서로 다른 크기의 투자 결과를 비율로 살펴볼 때 사용해. 지난 변화를 보여줄 뿐 앞으로의 결과를 알려주지는 않아.",
+    example: "서로 다른 길이의 달리기에서 출발점부터 얼마나 이동했는지 비율로 비교하는 것과 비슷해. 출발한 금액이 기준이 돼.",
+  }),
+  "average-price": termScript("average-price", {
+    brief: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 낸 가격이야.",
+    check: {
+      question: "평균 매수가는 무엇을 보여줄까?",
+      choices: [
+        { id: "average-cost", label: "한 주당 평균으로 산 가격" },
+        { id: "current-price", label: "지금 시장의 현재가" },
+        { id: "sell-count", label: "팔린 주식의 개수" },
+      ],
+      answerId: "average-cost",
+    },
+    adjust: {
+      explanation: "같은 종목을 서로 다른 가격에 여러 번 산 장면을 떠올려 보자.",
+      question: "그 가격들을 한 주당 평균으로 나타낸 값은 무엇일까?",
+      choices: [
+        { id: "average-price", label: "평균 매수가" },
+        { id: "volume", label: "거래량" },
+      ],
+      answerId: "average-price",
+    },
+    detail: "평균 매수가는 같은 종목을 여러 번 매수할 때 쓴 전체 금액을 산 주식 수로 나누어 계산해. 현재가와는 다른 값이야.",
+    example: "같은 연필을 다른 날 서로 다른 값에 샀다고 해 보자. 산 연필 전체의 한 자루당 평균값이 평균 매수가와 비슷해.",
+  }),
+  sector: termScript("sector", {
+    brief: "업종은 비슷한 일을 하는 회사들을 묶은 이름이야.",
+    check: {
+      question: "같은 업종의 회사들은 무엇이 비슷할까?",
+      choices: [
+        { id: "business", label: "주로 하는 일" },
+        { id: "name-length", label: "회사 이름의 길이" },
+        { id: "logo-color", label: "로고 색깔" },
+      ],
+      answerId: "business",
+    },
+    adjust: {
+      explanation: "게임 회사와 식품 회사처럼 하는 일에 따라 묶는 모습을 떠올려 보자.",
+      question: "업종은 회사를 무엇으로 나눌까?",
+      choices: [
+        { id: "work", label: "하는 일" },
+        { id: "alphabet", label: "이름의 첫 글자" },
+      ],
+      answerId: "work",
+    },
+    detail: "업종을 보면 회사가 어떤 산업에서 활동하는지 알 수 있어. 같은 업종이라도 회사마다 사업 내용과 결과는 다를 수 있어.",
+    example: "도서관에서 과학책과 역사책을 분야별로 묶는 것과 비슷해. 회사도 하는 일이 비슷하면 같은 업종으로 묶어.",
+  }),
+  "market-cap": termScript("market-cap", {
+    brief: "시가총액은 회사의 모든 주식을 현재 가격으로 계산한 전체 크기야.",
+    check: {
+      question: "시가총액을 계산할 때 무엇을 함께 볼까?",
+      choices: [
+        { id: "price-shares", label: "현재가와 전체 주식 수" },
+        { id: "staff-age", label: "직원 수와 회사 나이" },
+        { id: "stores-logo", label: "가게 수와 로고 색" },
+      ],
+      answerId: "price-shares",
+    },
+    adjust: {
+      explanation: "주식 한 조각의 현재 값과 전체 조각 수를 연결해 보자.",
+      question: "모든 조각의 현재 값을 합치면 무엇을 볼 수 있을까?",
+      choices: [
+        { id: "company-size", label: "시장에서 본 회사의 전체 크기" },
+        { id: "employee-pay", label: "직원 한 명의 월급" },
+      ],
+      answerId: "company-size",
+    },
+    detail: "시가총액은 현재가에 전체 주식 수를 곱해 계산해. 시장에서 본 회사의 크기를 나타내지만 회사의 모든 장점과 단점을 말해 주지는 않아.",
+    example: "퍼즐 한 조각의 현재 값에 전체 조각 수를 곱해 퍼즐 전체 값을 보는 것과 비슷해. 주식 조각 전체의 값이 시가총액이야.",
+  }),
+  revenue: termScript("revenue", {
+    brief: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 전체 규모야.",
+    check: {
+      question: "매출에서 비용은 이미 모두 빠졌을까?",
+      choices: [
+        { id: "not-yet", label: "아직 비용을 빼기 전이야" },
+        { id: "all-removed", label: "모든 비용을 뺀 뒤야" },
+        { id: "no-sales", label: "판매와 관계없어" },
+      ],
+      answerId: "not-yet",
+    },
+    adjust: {
+      explanation: "물건을 팔아 들어온 돈과 물건을 만드는 데 든 돈을 나눠 생각해 보자.",
+      question: "매출은 먼저 어느 쪽을 셀까?",
+      choices: [
+        { id: "sales-money", label: "팔아서 들어온 돈" },
+        { id: "remaining-profit", label: "비용을 빼고 남은 돈만" },
+      ],
+      answerId: "sales-money",
+    },
+    detail: "매출은 판매로 들어온 돈을 먼저 모아 본 값이야. 재료비나 월급 같은 비용을 빼기 전이라 매출과 이익은 달라.",
+    example: "학교 장터에서 물건을 팔아 받은 돈을 모두 더한 것이 매출과 비슷해. 재료를 산 돈을 빼기 전의 값이야.",
+  }),
+  "operating-profit": termScript("operating-profit", {
+    brief: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과야.",
+    check: {
+      question: "영업이익을 볼 때 매출에서 무엇을 뺄까?",
+      choices: [
+        { id: "business-cost", label: "본업에 든 비용" },
+        { id: "stock-count", label: "전체 주식 수" },
+        { id: "company-age", label: "회사의 나이" },
+      ],
+      answerId: "business-cost",
+    },
+    adjust: {
+      explanation: "물건을 팔아 받은 돈에서 재료비와 월급처럼 본업에 쓴 돈을 빼 보자.",
+      question: "그렇게 남은 본업의 결과는 무엇일까?",
+      choices: [
+        { id: "operating-profit", label: "영업이익" },
+        { id: "volume", label: "거래량" },
+      ],
+      answerId: "operating-profit",
+    },
+    detail: "영업이익은 회사의 본업이 지난 기간에 어떤 결과를 냈는지 보는 값이야. 회사의 모든 돈 흐름이나 미래 결과를 뜻하지는 않아.",
+    example: "주스 가게의 판매금에서 과일값과 가게 운영비를 뺀 결과와 비슷해. 본업을 운영하고 남은 돈을 보는 거야.",
+  }),
+  dividend: termScript("dividend", {
+    brief: "배당은 회사가 이익의 일부를 주주에게 나누어 주는 일이야.",
+    check: {
+      question: "배당을 받는 대상은 누구일까?",
+      choices: [
+        { id: "shareholder", label: "회사의 주주" },
+        { id: "all-customer", label: "물건을 산 모든 손님" },
+        { id: "all-people", label: "세상의 모든 사람" },
+      ],
+      answerId: "shareholder",
+    },
+    adjust: {
+      explanation: "회사 주식의 일부를 가진 사람을 주주라고 불러.",
+      question: "회사가 이익 일부를 주식 주인에게 나누면 무엇일까?",
+      choices: [
+        { id: "dividend", label: "배당" },
+        { id: "order", label: "주문" },
+      ],
+      answerId: "dividend",
+    },
+    detail: "회사는 정해진 절차를 거쳐 배당 여부와 규모를 결정해. 모든 회사가 언제나 배당하는 것은 아니야.",
+    example: "동아리 활동으로 남은 돈 일부를 구성원에게 나누는 모습과 비슷해. 회사는 이익 일부를 주주에게 나눌 수 있어.",
+  }),
+  etf: termScript("etf", {
+    brief: "ETF는 여러 회사의 주식 같은 자산을 한 바구니에 담아 거래하는 상품이야.",
+    check: {
+      question: "ETF 한 상품 안에는 무엇이 담길 수 있을까?",
+      choices: [
+        { id: "many-assets", label: "여러 주식이나 자산" },
+        { id: "employee-list", label: "회사 직원 명단" },
+        { id: "future-price", label: "미래 가격의 정답" },
+      ],
+      answerId: "many-assets",
+    },
+    adjust: {
+      explanation: "여러 종류를 한 상자에 모아 둔 묶음 상품을 떠올려 보자.",
+      question: "ETF는 하나만 담은 물건일까, 여러 자산을 묶은 상품일까?",
+      choices: [
+        { id: "bundle", label: "여러 자산을 묶은 상품" },
+        { id: "one-employee", label: "직원 한 명" },
+      ],
+      answerId: "bundle",
+    },
+    detail: "ETF는 정해진 기준에 따라 여러 자산을 담고 주식처럼 거래돼. 어떤 자산이 얼마나 담겼는지는 상품 설명에서 확인해야 해.",
+    example: "여러 맛 과자가 함께 든 묶음 상자와 비슷해. 상자마다 들어 있는 과자의 종류와 비율이 다를 수 있어.",
+  }),
+  index: termScript("index", {
+    brief: "지수는 여러 주식의 가격 움직임을 한눈에 보려고 만든 숫자야.",
+    check: {
+      question: "주가지수는 보통 무엇의 움직임을 묶어 보여줄까?",
+      choices: [
+        { id: "stock-group", label: "여러 주식의 가격" },
+        { id: "one-person", label: "한 사람의 수익률" },
+        { id: "employee-age", label: "직원의 나이" },
+      ],
+      answerId: "stock-group",
+    },
+    adjust: {
+      explanation: "여러 학생의 기록을 모아 반 전체의 흐름을 보는 모습을 떠올려 보자.",
+      question: "지수는 한 종목만 볼까, 여러 종목을 묶어 볼까?",
+      choices: [
+        { id: "many", label: "여러 종목을 묶어 봐" },
+        { id: "one", label: "한 종목만 봐" },
+      ],
+      answerId: "many",
+    },
+    detail: "지수는 시장 전체나 특정 업종에 속한 여러 종목의 움직임을 요약해. 한 회사의 값이나 미래 방향을 정해 주는 숫자는 아니야.",
+    example: "반 친구들의 기록을 모아 반 평균을 보는 것과 비슷해. 한 친구가 아니라 여러 주식의 흐름을 묶어 보여줘.",
+  }),
+  chart: termScript("chart", {
+    brief: "차트는 시간이 지나며 가격이 어떻게 움직였는지 그림으로 보여주는 기록이야.",
+    check: {
+      question: "주가 차트가 직접 보여주는 것은 무엇일까?",
+      choices: [
+        { id: "past-movement", label: "지나간 가격 움직임" },
+        { id: "future-answer", label: "미래 가격의 정답" },
+        { id: "company-rule", label: "회사의 사내 규칙" },
+      ],
+      answerId: "past-movement",
+    },
+    adjust: {
+      explanation: "차트에는 이미 지나간 시각과 그때의 가격이 점과 선으로 남아.",
+      question: "지나간 기록만으로 미래 가격을 확정할 수 있을까?",
+      choices: [
+        { id: "cannot", label: "확정할 수 없어" },
+        { id: "can", label: "언제나 맞힐 수 있어" },
+      ],
+      answerId: "cannot",
+    },
+    detail: "차트의 가로축은 시간, 세로축은 가격처럼 변화를 읽는 기준을 보여줘. 과거 기록을 살펴보는 도구이지 미래를 보장하는 그림은 아니야.",
+    example: "지난날의 기온을 선으로 그린 날씨 기록과 비슷해. 지나간 변화는 볼 수 있지만 다음 날 기온의 정답은 아니야.",
+  }),
+  volume: termScript("volume", {
+    brief: "거래량은 일정한 동안 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자야.",
+    check: {
+      question: "거래량은 무엇을 셀까?",
+      choices: [
+        { id: "traded-shares", label: "사고팔린 주식 수" },
+        { id: "company-profit", label: "회사가 번 이익" },
+        { id: "future-price", label: "앞으로의 주가" },
+      ],
+      answerId: "traded-shares",
+    },
+    adjust: {
+      explanation: "시장 안에서 주식이 몇 번이나 오간 것이 아니라, 사고팔린 주식 수를 모아 본다고 생각해 보자.",
+      question: "많은 주식이 거래되면 거래량은 어떻게 될까?",
+      choices: [
+        { id: "larger", label: "거래량이 커져" },
+        { id: "smaller", label: "거래량이 작아져" },
+      ],
+      answerId: "larger",
+    },
+    detail: "거래량은 시장에서 거래가 얼마나 활발했는지 살펴보는 기록이야. 거래량이 많다는 사실만으로 가격 방향을 알 수는 없어.",
+    example: "장터에서 하루 동안 바뀐 카드 수를 세는 것과 비슷해. 많이 오가면 거래량은 크지만 카드 값의 다음 방향은 따로 알 수 없어.",
+  }),
+  volatility: termScript("volatility", {
+    brief: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 나타내는 말이야.",
+    check: {
+      question: "가격이 크게 오르내리면 변동성은 어떻게 보일까?",
+      choices: [
+        { id: "large", label: "변동성이 커 보여" },
+        { id: "small", label: "변동성이 작아 보여" },
+        { id: "none", label: "변동성이 사라져" },
+      ],
+      answerId: "large",
+    },
+    adjust: {
+      explanation: "가격 선이 잔잔한 길인지 크게 출렁이는 길인지 떠올려 보자.",
+      question: "가격 변화 폭이 작으면 변동성도 작을까?",
+      choices: [
+        { id: "yes", label: "작게 보여" },
+        { id: "no", label: "더 크게 보여" },
+      ],
+      answerId: "yes",
+    },
+    detail: "변동성이 크면 짧은 동안에도 가격이 크게 달라질 수 있어. 변동성은 움직임의 폭을 말할 뿐 오를지 내릴지를 알려주지는 않아.",
+    example: "잔잔한 산책길과 높낮이가 큰 놀이기구를 비교해 봐. 오르내림의 폭이 큰 쪽이 변동성이 큰 모습과 비슷해.",
+  }),
+  risk: termScript("risk", {
+    brief: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이야.",
+    check: {
+      question: "투자 위험은 무엇을 뜻할까?",
+      choices: [
+        { id: "uncertain-result", label: "예상과 다른 결과 가능성" },
+        { id: "certain-profit", label: "이익이 확정됐다는 뜻" },
+        { id: "fixed-price", label: "가격이 고정됐다는 뜻" },
+      ],
+      answerId: "uncertain-result",
+    },
+    adjust: {
+      explanation: "투자 결과는 미리 확정되지 않고 가격이나 회사 상황에 따라 달라질 수 있어.",
+      question: "생각과 다른 결과가 생길 가능성을 무엇이라고 할까?",
+      choices: [
+        { id: "risk", label: "위험" },
+        { id: "execution", label: "체결" },
+      ],
+      answerId: "risk",
+    },
+    detail: "투자에는 값이 줄거나 원하는 때 거래되지 않는 등 여러 위험이 있어. 위험을 없다고 단정하지 않고 어떤 점이 달라질 수 있는지 살펴보는 말이야.",
+    example: "소풍날 비가 올 수도 있는 것처럼 결과가 계획과 달라질 가능성이 있어. 가능성을 미리 알고 살펴보는 것이 위험을 이해하는 출발점이야.",
+  }),
+} satisfies Record<string, ExplainScript>;
+
 export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
-  { id: "stock", kind: "glossary", triggers: ["주식"], answer: "주식은 회사의 작은 조각이라고 생각하면 돼. 주식을 가진 사람은 그 회사의 주주가 돼.", status: reviewed },
-  { id: "shareholder", kind: "glossary", triggers: ["주주"], answer: "주주는 회사의 주식을 가진 사람이야. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼.", status: reviewed },
-  { id: "stock-item", kind: "glossary", triggers: ["종목"], answer: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해. 여기서는 각 회사의 주식이 하나의 종목이야.", status: reviewed },
-  { id: "buy", kind: "glossary", triggers: ["매수", "주식 사기"], answer: "매수는 주식을 사는 거래야. 주문 전에 수량과 예상 금액, 그리고 네 생각을 확인하면 돼.", status: reviewed },
-  { id: "sell", kind: "glossary", triggers: ["매도", "팔기"], answer: "매도는 가지고 있던 주식을 파는 거래야. 팔고 나면 그 거래의 결과가 실현손익으로 기록돼.", status: reviewed },
-  { id: "order", kind: "glossary", triggers: ["주문"], answer: "주문은 주식을 사고팔겠다고 거래소에 알리는 과정이야. 주문을 넣었다고 바로 거래가 끝나는 것은 아니야.", status: reviewed },
-  { id: "execution", kind: "glossary", triggers: ["체결"], answer: "체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태야. 체결된 뒤에 보유 수량이 바뀌어.", status: reviewed },
-  { id: "current-price", kind: "glossary", triggers: ["현재가"], answer: "현재가는 지금 화면에 표시된 최근 거래 가격이야. 시간이 지나면 달라질 수 있어.", status: reviewed },
+  { id: "stock", kind: "glossary", triggers: ["주식"], answer: "주식은 회사의 작은 조각이라고 생각하면 돼. 주식을 가진 사람은 그 회사의 주주가 돼.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.stock, status: reviewed },
+  { id: "shareholder", kind: "glossary", triggers: ["주주"], answer: "주주는 회사의 주식을 가진 사람이야. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.shareholder, status: reviewed },
+  { id: "stock-item", kind: "glossary", triggers: ["종목"], answer: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해. 여기서는 각 회사의 주식이 하나의 종목이야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["stock-item"], status: reviewed },
+  { id: "buy", kind: "glossary", triggers: ["매수", "주식 사기"], answer: "매수는 주식을 사는 거래야. 주문 전에 수량과 예상 금액, 그리고 네 생각을 확인하면 돼.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.buy, status: reviewed },
+  { id: "sell", kind: "glossary", triggers: ["매도", "팔기"], answer: "매도는 가지고 있던 주식을 파는 거래야. 팔고 나면 그 거래의 결과가 실현손익으로 기록돼.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sell, status: reviewed },
+  { id: "order", kind: "glossary", triggers: ["주문"], answer: "주문은 주식을 사고팔겠다고 거래소에 알리는 과정이야. 주문을 넣었다고 바로 거래가 끝나는 것은 아니야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.order, status: reviewed },
+  { id: "execution", kind: "glossary", triggers: ["체결"], answer: "체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태야. 체결된 뒤에 보유 수량이 바뀌어.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.execution, status: reviewed },
+  { id: "current-price", kind: "glossary", triggers: ["현재가"], answer: "현재가는 지금 화면에 표시된 최근 거래 가격이야. 시간이 지나면 달라질 수 있어.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["current-price"], status: reviewed },
   { id: "market-order", kind: "glossary", triggers: ["시장가"], answer: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이야. 주문을 넣는 순간의 가격과 조금 달라질 수 있어.",
     explainScript: {
         id: "term:market-order",
@@ -79,9 +641,9 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           "친구에게 이만큼이면 바꾸겠다고 미리 말해 두는 것과 비슷해. 친구가 동의해야 바꿀 수 있어.",
       },
     status: reviewed },
-  { id: "quantity", kind: "glossary", triggers: ["수량", "몇 주"], answer: "수량은 사고팔 주식의 개수야. 한 주 가격과 곱하면 대략의 거래 금액을 확인할 수 있어.", status: reviewed },
-  { id: "estimated-amount", kind: "glossary", triggers: ["예상 금액"], answer: "예상 금액은 주문 수량과 가격으로 계산한 돈이야. 주문을 확정하기 전 최종 금액을 다시 확인해 줘.", status: reviewed },
-  { id: "evaluation-amount", kind: "glossary", triggers: ["평가금액"], answer: "평가금액은 지금 가지고 있는 주식이 현재 가격으로 얼마인지 보여주는 금액이야. 아직 팔지 않았다면 가격에 따라 바뀔 수 있어.", status: reviewed },
+  { id: "quantity", kind: "glossary", triggers: ["수량", "몇 주"], answer: "수량은 사고팔 주식의 개수야. 한 주 가격과 곱하면 대략의 거래 금액을 확인할 수 있어.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.quantity, status: reviewed },
+  { id: "estimated-amount", kind: "glossary", triggers: ["예상 금액"], answer: "예상 금액은 주문 수량과 가격으로 계산한 돈이야. 주문을 확정하기 전 최종 금액을 다시 확인해 줘.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["estimated-amount"], status: reviewed },
+  { id: "evaluation-amount", kind: "glossary", triggers: ["평가금액"], answer: "평가금액은 지금 가지고 있는 주식이 현재 가격으로 얼마인지 보여주는 금액이야. 아직 팔지 않았다면 가격에 따라 바뀔 수 있어.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["evaluation-amount"], status: reviewed },
   { id: "unrealized-profit", kind: "glossary", triggers: ["평가손익"], answer: "평가손익은 아직 가진 주식의 값이 산 뒤보다 얼마나 달라졌는지 보여줘. 아직 팔지 않은 변화라서 계속 바뀔 수 있어.",
     explainScript: {
         id: "term:unrealized-profit",
@@ -138,13 +700,13 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           "친구와 카드를 바꾸고 나서 적어 둔 결과표와 비슷해. 바꾼 뒤에는 숫자가 그대로 남아.",
       },
     status: reviewed },
-  { id: "return", kind: "glossary", triggers: ["수익률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이야. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아.", status: reviewed },
-  { id: "average-price", kind: "glossary", triggers: ["평균 매수가", "평균매수가"], answer: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이야.", status: reviewed },
-  { id: "sector", kind: "glossary", triggers: ["업종"], answer: "업종은 비슷한 일을 하는 회사들을 묶은 이름이야. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어.", status: reviewed },
-  { id: "market-cap", kind: "glossary", triggers: ["시가총액"], answer: "시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기야. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니야.", status: reviewed },
-  { id: "revenue", kind: "glossary", triggers: ["매출"], answer: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모야. 매출이 모두 회사의 이익은 아니야.", status: reviewed },
-  { id: "operating-profit", kind: "glossary", triggers: ["영업이익"], answer: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과야. 회사의 공개된 과거 성적을 볼 때 쓰는 말이야.", status: reviewed },
-  { id: "dividend", kind: "glossary", triggers: ["배당"], answer: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해. 모든 회사가 배당하는 것은 아니야.", status: reviewed },
+  { id: "return", kind: "glossary", triggers: ["수익률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이야. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.return, status: reviewed },
+  { id: "average-price", kind: "glossary", triggers: ["평균 매수가", "평균매수가"], answer: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["average-price"], status: reviewed },
+  { id: "sector", kind: "glossary", triggers: ["업종"], answer: "업종은 비슷한 일을 하는 회사들을 묶은 이름이야. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sector, status: reviewed },
+  { id: "market-cap", kind: "glossary", triggers: ["시가총액"], answer: "시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기야. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["market-cap"], status: reviewed },
+  { id: "revenue", kind: "glossary", triggers: ["매출"], answer: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모야. 매출이 모두 회사의 이익은 아니야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.revenue, status: reviewed },
+  { id: "operating-profit", kind: "glossary", triggers: ["영업이익"], answer: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과야. 회사의 공개된 과거 성적을 볼 때 쓰는 말이야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["operating-profit"], status: reviewed },
+  { id: "dividend", kind: "glossary", triggers: ["배당"], answer: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해. 모든 회사가 배당하는 것은 아니야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.dividend, status: reviewed },
   {
     id: "per",
     kind: "glossary",
@@ -231,8 +793,8 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           "피자 한 판을 여덟 조각으로 나누면 한 조각 몫이 정해지지. EPS도 번 돈을 조각 수로 나눈 몫이야.",
       },
     status: reviewed },
-  { id: "etf", kind: "glossary", triggers: ["etf"], answer: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이야. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어.", status: reviewed },
-  { id: "index", kind: "glossary", triggers: ["지수"], answer: "지수는 여러 주식의 가격 움직임을 한눈에 보기 위해 만든 숫자야. 시장 전체나 특정 업종의 흐름을 살펴볼 때 써.", status: reviewed },
+  { id: "etf", kind: "glossary", triggers: ["etf"], answer: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이야. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.etf, status: reviewed },
+  { id: "index", kind: "glossary", triggers: ["지수"], answer: "지수는 여러 주식의 가격 움직임을 한눈에 보기 위해 만든 숫자야. 시장 전체나 특정 업종의 흐름을 살펴볼 때 써.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.index, status: reviewed },
   { id: "diversification", kind: "glossary", triggers: ["분산투자", "분산 투자"], answer: "분산투자는 한 곳에만 담지 않고 여러 곳에 나누어 보는 방법이야. 결과를 보장하지는 않지만 한 종목에만 의존하는 정도는 줄일 수 있어.",
     explainScript: {
         id: "term:diversification",
@@ -261,10 +823,10 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
           "달걀을 한 바구니에 다 담지 않는 것과 같아. 바구니 하나를 떨어뜨려도 남은 달걀은 무사해.",
       },
     status: reviewed },
-  { id: "chart", kind: "glossary", triggers: ["차트"], answer: "차트는 과거 가격 변화를 그림으로 보여줘. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니야.", status: reviewed },
-  { id: "volume", kind: "glossary", triggers: ["거래량"], answer: "거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자야. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어.", status: reviewed },
-  { id: "volatility", kind: "glossary", triggers: ["변동성"], answer: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해. 가격은 늘 움직일 수 있다는 점을 기억하면 돼.", status: reviewed },
-  { id: "risk", kind: "glossary", triggers: ["위험"], answer: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이야. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해.", status: reviewed },
+  { id: "chart", kind: "glossary", triggers: ["차트"], answer: "차트는 과거 가격 변화를 그림으로 보여줘. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니야.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.chart, status: reviewed },
+  { id: "volume", kind: "glossary", triggers: ["거래량"], answer: "거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자야. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volume, status: reviewed },
+  { id: "volatility", kind: "glossary", triggers: ["변동성"], answer: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해. 가격은 늘 움직일 수 있다는 점을 기억하면 돼.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volatility, status: reviewed },
+  { id: "risk", kind: "glossary", triggers: ["위험"], answer: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이야. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.risk, status: reviewed },
   { id: "reason", kind: "faq", triggers: ["투자 근거", "고른 이유", "기록"], answer: "기록에서는 고른 이유와 확신도를 남길 수 있어. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거야.", status: reviewed },
   { id: "confidence", kind: "faq", triggers: ["확신도", "확신"], answer: "확신도는 내 생각이 얼마나 또렷한지 표시하는 방법이야. 정답은 없고, 나중에 행동과 생각을 돌아보기 위한 기록이야.", status: reviewed },
   { id: "archive", kind: "faq", triggers: ["아카이브"], answer: "아카이브에서는 네가 남긴 거래와 생각을 다시 볼 수 있어. 점수표가 아니라 네 투자 스타일을 관찰하는 기록이야.", actionTarget: "archive", status: reviewed },
