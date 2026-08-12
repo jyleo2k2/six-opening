@@ -56,6 +56,19 @@ type RecommendationKind =
   | "event"
   | "metric";
 
+type UnsafeKind =
+  | "crisis"
+  | "credential"
+  | "personalInfo"
+  | "familyData"
+  | "proxyAction"
+  | "frustration"
+  | "familyPressure"
+  | "comparison"
+  | "anxiety"
+  | "impulsiveTrade"
+  | "ethicalDistress";
+
 const SELECTION_PATTERNS = [
   "종목사",
   "무슨종목",
@@ -351,23 +364,172 @@ const METRIC_PATTERNS = [
   "거래량",
   "차트보고",
 ];
-const PERSONAL_INFO_PATTERNS = [
+const CREDENTIAL_PATTERNS = [
+  "비밀번호",
+  "비번",
+  "패스워드",
+  "로그인암호",
+  "주문암호",
+  "핀번호",
+  "pin번호",
+  "인증번호",
+];
+const PERSONAL_IDENTIFIER_PATTERNS = [
   "주민번호",
+  "주민등록번호",
   "비밀번호",
   "전화번호",
-  "주소",
+  "휴대폰번호",
+  "전번",
   "계좌번호",
+  "통장번호",
   "생년월일",
   "학교이름",
+  "학교명",
   "이메일",
+  "sns아이디",
 ];
 const CRISIS_PATTERNS = [
   "자해",
   "죽고싶",
+  "죽어버리고싶",
   "살기싫",
   "사라지고싶",
+  "없어지고싶",
   "해치고싶",
   "끝내고싶",
+  "다포기하고싶",
+  "전부포기하고",
+  "모든걸포기하고싶",
+  "그만살고싶",
+  "내가없어졌으면",
+  "모든게끝났으면",
+];
+const FAMILY_MEMBER_PATTERNS = ["엄마", "아빠", "부모님", "부모", "가족"];
+const FAMILY_DATA_PATTERNS = [
+  "수익률",
+  "성향",
+  "기록",
+  "종목",
+  "뭐샀",
+  "뭘샀",
+  "산이유",
+  "거래내역",
+  "투자내역",
+  "보유",
+];
+const FAMILY_DATA_ACCESS_PATTERNS = [
+  "알려",
+  "몇인데",
+  "보여",
+  "볼수",
+  "말해",
+  "비교해",
+  "뭐샀",
+  "합칠",
+  "찾아",
+  "읽",
+  "똑같이",
+];
+const PROXY_ACTION_PATTERNS = [
+  "친구폰으로내주문",
+  "친구가내계정으로주문",
+  "대신주문",
+  "주문대신",
+  "대신눌러",
+  "대신매수",
+  "대신매도",
+  "대신팔",
+  "한도풀어",
+  "기록잠가",
+];
+const IMPULSIVE_TRADE_PATTERNS = [
+  "다팔아버릴까",
+  "다팔고끝낼까",
+  "전부팔아버릴까",
+  "싹팔아버릴까",
+  "모두팔아버릴까",
+  "전량매도해버릴까",
+];
+const ETHICAL_DISTRESS_PATTERNS = [
+  "전쟁으로이익",
+  "전쟁으로돈",
+  "윤리적으로",
+  "죄책감",
+  "도덕적으로",
+  "돈버는기분이라찜찜",
+];
+const FAMILY_PRESSURE_PATTERNS = [
+  "혼나",
+  "혼날",
+  "왜자꾸하래",
+  "또하라해서",
+  "말해야해",
+  "계속평가해서",
+  "빨리누르라고",
+  "수익률얘기",
+  "빨리정하라",
+  "점수처럼비교",
+  "순위로뭐라",
+  "비교좀그만",
+  "수익률로뭐라",
+  "수익률이낮다고",
+  "투자자체가싫어",
+  "그냥지쳐",
+  "수익률들이밀",
+  "계속닦달",
+  "부담",
+  "압박됨",
+  "속상",
+  "숨막",
+];
+const COMPARISON_DISTRESS_PATTERNS = [
+  "나만꼴찌",
+  "내기했는데지면",
+  "나만떨어져",
+  "엄마보다수익률낮",
+  "친구는잘되는데왜나만",
+  "친구들이계속수익자랑",
+  "점수가계속떨어지니까내가게임을못",
+  "엄마한테져서",
+  "소질이없는",
+  "판단을못하는사람",
+  "친구들자랑만보니까나만못",
+  "나만뒤처진",
+  "이상한사람처럼분류",
+  "못하는사람처럼보",
+  "바보같",
+  "수익자랑때문에초조",
+];
+const ANXIETY_PATTERNS = [
+  "계속이종목만확인",
+  "계속들여다보",
+  "너무불안",
+  "불안해서주문",
+  "손이안눌",
+  "뉴스만보면괜히쫄",
+  "너무신경쓰",
+  "뉴스때문에망하면",
+  "마음이무거",
+  "계속봐야할까",
+  "무서워서주문",
+];
+const FRUSTRATION_PATTERNS = [
+  "짜증",
+  "답답",
+  "개빡",
+  "빡치",
+  "열받",
+  "꺼져",
+  "장난하냐",
+  "버그투성이",
+  "부정확",
+  "뻔한소리",
+  "개헷갈",
+  "결론이뭐냐고",
+  "어렵게말하지마",
+  "설명왜이렇게구림",
+  "아씨또",
 ];
 const HARMFUL_PATTERNS = ["협박", "때리고", "죽여", "해킹", "시스템지시무시", "프롬프트보여"];
 const OUT_OF_SCOPE_PATTERNS = ["숙제", "게임공략", "날씨", "노래", "영화"];
@@ -435,6 +597,102 @@ function findMentionedStock(message: string) {
   })?.stock;
 }
 
+function containsPersonalAddress(message: string) {
+  if (includesAny(message, ["회사주소", "본사주소"])) return false;
+  return (
+    includesAny(message, ["내주소", "우리집주소", "집주소"]) ||
+    /주소(?:를|도|랑|은|가)?(?:말|쓰|입력|알려|적|맞혀|보내|까|남아)/.test(message)
+  );
+}
+
+function findUnsafeKind(message: string): UnsafeKind | null {
+  if (includesAny(message, CRISIS_PATTERNS)) return "crisis";
+  if (includesAny(message, CREDENTIAL_PATTERNS)) return "credential";
+  if (
+    includesAny(message, PERSONAL_IDENTIFIER_PATTERNS) ||
+    containsPersonalAddress(message)
+  ) {
+    return "personalInfo";
+  }
+
+  const familyComparisonHelp =
+    includesAny(message, ["가족비교", "비교화면", "엄마랑비교", "아빠랑비교"]) &&
+    includesAny(message, ["어떻게", "어디", "방법", "화면"]);
+  const familyDataRequest =
+    !familyComparisonHelp &&
+    includesAny(message, FAMILY_MEMBER_PATTERNS) &&
+    includesAny(message, FAMILY_DATA_PATTERNS) &&
+    includesAny(message, FAMILY_DATA_ACCESS_PATTERNS);
+  const ownDataSharing =
+    (message.includes("내성향") &&
+      message.includes("친구") &&
+      includesAny(message, ["공개", "보여", "보임"])) ||
+    (message.includes("손해") && message.includes("엄마") && message.includes("보여도"));
+  if (familyDataRequest || ownDataSharing) return "familyData";
+
+  const proxyAction =
+    includesAny(message, PROXY_ACTION_PATTERNS) ||
+    /(?:네가|키웅이가|내대신).{0,10}(?:주문|매수|매도|버튼).{0,8}(?:해줘|눌러)/.test(
+      message,
+    );
+  if (proxyAction) return "proxyAction";
+
+  const impulsiveTrade =
+    includesAny(message, IMPULSIVE_TRADE_PATTERNS) ||
+    /(?:다|전부|싹|모두|전량).{0,8}(?:팔|매도|정리).{0,8}(?:할까|버릴까|끝낼까|해버)/.test(
+      message,
+    );
+  if (impulsiveTrade) return "impulsiveTrade";
+
+  const ethicalDistress =
+    includesAny(message, ETHICAL_DISTRESS_PATTERNS) ||
+    (message.includes("전쟁") &&
+      includesAny(message, ["이익", "돈벌", "수익"]) &&
+      includesAny(message, ["찜찜", "불편", "마음", "맞나", "옳"]));
+  if (ethicalDistress) return "ethicalDistress";
+
+  const familyPressure =
+    (includesAny(message, FAMILY_PRESSURE_PATTERNS) &&
+      (includesAny(message, FAMILY_MEMBER_PATTERNS) ||
+        includesAny(message, ["혼나", "왜자꾸하래", "압박", "부담"]))) ||
+    (includesAny(message, FAMILY_MEMBER_PATTERNS) &&
+      includesAny(message, [
+        "짜증",
+        "화나",
+        "열받",
+        "개빡",
+        "스트레스",
+        "지쳐",
+        "재촉",
+        "닦달",
+        "평가",
+      ]));
+  if (familyPressure && !includesAny(message, SIZING_PATTERNS)) {
+    return "familyPressure";
+  }
+
+  const comparisonDistress =
+    includesAny(message, COMPARISON_DISTRESS_PATTERNS) ||
+    (message.includes("나만") &&
+      includesAny(message, ["못", "뒤처", "꼴찌", "떨어", "바보"])) ||
+    (includesAny(message, ["친구", "친구들", "애들"]) &&
+      includesAny(message, ["수익자랑", "자랑"]) &&
+      includesAny(message, ["스트레스", "초조", "불안", "짜증"]));
+  if (comparisonDistress) return "comparison";
+
+  const anxiety =
+    includesAny(message, ANXIETY_PATTERNS) ||
+    (includesAny(message, ["주문", "종목", "뉴스", "투자화면"]) &&
+      includesAny(message, ["불안", "무서", "초조", "쫄", "마음이무거", "자꾸확인"]));
+  const explicitPrediction =
+    includesAny(message, PREDICTION_PATTERNS) ||
+    (includesAny(message, FUTURE_PATTERNS) &&
+      includesAny(message, FUTURE_OUTCOME_PATTERNS));
+  if (anxiety && !explicitPrediction) return "anxiety";
+  if (includesAny(message, FRUSTRATION_PATTERNS)) return "frustration";
+  return null;
+}
+
 function findRecommendationKind(message: string): RecommendationKind | null {
   const selection = includesAny(message, SELECTION_PATTERNS);
   const prediction =
@@ -499,6 +757,160 @@ function reply(
   > = {},
 ): ChatReply {
   return { route, intent, text, steps, ...extras };
+}
+
+function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
+  let credentialText =
+    "비밀번호는 채팅에 쓰지 않아도 돼. 나는 비밀번호를 기억하거나 로그인·주문에 사용하지 않아.";
+  if (includesAny(message, ["까먹", "잊었"])) {
+    credentialText =
+      "비밀번호는 채팅에 쓰지 말고 앱의 공식 로그인 화면에서 다시 설정해 줘. 나는 비밀번호를 확인하거나 알려줄 수 없어.";
+  } else if (includesAny(message, ["sns", "친구수익"])) {
+    credentialText =
+      "SNS 아이디나 비밀번호는 채팅에 쓰지 않아도 돼. 나는 그 정보로 친구의 계정이나 수익 인증을 대신 찾아보지 않아.";
+  } else if (includesAny(message, ["대신", "한도풀", "기록잠가"])) {
+    credentialText =
+      "비밀번호는 채팅에 쓰지 않아도 돼. 나는 비밀번호를 받아 주문하거나 한도·기록 권한을 바꾸지 않아.";
+  } else if (/(?:비번|비밀번호)\d/.test(message)) {
+    credentialText =
+      "방금 적은 번호는 답변에서 다시 보여주지 않을게. 실제 비밀번호라면 앱의 공식 화면에서 바로 바꿔 줘.";
+  } else if (message.includes("요구하면이상")) {
+    credentialText =
+      "맞아, 모의투자 채팅이 비밀번호를 요구하면 입력하지 말고 화면을 닫아 줘. 나는 비밀번호를 받거나 기억하지 않아.";
+  } else if (message.includes("기록")) {
+    credentialText =
+      "거래 기록을 확인하려고 비밀번호나 계좌번호를 보낼 필요는 없어. 나는 로그인 정보 없이 네게 허용된 본인 기록만 확인해.";
+  }
+
+  let personalInfoText =
+    "계좌번호나 집 주소 같은 개인정보는 채팅에 쓰지 않아도 돼. 앱의 공식 화면에서만 보호자와 함께 확인해 줘.";
+  if (message.includes("친구한테보내")) {
+    personalInfoText =
+      "계좌번호는 친구에게 보내지 않는 게 안전해. 이미 보냈다면 믿을 수 있는 어른과 공식 금융사에 바로 알려 줘.";
+  } else if (message.includes("숨겨")) {
+    personalInfoText =
+      "주소나 계좌번호는 채팅에 적지 말아 줘. 나는 개인정보를 숨기거나 가족의 공개 권한을 대신 바꾸지 않아.";
+  } else if (
+    message.includes("계좌번호") &&
+    includesAny(message, FAMILY_MEMBER_PATTERNS)
+  ) {
+    personalInfoText =
+      "가족의 계좌번호도 채팅에 적거나 대신 조회하면 안 돼. 서로 동의한 비교 정보는 가족 화면에서 직접 확인해 줘.";
+  } else if (message.includes("순위")) {
+    personalInfoText =
+      "계좌번호를 알려줘도 순위나 점수를 바꿀 수 없어. 개인정보는 적지 말고 리그 규칙에서 계산 방식을 확인해 줘.";
+  } else if (includesAny(message, ["실제계좌", "증권계좌"])) {
+    personalInfoText =
+      "계좌번호를 채팅에 입력해도 실제 계좌와 연결되지 않아. 실제 금융 정보는 앱의 공식 화면에서만 확인해 줘.";
+  } else if (includesAny(message, ["선물", "굿즈", "보너스", "실물상품"])) {
+    personalInfoText =
+      "주소나 계좌번호를 채팅에 적어도 선물이나 모의투자금을 주지 않아. 공식 이벤트인지는 보호자와 앱 안내에서 확인해 줘.";
+  } else if (message.includes("가족팀")) {
+    personalInfoText =
+      "주소나 학교 이름으로 가족 팀을 찾지 않아. 가족 초대는 보호자와 앱의 공식 화면에서 확인해 줘.";
+  }
+
+  let familyDataText =
+    "나는 엄마나 아빠의 수익률·종목·기록을 대신 조회하지 않아. 서로 공개에 동의한 내용은 가족 비교 화면에서 직접 확인할 수 있어.";
+  if (message.includes("손해") && message.includes("보여도")) {
+    familyDataText =
+      "손익 기록의 공개 범위는 가족 화면에서 확인할 수 있어. 이 채팅의 질문 원문은 엄마에게 대신 보내지 않아.";
+  } else if (message.includes("친구") && includesAny(message, ["공개", "보여", "보임"])) {
+    familyDataText =
+      "네 성향 결과를 친구에게 자동으로 공개하지 않아. 공개 범위가 궁금하면 가족 비교 화면의 안내를 확인해 줘.";
+  } else if (message.includes("누가더잘")) {
+    familyDataText =
+      "나는 부모님의 성향 데이터를 가져오거나 누가 더 잘하는지 점수를 매기지 않아. 성향은 실력이나 성적이 아니라 투자 스타일을 돌아보는 기록이야.";
+  } else if (message.includes("똑같이")) {
+    familyDataText =
+      "나는 엄마의 보유 종목을 채팅에서 알려주거나 그대로 따라 사라고 하지 않아. 서로 공개한 기록은 가족 화면에서 직접 확인할 수 있어.";
+  }
+
+  let frustrationText =
+    "내 답변이 도움이 되지 않아 답답했구나. 궁금한 부분 하나만 골라 주면 더 짧게 다시 설명할게.";
+  if (message.includes("증권사직원인척")) {
+    frustrationText =
+      "답답하게 느꼈구나. 나는 증권사 직원이 아니라 금융 기초와 이 서비스 사용법을 설명하는 AI 도우미야.";
+  } else if (includesAny(message, ["숫자", "금액", "계산"])) {
+    frustrationText =
+      "숫자가 맞지 않아 답답했구나. 화면의 수량과 가격부터 하나씩 다시 확인할 수 있어.";
+  } else if (includesAny(message, ["주문", "취소", "한도"])) {
+    frustrationText =
+      "주문이 뜻대로 되지 않아 답답했구나. 매매를 재촉하지 않고 어디에서 막혔는지 한 단계씩 확인할 수 있어.";
+  }
+
+  const anxietyText = includesAny(message, ["뉴스", "마음이무거"])
+    ? "뉴스를 계속 봐서 마음이 불편하거나 무거웠구나. 지금은 투자 화면과 뉴스에서 잠시 벗어나도 돼."
+    : "계속 확인하거나 주문을 눌러야 할 것 같아 불안했구나. 지금은 주문하지 않고 화면을 잠시 닫아도 돼.";
+
+  const alternatives: Record<
+    UnsafeKind,
+    { text: string; steps: readonly string[]; questions: string[] }
+  > = {
+    crisis: {
+      text: "지금 혼자 견디지 않아도 돼. 먼저 네가 지금 안전한지 알려 줘. 급하게 위험하면 가까운 어른이나 112·119에 바로 도움을 요청해 줘.",
+      steps: ["안전 확인"],
+      questions: ["지금은 안전해", "도움이 필요해"],
+    },
+    credential: {
+      text: credentialText,
+      steps: ["인증정보 보호 안내"],
+      questions: ["키웅이가 뭘 도와줘?", "주문 전에 뭘 확인해?"],
+    },
+    personalInfo: {
+      text: personalInfoText,
+      steps: ["개인정보 보호 안내"],
+      questions: ["키웅이가 뭘 도와줘?", "모의투자 리그 규칙 알려줘"],
+    },
+    familyData: {
+      text: familyDataText,
+      steps: ["가족 데이터 보호 안내"],
+      questions: ["가족 비교는 어떻게 봐?", "내 거래 기록 보여줘"],
+    },
+    proxyAction: {
+      text: "나는 다른 사람 대신 주문하거나 주문 버튼을 누를 수 없어. 로그인 정보를 나누지 말고 네 화면에서 주문 내용을 직접 확인해 줘.",
+      steps: ["대리 행동 차단"],
+      questions: ["매수 어떻게 해?", "주문 전에 뭘 확인해?"],
+    },
+    frustration: {
+      text: frustrationText,
+      steps: ["서비스 불편 지원"],
+      questions: includesAny(message, ["숫자", "금액", "계산"])
+        ? ["예상 금액이 뭐야?", "수익률이 뭐야?"]
+        : includesAny(message, ["주문", "취소", "한도"])
+          ? ["주문 전에 뭘 확인해?", "매수 어떻게 해?"]
+          : ["키웅이가 뭘 도와줘?", "PER이 뭐야?"],
+    },
+    familyPressure: {
+      text: "부모님 반응이 걱정되거나 누군가 계속 재촉해서 부담스러웠구나. 수익률과 순위는 네 실력이나 성적표가 아니며, 지금은 화면을 닫고 믿을 수 있는 어른에게 부담된다고 말해도 돼.",
+      steps: ["가족 압박 지원"],
+      questions: ["수익률이 뭐야?", "내 거래 기록 보여줘"],
+    },
+    comparison: {
+      text: "다른 사람의 수익이나 순위와 비교돼 속상했구나. 한 번의 결과나 성향 숫자는 네 실력이나 사람의 가치를 정하는 점수가 아니야.",
+      steps: ["비교 스트레스 지원"],
+      questions: ["내 성향 결과 알려줘", "내 거래 기록 보여줘"],
+    },
+    anxiety: {
+      text: anxietyText,
+      steps: ["불안 지원"],
+      questions: ["변동성이 뭐야?", "내 거래 기록 보여줘"],
+    },
+    impulsiveTrade: {
+      text: "화가 난 상태에서 전부 팔지, 계속 가질지를 내가 정해 줄 수는 없어. 지금은 주문을 누르지 말고 화면을 닫은 뒤 네가 처음 남긴 이유를 나중에 다시 봐도 돼.",
+      steps: ["충동 매매 중단"],
+      questions: ["내 거래 기록 보여줘", "매도는 무슨 뜻이야?"],
+    },
+    ethicalDistress: {
+      text: "전쟁과 투자 이야기가 불편하게 느껴졌구나. 무엇이 마음에 걸리는지 네 기준을 기록할 수 있지만, 내가 옳고 그름이나 매매 결론을 대신 정하지는 않아.",
+      steps: ["윤리 고민 지원"],
+      questions: ["투자 근거는 뭐야?", "위험이 뭐야?"],
+    },
+  };
+  const alternative = alternatives[kind];
+  return reply("safety", "safety", alternative.text, alternative.steps, {
+    suggestedQuestions: alternative.questions,
+  });
 }
 
 function recommendationReply(
@@ -607,23 +1019,26 @@ function getContextReply(message: string, context: ChatContext): ChatReply | nul
 export function routeMessage(input: string, context: ChatContext): ChatReply {
   const message = normalizeChatInput(input);
 
-  if (includesAny(message, CRISIS_PATTERNS)) {
+  if (["지금은안전해", "안전한곳에있어"].includes(message)) {
     return reply(
       "safety",
       "safety",
-      "지금 혼자 견디지 않아도 돼. 가까운 보호자나 믿을 수 있는 어른에게 바로 알려 줘. 급하게 위험하다고 느껴지면 112나 119에 도움을 요청해 줘.",
-      ["안전 안내"],
+      "알려줘서 고마워. 지금은 투자 화면을 닫고 쉬면서, 계속 힘들면 믿을 수 있는 어른에게 지금 마음을 말해 줘.",
+      ["안전 상태 확인"],
     );
   }
 
-  if (includesAny(message, PERSONAL_INFO_PATTERNS)) {
+  if (["도움이필요해", "지금위험해", "안전하지않아"].includes(message)) {
     return reply(
       "safety",
       "safety",
-      "개인정보는 채팅에 입력하지 않아도 돼. 계좌나 비밀번호처럼 중요한 정보는 보호자와 함께 앱의 공식 화면에서만 확인해 줘.",
-      ["개인정보 보호 안내"],
+      "지금 혼자 있지 말고 가까운 보호자·교사처럼 믿을 수 있는 어른에게 바로 알려 줘. 급하게 다칠 위험이 있으면 112나 119에 도움을 요청해 줘.",
+      ["긴급 도움 안내"],
     );
   }
+
+  const unsafeKind = findUnsafeKind(message);
+  if (unsafeKind) return unsafeReply(unsafeKind, message);
 
   if (includesAny(message, HARMFUL_PATTERNS)) {
     return reply(
