@@ -13,7 +13,7 @@ type CandleRow = {
   volume: number | string;
 };
 
-type StockRow = { stock_id: number };
+type StockRow = { stock_id: number; stock_code: string };
 const stockIdCache = new Map<string, Promise<number>>();
 
 function configuration() {
@@ -97,6 +97,62 @@ export async function readStoredCandles(symbol: string, period: StoredPeriod, cu
   });
   const rows = await (await supabaseRequest(`stock_candles?${params}`)).json() as CandleRow[];
   return { stockId, points: rows.map(toPoint) };
+}
+
+/**
+ * 51종의 최근 종가와 직전 종가를 한 번에 읽는다.
+ *
+ * 종목별로 따로 조회하면 카드 51장이 채워지는 데 요청이 51번 필요하다. 최근 열흘치
+ * 일봉만 통째로 받아 JS에서 종목별 마지막 두 개를 고른다 (51종 × 약 7행).
+ */
+export async function readLatestDailyCloses(days = 10) {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const codeParams = new URLSearchParams({ select: "stock_id,stock_code", limit: "1000" });
+  const candleParams = new URLSearchParams({
+    select: "stock_id,candle_time,close",
+    timeframe: "eq.daily",
+    candle_time: `gte.${since}`,
+    order: "candle_time.asc",
+    limit: "2000",
+  });
+
+  const [codeRows, candleRows] = await Promise.all([
+    supabaseRequest(`stocks?${codeParams}`).then((response) => response.json() as Promise<StockRow[]>),
+    supabaseRequest(`stock_candles?${candleParams}`).then((response) => response.json() as Promise<CandleRow[]>),
+  ]);
+
+  const symbolById = new Map(codeRows.map((row) => [row.stock_id, row.stock_code]));
+  const byStock = new Map<number, { close: number; previousClose: number; time: number }>();
+  for (const row of candleRows) {
+    const close = Number(row.close);
+    if (!Number.isFinite(close) || close <= 0) continue;
+    const seen = byStock.get(row.stock_id);
+    byStock.set(row.stock_id, {
+      close,
+      previousClose: seen?.close ?? close,
+      time: Math.floor(new Date(row.candle_time).getTime() / 1000),
+    });
+  }
+
+  return new Map(
+    Array.from(byStock, ([stockId, value]) => [symbolById.get(stockId) ?? "", value] as const).filter(
+      ([symbol]) => symbol,
+    ),
+  );
+}
+
+/** 현재가 폴백용. 키움 자격증명이 없을 때 카드 시세를 보관 캔들의 종가로 맞춘다. */
+export async function readLatestCandles(symbol: string, period: StoredPeriod, limit: number) {
+  const stockId = await stockIdForSymbol(symbol);
+  const params = new URLSearchParams({
+    select: "stock_id,timeframe,candle_time,open,high,low,close,volume",
+    stock_id: `eq.${stockId}`,
+    timeframe: `eq.${period}`,
+    order: "candle_time.desc",
+    limit: String(limit),
+  });
+  const rows = await (await supabaseRequest(`stock_candles?${params}`)).json() as CandleRow[];
+  return rows.map(toPoint);
 }
 
 export async function syncStoredCandles(stockId: number, period: StoredPeriod, points: ChartPoint[], cutoff: number) {
