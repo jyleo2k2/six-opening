@@ -18,12 +18,34 @@
 |---|---|
 | `web/features/f11-feed/FeedScreen.tsx` | 피드 목록·카드·코멘트 UI |
 | `web/shared/store/use-family-feed-store.ts` | 열람 계정·가족 거래·코멘트 상태 |
-| `web/shared/store/use-investment-store.ts` | 본인 거래 (⚠ §7.2 참조 — 화면 연결 때 교체 예정) |
+| `web/shared/store/prototype-trades.ts` | 본인 거래 — app.html의 `localStorage`를 `Trade`로 변환 |
 | `web/shared/engine/comment-filter.ts` | 부모→자녀 코멘트 게이트 (순수 함수) |
 | `web/shared/engine/trade-markers.ts` | 차트 매매 지점 좌표·라벨 계산 (순수 함수) |
 | `web/shared/types/trade.ts` | `Trade`·`TradeComment`·`FamilyMember` 계약 |
+| `web/features/f0-home/ConnectedPrototype.tsx` | 피드 오버레이 열기·닫기와 차트 이동 중계 |
 
-> ⚠ **아직 라우트에 연결되지 않았다.** `/feed` 라우트와 차트 마커 렌더는 F11 화면 작업에서 붙인다. 화면 정본이 `web/public/ui/app.html`(iframe)이므로 피드는 F10 챗봇과 같은 React 오버레이 방식으로 얹는다.
+### 왜 라우트가 아니라 오버레이인가
+
+화면 정본은 iframe 안의 `web/public/ui/app.html`이다. `/feed` 라우트를 따로 만들면 iframe 밖으로 나가버려 앱이 두 개로 보인다. F10 챗봇과 같은 오버레이로 얹는다.
+
+### 본인 거래의 단일 저장소
+
+app.html이 자체 `localStorage` 키 **`kw_proto_v1`**에 잔고·매수·매도를 저장한다. iframe이 같은 오리진이라 부모 React가 그 키를 직접 읽는다. **별도의 투자 스토어를 두지 않는다** — 저장소가 둘로 갈리면 피드와 화면이 어긋난다.
+
+`prototype-trades.ts`가 처리하는 변환:
+
+| app.html | `Trade` |
+|---|---|
+| `records` / `sellRecords` | `side: "buy"` / `"sell"` |
+| `user_id: "child_minji"` / `"parent_mom"` | `member` |
+| `amount_krw ÷ qty` | `price` |
+| `reason_code`·`sell_reason_code` | `reason` (한글 라벨) |
+| `confidence_raw` 0~100 연속값 | `confidence` 25·50·75·100 |
+| `order_status: "pending"` | **제외** — 미체결 지정가는 피드에 올리지 않는다 (§6) |
+
+### 피드 → 차트 이동
+
+`postMessage({ type: "kiwoom:open-stock", symbol })`을 app.html이 받아 해당 종목 상세로 전환한다. origin을 검증하며 F10의 `kiwoom:chat-context`와 같은 방식이다.
 
 ## 3. 피드 카드
 
@@ -106,7 +128,7 @@ type TradeComment = {
 
 | 우선순위 | 항목 | 완료 조건 |
 |---:|---|---|
-| 0 | **화면 재연결** | `mock-stock` 삭제로 `/feed` 라우트와 차트 마커 렌더가 사라졌다. `FeedScreen`을 React 오버레이로 얹고, 본인 거래 소스를 `use-investment-store`에서 app.html의 `localStorage` 키 `kw_proto_v1` 어댑터로 바꾼다 — 지금은 저장소가 둘로 갈려 있다 |
+| 0 | **차트 매매 지점 마커** | `trade-markers.ts`는 이관됐으나 렌더가 없다. 차트가 app.html 안 SVG라 마커를 그리려면 좌표 계산 결과를 iframe으로 넘기거나 app.html에서 계산해야 한다. 마커 탭 → 피드 카드 강조도 함께 붙인다 |
 | 1 | 실제 세션·가족 권한 | 지금은 클라이언트 상태의 열람 전환이다. 서버 세션이 생기면 같은 팀 구성원만 조회하도록 막고 타 가족 접근을 테스트한다 |
 | 2 | 코멘트 서버 저장 | 현재 `localStorage`. 저장소가 생기면 작성자 본인만 삭제 가능하도록 서버에서 검증한다 |
 | 3 | 피드 알림 정책 | 코멘트 즉시 푸시 여부 미정 — 일간 푸시 금지 원칙(§21)과 충돌 소지 |
@@ -115,8 +137,9 @@ type TradeComment = {
 
 ## 8. 완료 기준
 
-- `/feed`에서 부모·자녀 거래가 최신순으로 보이고 타인 카드에 수량·금액이 없다
+- "가족 기록" 버튼으로 피드가 열리고 부모·자녀 거래가 최신순으로 보이며 타인 카드에 수량·금액이 없다
 - 부모 계정으로 훈계·추천 코멘트를 쓰면 차단되고 안내가 뜬다
 - 자녀 계정의 같은 문구는 통과한다
-- 종목 차트에 가족 매매 지점이 뜨고 탭하면 해당 피드 카드로 간다
+- "차트에서 이 지점 보기"를 누르면 iframe이 해당 종목 상세로 이동한다
+- (§7.2 우선순위 0) 종목 차트에 가족 매매 지점이 뜨고 탭하면 해당 피드 카드로 간다
 - `web`의 `npm test`와 `npm run build`가 통과한다

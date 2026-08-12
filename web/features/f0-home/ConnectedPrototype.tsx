@@ -7,8 +7,10 @@ import {
   type ChatScreen,
 } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
+import { FeedScreen } from "../f11-feed";
 
 const CHAT_CONTEXT_MESSAGE = "kiwoom:chat-context";
+const OPEN_STOCK_MESSAGE = "kiwoom:open-stock";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -40,6 +42,16 @@ function parseChatContext(value: unknown): ChatContext | null {
 export function ConnectedPrototype() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [chatContext, setChatContext] = useState<ChatContext>({ screen: "home" });
+  const [feedOpen, setFeedOpen] = useState(false);
+
+  // 피드에서 종목을 고르면 iframe 안 app.html 을 그 종목 상세로 옮긴다.
+  const openChart = (symbol: string) => {
+    setFeedOpen(false);
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: OPEN_STOCK_MESSAGE, symbol },
+      window.location.origin,
+    );
+  };
 
   useEffect(() => {
     const receiveChatContext = (event: MessageEvent<unknown>) => {
@@ -71,6 +83,20 @@ export function ConnectedPrototype() {
       <div className="prototype-chat-overlay">
         <F10ChatbotDemo context={chatContext} />
       </div>
+
+      <button
+        className="prototype-feed-button"
+        onClick={() => setFeedOpen(true)}
+        type="button"
+      >
+        가족 기록
+      </button>
+
+      {feedOpen && (
+        <div className="prototype-feed-overlay">
+          <FeedScreen onClose={() => setFeedOpen(false)} onOpenChart={openChart} />
+        </div>
+      )}
     </div>
   );
 }

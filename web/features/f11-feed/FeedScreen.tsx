@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { STOCKS } from "../../shared/data/stocks";
 import { COMMENT_MAX_LENGTH } from "../../shared/engine/comment-filter";
 import { MEMBER_LABEL, useFamilyFeedStore } from "../../shared/store/use-family-feed-store";
-import { useInvestmentStore } from "../../shared/store/use-investment-store";
+import { readPrototypeTrades } from "../../shared/store/prototype-trades";
 import type { FamilyMember, Trade, TradeComment } from "../../shared/types/trade";
 import { Button, Card, PhoneShell, ScreenHeader, TabBar } from "../../shared/ui";
 
@@ -82,13 +81,13 @@ function CommentComposer({ trade }: { trade: Trade }) {
   );
 }
 
-function TradeCard({ trade, viewer, comments, highlighted }: {
+function TradeCard({ trade, viewer, comments, highlighted, onOpenChart }: {
   trade: Trade;
   viewer: FamilyMember;
   comments: TradeComment[];
   highlighted: boolean;
+  onOpenChart: (symbol: string) => void;
 }) {
-  const router = useRouter();
   const stockName = NAME_BY_SYMBOL.get(trade.symbol);
   const own = trade.member === viewer;
 
@@ -131,7 +130,7 @@ function TradeCard({ trade, viewer, comments, highlighted }: {
 
       <button
         className="mt-3 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-bold text-navy"
-        onClick={() => router.push(`/trade/${trade.symbol}`)}
+        onClick={() => onOpenChart(trade.symbol)}
         type="button"
       >
         차트에서 이 지점 보기
@@ -140,10 +139,15 @@ function TradeCard({ trade, viewer, comments, highlighted }: {
   );
 }
 
-export function FeedScreen() {
-  const searchParams = useSearchParams();
-  const highlightedId = searchParams.get("trade");
-  const ownTrades = useInvestmentStore((state) => state.trades);
+export function FeedScreen({ onClose, onOpenChart }: {
+  onClose: () => void;
+  onOpenChart: (symbol: string) => void;
+}) {
+  // 본인 거래는 app.html 이 localStorage 에 쌓은 것이 원본이다.
+  // 열 때마다 다시 읽어야 방금 한 거래가 바로 보인다.
+  const [ownTrades, setOwnTrades] = useState<Trade[]>([]);
+  useEffect(() => setOwnTrades(readPrototypeTrades()), []);
+
   const viewer = useFamilyFeedStore((state) => state.viewer);
   const setViewer = useFamilyFeedStore((state) => state.setViewer);
   const familyTrades = useFamilyFeedStore((state) => state.familyTrades);
@@ -159,7 +163,10 @@ export function FeedScreen() {
 
   return (
     <PhoneShell>
-      <ScreenHeader title="가족 기록" />
+      <ScreenHeader
+        title="가족 기록"
+        onBack={onClose}
+      />
 
       <p className="px-4 text-xs text-ink/70">서로의 판단을 보고 이야기해요</p>
 
@@ -187,8 +194,9 @@ export function FeedScreen() {
           feed.map((trade) => (
             <TradeCard
               comments={comments.filter((comment) => comment.tradeId === trade.id)}
-              highlighted={trade.id === highlightedId}
+              highlighted={false}
               key={trade.id}
+              onOpenChart={onOpenChart}
               trade={trade}
               viewer={viewer}
             />
