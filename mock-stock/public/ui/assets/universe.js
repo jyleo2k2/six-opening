@@ -100,6 +100,61 @@
   /* 회사 로고 — 파일을 assets/logos/ 에 넣고 코드별로 등록하면 카드 상단에 뜹니다.
    * 예: '005930': 'assets/logos/005930.png'
    * 등록되지 않은 종목은 섹터 이모지로 대체됩니다. */
+  // 로고에서 뽑은 색 — 카드 배경을 로고 배경과 같게 맞춘다
+  const tints = {
+    '000120': { bg: '#e1e1fb', accent: '#5b5ae2' },
+    '000270': { bg: '#f1eafa', accent: '#955ae2' },
+    '000660': { bg: '#fde0e3', accent: '#e25a68' },
+    '003230': { bg: '#fde8d8', accent: '#F0894A' },
+    '003490': { bg: '#d7eefd', accent: '#5aaae2' },
+    '004170': { bg: '#fde5e5', accent: '#e25a5d' },
+    '004370': { bg: '#fce8eb', accent: '#e25a74' },
+    '005380': { bg: '#d7e5fa', accent: '#5a92e2' },
+    '005930': { bg: '#e0d9fd', accent: '#765ae2' },
+    '009540': { bg: '#f5fafe', accent: '#5aa7e2' },
+    '010140': { bg: '#cfd0fd', accent: '#5a5de2' },
+    '010950': { bg: '#edfae0', accent: '#9ce25a' },
+    '011200': { bg: '#efe8fd', accent: '#895ae2' },
+    '012330': { bg: '#cddbfa', accent: '#5a83e2' },
+    '012450': { bg: '#fddcc8', accent: '#e28d5a' },
+    '015760': { bg: '#fdeeee', accent: '#e25c5a' },
+    '020560': { bg: '#fdd6d9', accent: '#e25a66' },
+    '021240': { bg: '#d5effd', accent: '#5ab3e2' },
+    '035900': { bg: '#c5defd', accent: '#5a98e2' },
+    '036570': { bg: '#eef2fe', accent: '#5a80e2' },
+    '039490': { bg: '#d9dcfb', accent: '#5a69e2' },
+    '041510': { bg: '#fedee3', accent: '#e25a6f' },
+    '042660': { bg: '#fde9d9', accent: '#e2955a' },
+    '047050': { bg: '#dcecf8', accent: '#5aa7e2' },
+    '047810': { bg: '#e7f1fd', accent: '#5a95e2' },
+    '051900': { bg: '#fcdfeb', accent: '#e25a91' },
+    '055550': { bg: '#cfe2fb', accent: '#5a96e2' },
+    '064350': { bg: '#d2e0f8', accent: '#5a8fe2' },
+    '066570': { bg: '#fbebf0', accent: '#e25a86' },
+    '078930': { bg: '#e1eaf9', accent: '#5a8ce2' },
+    '079550': { bg: '#e4f3fd', accent: '#5aace2' },
+    '086280': { bg: '#dde9fe', accent: '#5a8fe2' },
+    '086790': { bg: '#e2f5f1', accent: '#5ae2c7' },
+    '089860': { bg: '#feece7', accent: '#e27a5a' },
+    '090430': { bg: '#dae7f9', accent: '#5a94e2' },
+    '096770': { bg: '#fde1e6', accent: '#e25a74' },
+    '097950': { bg: '#efecfa', accent: '#7b5ae2' },
+    '105560': { bg: '#fdf0cf', accent: '#e2bb5a' },
+    '122870': { bg: '#f4e7fb', accent: '#b25ae2' },
+    '180640': { bg: '#d0e7fd', accent: '#5aa0e2' },
+    '251270': { bg: '#feefcd', accent: '#e2b85a' },
+    '259960': { bg: '#f3e7fd', accent: '#a75ae2' },
+    '263750': { bg: '#cbdefc', accent: '#5a8ee2' },
+    '271560': { bg: '#feecea', accent: '#e26a5a' },
+    '278470': { bg: '#fef1f0', accent: '#e2625a' },
+    '282330': { bg: '#f3fbeb', accent: '#a1e25a' },
+    '316140': { bg: '#d1e2f5', accent: '#5a9ae2' },
+    '329180': { bg: '#f5fbfc', accent: '#5ac3e2' },
+    '352820': { bg: '#efe7fb', accent: '#965ae2' },
+    '402340': { bg: '#fdebf1', accent: '#e25a89' },
+    '483650': { bg: '#f9ebe7', accent: '#e27c5a' }
+  };
+
   const logos = {
     '000120': 'assets/logos/000120.png',
     '000270': 'assets/logos/000270.png',
@@ -192,5 +247,5 @@
     bank: { headline:'은행이 번 돈이 지난해보다 늘었어', body:['은행은 사람들 돈을 맡아 주고, 필요한 사람에게 빌려주면서 그 차이로 돈을 벌어.','금리가 높으면 빌려주고 받는 이자가 커져서 은행이 버는 돈도 늘어. 대신 돈을 못 갚는 사람이 늘면 손해가 나기도 해.','은행은 번 돈의 일부를 주주에게 나눠 주는 편이야. 이걸 배당이라고 해.'], points:['금리가 높으면 더 벌어','못 갚는 사람이 늘면 손해야','배당을 주는 편이야'] }
   };
 
-  window.KW_UNIVERSE = { sectors: sectors, stocks: stocks, logos: logos, candles: candles, newsDetail: newsDetail };
+  window.KW_UNIVERSE = { sectors: sectors, stocks: stocks, logos: logos, candles: candles, newsDetail: newsDetail, tints: tints };
 })();

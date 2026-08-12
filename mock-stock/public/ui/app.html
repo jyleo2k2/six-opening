@@ -130,7 +130,7 @@ a:hover{color:#01185A}
 
 <div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:14px;padding:6px 86px 14px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
 <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
-<div onClick="{{ c.pick }}" style="position:relative;overflow:hidden;flex:none;width:230px;border-radius:32px;padding:18px 18px 16px;cursor:pointer;display:flex;flex-direction:column;scroll-snap-align:center;background:linear-gradient(157deg,#FFFFFF 0%,#FDFDFF 44%,#F2F2FB 100%);box-shadow:0 18px 34px rgba(35,25,80,0.14),0 3px 7px rgba(35,25,80,0.06),inset 0 2px 1px rgba(255,255,255,1),inset 0 -12px 22px rgba(70,60,120,0.08),inset 0 0 0 1px rgba(255,255,255,0.8)">
+<div onClick="{{ c.pick }}" style="{{ c.cardStyle }}">
 <div style="{{ c.glowStyle }}"></div>
 <div style="{{ c.sheenStyle }}"></div>
 <div style="{{ c.artStyle }}">
@@ -1229,6 +1229,10 @@ class Component extends DCLogic {
     const logos = u.logos || {};
     const list = u.stocks.filter(x => x.sector === s.sectorId).map(x => {
       const sec = this.sectorOf(x.sector);
+      // 카드 색은 그 회사 로고의 배경색을 그대로 쓴다 — 로고와 카드가 이어져 보이게
+      const tn = (u.tints || {})[x.code] || {};
+      const tBg = tn.bg || '#F4F5FB';
+      const tAc = tn.accent || sec.accent;
       return {
         name: x.name, desc: x.desc, emoji: sec.emoji,
         logo: logos[x.code] || '', hasLogo: !!logos[x.code], noLogo: !logos[x.code],
@@ -1237,9 +1241,10 @@ class Component extends DCLogic {
         priceText: x.price.toLocaleString('ko-KR'),
         changeText: (x.change >= 0 ? '▲ ' : '▼ ') + Math.abs(x.change).toFixed(2) + '%',
         changeStyle: 'font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:3px;color:' + (x.change >= 0 ? up : down),
-        glowStyle: 'position:absolute;right:-40px;top:-46px;width:150px;height:150px;border-radius:999px;filter:blur(30px);opacity:0.38;background:' + sec.accent,
+        glowStyle: 'position:absolute;right:-40px;top:-46px;width:150px;height:150px;border-radius:999px;filter:blur(30px);opacity:0.30;background:' + tAc,
+        cardStyle: 'position:relative;overflow:hidden;flex:none;width:230px;border-radius:32px;padding:18px 18px 16px;cursor:pointer;display:flex;flex-direction:column;scroll-snap-align:center;background:linear-gradient(160deg,#FFFFFF 0%,#FDFDFF 34%,' + tBg + ' 100%);box-shadow:0 18px 34px rgba(35,25,80,0.14),0 3px 7px rgba(35,25,80,0.06),inset 0 2px 1px rgba(255,255,255,1),inset 0 -12px 22px rgba(70,60,120,0.05),inset 0 0 0 1px rgba(255,255,255,0.8)',
         sheenStyle: 'position:absolute;left:-40%;top:-30%;width:70%;height:180%;transform:rotate(18deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.55) 50%,rgba(255,255,255,0) 100%);opacity:0.5;pointer-events:none',
-        artStyle: 'position:relative;height:84px;border-radius:22px;display:flex;align-items:center;justify-content:center;background:' + (logos[x.code] ? 'url(' + logos[x.code] + ') center/contain no-repeat,' : '') + 'radial-gradient(ellipse 70% 60% at 50% 8%,rgba(255,255,255,0.9) 0%,rgba(255,255,255,0) 70%),linear-gradient(160deg,' + sec.accent + '2E 0%,' + sec.accent + '14 55%,rgba(255,255,255,0) 100%);box-shadow:inset 0 2px 1px rgba(255,255,255,0.9),inset 0 0 0 1.5px ' + sec.accent + '26',
+        artStyle: 'position:relative;height:84px;border-radius:22px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:' + (logos[x.code] ? 'url(' + logos[x.code] + ') center/contain no-repeat,' : '') + tBg + ';box-shadow:inset 0 0 0 1.5px ' + tAc + '1F',
         pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
       };
     });
