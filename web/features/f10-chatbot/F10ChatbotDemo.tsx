@@ -4,18 +4,15 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 import type { ProactiveSignal } from "./lib/routing";
 import type {
-  GuidedDialogueOption,
   GuidedDialogueState,
 } from "./lib/dialogue-engine";
 
 type Screen = "home" | "stock" | "order" | "archive";
 type Message = { role: "assistant" | "user"; text: string };
 type GuidedAction = {
-  kind: "guided_options";
+  kind: "guided_dialogue";
   state: GuidedDialogueState;
-  options: GuidedDialogueOption[];
 };
-type GuidedRequest = GuidedDialogueState & { optionId: GuidedDialogueOption["id"] };
 
 const COPY = {
   service: "\ud0a4\uc6c0 \uac00\uc871 \ubaa8\uc758\ud22c\uc790 \ub9ac\uadf8",
@@ -129,7 +126,7 @@ export function F10ChatbotDemo() {
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
-  async function ask(question: string, guidedDialogue?: GuidedRequest) {
+  async function ask(question: string) {
     const history = messages.slice(-8);
     setMessages((current) => [
       ...current,
@@ -150,7 +147,7 @@ export function F10ChatbotDemo() {
           message: question,
           context: chatContext,
           history,
-          guidedDialogue,
+          guidedDialogue: guidedAction?.state,
         }),
       });
 
@@ -206,22 +203,16 @@ export function F10ChatbotDemo() {
   function isGuidedAction(value: unknown): value is GuidedAction {
     if (!value || typeof value !== "object") return false;
     const action = value as Record<string, unknown>;
-    if (action.kind !== "guided_options" || !action.state || !Array.isArray(action.options)) {
+    if (action.kind !== "guided_dialogue" || !action.state) {
       return false;
     }
 
     const state = action.state as Record<string, unknown>;
     return (
       /^(term|stock):.+$/.test(String(state.topicId)) &&
-      typeof state.currentNodeId === "string" &&
-      action.options.every((option) => {
-        if (!option || typeof option !== "object") return false;
-        const candidate = option as Record<string, unknown>;
-        return (
-          ["simpler", "example", "detail", "offerings", "touchpoint", "sector", "understood"].includes(String(candidate.id)) &&
-          typeof candidate.label === "string"
-        );
-      })
+      Array.isArray(state.explainedNodeIds) &&
+      state.explainedNodeIds.every((nodeId) => typeof nodeId === "string") &&
+      typeof state.pendingNodeId === "string"
     );
   }
 
@@ -403,24 +394,7 @@ export function F10ChatbotDemo() {
               {COPY.recommended}
             </p>
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-              {guidedAction
-                ? guidedAction.options.map((option) => (
-                    <button
-                      className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
-                      key={option.id}
-                      disabled={isLoading}
-                      onClick={() =>
-                        void ask(option.label, {
-                          ...guidedAction.state,
-                          optionId: option.id,
-                        })
-                      }
-                      type="button"
-                    >
-                      {option.label}
-                    </button>
-                  ))
-                : currentScreen.chips.map((question) => (
+              {currentScreen.chips.map((question) => (
                     <button
                       className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
                       key={question}

@@ -111,11 +111,8 @@ type ChatResponse = {
   suggestedQuestions?: string[];
   guidedDialogue?: {
     topicId: `term:${string}` | `stock:${string}`;
-    currentNodeId: string;
-    options: Array<{
-      id: "simpler" | "example" | "detail" | "offerings" | "touchpoint" | "sector" | "understood";
-      label: string;
-    }>;
+    explainedNodeIds: string[];
+    pendingNodeId: string;
   };
   uiAction?: {
     type: "open_screen";
@@ -131,9 +128,10 @@ type ChatResponse = {
 ### 3.3 DAPIE 단계형 설명 대화
 
 - 적용 범위는 등록된 용어 사전의 모든 `glossary` 항목과 모의투자 종목 유니버스의 모든 종목이다.
-- 용어 노드는 `핵심 설명 → 쉬운 설명·화면 예시·상세 설명 → 이해 완료`로, 종목 노드는 `회사 소개 → 제공 제품·서비스·일상 접점·업종 역할 → 이해 완료`로 연결한다.
-- 각 턴은 현재 노드의 설명과 다음 선택지를 함께 반환하며, 자유 입력창은 항상 유지한다.
-- 클라이언트가 보낸 `topicId`, `currentNodeId`, `optionId`는 신뢰하지 않고 서버가 그래프의 허용 전이인지 검증한다.
+- 용어는 현재 용어 설명 뒤에 용어 DB의 관련 용어 키워드를, 종목은 회사 소개 뒤에 `제공 제품·서비스`, `일상 접점`, `업종 역할` 키워드를 차례로 제안한다.
+- 각 턴은 현재 설명과 아직 설명하지 않은 DB 기반 키워드 하나를 “`… 쪽도 더 알아볼까?`”라고 제안하며, 자유 입력창은 항상 유지한다.
+- 사용자가 Yes 의미의 자연어로 답하면 제안한 키워드를 설명하고 다음 키워드를 제안한다. No 의미의 답변이면 대화를 종료한다. 그 밖의 답변에는 Yes/No를 다시 요청한다.
+- 클라이언트가 보낸 `topicId`, `explainedNodeIds`, `pendingNodeId`는 신뢰하지 않고 서버가 등록된 순서와 허용 전이인지 검증한다.
 - 단계형 설명은 고정된 승인 문구를 사용하고, LLM은 그래프 선택이나 전이에 관여하지 않는다.
 - 이해 여부를 시험하거나 점수화하지 않으며 사용자가 언제든 다른 질문으로 대화를 전환할 수 있다.
 - 자연어 질문에서 종목명·종목코드·등록 별칭 또는 용어 트리거를 결정적으로 찾는다. 현재 종목 화면에서 “이 회사”처럼 지시한 질문은 현재 화면 종목으로만 해석하며, 둘 이상을 임의로 선택하지 않는다.
@@ -172,8 +170,8 @@ type ChatRequest = {
   };
   guidedDialogue?: {
     topicId: `term:${string}` | `stock:${string}`;
-    currentNodeId: string;
-    optionId: "simpler" | "example" | "detail" | "offerings" | "touchpoint" | "sector" | "understood";
+    explainedNodeIds: string[];
+    pendingNodeId: string;
   };
 };
 ```
@@ -403,7 +401,7 @@ type SectorEducationContent = {
 - Luna Responses API 스트리밍
 - 문장 단위 금지 표현 필터와 최대 3문장 제한
 - `switch`, `dwell`, `lossRevisit` 3종 감지 함수와 데모 UI
-- `PER`, `ETF`, `분산투자`의 DAPIE식 설명 그래프와 서버 검증 전이
+- 등록 용어·종목의 DB 기반 후속 키워드 제안과 Yes/No DAPIE식 서버 검증 전이
 
 남은 작업은 안전 게이트를 먼저, 기능 확장을 나중에 진행한다.
 

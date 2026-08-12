@@ -5,29 +5,26 @@ import { advanceGuidedDialogue, startGuidedDialogue } from "./dialogue-engine";
 
 const perStart = startGuidedDialogue("PER이 뭐야?");
 assert.equal(perStart?.state?.topicId, "term:per");
-assert.equal(perStart?.state?.currentNodeId, "main");
-assert.deepEqual(perStart?.options.map(({ id }) => id), ["simpler", "example", "detail", "understood"]);
+assert.deepEqual(perStart?.state?.explainedNodeIds, ["main"]);
+assert.equal(perStart?.text.includes("eps"), true);
 
-const simpler = advanceGuidedDialogue(perStart!.state!, "simpler");
-assert.equal(simpler?.state?.currentNodeId, "simpler");
-assert.equal(simpler?.text.includes("PER"), true);
+const eps = advanceGuidedDialogue(perStart!.state!, "응");
+assert.equal(eps?.state?.explainedNodeIds.includes("related:eps"), true);
+assert.equal(eps?.text.includes("EPS"), true);
 
+assert.equal(advanceGuidedDialogue(perStart!.state!, "잘 모르겠어")?.text.includes("응 또는 아니"), true);
 assert.equal(
-  advanceGuidedDialogue({ topicId: "term:per", currentNodeId: "detail" }, "example"),
+  advanceGuidedDialogue({ topicId: "term:per", explainedNodeIds: ["related:eps"], pendingNodeId: "related:pbr" }, "응"),
   null,
 );
 
-const completed = advanceGuidedDialogue(
-  { topicId: "term:etf", currentNodeId: "main" },
-  "understood",
-);
+const completed = advanceGuidedDialogue(perStart!.state!, "아니");
 assert.equal(completed?.state, null);
-assert.deepEqual(completed?.options, []);
 
 const samsung = startGuidedDialogue("삼성 전자는 무엇을 만들어?");
 assert.equal(samsung?.state?.topicId, "stock:KRX:005930");
-assert.deepEqual(samsung?.options.map(({ id }) => id), ["offerings", "touchpoint", "sector", "understood"]);
-assert.equal(advanceGuidedDialogue(samsung!.state!, "offerings")?.text.includes("전자기기"), true);
+assert.equal(samsung?.text.includes("제공 제품·서비스"), true);
+assert.equal(advanceGuidedDialogue(samsung!.state!, "네")?.text.includes("전자기기"), true);
 
 assert.equal(startGuidedDialogue("분산 투자를 쉽게 알려줘")?.state?.topicId, "term:diversification");
 assert.equal(startGuidedDialogue("이 회사는 뭐 하는 회사야?", { screen: "stock", stockName: "삼성전자" })?.state?.topicId, "stock:KRX:005930");

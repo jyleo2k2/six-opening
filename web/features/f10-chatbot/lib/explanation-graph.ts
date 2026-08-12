@@ -1,42 +1,26 @@
 import { CHATBOT_KNOWLEDGE, type ChatbotKnowledgeEntry } from "../../../shared/data/chatbot-knowledge";
+import { SECTORS } from "../../../shared/data/sectors";
 import { STOCKS, type StockEducation } from "../../../shared/data/stocks";
 
 export type GuidedTopicId = `term:${string}` | `stock:${string}`;
-export type GuidedOptionId =
-  | "simpler"
-  | "example"
-  | "detail"
-  | "offerings"
-  | "touchpoint"
-  | "sector"
-  | "understood";
+export type GuidedNodeId = "main" | "related" | "offerings" | "touchpoint" | "sector";
 
-export type ExplanationOption = {
-  id: GuidedOptionId;
-  label: string;
-  targetNodeId: string | null;
-};
-
-export type ExplanationNode = {
-  id: string;
-  topicId: GuidedTopicId;
+export type GuidedSection = {
+  id: GuidedNodeId | `related:${string}`;
+  keyword: string;
   text: string;
-  options: ExplanationOption[];
 };
 
-const DONE: ExplanationOption = { id: "understood", label: "이해했어", targetNodeId: null };
-const TERM_OPTIONS: ExplanationOption[] = [
-  { id: "simpler", label: "더 쉽게", targetNodeId: "simpler" },
-  { id: "example", label: "화면 예시", targetNodeId: "example" },
-  { id: "detail", label: "다시 자세히", targetNodeId: "detail" },
-  DONE,
-];
-const STOCK_OPTIONS: ExplanationOption[] = [
-  { id: "offerings", label: "무엇을 만들어?", targetNodeId: "offerings" },
-  { id: "touchpoint", label: "어디에서 만나?", targetNodeId: "touchpoint" },
-  { id: "sector", label: "업종에서 하는 일", targetNodeId: "sector" },
-  DONE,
-];
+const TERM_RELATIONS: Record<string, readonly string[]> = {
+  stock: ["shareholder", "stock-item"], shareholder: ["stock", "dividend"], "stock-item": ["stock", "sector"],
+  buy: ["order", "quantity"], sell: ["order", "realized-profit"], order: ["buy", "sell"], execution: ["order", "quantity"],
+  "current-price": ["chart", "volatility"], "market-order": ["limit-order", "execution"], "limit-order": ["market-order", "execution"], quantity: ["estimated-amount", "order"],
+  "estimated-amount": ["quantity", "market-order"], "evaluation-amount": ["unrealized-profit", "current-price"], "unrealized-profit": ["evaluation-amount", "realized-profit"],
+  "realized-profit": ["unrealized-profit", "sell"], return: ["unrealized-profit", "risk"], "average-price": ["unrealized-profit", "buy"],
+  sector: ["stock-item", "diversification"], "market-cap": ["stock", "current-price"], revenue: ["operating-profit", "eps"], "operating-profit": ["revenue", "eps"],
+  dividend: ["shareholder", "stock"], per: ["eps", "pbr"], pbr: ["per", "market-cap"], eps: ["per", "operating-profit"], etf: ["diversification", "index"],
+  index: ["etf", "chart"], diversification: ["etf", "risk"], chart: ["current-price", "volatility"], volume: ["execution", "chart"], volatility: ["chart", "risk"], risk: ["diversification", "return"],
+};
 
 function normalize(value: string) {
   return value.replaceAll(" ", "").toLowerCase();
@@ -46,39 +30,19 @@ function findTermInText(message: string) {
   const normalized = normalize(message);
   const matches = CHATBOT_KNOWLEDGE
     .filter((entry) => entry.kind === "glossary" && entry.status === "reviewed")
-    .map((entry) => ({
-      entry,
-      aliases: entry.triggers.filter((trigger) => normalized.includes(normalize(trigger))).map(normalize),
-    }))
+    .map((entry) => ({ entry, aliases: entry.triggers.filter((trigger) => normalized.includes(normalize(trigger))).map(normalize) }))
     .filter(({ aliases }) => aliases.length > 0);
   if (matches.length > 1 && /와|과|및|그리고|,/.test(message)) return null;
-  const scored = matches.map(({ entry, aliases }) => ({ entry, aliases, score: Math.max(...aliases.map((alias) => alias.length)) }));
-  const bestScore = Math.max(...scored.map(({ score }) => score), 0);
-  const best = scored.filter(({ score }) => score === bestScore);
-  if (best.length !== 1) return null;
-  return scored.every(({ entry, aliases }) =>
-    entry === best[0].entry || aliases.every((alias) => best[0].aliases.some((bestAlias) => bestAlias.includes(alias))),
-  )
-    ? best[0].entry
-    : null;
+  const best = matches.sort((a, b) => Math.max(...b.aliases.map((alias) => alias.length)) - Math.max(...a.aliases.map((alias) => alias.length)))[0];
+  return best && matches.filter(({ aliases }) => Math.max(...aliases.map((alias) => alias.length)) === Math.max(...best.aliases.map((alias) => alias.length))).length === 1 ? best.entry : null;
 }
 
 function findStockInText(message: string) {
   const normalized = normalize(message);
-  const matches = STOCKS.map((stock) => ({
-    stock,
-    aliases: [stock.symbol, stock.name, ...stock.searchAliases].filter((alias) => normalized.includes(normalize(alias))).map(normalize),
-  })).filter(({ aliases }) => aliases.length > 0);
+  const matches = STOCKS.map((stock) => ({ stock, aliases: [stock.symbol, stock.name, ...stock.searchAliases].filter((alias) => normalized.includes(normalize(alias))).map(normalize) })).filter(({ aliases }) => aliases.length > 0);
   if (matches.length > 1 && /와|과|및|그리고|,/.test(message)) return null;
-  const scored = matches.map(({ stock, aliases }) => ({ stock, aliases, score: Math.max(...aliases.map((alias) => alias.length)) }));
-  const bestScore = Math.max(...scored.map(({ score }) => score), 0);
-  const best = scored.filter(({ score }) => score === bestScore);
-  if (best.length !== 1) return null;
-  return scored.every(({ stock, aliases }) =>
-    stock === best[0].stock || aliases.every((alias) => best[0].aliases.some((bestAlias) => bestAlias.includes(alias))),
-  )
-    ? best[0].stock
-    : null;
+  const best = matches.sort((a, b) => Math.max(...b.aliases.map((alias) => alias.length)) - Math.max(...a.aliases.map((alias) => alias.length)))[0];
+  return best && matches.filter(({ aliases }) => Math.max(...aliases.map((alias) => alias.length)) === Math.max(...best.aliases.map((alias) => alias.length))).length === 1 ? best.stock : null;
 }
 
 function isStockQuestion(message: string) {
@@ -87,107 +51,52 @@ function isStockQuestion(message: string) {
 
 function getTopic(topicId: GuidedTopicId) {
   if (topicId.startsWith("term:")) {
-    const id = topicId.slice("term:".length);
-    const term = CHATBOT_KNOWLEDGE.find(
-      (entry) => entry.kind === "glossary" && entry.status === "reviewed" && entry.id === id,
-    );
+    const term = CHATBOT_KNOWLEDGE.find((entry) => entry.kind === "glossary" && entry.status === "reviewed" && entry.id === topicId.slice(5));
     return term ? { kind: "term" as const, value: term } : null;
   }
-
-  const id = topicId.slice("stock:".length);
-  const stock = STOCKS.find((entry) => entry.id === id);
+  const stock = STOCKS.find((entry) => entry.id === topicId.slice(6));
   return stock ? { kind: "stock" as const, value: stock } : null;
 }
 
-function termNode(topicId: GuidedTopicId, term: ChatbotKnowledgeEntry, nodeId: string): ExplanationNode | null {
-  const label = term.triggers[0] ?? term.id;
-  if (nodeId === "main") {
-    return { text: `${term.answer} 어떤 방식으로 더 볼까?`, id: nodeId, topicId, options: TERM_OPTIONS };
-  }
-  if (nodeId === "simpler") {
-    return {
-      text: `쉽게 말하면, ${term.answer} 화면에서 ${label}이라는 말을 만나면 이 뜻을 떠올리면 돼.`,
-      id: nodeId,
-      topicId,
-      options: [
-        { id: "example", label: "화면 예시", targetNodeId: "example" },
-        { id: "detail", label: "다시 자세히", targetNodeId: "detail" },
-        DONE,
-      ],
-    };
-  }
-  if (nodeId === "example") {
-    return {
-      text: `예를 들어 화면에서 ${label} 항목을 보면, 그 숫자나 상태가 무엇을 뜻하는지 확인하는 데 쓰는 말이야. ${term.answer}`,
-      id: nodeId,
-      topicId,
-      options: [
-        { id: "detail", label: "다시 자세히", targetNodeId: "detail" },
-        DONE,
-      ],
-    };
-  }
-  if (nodeId === "detail") {
-    return { text: `${term.answer} 이 용어는 한 가지 숫자나 결과만으로 판단하기보다, 화면의 다른 정보와 함께 읽는 데 도움을 줘.`, id: nodeId, topicId, options: [DONE] };
-  }
-  return null;
+function termSections(term: ChatbotKnowledgeEntry): GuidedSection[] {
+  const related = TERM_RELATIONS[term.id] ?? [];
+  return [
+    { id: "main", keyword: term.triggers[0] ?? term.id, text: term.answer },
+    ...related.flatMap((id) => {
+      const entry = CHATBOT_KNOWLEDGE.find((candidate) => candidate.id === id && candidate.kind === "glossary" && candidate.status === "reviewed");
+      return entry ? [{ id: `related:${entry.id}` as const, keyword: entry.triggers[0] ?? entry.id, text: entry.answer }] : [];
+    }),
+  ];
 }
 
-function stockNode(topicId: GuidedTopicId, stock: StockEducation, nodeId: string): ExplanationNode | null {
-  if (nodeId === "main") {
-    return { text: `${stock.name}은(는) ${stock.companySummary} 무엇이 더 궁금해?`, id: nodeId, topicId, options: STOCK_OPTIONS };
-  }
-  if (nodeId === "offerings") {
-    return { text: `${stock.name}은(는) ${stock.offerings.join(", ")} 같은 일을 해. 다음에는 어디에서 만나는지나 업종 역할도 볼까?`, id: nodeId, topicId, options: [
-      { id: "touchpoint", label: "어디에서 만나?", targetNodeId: "touchpoint" },
-      { id: "sector", label: "업종에서 하는 일", targetNodeId: "sector" },
-      DONE,
-    ] };
-  }
-  if (nodeId === "touchpoint") {
-    return { text: `${stock.name}은(는) ${stock.everydayTouchpoints.join(", ")} 만날 수 있어. 만드는 것과 업종 역할도 이어서 볼 수 있어.`, id: nodeId, topicId, options: [
-      { id: "offerings", label: "무엇을 만들어?", targetNodeId: "offerings" },
-      { id: "sector", label: "업종에서 하는 일", targetNodeId: "sector" },
-      DONE,
-    ] };
-  }
-  if (nodeId === "sector") {
-    return { text: `${stock.name}은(는) ${stock.sector} 업종에 속해 있어. ${stock.companySummary} 만드는 것과 일상에서 만나는 모습도 더 볼 수 있어.`, id: nodeId, topicId, options: [
-      { id: "offerings", label: "무엇을 만들어?", targetNodeId: "offerings" },
-      { id: "touchpoint", label: "어디에서 만나?", targetNodeId: "touchpoint" },
-      DONE,
-    ] };
-  }
-  return null;
+function stockSections(stock: StockEducation): GuidedSection[] {
+  const sector = SECTORS.find((entry) => entry.key === stock.sector);
+  return [
+    { id: "main", keyword: stock.name, text: `${stock.name}은(는) ${stock.companySummary}` },
+    { id: "offerings", keyword: "제공 제품·서비스", text: `${stock.name}은(는) ${stock.offerings.join(", ")} 같은 일을 해.` },
+    { id: "touchpoint", keyword: "일상에서 만나는 모습", text: `${stock.name}은(는) ${stock.everydayTouchpoints.join(", ")} 만날 수 있어.` },
+    { id: "sector", keyword: "업종에서 하는 일", text: `${stock.name}은(는) ${sector?.label ?? stock.sector} 업종에 속해 있어. ${sector?.summary ?? stock.companySummary}` },
+  ];
 }
 
 export function findGuidedTopic(message: string, contextStockName?: string): GuidedTopicId | null {
   const stock = findStockInText(message);
   if (stock) return `stock:${stock.id}`;
-
   const term = findTermInText(message);
   if (term) return `term:${term.id}`;
-
   if (contextStockName && isStockQuestion(message)) {
     const contextStock = findStockInText(contextStockName);
     if (contextStock) return `stock:${contextStock.id}`;
   }
-
   return null;
 }
 
-export function getExplanationNode(topicId: GuidedTopicId, nodeId: string) {
+export function getGuidedSections(topicId: GuidedTopicId) {
   const topic = getTopic(topicId);
   if (!topic) return null;
-  return topic.kind === "term"
-    ? termNode(topicId, topic.value, nodeId)
-    : stockNode(topicId, topic.value, nodeId);
+  return topic.kind === "term" ? termSections(topic.value) : stockSections(topic.value);
 }
 
 export function isGuidedTopicId(value: unknown): value is GuidedTopicId {
   return typeof value === "string" && getTopic(value as GuidedTopicId) !== null;
-}
-
-export function isGuidedOptionId(value: unknown): value is GuidedOptionId {
-  return ["simpler", "example", "detail", "offerings", "touchpoint", "sector", "understood"].includes(String(value));
 }

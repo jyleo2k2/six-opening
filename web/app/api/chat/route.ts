@@ -5,7 +5,6 @@ import type { ConversationMessage } from "../../../features/f10-chatbot/lib/open
 import { ChatContext, routeMessage } from "../../../features/f10-chatbot/lib/routing";
 import {
   advanceGuidedDialogue,
-  isGuidedOptionId,
   isGuidedTopicId,
   startGuidedDialogue,
 } from "../../../features/f10-chatbot/lib/dialogue-engine";
@@ -63,8 +62,9 @@ function parseGuidedDialogue(value: unknown) {
   const guided = value as Record<string, unknown>;
   if (
     !isGuidedTopicId(guided.topicId) ||
-    typeof guided.currentNodeId !== "string" ||
-    !isGuidedOptionId(guided.optionId)
+    !Array.isArray(guided.explainedNodeIds) ||
+    !guided.explainedNodeIds.every((nodeId) => typeof nodeId === "string") ||
+    typeof guided.pendingNodeId !== "string"
   ) {
     return null;
   }
@@ -72,18 +72,17 @@ function parseGuidedDialogue(value: unknown) {
   return {
     state: {
       topicId: guided.topicId,
-      currentNodeId: guided.currentNodeId.slice(0, 80),
+      explainedNodeIds: guided.explainedNodeIds.slice(0, 8).map((nodeId) => nodeId.slice(0, 80)),
+      pendingNodeId: guided.pendingNodeId.slice(0, 80),
     } satisfies GuidedDialogueState,
-    optionId: guided.optionId,
   };
 }
 
 function guidedAction(turn: GuidedDialogueTurn) {
   if (!turn.state) return null;
   return {
-    kind: "guided_options" as const,
+    kind: "guided_dialogue" as const,
     state: turn.state,
-    options: turn.options,
   };
 }
 
@@ -117,10 +116,9 @@ export async function POST(request: NextRequest) {
       send("status", "무슨 질문인지 보는 중");
       const shouldUseGuidedDialogue =
         routed.route === "faq" || routed.route === "context" || routed.route === "fallback";
+      const newGuidedTurn = shouldUseGuidedDialogue ? startGuidedDialogue(message, context) : null;
       const guidedTurn = shouldUseGuidedDialogue
-        ? guidedDialogue
-          ? advanceGuidedDialogue(guidedDialogue.state, guidedDialogue.optionId)
-          : startGuidedDialogue(message, context)
+        ? newGuidedTurn ?? (guidedDialogue ? advanceGuidedDialogue(guidedDialogue.state, message) : null)
         : null;
 
       if (guidedDialogue && shouldUseGuidedDialogue && !guidedTurn) {
