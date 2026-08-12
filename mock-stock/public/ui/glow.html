@@ -1,0 +1,55 @@
+<meta charset="utf-8">
+<title>밝은 배경에서 카드 외곽 처리 — 비교</title>
+<style>
+  body{font-family:'Pretendard','Malgun Gothic',sans-serif;background:#22242C;margin:0;padding:28px;color:#E8EEFB}
+  h1{font-size:20px;margin:0 0 6px}
+  p.s{color:#9AA3B8;font-size:13px;margin:0 0 6px;line-height:1.6}
+  p.k{color:#FFC7C4;font-size:13px;margin:0 0 24px;line-height:1.6}
+  .rack{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+  .cell{width:390px}
+  .cap{font-size:14px;font-weight:800;margin:0 0 4px}
+  .note{font-size:12.5px;color:#9AA3B8;margin:0 0 12px;line-height:1.5;height:52px}
+  .plate{position:relative;height:430px;border-radius:26px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+</style>
+<h1>밝은 배경에서 카드 외곽을 어떻게 처리할까</h1>
+<p class="s">모두 <b>같은 카드</b>입니다. 카드 바깥 처리와 페이지 배경만 다릅니다.</p>
+<p class="k">전제: 발광은 "주변보다 밝을 때"만 빛으로 읽힙니다. 등락색(#E8322E·#1668DC)은 밝기 15~16%, 앱 배경(#F5F2F8)은 90%라, 밝은 배경 위에서는 어떤 설정을 해도 빛이 아니라 붉은/푸른 그림자로 보입니다.</p>
+<div class="rack" id="out"></div>
+<script src="/api/universe"></script>
+<script src="/ui/card.js"></script>
+<script>
+(function () {
+  var u = window.KW_UNIVERSE;
+  if (!u) { document.getElementById('out').textContent = 'universe 로드 실패'; return; }
+  var x = u.stocks.filter(function (s) { return s.code === '005930'; })[0] || u.stocks[0];
+
+  function cell(cap, note, bg, outer, aura, key) {
+    var inner = (aura ? '<div style="' + window.KW_AURA(x, u, aura) + '"></div>' : '') + window.KW_CARD(x, u, { outer: outer, key: key });
+    return '<div class="cell"><div class="cap">' + cap + '</div><div class="note">' + note + '</div>'
+      + '<div class="plate" style="background:' + bg + '">' + inner + '</div></div>';
+  }
+
+  var LIGHT = '#F5F2F8';
+  var items = [
+    cell('1 · 지금 설정 (밝은 배경)',
+      '어두운 배경용 넓은 발광(blur 40px)을 그대로 쓴 상태. 배경보다 어두워서 번짐이 거의 안 보이고 카드만 뚝 떨어져 보입니다.',
+      LIGHT, 'glow', 0, 'a'),
+    cell('2 · 짧고 진한 색 그림자 + 선명한 림',
+      '넓은 번짐을 버리고, 등락색 그림자를 짧고 진하게 + 카드 가장자리에 선명한 링. 밝기 대신 채도로 눈에 띕니다.',
+      LIGHT, 'aura', 0, 'b'),
+    cell('3 · 2번 + 카드 뒤 아우라 판',
+      '카드 뒤에 같은 색을 아주 옅게 넓게 깔았습니다. 흰 테이블에 조명을 비춘 느낌이 나면서 발광에 가장 근접합니다.',
+      LIGHT, 'aura', 1.35, 'c'),
+    cell('4 · 배경을 한 단계 낮춤',
+      '페이지를 옅은 회청색(#DFE3ED)으로만 낮춰본 것. 이 정도로는 여전히 배경이 밝아 발광이 살아나지 않습니다.',
+      '#DFE3ED', 'aura', 1.35, 'd'),
+    cell('5 · 배경을 충분히 낮춤',
+      '#2A2E3A. 여기서부터 등락색이 배경보다 밝아져 비로소 발광으로 읽힙니다. 발광을 원하면 이 선을 넘어야 합니다.',
+      '#2A2E3A', 'glow', 0, 'e'),
+    cell('6 · 어두운 무대 (A안)',
+      '실제 A안에서 쓰는 무대 색. 발광이 온전히 살아납니다.',
+      'radial-gradient(90% 70% at 50% 0%,#141F3D 0%,#0A1024 55%,#06080F 100%)', 'glow', 0, 'f')
+  ];
+  document.getElementById('out').innerHTML = items.join('');
+})();
+</script>

@@ -108,7 +108,7 @@ a:hover{color:#01185A}
 </sc-if>
 
 <sc-if value="{{ isExplore }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="{{ exploreBgStyle }}">
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ goHome }}" style="{{ backBtnStyle }}">‹</div>
 <div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">어떤 회사를 살까?</div>
@@ -128,7 +128,23 @@ a:hover{color:#01185A}
 <span style="font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">손가락으로 슉 밀어봐 →</span>
 </div>
 
-<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:18px;padding:6px 46px 14px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
+<div style="{{ stageStyle }}">
+<div style="{{ stageBrand }}"></div>
+<div style="{{ stageChange }}"></div>
+<div style="{{ stageAura }}"></div>
+<div style="{{ stageRing }}"></div>
+<div style="{{ stageGrid }}"></div>
+<svg width="402" height="100%" viewBox="0 0 402 420" preserveAspectRatio="none" style="{{ stageDust }}">
+<circle cx="64" cy="96" r="1.6" fill="#FFFFFF" fill-opacity="0.10"></circle>
+<circle cx="332" cy="150" r="1.4" fill="{{ stageDustColor }}" fill-opacity="0.12"></circle>
+<circle cx="46" cy="292" r="1.2" fill="{{ stageDustColor }}" fill-opacity="0.10"></circle>
+<circle cx="358" cy="330" r="1.7" fill="#FFFFFF" fill-opacity="0.08"></circle>
+<circle cx="118" cy="58" r="1.1" fill="{{ stageDustColor }}" fill-opacity="0.09"></circle>
+</svg>
+<div style="{{ stageVignette }}"></div>
+<div style="{{ stageFloor }}"></div>
+<div style="{{ stageBounce }}"></div>
+<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:18px;padding:6px 46px 14px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
 <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
 <div onClick="{{ c.pick }}" style="{{ c.cardStyle }}">
 <div style="{{ c.gridStyle }}"></div>
@@ -140,25 +156,25 @@ a:hover{color:#01185A}
 <circle cx="146" cy="66" r="1" fill="{{ c.brand }}" fill-opacity="0.6"></circle>
 <rect x="6" y="6" width="298" height="328" rx="34" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-opacity="0.05"></rect>
 <rect x="6" y="6" width="298" height="328" rx="34" fill="none" stroke="#8FB0E8" stroke-width="5" stroke-opacity="0.16"></rect>
-<rect x="6" y="6" width="298" height="328" rx="34" fill="none" stroke="{{ c.brand }}" stroke-width="1.6" stroke-opacity="0.35"></rect>
+<rect x="6" y="6" width="298" height="328" rx="34" fill="none" stroke="{{ c.lineColor }}" stroke-width="1.6" stroke-opacity="0.35"></rect>
 <path d="M236 6 H270 A34 34 0 0 1 304 40 V86 L291 74 V29 H249 Z" fill="#070C1C" fill-opacity="0.9"></path>
-<path d="M249 29 H291 V74" fill="none" stroke="{{ c.brand }}" stroke-width="1.2" stroke-opacity="0.5"></path>
-<path d="M254 13 l11 11 M267 13 l11 11 M280 15 l10 10" stroke="{{ c.brand }}" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round"></path>
+<path d="M249 29 H291 V74" fill="none" stroke="{{ c.lineColor }}" stroke-width="1.2" stroke-opacity="0.5"></path>
+<path d="M254 13 l11 11 M267 13 l11 11 M280 15 l10 10" stroke="{{ c.lineColor }}" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round"></path>
 <path d="M6 266 V300 A34 34 0 0 0 40 334 H86 L74 322 H31 V278 Z" fill="#070C1C" fill-opacity="0.85"></path>
-<path d="M16 300 l12 12 M16 286 l26 26" stroke="{{ c.brand }}" stroke-width="1.8" stroke-opacity="0.6" stroke-linecap="round"></path>
-<path d="M286 318 l8 -8 M295 309 l6 -6" stroke="{{ c.brand }}" stroke-width="1.8" stroke-opacity="0.7" stroke-linecap="round"></path>
-<path d="M6 128 V40 A34 34 0 0 1 40 6 H132" fill="none" stroke="{{ c.brand }}" stroke-width="4" stroke-linecap="round" style="filter:drop-shadow(0 0 7px {{ c.brand }})"></path>
-<path d="M236 6 H270 A34 34 0 0 1 304 40 V86" fill="none" stroke="{{ c.brand }}" stroke-width="2.6" stroke-linecap="round" style="filter:drop-shadow(0 0 5px {{ c.brand }})"></path>
-<path d="M304 150 V214" fill="none" stroke="{{ c.brand }}" stroke-width="3.4" stroke-linecap="round" style="filter:drop-shadow(0 0 7px {{ c.brand }})"></path>
-<path d="M304 258 V300 A34 34 0 0 1 270 334 H244" fill="none" stroke="{{ c.brand }}" stroke-width="1.8" stroke-opacity="0.4" stroke-linecap="round"></path>
-<path d="M96 334 H40 A34 34 0 0 1 6 300 V268" fill="none" stroke="{{ c.brand }}" stroke-width="2.6" stroke-opacity="0.55" stroke-linecap="round"></path>
-<path d="M6 190 V236" fill="none" stroke="{{ c.brand }}" stroke-width="1.6" stroke-opacity="0.3" stroke-linecap="round"></path>
+<path d="M16 300 l12 12 M16 286 l26 26" stroke="{{ c.lineColor }}" stroke-width="1.8" stroke-opacity="0.6" stroke-linecap="round"></path>
+<path d="M286 318 l8 -8 M295 309 l6 -6" stroke="{{ c.lineColor }}" stroke-width="1.8" stroke-opacity="0.7" stroke-linecap="round"></path>
+<path d="M6 128 V40 A34 34 0 0 1 40 6 H132" fill="none" stroke="{{ c.lineColor }}" stroke-width="4" stroke-linecap="round" style="filter:drop-shadow(0 0 7px {{ c.lineColor }})"></path>
+<path d="M236 6 H270 A34 34 0 0 1 304 40 V86" fill="none" stroke="{{ c.lineColor }}" stroke-width="2.6" stroke-linecap="round" style="filter:drop-shadow(0 0 5px {{ c.lineColor }})"></path>
+<path d="M304 150 V214" fill="none" stroke="{{ c.lineColor }}" stroke-width="3.4" stroke-linecap="round" style="filter:drop-shadow(0 0 7px {{ c.lineColor }})"></path>
+<path d="M304 258 V300 A34 34 0 0 1 270 334 H244" fill="none" stroke="{{ c.lineColor }}" stroke-width="1.8" stroke-opacity="0.4" stroke-linecap="round"></path>
+<path d="M96 334 H40 A34 34 0 0 1 6 300 V268" fill="none" stroke="{{ c.lineColor }}" stroke-width="2.6" stroke-opacity="0.55" stroke-linecap="round"></path>
+<path d="M6 190 V236" fill="none" stroke="{{ c.lineColor }}" stroke-width="1.6" stroke-opacity="0.3" stroke-linecap="round"></path>
 <path d="M132 334 H186" fill="none" stroke="#FFFFFF" stroke-width="3.4" stroke-opacity="0.9" stroke-linecap="round" style="filter:drop-shadow(0 0 6px #FFFFFF)"></path>
 <path d="M140 6 H186" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round"></path>
 <path d="M6 72 V104" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-opacity="0.45" stroke-linecap="round"></path>
 <path d="M304 108 V138" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-opacity="0.35" stroke-linecap="round"></path>
-<path d="M28 120 L39 129 H105 L116 120" fill="none" stroke="{{ c.brand }}" stroke-width="2.2" stroke-opacity="0.9" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 5px {{ c.brand }})"></path>
-<path d="M50 133 H94" fill="none" stroke="{{ c.brand }}" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"></path>
+<path d="M28 120 L39 129 H105 L116 120" fill="none" stroke="{{ c.lineColor }}" stroke-width="2.2" stroke-opacity="0.9" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 5px {{ c.lineColor }})"></path>
+<path d="M50 133 H94" fill="none" stroke="{{ c.lineColor }}" stroke-width="1" stroke-opacity="0.45" stroke-linecap="round"></path>
 </svg>
 <div style="{{ c.artStyle }}">
 <sc-if value="{{ c.noLogo }}" hint-placeholder-val="{{ true }}">
@@ -189,17 +205,18 @@ a:hover{color:#01185A}
 </div>
 </sc-for>
 </div>
-<div style="flex:none;display:flex;justify-content:center;gap:5px;padding:0 0 10px">
+<div style="position:relative;flex:none;display:flex;justify-content:center;gap:5px;padding:0 0 14px">
 <sc-for list="{{ cardDots }}" as="d" hint-placeholder-count="8">
 <div style="{{ d.style }}"></div>
 </sc-for>
 </div>
+</div>
 
-<div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div style="{{ navStyleX }}">
+<div onClick="{{ goHome }}" style="{{ navHomeX }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
+<div onClick="{{ goExplore }}" style="{{ navTradeX }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchiveX }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRankingX }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -1232,6 +1249,10 @@ class Component extends DCLogic {
   navItem(on){
     return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#A9AEC4');
   }
+  // 어두운 스테이지 위에 놓이는 네비 (종목 고르기 화면)
+  navItemX(on){
+    return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#7F8CA8');
+  }
 
   renderVals(){
     const s = this.state, m = this.me(), st = this.stock(), u = this.uni();
@@ -1299,7 +1320,7 @@ class Component extends DCLogic {
         brand: B,
 
         // 카드 몸체 — 좌상단 브랜드 광원, 중앙은 깊게, 우하단은 검정에 가깝게
-        cardStyle: 'position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + B + 'B3',
+        cardStyle: 'position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + CL + 'B3',
         sheenStyle: 'position:absolute;left:-20%;top:-20%;right:-20%;bottom:-20%;pointer-events:none;background:linear-gradient(122deg,rgba(255,255,255,0) 34%,rgba(255,255,255,0.075) 50%,rgba(255,255,255,0) 63%)',
         // 격자는 차트 주변에서만 아주 옅게
         gridStyle: 'position:absolute;left:150px;top:212px;width:140px;height:112px;pointer-events:none;opacity:0.4;background-image:linear-gradient(' + B + '26 1px,transparent 1px),linear-gradient(90deg,' + B + '26 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%);mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%)',
@@ -1319,6 +1340,14 @@ class Component extends DCLogic {
         pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
       };
     });
+
+    // 카드 스테이지 — 지금 보이는 카드의 색을 배경 조명에 반영한다.
+    // 색만 background-color로 바꾸고 모양은 마스크로 고정해야 전환이 부드럽다(그라데이션은 보간되지 않는다).
+    const stCur = list[Math.max(0, Math.min(s.cardIndex, list.length - 1))] || {};
+    const stB = stCur.brand || '#5B87E8';
+    const stC = stCur.lineColor || up;
+    const stMask = (shape) => '-webkit-mask-image:' + shape + ';mask-image:' + shape;
+    const stLayer = (color, op, shape) => 'position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;opacity:' + op + ';background-color:' + color + ';transition:background-color 420ms ease;' + stMask(shape);
 
     const holdingCards = m.holdings.map(h => {
       const x = u.stocks.filter(y => y.code === h.code)[0];
@@ -1462,15 +1491,34 @@ class Component extends DCLogic {
       sectorChips: u.sectors.map(x => ({
         name: x.name, emoji: x.emoji,
         style: 'display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:' + (x.id === s.sectorId ? '700' : '500') + ';white-space:nowrap;cursor:pointer;' + (x.id === s.sectorId
-          ? 'color:#fff;background:linear-gradient(180deg,#0A2E7A 0%,#01185A 100%);box-shadow:0 6px 12px -4px rgba(1,24,90,0.4),inset 0 1.5px 1px rgba(255,255,255,0.25)'
-          : 'color:#5C6280;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 4px 9px -4px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)'),
+          ? 'color:#fff;background:linear-gradient(180deg,#FF7FB4 0%,#F5327F 100%);box-shadow:0 6px 14px -4px rgba(245,50,127,0.5),0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)'
+          : 'color:#5C6280;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(240,240,250,0.78) 100%);box-shadow:0 5px 12px -5px rgba(70,50,120,0.28),inset 0 1.5px 1px rgba(255,255,255,0.95),inset 0 0 0 1px rgba(120,110,180,0.10)'),
         pick: () => this.set({ sectorId: x.id, cardIndex: 0 })
       })),
       sectorTitle: this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
       cards: list,
       cardDots: list.map((x, i) => ({
-        style: 'width:' + (i === s.cardIndex ? '18px' : '6px') + ';height:6px;border-radius:999px;transition:width .18s ease;background:' + (i === s.cardIndex ? '#F5327F' : '#D5D8E8')
+        style: 'width:' + (i === s.cardIndex ? '18px' : '6px') + ';height:6px;border-radius:999px;transition:width .18s ease;background:' + (i === s.cardIndex ? '#F5327F' : 'rgba(255,255,255,0.22)') + (i === s.cardIndex ? ';box-shadow:0 0 10px -1px #F5327F' : '')
       })),
+
+      // 상단은 밝게 두고 아래로 갈수록 어두워진다 — 스테이지와 직선으로 갈리지 않게
+      exploreBgStyle: 'position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2F1F8 0%,#EDEEF7 52%,#E4E6F2 100%)',
+      // 스테이지 본체 — 화면 좌우 전체를 쓰고, 위쪽 경계는 부드럽게 페이드인
+      stageStyle: 'position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(180deg,rgba(23,23,42,0) 0%,rgba(23,23,42,0.55) 4%,#17172A 11%,#0B1022 46%,#050816 100%)',
+      stageBrand: stLayer(stB, '0.20', 'radial-gradient(circle at 50% 38%,#000 0%,rgba(0,0,0,0.40) 32%,rgba(0,0,0,0) 62%)'),
+      stageChange: stLayer(stC, '0.12', 'radial-gradient(circle at 50% 76%,#000 0%,rgba(0,0,0,0) 48%)'),
+      // 카드 뒤 넓은 방사형 광원
+      stageAura: 'position:absolute;left:50%;top:45%;width:430px;height:340px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;opacity:0.26;filter:blur(26px);background-color:' + stB + ';transition:background-color 420ms ease;' + stMask('radial-gradient(ellipse at center,#000 0%,rgba(0,0,0,0.45) 36%,rgba(0,0,0,0) 72%)'),
+      stageRing: 'position:absolute;left:50%;top:44%;width:322px;height:322px;transform:translate(-50%,-50%);border-radius:999px;pointer-events:none;border:1px solid rgba(255,255,255,0.055);box-shadow:0 0 0 24px rgba(255,255,255,0.022)',
+      stageGrid: 'position:absolute;left:-12%;right:-12%;bottom:0;height:36%;pointer-events:none;opacity:0.10;background-image:linear-gradient(rgba(255,255,255,0.55) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.55) 1px,transparent 1px);background-size:34px 30px;transform:perspective(300px) rotateX(62deg);transform-origin:bottom center;' + stMask('linear-gradient(180deg,rgba(0,0,0,0) 0%,#000 58%)'),
+      stageVignette: 'position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;background:radial-gradient(120% 78% at 50% 44%,rgba(0,0,0,0) 42%,rgba(0,0,0,0.42) 100%)',
+      // 카드 바닥 — 흐릿한 타원 그림자 + 아주 약한 반사광
+      stageFloor: 'position:absolute;left:50%;bottom:52px;width:262px;height:30px;transform:translateX(-50%);border-radius:50%;pointer-events:none;filter:blur(9px);background:radial-gradient(closest-side,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0) 100%)',
+      stageBounce: 'position:absolute;left:50%;bottom:44px;width:180px;height:12px;transform:translateX(-50%);border-radius:50%;pointer-events:none;opacity:0.16;filter:blur(7px);background-color:' + stC + ';transition:background-color 420ms ease',
+      stageDust: 'position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none',
+      stageDustColor: stB,
+      navStyleX: 'flex:none;display:flex;padding-bottom:14px;background:linear-gradient(180deg,rgba(5,8,22,0) 0%,#050816 36%)',
+      navHomeX: this.navItemX(false), navTradeX: this.navItemX(true), navArchiveX: this.navItemX(false), navRankingX: this.navItemX(false),
       cardsRef: (el) => { this.cardsEl = el; },
       cardsScroll: (e) => {
         const el = e.currentTarget;

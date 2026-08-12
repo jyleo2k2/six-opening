@@ -1,26 +1,19 @@
-<meta charset="utf-8">
-<title>게임형 종목카드 51</title>
-<style>
-  body{font-family:'Pretendard','Malgun Gothic',sans-serif;background:#04060D;margin:0;padding:26px;color:#E8EEFB}
-  h1{font-size:20px;margin:0 0 6px}
-  p.s{color:#8095BC;font-size:13px;margin:0 0 22px}
-  h2{font-size:14px;color:#8095BC;margin:32px 0 14px}
-  .row{display:flex;gap:22px;flex-wrap:wrap}
-</style>
-<h1>게임형 종목카드 51장</h1>
-<p class="s">앱과 같은 데이터로 그립니다 — 가격·등락률·차트 모두 <code>/api/universe</code>(키움) 값입니다. 상승 빨강 / 하락 파랑.</p>
-<div id="out"></div>
-<script src="/api/universe"></script>
-<script>
+/* 종목 카드 렌더러 (검토용 페이지 공용)
+ * window.KW_CARD(stock, universe, opt) → 카드 HTML 문자열
+ * opt.outer : 카드 바깥 처리 — 'glow'(어두운 배경용, 기본) | 'aura'(밝은 배경용) | 'flat'
+ * 앱 본체(app.html)는 자체 런타임이라 같은 값을 복제해 쓴다. 수치를 바꾸면 양쪽 다 고칠 것.
+ */
 (function () {
-  var SEC = { semi:'반도체', game:'게임', food:'식품', auto:'자동차', enter:'엔터', beauty:'화장품', air:'항공', ship:'조선', defense:'방산', energy:'에너지', retail:'유통', logi:'물류', bank:'은행·금융' };
-  var u = window.KW_UNIVERSE;
-  if (!u) { document.getElementById('out').textContent = 'universe 로드 실패'; return; }
-  var mixW = function (hx, w) { var n = parseInt(hx.slice(1), 16); var c = [(n>>16)&255,(n>>8)&255,n&255].map(function(v){return Math.round(v+(255-v)*w);}); return '#' + c.map(function(v){return v.toString(16).padStart(2,'0');}).join(''); };
+  var mixW = function (hx, w) {
+    var n = parseInt(hx.slice(1), 16);
+    var c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (v) { return Math.round(v + (255 - v) * w); });
+    return '#' + c.map(function (v) { return v.toString(16).padStart(2, '0'); }).join('');
+  };
   var G = function (s) { return ' style="filter:drop-shadow(0 0 ' + s + ')"'; };
 
-  function card(x) {
-    var br = (u.brands || {})[x.code] || { cat:'', color:'#5B87E8', dark:false };
+  window.KW_CARD = function (x, u, opt) {
+    opt = opt || {};
+    var br = (u.brands || {})[x.code] || { cat: '', color: '#5B87E8', dark: false };
     var B = br.color, BL = mixW(B, 0.45), BI = mixW(B, 0.66);
     var up = x.change >= 0, CL = up ? '#E8322E' : '#1668DC', CB = mixW(CL, 0.42);
     var logo = (u.logos || {})[x.code] || '';
@@ -30,8 +23,21 @@
     var last = pts[pts.length - 1] || [W - PR, H / 2];
     var priceText = x.price.toLocaleString('ko-KR');
     var pf = priceText.length >= 9 ? 24 : priceText.length === 8 ? 26 : priceText.length === 7 ? 28 : 30;
+    var gid = 'g' + x.code + (opt.key || '');
 
-    return '<div style="position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + CL + 'B3">'
+    // 카드 바깥 — 배경 밝기에 따라 다르게
+    var outer = opt.outer || 'glow';
+    var shadow;
+    if (outer === 'aura') {
+      // 밝은 배경: 넓은 번짐은 사라지므로 짧고 진한 색 그림자 + 선명한 림
+      shadow = '0 18px 30px -14px rgba(20,16,40,0.5),0 10px 26px -10px ' + CL + '8C,0 0 0 1.5px ' + CL + '73';
+    } else if (outer === 'flat') {
+      shadow = '0 20px 38px -16px rgba(20,16,40,0.45)';
+    } else {
+      shadow = '0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + CL + 'B3';
+    }
+
+    return '<div style="position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:' + shadow + '">'
       + '<div style="position:absolute;left:150px;top:212px;width:140px;height:112px;pointer-events:none;opacity:0.4;background-image:linear-gradient(' + B + '26 1px,transparent 1px),linear-gradient(90deg,' + B + '26 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%);mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%)"></div>'
       + '<div style="position:absolute;left:-20%;top:-20%;right:-20%;bottom:-20%;pointer-events:none;background:linear-gradient(122deg,rgba(255,255,255,0) 34%,rgba(255,255,255,0.075) 50%,rgba(255,255,255,0) 63%)"></div>'
       + '<svg width="310" height="340" viewBox="0 0 310 340" style="position:absolute;left:0;top:0;pointer-events:none">'
@@ -69,21 +75,19 @@
       + '<div style="position:absolute;left:28px;top:' + (270 - pf) + 'px;font-size:' + pf + 'px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.035em;line-height:1;text-shadow:0 3px 14px rgba(0,0,0,0.75)">' + priceText + '</div>'
       + '<div style="position:absolute;left:28px;top:284px;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + CB + ';background:linear-gradient(180deg,rgba(255,255,255,0.10) 0%,rgba(0,0,0,0.42) 100%),' + CL + '26;box-shadow:inset 0 1px 0 rgba(255,255,255,0.30),inset 0 0 0 1.5px ' + CL + 'B3,0 0 18px -6px ' + CL + '">' + (up ? '▲ ' : '▼ ') + Math.abs(x.change).toFixed(2) + '%</div>'
       + '<svg width="127" height="104" viewBox="0 0 127 104" style="position:absolute;left:155px;top:212px;pointer-events:none">'
-      + '<defs><linearGradient id="ar' + x.code + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + CL + '" stop-opacity="0.42"></stop><stop offset="1" stop-color="' + CL + '" stop-opacity="0"></stop></linearGradient></defs>'
-      + '<path d="M' + xy.join(' L ') + ' L ' + (W - PR) + ',' + H + ' L ' + PL + ',' + H + ' Z" fill="url(#ar' + x.code + ')"></path>'
+      + '<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + CL + '" stop-opacity="0.42"></stop><stop offset="1" stop-color="' + CL + '" stop-opacity="0"></stop></linearGradient></defs>'
+      + '<path d="M' + xy.join(' L ') + ' L ' + (W - PR) + ',' + H + ' L ' + PL + ',' + H + ' Z" fill="url(#' + gid + ')"></path>'
       + '<polyline points="' + xy.join(' ') + '" fill="none" stroke="' + CL + '" stroke-width="9" stroke-opacity="0.13" stroke-linejoin="round" stroke-linecap="round"></polyline>'
       + '<polyline points="' + xy.join(' ') + '" fill="none" stroke="' + CL + '" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"' + G('5px ' + CL) + '></polyline>'
       + '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="10" fill="' + CL + '" fill-opacity="0.24"></circle>'
       + '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="4.2" fill="#FFFFFF"' + G('7px ' + CL) + '></circle></svg>'
       + '</div>';
-  }
+  };
 
-  var html = '';
-  Object.keys(SEC).forEach(function (s) {
-    var list = u.stocks.filter(function (x) { return x.sector === s; });
-    if (!list.length) return;
-    html += '<h2>' + SEC[s] + ' · ' + list.length + '곳</h2><div class="row">' + list.map(card).join('') + '</div>';
-  });
-  document.getElementById('out').innerHTML = html;
+  // 카드 뒤에 까는 아우라 판 (밝은 배경용) — 카드보다 크게, 아주 옅게
+  window.KW_AURA = function (x, u, scale) {
+    var up = x.change >= 0, CL = up ? '#E8322E' : '#1668DC';
+    var s = scale || 1.35;
+    return 'position:absolute;left:50%;top:50%;width:' + Math.round(310 * s) + 'px;height:' + Math.round(340 * s) + 'px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;background:radial-gradient(closest-side,' + CL + '2E 0%,' + CL + '14 45%,rgba(0,0,0,0) 78%)';
+  };
 })();
-</script>

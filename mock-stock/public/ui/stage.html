@@ -1,19 +1,21 @@
 <meta charset="utf-8">
-<title>게임형 종목카드 51</title>
+<title>종목 고르기 — 배경 시안 비교</title>
 <style>
-  body{font-family:'Pretendard','Malgun Gothic',sans-serif;background:#04060D;margin:0;padding:26px;color:#E8EEFB}
+  body{font-family:'Pretendard','Malgun Gothic',sans-serif;background:#1A1C22;margin:0;padding:28px;color:#E8EEFB}
   h1{font-size:20px;margin:0 0 6px}
-  p.s{color:#8095BC;font-size:13px;margin:0 0 22px}
-  h2{font-size:14px;color:#8095BC;margin:32px 0 14px}
-  .row{display:flex;gap:22px;flex-wrap:wrap}
+  p.s{color:#9AA3B8;font-size:13px;margin:0 0 24px}
+  .rack{display:flex;gap:34px;flex-wrap:wrap;align-items:flex-start}
+  .item{width:402px}
+  .cap{font-size:14px;font-weight:800;margin:0 0 4px}
+  .note{font-size:12.5px;color:#9AA3B8;margin:0 0 12px;line-height:1.5;height:34px}
+  .phone{position:relative;width:402px;height:874px;border-radius:40px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 </style>
-<h1>게임형 종목카드 51장</h1>
-<p class="s">앱과 같은 데이터로 그립니다 — 가격·등락률·차트 모두 <code>/api/universe</code>(키움) 값입니다. 상승 빨강 / 하락 파랑.</p>
-<div id="out"></div>
+<h1>종목 고르기 — 배경 시안 3안</h1>
+<p class="s">같은 데이터·같은 카드로, 배경 처리만 다르게 그렸습니다. 실제 폰 크기(402×874)입니다.</p>
+<div class="rack" id="out"></div>
 <script src="/api/universe"></script>
 <script>
 (function () {
-  var SEC = { semi:'반도체', game:'게임', food:'식품', auto:'자동차', enter:'엔터', beauty:'화장품', air:'항공', ship:'조선', defense:'방산', energy:'에너지', retail:'유통', logi:'물류', bank:'은행·금융' };
   var u = window.KW_UNIVERSE;
   if (!u) { document.getElementById('out').textContent = 'universe 로드 실패'; return; }
   var mixW = function (hx, w) { var n = parseInt(hx.slice(1), 16); var c = [(n>>16)&255,(n>>8)&255,n&255].map(function(v){return Math.round(v+(255-v)*w);}); return '#' + c.map(function(v){return v.toString(16).padStart(2,'0');}).join(''); };
@@ -30,8 +32,7 @@
     var last = pts[pts.length - 1] || [W - PR, H / 2];
     var priceText = x.price.toLocaleString('ko-KR');
     var pf = priceText.length >= 9 ? 24 : priceText.length === 8 ? 26 : priceText.length === 7 ? 28 : 30;
-
-    return '<div style="position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + CL + 'B3">'
+    return '<div style="position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%,' + B + '5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 30px 56px -18px rgba(0,0,0,0.85),0 0 40px -14px ' + CL + 'B3">'
       + '<div style="position:absolute;left:150px;top:212px;width:140px;height:112px;pointer-events:none;opacity:0.4;background-image:linear-gradient(' + B + '26 1px,transparent 1px),linear-gradient(90deg,' + B + '26 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%);mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%)"></div>'
       + '<div style="position:absolute;left:-20%;top:-20%;right:-20%;bottom:-20%;pointer-events:none;background:linear-gradient(122deg,rgba(255,255,255,0) 34%,rgba(255,255,255,0.075) 50%,rgba(255,255,255,0) 63%)"></div>'
       + '<svg width="310" height="340" viewBox="0 0 310 340" style="position:absolute;left:0;top:0;pointer-events:none">'
@@ -69,8 +70,8 @@
       + '<div style="position:absolute;left:28px;top:' + (270 - pf) + 'px;font-size:' + pf + 'px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.035em;line-height:1;text-shadow:0 3px 14px rgba(0,0,0,0.75)">' + priceText + '</div>'
       + '<div style="position:absolute;left:28px;top:284px;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + CB + ';background:linear-gradient(180deg,rgba(255,255,255,0.10) 0%,rgba(0,0,0,0.42) 100%),' + CL + '26;box-shadow:inset 0 1px 0 rgba(255,255,255,0.30),inset 0 0 0 1.5px ' + CL + 'B3,0 0 18px -6px ' + CL + '">' + (up ? '▲ ' : '▼ ') + Math.abs(x.change).toFixed(2) + '%</div>'
       + '<svg width="127" height="104" viewBox="0 0 127 104" style="position:absolute;left:155px;top:212px;pointer-events:none">'
-      + '<defs><linearGradient id="ar' + x.code + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + CL + '" stop-opacity="0.42"></stop><stop offset="1" stop-color="' + CL + '" stop-opacity="0"></stop></linearGradient></defs>'
-      + '<path d="M' + xy.join(' L ') + ' L ' + (W - PR) + ',' + H + ' L ' + PL + ',' + H + ' Z" fill="url(#ar' + x.code + ')"></path>'
+      + '<defs><linearGradient id="s' + x.code + Math.round(Math.abs(x.change)*100) + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + CL + '" stop-opacity="0.42"></stop><stop offset="1" stop-color="' + CL + '" stop-opacity="0"></stop></linearGradient></defs>'
+      + '<path d="M' + xy.join(' L ') + ' L ' + (W - PR) + ',' + H + ' L ' + PL + ',' + H + ' Z" fill="url(#s' + x.code + Math.round(Math.abs(x.change)*100) + ')"></path>'
       + '<polyline points="' + xy.join(' ') + '" fill="none" stroke="' + CL + '" stroke-width="9" stroke-opacity="0.13" stroke-linejoin="round" stroke-linecap="round"></polyline>'
       + '<polyline points="' + xy.join(' ') + '" fill="none" stroke="' + CL + '" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"' + G('5px ' + CL) + '></polyline>'
       + '<circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="10" fill="' + CL + '" fill-opacity="0.24"></circle>'
@@ -78,12 +79,65 @@
       + '</div>';
   }
 
-  var html = '';
-  Object.keys(SEC).forEach(function (s) {
-    var list = u.stocks.filter(function (x) { return x.sector === s; });
-    if (!list.length) return;
-    html += '<h2>' + SEC[s] + ' · ' + list.length + '곳</h2><div class="row">' + list.map(card).join('') + '</div>';
-  });
-  document.getElementById('out').innerHTML = html;
+  var SECT = [['semi','반도체','🔬'],['game','게임','🎮'],['food','식품','🍜'],['auto','자동차','🚗'],['enter','엔터','🎤'],['beauty','화장품','💄'],['air','항공','✈️']];
+  var list = u.stocks.filter(function (x) { return x.sector === 'semi'; });
+
+  // v: 'light' | 'stage' | 'dark'
+  function screen(v) {
+    var dark = v === 'dark';
+    var ink = dark ? '#EAF0FF' : '#01185A';
+    var sub = dark ? '#8095BC' : '#A9AEC4';
+    var pageBg = dark ? 'radial-gradient(120% 60% at 50% 0%,#101A34 0%,#080C18 55%,#05070E 100%)' : '#F5F2F8';
+    var chipOn = 'font-size:13px;font-weight:700;padding:9px 15px;border-radius:999px;white-space:nowrap;color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:0 5px 11px -3px rgba(214,54,124,.45)';
+    var chipOff = dark
+      ? 'font-size:13px;font-weight:600;padding:9px 15px;border-radius:999px;white-space:nowrap;color:#93A6C8;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09)'
+      : 'font-size:13px;font-weight:600;padding:9px 15px;border-radius:999px;white-space:nowrap;color:#5C6280;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 4px 9px -4px rgba(35,25,80,.18)';
+
+    var h = '<div class="phone" style="background:' + pageBg + '">';
+    // 상태바 자리
+    h += '<div style="height:59px"></div>';
+    // 헤더
+    h += '<div style="display:flex;align-items:center;gap:12px;padding:6px 18px 10px">'
+      + '<div style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-size:22px;border-radius:14px;color:' + ink + ';background:' + (dark ? 'rgba(255,255,255,.07)' : 'linear-gradient(180deg,#FCFCFE 0%,#EFF0F7 100%)') + ';box-shadow:' + (dark ? 'inset 0 0 0 1px rgba(255,255,255,.10)' : '0 6px 12px -5px rgba(35,25,80,.2)') + '">‹</div>'
+      + '<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:' + ink + '">어떤 회사를 살까?</div><div style="width:38px"></div></div>';
+    // 섹터 칩
+    h += '<div style="display:flex;gap:8px;padding:2px 16px 12px;overflow:hidden">';
+    SECT.forEach(function (s, i) { h += '<div style="' + (i === 0 ? chipOn : chipOff) + '"><span style="margin-right:5px">' + s[2] + '</span>' + s[1] + '</div>'; });
+    h += '</div>';
+
+    // 무대(stage)안일 때만 어두운 패널로 감싼다
+    var stageOpen = '', stageClose = '';
+    if (v === 'stage') {
+      stageOpen = '<div style="position:relative;margin:0 10px;border-radius:32px;padding:14px 0 10px;background:radial-gradient(90% 70% at 50% 0%,#141F3D 0%,#0A1024 55%,#06080F 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 14px 30px -18px rgba(0,0,0,.8)">';
+      stageClose = '</div>';
+    }
+    h += stageOpen;
+    var titleInk = (v === 'light') ? '#01185A' : '#EAF0FF';
+    var titleSub = (v === 'light') ? '#A9AEC4' : '#8095BC';
+    h += '<div style="display:flex;align-items:baseline;justify-content:space-between;padding:0 22px 10px">'
+      + '<span style="font-size:13.5px;font-weight:700;color:' + titleInk + '">반도체 회사 ' + list.length + '곳</span>'
+      + '<span style="font-size:12.5px;font-weight:500;color:' + titleSub + '">손가락으로 슉 밀어봐 →</span></div>';
+    h += '<div style="display:flex;align-items:center;gap:18px;padding:6px 46px 14px;overflow:hidden">' + list.map(card).join('') + '</div>';
+    h += '<div style="display:flex;justify-content:center;gap:5px;padding:0 0 10px">';
+    list.forEach(function (_, i) { h += '<div style="width:' + (i === 0 ? 18 : 6) + 'px;height:6px;border-radius:999px;background:' + (i === 0 ? '#F5327F' : (v === 'light' ? '#D8DAE8' : 'rgba(255,255,255,.22)')) + '"></div>'; });
+    h += '</div>' + stageClose;
+
+    // 하단 네비
+    h += '<div style="position:absolute;left:0;right:0;bottom:0;display:flex;padding-bottom:14px;background:' + (dark ? 'linear-gradient(180deg,rgba(5,7,14,0) 0%,#05070E 34%)' : 'linear-gradient(180deg,rgba(245,242,248,0) 0%,#F5F2F8 34%)') + '">';
+    [['🏠','홈',0],['📈','모의투자',1],['📔','아카이브',0],['🏆','랭킹',0]].forEach(function (n) {
+      h += '<div style="flex:1;text-align:center;padding:9px 0 6px;color:' + (n[2] ? '#F5327F' : (dark ? '#7F8CA8' : '#A9AEC4')) + '"><div style="font-size:19px">' + n[0] + '</div><div style="font-size:12px;font-weight:600;margin-top:2px">' + n[1] + '</div></div>';
+    });
+    h += '</div></div>';
+    return h;
+  }
+
+  var items = [
+    ['A안 · 카드 영역만 어둡게', '캐러셀 구간에만 어두운 무대를 깔았습니다. 카드 글로우가 살고, 헤더·섹터칩·네비는 앱의 밝은 톤을 유지합니다.', 'stage'],
+    ['B안 · 화면 전체 어둡게', '종목 고르기 화면만 다크 테마로. 몰입감이 가장 크지만 홈·계좌·아카이브와 톤이 갈립니다.', 'dark'],
+    ['C안 · 현재 상태', '밝은 배경 그대로. 흰 테이블에 카드를 올린 느낌이지만 카드 외곽 발광이 거의 보이지 않습니다.', 'light']
+  ];
+  document.getElementById('out').innerHTML = items.map(function (it) {
+    return '<div class="item"><div class="cap">' + it[0] + '</div><div class="note">' + it[1] + '</div>' + screen(it[2]) + '</div>';
+  }).join('');
 })();
 </script>
