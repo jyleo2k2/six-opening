@@ -13,6 +13,27 @@ assert.equal(routeMessage("ETF가 뭐야?", stockContext).intent, "financial_con
 assert.equal(routeMessage("매수 어떻게 해?", stockContext).route, "faq");
 assert.equal(routeMessage("매수 어떻게 해?", stockContext).uiAction?.target, "order");
 assert.equal(routeMessage("이 회사는 뭐 하는 회사야?", stockContext).tool, "approved_stock_facts");
+assert.deepEqual(routeMessage("이 회사는 뭐 하는 회사야?", stockContext).stockFact, {
+  stockId: "KRX:005930",
+  topic: "company",
+});
+assert.deepEqual(routeMessage("우리은행이 뭐임", { screen: "home" }).stockFact, {
+  stockId: "KRX:316140",
+  topic: "company",
+});
+assert.deepEqual(routeMessage("키움증권은 어떻게 돈 벌어?", { screen: "home" }).stockFact, {
+  stockId: "KRX:039490",
+  topic: "business",
+});
+assert.deepEqual(routeMessage("삼성전자 2024년 실적 알려줘", { screen: "home" }).stockFact, {
+  stockId: "KRX:005930",
+  topic: "financial",
+});
+assert.equal(routeMessage("GS리테일은 뭐 하는 회사야?", { screen: "home" }).stockFact, undefined);
+assert.deepEqual(routeMessage("GS는 뭐 하는 회사야?", { screen: "home" }).stockFact, {
+  stockId: "KRX:078930",
+  topic: "company",
+});
 assert.equal(routeMessage("10주면 얼마야?", orderContext).text.includes("125,000원"), true);
 assert.equal(routeMessage("내가 지난번에 왜 골랐어?", stockContext).tool, "own_trade_records");
 assert.equal(routeMessage("내 투자 성향 알려줘", stockContext).tool, "own_behavior_profile");

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   isAllowedUiAction,
   isExplainAction,
+  isStockExploreAction,
   parseChatRequest,
   sanitizeActionPayload,
 } from "./contracts";
@@ -99,6 +100,52 @@ assert.equal(
   true,
 );
 assert.equal(isExplainAction({ kind: "explain", turn: { scriptId: "term:per", stage: "brief", prompt: "?", choices: [] } }), false);
+
+const stockExplore = {
+  stockId: "KRX:316140" as const,
+  shownTopics: ["company"] as const,
+  choiceId: "business" as const,
+};
+assert.deepEqual(
+  parseChatRequest({
+    message: "우리금융지주는 어떻게 돈을 벌어?",
+    context: { screen: "stock" },
+    stockExplore,
+  }),
+  {
+    message: "우리금융지주는 어떻게 돈을 벌어?",
+    context: { screen: "stock" },
+    stockExplore,
+  },
+);
+assert.equal(
+  parseChatRequest({
+    message: "실적 알려줘",
+    context: { screen: "stock" },
+    stockExplore: { ...stockExplore, choiceId: "financial" },
+  }),
+  null,
+);
+assert.equal(
+  parseChatRequest({
+    message: "계속",
+    context: { screen: "stock" },
+    stockExplore: { ...stockExplore, stockId: "KRX:999999" },
+  }),
+  null,
+);
+assert.equal(
+  isStockExploreAction({
+    kind: "stock-explore",
+    turn: {
+      stockId: "KRX:316140",
+      shownTopics: ["company"],
+      prompt: "이것도 알려줄까?",
+      choices: [{ id: "business", label: "어떻게 돈을 벌어?" }],
+    },
+  }),
+  true,
+);
 
 assert.equal(isAllowedUiAction({ type: "open_screen", target: "archive" }), true);
 assert.equal(isAllowedUiAction({ type: "open_url", target: "https://example.com" }), false);

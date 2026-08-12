@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { CHATBOT_KNOWLEDGE } from "../../../shared/data/chatbot-knowledge";
+import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput, SAFE_REFUSAL } from "../../../shared/llm/filter";
-import { isExplainAction } from "./contracts";
+import { isExplainAction, isStockExploreAction } from "./contracts";
 import { CHAT_FALLBACK, createChatOutcome } from "./orchestrator";
 import { advanceExplain } from "./explain";
 import type { ChatSession } from "./session";
@@ -160,7 +161,57 @@ async function main() {
   );
   assert.equal(stockFacts.source, "tool");
   assert.equal(stockFacts.gate, "passed");
-  assert.equal(isExplainAction(stockFacts.action), true);
+  assert.equal(isStockExploreAction(stockFacts.action), true);
+  assert.equal(stockFacts.response.text.startsWith("궁금한 회사를 잘 짚었어 —"), true);
+
+  // 51종 모두 네 주제를 한 번씩만 제공하고 마지막에는 다른 종목 전환을 제안한다.
+  for (const stock of STOCKS) {
+    const stockContext = {
+      screen: "stock" as const,
+      stockId: stock.id,
+      stockName: stock.name,
+    };
+    let outcome = await createChatOutcome(
+      { message: "이 회사는 뭐 하는 회사야?", context: stockContext },
+      session,
+      { generateAnswer: noModel },
+    );
+    const seenTexts = new Set<string>();
+
+    for (let turnIndex = 0; turnIndex < 4; turnIndex += 1) {
+      assert.equal(outcome.source, "tool", `${stock.name} ${turnIndex + 1}번째 주제가 Tool 응답이 아니야`);
+      assert.equal(outcome.gate, "passed", `${stock.name} ${turnIndex + 1}번째 주제가 게이트를 통과하지 못했어`);
+      assert.equal(isStockExploreAction(outcome.action), true, `${stock.name} 탐색 action이 없어`);
+      assert.equal(seenTexts.has(outcome.response.text), false, `${stock.name}에서 같은 설명이 반복됐어`);
+      seenTexts.add(outcome.response.text);
+      if (!isStockExploreAction(outcome.action)) break;
+
+      const { turn } = outcome.action;
+      assert.equal(new Set(turn.shownTopics).size, turn.shownTopics.length);
+      assert.equal(turn.shownTopics.length, turnIndex + 1);
+      if (turnIndex === 3) {
+        assert.equal(turn.choices[0]?.id, "ask-other");
+        assert.equal(turn.prompt.includes("모두 살펴봤어"), true);
+        break;
+      }
+
+      const nextChoice = turn.choices[0];
+      outcome = await createChatOutcome(
+        {
+          message: nextChoice.label,
+          context: stockContext,
+          stockExplore: {
+            stockId: turn.stockId,
+            shownTopics: [...turn.shownTopics],
+            choiceId: nextChoice.id,
+          },
+        },
+        session,
+        { generateAnswer: noModel },
+      );
+    }
+    assert.equal(seenTexts.size, 4, `${stock.name} 네 주제가 모두 제공되지 않았어`);
+  }
 
   const simpler = await createChatOutcome(
     {

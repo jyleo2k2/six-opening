@@ -20,6 +20,13 @@ import { generateChatAnswer } from "./openai";
 import { looksLikeNewQuestion } from "./colloquial";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
+import {
+  advanceStockExplore,
+  createStockExploreTurn,
+  formatStockFactAnswer,
+  startStockExplore,
+  type StockExploreStep,
+} from "./stock-explore";
 import { runReadOnlyTool, type ToolExecution } from "./tools";
 
 export const CHAT_FALLBACK =
@@ -135,6 +142,28 @@ function resolveExplainStep(
   return routed.explainScript ? startExplain(routed.explainScript) : null;
 }
 
+function resolveStockExploreStep(
+  request: ChatRequest,
+  routed: ReturnType<typeof routeMessage>,
+): StockExploreStep | "invalid" | null {
+  const protectedRoute =
+    routed.route === "refusal" ||
+    routed.route === "safety" ||
+    routed.route === "outOfScope";
+  if (protectedRoute) return null;
+
+  if (request.stockExplore) {
+    return advanceStockExplore(request.stockExplore) ?? "invalid";
+  }
+  if (routed.stockFact) {
+    return (
+      startStockExplore(routed.stockFact.stockId, routed.stockFact.topic) ??
+      "invalid"
+    );
+  }
+  return null;
+}
+
 function dapieFeedback(
   route: ChatRoute,
   intent: ChatIntent,
@@ -155,6 +184,7 @@ export async function createChatOutcome(
   const onStatus = dependencies.onStatus ?? (() => undefined);
   const routed = routeMessage(request.message, request.context);
   const explainStep = resolveExplainStep(request, routed);
+  const stockExploreStep = resolveStockExploreStep(request, routed);
   let response: ChatResponse = {
     text: routed.text,
     suggestedQuestions: routed.suggestedQuestions,
@@ -164,10 +194,47 @@ export async function createChatOutcome(
   let toolExecution: ToolExecution | undefined;
   let failure: ChatOutcome["failure"];
   let explainAction: ChatActionPayload | undefined;
+  let stockExploreAction: ChatActionPayload | undefined;
 
   onStatus("질문을 안전하게 확인하는 중");
 
-  if (explainStep === "invalid") {
+  if (stockExploreStep === "invalid") {
+    response = {
+      text: "그 종목 정보 단계는 이어 갈 수 없어. 종목 이름과 궁금한 점을 다시 적어 줘.",
+    };
+  } else if (stockExploreStep?.kind === "end") {
+    response = { text: stockExploreStep.text };
+  } else if (stockExploreStep?.kind === "topic") {
+    onStatus("승인된 종목 정보를 확인하는 중");
+    try {
+      toolExecution = await (dependencies.runTool ?? runReadOnlyTool)(
+        "approved_stock_facts",
+        { ...request.context, stockId: stockExploreStep.stockId },
+        session,
+        stockExploreStep.topic,
+      );
+      response = toolExecution.response;
+      source = "tool";
+      if (toolExecution.status === "ok") {
+        response = {
+          ...response,
+          text: formatStockFactAnswer(
+            stockExploreStep.topic,
+            response.text,
+          ),
+        };
+        const turn = createStockExploreTurn(
+          stockExploreStep.stockId,
+          stockExploreStep.shownTopics,
+        );
+        if (turn) stockExploreAction = { kind: "stock-explore", turn };
+      }
+    } catch {
+      failure = "tool_error";
+      response = { text: CHAT_FALLBACK };
+      source = "fixed";
+    }
+  } else if (explainStep === "invalid") {
     response = {
       text: "그 설명 단계는 이어 갈 수 없어. 궁금한 용어를 다시 물어봐 줘. 🐻",
     };
@@ -230,7 +297,7 @@ export async function createChatOutcome(
     routed.route === "refusal" ||
     routed.route === "safety" ||
     routed.route === "outOfScope";
-  if (explainStep === null && !protectedRoute) {
+  if (explainStep === null && stockExploreStep === null && !protectedRoute) {
     const guided = startGuidedExplain(
       response.text,
       dapieFeedback(routed.route, routed.intent, source),
@@ -251,9 +318,11 @@ export async function createChatOutcome(
     ? sanitizeActionPayload(response)
     : undefined;
   const outputAction = gate.ok
-    ? explainAction
-      ? { ...standardAction, ...explainAction }
-      : standardAction
+    ? stockExploreAction
+      ? { ...standardAction, ...stockExploreAction }
+      : explainAction
+        ? { ...standardAction, ...explainAction }
+        : standardAction
     : undefined;
   const gatedResponse: ChatResponse = {
     text: gate.ok
@@ -268,11 +337,14 @@ export async function createChatOutcome(
   return {
     response: gatedResponse,
     ...(outputAction ? { action: outputAction } : {}),
-    route: routed.route,
-    intent: routed.intent,
+    route: stockExploreStep ? "tool" : routed.route,
+    intent: stockExploreStep ? "stock_facts" : routed.intent,
     source,
-    ...(routed.tool ? { tool: routed.tool } : {}),
-    ...(toolExecution ? { toolStatus: toolExecution.status } : {}),
+    ...(toolExecution
+      ? { tool: toolExecution.tool, toolStatus: toolExecution.status }
+      : routed.tool
+        ? { tool: routed.tool }
+        : {}),
     gate: gate.ok ? "passed" : "replaced",
     ...(!gate.ok ? { gateReason: gate.reason } : {}),
     ...(failure ? { failure } : {}),

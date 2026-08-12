@@ -15,6 +15,29 @@ export type ChatUiAction = {
   target: ChatScreen;
 };
 
+export const STOCK_FACT_TOPICS = [
+  "company",
+  "business",
+  "industry",
+  "financial",
+] as const;
+
+export type StockFactTopic = (typeof STOCK_FACT_TOPICS)[number];
+export type StockExploreChoiceId = StockFactTopic | "ask-other" | "done";
+
+export type StockExploreReply = {
+  stockId: `KRX:${string}`;
+  shownTopics: StockFactTopic[];
+  choiceId: StockExploreChoiceId;
+};
+
+export type StockExploreTurn = {
+  stockId: `KRX:${string}`;
+  shownTopics: readonly StockFactTopic[];
+  prompt: string;
+  choices: readonly { id: StockExploreChoiceId; label: string }[];
+};
+
 export const EXPLAIN_STAGES = ["brief", "detail", "example", "followup"] as const;
 
 export type ExplainStage = (typeof EXPLAIN_STAGES)[number];

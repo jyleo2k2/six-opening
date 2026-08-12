@@ -1,10 +1,12 @@
 import { findChatbotKnowledge } from "../../../shared/data/chatbot-knowledge";
+import { STOCKS } from "../../../shared/data/stocks";
 import type {
   ChatContext,
   ExplainScript,
   ChatUiAction,
   ProactiveSignal,
   ReadOnlyChatToolName,
+  StockFactTopic,
 } from "../../../shared/types/chatbot";
 
 export type { ChatContext, ProactiveSignal } from "../../../shared/types/chatbot";
@@ -37,6 +39,10 @@ export type ChatReply = {
   uiAction?: ChatUiAction;
   tool?: ReadOnlyChatToolName;
   explainScript?: ExplainScript;
+  stockFact?: {
+    stockId: `KRX:${string}`;
+    topic: StockFactTopic;
+  };
 };
 
 const RECOMMENDATION_PATTERNS = [
@@ -93,7 +99,35 @@ const OUT_OF_SCOPE_PATTERNS = ["숙제", "게임공략", "날씨", "노래", "�
 const RECORD_PATTERNS = ["내기록", "내거래", "지난거래", "왜골랐", "거래이유", "내보유기간"];
 const PROFILE_PATTERNS = ["내성향", "투자성향", "성향분석", "나는어떤투자"];
 const ARCHIVE_PATTERNS = ["내아카이브", "지난시즌", "시즌기록", "시즌변화", "예전기록"];
-const STOCK_PATTERNS = ["이회사", "무슨회사", "회사뭐", "이종목", "무엇을만들", "어떤일을해"];
+const STOCK_PATTERNS = [
+  "이회사",
+  "무슨회사",
+  "회사뭐",
+  "이종목",
+  "무엇을만들",
+  "어떤일을해",
+  "뭐하는",
+  "뭐임",
+  "돈을벌",
+  "돈벌",
+  "수익구조",
+  "업종",
+  "산업역할",
+  "실적",
+  "매출",
+  "영업이익",
+  "순이익",
+];
+const STOCK_BUSINESS_PATTERNS = ["돈을벌", "돈벌", "수익구조", "어떻게벌"];
+const STOCK_INDUSTRY_PATTERNS = ["업종", "산업", "역할"];
+const STOCK_FINANCIAL_PATTERNS = [
+  "실적",
+  "매출",
+  "영업이익",
+  "순이익",
+  "재무",
+  "2024",
+];
 
 export function normalizeChatInput(input: string) {
   return input.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}%]+/gu, "");
@@ -103,12 +137,47 @@ function includesAny(message: string, patterns: readonly string[]) {
   return patterns.some((pattern) => message.includes(pattern));
 }
 
+const STOCK_NAME_MATCHERS = STOCKS.flatMap((stock) =>
+  [stock.name, ...stock.searchAliases].map((name) => ({
+    stock,
+    name: normalizeChatInput(name),
+  })),
+)
+  .filter((entry) => entry.name.length >= 2)
+  .sort((left, right) => right.name.length - left.name.length);
+
+function findMentionedStock(message: string) {
+  return STOCK_NAME_MATCHERS.find((entry) => {
+    const index = message.indexOf(entry.name);
+    if (index < 0) return false;
+    if (entry.name.length >= 3) return true;
+    if (index !== 0) return false;
+    const tail = message.slice(entry.name.length);
+    return (
+      tail.length === 0 ||
+      /^(?:은|는|이|가|을|를|의|도|에|에서|하고|뭐|무슨|어떤|알려)/.test(tail)
+    );
+  })?.stock;
+}
+
+function findStockFactTopic(message: string): StockFactTopic {
+  if (includesAny(message, STOCK_FINANCIAL_PATTERNS)) return "financial";
+  if (includesAny(message, STOCK_BUSINESS_PATTERNS)) return "business";
+  if (includesAny(message, STOCK_INDUSTRY_PATTERNS)) return "industry";
+  return "company";
+}
+
 function reply(
   route: ChatRoute,
   intent: ChatIntent,
   text: string,
   steps: readonly string[] = [],
-  extras: Partial<Pick<ChatReply, "suggestedQuestions" | "tool" | "uiAction" | "explainScript">> = {},
+  extras: Partial<
+    Pick<
+      ChatReply,
+      "suggestedQuestions" | "tool" | "uiAction" | "explainScript" | "stockFact"
+    >
+  > = {},
 ): ChatReply {
   return { route, intent, text, steps, ...extras };
 }
@@ -204,12 +273,6 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       tool: "own_archive",
     });
   }
-  if (context.screen === "stock" && includesAny(message, STOCK_PATTERNS)) {
-    return reply("tool", "stock_facts", "", ["승인 종목 사실 조회"], {
-      tool: "approved_stock_facts",
-    });
-  }
-
   const knowledge = findChatbotKnowledge(message);
   if (knowledge) {
     return reply(
@@ -224,6 +287,22 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
         ...(knowledge.explainScript ? { explainScript: knowledge.explainScript } : {}),
       },
     );
+  }
+
+  const mentionedStock = findMentionedStock(message);
+  const contextStock =
+    context.screen === "stock" || context.screen === "order"
+      ? STOCKS.find((stock) => stock.id === context.stockId)
+      : undefined;
+  const stock = mentionedStock ?? contextStock;
+  if (stock && (mentionedStock || includesAny(message, STOCK_PATTERNS))) {
+    return reply("tool", "stock_facts", "", ["승인 종목 사실 조회"], {
+      tool: "approved_stock_facts",
+      stockFact: {
+        stockId: stock.id,
+        topic: findStockFactTopic(message),
+      },
+    });
   }
 
   return reply(
