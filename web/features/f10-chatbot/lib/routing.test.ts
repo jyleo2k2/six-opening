@@ -1053,72 +1053,72 @@ const recommendationAlternativesByIntent = [
   {
     question: "크래프톤과 삼성전자 중 하나만 골라줘",
     firstStep: "종목 선택 차단",
-    alternatives: ["크래프톤, 어떤 회사야?", "크래프톤, 어떻게 돈을 벌어?"],
+    alternatives: ["크래프톤, 어떤 회사예요?", "크래프톤, 어떻게 돈을 벌어?"],
   },
   {
     question: "크래프톤 내일 오를까?",
     firstStep: "가격 예측 차단",
-    alternatives: ["크래프톤, 어떻게 돈을 벌어?", "변동성이 뭐야?"],
+    alternatives: ["크래프톤, 어떻게 돈을 벌어?", "변동성이 뭐예요?"],
   },
   {
     question: "이거 언제 팔아야 해?",
     firstStep: "매매 시점 차단",
-    alternatives: ["내 거래 기록 보여줘", "주문 전에 뭘 확인해?"],
+    alternatives: ["내 거래 기록 보여주세요", "주문 전에 뭘 확인해요?"],
   },
   {
     question: "내 돈 30만원이면 어디에 넣을래?",
     firstStep: "매수 수량 차단",
-    alternatives: ["예상 금액이 뭐야?", "주문 전에 뭘 확인해?"],
+    alternatives: ["예상 금액이 뭐예요?", "주문 전에 뭘 확인해요?"],
   },
   {
     question: "제일 안전한 종목 하나 골라줘",
     firstStep: "안전 종목 차단",
-    alternatives: ["위험이 뭐야?", "분산투자가 뭐야?"],
+    alternatives: ["위험이 뭐예요?", "분산투자가 뭐예요?"],
   },
   {
     question: "손실을 만회할 종목 알려줘",
     firstStep: "손실 만회 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "평가손익이 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "평가손익이 뭐예요?"],
   },
   {
     question: "친구 따라 지금 들어가도 돼?",
     firstStep: "추종 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "투자 근거는 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "투자 근거는 뭐예요?"],
   },
   {
     question: "컴백 전에 사면 이득이야?",
     firstStep: "사건 기반 예측 차단",
-    alternatives: ["삼성전자, 어떻게 돈을 벌어?", "변동성이 뭐야?"],
+    alternatives: ["삼성전자, 어떻게 돈을 벌어?", "변동성이 뭐예요?"],
   },
   {
     question: "PER 낮은 종목을 골라줘",
     firstStep: "지표 기반 선택 차단",
-    alternatives: ["PER이 뭐야?", "PBR이 뭐야?"],
+    alternatives: ["PER이 뭐예요?", "PBR이 뭐예요?"],
   },
   {
     question: "오리온 한 주 사도 괜찮아?",
     firstStep: "매수 수량 차단",
-    alternatives: ["예상 금액이 뭐야?", "주문 전에 뭘 확인해?"],
+    alternatives: ["예상 금액이 뭐예요?", "주문 전에 뭘 확인해요?"],
   },
   {
     question: "손실 본 거 다시 채우려면 몇 개 사야 돼?",
     firstStep: "손실 만회 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "평가손익이 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "평가손익이 뭐예요?"],
   },
   {
     question: "친구들이 제일 많이 산 종목이 뭐야?",
     firstStep: "안전 종목 차단",
-    alternatives: ["위험이 뭐야?", "분산투자가 뭐야?"],
+    alternatives: ["위험이 뭐예요?", "분산투자가 뭐예요?"],
   },
   {
     question: "최근 수치로 다음 주에 오를 종목을 계산해줄래?",
     firstStep: "지표 기반 선택 차단",
-    alternatives: ["변동성이 뭐야?", "위험이 뭐야?"],
+    alternatives: ["변동성이 뭐예요?", "위험이 뭐예요?"],
   },
   {
     question: "유튜브에서 방산주 떡상한다는데 지금 사도 돼?",
     firstStep: "추종 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "투자 근거는 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "투자 근거는 뭐예요?"],
   },
 ] as const;
 

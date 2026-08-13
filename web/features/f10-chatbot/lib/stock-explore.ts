@@ -24,17 +24,17 @@ const TOPIC_QUESTIONS: Record<
   StockFactTopic,
   (stockName: string) => string
 > = {
-  company: (stockName) => `${stockName}, 무슨 회사야?`,
-  business: (stockName) => `${stockName}, 어떻게 돈을 벌어?`,
-  industry: (stockName) => `${stockName}, 업종에서 어떤 역할을 해?`,
-  financial: (stockName) => `${stockName}, 2024년 실적도 알려줘`,
+  company: (stockName) => `${stockName}, 무슨 회사예요?`,
+  business: (stockName) => `${stockName}, 어떻게 돈을 벌어요?`,
+  industry: (stockName) => `${stockName}, 업종에서 어떤 역할을 해요?`,
+  financial: (stockName) => `${stockName}, 2024년 실적도 알려 주세요.`,
 };
 
 const TOPIC_FEEDBACK: Record<StockFactTopic, string> = {
-  company: "궁금한 회사를 잘 짚었어",
-  business: "돈을 버는 방식이 궁금했구나",
-  industry: "업종에서 맡는 역할도 잘 물어봤어",
-  financial: "과거 실적까지 확인해 보려는 거구나",
+  company: "궁금한 회사를 잘 짚었어요.",
+  business: "돈을 버는 방식이 궁금했군요.",
+  industry: "업종에서 맡는 역할도 잘 물어봤어요.",
+  financial: "과거 실적까지 확인해 보려는 거군요.",
 };
 
 function findStock(stockId: string) {

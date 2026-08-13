@@ -370,7 +370,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     ]);
     acceptActiveSignal();
     openChat();
-    if (signal === "orderMethodConfusion") void ask("시장가가 뭐야?");
+    if (signal === "orderMethodConfusion") void ask("시장가가 뭐예요?");
   }
 
   function closeChat() {
@@ -722,10 +722,11 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       {signal === "buyHesitation" && isBuyHesitationBubbleVisible && (
         <aside
           aria-live="polite"
-          className="fixed z-20 -translate-x-full"
+          className="fixed z-20"
           style={{
             bottom: 148,
-            left: "min(calc(50% + 158px), calc(100% - 16px))",
+            left: "min(calc(50% + 140px), calc(100% - 44px))",
+            transform: "translateX(-82%)",
           }}
         >
           <button
@@ -749,27 +750,24 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
           style={
             prototypeScreen
               ? {
-                  left: prototypeScreen.left + prototypeScreen.width / 2,
+                  left:
+                    prototypeScreen.left +
+                    prototypeScreen.width -
+                    44 * prototypeScreen.scale,
                   top:
                     prototypeScreen.top +
                     prototypeScreen.height -
                     142 * prototypeScreen.scale,
-                  transform: "translateX(-50%)",
+                  transform: "translateX(-82%)",
                 }
               : undefined
           }
         >
           <button
-            className="relative flex items-center gap-2 rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:left-1/2 after:size-4 after:-translate-x-1/2 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-['']"
+            className="relative whitespace-nowrap rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:right-5 after:size-4 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-['']"
             onClick={openProactiveChat}
             type="button"
           >
-            <span
-              className="grid size-7 shrink-0 place-items-center rounded-full bg-navy text-xs text-white"
-              aria-hidden="true"
-            >
-              {COPY.avatar}
-            </span>
             {PROACTIVE_SCRIPTS[signal].text}
           </button>
         </aside>
