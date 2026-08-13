@@ -45,15 +45,11 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
 <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 20px 12px">
 <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:20px;font-weight:800;color:#01185A;letter-spacing:-0.02em">영웅 키움</span><span style="font-size:13px;font-weight:500;color:#A9AEC4">시즌 3</span></div>
-<div style="display:flex;align-items:center;background:#E7E8F3;border-radius:999px;padding:3px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
-<span onClick="{{ pickChild }}" style="{{ childTabStyle }}">민지</span>
-<span onClick="{{ pickParent }}" style="{{ parentTabStyle }}">엄마</span>
-</div>
 </div>
 
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:30px;padding:20px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:30px;padding:20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:11px">
 <div style="width:44px;height:44px;border-radius:999px;background:#01185A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">{{ initial }}</div>
 <div style="flex:1;min-width:0">
@@ -69,37 +65,36 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <span style="font-size:13px;font-weight:500;color:#A9AEC4;white-space:nowrap">시작할 때 10,000,000원</span>
 </div>
 <div style="display:flex;gap:10px;margin-top:16px">
-<div style="flex:1;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:11px 13px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="flex:1;background:#F4F4FA;border-radius:16px;padding:11px 13px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="font-size:12.5px;font-weight:500;color:#8E93A8">쓸 수 있는 돈</div>
 <div style="font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ cashText }}</div>
 </div>
-<div style="flex:1;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:11px 13px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="flex:1;background:#F4F4FA;border-radius:16px;padding:11px 13px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="font-size:12.5px;font-weight:500;color:#8E93A8">가진 회사</div>
 <div style="font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ holdCountText }}</div>
 </div>
 </div>
-<div onClick="{{ goPortfolio }}" style="margin-top:14px;text-align:center;border-radius:16px;padding:14px;font-size:15.5px;font-weight:800;color:#01185A;cursor:pointer;background:radial-gradient(ellipse 66% 56% at 50% -6%,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 9px 15px -5px rgba(35,25,80,0.2),0 18px 26px -12px rgba(35,25,80,0.13),inset 0 -12px 18px -9px rgba(255,255,255,0.9),inset 0 2px 3px rgba(255,255,255,1)">내 계좌 보기</div>
+<div onClick="{{ goPortfolio }}" style="margin-top:14px;text-align:center;border-radius:16px;padding:14px;font-size:15.5px;font-weight:800;color:#01185A;cursor:pointer;background:#F1F2F8">내 계좌 보기</div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="padding:2px 4px">
 <div style="display:flex;justify-content:space-between;align-items:baseline">
 <span style="font-size:14px;font-weight:600;color:#01185A">시즌 진행</span>
 <span style="font-size:13.5px;font-weight:600;color:#8E93A8;font-variant-numeric:tabular-nums;white-space:nowrap"><b style="color:#F5327F">3주차</b> / 4주</span>
 </div>
-<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.14)"><div style="width:75%;height:100%;border-radius:999px;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 60%,#EE4A8E 100%)"></div></div>
+<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px;box-shadow:none"><div style="width:75%;height:100%;border-radius:999px;background:#F5327F"></div></div>
 </div>
 
 <sc-if value="{{ isParentAcct }}" hint-placeholder-val="{{ false }}">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:13px">
-<span style="font-size:22px">🏫</span>
 <div style="flex:1;min-width:0">
 <div style="font-size:15.5px;font-weight:800;color:#01185A">학교 시간엔 매매 쉬기</div>
-<div style="font-size:13px;font-weight:500;color:#8E93A8;margin-top:4px;white-space:nowrap">평일 09:00~16:00 · 민지 계정에만</div>
+<div style="font-size:13px;font-weight:500;color:#8E93A8;margin-top:4px;white-space:nowrap">평일 09:00~16:00 · 김찬영 계정에만</div>
 </div>
 <div onClick="{{ toggleLock }}" style="{{ lockToggleStyle }}"><div style="{{ lockKnobStyle }}"></div></div>
 </div>
-<div style="font-size:13px;font-weight:600;color:#5C6280;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:14px;padding:11px 13px;margin-top:13px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">{{ schoolStateText }}</div>
+<div style="font-size:13px;font-weight:600;color:#5C6280;background:#F4F4FA;border-radius:14px;padding:11px 13px;margin-top:13px;box-shadow:inset 0 0 0 1px #E4E6F1">{{ schoolStateText }}</div>
 <div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.65;margin-top:10px;text-wrap:pretty">구경하고 배우는 건 언제든 할 수 있어요. 주문만 잠깐 쉬어요.</div>
 </div>
 </sc-if>
@@ -109,10 +104,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -125,10 +120,17 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="width:38px"></div>
 </div>
 
-<div style="flex:none;overflow-x:auto;padding:2px 0 12px">
+<div style="flex:none;padding:0 16px 10px;display:flex;align-items:center;gap:8px">
+<input value="{{ stockQuery }}" onInput="{{ onStockQuery }}" placeholder="회사 이름으로 찾기" style="flex:1;min-width:0;box-sizing:border-box;border:0;outline:none;background:#FFFFFF;border-radius:14px;padding:12px 14px;font-family:'Pretendard',sans-serif;font-size:14.5px;font-weight:600;color:#01185A;box-shadow:0 1px 3px rgba(30,25,60,0.08)">
+<sc-if value="{{ hasStockQuery }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ clearStockQuery }}" style="flex:none;font-size:13px;font-weight:700;color:#8E93A8;padding:11px 13px;border-radius:14px;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)">지우기</div>
+</sc-if>
+</div>
+
+<div id="tut-chips" style="flex:none;overflow-x:auto;padding:2px 0 12px">
 <div style="display:flex;gap:8px;padding:0 16px;width:max-content">
 <sc-for list="{{ sectorChips }}" as="s" hint-placeholder-count="5">
-<div onClick="{{ s.pick }}" style="{{ s.style }}"><span style="font-size:14px">{{ s.emoji }}</span><span>{{ s.name }}</span></div>
+<div onClick="{{ s.pick }}" style="{{ s.style }}"><span>{{ s.name }}</span></div>
 </sc-for>
 </div>
 </div>
@@ -138,8 +140,15 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <span style="font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">손가락으로 슉 밀어봐 →</span>
 </div>
 
+<sc-if value="{{ noCards }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;gap:9px">
+<div style="font-size:16px;font-weight:800;color:#01185A;text-align:center">{{ noCardsTitle }}</div>
+<div style="font-size:13.5px;font-weight:500;color:#8E93A8;line-height:1.6;text-align:center;text-wrap:pretty">{{ noCardsHint }}</div>
+</div>
+</sc-if>
+
 <div style="{{ stageStyle }}">
-<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:33px;padding:2px 46px 6px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none">
+<div id="tut-cards" ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:33px;padding:2px 46px 6px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none">
 <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
 <div style="{{ c.slideStyle }}">
 <div style="{{ c.auraMain }}"></div>
@@ -214,10 +223,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyleX }}">
-<div onClick="{{ goHome }}" style="{{ navHomeX }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTradeX }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchiveX }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRankingX }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHomeX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div onClick="{{ goExplore }}" style="{{ navTradeX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchiveX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRankingX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -227,12 +236,14 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ goExplore }}" style="{{ backBtnStyle }}">‹</div>
 <div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">{{ stockName }}</div>
-<div style="width:38px"></div>
+<div onClick="{{ toggleWatch }}" style="{{ watchBtnStyle }}">
+<svg width="21" height="19" viewBox="0 0 21 19" style="display:block"><path d="M10.5 17.5 2.6 9.9a4.6 4.6 0 1 1 7.9-4.4 4.6 4.6 0 1 1 7.9 4.4z" fill="{{ watchFill }}" stroke="{{ watchStroke }}" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+</div>
 </div>
 
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:11px">
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:30px;padding:18px 20px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:30px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:12px">
 <div style="{{ detailBadgeStyle }}">{{ stockEmoji }}</div>
 <div style="flex:1;min-width:0">
@@ -250,13 +261,13 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:16px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="display:flex;align-items:center;gap:9px"><span style="font-size:19px">🐻</span><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">이 회사는 뭘 해?</span></div>
+<div style="background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">이 회사는 뭘 해?</span></div>
 <div style="font-size:16px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:10px;text-wrap:pretty">{{ stockDescLong }}</div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:16px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="display:flex;align-items:center;gap:9px"><span style="font-size:19px">🗞️</span><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">요즘 무슨 일이 있었어?</span></div>
+<div style="background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">요즘 무슨 일이 있었어?</span></div>
 <div style="font-size:16px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:10px;text-wrap:pretty">{{ stockNews }}</div>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:13px">
 <span style="font-size:13px;font-weight:500;color:#A9AEC4">키움 뉴스를 어린이 눈높이로</span>
@@ -268,12 +279,11 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <div style="flex:none;padding:14px 16px 26px">
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:11px;background:linear-gradient(157deg,#FFF8FB 0%,#FDEFF5 100%);border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
+<div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
-<div onClick="{{ startBuy }}" style="{{ ctaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">사볼래! (매수)</span></div>
+<div id="tut-buy-cta" onClick="{{ startBuy }}" style="{{ ctaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">사볼래! (매수)</span></div>
 </div>
 </div>
 </sc-if>
@@ -287,7 +297,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:28px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:28px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:flex-end;justify-content:space-between">
 <div><div style="font-size:13px;font-weight:500;color:#8E93A8">지금 가격</div><div style="font-size:27px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:4px;white-space:nowrap">{{ stockPriceText }}</div></div>
 <span style="{{ detailChangeStyle }}">{{ stockChangeText }}</span>
@@ -304,19 +314,18 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <iframe data-chart-frame="1" title="{{ stockName }} TradingView 차트" src="{{ tradingViewChartUrl }}" width="330" height="264" loading="eager" style="display:block;margin-top:16px;border:0;background:#FFFFFF"></iframe>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:16px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🐻</span><span style="font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap">캔들이 뭐야?</span></div>
+<div style="background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:center;gap:8px"><span style="font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap">캔들이 뭐야?</span></div>
 <div style="font-size:14px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:9px;text-wrap:pretty">막대 하나가 하루야. 그날 시작한 값보다 끝난 값이 높으면 <b style="color:#E8322E">빨간 막대</b>, 낮으면 <b style="color:#1668DC">파란 막대</b>가 돼. 위아래로 나온 선은 그날 가장 비쌌던 값과 가장 쌌던 값이야.</div>
 <div style="display:flex;gap:8px;margin-top:12px">
-<div style="flex:1;background:linear-gradient(157deg,#FFF5F5 0%,#FDECEC 100%);border-radius:14px;padding:11px 13px"><div style="font-size:12.5px;font-weight:600;color:#E8322E">빨간 막대</div><div style="font-size:12.5px;font-weight:500;color:#7E849B;margin-top:4px;line-height:1.5">그날 값이 올랐어</div></div>
-<div style="flex:1;background:linear-gradient(157deg,#F4F7FE 0%,#EBF1FC 100%);border-radius:14px;padding:11px 13px"><div style="font-size:12.5px;font-weight:600;color:#1668DC">파란 막대</div><div style="font-size:12.5px;font-weight:500;color:#7E849B;margin-top:4px;line-height:1.5">그날 값이 내렸어</div></div>
+<div style="flex:1;background:#FFF4F4;border-radius:14px;padding:11px 13px"><div style="font-size:12.5px;font-weight:600;color:#E8322E">빨간 막대</div><div style="font-size:12.5px;font-weight:500;color:#7E849B;margin-top:4px;line-height:1.5">그날 값이 올랐어</div></div>
+<div style="flex:1;background:#F1F5FD;border-radius:14px;padding:11px 13px"><div style="font-size:12.5px;font-weight:600;color:#1668DC">파란 막대</div><div style="font-size:12.5px;font-weight:500;color:#7E849B;margin-top:4px;line-height:1.5">그날 값이 내렸어</div></div>
 </div>
 </div>
 </div>
 <div style="flex:none;padding:14px 16px 26px">
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:11px;background:linear-gradient(157deg,#FFF8FB 0%,#FDEFF5 100%);border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
+<div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
@@ -334,12 +343,12 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
 
-<div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:28px;padding:18px 20px;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(170,80,125,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
+<div style="background:#FDEFF5;border-radius:28px;padding:18px 20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)">
 <div style="font-size:13px;font-weight:700;color:#D5327A">{{ newsKicker }}</div>
 <div style="font-size:21px;font-weight:800;color:#01185A;line-height:1.45;margin-top:9px;letter-spacing:-0.02em;text-wrap:pretty">{{ newsHeadline }}</div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:15.5px;font-weight:800;color:#01185A">3줄 요약</div>
 <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
 <sc-for list="{{ newsLines }}" as="p" hint-placeholder-count="3">
@@ -351,20 +360,18 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </div>
 
-<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:22px;padding:14px 16px;box-shadow:0 10px 24px rgba(35,25,80,0.08),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFFFFF;border-radius:22px;padding:14px 16px;box-shadow:0 10px 24px rgba(35,25,80,0.08),inset 0 0 0 1px rgba(255,255,255,0.7)">
 <div style="min-width:0;font-size:13px;font-weight:500;color:#8E93A8;line-height:1.5">{{ newsSourceText }}</div>
 <div onClick="{{ openNewsSource }}" style="flex:none;font-size:13.5px;font-weight:800;color:#D5327A;cursor:pointer;padding:8px 2px 8px 10px;white-space:nowrap">원문 보기 ↗</div>
 </div>
 
-<div style="display:flex;align-items:flex-start;gap:10px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 46%,#DFE1F1 100%);border-radius:22px;padding:14px 16px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
-<span style="font-size:16px">🐻</span>
+<div style="display:flex;align-items:flex-start;gap:10px;background:#ECEDF7;border-radius:22px;padding:14px 16px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="flex:1;font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty">이건 이 회사가 좋다 나쁘다는 이야기가 아니야. 무슨 일이 있었는지만 알려주는 거야.</div>
 </div>
 </div>
 <div style="flex:none;padding:14px 16px 26px">
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:11px;background:linear-gradient(157deg,#FFF8FB 0%,#FDEFF5 100%);border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
+<div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
@@ -378,57 +385,68 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ buyBack }}" style="{{ backBtnStyle }}">{{ buyBackGlyph }}</div>
 <div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">사기(매수)</div>
-<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ buyStepNo }}</span> / 4</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ buyStepNo }}</span> / 3</div>
 </div>
 <div style="flex:none;display:flex;gap:5px;padding:0 20px 12px">
-<div style="{{ prog1 }}"></div><div style="{{ prog2 }}"></div><div style="{{ prog3 }}"></div><div style="{{ prog4 }}"></div>
+<div style="{{ prog1 }}"></div><div style="{{ prog2 }}"></div><div style="{{ prog3 }}"></div>
 </div>
 
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 0;display:flex;flex-direction:column;gap:12px">
 
-<div style="flex:none;background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:22px;padding:12px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 10px 22px rgba(35,25,80,0.09),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="flex:none;background:#FFFFFF;border-radius:22px;padding:12px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="{{ miniBadgeStyle }}">{{ stockEmoji }}</div>
 <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:800;color:#01185A;white-space:nowrap">{{ stockName }}</div><div style="font-size:12.5px;font-weight:500;color:#8E93A8;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap">{{ stockPriceText }}</div></div>
 <span style="{{ detailChangeStyleSm }}">{{ stockChangeText }}</span>
 </div>
 
 <sc-if value="{{ isBuy1 }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:center;gap:9px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 46%,#DFE1F1 100%);border-radius:20px;padding:12px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
-<span style="font-size:16px">💰</span>
+<div id="tut-buy1" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:9px;background:#ECEDF7;border-radius:20px;padding:12px 15px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <span style="font-size:14px;font-weight:600;color:#5C6280;white-space:nowrap">내 지갑</span>
 <span style="flex:1;text-align:right;font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:16px;font-weight:800;color:#01185A">얼마나 살까?</div>
+<div style="display:flex;gap:6px;margin-top:12px">
+<div onClick="{{ pickByAmount }}" style="{{ byAmountStyle }}">금액으로</div>
+<div onClick="{{ pickByQty }}" style="{{ byQtyStyle }}">주 수로</div>
+</div>
 <div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:16px 0 4px">
-<span style="font-size:34px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ amountText }}</span>
-<span style="font-size:20px;font-weight:800;color:#01185A">원</span>
+<span style="font-size:34px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ buyInputText }}</span>
+<span style="font-size:20px;font-weight:800;color:#01185A">{{ buyInputUnit }}</span>
 </div>
 <div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px">{{ qtyHint }}</div>
+<div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:6px;white-space:nowrap">{{ buyMaxHint }}</div>
 <div style="display:flex;gap:8px;margin-top:16px">
+<sc-if value="{{ buyByAmount }}" hint-placeholder-val="{{ true }}">
 <div onClick="{{ amt1 }}" style="{{ chip1 }}">1만원</div>
 <div onClick="{{ amt3 }}" style="{{ chip3 }}">3만원</div>
 <div onClick="{{ amt5 }}" style="{{ chip5 }}">5만원</div>
 <div onClick="{{ amtCustom }}" style="{{ chipC }}">직접</div>
+</sc-if>
+<sc-if value="{{ buyByQty }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ qtyChips }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
+</sc-for>
+</sc-if>
 </div>
 <sc-if value="{{ showPad }}" hint-placeholder-val="{{ false }}">
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
-<sc-for list="{{ padKeys }}" as="k" hint-placeholder-count="12">
-<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -3px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)">{{ k.label }}</div>
+<sc-for list="{{ buyPadKeys }}" as="k" hint-placeholder-count="12">
+<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#F4F4FA;box-shadow:inset 0 0 0 1px #E4E6F1">{{ k.label }}</div>
 </sc-for>
 </div>
 </sc-if>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:22px;padding:6px 8px;display:flex;gap:6px;box-shadow:0 10px 22px rgba(35,25,80,0.09),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:22px;padding:6px 8px;display:flex;gap:6px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div onClick="{{ pickMarket }}" style="{{ mktStyle }}">지금 가격에 바로</div>
 <div onClick="{{ pickLimit }}" style="{{ limStyle }}">내가 정한 가격에</div>
 </div>
 
 <sc-if value="{{ showLimit }}" hint-placeholder-val="{{ false }}">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:16px;font-weight:800;color:#01185A">얼마가 되면 살까?</div>
 <div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:14px 0 2px">
 <span style="font-size:30px;font-weight:800;color:#F5327F;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ limitPriceText }}</span>
@@ -441,26 +459,25 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div onClick="{{ lim3 }}" style="{{ limChip3 }}">-3%</div>
 <div onClick="{{ lim0 }}" style="{{ limChip0 }}">지금값</div>
 </div>
-<div style="display:flex;align-items:flex-start;gap:9px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 100%);border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
-<span style="font-size:15px">🐻</span>
+<div style="display:flex;align-items:flex-start;gap:9px;background:#ECEDF7;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 살게. 기다리는 동안 그 돈은 잠깐 맡아둘게.</span>
 </div>
 </div>
 </sc-if>
 
 <sc-if value="{{ hasWarn }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:9px;background:linear-gradient(157deg,#FFF3F7 0%,#FDE6EF 100%);border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
-<span style="font-size:15px">🐻</span><span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ warnText }}</span>
+<div style="display:flex;align-items:center;gap:9px;background:#FFF1F6;border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
+<span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ warnText }}</span>
 </div>
 </sc-if>
 </div>
 </sc-if>
 
 <sc-if value="{{ isBuy2 }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:12px">
+<div id="tut-buy2" style="display:flex;flex-direction:column;gap:12px">
 <div style="display:flex;align-items:flex-start;gap:10px">
 <img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:linear-gradient(157deg,#FFFFFF 0%,#FDFDFF 100%);border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 8px 18px rgba(35,25,80,0.09),inset 0 0 0 1.5px rgba(1,24,90,0.1)">
+<div style="flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)">
 <div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5;text-wrap:pretty">왜 이 회사가 좋아 보였어?</div>
 <div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:5px">정답은 없어, 솔직한 게 최고야!</div>
 </div>
@@ -468,31 +485,21 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 <sc-for list="{{ reasonBtns }}" as="r" hint-placeholder-count="6">
 <div onClick="{{ r.pick }}" style="{{ r.style }}">
-<div style="font-size:22px;line-height:1.1">{{ r.emoji }}</div>
-<div style="font-size:13.5px;font-weight:600;color:#01185A;margin-top:7px;line-height:1.4">{{ r.label }}</div>
+<div style="font-size:14.5px;font-weight:600;color:#01185A;line-height:1.45">{{ r.label }}</div>
 </div>
 </sc-for>
 </div>
-</div>
-</sc-if>
 
-<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:flex-start;gap:10px">
-<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:linear-gradient(157deg,#FFFFFF 0%,#FDFDFF 100%);border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 8px 18px rgba(35,25,80,0.09),inset 0 0 0 1.5px rgba(1,24,90,0.1)">
-<div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5">언제까지 가질 생각이야?</div>
-</div>
-</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">언제까지 가질 생각이야?</div>
 <div style="display:flex;flex-direction:column;gap:9px">
 <sc-for list="{{ planBtns }}" as="p" hint-placeholder-count="4">
-<div onClick="{{ p.pick }}" style="{{ p.style }}"><span style="font-size:19px">{{ p.emoji }}</span><span style="font-size:15.5px;font-weight:600;color:#01185A">{{ p.label }}</span></div>
+<div onClick="{{ p.pick }}" style="{{ p.style }}"><span style="font-size:15.5px;font-weight:600;color:#01185A">{{ p.label }}</span></div>
 </sc-for>
 </div>
 
 <sc-if value="{{ showTarget }}" hint-placeholder-val="{{ false }}">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:24px;padding:16px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="font-size:15px;font-weight:800;color:#01185A">목표 가격을 정해볼까?</div>
+<div style="background:#FFFFFF;border-radius:20px;padding:16px 18px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="font-size:15px;font-weight:700;color:#01185A">목표 가격을 정해볼까?</div>
 <div style="display:flex;gap:8px;margin-top:12px">
 <div onClick="{{ tgt5 }}" style="{{ tgtChip5 }}">+5%</div>
 <div onClick="{{ tgt10 }}" style="{{ tgtChip10 }}">+10%</div>
@@ -501,31 +508,59 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:14px;font-weight:600;color:#5C6280;margin-top:13px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ targetHint }}</div>
 </div>
 </sc-if>
-</div>
-</sc-if>
 
-<sc-if value="{{ isBuy4 }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:28px;padding:18px 20px;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(170,80,125,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
-<div style="font-size:13px;font-weight:700;color:#D5327A">내가 남긴 답</div>
-<div style="font-size:20px;font-weight:800;color:#01185A;line-height:1.55;margin-top:9px;text-wrap:pretty">{{ answerSentence }}</div>
-</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">하고 싶은 말 남겨둘래? <span style="font-size:13px;font-weight:500;color:#A9AEC4">(안 써도 괜찮아)</span></div>
+<input value="{{ buyMemo }}" onInput="{{ buyMemoInput }}" maxlength="50" placeholder="예: 월드투어 시작한대" style="width:100%;box-sizing:border-box;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="text-align:right;font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums;margin-top:-4px">{{ buyMemoCount }} / 50</div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>회사</span><span style="font-weight:800;color:#01185A">{{ stockName }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>사는 방법</span><span style="font-weight:800;color:#01185A;white-space:nowrap">{{ orderTypeText }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>살 수 있는 양</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ qtyText }}</span></div>
+<div style="background:#FFFFFF;border-radius:20px;padding:15px 17px;margin-top:2px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ qtyText }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>사는 방법</span><span style="font-weight:700;color:#01185A;white-space:nowrap">{{ orderTypeText }}</span></div>
 <div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:800;color:#01185A">주문 금액</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#01185A">주문 금액</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
+<div id="tut-buy3" style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none">
+<sc-for list="{{ balloons }}" as="b" hint-placeholder-count="5">
+<div style="{{ b.style }}">{{ b.emoji }}</div>
+</sc-for>
+<sc-for list="{{ confetti }}" as="c" hint-placeholder-count="14">
+<div style="{{ c.style }}"></div>
+</sc-for>
+</div>
+
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;width:100%">
+<img src="assets/mascot-bear.png" width="132" alt="키웅이" style="display:block;animation:kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.18))">
+<div style="font-size:14px;font-weight:700;color:#F5327F;letter-spacing:0.08em;margin-top:14px">{{ doneKicker }}</div>
+<div style="font-size:26px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;text-wrap:pretty">{{ doneHeadline }}</div>
+<div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ donePraise }}</div>
+
+<div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:22px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ doneStockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneQty }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>주문 금액</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneAmount }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>남은 지갑</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
+</div>
 </div>
 </div>
 </sc-if>
 
 </div>
 
+<sc-if value="{{ buyInProgress }}" hint-placeholder-val="{{ true }}">
 <div style="flex:none;padding:8px 16px 10px">
-<div onClick="{{ buyNext }}" style="{{ buyCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ buyCtaLabel }}</span></div>
+<div id="tut-next" onClick="{{ buyNext }}" style="{{ buyCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ buyCtaLabel }}</span></div>
 </div>
+</sc-if>
+<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
+<div onClick="{{ goHome }}" style="{{ subCtaStyle }}">홈으로</div>
+<div id="tut-to-account" onClick="{{ goPortfolio }}" style="{{ mainCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
+</div>
+</sc-if>
 </div>
 </sc-if>
 
@@ -534,17 +569,17 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ sellBack }}" style="{{ backBtnStyle }}">{{ sellBackGlyph }}</div>
 <div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">팔기(매도)</div>
-<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ sellStepNo }}</span> / 5</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ sellStepNo }}</span> / 3</div>
 </div>
 <div style="flex:none;display:flex;gap:5px;padding:0 20px 12px">
-<div style="{{ sProg1 }}"></div><div style="{{ sProg2 }}"></div><div style="{{ sProg3 }}"></div><div style="{{ sProg4 }}"></div><div style="{{ sProg5 }}"></div>
+<div style="{{ sProg1 }}"></div><div style="{{ sProg2 }}"></div><div style="{{ sProg3 }}"></div>
 </div>
 
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 0;display:flex;flex-direction:column;gap:12px">
 
 <sc-if value="{{ isSell1 }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:28px;padding:18px 20px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div id="tut-sell1" style="display:flex;flex-direction:column;gap:12px">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:12px">
 <div style="{{ detailBadgeStyle }}">{{ stockEmoji }}</div>
 <div style="flex:1;min-width:0">
@@ -559,54 +594,90 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:16px;font-weight:800;color:#01185A">얼마나 팔까?</div>
-<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:16px 0 2px">
-<span style="font-size:32px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ sellQtyText }}</span>
-<span style="font-size:19px;font-weight:800;color:#01185A">주</span>
+<div style="display:flex;gap:6px;margin-top:12px">
+<div onClick="{{ pickSellByQty }}" style="{{ sellByQtyStyle }}">주 수로</div>
+<div onClick="{{ pickSellByAmount }}" style="{{ sellByAmountStyle }}">금액으로</div>
 </div>
-<div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px;white-space:nowrap">{{ sellAmountHint }}</div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:16px 0 4px">
+<span style="font-size:32px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ sellInputText }}</span>
+<span style="font-size:19px;font-weight:800;color:#01185A">{{ sellInputUnit }}</span>
+</div>
+<div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px;white-space:nowrap">{{ sellHint }}</div>
+<div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:6px;white-space:nowrap">{{ sellMaxHint }}</div>
 <div style="display:flex;gap:8px;margin-top:16px">
-<div onClick="{{ sellAll }}" style="{{ sellChipAll }}">전부</div>
-<div onClick="{{ sellHalf }}" style="{{ sellChipHalf }}">절반</div>
-<div onClick="{{ sellCustom }}" style="{{ sellChipCustom }}">직접</div>
+<sc-for list="{{ sellChips }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
+</sc-for>
 </div>
 <sc-if value="{{ showSellPad }}" hint-placeholder-val="{{ false }}">
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
 <sc-for list="{{ sellPadKeys }}" as="k" hint-placeholder-count="12">
-<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -3px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)">{{ k.label }}</div>
+<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#F4F4FA;box-shadow:inset 0 0 0 1px #E4E6F1">{{ k.label }}</div>
 </sc-for>
 </div>
-<div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:10px;white-space:nowrap">가진 만큼까지만 팔 수 있어 (최대 {{ holdQtyText }})</div>
 </sc-if>
 </div>
+
+<div style="background:#FFFFFF;border-radius:22px;padding:6px 8px;display:flex;gap:6px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div onClick="{{ pickSellMarket }}" style="{{ sellMktStyle }}">지금 가격에 바로</div>
+<div onClick="{{ pickSellLimit }}" style="{{ sellLimStyle }}">내가 정한 가격에</div>
+</div>
+
+<sc-if value="{{ showSellLimit }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="font-size:16px;font-weight:800;color:#01185A">얼마가 되면 팔까?</div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:14px 0 2px">
+<span style="font-size:30px;font-weight:800;color:#F5327F;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ sellLimitPriceText }}</span>
+<span style="font-size:18px;font-weight:800;color:#F5327F">원</span>
+</div>
+<div style="text-align:center;font-size:14px;font-weight:500;color:#7E849B;margin-top:9px;white-space:nowrap">{{ sellLimitDiffText }}</div>
+<div style="display:flex;gap:7px;margin-top:15px">
+<sc-for list="{{ sellLimitChips }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
+</sc-for>
+</div>
+<div style="display:flex;align-items:flex-start;gap:9px;background:#ECEDF7;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 팔게. 기다리는 동안 그 주식은 잠깐 맡아둘게.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasSellWarn }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:9px;background:#FFF1F6;border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
+<span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ sellWarnText }}</span>
+</div>
+</sc-if>
 </div>
 </sc-if>
 
 <sc-if value="{{ isSell2 }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:12px">
+<div id="tut-sell2" style="display:flex;flex-direction:column;gap:12px">
 <div style="display:flex;align-items:flex-start;gap:10px">
 <img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:linear-gradient(157deg,#FFFFFF 0%,#FDFDFF 100%);border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 8px 18px rgba(35,25,80,0.09),inset 0 0 0 1.5px rgba(1,24,90,0.1)">
+<div style="flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)">
 <div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5;text-wrap:pretty">잠깐! 사던 날의 너는 이렇게 생각했어.</div>
 </div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:30px;padding:20px;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(170,80,125,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
-<span style="display:inline-block;font-size:13px;font-weight:700;color:#F5327F;background:linear-gradient(180deg,#FEF0F5 0%,#FBDCEA 100%);border-radius:999px;padding:6px 13px;white-space:nowrap;box-shadow:0 3px 7px rgba(200,60,130,0.14),inset 0 1.5px 1px rgba(255,255,255,1)">{{ retroAgoText }}</span>
+<div style="background:#FDEFF5;border-radius:26px;padding:20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)">
+<span style="display:inline-block;font-size:13px;font-weight:700;color:#F5327F;background:#FCE9F1;border-radius:999px;padding:6px 13px;white-space:nowrap">{{ retroAgoText }}</span>
 <div style="display:flex;gap:6px;margin-top:14px">
 <span style="font-size:26px;font-weight:800;color:#F5327F;line-height:0.85">“</span>
-<div style="flex:1;font-size:21px;font-weight:800;color:#01185A;line-height:1.5;letter-spacing:-0.01em;text-wrap:pretty">{{ retroSentence }}<span style="font-size:26px;color:#F5327F;line-height:0.85;margin-left:3px">”</span></div>
+<div style="flex:1;font-size:20px;font-weight:800;color:#01185A;line-height:1.5;letter-spacing:-0.01em;text-wrap:pretty">{{ retroSentence }}<span style="font-size:26px;color:#F5327F;line-height:0.85;margin-left:3px">”</span></div>
 </div>
-<sc-if value="{{ hasRetroMemo }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:flex-start;gap:8px;background:rgba(255,255,255,0.72);border-radius:16px;padding:12px 14px;margin-top:14px">
-<span style="font-size:14px">✍️</span>
-<span style="font-size:14.5px;font-weight:500;color:#5C6280;line-height:1.6">{{ retroMemo }}</span>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+<sc-for list="{{ retroRows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;background:rgba(255,255,255,0.72);border-radius:14px;padding:11px 13px">
+<span style="flex:none;font-size:13px;font-weight:600;color:#A9739B;white-space:nowrap">{{ r.label }}</span>
+<span style="flex:1;min-width:0;text-align:right;font-size:14px;font-weight:700;color:#01185A;line-height:1.5;text-wrap:pretty">{{ r.value }}</span>
 </div>
-</sc-if>
+</sc-for>
+</div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:22px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:13.5px;font-weight:600;color:#8E93A8">지금은</div>
 <div style="display:flex;margin-top:12px">
 <div style="flex:1"><div style="font-size:12.5px;font-weight:500;color:#A9AEC4">수익률</div><div style="font-size:17px;font-weight:800;color:#5C6280;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ retroPnlText }}</div></div>
@@ -614,112 +685,90 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:1"><div style="font-size:12.5px;font-weight:500;color:#A9AEC4">남은 시즌</div><div style="font-size:17px;font-weight:800;color:#5C6280;margin-top:4px;white-space:nowrap">1주</div></div>
 </div>
 </div>
+
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">왜 팔고 싶어?</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<sc-for list="{{ sellReasonBtns }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.pick }}" style="{{ r.style }}">
+<div style="font-size:14.5px;font-weight:600;color:#01185A;line-height:1.45">{{ r.label }}</div>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ planMatched }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:22px;padding:16px 18px;box-shadow:0 2px 10px rgba(120,90,20,0.07)">
+<div style="flex:1;min-width:0">
+<div style="font-size:16px;font-weight:800;color:#01185A">계획 실천 배지</div>
+<div style="font-size:13.5px;font-weight:600;color:#8A6B1F;margin-top:5px;line-height:1.55;text-wrap:pretty">처음 세운 생각을 기억하고 실천했네! 아카이브에 모아둘게.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ planChanged }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px;line-height:1.5;text-wrap:pretty">{{ changeQuestion }}</div>
+<div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:-6px">계획이 바뀌는 건 괜찮아!</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ changeBtns }}" as="c" hint-placeholder-count="5">
+<div onClick="{{ c.pick }}" style="{{ c.style }}"><span style="font-size:15px;font-weight:600;color:#01185A;line-height:1.4">{{ c.label }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+
+<div style="background:#FFFFFF;border-radius:20px;padding:15px 17px;margin-top:2px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellQtyText }}주</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>파는 방법</span><span style="font-weight:700;color:#01185A;white-space:nowrap">{{ sellOrderTypeText }}</span></div>
+<div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#01185A">받게 되는 돈</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellProceedsText }}</span></div>
+</div>
 </div>
 </sc-if>
 
 <sc-if value="{{ isSell3 }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:flex-start;gap:10px">
-<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:linear-gradient(157deg,#FFFFFF 0%,#FDFDFF 100%);border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 8px 18px rgba(35,25,80,0.09),inset 0 0 0 1.5px rgba(1,24,90,0.1)">
-<div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5">왜 팔고 싶어?</div>
-</div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-<sc-for list="{{ sellReasonBtns }}" as="r" hint-placeholder-count="6">
-<div onClick="{{ r.pick }}" style="{{ r.style }}">
-<div style="font-size:22px;line-height:1.1">{{ r.emoji }}</div>
-<div style="font-size:13.5px;font-weight:600;color:#01185A;margin-top:7px;line-height:1.4">{{ r.label }}</div>
-</div>
-</sc-for>
-</div>
-</div>
-</sc-if>
+<div id="tut-sell3" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px">
+<img src="assets/mascot-bear.png" width="132" alt="키웅이" style="display:block;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.18))">
+<div style="font-size:14px;font-weight:700;color:#8E93A8;letter-spacing:0.08em;margin-top:14px">{{ sellDoneKicker }}</div>
+<div style="font-size:24px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;white-space:pre-line;text-wrap:pretty">{{ sellDoneHeadline }}</div>
+<div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ sellDoneNote }}</div>
 
-<sc-if value="{{ isSell4 }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<sc-if value="{{ planMatched }}" hint-placeholder-val="{{ false }}">
-<div style="background:linear-gradient(157deg,#FFFDF6 0%,#FFF6DF 46%,#FFEFC9 100%);border-radius:30px;padding:26px 20px;text-align:center;box-shadow:0 16px 34px rgba(120,90,20,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(180,140,50,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
-<div style="font-size:58px;line-height:1">🏅</div>
-<div style="font-size:22px;font-weight:800;color:#01185A;margin-top:14px;letter-spacing:-0.01em">계획 실천 배지</div>
-<div style="font-size:16px;font-weight:600;color:#8A6B1F;margin-top:10px;line-height:1.6;text-wrap:pretty">처음 세운 생각을 기억하고 실천했네!</div>
-<div style="font-size:13.5px;font-weight:500;color:#A08640;margin-top:12px;line-height:1.6">아카이브에 모아둘게</div>
-</div>
-</sc-if>
-<sc-if value="{{ planChanged }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:flex-start;gap:10px">
-<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:linear-gradient(157deg,#FFFFFF 0%,#FDFDFF 100%);border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 8px 18px rgba(35,25,80,0.09),inset 0 0 0 1.5px rgba(1,24,90,0.1)">
-<div style="font-size:16px;font-weight:800;color:#01185A;line-height:1.55;text-wrap:pretty">{{ changeQuestion }}</div>
-<div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:6px">계획이 바뀌는 건 괜찮아!</div>
-</div>
-</div>
-<div style="display:flex;flex-direction:column;gap:9px">
-<sc-for list="{{ changeBtns }}" as="c" hint-placeholder-count="5">
-<div onClick="{{ c.pick }}" style="{{ c.style }}"><span style="font-size:19px">{{ c.emoji }}</span><span style="font-size:15px;font-weight:600;color:#01185A;line-height:1.4">{{ c.label }}</span></div>
-</sc-for>
-</div>
-</div>
-</sc-if>
-</div>
-</sc-if>
-
-<sc-if value="{{ isSell5 }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:28px;padding:18px 20px;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 0 0 1px rgba(255,255,255,0.6)">
-<div style="font-size:13px;font-weight:700;color:#D5327A">내가 남긴 답</div>
-<div style="font-size:20px;font-weight:800;color:#01185A;line-height:1.55;margin-top:9px;text-wrap:pretty">{{ sellSentence }}</div>
-</div>
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>회사</span><span style="font-weight:800;color:#01185A">{{ stockName }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>파는 양</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellQtyText }}주</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>파는 값</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ stockPriceText }}</span></div>
-<div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:800;color:#01185A">받게 되는 돈</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellProceedsText }}</span></div>
-</div>
-</div>
-</sc-if>
-
-</div>
-
-<div style="flex:none;padding:8px 16px 10px">
-<div onClick="{{ sellNext }}" style="{{ sellCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ sellCtaLabel }}</span></div>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:#FFFFFF">
-<div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px">
-<img src="assets/mascot-bear.png" width="150" alt="키웅이" style="display:block;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.2))">
-<div style="font-size:25px;font-weight:800;color:#01185A;margin-top:16px;text-align:center;letter-spacing:-0.01em;line-height:1.45;white-space:pre-line">{{ doneTitle }}</div>
-<div style="font-size:19px;font-weight:800;color:#F5327F;margin-top:14px;text-align:center;line-height:1.5;text-wrap:pretty">{{ doneSentence }}</div>
 <sc-if value="{{ hasBadge }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:11px;background:linear-gradient(157deg,#FFFDF6 0%,#FFF3D6 100%);border-radius:20px;padding:13px 16px;margin-top:16px;width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)">
-<span style="font-size:26px">🏅</span>
+<div style="display:flex;align-items:center;gap:11px;background:#FFF8E4;border-radius:20px;padding:13px 16px;margin-top:16px;width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)">
 <span style="font-size:14.5px;font-weight:700;color:#8A6B1F;line-height:1.5">계획 실천 배지를 받았어!</span>
 </div>
 </sc-if>
-<div style="width:100%;background:linear-gradient(157deg,#F6F6FC 0%,#EFEFF7 100%);border-radius:22px;padding:15px 17px;margin-top:22px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
-<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneQtyText }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>남은 지갑</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
+
+<div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:20px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneStock }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneQty }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneMoneyLabel }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneProceeds }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>남은 지갑</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
 </div>
-<div style="width:100%;margin-top:14px">
+
+<div style="width:100%;margin-top:16px">
 <div style="font-size:14px;font-weight:600;color:#5C6280">하고 싶은 말이 있으면 남겨둬 <span style="color:#A9AEC4;font-weight:500">(나중에 다시 보여줄게)</span></div>
-<input value="{{ memoValue }}" onInput="{{ memoInput }}" maxlength="50" placeholder="예: 월드투어 시작한대" style="width:100%;box-sizing:border-box;margin-top:9px;border:0;outline:none;background:linear-gradient(157deg,#F6F6FC 0%,#EFEFF7 100%);border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
+<input value="{{ sellMemo }}" onInput="{{ sellMemoInput }}" maxlength="50" placeholder="예: 목표까지 와서 팔았어" style="width:100%;box-sizing:border-box;margin-top:9px;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:10px">
-<span style="font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums">{{ memoCount }} / 50</span>
-<div onClick="{{ saveMemo }}" style="{{ memoBtnStyle }}">{{ memoBtnLabel }}</div>
+<span style="font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums">{{ sellMemoCount }} / 50</span>
+<div onClick="{{ saveSellMemo }}" style="{{ sellMemoBtnStyle }}">{{ sellMemoBtnLabel }}</div>
 </div>
-</div>
-</div>
-<div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
-<div onClick="{{ goHome }}" style="flex:1;text-align:center;border-radius:999px;padding:17px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 9px 15px -5px rgba(35,25,80,0.2),inset 0 2px 3px rgba(255,255,255,1)">홈으로</div>
-<div onClick="{{ goPortfolio }}" style="flex:1.3;position:relative;border-radius:999px;padding:17px;text-align:center;font-size:17px;font-weight:800;color:#fff;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0) 92%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 14px 22px -9px rgba(214,54,124,0.4),inset 0 -20px 28px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
 </div>
 </div>
 </sc-if>
+
+</div>
+
+<sc-if value="{{ sellInProgress }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;padding:8px 16px 10px">
+<div id="tut-sell-next" onClick="{{ sellNext }}" style="{{ sellCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ sellCtaLabel }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ isSell3 }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
+<div onClick="{{ goHome }}" style="{{ subCtaStyle }}">홈으로</div>
+<div onClick="{{ goPortfolio }}" style="{{ mainCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
 
 <sc-if value="{{ isPortfolio }}" hint-placeholder-val="{{ false }}">
 <div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
@@ -729,29 +778,28 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="width:38px"></div>
 </div>
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:11px">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:28px;padding:18px 20px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:28px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:13.5px;font-weight:500;color:#8E93A8">{{ meName }}의 전체 자산</div>
 <div style="font-size:30px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:6px;line-height:1.15;white-space:nowrap">{{ totalAssetText }}</div>
 <div style="display:flex;gap:9px;margin-top:9px"><span style="{{ pnlStyle }}">{{ pnlText }}</span></div>
-<div style="display:flex;justify-content:space-between;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="display:flex;justify-content:space-between;background:#F4F4FA;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <span style="font-size:14px;font-weight:500;color:#8E93A8">쓸 수 있는 돈</span>
 <span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span>
 </div>
 </div>
 
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:11px;background:linear-gradient(157deg,#FFF8FB 0%,#FDEFF5 100%);border-radius:20px;padding:14px 16px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
+<div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
 
 <sc-if value="{{ hasPending }}" hint-placeholder-val="{{ false }}">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:16px 18px;box-shadow:0 12px 26px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:15.5px;font-weight:800;color:#01185A">기다리는 주문</div>
 <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
 <sc-for list="{{ pendingCards }}" as="p" hint-placeholder-count="1">
-<div style="display:flex;align-items:center;gap:11px;background:linear-gradient(157deg,#F6F6FC 0%,#EFEFF7 100%);border-radius:18px;padding:12px 14px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="display:flex;align-items:center;gap:11px;background:#F4F4FA;border-radius:18px;padding:12px 14px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="flex:1;min-width:0">
 <div style="font-size:15px;font-weight:800;color:#01185A">{{ p.name }}</div>
 <div style="font-size:12.5px;font-weight:500;color:#8E93A8;margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ p.desc }}</div>
@@ -766,7 +814,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <sc-if value="{{ hasHoldings }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;gap:10px">
 <sc-for list="{{ holdingCards }}" as="h" hint-placeholder-count="2">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:24px;padding:15px 17px;box-shadow:0 12px 26px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:24px;padding:15px 17px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:11px">
 <div style="{{ h.badgeStyle }}">{{ h.emoji }}</div>
 <div style="flex:1;min-width:0">
@@ -780,7 +828,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 <div style="display:flex;gap:9px;margin-top:13px">
 <div onClick="{{ h.buy }}" style="{{ h.buyStyle }}">사러 가기</div>
-<div onClick="{{ h.sell }}" style="{{ h.sellStyle }}">팔러 가기</div>
+<div id="tut-sell-cta" onClick="{{ h.sell }}" style="{{ h.sellStyle }}">팔러 가기</div>
 </div>
 </div>
 </sc-for>
@@ -788,8 +836,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </sc-if>
 
 <sc-if value="{{ noHoldings }}" hint-placeholder-val="{{ false }}">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#F6F6FC 100%);border-radius:26px;padding:34px 20px;text-align:center;box-shadow:0 12px 26px rgba(35,25,80,0.09),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="font-size:40px">🪺</div>
+<div style="background:#FFFFFF;border-radius:26px;padding:34px 20px;text-align:center;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:16px;font-weight:800;color:#01185A;margin-top:12px">아직 가진 회사가 없어</div>
 <div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:7px;line-height:1.6">모의투자에서 마음에 드는 회사를 찾아봐</div>
 </div>
@@ -797,10 +844,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -810,7 +857,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <div style="{{ rkHeadStyle }}">
 <div onClick="{{ goHome }}" style="{{ rkBackStyle }}">‹</div>
-<div style="{{ rkTitleStyle }}"><span style="font-size:20px;line-height:1">🏆</span><span>랭킹</span></div>
+<div style="{{ rkTitleStyle }}"><span>랭킹</span></div>
 <div style="{{ rkSegWrap }}">
 <div onClick="{{ pickWeek }}" style="{{ rkSegWeek }}">이번 주</div>
 <div onClick="{{ pickSeason }}" style="{{ rkSegSeason }}">시즌 전체</div>
@@ -851,10 +898,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -895,7 +942,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:9px;line-height:1.6">캐릭터는 시즌마다 새로 뽑아 — 계속 바뀌어도 괜찮아</div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:16px;font-weight:800;color:#01185A">내 능력치 오각형</span><span style="font-size:12.5px;font-weight:500;color:#A9AEC4">10점 만점</span></div>
 <svg width="270" height="230" viewBox="0 0 270 230" style="display:block;margin:8px auto 0">
 <polygon points="{{ radarRingInner }}" fill="none" stroke="#F0F1F7" stroke-width="1"></polygon>
@@ -911,7 +958,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:12px;font-weight:500;color:#A9AEC4;text-align:center;margin-top:4px">근거+직관 = 10 · 집중+분산 = 10 — 오른쪽으로 기울면 근거·집중</div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:16px;font-weight:800;color:#01185A">왜 샀는지 모아봤어</span><span style="font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">매수 {{ recordCount }}번</span></div>
 <sc-if value="{{ hasReasons }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
@@ -930,7 +977,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </sc-if>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:9px"><span style="font-size:18px">🐻</span><span style="font-size:16px;font-weight:800;color:#01185A">키웅이가 본 이번 시즌</span></div>
 <div style="font-size:15px;font-weight:500;color:#5C6280;line-height:1.8;margin-top:10px;text-wrap:pretty">{{ coachText }}</div>
 </div>
@@ -939,7 +986,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ atReturn }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;gap:11px">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:28px;padding:19px 20px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:28px;padding:19px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:13.5px;font-weight:500;color:#8E93A8">지금 내 돈 전부</div>
 <div style="font-size:31px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:7px;line-height:1.15;white-space:nowrap">{{ totalAssetText }}</div>
 <div style="display:flex;align-items:baseline;gap:10px;margin-top:9px">
@@ -949,7 +996,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <sc-if value="{{ hasHoldings }}" hint-placeholder-val="{{ false }}">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:6px 19px 10px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:6px 19px 10px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 0 0 1px rgba(255,255,255,0.7)">
 <sc-for list="{{ holdingCards }}" as="h" hint-placeholder-count="2">
 <div style="display:flex;align-items:center;gap:11px;padding:13px 0;border-bottom:1px solid #F0F1F7">
 <span style="font-size:19px;flex:none">{{ h.emoji }}</span>
@@ -961,7 +1008,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </sc-if>
 <sc-if value="{{ noHoldings }}" hint-placeholder-val="{{ true }}">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#F6F6FC 100%);border-radius:26px;padding:30px 20px;text-align:center;box-shadow:0 12px 26px rgba(35,25,80,0.09)">
+<div style="background:#FFFFFF;border-radius:26px;padding:30px 20px;text-align:center;box-shadow:0 12px 26px rgba(35,25,80,0.09)">
 <div style="font-size:36px">🪺</div>
 <div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:11px">아직 가진 회사가 없어</div>
 </div>
@@ -971,10 +1018,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ atCompare }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;gap:11px">
-<div style="display:flex;align-items:center;gap:9px;background:linear-gradient(157deg,#FFFFFF 0%,#F6F6FC 100%);border-radius:20px;padding:12px 15px;box-shadow:0 10px 22px rgba(35,25,80,0.09)">
+<div style="display:flex;align-items:center;gap:9px;background:#FFFFFF;border-radius:20px;padding:12px 15px;box-shadow:0 10px 22px rgba(35,25,80,0.09)">
 <span style="font-size:15px">🔒</span><span style="font-size:13.5px;font-weight:600;color:#5C6280">양쪽이 공개에 동의했어요</span>
 </div>
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;gap:10px">
 <div style="flex:1;text-align:center;background:#FDF2F7;border-radius:18px;padding:14px 8px">
 <div style="font-size:13px;font-weight:700;color:#F5327F">{{ childName }}</div>
@@ -1011,7 +1058,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ atSeason }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;gap:11px">
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:16px;font-weight:800;color:#01185A">시즌 3 기록</div>
 <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">산 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ recordCount }}번</span></div>
 <div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">판 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ sellCount }}번</span></div>
@@ -1029,10 +1076,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 </div>
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -1048,7 +1095,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="width:330px;display:flex;flex-direction:column;gap:14px">
 <div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
 <div style="font-size:17px;font-weight:800;color:#01185A">연결된 프로토타입 · 1차</div>
-<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.7;margin-top:9px;text-wrap:pretty">홈 · 종목 탐색 · 종목 상세 · 차트/뉴스 상세 · 매수 5단계 · 매도 5단계 · 계좌 · 아카이브 4탭 · 랭킹이 전부 눌러서 진행됩니다. 사고팔면 지갑과 보유 종목이 실제로 바뀌고, 아카이브 수치도 그 기록에서 계산됩니다. 상태는 브라우저에 저장돼 새로고침해도 남습니다.</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.7;margin-top:9px;text-wrap:pretty">홈 · 종목 탐색 · 종목 상세 · 차트/뉴스 상세 · 매수 3단계 · 매도 3단계 · 계좌 · 아카이브 4탭 · 랭킹이 전부 눌러서 진행됩니다. 사고팔면 지갑과 보유 종목이 실제로 바뀌고, 아카이브 수치도 그 기록에서 계산됩니다. 상태는 브라우저에 저장돼 새로고침해도 남습니다.</div>
 <div style="margin-top:16px;padding-top:15px;border-top:1px solid #EFEFF5">
 <div style="font-size:13px;font-weight:700;color:#01185A">시연용 · 학교 시간 강제</div>
 <div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.6;margin-top:6px">실제 시각과 무관하게 잠금 상태를 보여줍니다. 자녀 계정에서만 효과가 있습니다.</div>
@@ -1084,33 +1131,33 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 const SEED = 10000000, FEE = 0.00015;
 
 const REASONS = [
-  { code:'buy_news',      emoji:'📰', label:'뉴스에서 봐서',            short:'뉴스를 보고' },
-  { code:'buy_chart',     emoji:'📈', label:'그래프가 좋아 보여서',      short:'그래프를 보고' },
-  { code:'buy_familiar',  emoji:'🛒', label:'내가 아는 회사라서',        short:'내가 아는 회사라서' },
-  { code:'buy_ranking',   emoji:'🏆', label:'인기 순위에서 봐서',        short:'인기 순위를 보고' },
-  { code:'buy_social',    emoji:'🗣', label:'친구·가족이 말해줘서',      short:'친구·가족 말을 듣고' },
-  { code:'buy_intuition', emoji:'🤷', label:'그냥 느낌이 좋아서',        short:'느낌이 좋아서' }
+  { code:'buy_news',      label:'뉴스에서 봐서',            short:'뉴스를 보고' },
+  { code:'buy_chart',     label:'그래프가 좋아 보여서',      short:'그래프를 보고' },
+  { code:'buy_familiar',  label:'내가 아는 회사라서',        short:'내가 아는 회사라서' },
+  { code:'buy_ranking',   label:'인기 순위에서 봐서',        short:'인기 순위를 보고' },
+  { code:'buy_social',    label:'친구·가족이 말해줘서',      short:'친구·가족 말을 듣고' },
+  { code:'buy_intuition', label:'그냥 느낌이 좋아서',        short:'느낌이 좋아서' }
 ];
 const PLANS = [
-  { code:'plan_short',  emoji:'📅', label:'이번 주만',                    short:'이번 주만' },
-  { code:'plan_season', emoji:'🏁', label:'시즌 끝까지',                  short:'시즌 끝까지' },
-  { code:'plan_target', emoji:'🎯', label:'내가 정한 목표 가격이 되면',   short:'목표 가격이 되면' },
-  { code:'plan_none',   emoji:'🤷', label:'아직 모르겠어',                short:'아직 모르겠지만' }
+  { code:'plan_short',  label:'이번 주만',                    short:'이번 주만' },
+  { code:'plan_season', label:'시즌 끝까지',                  short:'시즌 끝까지' },
+  { code:'plan_target', label:'내가 정한 목표 가격이 되면',   short:'목표 가격이 되면' },
+  { code:'plan_none',   label:'아직 모르겠어',                short:'아직 모르겠지만' }
 ];
 const SELL_REASONS = [
-  { code:'sell_target_hit', emoji:'🎯', label:'목표한 만큼 와서',        short:'목표한 만큼 와서' },
-  { code:'sell_plan_time',  emoji:'🏁', label:'정한 날짜가 돼서',        short:'정한 날짜가 돼서' },
-  { code:'sell_rebalance',  emoji:'🔄', label:'더 좋아 보이는 회사를 찾아서', short:'더 좋아 보이는 회사를 찾아서' },
-  { code:'sell_fear_drop',  emoji:'😟', label:'더 떨어질까 봐',          short:'더 떨어질까 봐' },
-  { code:'sell_anxiety',    emoji:'😰', label:'그냥 불안해서',           short:'그냥 불안해서' },
-  { code:'sell_liquidity',  emoji:'💰', label:'다른 데 쓸 돈이 필요해서', short:'다른 데 쓸 돈이 필요해서' }
+  { code:'sell_target_hit', label:'목표한 만큼 와서',        short:'목표한 만큼 와서' },
+  { code:'sell_plan_time',  label:'정한 날짜가 돼서',        short:'정한 날짜가 돼서' },
+  { code:'sell_rebalance',  label:'더 좋아 보이는 회사를 찾아서', short:'더 좋아 보이는 회사를 찾아서' },
+  { code:'sell_fear_drop',  label:'더 떨어질까 봐',          short:'더 떨어질까 봐' },
+  { code:'sell_anxiety',    label:'그냥 불안해서',           short:'그냥 불안해서' },
+  { code:'sell_liquidity',  label:'다른 데 쓸 돈이 필요해서', short:'다른 데 쓸 돈이 필요해서' }
 ];
 const CHANGES = [
-  { code:'change_new_info',       emoji:'📰', label:'새로운 소식을 알게 됐어' },
-  { code:'change_view_shift',     emoji:'🏢', label:'회사에 대한 생각이 바뀌었어' },
-  { code:'change_price_emotion',  emoji:'📉', label:'가격이 움직여서 불안해졌어' },
-  { code:'change_alternative',    emoji:'🔄', label:'다른 회사가 더 좋아 보였어' },
-  { code:'change_plan_revision',  emoji:'🙋', label:'처음 계획이 나와 맞지 않았어' }
+  { code:'change_new_info',       label:'새로운 소식을 알게 됐어' },
+  { code:'change_view_shift',     label:'회사에 대한 생각이 바뀌었어' },
+  { code:'change_price_emotion',  label:'가격이 움직여서 불안해졌어' },
+  { code:'change_alternative',    label:'다른 회사가 더 좋아 보였어' },
+  { code:'change_plan_revision',  label:'처음 계획이 나와 맞지 않았어' }
 ];
 const SHORT_TERM_DAYS = 7;
 
@@ -1119,22 +1166,22 @@ const SHORT_TERM_DAYS = 7;
 // img 가 있으면 실제 가족사진, 없으면 마스코트 이모지 + 색으로 대신한다.
 // 사진 가족과 이모지 가족은 순위와 상관없이 섞어 둔다. '우리 가족'만 family1로 고정.
 const RK_FAMS = {
-  '우리 가족':   { img:'assets/profiles/family1.jpg',  emoji:'🐮', a:'#FFFFFF', b:'#FFE6F1' },
-  '별빛 가족':   {                                     emoji:'🐻', a:'#FFE6D6', b:'#F8C9A6' },
-  '초록곰 가족': { img:'assets/profiles/family2.jpg',  emoji:'🐸', a:'#DFF6E4', b:'#B6E7C2' },
-  '바다별 가족': {                                     emoji:'🐧', a:'#DCEBFF', b:'#B6D6FA' },
-  '달토끼 가족': { img:'assets/profiles/family3.jpg',  emoji:'🐰', a:'#F5EEFF', b:'#DED0F7' },
-  '해바라기 가족': {                                   emoji:'🦁', a:'#FFF4D6', b:'#FBE1A2' },
-  '구름섬 가족': { img:'assets/profiles/family4.jpg',  emoji:'🐨', a:'#EDF1F7', b:'#D2DCE8' },
-  '무지개 가족': { img:'assets/profiles/family5.jpg',  emoji:'🐼', a:'#F7ECFF', b:'#E2CBF7' },
-  '밤톨 가족':   {                                     emoji:'🦊', a:'#FFE9DA', b:'#F9CBA6' },
-  '민들레 가족': { img:'assets/profiles/family6.jpg',  emoji:'🐥', a:'#FFF7DA', b:'#FAE7A4' },
-  '도토리 가족': { img:'assets/profiles/family7.jpg',  emoji:'🐿️', a:'#F6EEE4', b:'#E4CFB6' },
-  '눈송이 가족': {                                     emoji:'🐻‍❄️', a:'#EFF6FF', b:'#D3E6F7' },
-  '파랑새 가족': { img:'assets/profiles/family8.jpg',  emoji:'🐦', a:'#E7F4FF', b:'#C4E1F7' },
-  '산들바람 가족': {                                   emoji:'🦉', a:'#F2F0E6', b:'#DCD7C2' },
-  '반짝별 가족': { img:'assets/profiles/family9.jpg',  emoji:'🐝', a:'#FFF6E0', b:'#F8E0A8' },
-  '씨앗 가족':   { img:'assets/profiles/family10.jpg', emoji:'🐢', a:'#EDF7EC', b:'#CBE6C6' }
+  '우리 가족':   { img:'assets/profiles/family1.jpg',  a:'#FFFFFF', b:'#FFE6F1' },
+  '별빛 가족':   {                                     a:'#FFE6D6', b:'#F8C9A6' },
+  '초록곰 가족': { img:'assets/profiles/family2.jpg',  a:'#DFF6E4', b:'#B6E7C2' },
+  '바다별 가족': {                                     a:'#DCEBFF', b:'#B6D6FA' },
+  '달토끼 가족': { img:'assets/profiles/family3.jpg',  a:'#F5EEFF', b:'#DED0F7' },
+  '해바라기 가족': {                                   a:'#FFF4D6', b:'#FBE1A2' },
+  '구름섬 가족': { img:'assets/profiles/family4.jpg',  a:'#EDF1F7', b:'#D2DCE8' },
+  '무지개 가족': { img:'assets/profiles/family5.jpg',  a:'#F7ECFF', b:'#E2CBF7' },
+  '밤톨 가족':   {                                     a:'#FFE9DA', b:'#F9CBA6' },
+  '민들레 가족': { img:'assets/profiles/family6.jpg',  a:'#FFF7DA', b:'#FAE7A4' },
+  '도토리 가족': { img:'assets/profiles/family7.jpg',  a:'#F6EEE4', b:'#E4CFB6' },
+  '눈송이 가족': {                                     a:'#EFF6FF', b:'#D3E6F7' },
+  '파랑새 가족': { img:'assets/profiles/family8.jpg',  a:'#E7F4FF', b:'#C4E1F7' },
+  '산들바람 가족': {                                   a:'#F2F0E6', b:'#DCD7C2' },
+  '반짝별 가족': { img:'assets/profiles/family9.jpg',  a:'#FFF6E0', b:'#F8E0A8' },
+  '씨앗 가족':   { img:'assets/profiles/family10.jpg', a:'#EDF7EC', b:'#CBE6C6' }
 };
 const RK_LEAGUES = {
   week: [
@@ -1198,7 +1245,7 @@ function rkPodium(tab){
   // 화면 왼쪽부터 2등 · 1등 · 3등 순으로 그린다.
   return [2, 1, 3].map(rank => {
     const row = (RK_LEAGUES[tab] || RK_LEAGUES.week)[rank - 1];
-    const f = RK_FAMS[row.name] || { emoji:'🐣', a:'#FFFFFF', b:'#E9E9F0' };
+    const f = RK_FAMS[row.name] || { a:'#FFFFFF', b:'#E9E9F0' };
     const g = RK_POD[rank];
     const ring = row.me
       ? '0 0 0 3px #F5327F,0 0 18px rgba(245,50,127,0.55)'
@@ -1208,8 +1255,8 @@ function rkPodium(tab){
       + 'px;border-radius:2px;background:linear-gradient(180deg,#4E86DC 0%,#2A5BA8 100%);'
       + 'clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);transform-origin:50% 0;';
     return {
-      rank: rank, name: row.name, pct: row.pct, emoji: f.img ? '' : f.emoji,
-      crown: rank === 1 ? '👑' : '',
+      rank: rank, name: row.name, pct: row.pct, emoji: f.img ? '' : row.name.charAt(0),
+      crown: '',
       step: row.step || '',
       slotStyle: 'position:absolute;' + g.slot + ';display:flex;flex-direction:column;align-items:center;pointer-events:none',
       crownStyle: rank === 1
@@ -1246,15 +1293,15 @@ function rkPodium(tab){
 
 function rkRows(tab, upC, downC){
   return (RK_LEAGUES[tab] || RK_LEAGUES.week).slice(3).map((row, i) => {
-    const f = RK_FAMS[row.name] || { emoji:'🐣', a:'#FFFFFF', b:'#E9E9F0' };
+    const f = RK_FAMS[row.name] || { a:'#FFFFFF', b:'#E9E9F0' };
     const me = !!row.me, neg = row.pct.charAt(0) === '-';
     return {
-      rank: i + 4, name: row.name, pct: row.pct, emoji: f.img ? '' : f.emoji, step: row.step || '',
+      rank: i + 4, name: row.name, pct: row.pct, emoji: f.img ? '' : row.name.charAt(0), step: row.step || '',
       rowStyle: 'flex:none;height:64px;display:flex;align-items:center;padding:0 18px 0 10px;border-radius:28px;' + (me
         ? 'background:linear-gradient(180deg,#FF7FB8 0%,#F5327F 62%,#E01D6B 100%);'
           + 'box-shadow:0 14px 26px -8px rgba(224,29,107,0.42),inset 0 1px 0 rgba(255,255,255,0.35)'
         : 'background:linear-gradient(180deg,#FFFFFF 0%,#FFFFFF 55%,#F2F3FA 100%);'
-          + 'box-shadow:0 8px 18px rgba(35,25,80,0.08),inset 0 0 0 1px rgba(255,255,255,0.9)'),
+          + 'box-shadow:0 2px 10px rgba(30,25,60,0.05)'),
       rankStyle: 'flex:none;width:32px;text-align:center;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:'
         + (me ? '#fff' : '#A9AEC4'),
       plateStyle: 'flex:none;margin-left:2px;width:44px;height:44px;border-radius:15px;display:flex;align-items:center;'
@@ -1275,15 +1322,17 @@ function rkRows(tab, upC, downC){
 }
 
 const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
-const glass = 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)';
+const glass = 'background:#FFFFFF;box-shadow:0 2px 10px rgba(30,25,60,0.05)';
 const CTA_ON = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%),radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)";
-const CTA_OFF = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:linear-gradient(180deg,#D3D5E2 0%,#C3C6D6 60%,#B7BACC 100%);box-shadow:0 8px 14px -6px rgba(35,25,80,0.18),inset 0 2px 3px rgba(255,255,255,0.6)";
+const CTA_OFF = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:#C6C9D8";
+// 주된 버튼 옆에 서는 보조 버튼 (홈으로 같은 것)
+const SUB_CTA = "flex:1;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;cursor:pointer;background:#EFEFF5";
 
 // 시드 2주치 거래(shared/store/family-trade-seed.ts와 동일)의 결과 잔고.
-// 민지: 매수 891,000 − 매도 회수 230,500 / 엄마: 매수 690,750 − 매도 회수 231,000.
+// 김찬영: 매수 891,000 − 매도 회수 230,500 / 엄마: 매수 690,750 − 매도 회수 231,000.
 // 보유 평균단가는 시드 체결가 기준이다. 여기 값을 바꾸면 시드 파일과 함께 바꾼다.
 const seedAccounts = () => ({
-  child:  { name:'민지', cash: SEED - 660500, holdings: [ { code:'259960', qty:2, avg:232000 }, { code:'352820', qty:1, avg:181000 } ], pending:[] },
+  child:  { name:'김찬영', cash: SEED - 660500, holdings: [ { code:'259960', qty:2, avg:232000 }, { code:'352820', qty:1, avg:181000 } ], pending:[] },
   parent: { name:'엄마', cash: SEED - 459750, holdings: [ { code:'005930', qty:1, avg:240000 }, { code:'011200', qty:10, avg:21075 } ], pending:[] }
 });
 
@@ -1292,10 +1341,12 @@ class Component extends DCLogic {
     screen: 'home', account: 'child',
     acc: seedAccounts(),
     sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0,
+    orderDone: null, sellDone: null, watchlist: [], stockQuery: '',
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
     profiles: null, profileStatus: 'idle',
-    sellStep: 1, sellDraft: { qty:0, reason:null, change:null, memo:'', memoSaved:false }, doneKind: 'buy', arcTab: 'report', sellPick: 'all',
+    sellStep: 1, arcTab: 'report', sellPick: 'all',
+    sellDraft: { sellBy:'qty', qty:0, amountInput:0, orderType:'market', limitPct:0, reason:null, change:null, memo:'', memoSaved:false },
     schoolLock: true, forceSchool: 'auto', rankTab: 'week',
     reasonOrder: [0,1,2,3,4,5],
     newsByStock: {}, newsStatusByStock: {}, activeNewsId: null, activeNews: null
@@ -1303,7 +1354,7 @@ class Component extends DCLogic {
 
   blankDraft(){
     this.orderFlowSequence = (this.orderFlowSequence || 0) + 1;
-    return { amount:0, amountSource:null, reason:null, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false, orderFlowId:'buy_' + this.orderFlowSequence };
+    return { buyBy:'amount', amount:0, shares:0, amountSource:null, reason:null, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false, orderFlowId:'buy_' + this.orderFlowSequence };
   }
 
   pickOrderType(orderType){
@@ -1385,14 +1436,14 @@ class Component extends DCLogic {
         const canOpenSellReason = sameSell && this.state.sellDraft.qty > 0;
         const canOpenSellConfirmation = canOpenSellReason && !!this.state.sellDraft.reason;
         const sellStep = action.orderStep === 'confirmation' && canOpenSellConfirmation ? 5 : (action.orderStep === 'reason' && canOpenSellReason ? 3 : 1);
-        this.set({ code:stock.code, screen:'sell', sellStep:sellStep, sellReasonOrder:[0,1,2,3,4,5], doneKind:'sell' });
+        this.set({ code:stock.code, screen:'sell', sellStep:sellStep, sellReasonOrder:[0,1,2,3,4,5] });
       } else {
         const sameBuy = this.state.screen === 'buy' && this.state.code === stock.code;
         const canOpenBuyReason = sameBuy && this.state.draft.amount > 0;
         const hasBuyPlan = !!this.state.draft.plan && (this.state.draft.plan !== 'plan_target' || this.state.draft.targetPct !== null);
         const canOpenBuyConfirmation = canOpenBuyReason && !!this.state.draft.reason && hasBuyPlan;
         const buyStep = action.orderStep === 'confirmation' && canOpenBuyConfirmation ? 4 : (action.orderStep === 'reason' && canOpenBuyReason ? 2 : 1);
-        this.set({ code:stock.code, screen:'buy', buyStep:buyStep, draft:sameBuy ? this.state.draft : this.blankDraft(), showPad:false, doneKind:'buy' });
+        this.set({ code:stock.code, screen:'buy', buyStep:buyStep, draft:sameBuy ? this.state.draft : this.blankDraft(), showPad:false });
       }
     }
   }
@@ -1403,7 +1454,7 @@ class Component extends DCLogic {
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
     for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
-    this.setState(s => Object.assign({}, s, saved ? { acc:saved.acc, records:saved.records, sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq } : {}, { reasonOrder: order }), () => this.notifyChatContext());
+    this.setState(s => Object.assign({}, s, saved ? { acc:saved.acc, records:saved.records, sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq, watchlist:saved.watchlist || [] } : {}, { reasonOrder: order }), () => this.notifyChatContext());
     this.liveRefreshTimer = null;
     this.liveRefreshBusy = false;
     this.liveRefreshTick = () => {
@@ -1474,7 +1525,7 @@ class Component extends DCLogic {
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
-    const orderContextChanged = prevState && ['buy', 'sell', 'done'].indexOf(this.state.screen) >= 0 && (
+    const orderContextChanged = prevState && ['buy', 'sell'].indexOf(this.state.screen) >= 0 && (
       prevState.draft.amount !== this.state.draft.amount ||
       prevState.draft.orderType !== this.state.draft.orderType ||
       prevState.draft.limitPct !== this.state.draft.limitPct ||
@@ -1618,7 +1669,7 @@ class Component extends DCLogic {
   }
 
   persist(next){
-    try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq })); } catch(e){}
+    try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq, watchlist: next.watchlist || [] })); } catch(e){}
   }
   set(patch){ this.setState(s => { const n = Object.assign({}, s, patch); this.persist(n); return n; }); }
   setDraft(patch){ this.setState(s => Object.assign({}, s, { draft: Object.assign({}, s.draft, patch) })); }
@@ -1700,7 +1751,7 @@ class Component extends DCLogic {
       ? 'archive'
       : ['detail', 'chart', 'news'].indexOf(screen) >= 0
         ? 'stock'
-        : ['buy', 'sell', 'done'].indexOf(screen) >= 0
+        : ['buy', 'sell'].indexOf(screen) >= 0
           ? 'order'
           : 'home';
     const stock = this.stock();
@@ -1710,7 +1761,7 @@ class Component extends DCLogic {
       context.stockName = stock.name;
     }
     if (stock && chatScreen === 'order') {
-      const isSellOrder = screen === 'sell' || (screen === 'done' && this.state.doneKind === 'sell');
+      const isSellOrder = screen === 'sell' || (false);
       const unitPrice = isSellOrder
         ? stock.price
         : (this.state.draft.orderType === 'limit'
@@ -1726,7 +1777,7 @@ class Component extends DCLogic {
     if (window.parent === window) return;
     window.parent.postMessage({ type:'kiwoom:chat-behavior', event:event }, window.location.origin);
   }
-  sectorOf(id){ return this.uni().sectors.filter(s => s.id === id)[0] || { accent:'#8E93A8', emoji:'📦', name:'' }; }
+  sectorOf(id){ return this.uni().sectors.filter(s => s.id === id)[0] || { accent:'#8E93A8', name:'' }; }
   totalAsset(){
     const m = this.me();
     const held = m.holdings.reduce((a,h) => {
@@ -1742,8 +1793,8 @@ class Component extends DCLogic {
   }
   chip(on){
     return on
-      ? 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 62%,#EE4A8E 100%);box-shadow:0 8px 15px -5px rgba(214,54,124,0.45),inset 0 2px 3px rgba(255,255,255,0.45)'
-      : 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:600;color:#5C6280;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -4px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)';
+      ? 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;background:#F5327F'
+      : 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:600;color:#5C6280;cursor:pointer;background:#F1F2F8';
   }
   navItem(on){
     return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#A9AEC4');
@@ -1751,7 +1802,7 @@ class Component extends DCLogic {
   // 랭킹 화면의 이번 주 / 시즌 전체 토글
   rkSeg(on){
     return 'flex:1;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:13.5px;cursor:pointer;' + (on
-      ? 'font-weight:700;color:#01185A;background:linear-gradient(180deg,#FFFFFF 0%,#EFF1F9 100%);box-shadow:0 3px 8px rgba(0,0,0,0.22)'
+      ? 'font-weight:700;color:#01185A;background:#FFFFFF'
       : 'font-weight:600;color:rgba(255,255,255,0.7)');
   }
   // 종목 고르기 화면 네비 (밝은 배경)
@@ -1763,26 +1814,33 @@ class Component extends DCLogic {
     const s = this.state, m = this.me(), st = this.stock(), u = this.uni();
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
+    // 주문 직후 값 — 매수 3단계 축하 화면과 매도 3단계 완료 화면이 이걸로 문구를 만든다
+    const od = s.orderDone || {};
+    const odQty = od.qty === undefined ? '' : ((Math.round(od.qty * 100) / 100) + '주');
+    const sd = s.sellDone || {};
+    const sdQty = sd.qty === undefined ? '' : ((Math.round(sd.qty * 100) / 100) + '주');
     const rankTab = s.rankTab || 'week';
     const reason = REASONS.filter(r => r.code === s.draft.reason)[0];
     const plan = PLANS.filter(p => p.code === s.draft.plan)[0];
 
     const price = st ? st.price : 0;
-    const amount = s.draft.amount;
     const availableCash = Math.max(0, Math.floor(m.cash));
     const limPrice = s.draft.limitPct === null || s.draft.limitPct === undefined ? price : Math.round(price * (1 + s.draft.limitPct / 100));
     const execPrice = s.draft.orderType === 'limit' ? limPrice : price;
-    const qty = execPrice > 0 ? amount / execPrice : 0;
+    const byQty = s.draft.buyBy === 'qty';
+    const shares = s.draft.shares || 0;
+    // 주 수로 넣을 때는 주 수 × 주문 가격이 곧 주문 금액이다
+    const amount = byQty ? Math.round(shares * execPrice) : s.draft.amount;
+    const qty = byQty ? shares : (execPrice > 0 ? amount / execPrice : 0);
     const grand = amount;
     const overCash = grand > m.cash;
     const tooSmall = amount > 0 && qty < 0.01;
-    const warn = overCash ? '지갑보다 많이 살 수는 없어!'
+    const warn = overCash ? (byQty ? '지갑으로 살 수 있는 주 수보다 많아!' : '지갑보다 많이 살 수는 없어!')
       : tooSmall ? '이 금액으로는 아직 살 수 없어. 조금 더 올려볼까?' : '';
     const canBuy1 = amount > 0 && !overCash && !tooSmall;
 
     const nextOk = s.buyStep === 1 ? canBuy1
-      : s.buyStep === 2 ? !!s.draft.reason
-      : s.buyStep === 3 ? (!!s.draft.plan && (s.draft.plan !== 'plan_target' || s.draft.targetPct !== null))
+      : s.buyStep === 2 ? (!!s.draft.reason && !!s.draft.plan && (s.draft.plan !== 'plan_target' || s.draft.targetPct !== null))
       : true;
 
     const sentence = [reason ? reason.short : '', plan ? plan.short : ''].filter(Boolean).join(' · ');
@@ -1793,9 +1851,18 @@ class Component extends DCLogic {
     const rgbOf = (hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); };
     // 'rank' 는 섹터가 아니라 그날 등락률 순으로 51종 전체를 보는 모드다.
     const isRank = s.sectorId === 'rank';
-    const baseList = isRank
-      ? u.stocks.slice().sort((a, b) => b.change - a.change)
-      : u.stocks.filter(x => x.sector === s.sectorId);
+    // 'watch' 는 하트를 눌러 담아둔 관심 기업만 보는 모드다.
+    const isWatch = s.sectorId === 'watch';
+    const watch = s.watchlist || [];
+    const q = (s.stockQuery || '').trim().toLowerCase();
+    // 검색어가 있으면 섹터·관심 선택보다 검색이 앞선다
+    const baseList = q
+      ? u.stocks.filter(x => x.name.toLowerCase().indexOf(q) >= 0).sort((a, b) => b.change - a.change)
+      : isRank
+        ? u.stocks.slice().sort((a, b) => b.change - a.change)
+        : isWatch
+          ? u.stocks.filter(x => watch.indexOf(x.code) >= 0)
+          : u.stocks.filter(x => x.sector === s.sectorId);
     const list = baseList.map((x, ci) => {
       const sec = this.sectorOf(x.sector);
       const active = ci === s.cardIndex;
@@ -1873,19 +1940,19 @@ class Component extends DCLogic {
       const pct = cost > 0 ? d / cost * 100 : 0;
       const sec = this.sectorOf(x.sector);
       return {
-        name: x.name, emoji: sec.emoji,
+        name: x.name, emoji: (sec.name || '').charAt(0),
         qtyText: h.qty.toFixed(2) + '주',
         avgText: Math.round(h.avg).toLocaleString('ko-KR') + '원',
         valueText: won(val),
         pnlText: (d >= 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '%',
         pnlStyle: 'font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px;white-space:nowrap;color:' + (d >= 0 ? up : down),
-        badgeStyle: 'width:40px;height:40px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:19px;background:linear-gradient(180deg,#FFFFFF 0%,#F2F3FA 100%);box-shadow:0 5px 10px -3px rgba(35,25,80,0.2),inset 0 1.5px 1px rgba(255,255,255,1),0 0 0 1.5px ' + sec.accent + '33',
+        badgeStyle: 'width:40px;height:40px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:19px;background:#F4F4FA,0 0 0 1.5px ' + sec.accent + '33',
         buyStyle: 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;' + (locked
           ? 'color:#B9BDCE;cursor:not-allowed;background:#F1F2F8'
-          : 'color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 6px 12px -4px rgba(35,25,80,0.18),inset 0 1.5px 1px rgba(255,255,255,1)'),
+          : 'color:#01185A;cursor:pointer;background:#F1F2F8'),
         sellStyle: 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;' + (locked
           ? 'color:#E4B7CD;cursor:not-allowed;background:#FAF2F6'
-          : 'color:#D5327A;cursor:pointer;background:linear-gradient(180deg,#FFFDFE 0%,#FDE9F2 100%);box-shadow:0 6px 12px -4px rgba(226,60,130,0.2),inset 0 1.5px 1px rgba(255,255,255,1)'),
+          : 'color:#D5327A;cursor:pointer;background:#FDECF4'),
         buy: () => { if (locked) return; this.set({ code: x.code, screen: 'buy', buyStep: 1, draft: this.blankDraft(), showPad:false }); },
         sell: () => {
           if (locked) return;
@@ -1912,16 +1979,28 @@ class Component extends DCLogic {
     const planMatch = this.judgePlanMatch(buyRec, price);
     const isFirstSell = buyRec ? !(s.sellRecords || []).some(r => r.linked_buy_order_id === buyRec.order_id) : true;
     const showJudge = isFirstSell && planMatch !== null;
-    const sellQty = s.sellDraft.qty;
+    // 매도도 매수와 같은 방식으로 넣는다 — 금액 또는 주 수, 시장가 또는 지정가
+    const sellLimPct = s.sellDraft.limitPct === null || s.sellDraft.limitPct === undefined ? 0 : s.sellDraft.limitPct;
+    const sellLimPrice = Math.round(price * (1 + sellLimPct / 100));
+    const sellExecPrice = s.sellDraft.orderType === 'limit' ? sellLimPrice : price;
+    const sellByQty = s.sellDraft.sellBy !== 'amount';
+    const sellMaxQty = heldQty;
+    const sellWant = sellByQty
+      ? (s.sellDraft.qty || 0)
+      : (sellExecPrice > 0 ? (s.sellDraft.amountInput || 0) / sellExecPrice : 0);
+    const sellQty = Math.min(sellMaxQty, Math.max(0, sellWant));
+    const sellProceeds = sellQty * sellExecPrice;
+    const sellOver = sellWant > sellMaxQty + 0.0001;
+    const sellWarn = sellOver ? '가진 것보다 많이 팔 수는 없어!'
+      : (sellWant > 0 && sellQty < 0.01) ? '이 금액으로는 아직 팔 수 없어. 조금 더 올려볼까?' : '';
     const sellReason = SELL_REASONS.filter(r => r.code === s.sellDraft.reason)[0];
-    const sellOk = s.sellStep === 1 ? sellQty > 0
-      : s.sellStep === 3 ? !!s.sellDraft.reason
-      : s.sellStep === 4 ? (planMatch === true || !!s.sellDraft.change)
+    const sellOk = s.sellStep === 1 ? (sellQty > 0 && !sellOver)
+      : s.sellStep === 2 ? (!!s.sellDraft.reason && (!showJudge || planMatch === true || !!s.sellDraft.change))
       : true;
     const prog2 = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.sellStep ? '#F5327F' : '#DDDFEC');
     const devChip = on => 'flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:12.5px;font-weight:' + (on ? '800' : '600') + ';cursor:pointer;' + (on ? 'color:#fff;background:#01185A' : 'color:#6E7488;background:#F1F2F8');
     const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:999px;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap;' + (on
-      ? 'color:#fff;background:linear-gradient(180deg,#0A2E7A 0%,#01185A 100%);box-shadow:0 6px 12px -4px rgba(1,24,90,0.4)'
+      ? 'color:#fff;background:#01185A;box-shadow:0 6px 12px -4px rgba(1,24,90,0.4)'
       : 'color:#8E93A8');
     const myRecs = s.records.filter(r => r.user_id === (s.account === 'child' ? 'child_minji' : 'parent_mom'));
     const cnt = {};
@@ -1929,12 +2008,12 @@ class Component extends DCLogic {
     const reasonStats = REASONS.filter(r => cnt[r.code]).map(r => ({
       emoji: r.emoji, label: r.label, n: cnt[r.code],
       pct: Math.round(cnt[r.code] / myRecs.length * 100) + '%',
-      barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%)'
+      barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:#F5327F'
     })).sort((a, b) => b.n - a.n);
     // 성향은 서버 엔진(BehaviorProfileSnapshot)이 계산한다. 여기서는 표시만 한다.
     const CHARACTER_CARD = {
-      sniper: { emoji:'🎯', name:'저격수' }, strategist: { emoji:'🧩', name:'전략가' },
-      challenger: { emoji:'⚡', name:'승부사' }, explorer: { emoji:'🦋', name:'탐험가' }
+      sniper: { name:'저격수' }, strategist: { name:'전략가' },
+      challenger: { name:'승부사' }, explorer: { name:'탐험가' }
     };
     const ABILITY_ROWS = [
       { key:'accuracy', label:'정확력' }, { key:'evidence', label:'근거력' }, { key:'focus', label:'집중력' },
@@ -1985,8 +2064,8 @@ class Component extends DCLogic {
     const childSnap = profs.child ? profs.child.snapshot : null;
     const parentSnap = profs.parent ? profs.parent.snapshot : null;
     const compareSide = snapX => {
-      if (!snapX) return { emoji:'⏳', name:'불러오는 중', star:'' };
-      if (snapX.observationState === 'initial' || !snapX.character) return { emoji:'🌱', name:'관찰 초기', star:'' };
+      if (!snapX) return { name:'불러오는 중', star:'' };
+      if (snapX.observationState === 'initial' || !snapX.character) return { name:'관찰 초기', star:'' };
       const card = CHARACTER_CARD[snapX.character];
       return { emoji: card.emoji, name: card.name, star: snapX.starGrade ? starTextOf(snapX.starGrade) : '별 판정 중' };
     };
@@ -2007,13 +2086,22 @@ class Component extends DCLogic {
       ? s.acc.child.name + '는 ' + CHARACTER_CARD[childSnap.character].name + ', ' + s.acc.parent.name + '는 ' + CHARACTER_CARD[parentSnap.character].name + '. '
         + (childSnap.character === parentSnap.character ? '같은 캐릭터여도 오각형 모양이 달라요.' : '스타일이 달라요.')
       : '두 사람의 기록이 모이는 중이에요.';
-    const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8', emoji:'📦' };
-    const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:linear-gradient(180deg,#FFFFFF 0%,#F2F3FA 100%);box-shadow:0 6px 12px -3px rgba(35,25,80,0.2),inset 0 2px 1px rgba(255,255,255,1),0 0 0 1.5px ' + sec.accent + '33';
+    const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8' };
+    const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:#F4F4FA,0 0 0 1.5px ' + sec.accent + '33';
 
     const prog = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.buyStep ? '#F5327F' : '#DDDFEC');
-    const tabOn = 'font-size:13.5px;font-weight:700;padding:7px 15px;border-radius:999px;cursor:pointer;color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)';
+    const tabOn = 'font-size:13.5px;font-weight:700;padding:7px 15px;border-radius:999px;cursor:pointer;color:#fff;background:#F5327F;box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)';
     const tabOff = 'font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;cursor:pointer;color:#8E93A8';
 
+    const maxShares = execPrice > 0 ? Math.floor(availableCash / execPrice) : 0;
+    const qtyPadKeys = ['1','2','3','4','5','6','7','8','9','←','0','00'].map(k => ({
+      label: k,
+      tap: () => {
+        const cur = String(s.draft.shares || '');
+        const v = k === '←' ? cur.slice(0, -1) : cur + k;
+        this.setDraft({ shares: Math.min(maxShares, parseInt(v || '0', 10) || 0), amountSource:'custom' });
+      }
+    }));
     const padKeys = ['1','2','3','4','5','6','7','8','9','←','0','000'].map(k => ({
       label: k,
       tap: () => {
@@ -2027,32 +2115,40 @@ class Component extends DCLogic {
 
     return {
       isHome: s.screen === 'home', isExplore: s.screen === 'explore', isDetail: s.screen === 'detail',
-      isBuy: s.screen === 'buy', isDone: s.screen === 'done',
+      isBuy: s.screen === 'buy',
       isChart: s.screen === 'chart', isNews: s.screen === 'news',
       isPortfolio: s.screen === 'portfolio', isArchive: s.screen === 'archive',
       isBuy1: s.buyStep === 1, isBuy2: s.buyStep === 2, isBuy3: s.buyStep === 3,
-      isBuy4: s.buyStep === 4,
+      buyInProgress: s.buyStep < 3,
 
       meName: m.name, initial: m.name.charAt(0),
       totalAssetText: won(total), cashText: won(m.cash), navAccount: this.navItem(s.screen === 'portfolio'),
       holdCountText: m.holdings.length + '곳',
       pnlText: (pnl >= 0 ? '▲ +' : '▼ ') + Math.abs(Math.round(pnl)).toLocaleString('ko-KR') + '원',
       pnlStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      childTabStyle: s.account === 'child' ? tabOn : tabOff,
-      parentTabStyle: s.account === 'parent' ? tabOn : tabOff,
-      pickChild: () => this.set({ account:'child' }),
-      pickParent: () => this.set({ account:'parent' }),
 
       // 맨 앞은 섹터가 아니라 '오늘 많이 오른 순' 보기다
-      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순', emoji: '🔥' }].concat(u.sectors).map(x => ({
+      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순', emoji: '' }, { id: 'watch', name: '관심 기업', emoji: '' }].concat(u.sectors).map(x => ({
         name: x.name, emoji: x.emoji,
         style: 'display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:' + (x.id === s.sectorId ? '700' : '500') + ';white-space:nowrap;cursor:pointer;' + (x.id === s.sectorId
-          ? 'color:#fff;background:linear-gradient(180deg,#FF7FB4 0%,#F5327F 100%);box-shadow:0 6px 14px -4px rgba(245,50,127,0.5),0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)'
-          : 'color:#5C6280;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(240,240,250,0.78) 100%);box-shadow:0 5px 12px -5px rgba(70,50,120,0.28),inset 0 1.5px 1px rgba(255,255,255,0.95),inset 0 0 0 1px rgba(120,110,180,0.10)'),
+          ? 'color:#fff;background:#F5327F,0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)'
+          : 'color:#5C6280;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)'),
         pick: () => this.set({ sectorId: x.id, cardIndex: 0 })
       })),
       // 등락률 순 보기에서는 칩이 이미 무슨 목록인지 말해주므로 제목을 비운다
-      sectorTitle: isRank ? '' : this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
+      sectorTitle: q ? ('\"' + s.stockQuery.trim() + '\" 검색 결과 ' + baseList.length + '곳')
+        : isRank ? ''
+        : isWatch ? ('관심 기업 ' + baseList.length + '곳')
+        : (this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳'),
+
+      // 종목 검색
+      stockQuery: s.stockQuery, hasStockQuery: !!q,
+      onStockQuery: e => { const v = e.target.value; this.setState({ stockQuery: v, cardIndex: 0 }); },
+      clearStockQuery: () => this.setState({ stockQuery: '', cardIndex: 0 }),
+      noCards: baseList.length === 0,
+      noCardsTitle: q ? '찾는 회사가 없어' : '아직 관심 기업이 없어',
+      noCardsHint: q ? '이름 일부만 넣어도 찾아줄게. 예를 들면 \"삼성\"'
+        : '회사를 눌러서 들어간 다음, 오른쪽 위 하트를 누르면 여기에 모여.',
       cards: list,
       // 종목이 많으면 도트가 화면을 넘친다. 현재 위치 주변만 창처럼 보여주고 양끝은 작게 흘린다.
       cardDots: (() => {
@@ -2135,7 +2231,18 @@ class Component extends DCLogic {
         window.addEventListener('pointercancel', up);
       },
 
-      stockName: st ? st.name : '', stockEmoji: sec.emoji,
+      stockName: st ? st.name : '', stockEmoji: (sec.name || '').charAt(0),
+
+      // 관심 종목 — 누르기 전 회색, 담고 나면 분홍
+      watchBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
+      watchFill: (st && (s.watchlist || []).indexOf(st.code) >= 0) ? '#F5327F' : 'none',
+      watchStroke: (st && (s.watchlist || []).indexOf(st.code) >= 0) ? '#F5327F' : '#B8BDD0',
+      toggleWatch: () => {
+        if (!st) return;
+        const cur = this.state.watchlist || [];
+        const on = cur.indexOf(st.code) >= 0;
+        this.set({ watchlist: on ? cur.filter(c => c !== st.code) : cur.concat([st.code]) });
+      },
       stockPriceText: st ? st.price.toLocaleString('ko-KR') + '원' : '',
       stockChangeText: st ? ((st.change >= 0 ? '▲ ' : '▼ ') + Math.abs(st.change).toFixed(2) + '%') : '',
       detailChangeStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (st && st.change >= 0 ? up : down),
@@ -2148,12 +2255,25 @@ class Component extends DCLogic {
       miniBadgeStyle: bigBadge(38, 13, 18),
 
       buyStepNo: s.buyStep,
-      prog1: prog(1), prog2: prog(2), prog3: prog(3), prog4: prog(4),
-      buyBackGlyph: s.buyStep === 1 ? '✕' : '‹',
-      amountText: amount.toLocaleString('ko-KR'),
+      prog1: prog(1), prog2: prog(2), prog3: prog(3),
+      buyBackGlyph: s.buyStep === 1 ? '✕' : (s.buyStep === 3 ? '✕' : '‹'),
+      buyInputText: (byQty ? shares : amount).toLocaleString('ko-KR'),
+      buyInputUnit: byQty ? '주' : '원',
       amountWon: won(amount), totalText: won(grand),
       qtyText: qty.toFixed(2) + '주',
-      qtyHint: amount > 0 && st ? (st.name + ' 약 ' + qty.toFixed(2) + '주' + (s.draft.orderType === 'limit' ? '를 살 수 있게 돼' : '를 살 수 있어')) : '얼마를 넣을지 골라봐',
+      // 금액으로 넣으면 몇 주가 되는지, 주 수로 넣으면 얼마가 되는지 서로 보여준다
+      qtyHint: byQty
+        ? (shares > 0 && st ? (Math.round(shares * execPrice)).toLocaleString('ko-KR') + '원이 들어가' : '몇 주 살지 골라봐')
+        : (amount > 0 && st ? (st.name + ' 약 ' + qty.toFixed(2) + '주' + (s.draft.orderType === 'limit' ? '를 살 수 있게 돼' : '를 살 수 있어')) : '얼마를 넣을지 골라봐'),
+      // 지갑과 주문 가격으로 최대 몇 주까지 살 수 있는지
+      buyMaxHint: (execPrice > 0 && m.cash > 0)
+        ? ('최대 ' + Math.floor(m.cash / execPrice) + '주까지 살 수 있어 · 지갑 ' + won(m.cash))
+        : '',
+      byAmountStyle: this.chip(!byQty), byQtyStyle: this.chip(byQty),
+      pickByAmount: () => { this.setDraft({ buyBy:'amount' }); this.setState({ showPad:false }); },
+      pickByQty: () => { this.setDraft({ buyBy:'qty' }); this.setState({ showPad:false }); },
+      // 빠른선택과 직접 입력은 구분한다 — 직접 넣은 값이 3만원이어도 3만원 칩이 켜지지 않는다
+      // 금액 칩 — 빠른선택과 직접 입력을 구분한다 (f2-trade 계약)
       chip1: this.chip(s.draft.amountSource === 'preset' && amount === 10000),
       chip3: this.chip(s.draft.amountSource === 'preset' && amount === 30000),
       chip5: this.chip(s.draft.amountSource === 'preset' && amount === 50000),
@@ -2165,7 +2285,23 @@ class Component extends DCLogic {
         this.setDraft({ amount:Math.min(availableCash, amount), amountSource:'custom' });
         this.setState(x => ({ showPad: !x.showPad }));
       },
+      // 주 수 칩 — 같은 규칙을 주 수에 적용한다
+      maxShares: maxShares,
+      qtyChips: [1, 5, 10].map(v => ({
+        label: v + '주',
+        style: this.chip(s.draft.amountSource === 'preset' && shares === v),
+        pick: () => { this.setDraft({ shares: Math.min(maxShares, v), amountSource:'preset' }); this.setState({ showPad:false }); }
+      })).concat([{
+        label: '직접', style: this.chip(s.draft.amountSource === 'custom'),
+        pick: () => {
+          this.setDraft({ shares: Math.min(maxShares, shares), amountSource:'custom' });
+          this.setState(x => ({ showPad: !x.showPad }));
+        }
+      }]),
+      qtyPadKeys: qtyPadKeys,
       showPad: s.showPad, padKeys: padKeys,
+      buyByAmount: !byQty, buyByQty: byQty,
+      buyPadKeys: byQty ? qtyPadKeys : padKeys,
       mktStyle: this.chip(s.draft.orderType === 'market'), limStyle: this.chip(s.draft.orderType === 'limit'),
       pickMarket: () => this.pickOrderType('market'),
       pickLimit: () => this.pickOrderType('limit'),
@@ -2180,17 +2316,17 @@ class Component extends DCLogic {
       hasWarn: !!warn, warnText: warn,
 
       reasonBtns: s.reasonOrder.map(i => REASONS[i]).map(r => ({
-        emoji: r.emoji, label: r.label,
-        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:15px 9px;border-radius:24px;cursor:pointer;min-height:96px;justify-content:center;' + (s.draft.reason === r.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+        label: r.label,
+        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 10px;border-radius:20px;cursor:pointer;min-height:64px;justify-content:center;' + (s.draft.reason === r.code
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setDraft({ reason: r.code })
       })),
 
       planBtns: PLANS.map(p => ({
-        emoji: p.emoji, label: p.label,
+        label: p.label,
         style: 'display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;cursor:pointer;' + (s.draft.plan === p.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setDraft({ plan: p.code, targetPct: p.code === 'plan_target' ? s.draft.targetPct : null })
       })),
@@ -2200,12 +2336,44 @@ class Component extends DCLogic {
       targetHint: s.draft.targetPct && st ? ('지금 ' + st.price.toLocaleString('ko-KR') + '원 → 목표 ' + Math.round(st.price * (1 + s.draft.targetPct/100)).toLocaleString('ko-KR') + '원') : '몇 퍼센트 오르면 팔지 골라봐',
 
       answerSentence: sentence,
-      buyCtaLabel: s.buyStep === 4 ? '주문 넣기!' : '다음',
-      buyCtaStyle: (nextOk && !(locked && s.buyStep === 4)) ? CTA_ON : CTA_OFF,
+      buyMemo: s.draft.memo, buyMemoCount: s.draft.memo.length,
+      buyMemoInput: e => { const v = e.target.value.slice(0, 50); this.setDraft({ memo: v }); },
+      buyCtaLabel: s.buyStep === 2 ? '주문하기' : '다음',
+      buyCtaStyle: (nextOk && !(locked && s.buyStep === 2)) ? CTA_ON : CTA_OFF,
+      subCtaStyle: SUB_CTA, mainCtaStyle: 'flex:1.3;' + CTA_ON,
+
+      // ── 3단계 · 주문을 끝낸 축하 화면 ───────────────────────────────
+      doneKicker: od.limit ? '기다리는 주문에 넣었어' : '주문 완료!',
+      doneHeadline: od.name
+        ? (od.limit
+          ? (od.limit.toLocaleString('ko-KR') + '원이 되면\n' + od.name + ' ' + odQty + '를 살게요!')
+          : (od.name + ' ' + odQty + '를\n주문했어요!'))
+        : '주문했어요!',
+      donePraise: od.limit
+        ? '값이 목표에 닿을 때까지 키웅이가 지켜볼게.\n그동안 그 돈은 잠깐 맡아둘게!'
+        : '왜 샀는지까지 남긴 건 정말 잘한 거야.\n나중에 아카이브에서 오늘의 너를 다시 만나자!',
+      doneStockName: od.name || '',
+      doneQty: odQty,
+      doneAmount: won(od.amount || 0),
+      balloons: ['🎈','🎈','🎈','🎉','🎊'].map((e, i) => ({
+        emoji: e,
+        style: 'position:absolute;left:' + (8 + i * 21) + '%;bottom:-40px;font-size:' + (26 + (i % 3) * 7) + 'px;'
+          + '--kwx:' + (i % 2 ? '' : '-') + (10 + i * 6) + 'px;'
+          + 'animation:kwRise ' + (2.6 + i * 0.35) + 's ease-in ' + (i * 0.18) + 's forwards'
+      })),
+      confetti: Array.from({ length: 14 }, (_, i) => {
+        const col = ['#F5327F','#FFC53D','#4FC3F7','#7BE3A0','#9B8CFF','#FF8AD0'][i % 6];
+        return {
+          style: 'position:absolute;top:-20px;left:' + (4 + i * 6.8) + '%;width:' + (7 + (i % 3) * 3) + 'px;height:'
+            + (11 + (i % 4) * 3) + 'px;border-radius:2px;background:' + col + ';'
+            + '--kwx:' + (i % 2 ? '' : '-') + (14 + (i % 5) * 12) + 'px;'
+            + 'animation:kwFall ' + (2 + (i % 5) * 0.3) + 's linear ' + (i * 0.09) + 's forwards'
+        };
+      }),
       buyNext: () => {
         if (!nextOk) return;
-        if (locked && s.buyStep === 4) return;
-        if (s.buyStep < 4) { this.setState({ buyStep: s.buyStep + 1, showPad:false }); return; }
+        if (locked && s.buyStep === 2) return;
+        if (s.buyStep < 2) { this.setState({ buyStep: s.buyStep + 1, showPad:false }); return; }
         const isLimit = s.draft.orderType === 'limit';
         const nm = this.state.acc[this.state.account];
         const hold = nm.holdings.slice();
@@ -2231,55 +2399,28 @@ class Component extends DCLogic {
           reason_code: s.draft.reason,
           plan_code: s.draft.plan,
           plan_target_price: s.draft.targetPct ? Math.round(price * (1 + s.draft.targetPct/100)) : null,
-          memo: null, ts: new Date().toISOString()
+          memo: (s.draft.memo || '').trim() || null, ts: new Date().toISOString()
         };
         const acc2 = Object.assign({}, this.state.acc);
         acc2[this.state.account] = { name: nm.name, cash: nm.cash - grand, holdings: hold, pending: pend };
-        this.set({ acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, screen: 'done', profiles: null, profileStatus: 'idle' });
+        // 축하 화면은 주문 직후 값으로 고정한다 (뒤에서 시세가 움직여도 문구가 바뀌지 않게)
+        // 체결이 났으니 성향 스냅샷을 비워 다음 아카이브 진입에서 다시 계산하게 둔다
+        this.set({
+          acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3,
+          profiles: null, profileStatus: 'idle',
+          orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null }
+        });
         if (!isLimit) {
           this.saveTrade('buy', st.code, price, qty, s.draft.reason);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
         }
       },
       buyBack: () => {
-        if (s.buyStep === 4 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
+        if (s.buyStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
+        if (s.buyStep === 3) { this.set({ screen:'portfolio' }); return; }
         if (s.buyStep === 1) this.set({ screen:'detail' }); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
       },
 
-      doneTitle: s.doneKind === 'sell' ? '기록 완료!\n키웅이가 기억해둘게'
-        : (s.draft.orderType === 'limit' ? '기다리는 주문에 넣었어!' : '기록 완료!\n키웅이가 기억해둘게'),
-      doneSentence: s.doneKind === 'sell' ? (sellReason ? (sellReason.short + ' 팔았어') : '') : sentence,
-      doneQtyText: s.doneKind === 'sell' ? (sellQty.toFixed(2) + '주 팔았어')
-        : (s.draft.orderType === 'limit' ? (limPrice.toLocaleString('ko-KR') + '원이 되면 ' + qty.toFixed(2) + '주') : (qty.toFixed(2) + '주')),
-      hasBadge: s.doneKind === 'sell' && showJudge && planMatch === true,
-      memoValue: s.doneKind === 'sell' ? s.sellDraft.memo : s.draft.memo,
-      memoCount: (s.doneKind === 'sell' ? s.sellDraft.memo : s.draft.memo).length,
-      memoBtnLabel: (s.doneKind === 'sell' ? s.sellDraft.memoSaved : s.draft.memoSaved) ? '저장됐어 ✓' : '저장하기',
-      memoBtnStyle: (s.doneKind === 'sell' ? s.sellDraft.memoSaved : s.draft.memoSaved)
-        ? 'font-size:14px;font-weight:700;color:#8E93A8;padding:11px 18px;border-radius:999px;white-space:nowrap;background:#F1F2F8;box-shadow:inset 0 0 0 1px #E2E4EF'
-        : 'font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 62%,#EE4A8E 100%);box-shadow:0 8px 15px -5px rgba(214,54,124,0.45),inset 0 2px 3px rgba(255,255,255,0.45)',
-      saveMemo: () => {
-        if (s.draft.memoSaved) return;
-        const v = s.draft.memo.trim();
-        if (s.doneKind === 'sell') { this.setSell({ memoSaved: true }); } else { this.setDraft({ memoSaved: true }); }
-        this.setState(x => {
-          const recs = x.doneKind === 'sell' ? x.sellRecords.slice() : x.records.slice();
-          if (recs.length) recs[recs.length - 1] = Object.assign({}, recs[recs.length - 1], { memo: v || null });
-          const evs = (x.events || []).concat(v ? [{ event:'memo_written', symbol: x.code, ts: new Date().toISOString() }] : []);
-          const n = Object.assign({}, x, x.doneKind === 'sell' ? { sellRecords: recs } : { records: recs }, { events: evs });
-          this.persist(n); return n;
-        });
-      },
-      memoInput: (e) => {
-        const v = e.target.value.slice(0, 50);
-        if (s.doneKind === 'sell') this.setSell({ memo: v }); else this.setDraft({ memo: v });
-        this.setState(x => {
-          const recs = x.records.slice();
-          if (recs.length) recs[recs.length - 1] = Object.assign({}, recs[recs.length - 1], { memo: v || null });
-          const n = Object.assign({}, x, { records: recs });
-          this.persist(n); return n;
-        });
-      },
 
       atReport: s.arcTab === 'report' || !s.arcTab, atReturn: s.arcTab === 'return',
       atCompare: s.arcTab === 'compare', atSeason: s.arcTab === 'season',
@@ -2340,50 +2481,105 @@ class Component extends DCLogic {
 
       isSell: s.screen === 'sell',
       isSell1: s.sellStep === 1, isSell2: s.sellStep === 2, isSell3: s.sellStep === 3,
-      isSell4: s.sellStep === 4, isSell5: s.sellStep === 5,
+      sellInProgress: s.sellStep < 3,
       sellStepNo: s.sellStep,
-      sProg1: prog2(1), sProg2: prog2(2), sProg3: prog2(3), sProg4: prog2(4), sProg5: prog2(5),
-      sellBackGlyph: s.sellStep === 1 ? '✕' : '‹',
+      sProg1: prog2(1), sProg2: prog2(2), sProg3: prog2(3),
+      sellBackGlyph: s.sellStep === 1 ? '✕' : (s.sellStep === 3 ? '✕' : '‹'),
       holdQtyText: heldQty.toFixed(2) + '주', holdAvgText: Math.round(heldAvg).toLocaleString('ko-KR') + '원',
       holdValueText: won(heldQty * price),
       holdPnlText: (heldPnl >= 0 ? '▲ +' : '▼ ') + Math.abs(Math.round(heldPnl)).toLocaleString('ko-KR') + '원',
       holdPnlStyle: 'font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:5px;white-space:nowrap;color:' + (heldPnl >= 0 ? up : down),
+
+      // ── 1단계 · 얼마나 팔까 (매수 1단계와 같은 방식) ────────────────
+      sellByQtyStyle: this.chip(sellByQty), sellByAmountStyle: this.chip(!sellByQty),
+      pickSellByQty: () => { this.setSell({ sellBy:'qty' }); this.setState({ showSellPad:false }); },
+      pickSellByAmount: () => { this.setSell({ sellBy:'amount' }); this.setState({ showSellPad:false }); },
+      sellInputText: sellByQty
+        ? (Math.round((s.sellDraft.qty || 0) * 100) / 100).toString()
+        : (s.sellDraft.amountInput || 0).toLocaleString('ko-KR'),
+      sellInputUnit: sellByQty ? '주' : '원',
+      sellHint: sellQty > 0
+        ? (won(sellProceeds) + '을 받게 돼')
+        : (sellByQty ? '몇 주 팔지 골라봐' : '얼마어치 팔지 골라봐'),
+      sellMaxHint: sellMaxQty > 0
+        ? ('최대 ' + (Math.floor(sellMaxQty * 100) / 100) + '주까지 팔 수 있어 · ' + won(sellMaxQty * sellExecPrice))
+        : '',
       sellQtyText: sellQty.toFixed(2),
-      sellAmountHint: sellQty > 0 ? (won(sellQty * price) + '을 받게 돼') : '얼마나 팔지 골라봐',
-      sellChipAll: this.chip(s.sellPick === 'all'),
-      sellChipHalf: this.chip(s.sellPick === 'half'),
-      sellChipCustom: this.chip(s.sellPick === 'custom'),
-      sellAll: () => { this.setState({ sellPick:'all', showSellPad:false, sellQtyStr:'' }); this.setSell({ qty: heldQty }); },
-      sellHalf: () => { this.setState({ sellPick:'half', showSellPad:false, sellQtyStr:'' }); this.setSell({ qty: heldQty / 2 }); },
-      sellCustom: () => { this.setState({ sellPick:'custom', showSellPad:true, sellQtyStr:'' }); this.setSell({ qty: 0 }); },
+      sellProceedsText: won(sellProceeds),
+      sellOrderTypeText: s.sellDraft.orderType === 'limit' ? (sellLimPrice.toLocaleString('ko-KR') + '원이 되면') : '지금 가격에 바로',
+      sellChips: (sellByQty
+        ? [{ k:'all', label:'전부', v: sellMaxQty }, { k:'half', label:'절반', v: sellMaxQty / 2 }]
+        : [{ k:'a3', label:'3만원', v: 30000 }, { k:'a5', label:'5만원', v: 50000 }]
+      ).map(c => ({
+        label: c.label,
+        style: this.chip(s.sellPick === c.k),
+        pick: () => {
+          this.setState({ sellPick: c.k, showSellPad:false, sellQtyStr:'' });
+          this.setSell(sellByQty ? { qty: c.v } : { amountInput: Math.min(c.v, Math.round(sellMaxQty * sellExecPrice)) });
+        }
+      })).concat([{
+        label: '직접', style: this.chip(s.sellPick === 'custom'),
+        pick: () => {
+          this.setState({ sellPick:'custom', showSellPad:true, sellQtyStr:'' });
+          this.setSell(sellByQty ? { qty: 0 } : { amountInput: 0 });
+        }
+      }]),
       showSellPad: !!s.showSellPad,
-      sellPadKeys: ['1','2','3','4','5','6','7','8','9','.','0','←'].map(k => ({
+      sellPadKeys: (sellByQty ? ['1','2','3','4','5','6','7','8','9','.','0','←'] : ['1','2','3','4','5','6','7','8','9','←','0','000']).map(k => ({
         label: k,
         tap: () => {
+          if (!sellByQty) {
+            const cur = String(s.sellDraft.amountInput || '');
+            const v = k === '←' ? cur.slice(0, -1) : cur + k;
+            this.setSell({ amountInput: Math.min(Math.round(sellMaxQty * sellExecPrice), parseInt(v || '0', 10) || 0) });
+            return;
+          }
           const cur = s.sellQtyStr || '';
           let v;
           if (k === '←') v = cur.slice(0, -1);
           else if (k === '.') v = cur.indexOf('.') >= 0 ? cur : (cur === '' ? '0.' : cur + '.');
           else v = cur + k;
-          const n = Math.min(heldQty, parseFloat(v || '0') || 0);
           this.setState({ sellQtyStr: v });
-          this.setSell({ qty: n });
+          this.setSell({ qty: parseFloat(v || '0') || 0 });
         }
       })),
+      sellMktStyle: this.chip(s.sellDraft.orderType !== 'limit'),
+      sellLimStyle: this.chip(s.sellDraft.orderType === 'limit'),
+      pickSellMarket: () => this.setSell({ orderType:'market' }),
+      pickSellLimit: () => this.setSell({ orderType:'limit' }),
+      showSellLimit: s.sellDraft.orderType === 'limit',
+      sellLimitPriceText: sellLimPrice.toLocaleString('ko-KR'),
+      sellLimitDiffText: sellLimPct === 0 ? '지금 값 그대로야' : ('지금보다 ' + sellLimPct + '% 높은 값이야'),
+      // 팔 때는 지금보다 높은 값을 기다린다
+      sellLimitChips: [0, 3, 5, 10].map(v => ({
+        label: v === 0 ? '지금값' : ('+' + v + '%'),
+        style: this.chip(sellLimPct === v),
+        pick: () => this.setSell({ limitPct: v })
+      })),
+      hasSellWarn: !!sellWarn, sellWarnText: sellWarn,
 
+      // ── 2단계 · 사던 날의 기록 + 왜 파는지 ──────────────────────────
       retroAgoText: heldDays === 0 ? '오늘의 나' : (heldDays + '일 전의 나'),
       retroSentence: buyRec ? ([
         (REASONS.filter(r => r.code === buyRec.reason_code)[0] || {}).short,
         (PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).short
       ].filter(Boolean).join(',\n') + ' 샀어.') : '기록이 없어.',
+      // 매수 때 남긴 것들을 그대로 다시 보여준다
+      retroRows: buyRec ? [
+        { label: '산 날', value: (d => (d.getMonth() + 1) + '월 ' + d.getDate() + '일')(new Date(buyRec.ts)) },
+        { label: '산 만큼', value: (Math.round(buyRec.qty * 100) / 100) + '주 · ' + won(buyRec.amount_krw) },
+        { label: '왜 샀는지', value: (REASONS.filter(r => r.code === buyRec.reason_code)[0] || {}).label || '기록 없음' },
+        { label: '언제까지', value: (PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).label || '기록 없음' }
+      ].concat(buyRec.plan_target_price ? [{ label: '목표 가격', value: won(buyRec.plan_target_price) }] : [])
+       .concat(buyRec.memo ? [{ label: '그때 한 말', value: buyRec.memo }] : []) : [],
       hasRetroMemo: !!(buyRec && buyRec.memo), retroMemo: buyRec ? buyRec.memo : '',
       retroPnlText: (heldPct >= 0 ? '+' : '') + heldPct.toFixed(1) + '%',
       retroHeldText: heldDays === 0 ? '오늘' : (heldDays + '일'),
 
       sellReasonBtns: s.sellReasonOrder ? s.sellReasonOrder.map(i => SELL_REASONS[i]).map(r => ({
-        emoji: r.emoji, label: r.label,
-        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:15px 9px;border-radius:24px;cursor:pointer;min-height:96px;justify-content:center;' + (s.sellDraft.reason === r.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+        label: r.label,
+        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 10px;border-radius:20px;cursor:pointer;min-height:64px;justify-content:center;' + (s.sellDraft.reason === r.code
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setSell({ reason: r.code })
       })) : [],
@@ -2392,56 +2588,102 @@ class Component extends DCLogic {
       hasBadgeNow: showJudge && planMatch === true,
       changeQuestion: buyRec ? ('처음에는 ' + ((PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).short || '') + ' 가지려고 했었네. 무엇이 달라졌어?') : '무엇이 달라졌어?',
       changeBtns: CHANGES.map(c => ({
-        emoji: c.emoji, label: c.label,
+        label: c.label,
         style: 'display:flex;align-items:center;gap:12px;padding:15px 17px;border-radius:22px;cursor:pointer;' + (s.sellDraft.change === c.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setSell({ change: c.code })
       })),
 
       sellSentence: sellReason ? (sellReason.short + ' 팔기로 했어') : '',
-      sellProceedsText: won(sellQty * price),
-      sellCtaLabel: s.sellStep === 5 ? '팔기!' : '다음',
-      sellCtaStyle: (sellOk && !(locked && s.sellStep === 5)) ? CTA_ON : CTA_OFF,
+      sellCtaLabel: s.sellStep === 2 ? '팔기' : '다음',
+      sellCtaStyle: (sellOk && !(locked && s.sellStep === 2)) ? CTA_ON : CTA_OFF,
+
+      // ── 3단계 · 매도 완료 (축하 연출 없음) ──────────────────────────
+      sellDoneKicker: sd.limit ? '기다리는 주문에 넣었어' : '매도 완료',
+      sellDoneHeadline: sd.name
+        ? (sd.limit
+          ? (sd.limit.toLocaleString('ko-KR') + '원이 되면\n' + sd.name + ' ' + sdQty + '를 팔게요')
+          : (sd.name + ' ' + sdQty + '를\n팔았어요'))
+        : '팔았어요',
+      sellDoneNote: sd.limit
+        ? '값이 목표에 닿을 때까지 키웅이가 지켜볼게.\n그동안 그 주식은 잠깐 맡아둘게.'
+        : '왜 팔았는지까지 남겨뒀어.\n아카이브에서 산 날과 판 날을 같이 볼 수 있어.',
+      sellDoneStock: sd.name || '',
+      sellDoneQty: sdQty,
+      sellDoneMoneyLabel: sd.limit ? '받게 될 돈' : '받은 돈',
+      sellDoneProceeds: won(sd.proceeds || 0),
+      hasBadge: !!sd.badge,
+      sellMemo: s.sellDraft.memo, sellMemoCount: s.sellDraft.memo.length,
+      sellMemoInput: e => { const v = e.target.value.slice(0, 50); this.setSell({ memo: v, memoSaved: false }); },
+      sellMemoBtnLabel: s.sellDraft.memoSaved ? '저장됐어 ✓' : '저장하기',
+      sellMemoBtnStyle: s.sellDraft.memoSaved
+        ? 'font-size:14px;font-weight:700;color:#8E93A8;padding:11px 18px;border-radius:999px;white-space:nowrap;background:#F1F2F8'
+        : 'font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F5327F',
+      saveSellMemo: () => {
+        if (s.sellDraft.memoSaved) return;
+        const v = (s.sellDraft.memo || '').trim();
+        this.setState(x => {
+          const recs = (x.sellRecords || []).slice();
+          if (recs.length) recs[recs.length - 1] = Object.assign({}, recs[recs.length - 1], { memo: v || null });
+          const n = Object.assign({}, x, {
+            sellRecords: recs,
+            sellDraft: Object.assign({}, x.sellDraft, { memoSaved: true })
+          });
+          this.persist(n); return n;
+        });
+      },
+
       sellBack: () => {
-        if (s.sellStep === 5 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'sell' });
+        if (s.sellStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'sell' });
+        if (s.sellStep === 3) { this.set({ screen:'portfolio' }); return; }
         if (s.sellStep === 1) this.set({ screen:'portfolio' }); else this.setState({ sellStep: s.sellStep - 1 });
       },
       sellNext: () => {
         if (!sellOk) return;
-        if (locked && s.sellStep === 5) return;
+        if (locked && s.sellStep === 2) return;
         if (s.sellStep === 1) { this.retroAt = Date.now(); this.setState({ sellStep: 2 }); return; }
-        if (s.sellStep === 2) { this.retroMs = this.retroAt ? Date.now() - this.retroAt : 0; this.setState({ sellStep: 3 }); return; }
-        if (s.sellStep === 3) { this.setState({ sellStep: showJudge ? 4 : 5 }); return; }
-        if (s.sellStep < 5) { this.setState({ sellStep: s.sellStep + 1 }); return; }
+        this.retroMs = this.retroAt ? Date.now() - this.retroAt : 0;
+        const isLimit = s.sellDraft.orderType === 'limit';
         const nm = this.state.acc[this.state.account];
         const hold = nm.holdings.slice();
+        const pend = (nm.pending || []).slice();
+        // 시장가든 지정가든 파는 주식은 바로 보유에서 빼둔다 (지정가는 예약으로 잡힌다)
         const idx = hold.map(h => h.code).indexOf(st.code);
         if (idx >= 0) {
           const left = hold[idx].qty - sellQty;
           if (left < 0.005) hold.splice(idx, 1); else hold[idx] = { code: hold[idx].code, qty: left, avg: hold[idx].avg };
         }
+        if (isLimit) pend.push({ id: 'ord_' + String(s.seq).padStart(4, '0'), code: st.code, side: 'sell', qty: sellQty, price: sellLimPrice });
         const rec = {
           order_id: 'ord_' + String(s.seq).padStart(4, '0'),
           user_id: s.account === 'child' ? 'child_minji' : 'parent_mom',
           symbol: st.code, qty: Math.round(sellQty * 10000) / 10000,
           linked_buy_order_id: buyRec ? buyRec.order_id : null,
+          order_type: isLimit ? 'limit' : 'market',
+          limit_price: isLimit ? sellLimPrice : null,
+          order_status: isLimit ? 'pending' : 'filled',
           sell_reason_code: s.sellDraft.reason,
           plan_match: planMatch,
           change_reason_code: (showJudge && planMatch === false) ? s.sellDraft.change : null,
           badge_awarded: showJudge && planMatch === true,
           retro_card_viewed_ms: this.retroMs || 0,
           pnl_pct_at_sell: Math.round(heldPct * 10) / 10,
-          held_days: heldDays, memo: null, ts: new Date().toISOString()
+          held_days: heldDays, avg: heldAvg, memo: null, ts: new Date().toISOString()
         };
         const acc2 = Object.assign({}, this.state.acc);
-        acc2[this.state.account] = { name: nm.name, cash: nm.cash + sellQty * price, holdings: hold, pending: nm.pending || [] };
+        acc2[this.state.account] = {
+          name: nm.name, cash: nm.cash + (isLimit ? 0 : sellProceeds), holdings: hold, pending: pend
+        };
         this.set({
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
-          seq: s.seq + 1, screen: 'done', doneKind: 'sell',
-          profiles: null, profileStatus: 'idle'
+          seq: s.seq + 1, sellStep: 3,
+          profiles: null, profileStatus: 'idle',
+          sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
+          sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, badge: showJudge && planMatch === true }
         });
+        if (isLimit) return;
         this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, null);
         const behaviorEvent = { kind:'trade_filled', stockId:'KRX:' + st.code, side:'sell' };
         if (heldRow && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
@@ -2473,8 +2715,8 @@ class Component extends DCLogic {
       holdingCards: holdingCards,
       recordCount: s.records.length,
 
-      backBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:radial-gradient(ellipse 66% 56% at 50% -6%,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 9px 15px -5px rgba(35,25,80,0.2),inset 0 -12px 18px -9px rgba(255,255,255,0.9),inset 0 2px 3px rgba(255,255,255,1)',
-      stepPillStyle: 'min-width:58px;text-align:center;border-radius:999px;padding:8px 12px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#A9AEC4;background:linear-gradient(180deg,#FCFCFE 0%,#F5F6FB 36%,#ECEEF8 70%,#E4E6F2 100%);box-shadow:0 8px 13px -5px rgba(35,25,80,0.18),inset 0 1.5px 2px rgba(255,255,255,1)',
+      backBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
+      stepPillStyle: 'min-width:58px;text-align:center;border-radius:999px;padding:8px 12px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#A9AEC4;background:#F1F2F8',
 
       navStyle: 'flex:none;display:flex;padding-bottom:14px;background:linear-gradient(180deg,rgba(245,242,248,0) 0%,#F5F2F8 34%);box-shadow:0 -1px 0 rgba(1,24,90,0.06)',
       navHome: this.navItem(s.screen === 'home'),
@@ -2486,7 +2728,7 @@ class Component extends DCLogic {
       isParentAcct: s.account === 'parent',
       schoolLockOn: !!s.schoolLock,
       lockToggleStyle: s.schoolLock
-        ? 'width:52px;height:30px;border-radius:999px;flex:none;cursor:pointer;position:relative;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:inset 0 2px 4px rgba(150,20,80,0.25)'
+        ? 'width:52px;height:30px;border-radius:999px;flex:none;cursor:pointer;position:relative;background:#F5327F'
         : 'width:52px;height:30px;border-radius:999px;flex:none;cursor:pointer;position:relative;background:#DDDFEC;box-shadow:inset 0 2px 4px rgba(70,60,120,0.18)',
       lockKnobStyle: 'position:absolute;top:3px;left:' + (s.schoolLock ? '25px' : '3px') + ';width:24px;height:24px;border-radius:999px;background:#fff;box-shadow:0 3px 6px rgba(35,25,80,0.28);transition:left .16s ease',
       toggleLock: () => this.set({ schoolLock: !s.schoolLock }),
@@ -2495,7 +2737,7 @@ class Component extends DCLogic {
       forceOn: () => this.set({ forceSchool:'on' }),
       forceOff: () => this.set({ forceSchool:'off' }),
       forceAutoStyle: devChip(s.forceSchool === 'auto'), forceOnStyle: devChip(s.forceSchool === 'on'), forceOffStyle: devChip(s.forceSchool === 'off'),
-      moreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1)',
+      moreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F1F2F8',
       newsMoreLabel: newsItem ? '뉴스 자세히 보기' : (newsStatus === 'error' ? '다시 불러오기' : (newsStatus === 'empty' ? '새 소식 없음' : '불러오는 중')),
       newsMoreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1);cursor:' + (newsItem || newsStatus === 'error' ? 'pointer' : 'default') + ';opacity:' + (newsItem || newsStatus === 'error' ? '1' : '0.58'),
       ctaStyle: locked ? CTA_OFF : CTA_ON,
@@ -2514,7 +2756,7 @@ class Component extends DCLogic {
       newsHeadline: detailNews ? detailNews.headline : '',
       newsLines: detailNews ? detailNews.summaryLines.map((t, i) => ({
         text: t, n: i + 1,
-        numStyle: 'width:22px;height:22px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)'
+        numStyle: 'width:22px;height:22px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:#F5327F;box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)'
       })) : [],
       newsSourceText: detailNews ? detailNews.publisher + ' · ' + this.formatNewsDate(detailNews.sourcePublishedAt) : '',
       openNewsSource: () => { if (detailNews && this.validNewsItem(detailNews, st ? st.code : '')) window.location.assign(detailNews.sourceUrl); },
@@ -2523,10 +2765,10 @@ class Component extends DCLogic {
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
       goArchive: () => { this.set({ screen:'archive' }); this.loadProfiles(); },
-      startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false, doneKind:'buy' }); },
+      startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();
-        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft(), doneKind:'buy' });
+        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft() , watchlist: [] });
       }
     };
   }
