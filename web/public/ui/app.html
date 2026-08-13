@@ -260,7 +260,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:16px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:10px;text-wrap:pretty">{{ stockNews }}</div>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:13px">
 <span style="font-size:13px;font-weight:500;color:#A9AEC4">키움 뉴스를 어린이 눈높이로</span>
-<div onClick="{{ openNews }}" style="{{ moreBtnStyle }}">뉴스 자세히 보기 ›</div>
+<div onClick="{{ openNews }}" style="{{ newsMoreBtnStyle }}">{{ newsMoreLabel }} ›</div>
 </div>
 </div>
 
@@ -335,26 +335,25 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
 
 <div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:28px;padding:18px 20px;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(170,80,125,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
-<div style="font-size:13px;font-weight:700;color:#D5327A">{{ sectorNameText }} 이야기</div>
+<div style="font-size:13px;font-weight:700;color:#D5327A">{{ newsKicker }}</div>
 <div style="font-size:21px;font-weight:800;color:#01185A;line-height:1.45;margin-top:9px;letter-spacing:-0.02em;text-wrap:pretty">{{ newsHeadline }}</div>
 </div>
 
-<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px 20px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<sc-for list="{{ newsBody }}" as="p" hint-placeholder-count="3">
-<div style="font-size:14.5px;font-weight:500;color:#5C6280;line-height:1.85;margin-bottom:13px;text-wrap:pretty">{{ p.text }}</div>
-</sc-for>
-</div>
-
 <div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="font-size:15.5px;font-weight:800;color:#01185A">기억할 점 세 가지</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A">3줄 요약</div>
 <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
-<sc-for list="{{ newsPoints }}" as="p" hint-placeholder-count="3">
+<sc-for list="{{ newsLines }}" as="p" hint-placeholder-count="3">
 <div style="display:flex;align-items:flex-start;gap:10px">
 <div style="{{ p.numStyle }}">{{ p.n }}</div>
 <div style="flex:1;font-size:14px;font-weight:500;color:#5C6280;line-height:1.6;padding-top:2px">{{ p.text }}</div>
 </div>
 </sc-for>
 </div>
+</div>
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:22px;padding:14px 16px;box-shadow:0 10px 24px rgba(35,25,80,0.08),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="min-width:0;font-size:13px;font-weight:500;color:#8E93A8;line-height:1.5">{{ newsSourceText }}</div>
+<div onClick="{{ openNewsSource }}" style="flex:none;font-size:13.5px;font-weight:800;color:#D5327A;cursor:pointer;padding:8px 2px 8px 10px;white-space:nowrap">원문 보기 ↗</div>
 </div>
 
 <div style="display:flex;align-items:flex-start;gap:10px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 46%,#DFE1F1 100%);border-radius:22px;padding:14px 16px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
@@ -1114,21 +1113,6 @@ const CHANGES = [
   { code:'change_plan_revision',  emoji:'🙋', label:'처음 계획이 나와 맞지 않았어' }
 ];
 const SHORT_TERM_DAYS = 7;
-const NEWS = {
-  semi:'요즘 인공지능 때문에 반도체가 많이 필요해졌대. 공장을 더 짓는다는 이야기도 나왔어.',
-  game:'새로 만든 게임을 곧 보여준대. 사람들이 재미있을지 궁금해하고 있어.',
-  food:'외국에서도 이 회사 과자랑 라면을 많이 사 간대. 수출이 늘었대.',
-  auto:'전기차를 더 많이 만들기로 했대. 새 공장 이야기도 나왔어.',
-  enter:'소속 가수가 월드투어를 시작한대. 콘서트 표가 빨리 팔렸대.',
-  beauty:'외국 사람들이 한국 화장품을 좋아해서 많이 사 간대.',
-  air:'여행 가는 사람이 늘어서 비행기가 꽉 찼대.',
-  ship:'외국에서 큰 배를 여러 척 주문했대.',
-  defense:'다른 나라에 무기를 수출하기로 했대.',
-  energy:'전기차 배터리를 더 많이 만들기로 했대.',
-  retail:'편의점이랑 마트에 손님이 조금 늘었대.',
-  logi:'택배랑 배로 실어 나르는 짐이 많아졌대.',
-  bank:'은행이 번 돈이 지난해보다 늘었대.'
-};
 
 // ── 랭킹 화면 ────────────────────────────────────────────────────────────────
 // 가족마다 프로필과 색을 하나씩 갖는다. 시상대에 서든 목록에 있든 같은 것을 쓴다.
@@ -1313,7 +1297,8 @@ class Component extends DCLogic {
     profiles: null, profileStatus: 'idle',
     sellStep: 1, sellDraft: { qty:0, reason:null, change:null, memo:'', memoSaved:false }, doneKind: 'buy', arcTab: 'report', sellPick: 'all',
     schoolLock: true, forceSchool: 'auto', rankTab: 'week',
-    reasonOrder: [0,1,2,3,4,5]
+    reasonOrder: [0,1,2,3,4,5],
+    newsByStock: {}, newsStatusByStock: {}, activeNewsId: null, activeNews: null
   };
 
   blankDraft(){
@@ -1501,6 +1486,9 @@ class Component extends DCLogic {
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
     }
+    if (this.state.screen === 'detail' && this.state.code && (!prevState || prevState.screen !== 'detail' || prevState.code !== this.state.code)) {
+      this.loadNews(this.state.code);
+    }
     if (prevState && prevState.screen !== this.state.screen) this.trackTabWindow(prevState.screen, this.state.screen);
   }
 
@@ -1513,6 +1501,74 @@ class Component extends DCLogic {
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d && d.user_id) this.dbUser = d; })
       .catch(() => {});
+  }
+
+  validNewsItem(item, stockCode){
+    if (!item || !Number.isSafeInteger(item.newsId) || item.newsId <= 0 || !Number.isSafeInteger(item.articleId) || item.articleId <= 0) return false;
+    if (item.scope !== 'market' && item.scope !== 'company') return false;
+    if (!Array.isArray(item.stockCodes) || item.stockCodes.some(code => !/^\d{6}$/.test(code))) return false;
+    if (item.scope === 'market' && item.stockCodes.length !== 0) return false;
+    if (item.scope === 'company' && item.stockCodes.indexOf(stockCode) < 0) return false;
+    if (typeof item.headline !== 'string' || !item.headline.trim() || typeof item.homeSummary !== 'string' || !item.homeSummary.trim()) return false;
+    if (!Array.isArray(item.summaryLines) || item.summaryLines.length !== 3 || item.summaryLines.some(line => typeof line !== 'string' || !line.trim() || line.length > 36)) return false;
+    if (typeof item.publisher !== 'string' || !item.publisher.trim() || typeof item.sourcePublishedAt !== 'string' || !Number.isFinite(Date.parse(item.sourcePublishedAt))) return false;
+    try {
+      const source = new URL(item.sourceUrl);
+      return source.protocol === 'http:' || source.protocol === 'https:';
+    } catch(e) {
+      return false;
+    }
+  }
+
+  loadNews(code){
+    if (!/^\d{6}$/.test(code || '')) return;
+    const status = this.state.newsStatusByStock[code];
+    if (status === 'loading' || status === 'ready' || status === 'empty') return;
+    this.setState(s => {
+      const statuses = Object.assign({}, s.newsStatusByStock, { [code]:'loading' });
+      return Object.assign({}, s, { newsStatusByStock:statuses });
+    });
+    fetch('/api/news?stockId=' + encodeURIComponent('KRX:' + code), { cache:'no-store' })
+      .then(r => { if (!r.ok) throw new Error('news lookup failed'); return r.json(); })
+      .then(d => {
+        const item = d && d.item ? d.item : null;
+        if (item && !this.validNewsItem(item, code)) throw new Error('invalid news contract');
+        this.setState(s => {
+          const items = Object.assign({}, s.newsByStock, { [code]:item });
+          const statuses = Object.assign({}, s.newsStatusByStock, { [code]:item ? 'ready' : 'empty' });
+          return Object.assign({}, s, { newsByStock:items, newsStatusByStock:statuses });
+        });
+      })
+      .catch(() => {
+        this.setState(s => {
+          const statuses = Object.assign({}, s.newsStatusByStock, { [code]:'error' });
+          return Object.assign({}, s, { newsStatusByStock:statuses });
+        });
+      });
+  }
+
+  openNewsItem(item){
+    const code = this.state.code;
+    if (!code || !this.validNewsItem(item, code)) return;
+    this.bumpTabCount();
+    this.setState(s => Object.assign({}, s, { activeNewsId:item.newsId, activeNews:item }));
+    this.logEvent('news_detail_opened', 'news');
+    fetch('/api/news/' + encodeURIComponent(String(item.newsId)), { cache:'no-store' })
+      .then(r => { if (!r.ok) throw new Error('news detail lookup failed'); return r.json(); })
+      .then(d => {
+        const fresh = d && d.item;
+        if (!this.validNewsItem(fresh, code) || fresh.newsId !== item.newsId || fresh.articleId !== item.articleId) throw new Error('news identity mismatch');
+        this.setState(s => s.activeNewsId === item.newsId ? Object.assign({}, s, { activeNews:fresh }) : null);
+      })
+      .catch(() => {});
+  }
+
+  formatNewsDate(value){
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return '';
+    return new Intl.DateTimeFormat('ko-KR', {
+      timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit'
+    }).format(date);
   }
 
   // 로그인한 사람의 계정(부모/자녀)에서 한 행동만 서버에 남긴다.
@@ -1842,8 +1898,9 @@ class Component extends DCLogic {
       };
     }).filter(Boolean);
 
-    const ND = (u.newsDetail || {});
-    const nd = (st && ND[st.sector]) || { headline:'', body:[], points:[] };
+    const newsItem = st && s.newsByStock ? (s.newsByStock[st.code] || null) : null;
+    const newsStatus = st && s.newsStatusByStock ? (s.newsStatusByStock[st.code] || 'idle') : 'idle';
+    const detailNews = s.activeNews && s.activeNewsId === s.activeNews.newsId ? s.activeNews : null;
     const heldRow = st ? (m.holdings.filter(h => h.code === st.code)[0] || null) : null;
     const heldQty = heldRow ? heldRow.qty : 0;
     const heldAvg = heldRow ? heldRow.avg : 0;
@@ -2085,7 +2142,7 @@ class Component extends DCLogic {
       stockLineColor: st && st.change >= 0 ? up : down,
       stockSparkBig: st ? this.polyline(st.spark, 336, 112) : '',
       stockDescLong: st ? (st.name + this.topic(st.name) + ' ' + st.desc + '.') : '',
-      stockNews: st ? (NEWS[st.sector] || '') : '',
+      stockNews: newsItem ? newsItem.homeSummary : (newsStatus === 'error' ? '뉴스를 불러오지 못했어. 다시 눌러 줘.' : (newsStatus === 'empty' ? '아직 검수를 통과한 새 소식이 없어.' : '검수를 통과한 새 소식을 찾고 있어.')),
       detailBadgeStyle: bigBadge(52, 18, 25),
       miniBadgeStyle: bigBadge(38, 13, 18),
 
@@ -2433,9 +2490,11 @@ class Component extends DCLogic {
       forceOff: () => this.set({ forceSchool:'off' }),
       forceAutoStyle: devChip(s.forceSchool === 'auto'), forceOnStyle: devChip(s.forceSchool === 'on'), forceOffStyle: devChip(s.forceSchool === 'off'),
       moreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1)',
+      newsMoreLabel: newsItem ? '뉴스 자세히 보기' : (newsStatus === 'error' ? '다시 불러오기' : (newsStatus === 'empty' ? '새 소식 없음' : '불러오는 중')),
+      newsMoreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1);cursor:' + (newsItem || newsStatus === 'error' ? 'pointer' : 'default') + ';opacity:' + (newsItem || newsStatus === 'error' ? '1' : '0.58'),
       ctaStyle: locked ? CTA_OFF : CTA_ON,
       openChart: () => { this.bumpTabCount(); this.logEvent('chart_detail_opened', 'chart'); },
-      openNews: () => { this.bumpTabCount(); this.logEvent('news_detail_opened', 'news'); },
+      openNews: () => { if (newsItem) this.openNewsItem(newsItem); else if (st && newsStatus === 'error') this.loadNews(st.code); },
       closeSub: () => this.closeSub(),
       chartLine: () => this.setChartType('line'), chartCandle: () => this.setChartType('candlestick'),
       chartLineStyle: this.chip(s.chartType === 'line'), chartCandleStyle: this.chip(s.chartType === 'candlestick'),
@@ -2445,12 +2504,14 @@ class Component extends DCLogic {
       // 통째로 다시 열려 차트 번들과 데이터를 다시 받는다. 두 값은 postChartOptions 로 넘긴다.
       tradingViewChartUrl: st ? '/tradingview-chart?symbol=' + encodeURIComponent(st.code) : '',
       sectorNameText: st ? this.sectorOf(st.sector).name : '',
-      newsHeadline: nd.headline,
-      newsBody: nd.body.map(t => ({ text: t })),
-      newsPoints: nd.points.map((t, i) => ({
+      newsKicker: detailNews ? (detailNews.scope === 'market' ? '오늘 국내 시황' : (st ? st.name + ' 이야기' : '기업 이야기')) : '',
+      newsHeadline: detailNews ? detailNews.headline : '',
+      newsLines: detailNews ? detailNews.summaryLines.map((t, i) => ({
         text: t, n: i + 1,
         numStyle: 'width:22px;height:22px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)'
-      })),
+      })) : [],
+      newsSourceText: detailNews ? detailNews.publisher + ' · ' + this.formatNewsDate(detailNews.sourcePublishedAt) : '',
+      openNewsSource: () => { if (detailNews && this.validNewsItem(detailNews, st ? st.code : '')) window.location.assign(detailNews.sourceUrl); },
 
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
