@@ -773,7 +773,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
           <section
             aria-labelledby="kiwoong-chat-title"
             aria-modal="true"
-            className={`absolute bottom-0 left-0 z-10 flex flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl ${
+            className={`absolute bottom-0 left-0 z-10 flex flex-col overflow-hidden rounded-t-[28px] bg-white shadow-card ${
               isSheetDragging
                 ? ""
                 : "transition-transform duration-200 ease-out motion-reduce:transition-none"
