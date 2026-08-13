@@ -84,6 +84,25 @@ export async function findProfileById(id: number) {
 }
 
 /**
+ * 같은 가족 안에서 부모·자녀 한 명을 찾는다. 화면의 계정 스위처가 쓴다.
+ *
+ * 부모가 둘(엄마·아빠)일 수 있어서 `id` 가 낮은 쪽을 기본으로 삼는다. 로그인 화면이
+ * 생기면 누구로 들어왔는지가 세션에 담기므로 이 기본값은 필요 없어진다.
+ *
+ * `familyTag` 가 없는 계정은 넘기지 않는다 — 빈 값으로 훑으면 남의 가족이 섞인다.
+ */
+export async function findFamilyMember(familyTag: string, role: "parent" | "child") {
+  const rows = await selectRows<Profile>("profiles", {
+    select: PROFILE_COLUMNS,
+    family_tag: `eq.${familyTag}`,
+    parent_child: `eq.${role}`,
+    order: "id.asc",
+    limit: "1",
+  });
+  return rows[0] ?? null;
+}
+
+/**
  * 요청 쿠키에서 로그인한 사용자 id 를 읽는다.
  * 로그인 기능을 붙이기 전까지는 DEMO_USER_ID 환경변수로 대신 지정할 수 있다.
  */

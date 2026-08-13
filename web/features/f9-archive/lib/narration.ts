@@ -43,17 +43,19 @@ function allowedNumbers(snapshot: BehaviorProfileSnapshot): (string | number)[] 
     focus,
     diversification,
     accuracy,
+    ...(snapshot.level === null ? [] : [snapshot.level]),
     snapshot.sampleSize,
     snapshot.gradedTradeCount,
     snapshot.pendingTradeCount,
     10,
+    100,
     5,
     3,
   ];
 }
 
 const NARRATION_INSTRUCTIONS = `너는 아이의 모의투자 기록을 관찰해 설명하는 도우미다.
-입력 JSON의 능력치·캐릭터·별은 엔진이 계산한 확정값이다. 숫자와 라벨을 바꾸거나 새 수치를 만들지 않는다.
+입력 JSON의 능력치·캐릭터·레벨은 엔진이 계산한 확정값이다. 숫자와 라벨을 바꾸거나 새 수치를 만들지 않는다.
 관찰 톤의 쉬운 한국어 해요체로 정확히 2~3문장만 쓴다. 잘한 점 1~2개를 먼저, 아쉬운 점은 1개 이내로 담되 훈계하지 않는다.
 종목 추천, 매수·매도 시점, 목표가, 수익률 전망은 절대 말하지 않는다.
 캐릭터에는 우열이 없다 — 다른 캐릭터나 가족과 비교해 낫다·못하다고 말하지 않는다.
@@ -65,13 +67,13 @@ function narrationInput(snapshot: BehaviorProfileSnapshot): string {
     abilities: snapshot.abilities,
     character: snapshot.character,
     characterLabel: snapshot.character ? CHARACTER_LABEL[snapshot.character] : null,
-    starGrade: snapshot.starGrade,
+    level: snapshot.level,
     sampleSize: snapshot.sampleSize,
     gradedTradeCount: snapshot.gradedTradeCount,
     pendingTradeCount: snapshot.pendingTradeCount,
     reasonDistribution: snapshot.reasonDistribution,
   };
-  return `능력치는 10점 만점이고 근거력+직관력=10, 집중력+분산력=10이다. 정확력은 기본 5점에서 채점된 거래가 맞으면 +1, 빗나가면 −1이다.\n\n엔진 산출:\n${JSON.stringify(summary)}`;
+  return `근거력·직관력·집중력·분산력은 10점 만점이고 근거력+직관력=10, 집중력+분산력=10이다. 정확력은 채점된 거래의 적중률 퍼센트(0~100)이고 레벨은 1~3이다.\n\n엔진 산출:\n${JSON.stringify(summary)}`;
 }
 
 export async function generateProfileNarration(

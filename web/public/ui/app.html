@@ -419,13 +419,21 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px">{{ qtyHint }}</div>
 <div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:6px;white-space:nowrap">{{ buyMaxHint }}</div>
 <div style="display:flex;gap:8px;margin-top:16px">
-<sc-for list="{{ amtChips }}" as="c" hint-placeholder-count="4">
+<sc-if value="{{ buyByAmount }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ amt1 }}" style="{{ chip1 }}">1만원</div>
+<div onClick="{{ amt3 }}" style="{{ chip3 }}">3만원</div>
+<div onClick="{{ amt5 }}" style="{{ chip5 }}">5만원</div>
+<div onClick="{{ amtCustom }}" style="{{ chipC }}">직접</div>
+</sc-if>
+<sc-if value="{{ buyByQty }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ qtyChips }}" as="c" hint-placeholder-count="4">
 <div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
 </sc-for>
+</sc-if>
 </div>
 <sc-if value="{{ showPad }}" hint-placeholder-val="{{ false }}">
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
-<sc-for list="{{ padKeys }}" as="k" hint-placeholder-count="12">
+<sc-for list="{{ buyPadKeys }}" as="k" hint-placeholder-count="12">
 <div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#F4F4FA;box-shadow:inset 0 0 0 1px #E4E6F1">{{ k.label }}</div>
 </sc-for>
 </div>
@@ -1346,7 +1354,7 @@ class Component extends DCLogic {
 
   blankDraft(){
     this.orderFlowSequence = (this.orderFlowSequence || 0) + 1;
-    return { buyBy:'amount', amount:0, shares:0, reason:null, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false, orderFlowId:'buy_' + this.orderFlowSequence };
+    return { buyBy:'amount', amount:0, shares:0, amountSource:null, reason:null, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false, orderFlowId:'buy_' + this.orderFlowSequence };
   }
 
   pickOrderType(orderType){
@@ -1816,6 +1824,7 @@ class Component extends DCLogic {
     const plan = PLANS.filter(p => p.code === s.draft.plan)[0];
 
     const price = st ? st.price : 0;
+    const availableCash = Math.max(0, Math.floor(m.cash));
     const limPrice = s.draft.limitPct === null || s.draft.limitPct === undefined ? price : Math.round(price * (1 + s.draft.limitPct / 100));
     const execPrice = s.draft.orderType === 'limit' ? limPrice : price;
     const byQty = s.draft.buyBy === 'qty';
@@ -2084,6 +2093,15 @@ class Component extends DCLogic {
     const tabOn = 'font-size:13.5px;font-weight:700;padding:7px 15px;border-radius:999px;cursor:pointer;color:#fff;background:#F5327F;box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)';
     const tabOff = 'font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;cursor:pointer;color:#8E93A8';
 
+    const maxShares = execPrice > 0 ? Math.floor(availableCash / execPrice) : 0;
+    const qtyPadKeys = ['1','2','3','4','5','6','7','8','9','←','0','00'].map(k => ({
+      label: k,
+      tap: () => {
+        const cur = String(s.draft.shares || '');
+        const v = k === '←' ? cur.slice(0, -1) : cur + k;
+        this.setDraft({ shares: Math.min(maxShares, parseInt(v || '0', 10) || 0), amountSource:'custom' });
+      }
+    }));
     const padKeys = ['1','2','3','4','5','6','7','8','9','←','0','000'].map(k => ({
       label: k,
       tap: () => {
@@ -2091,7 +2109,7 @@ class Component extends DCLogic {
         let v;
         if (k === '←') v = cur.slice(0, -1);
         else v = cur + k;
-        this.setDraft({ amount: Math.min(9999999, parseInt(v || '0', 10) || 0) });
+        this.setDraft({ amount: Math.min(availableCash, parseInt(v || '0', 10) || 0), amountSource:'custom' });
       }
     }));
 
@@ -2254,15 +2272,36 @@ class Component extends DCLogic {
       byAmountStyle: this.chip(!byQty), byQtyStyle: this.chip(byQty),
       pickByAmount: () => { this.setDraft({ buyBy:'amount' }); this.setState({ showPad:false }); },
       pickByQty: () => { this.setDraft({ buyBy:'qty' }); this.setState({ showPad:false }); },
-      amtChips: (byQty ? [1, 5, 10] : [10000, 30000, 50000]).map(v => ({
-        label: byQty ? v + '주' : (v / 10000) + '만원',
-        style: this.chip(byQty ? shares === v : amount === v),
-        pick: () => { this.setDraft(byQty ? { shares: v } : { amount: v }); this.setState({ showPad:false }); }
+      // 빠른선택과 직접 입력은 구분한다 — 직접 넣은 값이 3만원이어도 3만원 칩이 켜지지 않는다
+      // 금액 칩 — 빠른선택과 직접 입력을 구분한다 (f2-trade 계약)
+      chip1: this.chip(s.draft.amountSource === 'preset' && amount === 10000),
+      chip3: this.chip(s.draft.amountSource === 'preset' && amount === 30000),
+      chip5: this.chip(s.draft.amountSource === 'preset' && amount === 50000),
+      chipC: this.chip(s.draft.amountSource === 'custom'),
+      amt1: () => { this.setDraft({ amount:10000, amountSource:'preset' }); this.setState({ showPad:false }); },
+      amt3: () => { this.setDraft({ amount:30000, amountSource:'preset' }); this.setState({ showPad:false }); },
+      amt5: () => { this.setDraft({ amount:50000, amountSource:'preset' }); this.setState({ showPad:false }); },
+      amtCustom: () => {
+        this.setDraft({ amount:Math.min(availableCash, amount), amountSource:'custom' });
+        this.setState(x => ({ showPad: !x.showPad }));
+      },
+      // 주 수 칩 — 같은 규칙을 주 수에 적용한다
+      maxShares: maxShares,
+      qtyChips: [1, 5, 10].map(v => ({
+        label: v + '주',
+        style: this.chip(s.draft.amountSource === 'preset' && shares === v),
+        pick: () => { this.setDraft({ shares: Math.min(maxShares, v), amountSource:'preset' }); this.setState({ showPad:false }); }
       })).concat([{
-        label: '직접', style: this.chip(s.showPad),
-        pick: () => this.setState(x => ({ showPad: !x.showPad }))
+        label: '직접', style: this.chip(s.draft.amountSource === 'custom'),
+        pick: () => {
+          this.setDraft({ shares: Math.min(maxShares, shares), amountSource:'custom' });
+          this.setState(x => ({ showPad: !x.showPad }));
+        }
       }]),
+      qtyPadKeys: qtyPadKeys,
       showPad: s.showPad, padKeys: padKeys,
+      buyByAmount: !byQty, buyByQty: byQty,
+      buyPadKeys: byQty ? qtyPadKeys : padKeys,
       mktStyle: this.chip(s.draft.orderType === 'market'), limStyle: this.chip(s.draft.orderType === 'limit'),
       pickMarket: () => this.pickOrderType('market'),
       pickLimit: () => this.pickOrderType('limit'),
@@ -2492,7 +2531,7 @@ class Component extends DCLogic {
           if (!sellByQty) {
             const cur = String(s.sellDraft.amountInput || '');
             const v = k === '←' ? cur.slice(0, -1) : cur + k;
-            this.setSell({ amountInput: Math.min(9999999, parseInt(v || '0', 10) || 0) });
+            this.setSell({ amountInput: Math.min(Math.round(sellMaxQty * sellExecPrice), parseInt(v || '0', 10) || 0) });
             return;
           }
           const cur = s.sellQtyStr || '';
