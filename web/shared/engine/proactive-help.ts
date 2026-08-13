@@ -59,7 +59,15 @@ export function detectProactiveSignals(
   }
 
   if (latestEvent?.type === "order_method_selected") {
-    const orderMethodSelections = events.filter(
+    let lastOrderFlowBoundary = -1;
+    for (let index = events.length - 1; index >= 0; index -= 1) {
+      const event = events[index];
+      if (event.type === "screen_entered" && event.screen !== "order") {
+        lastOrderFlowBoundary = index;
+        break;
+      }
+    }
+    const orderMethodSelections = events.slice(lastOrderFlowBoundary + 1).filter(
       (event): event is Extract<
         ChatBehaviorEvent,
         { type: "order_method_selected" }

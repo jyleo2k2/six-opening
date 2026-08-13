@@ -37,7 +37,6 @@ assert.deepEqual(
   ),
   [],
 );
-
 const orderMethodConfusionEvents: ChatBehaviorEvent[] = [
   {
     type: "order_method_selected",
@@ -84,6 +83,37 @@ assert.deepEqual(
     now,
   ),
   [],
+);
+assert.deepEqual(
+  detectProactiveSignals(
+    [
+      ...orderMethodConfusionEvents,
+      { type: "screen_entered", screen: "home", at: now },
+      {
+        type: "order_method_selected",
+        stockId: "KRX:005930",
+        orderFlowId: "buy-1",
+        orderType: "limit",
+        at: now + 1,
+      },
+      {
+        type: "order_method_selected",
+        stockId: "KRX:005930",
+        orderFlowId: "buy-1",
+        orderType: "market",
+        at: now + 2,
+      },
+      {
+        type: "order_method_selected",
+        stockId: "KRX:005930",
+        orderFlowId: "buy-1",
+        orderType: "limit",
+        at: now + 3,
+      },
+    ],
+    now + 3,
+  ),
+  ["orderMethodConfusion"],
 );
 assert.deepEqual(
   detectProactiveSignals(
