@@ -473,6 +473,8 @@ const CRISIS_PATTERNS = [
   "다포기하고싶",
   "전부포기하고",
   "모든걸포기하고싶",
+  // "다 포기하고 싶어" 와 같은 계열. `다` 를 붙여 "게임 그만두고 싶어" 는 걸리지 않게 한다.
+  "다그만두고싶",
   "그만살고싶",
   "내가없어졌으면",
   "모든게끝났으면",
@@ -585,6 +587,11 @@ const ANXIETY_PATTERNS = [
   "마음이무거",
   "계속봐야할까",
   "무서워서주문",
+  // 서비스 낱말과 섞여 들어오는 정서 신호. SPEC §6.1.2 는 불편을 먼저 인정하게 한다.
+  "너무힘든",
+  "너무힘들",
+  "많이힘든",
+  "많이힘들",
 ];
 const FRUSTRATION_PATTERNS = [
   "짜증",
@@ -3571,11 +3578,14 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const privacyReply = getPrivacyReply(message);
   if (privacyReply) return privacyReply;
 
-  const curatedServiceHowToReply = getCuratedServiceHowToReply(message, context);
-  if (curatedServiceHowToReply) return curatedServiceHowToReply;
-
+  // SPEC §6.1.2 의 입력 안전 우선순위대로 보호 판정을 사용법 FAQ 앞에 둔다.
+  // 뒤에 두면 "다 포기하고 싶어 매수 버튼 누르면 끝이야?" 처럼 위기 표현에
+  // 서비스 낱말이 섞였을 때 큐레이트 FAQ 가 먼저 잡아 보호 응답이 사라진다.
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);
+
+  const curatedServiceHowToReply = getCuratedServiceHowToReply(message, context);
+  if (curatedServiceHowToReply) return curatedServiceHowToReply;
 
   if (includesAny(message, HARMFUL_PATTERNS)) {
     return reply(

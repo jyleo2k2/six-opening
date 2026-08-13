@@ -502,17 +502,87 @@ async function main() {
     assert.equal(outcome.action?.uiAction?.target, entry.actionTarget);
   }
 
+  let judgeCalls = 0;
+  const passJudge = async () => {
+    judgeCalls += 1;
+    return { violation: false, rule: 0 };
+  };
+
   const model = await createChatOutcome(
     {
       message: "주가와 회사 이익은 어떻게 달라?",
       context: { screen: "home" },
     },
     session,
-    { generateAnswer: async () => "주가는 시장에서 거래된 가격이야. 회사 이익은 회사가 번 돈을 계산한 결과야." },
+    {
+      generateAnswer: async () => "주가는 시장에서 거래된 가격이야. 회사 이익은 회사가 번 돈을 계산한 결과야.",
+      judgeOutput: passJudge,
+    },
   );
   assert.equal(model.gate, "passed");
   assert.equal(model.source, "model");
   assert.equal(isExplainAction(model.action), true);
+  assert.equal(judgeCalls, 1, "모델 생성 답변은 T5b 판정을 거쳐야 해");
+
+  // 고정 응답은 승인된 정적 텍스트라 T5b 를 호출하지 않는다 (SPEC §6.0.2).
+  judgeCalls = 0;
+  await createChatOutcome({ message: "PER이 뭐야?", context }, session, {
+    generateAnswer: noModel,
+    judgeOutput: passJudge,
+  });
+  assert.equal(judgeCalls, 0, "고정 응답에 T5b 를 호출하면 안 돼");
+
+  // 룰을 통과한 재표현 추천은 T5b 가 잡는다.
+  const judgeBlocked = await createChatOutcome(
+    { message: "이 회사 어때?", context: { screen: "home" } },
+    session,
+    {
+      generateAnswer: async () => "장기적으로 보면 유망한 회사예요.",
+      judgeOutput: async () => ({ violation: true, rule: 5 }),
+    },
+  );
+  assert.equal(judgeBlocked.gate, "replaced");
+  assert.equal(judgeBlocked.gateReason, "judge_violation");
+  assert.equal(judgeBlocked.response.text, SAFE_REFUSAL);
+  assert.equal(judgeBlocked.response.text.includes("유망"), false);
+
+  // 판정 실패는 닫힌 실패다. 검사하지 못한 생성문을 내보내지 않는다.
+  const judgeDown = await createChatOutcome(
+    { message: "이 회사 어때?", context: { screen: "home" } },
+    session,
+    {
+      generateAnswer: async () => "회사는 반도체를 만들어요.",
+      judgeOutput: async () => {
+        throw new Error("judge offline");
+      },
+    },
+  );
+  assert.equal(judgeDown.gate, "replaced");
+  assert.equal(judgeDown.gateReason, "judge_unavailable");
+  assert.equal(judgeDown.response.text, CHAT_FALLBACK);
+
+  const judgeTimedOut = await createChatOutcome(
+    { message: "이 회사 어때?", context: { screen: "home" } },
+    session,
+    {
+      generateAnswer: async () => "회사는 반도체를 만들어요.",
+      judgeTimeoutMs: 5,
+      judgeOutput: () => new Promise(() => undefined),
+    },
+  );
+  assert.equal(judgeTimedOut.gateReason, "judge_unavailable");
+  assert.equal(judgeTimedOut.response.text, CHAT_FALLBACK);
+
+  // 사용자가 질문에 적은 숫자는 되짚어 말할 수 있다 (SPEC §6.1.5).
+  const quotedNumber = await createChatOutcome(
+    { message: "3% 오르면 20만원은 얼마 늘어?", context: { screen: "home" } },
+    session,
+    {
+      generateAnswer: async () => "3% 오르면 처음 넣은 금액의 3% 만큼 늘어난 것으로 보여요.",
+      judgeOutput: passJudge,
+    },
+  );
+  assert.equal(quotedNumber.gate, "passed");
 
   const blocked = await createChatOutcome(
     { message: "조금 더 설명해 줘", context },
