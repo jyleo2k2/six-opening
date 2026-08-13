@@ -210,20 +210,13 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
               marker.member === "child"
                 ? "var(--color-trade-child)"
                 : "var(--color-trade-parent)";
-            // 매수는 뱃지가 체결가 아래, 매도는 위. 삼각 포인터 꼭짓점이 체결가를 가리킨다.
-            const badgeY =
-              marker.side === "buy" ? marker.y + 8 : marker.y - 8 - BADGE;
-            const wing = marker.side === "buy" ? marker.y + 8 : marker.y - 8;
+            // 뱃지 한가운데가 체결가다. 봉 위아래로 밀지 않는다.
             return (
               <g key={marker.id}>
                 <title>{marker.label}</title>
-                <polygon
-                  points={`${marker.x - 5},${wing} ${marker.x + 5},${wing} ${marker.x},${marker.y}`}
-                  fill={fill}
-                />
                 <rect
                   x={marker.x - BADGE / 2}
-                  y={badgeY}
+                  y={marker.y - BADGE / 2}
                   width={BADGE}
                   height={BADGE}
                   rx={6}
@@ -231,7 +224,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
                 />
                 <text
                   x={marker.x}
-                  y={badgeY + BADGE / 2}
+                  y={marker.y}
                   fontSize={12}
                   fontWeight={700}
                   fill="#fff"
