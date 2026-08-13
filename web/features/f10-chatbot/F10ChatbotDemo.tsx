@@ -846,14 +846,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                 onClick={openProactiveChat}
                 type="button"
               >
-                직접 질문
+                그래!
               </button>
               <button
                 className="rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
                 onClick={dismissProactiveHelp}
                 type="button"
               >
-                괜찮아요
+                싫어
               </button>
             </div>
           </div>
