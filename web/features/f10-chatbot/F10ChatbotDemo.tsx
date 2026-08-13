@@ -34,6 +34,11 @@ import {
   type PrototypeScreenRect,
   shouldDismissBottomSheet,
 } from "./lib/bottom-sheet";
+import {
+  RESPONSE_PREPARATION_STEPS,
+  getPreparationStepIndex,
+  remainingPreparationMs,
+} from "./lib/response-preparation";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
@@ -260,6 +265,43 @@ function MessageBubble({
         )}
       </div>
     </div>
+  );
+}
+
+function ResponsePreparation({ status }: { status: string }) {
+  const activeStepIndex = getPreparationStepIndex(status);
+
+  return (
+    <section
+      aria-label="답변 준비 상태"
+      className="rounded-2xl bg-bg px-4 py-3 text-sm text-ink/80"
+    >
+      <p className="font-semibold text-navy">💡 키웅이가 답변을 준비하고 있어요</p>
+      <ol className="mt-3 space-y-2 border-l-2 border-navy/15 pl-3">
+        {RESPONSE_PREPARATION_STEPS.map((step, index) => {
+          const isComplete = index < activeStepIndex;
+          const isActive = index === activeStepIndex;
+          return (
+            <li className="relative" key={step}>
+              <span
+                aria-hidden="true"
+                className={`absolute -left-[19px] top-1.5 size-2.5 rounded-full ${
+                  isComplete
+                    ? "bg-mint"
+                    : isActive
+                      ? "animate-pulse bg-magenta"
+                      : "bg-gray/60"
+                }`}
+              />
+              <span className={isActive ? "font-semibold text-navy" : ""}>
+                {isComplete ? "✓ " : ""}
+                {step}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
   );
 }
 
@@ -588,7 +630,6 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setMessages((current) => [
       ...current,
       { role: "user", text: question },
-      { role: "assistant", text: "" },
     ]);
     openChat();
     setInput("");
@@ -596,6 +637,11 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setExplainAction(null);
     setStockExploreAction(null);
     setIsLoading(true);
+    const startedAt = Date.now();
+    let bufferedText = "";
+    let pendingExplainAction: ExplainActionPayload | null = null;
+    let pendingStockExploreAction: StockExploreActionPayload | null = null;
+    let pendingStandardAction: StandardChatActionPayload | null = null;
 
     try {
       const response = await fetch("/api/chat", {
@@ -652,84 +698,78 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
             setStatus(value);
           }
           if (type === "text" && typeof value === "string") {
-            setMessages((current) => {
-              const last = current.at(-1);
-              if (!last || last.role !== "assistant") return current;
-              return [...current.slice(0, -1), { ...last, text: `${last.text}${value}` }];
-            });
+            bufferedText += value;
           }
           if (type === "action" && value && typeof value === "object") {
             if (isExplainAction(value)) {
-              setExplainAction(value);
-              setMessages((current) => {
-                const last = current.at(-1);
-                if (!last || last.role !== "assistant") return current;
-                return [
-                  ...current.slice(0, -1),
-                  {
-                    ...last,
-                    explainTurn: value.turn,
-                    ...(Array.isArray(value.suggestedQuestions)
-                      ? { suggestedQuestions: value.suggestedQuestions }
-                      : {}),
-                    ...(isAllowedUiAction(value.uiAction)
-                      ? { uiAction: value.uiAction }
-                      : {}),
-                  },
-                ];
-              });
+              pendingExplainAction = value;
               continue;
             }
 
             if (isStockExploreAction(value)) {
-              setStockExploreAction(value);
-              setMessages((current) => {
-                const last = current.at(-1);
-                if (!last || last.role !== "assistant") return current;
-                return [
-                  ...current.slice(0, -1),
-                  {
-                    ...last,
-                    stockExploreTurn: value.turn,
-                    ...(Array.isArray(value.suggestedQuestions)
-                      ? { suggestedQuestions: value.suggestedQuestions }
-                      : {}),
-                    ...(isAllowedUiAction(value.uiAction)
-                      ? { uiAction: value.uiAction }
-                      : {}),
-                  },
-                ];
-              });
+              pendingStockExploreAction = value;
               continue;
             }
 
-            const action = value as StandardChatActionPayload;
-            setMessages((current) => {
-              const last = current.at(-1);
-              if (!last || last.role !== "assistant") return current;
-              return [
-                ...current.slice(0, -1),
-                {
-                  ...last,
-                  ...(Array.isArray(action.suggestedQuestions)
-                    ? { suggestedQuestions: action.suggestedQuestions }
-                    : {}),
-                  ...(isAllowedUiAction(action.uiAction)
-                    ? { uiAction: action.uiAction }
-                    : {}),
-                },
-              ];
-            });
+            pendingStandardAction = value as StandardChatActionPayload;
           }
         }
       }
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, remainingPreparationMs(startedAt, Date.now()));
+      });
+
+      setExplainAction(pendingExplainAction);
+      setStockExploreAction(pendingStockExploreAction);
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          text: bufferedText,
+          ...(pendingExplainAction
+            ? {
+                explainTurn: pendingExplainAction.turn,
+                ...(Array.isArray(pendingExplainAction.suggestedQuestions)
+                  ? { suggestedQuestions: pendingExplainAction.suggestedQuestions }
+                  : {}),
+                ...(isAllowedUiAction(pendingExplainAction.uiAction)
+                  ? { uiAction: pendingExplainAction.uiAction }
+                  : {}),
+              }
+            : {}),
+          ...(pendingStockExploreAction
+            ? {
+                stockExploreTurn: pendingStockExploreAction.turn,
+                ...(Array.isArray(pendingStockExploreAction.suggestedQuestions)
+                  ? { suggestedQuestions: pendingStockExploreAction.suggestedQuestions }
+                  : {}),
+                ...(isAllowedUiAction(pendingStockExploreAction.uiAction)
+                  ? { uiAction: pendingStockExploreAction.uiAction }
+                  : {}),
+              }
+            : {}),
+          ...(pendingStandardAction
+            ? {
+                ...(Array.isArray(pendingStandardAction.suggestedQuestions)
+                  ? { suggestedQuestions: pendingStandardAction.suggestedQuestions }
+                  : {}),
+                ...(isAllowedUiAction(pendingStandardAction.uiAction)
+                  ? { uiAction: pendingStandardAction.uiAction }
+                  : {}),
+              }
+            : {}),
+        },
+      ]);
+      setStatus("답변을 준비했어요");
     } catch {
       setStatus("연결을 다시 확인해 주세요");
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, remainingPreparationMs(startedAt, Date.now()));
+      });
       setMessages((current) => {
-        const last = current.at(-1);
-        if (!last || last.role !== "assistant") return current;
         return [
-          ...current.slice(0, -1),
+          ...current,
           { role: "assistant", text: "키웅이가 잠깐 낮잠 중이에요! 조금 있다 다시 물어봐 주세요 🐻" },
         ];
       });
@@ -994,6 +1034,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                   actionsDisabled={isLoading || index !== messages.length - 1}
                 />
               ))}
+              {isLoading && <ResponsePreparation status={status} />}
             </div>
 
             <div className="shrink-0 border-t border-gray/40 px-4 py-3">
