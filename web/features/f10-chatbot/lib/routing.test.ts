@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput } from "../../../shared/llm/filter";
 import { normalizeChatInput, routeMessage } from "./routing";
 
@@ -37,6 +38,44 @@ assert.deepEqual(routeMessage("키움증권은 어떻게 돈 벌어?", { screen:
   stockId: "KRX:039490",
   topic: "business",
 });
+for (const stock of STOCKS) {
+  const otherStock = STOCKS.find((candidate) => candidate.id !== stock.id)!;
+  const otherContext = {
+    screen: "stock" as const,
+    stockId: otherStock.id,
+    stockName: otherStock.name,
+  };
+  for (const reference of [stock.name, ...stock.searchAliases]) {
+    assert.equal(
+      routeMessage(`${reference} 뭐 하는 회사야?`, otherContext).stockFact?.stockId,
+      stock.id,
+      `${reference} 질문이 현재 화면의 ${otherStock.name}으로 바뀌었어`,
+    );
+  }
+}
+assert.equal(
+  routeMessage("에스케이스퀘어 뭐하는데임", {
+    screen: "order",
+    stockId: "KRX:066570",
+    stockName: "LG전자",
+  }).stockFact?.stockId,
+  "KRX:402340",
+);
+assert.equal(
+  routeMessage("엘지전자 뭐하는데냐고", {
+    screen: "stock",
+    stockId: "KRX:259960",
+    stockName: "크래프톤",
+  }).stockFact?.stockId,
+  "KRX:066570",
+);
+const unresolvedCompany = routeMessage("아무개회사 뭐하는데", {
+  screen: "stock",
+  stockId: "KRX:259960",
+  stockName: "크래프톤",
+});
+assert.equal(unresolvedCompany.stockFact, undefined);
+assert.equal(unresolvedCompany.text.includes("회사 이름을 찾지 못했어요"), true);
 assert.deepEqual(routeMessage("삼성전자 2024년 실적 알려줘", { screen: "home" }).stockFact, {
   stockId: "KRX:005930",
   topic: "financial",

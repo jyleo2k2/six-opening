@@ -1123,6 +1123,43 @@ function findMentionedStock(message: string) {
   })?.stock;
 }
 
+const NAMED_STOCK_QUESTION_MARKERS = [
+  "회사는",
+  "회사에서",
+  "회사뭐",
+  "무슨회사",
+  "어떤회사",
+  "뭐하는",
+  "뭐임",
+  "무엇을만들",
+  "어떤일을해",
+  "어떻게돈을벌",
+  "어떻게벌",
+  "돈을벌",
+  "돈벌",
+  "수익구조",
+  "업종",
+  "산업역할",
+  "실적",
+  "매출",
+  "영업이익",
+  "순이익",
+] as const;
+
+function hasUnrecognizedStockName(message: string) {
+  if (findMentionedStock(message)) return false;
+  const markerIndex = NAMED_STOCK_QUESTION_MARKERS.reduce((earliest, marker) => {
+    const index = message.indexOf(marker);
+    return index > 0 && (earliest < 0 || index < earliest) ? index : earliest;
+  }, -1);
+  if (markerIndex < 0) return false;
+
+  const prefix = message.slice(0, markerIndex);
+  return !/^(?:(?:이회사|이종목|현재회사|보고있는회사|회사|검수된|과거|최근|작년|지난해|2024년))+$/.test(
+    prefix,
+  );
+}
+
 function containsPersonalAddress(message: string) {
   if (includesAny(message, ["회사주소", "본사주소"])) return false;
   return (
@@ -3586,6 +3623,21 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     context.screen === "stock" || context.screen === "order"
       ? STOCKS.find((stock) => stock.id === context.stockId)
       : undefined;
+  if (!mentionedStock && hasUnrecognizedStockName(message)) {
+    return reply(
+      "faq",
+      "service_help",
+      "말한 회사 이름을 찾지 못했어요. 회사 이름을 다시 적거나 51개 종목 탐색에서 골라 주세요.",
+      ["미등록 종목명 대체 차단"],
+      {
+        uiAction: {
+          type: "open_screen",
+          target: "stock",
+          label: "종목 탐색에서 회사 찾기",
+        },
+      },
+    );
+  }
   const stock = mentionedStock ?? contextStock;
   if (stock && (mentionedStock || includesAny(message, STOCK_PATTERNS))) {
     return reply("tool", "stock_facts", "", ["승인 종목 사실 조회"], {

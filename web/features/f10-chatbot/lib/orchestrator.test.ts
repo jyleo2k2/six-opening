@@ -226,6 +226,17 @@ async function main() {
   );
   assert.equal(mentionedKrafton.action?.uiAction?.stockId, "KRX:259960");
 
+  const unresolvedCompany = await createChatOutcome(
+    { message: "아무개회사 뭐하는데", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(unresolvedCompany.source, "fixed");
+  assert.equal(unresolvedCompany.response.text.includes("회사 이름을 찾지 못했어요"), true);
+  assert.equal(unresolvedCompany.action?.uiAction?.target, "stock");
+  assert.equal(isExplainAction(unresolvedCompany.action), false);
+  assert.equal(modelCalls, 0);
+
   // 51종 모두 회사·사업·업종 세 주제만 한 번씩 제공하고 실적은 추천하지 않는다.
   for (const stock of STOCKS) {
     const stockContext = {
