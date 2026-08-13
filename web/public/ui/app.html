@@ -1303,7 +1303,7 @@ class Component extends DCLogic {
 
   blankDraft(){
     this.orderFlowSequence = (this.orderFlowSequence || 0) + 1;
-    return { amount:0, reason:null, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false, orderFlowId:'buy_' + this.orderFlowSequence };
+    return { amount:0, amountSource:null, reason:null, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false, orderFlowId:'buy_' + this.orderFlowSequence };
   }
 
   pickOrderType(orderType){
@@ -1769,6 +1769,7 @@ class Component extends DCLogic {
 
     const price = st ? st.price : 0;
     const amount = s.draft.amount;
+    const availableCash = Math.max(0, Math.floor(m.cash));
     const limPrice = s.draft.limitPct === null || s.draft.limitPct === undefined ? price : Math.round(price * (1 + s.draft.limitPct / 100));
     const execPrice = s.draft.orderType === 'limit' ? limPrice : price;
     const qty = execPrice > 0 ? amount / execPrice : 0;
@@ -2020,7 +2021,7 @@ class Component extends DCLogic {
         let v;
         if (k === '←') v = cur.slice(0, -1);
         else v = cur + k;
-        this.setDraft({ amount: Math.min(9999999, parseInt(v || '0', 10) || 0) });
+        this.setDraft({ amount: Math.min(availableCash, parseInt(v || '0', 10) || 0), amountSource:'custom' });
       }
     }));
 
@@ -2153,12 +2154,17 @@ class Component extends DCLogic {
       amountWon: won(amount), totalText: won(grand),
       qtyText: qty.toFixed(2) + '주',
       qtyHint: amount > 0 && st ? (st.name + ' 약 ' + qty.toFixed(2) + '주' + (s.draft.orderType === 'limit' ? '를 살 수 있게 돼' : '를 살 수 있어')) : '얼마를 넣을지 골라봐',
-      chip1: this.chip(amount === 10000), chip3: this.chip(amount === 30000),
-      chip5: this.chip(amount === 50000), chipC: this.chip(s.showPad),
-      amt1: () => { this.setDraft({ amount:10000 }); this.setState({ showPad:false }); },
-      amt3: () => { this.setDraft({ amount:30000 }); this.setState({ showPad:false }); },
-      amt5: () => { this.setDraft({ amount:50000 }); this.setState({ showPad:false }); },
-      amtCustom: () => this.setState(x => ({ showPad: !x.showPad })),
+      chip1: this.chip(s.draft.amountSource === 'preset' && amount === 10000),
+      chip3: this.chip(s.draft.amountSource === 'preset' && amount === 30000),
+      chip5: this.chip(s.draft.amountSource === 'preset' && amount === 50000),
+      chipC: this.chip(s.draft.amountSource === 'custom'),
+      amt1: () => { this.setDraft({ amount:10000, amountSource:'preset' }); this.setState({ showPad:false }); },
+      amt3: () => { this.setDraft({ amount:30000, amountSource:'preset' }); this.setState({ showPad:false }); },
+      amt5: () => { this.setDraft({ amount:50000, amountSource:'preset' }); this.setState({ showPad:false }); },
+      amtCustom: () => {
+        this.setDraft({ amount:Math.min(availableCash, amount), amountSource:'custom' });
+        this.setState(x => ({ showPad: !x.showPad }));
+      },
       showPad: s.showPad, padKeys: padKeys,
       mktStyle: this.chip(s.draft.orderType === 'market'), limStyle: this.chip(s.draft.orderType === 'limit'),
       pickMarket: () => this.pickOrderType('market'),
