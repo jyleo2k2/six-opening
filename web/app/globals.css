@@ -8,6 +8,9 @@
   --color-ink: #1A2233;
   --color-up: #E8322E;
   --color-down: #1668DC;
+  /* 차트 매매 지점 마커. 등락색(up·down)을 쓰면 마커를 상승·하락으로 오독한다. */
+  --color-trade-child: #0F8A68;
+  --color-trade-parent: #16233F;
   --shadow-card: 0 8px 24px rgb(0 30 90 / 0.08);
 }
 
