@@ -7,19 +7,12 @@ import type {
 export const PROACTIVE_LIMITS = {
   dwellMs: 5 * 60 * 1000,
   lossRevisitWindowMs: 5 * 60 * 1000,
-  minimumGapMs: 3 * 60 * 1000,
-  sameSignalGapMs: 10 * 60 * 1000,
   sessionIdleMs: 30 * 60 * 1000,
-  maximumPerSession: 2,
 } as const;
 
 export function createProactiveSession(now: number): ProactiveSessionState {
   return {
     lastActivityAt: now,
-    lastShownAt: null,
-    shownAtBySignal: {},
-    shownCount: 0,
-    mutedSignals: [],
   };
 }
 
@@ -65,11 +58,10 @@ export function detectProactiveSignals(
     signals.push("buyHesitation");
   }
 
-  const dwell = [...events].reverse().find(
-    (event): event is Extract<ChatBehaviorEvent, { type: "screen_dwell_completed" }> =>
-      event.type === "screen_dwell_completed",
-  );
-  if (dwell && dwell.durationMs > PROACTIVE_LIMITS.dwellMs) {
+  if (
+    latestEvent?.type === "screen_dwell_completed" &&
+    latestEvent.durationMs > PROACTIVE_LIMITS.dwellMs
+  ) {
     signals.push("dwell");
   }
 
@@ -83,6 +75,9 @@ export function detectProactiveSignals(
 
   if (
     realizedLoss &&
+    latestEvent?.type === "screen_entered" &&
+    latestEvent.screen === "stock" &&
+    latestEvent.stockId === realizedLoss.stockId &&
     now >= realizedLoss.at &&
     now - realizedLoss.at <= PROACTIVE_LIMITS.lossRevisitWindowMs
   ) {
@@ -102,53 +97,6 @@ export function detectProactiveSignals(
 
 export function selectProactiveSignal(
   signals: readonly ProactiveSignal[],
-  state: ProactiveSessionState,
-  now: number,
 ): ProactiveSignal | null {
-  if (state.shownCount >= PROACTIVE_LIMITS.maximumPerSession) return null;
-  if (
-    state.lastShownAt !== null &&
-    now - state.lastShownAt < PROACTIVE_LIMITS.minimumGapMs
-  ) {
-    return null;
-  }
-
-  return (
-    signals.find((signal) => {
-      if (state.mutedSignals.includes(signal)) return false;
-      const lastShownAt = state.shownAtBySignal[signal];
-      return (
-        lastShownAt === undefined ||
-        now - lastShownAt >= PROACTIVE_LIMITS.sameSignalGapMs
-      );
-    }) ?? null
-  );
-}
-
-export function markProactiveSignalShown(
-  state: ProactiveSessionState,
-  signal: ProactiveSignal,
-  now: number,
-): ProactiveSessionState {
-  return {
-    ...state,
-    lastActivityAt: now,
-    lastShownAt: now,
-    shownAtBySignal: { ...state.shownAtBySignal, [signal]: now },
-    shownCount: state.shownCount + 1,
-  };
-}
-
-export function muteProactiveSignal(
-  state: ProactiveSessionState,
-  signal: ProactiveSignal,
-  now: number,
-): ProactiveSessionState {
-  return {
-    ...state,
-    lastActivityAt: now,
-    mutedSignals: state.mutedSignals.includes(signal)
-      ? state.mutedSignals
-      : [...state.mutedSignals, signal],
-  };
+  return signals[0] ?? null;
 }

@@ -237,9 +237,12 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const sheetDragRef = useRef<SheetDragState | null>(null);
   const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
+  const signalVersion = useChatBehaviorStore((state) => state.activeSignalVersion);
   const recordBehaviorEvent = useChatBehaviorStore((state) => state.recordEvent);
   const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
-  const muteActiveSignal = useChatBehaviorStore((state) => state.muteActiveSignal);
+  const dismissActiveSignal = useChatBehaviorStore(
+    (state) => state.dismissActiveSignal,
+  );
 
   const currentScreen = SCREENS[screen];
   const chatContext = useMemo(
@@ -346,7 +349,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       PROACTIVE_BUBBLE_VISIBLE_MS,
     );
     return () => window.clearTimeout(timer);
-  }, [signal]);
+  }, [signal, signalVersion]);
 
   function openChat() {
     setPrototypeScreen(
@@ -634,7 +637,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
 
   function dismissSignal() {
     if (!signal) return;
-    muteActiveSignal(Date.now());
+    dismissActiveSignal();
   }
 
   function handleUiAction(action: ChatUiAction) {

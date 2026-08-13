@@ -156,8 +156,4 @@ export type ChatBehaviorEvent =
 
 export type ProactiveSessionState = {
   lastActivityAt: number;
-  lastShownAt: number | null;
-  shownAtBySignal: Partial<Record<ProactiveSignal, number>>;
-  shownCount: number;
-  mutedSignals: ProactiveSignal[];
 };
