@@ -1,10 +1,12 @@
 // 서버 전용 Supabase 접근. 키는 절대 클라이언트로 넘기지 않는다.
 // app/api/quote/stock-candles.ts 의 REST 호출 방식을 그대로 따른다.
 import type { NextRequest } from "next/server";
+import { loadDevelopmentEnvironment } from "./dev-env";
 
 export const SESSION_COOKIE = "kw_uid";
 
 function configuration() {
+  loadDevelopmentEnvironment();
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) throw new Error("Supabase 서버 환경변수가 없습니다.");
@@ -86,6 +88,8 @@ export async function findProfileById(id: number) {
  * 로그인 기능을 붙이기 전까지는 DEMO_USER_ID 환경변수로 대신 지정할 수 있다.
  */
 export function sessionUserId(request: NextRequest): number | null {
+  // 쿠키가 없을 때 볼 DEMO_USER_ID 도 개발용 env 파일에 있다. 먼저 읽어 둔다.
+  loadDevelopmentEnvironment();
   const raw = request.cookies.get(SESSION_COOKIE)?.value ?? process.env.DEMO_USER_ID;
   if (!raw) return null;
   const id = Number(raw);
