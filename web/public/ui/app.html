@@ -1306,7 +1306,25 @@ class Component extends DCLogic {
     reasonOrder: [0,1,2,3,4,5]
   };
 
-  blankDraft(){ return { amount:0, reason:null, conf:50, touched:false, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false }; }
+  blankDraft(){
+    this.orderFlowSequence = (this.orderFlowSequence || 0) + 1;
+    return { amount:0, reason:null, conf:50, touched:false, plan:null, targetPct:null, memo:'', orderType:'market', limitPct:0, memoSaved:false, orderFlowId:'buy_' + this.orderFlowSequence };
+  }
+
+  pickOrderType(orderType){
+    const draft = this.state.draft;
+    if (draft.orderType === orderType) return;
+    const stock = this.stock();
+    this.setDraft({ orderType:orderType });
+    if (stock && draft.orderFlowId) {
+      this.notifyChatBehavior({
+        kind:'order_method_selected',
+        stockId:'KRX:' + stock.code,
+        orderFlowId:draft.orderFlowId,
+        orderType:orderType
+      });
+    }
+  }
 
   openRequestedScreen(data){
     if (!data) return;
@@ -1992,8 +2010,8 @@ class Component extends DCLogic {
       amtCustom: () => this.setState(x => ({ showPad: !x.showPad })),
       showPad: s.showPad, padKeys: padKeys,
       mktStyle: this.chip(s.draft.orderType === 'market'), limStyle: this.chip(s.draft.orderType === 'limit'),
-      pickMarket: () => this.setDraft({ orderType:'market' }),
-      pickLimit: () => this.setDraft({ orderType:'limit' }),
+      pickMarket: () => this.pickOrderType('market'),
+      pickLimit: () => this.pickOrderType('limit'),
       showLimit: s.draft.orderType === 'limit',
       limitPriceText: limPrice.toLocaleString('ko-KR'),
       limitDiffText: s.draft.limitPct === 0 ? '지금 가격 그대로야' : ('지금 ' + price.toLocaleString('ko-KR') + '원보다 ' + Math.abs(s.draft.limitPct) + '% 싸'),

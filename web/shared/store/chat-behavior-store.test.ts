@@ -84,6 +84,23 @@ async function run() {
   assert.equal(useChatBehaviorStore.getState().activeSignal, "lossRevisit");
   assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 6);
 
+  useChatBehaviorStore.getState().dismissActiveSignal();
+  for (const [offset, orderType] of [
+    [15, "limit"],
+    [16, "market"],
+    [17, "limit"],
+  ] as const) {
+    useChatBehaviorStore.getState().recordEvent({
+      type: "order_method_selected",
+      stockId: "KRX:005930",
+      orderFlowId: "buy_1",
+      orderType,
+      at: start + offset,
+    });
+  }
+  assert.equal(useChatBehaviorStore.getState().activeSignal, "orderMethodConfusion");
+  assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 7);
+
   console.log("chat behavior store tests passed");
 }
 

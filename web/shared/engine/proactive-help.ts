@@ -58,6 +58,28 @@ export function detectProactiveSignals(
     signals.push("buyHesitation");
   }
 
+  if (latestEvent?.type === "order_method_selected") {
+    const orderMethodSelections = events.filter(
+      (event): event is Extract<
+        ChatBehaviorEvent,
+        { type: "order_method_selected" }
+      > =>
+        event.type === "order_method_selected" &&
+        event.orderFlowId === latestEvent.orderFlowId,
+    );
+    const isAlternating = orderMethodSelections.every(
+      (event, index) =>
+        index === 0 ||
+        event.orderType !== orderMethodSelections[index - 1]?.orderType,
+    );
+
+    // 세 번째 실제 변경에서만 발화한다. 이 주문 흐름 안에서는 한 번만
+    // 보여 주므로 시간·횟수 기반 발화 제한을 둘 필요가 없다.
+    if (orderMethodSelections.length === 3 && isAlternating) {
+      signals.push("orderMethodConfusion");
+    }
+  }
+
   if (
     latestEvent?.type === "screen_dwell_completed" &&
     latestEvent.durationMs > PROACTIVE_LIMITS.dwellMs
