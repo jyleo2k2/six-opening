@@ -46,6 +46,14 @@ function normalizeNumber(value: string | number) {
   return String(value).replace(/[,%\s]/g, "");
 }
 
+/**
+ * 화면 수치 주장으로 볼 값만 고른다. 단위가 붙은 값(`78,000원`·`12%`·`10주`)은
+ * 사용자 자산·시세 주장이므로 허용 목록과 대조하고, 단위 없는 숫자와 `1주당`
+ * 같은 관용구는 개념 설명이므로 통과시킨다. 모든 숫자를 막으면 "PER은 주가를
+ * 1주당 순이익으로 나눈 값이에요" 같은 정상 설명까지 폐기된다.
+ */
+const CLAIM_NUMBER = /(\d[\d,.]*)\s*(?:원|%|주(?!당))/g;
+
 export function gateChatOutput(options: {
   text: string;
   source: ChatOutputSource;
@@ -63,9 +71,10 @@ export function gateChatOutput(options: {
 
   if (options.source === "model") {
     const allowed = new Set((options.allowedNumbers ?? []).map(normalizeNumber));
-    const outputNumbers = text.match(/\d[\d,.]*%?/g)?.map(normalizeNumber) ?? [];
-    if (outputNumbers.some((value) => !allowed.has(value))) {
-      return { ok: false, reason: "unverified_number" };
+    for (const match of text.matchAll(CLAIM_NUMBER)) {
+      if (!allowed.has(normalizeNumber(match[1]))) {
+        return { ok: false, reason: "unverified_number" };
+      }
     }
   }
 

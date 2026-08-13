@@ -18,6 +18,7 @@ import {
   type ExplainStep,
 } from "./explain";
 import { generateChatAnswer } from "./openai";
+import { judgeChatOutput } from "./output-judge";
 import { looksLikeNewQuestion } from "./colloquial";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
@@ -43,14 +44,19 @@ export type ChatOutcome = {
   tool?: ToolExecution["tool"];
   toolStatus?: ToolExecution["status"];
   gate: "passed" | "replaced";
-  gateReason?: Exclude<ReturnType<typeof gateChatOutput>, { ok: true }>["reason"];
+  gateReason?:
+    | Exclude<ReturnType<typeof gateChatOutput>, { ok: true }>["reason"]
+    | "judge_violation"
+    | "judge_unavailable";
   failure?: "timeout" | "model_error" | "tool_error";
 };
 
 type ChatOrchestratorDependencies = {
   generateAnswer?: typeof generateChatAnswer;
+  judgeOutput?: typeof judgeChatOutput;
   runTool?: typeof runReadOnlyTool;
   timeoutMs?: number;
+  judgeTimeoutMs?: number;
   requestSignal?: AbortSignal;
   onStatus?: (status: string) => void;
 };
@@ -71,10 +77,17 @@ function createTimedSignal(parent: AbortSignal | undefined, timeoutMs: number) {
   };
 }
 
-function allowedContextNumbers(request: ChatRequest) {
-  const numbers = [request.context.quantity, request.context.unitPrice].filter(
-    (value): value is number => value !== undefined,
-  );
+function allowedContextNumbers(request: ChatRequest): (string | number)[] {
+  const numbers: (string | number)[] = [
+    request.context.quantity,
+    request.context.unitPrice,
+  ].filter((value): value is number => value !== undefined);
+
+  // 사용자가 같은 질문에 적은 값은 되짚어 말할 수 있어야 한다 (SPEC §6.1.5 조건 계산).
+  for (const match of request.message.matchAll(/\d[\d,.]*/g)) {
+    numbers.push(match[0].replace(/[.,]$/, ""));
+  }
+
   if (
     request.context.quantity !== undefined &&
     request.context.unitPrice !== undefined
@@ -398,9 +411,39 @@ export async function createChatOutcome(
     source,
     allowedNumbers: allowedContextNumbers(request),
   });
+
+  // T5b (SPEC §6.0.2) — 룰을 통과한 모델 생성 답변만 다시 판정한다. 고정 응답·
+  // 사전·FAQ·Tool 응답은 승인된 정적 텍스트라 호출하지 않는다.
+  let judgeReason: "judge_violation" | "judge_unavailable" | undefined;
+  if (gate.ok && source === "model") {
+    const timed = createTimedSignal(
+      dependencies.requestSignal,
+      dependencies.judgeTimeoutMs ?? 5_000,
+    );
+    try {
+      const verdict = await raceWithAbort(
+        (dependencies.judgeOutput ?? judgeChatOutput)(gate.text, timed.signal),
+        timed.signal,
+      );
+      if (verdict.violation) judgeReason = "judge_violation";
+    } catch (error) {
+      // 닫힌 실패 — 검사하지 못한 생성문은 내보내지 않는다.
+      judgeReason = "judge_unavailable";
+      if (!timed.signal.aborted) {
+        console.error(
+          "F10 output judge failed",
+          error instanceof Error ? error.name : "unknown",
+        );
+      }
+    } finally {
+      timed.cleanup();
+    }
+  }
+
+  const gateReason = gate.ok ? judgeReason : gate.reason;
   const useSimplerFallback =
-    explainStep === "simpler" && !gate.ok && simplerFallbackText;
-  const safeOutput = gate.ok || Boolean(useSimplerFallback);
+    explainStep === "simpler" && gateReason !== undefined && simplerFallbackText;
+  const safeOutput = gateReason === undefined || Boolean(useSimplerFallback);
   const standardAction = safeOutput
     ? sanitizeActionPayload(response)
     : undefined;
@@ -416,15 +459,17 @@ export async function createChatOutcome(
   const gatedResponse: ChatResponse = {
     text: useSimplerFallback
       ? useSimplerFallback
-      : gate.ok
-      ? gate.text
-      : gate.reason === "prohibited"
+      : gateReason === undefined
+      ? (gate as { ok: true; text: string }).text
+      : gateReason === "prohibited" || gateReason === "judge_violation"
         ? SAFE_REFUSAL
         : CHAT_FALLBACK,
     ...(standardAction ?? {}),
   };
 
-  onStatus(gate.ok ? "안전 점검 통과" : "안전한 답변으로 바꿨어요");
+  onStatus(
+    gateReason === undefined ? "안전 점검 통과" : "안전한 답변으로 바꿨어요",
+  );
   return {
     response: gatedResponse,
     ...(outputAction ? { action: outputAction } : {}),
@@ -436,8 +481,8 @@ export async function createChatOutcome(
       : routed.tool
         ? { tool: routed.tool }
         : {}),
-    gate: gate.ok ? "passed" : "replaced",
-    ...(!gate.ok ? { gateReason: gate.reason } : {}),
+    gate: gateReason === undefined ? "passed" : "replaced",
+    ...(gateReason !== undefined ? { gateReason } : {}),
     ...(failure ? { failure } : {}),
   };
 }

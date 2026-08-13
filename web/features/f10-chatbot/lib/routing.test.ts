@@ -1692,4 +1692,47 @@ for (const [question, expectedTarget] of howtoQuestions) {
   }
 }
 
+// 보호 신호에 서비스 낱말이 섞인 입력. 큐레이트 사용법 FAQ 가 보호 판정보다
+// 앞에 있으면 여기서 route 가 faq 로 떨어진다 (SPEC §6.1.2 입력 안전 우선순위).
+const protectionBeatsHowto = [
+  "죽고 싶어",
+  "사라지고 싶어",
+  "다 포기하고 싶어 매수 버튼 누르면 끝이야?",
+  "주문 취소 버튼 계속 누르면 어떻게 돼? 그냥 다 포기하고 싶어",
+  "매수 버튼 누르면 끝이야? 그냥 다 그만두고 싶어",
+] as const;
+for (const question of protectionBeatsHowto) {
+  const routed = routeMessage(question, howtoContexts.order);
+  assert.equal(
+    routed.route,
+    "safety",
+    `보호 신호가 사용법 FAQ 에 가려졌어: ${question}`,
+  );
+}
+
+// 정서 신호가 섞인 주문 질문은 불편을 먼저 인정한다 (SPEC §6.1.2).
+for (const question of [
+  "너무 힘든데 한 주만 사도 돼?",
+  "요즘 많이 힘든데 매수 버튼 누르면 끝이야?",
+] as const) {
+  assert.equal(
+    routeMessage(question, howtoContexts.order).route,
+    "safety",
+    `정서 신호가 사용법 FAQ 에 가려졌어: ${question}`,
+  );
+}
+
+// 같은 사용법 질문이 정서 신호 없이 오면 그대로 FAQ 여야 한다 (보호 판정 과탐지 방지).
+for (const question of [
+  "한 주만 사도 돼?",
+  "매수 버튼 누르면 끝?",
+  "주문 취소 버튼 계속 누르면 시스템 고장 나냐?",
+] as const) {
+  assert.notEqual(
+    routeMessage(question, howtoContexts.order).route,
+    "safety",
+    `평범한 사용법 질문이 보호 응답으로 넘어갔어: ${question}`,
+  );
+}
+
 console.log("routing tests passed");
