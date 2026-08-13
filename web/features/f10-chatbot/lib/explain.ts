@@ -148,10 +148,12 @@ export function resolveTextReply(
   // 라벨은 해요체지만 아이는 반말로 칠 수 있다("들어가지 않아요" 버튼 → "들어가지 않아").
   // 끝의 "요"를 떼고 견주되, 두 선택지가 같아지면 추측하지 않고 되묻는다.
   const target = normalizeChoiceLabel(message);
+  const politeTarget = normalizeChoiceLabel(toPoliteKorean(message));
   const labelMatches = stageChoices(script, stage).filter(
     (choice) =>
       normalizeChoiceLabel(choice.label) === target ||
-      normalizeChoiceLabel(toPoliteKorean(choice.label)) === target,
+      normalizeChoiceLabel(toPoliteKorean(choice.label)) === target ||
+      normalizeChoiceLabel(toPoliteKorean(choice.label)) === politeTarget,
   );
   if (labelMatches.length === 1) return labelMatches[0].id;
   if (labelMatches.length > 1) return null;
