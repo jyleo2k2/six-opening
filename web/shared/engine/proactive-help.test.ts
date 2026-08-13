@@ -13,8 +13,8 @@ import type { ChatBehaviorEvent } from "../types/chatbot";
 const now = 1_000_000_000;
 const buyHesitationEvents: ChatBehaviorEvent[] = [
   { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 3 },
-  { type: "screen_entered", screen: "home", at: now - 2 },
-  { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 1 },
+  { type: "buy_confirmation_abandoned", stockId: "KRX:000660", at: now - 2 },
+  { type: "buy_confirmation_abandoned", stockId: "KRX:035420", at: now - 1 },
 ];
 assert.deepEqual(detectProactiveSignals(buyHesitationEvents, now), ["buyHesitation"]);
 assert.deepEqual(detectProactiveSignals(buyHesitationEvents.slice(0, 2), now), []);
@@ -22,11 +22,12 @@ assert.deepEqual(
   detectProactiveSignals(
     [
       { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 3 },
+      { type: "buy_confirmation_abandoned", stockId: "KRX:000660", at: now - 2 },
       { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 1 },
     ],
     now,
   ),
-  [],
+  ["buyHesitation"],
 );
 assert.deepEqual(
   detectProactiveSignals(
@@ -43,7 +44,8 @@ assert.deepEqual(
     [
       { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 3 },
       { type: "trade_filled", stockId: "KRX:005930", side: "buy", at: now - 2 },
-      { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 1 },
+      { type: "buy_confirmation_abandoned", stockId: "KRX:000660", at: now - 1 },
+      { type: "buy_confirmation_abandoned", stockId: "KRX:035420", at: now },
     ],
     now,
   ),

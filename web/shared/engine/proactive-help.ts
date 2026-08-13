@@ -40,31 +40,27 @@ export function detectProactiveSignals(
 ): ProactiveSignal[] {
   const signals: ProactiveSignal[] = [];
   const latestEvent = events.at(-1);
-  const abandonedBuys = events.filter(
-    (event): event is Extract<ChatBehaviorEvent, { type: "buy_confirmation_abandoned" }> =>
-      event.type === "buy_confirmation_abandoned",
-  );
-  const recentAbandonedBuys = abandonedBuys.slice(-2);
+  let lastBuyFillIndex = -1;
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (event.type === "trade_filled" && event.side === "buy") {
+      lastBuyFillIndex = index;
+      break;
+    }
+  }
+  const recentAbandonedBuys = events
+    .slice(lastBuyFillIndex + 1)
+    .filter(
+      (event): event is Extract<
+        ChatBehaviorEvent,
+        { type: "buy_confirmation_abandoned" }
+      > => event.type === "buy_confirmation_abandoned",
+    )
+    .slice(-3);
 
   if (
     latestEvent?.type === "buy_confirmation_abandoned" &&
-    recentAbandonedBuys.length === 2 &&
-    recentAbandonedBuys[0].stockId === recentAbandonedBuys[1].stockId &&
-    events.some(
-      (event) =>
-        event.type === "screen_entered" &&
-        event.screen !== "order" &&
-        event.at > recentAbandonedBuys[0].at &&
-        event.at < recentAbandonedBuys[1].at,
-    ) &&
-    !events.some(
-      (event) =>
-        event.type === "trade_filled" &&
-        event.side === "buy" &&
-        event.stockId === recentAbandonedBuys[1].stockId &&
-        event.at > recentAbandonedBuys[0].at &&
-        event.at < recentAbandonedBuys[1].at,
-    )
+    recentAbandonedBuys.length === 3
   ) {
     signals.push("buyHesitation");
   }
