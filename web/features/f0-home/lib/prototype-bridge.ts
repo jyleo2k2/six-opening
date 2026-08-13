@@ -93,7 +93,6 @@ export function parseBehaviorEvent(
 
   if (value.kind === "order_method_selected") {
     if (
-      context?.screen !== "order" ||
       typeof value.orderFlowId !== "string" ||
       !/^[a-z0-9_-]{1,80}$/i.test(value.orderFlowId) ||
       (value.orderType !== "market" && value.orderType !== "limit")
