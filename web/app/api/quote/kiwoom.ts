@@ -33,14 +33,23 @@ export type ChartPoint = {
   price: number;
 };
 
+/** 키움 초당 1건 제한. 모든 호출이 이 간격으로 한 줄에 선다. */
+const REQUEST_INTERVAL_MS = 2600;
+const CHART_CACHE_MS = 5 * 60 * 1000;
+/** 분봉을 낡은 채로 먼저 보여줄 수 있는 한계. 이보다 오래되면 키움을 기다린다. */
+const MINUTE_STALE_MS = 60 * 60 * 1000;
+/** 보관 캔들 재조회 최소 간격. 요청마다 큐에 넣으면 큐가 백그라운드로 가득 찬다. */
+const STORED_REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+
 let accessToken = "";
 let tokenExpiresAt = 0;
-let queue = Promise.resolve<unknown>(undefined);
 let lastRequestAt = 0;
 let environmentLoaded = false;
 const quoteCache = new Map<string, { value: Quote; at: number }>();
 const chartCache = new Map<string, { value: ChartPoint[]; at: number }>();
 const chartRefreshes = new Map<string, Promise<void>>();
+const minuteRefreshes = new Map<string, Promise<void>>();
+const storedRefreshedAt = new Map<string, number>();
 
 function resolveEnvironmentCandidates(cwd = process.cwd()) {
   const repositoryRoot = path.resolve(cwd, "..");
@@ -148,16 +157,44 @@ async function getToken() {
   return accessToken;
 }
 
-function enqueue<T>(task: () => Promise<T>): Promise<T> {
-  const run = async () => {
-    const wait = Math.max(0, 2600 - (Date.now() - lastRequestAt));
-    if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
-    lastRequestAt = Date.now();
-    return task();
-  };
-  const result = queue.then(run, run);
-  queue = result.catch(() => undefined);
-  return result;
+type QueuedRequest = { background: boolean; run: () => Promise<void> };
+const pendingRequests: QueuedRequest[] = [];
+let draining = false;
+
+async function drainQueue() {
+  if (draining) return;
+  draining = true;
+  try {
+    while (pendingRequests.length) {
+      const wait = Math.max(0, REQUEST_INTERVAL_MS - (Date.now() - lastRequestAt));
+      // 기다리는 동안 화면 요청이 들어오면 그쪽이 먼저 뽑히도록 대기 후에 꺼낸다.
+      if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+      const next = pendingRequests.shift();
+      if (!next) break;
+      lastRequestAt = Date.now();
+      await next.run();
+    }
+  } finally {
+    draining = false;
+  }
+}
+
+/**
+ * 화면이 기다리는 요청을 백그라운드 작업 앞에 세운다.
+ *
+ * 카드 시세 폴링(5초 주기)과 보관 캔들 갱신이 큐를 계속 채우기 때문에, 순서가 도착순이면
+ * 사용자가 분봉을 눌렀을 때 그 뒤에 줄을 서서 요청당 2.6초씩 밀린다.
+ */
+function enqueue<T>(task: () => Promise<T>, background = false): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const firstBackground = pendingRequests.findIndex((request) => request.background);
+    const insertAt = background || firstBackground < 0 ? pendingRequests.length : firstBackground;
+    pendingRequests.splice(insertAt, 0, {
+      background,
+      run: () => task().then(resolve, reject),
+    });
+    void drainQueue();
+  });
 }
 
 function numeric(value: unknown, absolute = false) {
@@ -215,7 +252,8 @@ async function storedQuote(
   }
 }
 
-export async function getQuote(symbol: string): Promise<Quote> {
+/** `background`는 카드 시세 폴링처럼 아무도 기다리지 않는 호출에 쓴다. */
+export async function getQuote(symbol: string, background = false): Promise<Quote> {
   loadDevelopmentEnvironment();
   const fixture = await getQuoteFixture(symbol);
   if (!fixture) throw new Error("등록되지 않은 종목입니다.");
@@ -231,8 +269,9 @@ export async function getQuote(symbol: string): Promise<Quote> {
   }
 
   try {
-    const data = (await enqueue(() =>
-      post("/api/dostk/stkinfo", { stk_cd: symbol }, "ka10001"),
+    const data = (await enqueue(
+      () => post("/api/dostk/stkinfo", { stk_cd: symbol }, "ka10001"),
+      background,
     )) as Record<string, unknown>;
     const change =
       numeric(first(data, ["pred_pre", "change", "prdy_vrss"])) ?? fixture.change;
@@ -367,6 +406,7 @@ async function fetchKiwoomChart(
   symbol: string,
   period: ChartPeriod,
   stopAtTimestamp?: number,
+  background = false,
 ): Promise<ChartPoint[]> {
   const date = seoulDateDigits();
   const request =
@@ -382,8 +422,9 @@ async function fetchKiwoomChart(
   let continuation: Continuation | undefined;
 
   do {
-    const page = await enqueue(() =>
-      requestPage("/api/dostk/chart", request.body, request.apiId, continuation),
+    const page = await enqueue(
+      () => requestPage("/api/dostk/chart", request.body, request.apiId, continuation),
+      background,
     );
     const pageRows = findRows(page.data);
     rows.push(...pageRows);
@@ -441,6 +482,10 @@ function mergeChartPoints(...groups: ChartPoint[][]) {
  * 저장된 캔들 이후 구간만 키움에서 받아 DB에 반영한다. 응답을 보낸 뒤 호출한다.
  *
  * 분봉은 보관하지 않는다 — 14일치를 매일 쌓을 이유가 없고 항상 실시간으로 받는다.
+ *
+ * 차트를 열 때마다 돌리면 키움 큐가 백그라운드 페이징으로 가득 차서 정작 사용자가 누른
+ * 분봉이 그 뒤에 밀린다. 키별로 최소 간격을 두고, 실패해도 같은 간격만큼 쉰다.
+ * 51종 전체 적재는 `web/scripts/seed-candles.ts` 배치가 맡는다.
  */
 export function refreshStoredChart(symbol: string, period: Exclude<ChartPeriod, "minute">) {
   loadDevelopmentEnvironment();
@@ -448,11 +493,14 @@ export function refreshStoredChart(symbol: string, period: Exclude<ChartPeriod, 
   const pending = chartRefreshes.get(cacheKey);
   if (pending) return pending;
   if (!hasKiwoomCredentials()) return Promise.resolve();
+  const refreshedAt = storedRefreshedAt.get(cacheKey) ?? 0;
+  if (Date.now() - refreshedAt < STORED_REFRESH_INTERVAL_MS) return Promise.resolve();
+  storedRefreshedAt.set(cacheKey, Date.now());
 
   const refresh = (async () => {
     const cutoff = chartRetentionCutoff(period);
     const stored = await readStoredCandles(symbol, period, cutoff);
-    const fresh = await fetchKiwoomChart(symbol, period, stored.points.at(-1)?.time);
+    const fresh = await fetchKiwoomChart(symbol, period, stored.points.at(-1)?.time, true);
     const points = mergeChartPoints(stored.points, fresh).filter((point) => point.time >= cutoff);
     await syncStoredCandles(stored.stockId, period, fresh, cutoff);
     chartCache.set(cacheKey, { value: points, at: Date.now() });
@@ -464,8 +512,24 @@ export function refreshStoredChart(symbol: string, period: Exclude<ChartPeriod, 
   return refresh;
 }
 
+/** 분봉 캐시를 뒤에서 새로 채운다. 보관 DB가 없는 유일한 기간이라 따로 둔다. */
+function refreshMinuteChart(symbol: string, cacheKey: string) {
+  const pending = minuteRefreshes.get(cacheKey);
+  if (pending) return pending;
+
+  const refresh = fetchKiwoomChart(symbol, "minute", undefined, true)
+    .then((points) => {
+      chartCache.set(cacheKey, { value: points, at: Date.now() });
+    })
+    .catch(() => undefined)
+    .finally(() => minuteRefreshes.delete(cacheKey));
+
+  minuteRefreshes.set(cacheKey, refresh);
+  return refresh;
+}
+
 /**
- * 캔들 조회 순서: 5분 캐시 → (일·주봉) 보관 DB → 키움 → 픽스처.
+ * 캔들 조회 순서: 5분 캐시 → (분봉) 한 시간 이내 낡은 캐시 → (일·주봉) 보관 DB → 키움 → 픽스처.
  *
  * 분봉은 보관하지 않고 항상 키움에서 받는다. 일·주봉은 DB를 먼저 읽어 키움 호출과
  * 초당 1건 제한을 피하고, 최신 구간 반영은 `refreshStoredChart`가 응답 뒤에 처리한다.
@@ -478,7 +542,14 @@ export async function getChart(symbol: string, period: ChartPeriod): Promise<Cha
   if (!fixture) throw new Error("등록되지 않은 종목입니다.");
   const cacheKey = `${symbol}:${period}`;
   const cached = chartCache.get(cacheKey);
-  if (cached && Date.now() - cached.at < 5 * 60 * 1000) return cached.value;
+  if (cached && Date.now() - cached.at < CHART_CACHE_MS) return cached.value;
+
+  // 분봉만 보관 DB가 없어 키움 큐를 사용자가 직접 기다린다. 최근에 본 적이 있으면
+  // 낡은 값을 먼저 돌려주고 갱신은 뒤로 미룬다. 너무 오래된 캐시는 그대로 쓰지 않는다.
+  if (period === "minute" && cached && Date.now() - cached.at < MINUTE_STALE_MS) {
+    if (hasKiwoomCredentials()) void refreshMinuteChart(symbol, cacheKey);
+    return cached.value;
+  }
 
   if (period !== "minute") {
     try {

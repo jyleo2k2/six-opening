@@ -1320,10 +1320,31 @@ class Component extends DCLogic {
     };
     window.addEventListener('message', this.receiveOpenStock);
 
+    // 차트 iframe 은 종목이 바뀔 때만 다시 연다. 기간·차트종류는 메시지로 넘겨
+    // 문서를 다시 열지 않고 바꾼다.
+    this.chartFrame = null;
+    this.postChartOptions = () => {
+      if (!this.chartFrame) return;
+      this.chartFrame.postMessage(
+        { type: 'kiwoom:chart-options', period: this.state.tf, chartType: this.state.chartType },
+        window.location.origin,
+      );
+    };
+    this.receiveChartReady = (event) => {
+      if (event.origin !== window.location.origin) return;
+      const data = event.data;
+      if (!data || data.type !== 'kiwoom:chart-ready') return;
+      // 종목이 바뀌면 새 문서가 다시 알려온다. 그때 현재 선택을 되돌려 준다.
+      this.chartFrame = event.source;
+      this.postChartOptions();
+    };
+    window.addEventListener('message', this.receiveChartReady);
+
   }
   componentWillUnmount(){
     if (this.liveRefreshTimer) clearInterval(this.liveRefreshTimer);
     if (this.receiveOpenStock) window.removeEventListener('message', this.receiveOpenStock);
+    if (this.receiveChartReady) window.removeEventListener('message', this.receiveChartReady);
   }
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
@@ -1339,6 +1360,9 @@ class Component extends DCLogic {
     }
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
+    }
+    if (prevState && (prevState.tf !== this.state.tf || prevState.chartType !== this.state.chartType) && this.postChartOptions) {
+      this.postChartOptions();
     }
   }
   persist(next){
@@ -2159,7 +2183,9 @@ class Component extends DCLogic {
       chartLineStyle: this.chip(s.chartType === 'line'), chartCandleStyle: this.chip(s.chartType === 'candlestick'),
       tfMinute: () => this.setTf('minute'), tfDaily: () => this.setTf('daily'), tfWeekly: () => this.setTf('weekly'),
       tfMinuteStyle: this.chip(s.tf === 'minute'), tfDailyStyle: this.chip(s.tf === 'daily'), tfWeeklyStyle: this.chip(s.tf === 'weekly'),
-      tradingViewChartUrl: st ? '/tradingview-chart?symbol=' + encodeURIComponent(st.code) + '&period=' + encodeURIComponent(s.tf) + '&type=' + encodeURIComponent(s.chartType) : '',
+      // 종목만 주소에 남긴다. 기간·차트종류가 주소에 있으면 탭을 누를 때마다 iframe 문서가
+      // 통째로 다시 열려 차트 번들과 데이터를 다시 받는다. 두 값은 postChartOptions 로 넘긴다.
+      tradingViewChartUrl: st ? '/tradingview-chart?symbol=' + encodeURIComponent(st.code) : '',
       sectorNameText: st ? this.sectorOf(st.sector).name : '',
       newsHeadline: nd.headline,
       newsBody: nd.body.map(t => ({ text: t })),

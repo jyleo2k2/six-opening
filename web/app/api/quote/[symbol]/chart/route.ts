@@ -3,6 +3,17 @@ import { getChart, refreshStoredChart, type ChartPeriod } from "../../kiwoom";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * 일·주봉은 장 마감 뒤 하루 한 번 바뀐다. 매번 새로 받을 이유가 없어서 브라우저가 잠시
+ * 재사용하게 두고, 그보다 오래되면 낡은 값을 먼저 쓰면서 뒤에서 갱신한다.
+ * 분봉은 매초 바뀌므로 캐시하지 않는다.
+ */
+function cacheControl(period: ChartPeriod) {
+  return period === "minute"
+    ? "no-store"
+    : "public, max-age=300, stale-while-revalidate=86400";
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ symbol: string }> },
@@ -23,7 +34,7 @@ export async function GET(
     if (period !== "minute") after(() => refreshStoredChart(symbol, period));
     return NextResponse.json(
       { symbol, period, points },
-      { headers: { "Cache-Control": "no-store" } },
+      { headers: { "Cache-Control": cacheControl(period) } },
     );
   } catch (error) {
     return NextResponse.json(
