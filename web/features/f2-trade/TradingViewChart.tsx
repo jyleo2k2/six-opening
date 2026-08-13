@@ -113,6 +113,19 @@ function placeMarkers(
   return placed;
 }
 
+/** 좌표가 그대로면 상태를 갈아끼우지 않는다 — 매 프레임 다시 그리지 않기 위해서다. */
+function samePlacement(left: readonly PlacedMarker[], right: readonly PlacedMarker[]) {
+  if (left.length !== right.length) return false;
+  return left.every((marker, index) => {
+    const other = right[index];
+    return (
+      marker.id === other.id &&
+      Math.round(marker.x) === Math.round(other.x) &&
+      Math.round(marker.y) === Math.round(other.y)
+    );
+  });
+}
+
 function token(name: string, fallback: string) {
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   return value || fallback;
@@ -297,22 +310,29 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
     });
     setFound(markers.length);
 
-    /**
-     * 좌표는 차트가 배치를 마친 뒤에만 옳다.
-     *
-     * `timeToCoordinate` 는 시간축이 아직 폭을 못 잡았거나 보이는 범위 밖이면 `null` 을
-     * 준다. 그 상태로 읽으면 마커가 통째로 빠지거나 옛 축 기준 x 에 찍힌다. 그래서
-     * 구독을 **범위를 바꾸기 전에** 걸어 두고, 첫 계산도 한 프레임 뒤로 미룬다.
-     */
-    const reposition = () =>
-      setPlaced(placeMarkers(markers, chart, series, chart.paneSize().width));
-    chart.timeScale().subscribeVisibleLogicalRangeChange(reposition);
     showRecentBars(chart, points.length, shownPeriod);
-    const frame = requestAnimationFrame(reposition);
+
+    /**
+     * 좌표를 매 프레임 다시 읽는다.
+     *
+     * 이벤트만으로는 못 잡는다. `subscribeVisibleLogicalRangeChange` 는 **시간축**이
+     * 움직일 때만 오고, 가격축을 확대·축소하거나 자동 스케일이 자리를 다시 잡을 때는
+     * 아무 신호가 없다. 그러면 마커가 옛 y 에 그대로 남아 캔들과 어긋난다. 첫 배치도
+     * 마찬가지여서, 축이 아직 폭을 못 잡은 사이에 읽으면 `timeToCoordinate` 가 `null`
+     * 을 주고 마커가 통째로 사라진다.
+     *
+     * 좌표가 그대로면 상태를 갱신하지 않으므로 다시 그리지 않는다.
+     */
+    let frame = 0;
+    const follow = () => {
+      const next = placeMarkers(markers, chart, series, chart.paneSize().width);
+      setPlaced((current) => (samePlacement(current, next) ? current : next));
+      frame = requestAnimationFrame(follow);
+    };
+    frame = requestAnimationFrame(follow);
 
     const observer = new ResizeObserver(([entry]) => {
       chart.applyOptions({ width: Math.max(1, Math.floor(entry.contentRect.width)) });
-      reposition();
     });
     observer.observe(container);
     setState("ready");
@@ -320,7 +340,6 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
-      chart.timeScale().unsubscribeVisibleLogicalRangeChange(reposition);
       chart.remove();
     };
   }, [points, shownChartType, shownPeriod, symbol, viewer]);
@@ -336,11 +355,18 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
         ref={containerRef}
         className="h-[238px] w-full"
         role="img"
-        data-trade-markers={`${found}/${placed.length}`}
+        data-trade-markers={`${found}/${placed.length}${
+          placed[0] ? ` @${Math.round(placed[0].x)},${Math.round(placed[0].y)}` : ""
+        }`}
         aria-label={`${symbol} ${shownPeriod === "minute" ? "분봉" : shownPeriod === "daily" ? "일봉" : "주봉"} TradingView ${shownChartType === "line" ? "선" : "캔들"} 차트`}
       />
+      {/*
+        z-[60] 이 있어야 보인다. lightweight-charts 는 자기 캔버스에 z-index 를 최대 50
+        까지 준다. 이 SVG 가 `auto` 로 남으면 좌표를 제대로 잡고도 캔버스 밑에 깔려
+        화면에 안 나온다.
+      */}
       {state === "ready" && placed.length > 0 && (
-        <svg className="pointer-events-none absolute left-0 top-0 h-[238px] w-full">
+        <svg className="pointer-events-none absolute left-0 top-0 z-[60] h-[238px] w-full">
           {placed.map((marker) => {
             const fill =
               marker.member === "child"
