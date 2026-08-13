@@ -139,7 +139,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ stageStyle }}">
-<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:33px;padding:2px 46px 6px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x">
+<div ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:33px;padding:2px 46px 6px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none">
 <sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
 <div style="{{ c.slideStyle }}">
 <div style="{{ c.auraMain }}"></div>
@@ -1820,13 +1820,13 @@ class Component extends DCLogic {
           lastX = ev.clientX; lastT = now;
           if (Math.abs(ev.clientX - startX) > 6) this.dragged = true;
           el.scrollLeft = startLeft - (ev.clientX - startX);
-          ev.preventDefault();
+          // 실제로 끈 뒤에만 기본 동작을 막는다. 제자리 클릭에서 막으면 카드 click 이 사라진다.
+          if (this.dragged) ev.preventDefault();
         };
         const up = () => {
-          el.removeEventListener('pointermove', mv);
-          el.removeEventListener('pointerup', up);
-          el.removeEventListener('pointercancel', up);
+          window.removeEventListener('pointermove', mv);
           window.removeEventListener('pointerup', up);
+          window.removeEventListener('pointercancel', up);
           el.style.cursor = 'grab';
           let vel = -v * 16;
           if (vel > 90) vel = 90; if (vel < -90) vel = -90;
@@ -1839,11 +1839,11 @@ class Component extends DCLogic {
           setTimeout(() => { clearInterval(timer); restore(); }, 1200);
           setTimeout(() => { this.dragged = false; }, 0);
         };
-        try { el.setPointerCapture(e.pointerId); } catch (err) {}
-        el.addEventListener('pointermove', mv);
-        el.addEventListener('pointerup', up);
-        el.addEventListener('pointercancel', up);
+        // setPointerCapture 를 쓰면 click 이 카드가 아니라 캡처한 컨테이너로 재타깃돼
+        // 카드 진입이 죽는다. 대신 window 리스너로 컨테이너 밖 이동까지 받는다.
+        window.addEventListener('pointermove', mv);
         window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', up);
       },
 
       stockName: st ? st.name : '', stockEmoji: sec.emoji,
