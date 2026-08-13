@@ -25,7 +25,6 @@ const buy = {
   qty: 2,
   order_status: "filled",
   reason_code: "buy_intuition",
-  confidence_raw: 25,
   memo: null,
   ts: "2026-08-12T01:00:00.000Z",
 };
@@ -38,7 +37,6 @@ withStorage({ records: [buy], sellRecords: [] }, () => {
   assert.equal(trade.quantity, 2);
   assert.equal(trade.price, 71900, "단가는 체결금액을 수량으로 나눈 값이다");
   assert.equal(trade.reason, "그냥 느낌이 좋아서", "reason_code 는 라벨로 바뀐다");
-  assert.equal(trade.confidence, 25);
   assert.equal(trade.memo, "");
 });
 
@@ -62,13 +60,6 @@ withStorage(
     assert.equal(trade.reason, "그냥 불안해서");
   },
 );
-
-// 확신도 슬라이더는 연속값이라 F3 계약의 4단계로 내린다.
-for (const [raw, expected] of [[0, 25], [37, 25], [38, 50], [62, 50], [63, 75], [87, 75], [88, 100], [100, 100]] as const) {
-  withStorage({ records: [{ ...buy, confidence_raw: raw }], sellRecords: [] }, () => {
-    assert.equal(readPrototypeTrades()[0].confidence, expected, `confidence_raw=${raw}`);
-  });
-}
 
 // 깨진 저장값·종목코드에도 화면이 죽지 않아야 한다.
 withStorage(undefined, () => assert.deepEqual(readPrototypeTrades(), []));

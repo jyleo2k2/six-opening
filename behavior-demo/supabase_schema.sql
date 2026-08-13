@@ -86,7 +86,6 @@ create table if not exists session_summary (
   taps_total        integer not null default 0,
 
   -- 파생 지표
-  confidence_index  real,                          -- 확신도: 빠른 판단 + 얕은 탐색
   exploration_index real,                          -- 탐색도: 느린 판단 + 깊은 읽기
   behavior_type     text,                          -- 즉단형 | 탐색형 | 신중형 | 산만형
   decision_style    text,                          -- 이름형 | 정보형 | 혼합형
@@ -115,6 +114,9 @@ alter table session_summary add column if not exists avg_sections_before_buy rea
 alter table session_summary add column if not exists info_use_rate     real;
 alter table session_summary add column if not exists section_share     jsonb;
 alter table session_summary add column if not exists decision_style    text;
+
+-- 확신도(confidence_index)는 더 이상 저장하지 않는다. 옛 스키마에 남아 있으면 지운다.
+alter table session_summary drop column if exists confidence_index;
 
 -- 3) RLS — 데모는 익명 insert 허용 (실서비스에선 auth.uid() 기준으로 조이기)
 alter table behavior_events  enable row level security;

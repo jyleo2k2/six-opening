@@ -176,12 +176,6 @@ export function computeBehaviorProfile(input: BehaviorProfileInput): BehaviorPro
     if (!buy.reason) continue;
     reasonDistribution[buy.reason] = (reasonDistribution[buy.reason] ?? 0) + 1;
   }
-  const confidences = input.buys
-    .map((buy) => buy.confidence)
-    .filter((value): value is number => typeof value === "number" && Number.isFinite(value));
-  const average = confidences.length
-    ? Math.round(confidences.reduce((sum, value) => sum + value, 0) / confidences.length)
-    : 0;
   const judgedSells = input.sells.filter((sell) => sell.planMatch !== null);
   const matched = judgedSells.filter((sell) => sell.planMatch === true).length;
   const actionAlignment = judgedSells.length ? Math.round((matched / judgedSells.length) * 100) / 100 : 0;
@@ -199,7 +193,7 @@ export function computeBehaviorProfile(input: BehaviorProfileInput): BehaviorPro
     gradedTradeCount: graded,
     pendingTradeCount: pending,
     reasonDistribution,
-    confidencePattern: { average, actionAlignment },
+    actionAlignment,
     observationState: ready ? "ready" : "initial",
   };
 }
@@ -247,7 +241,6 @@ export function parsePrototypeProfileInput(
       price: amount / quantity,
       quantity,
       reason: str(record.reason_code) || null,
-      confidence: Number.isFinite(Number(record.confidence_raw)) ? Number(record.confidence_raw) : null,
       tradedAt: str(record.ts),
     });
   }
@@ -298,7 +291,6 @@ export function profileEntriesFromTrades(
         price: trade.price,
         quantity: trade.quantity,
         reason: trade.reason,
-        confidence: trade.confidence ?? null,
         tradedAt: trade.tradedAt,
       });
     } else {

@@ -38,7 +38,7 @@ F9는 가족의 기록을 세 부분으로 보여 준다.
 - F2 탐색 이벤트: 뉴스·기업정보·차트 탭 진입과 상세 체류시간
 - F2 포트폴리오 스냅샷: 보유 종목의 섹터, 현금비중, 평가손익
 - 체결 후 5거래일 종가: 정확력 적중 판정용 시세 (`app/api/quote` 경유 캔들)
-- F3 질문식 기록: 매수·매도 근거, 확신도, 예상 보유기간
+- F3 질문식 기록: 매수·매도 근거, 예상 보유기간
 
 ### 3.2 금지 입력
 
@@ -124,10 +124,8 @@ type BehaviorProfileSnapshot = {
   /** 5거래일 미경과 등으로 판정을 보류한 거래 수 */
   pendingTradeCount: number;
   reasonDistribution: Record<string, number>;
-  confidencePattern: {
-    average: number;
-    actionAlignment: number;
-  };
+  /** 계획대로 판 매도의 비율 0~1 */
+  actionAlignment: number;
   observationState: "initial" | "ready";
 };
 ```
@@ -157,7 +155,7 @@ type BehaviorProfileSnapshot = {
 - 능력치 5개 오각형 레이더(10점 만점)와 시즌·기간 표시
 - 시즌 결과: 캐릭터 + 정확 등급 (예: 🎯 저격수 ★★☆)
 - 판정 근거 한 줄: "근거 7 > 직관 3 → 근거형 · 집중 6 > 분산 4 → 집중형"
-- 근거 태깅 분포와 확신도 패턴
+- 근거 태깅 분포와 계획–행동 일치 비율
 - Luna가 만든 관찰 서술 2~3문장
 - "정답은 없어요!" 캡션
 - 정확력이 판정 중이면 오각형의 정확력 꼭짓점을 점선으로 비우고 별 자리에 "판정 중" 배지를 단다

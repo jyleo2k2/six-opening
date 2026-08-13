@@ -30,7 +30,6 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     // 크래프톤 KST 2026-08-03(월) 종가 235,000원
     price: 235000,
     reason: "내가 아는 회사라서",
-    confidence: 75,
     memo: "배그 잘 아니까 자신 있었어!",
     tradedAt: "2026-08-03T01:20:00.000Z",
   },
@@ -43,7 +42,6 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     // HMM KST 2026-08-03(월) 종가 20,750원
     price: 20750,
     reason: "뉴스에서 봤어",
-    confidence: 50,
     memo: "운임이 오르고 있다는 기사를 봤어.",
     tradedAt: "2026-08-03T04:10:00.000Z",
   },
@@ -56,7 +54,6 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     // 하이브 KST 2026-08-04(화) 종가 181,000원
     price: 181000,
     reason: "뉴스에서 봤어",
-    confidence: 50,
     memo: "새 앨범 소식 보고 골랐어.",
     tradedAt: "2026-08-04T01:05:00.000Z",
   },
@@ -69,7 +66,6 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     // 삼성전자 KST 2026-08-04(화) 종가 240,000원
     price: 240000,
     reason: "이 회사(제품)를 잘 알아",
-    confidence: 75,
     memo: "갤럭시를 오래 써서 사업을 이해하기 쉬웠어.",
     tradedAt: "2026-08-04T01:12:00.000Z",
   },
@@ -82,7 +78,6 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     // 크래프톤 KST 2026-08-05(수) 종가 229,000원
     price: 229000,
     reason: "그래프가 좋아 보여서",
-    confidence: 75,
     memo: "떨어졌길래 하나 더 담았어.",
     tradedAt: "2026-08-05T02:00:00.000Z",
   },
@@ -95,7 +90,6 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     // 삼성전자 KST 2026-08-05(수) 종가 246,000원
     price: 246000,
     reason: "그냥 느낌이 좋아서",
-    confidence: 25,
     memo: "다들 사길래 나도!",
     tradedAt: "2026-08-05T05:30:00.000Z",
   },
@@ -120,7 +114,6 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     // HMM KST 2026-08-06(목) 종가 21,400원
     price: 21400,
     reason: "뉴스에서 봤어",
-    confidence: 50,
     memo: "해외 매출 기사를 봤는데 확신까지는 아니었어.",
     tradedAt: "2026-08-06T04:35:00.000Z",
   },

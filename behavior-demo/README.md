@@ -119,9 +119,8 @@ Tracker.events[]
 | `info_use_rate` | 전체 결정 중 정보를 한 번이라도 연 비율 |
 | `first_section` / `top_section` | 제일 먼저 여는 / 제일 오래 보는 정보 |
 | `decision_style` | 이름형(≥0.7) / 혼합형 / 정보형(≤0.3) — 매수 2건 이상일 때만 |
-| `confidence_index` | 0.45 × 판단속도 + 0.3 × (1 − 상세진입률) + 0.25 × (1 − 정보열람률) |
 | `exploration_index` | 0.35 × 읽기깊이 + 0.25 × 상세진입률 + 0.25 × 섹션열람 + 0.15 × (1 − 판단속도) |
-| `behavior_type` | 즉단형 / 탐색형 / 신중형 / 산만형 — 결정 3건 이상일 때만 |
+| `behavior_type` | 즉단형 / 탐색형 / 신중형 / 산만형 — 결정 3건 이상일 때만. 사분면을 가르는 확신도 계산값은 내부에만 두고 저장하지 않는다 |
 
 판단속도점수는 평균 스와이프 시간 300ms를 1.0, 2300ms를 0.0으로 두고 선형 환산.
 
@@ -170,8 +169,8 @@ Tracker.events[]
 | 데모만 | `name_only_buy_rate`, `informed_buy_rate`, `info_use_rate` | 매수 또는 전체 결정에서 정보 사용 비율을 계산하는 세션 집계다. F9 축에는 비율 컷오프가 없다. |
 | 데모만 | `avg_sections_before_buy`, `first_section`, `top_section`과 섹션별 열람 통계 | 평균·선호 순서·체류시간 집계다. F9의 `viewedTabs` 단일 값과 같은 출력 계약이 아니다. |
 | 데모만 | `decision_style`의 혼합형과 0.7/0.3 컷오프 | F9 판단 근거 축은 직관형/근거형의 1/2개 컷오프만 사용한다. |
-| 데모만 | `confidence_index`, `exploration_index` | 속도·상세 진입·스크롤 깊이·정보 열람을 가중 합산한 데모 지표다. |
+| 데모만 | `exploration_index` | 속도·상세 진입·스크롤 깊이·정보 열람을 가중 합산한 데모 지표다. |
 | 데모만 | `behavior_type`의 즉단형·탐색형·신중형·산만형 | 확신도·탐색도 기준 4유형이다. F9 사분면과 축이 다르다. |
 | F9만 | `axes.tradedCompanies`와 집중러/분산러 | 시즌 거래 기업 수 3/4개 컷오프다. 데모 요약에는 거래 기업 수 축이 없다. |
 | F9만 | 직관형 집중러·직관형 분산러·근거형 집중러·근거형 분산러 | 판단 근거와 포트폴리오 폭을 조합한 F9 전용 4유형이다. |
-| F9만 | `sampleSize`, `reasonDistribution`, `confidencePattern`, `observationState` | F9 엔진 출력 계약이며 데모 세션 요약에는 같은 필드가 없다. |
+| F9만 | `sampleSize`, `reasonDistribution`, `actionAlignment`, `observationState` | F9 엔진 출력 계약이며 데모 세션 요약에는 같은 필드가 없다. |

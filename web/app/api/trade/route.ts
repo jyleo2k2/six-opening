@@ -36,10 +36,6 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "주문 정보가 올바르지 않습니다." }, { status: 400 });
   }
   const reason = typeof payload.reason === "string" ? payload.reason : null;
-  const confidence =
-    typeof payload.confidence === "number" && Number.isFinite(payload.confidence)
-      ? payload.confidence
-      : null;
 
   try {
     const result = await callRpc<TradeResult>("apply_trade", {
@@ -49,7 +45,6 @@ export async function POST(request: NextRequest) {
       p_price: price,
       p_quantity: quantity,
       p_reason: reason,
-      p_confidence: confidence,
     });
     console.info(
       JSON.stringify({ event: "trade_saved", userId, stockCode, side, transactionId: result.transaction_id }),
