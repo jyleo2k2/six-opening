@@ -81,7 +81,7 @@ const understood = advanceExplain(per, {
 });
 assert.equal(understood?.kind, "turn");
 assert.equal(understood?.kind === "turn" ? understood.turn.stage : null, "followup");
-assert.equal(understood?.text.includes(per.detail), true);
+assert.equal(understood?.text.includes(toPoliteKorean(per.detail)), true);
 const example = advanceExplain(per, {
   scriptId: "term:per",
   stage: "detail",
