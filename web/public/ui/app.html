@@ -1658,7 +1658,8 @@ class Component extends DCLogic {
         changeText: (x.change >= 0 ? '▲ ' : '▼ ') + Math.abs(x.change).toFixed(2) + '%',
         brand: B,
         // 카드 바깥 래퍼 — 카드는 손대지 않고 뒤쪽에만 후광 레이어를 깐다
-        slideStyle: 'position:relative;isolation:isolate;flex:none;scroll-snap-align:center;opacity:' + (active ? '1' : '0.72') + ';transition:opacity 300ms ease',
+        // scroll-snap-stop:always — 네이티브 플링이 스냅 지점을 건너뛰지 못하게 막는다.
+        slideStyle: 'position:relative;isolation:isolate;flex:none;scroll-snap-align:center;scroll-snap-stop:always;opacity:' + (active ? '1' : '0.72') + ';transition:opacity 300ms ease',
         // 주 후광 — 등락색 한 계열로만. 바깥으로 갈수록 같은 색의 옅은 톤이 되어 흰 배경에 사라진다.
         auraMain: 'position:absolute;z-index:-2;left:50%;top:50%;width:162%;height:152%;transform:translate(-50%,-50%);pointer-events:none;filter:blur(46px);opacity:' + (active ? '1' : '0') + ';transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(' + rgbOf(CL) + ',0.30) 0%,rgba(' + rgbOf(CL) + ',0.22) 20%,rgba(' + rgbOf(CM) + ',0.15) 38%,rgba(' + rgbOf(CM) + ',0.09) 52%,rgba(' + rgbOf(CF) + ',0.05) 66%,rgba(' + rgbOf(CF) + ',0.02) 78%,rgba(' + rgbOf(CF) + ',0) 88%)',
         // 좁은 반사광 — 네온관의 블룸. 가장자리에서 밝게 타고 여러 단계로 번져 흰 배경에 녹아든다.
@@ -1850,7 +1851,14 @@ class Component extends DCLogic {
       cardsScroll: (e) => {
         const el = e.currentTarget;
         const first = el.firstElementChild;
-        const step = first ? first.getBoundingClientRect().width + 14 : 280;
+        const second = first && first.nextElementSibling;
+        // 카드 간격은 슬라이드 폭 + gap 이다. 상수로 두면 gap 을 바꿀 때 어긋나므로
+        // 앞 두 슬라이드의 실제 거리를 잰다.
+        const step = first
+          ? (second
+            ? second.getBoundingClientRect().left - first.getBoundingClientRect().left
+            : first.getBoundingClientRect().width)
+          : 280;
         const i = Math.max(0, Math.min(list.length - 1, Math.round(el.scrollLeft / step)));
         if (i !== this.state.cardIndex) this.setState({ cardIndex: i });
       },
@@ -1876,8 +1884,11 @@ class Component extends DCLogic {
           window.removeEventListener('pointerup', up);
           window.removeEventListener('pointercancel', up);
           el.style.cursor = 'grab';
+          // 관성 상한. 감쇠가 0.93 이라 관성 이동거리는 vel/(1-0.93) = vel/0.07 이다.
+          // 카드 간격 343px 기준 48 이면 관성 2장이고, 마지막에 스냅이 카드 경계로 당기며
+          // 최대 0.5장이 더 붙어 손을 뗀 뒤 최대 2.5장에서 멈춘다. 더 줄이려면 이 값을 낮춘다.
           let vel = -v * 16;
-          if (vel > 90) vel = 90; if (vel < -90) vel = -90;
+          if (vel > 48) vel = 48; if (vel < -48) vel = -48;
           const restore = () => { el.style.scrollSnapType = 'x mandatory'; };
           const timer = setInterval(() => {
             if (Math.abs(vel) < 0.6) { clearInterval(timer); restore(); return; }
