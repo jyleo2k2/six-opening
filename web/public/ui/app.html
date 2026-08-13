@@ -23,6 +23,10 @@ body{margin:0;background:#E9E9F0;font-family:'Pretendard','Segoe UI','Malgun Got
 a{color:#F5327F;text-decoration:none}
 a:hover{color:#01185A}
 ::-webkit-scrollbar{width:0;height:0}
+/* 주문을 끝냈을 때 터지는 폭죽·풍선 */
+@keyframes kwFall{0%{transform:translate3d(0,-60px,0) rotate(0deg);opacity:0}10%{opacity:1}100%{transform:translate3d(var(--kwx,0),620px,0) rotate(760deg);opacity:0}}
+@keyframes kwRise{0%{transform:translate3d(0,120px,0) scale(0.85);opacity:0}16%{opacity:1}100%{transform:translate3d(var(--kwx,0),-560px,0) scale(1.05);opacity:0}}
+@keyframes kwPop{0%{transform:scale(0.5);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1);opacity:1}}
 html.runtime body{background:#F6F7FA;overflow:hidden}
 html.runtime x-dc>div,html.runtime .sc-host>div{padding:0!important;display:flex!important;justify-content:center!important;align-items:center!important;flex-wrap:nowrap!important;height:100dvh!important}
 html.runtime x-dc>div>div:first-child,html.runtime .sc-host>div>div:first-child{transform:scale(var(--runtime-scale,.9));transform-origin:center center}
@@ -78,7 +82,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ holdCountText }}</div>
 </div>
 </div>
-<div onClick="{{ goPortfolio }}" style="margin-top:14px;text-align:center;border-radius:16px;padding:14px;font-size:15.5px;font-weight:800;color:#01185A;cursor:pointer;background:radial-gradient(ellipse 66% 56% at 50% -6%,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 9px 15px -5px rgba(35,25,80,0.2),0 18px 26px -12px rgba(35,25,80,0.13),inset 0 -12px 18px -9px rgba(255,255,255,0.9),inset 0 2px 3px rgba(255,255,255,1)">내 계좌 보기</div>
+<div onClick="{{ goPortfolio }}" style="margin-top:14px;text-align:center;border-radius:16px;padding:14px;font-size:15.5px;font-weight:800;color:#01185A;cursor:pointer;background:#F1F2F8">내 계좌 보기</div>
 </div>
 
 <div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
@@ -86,7 +90,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <span style="font-size:14px;font-weight:600;color:#01185A">시즌 진행</span>
 <span style="font-size:13.5px;font-weight:600;color:#8E93A8;font-variant-numeric:tabular-nums;white-space:nowrap"><b style="color:#F5327F">3주차</b> / 4주</span>
 </div>
-<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px;box-shadow:inset 0 0 0 1px #E4E6F1"><div style="width:75%;height:100%;border-radius:999px;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 60%,#EE4A8E 100%)"></div></div>
+<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px;box-shadow:inset 0 0 0 1px #E4E6F1"><div style="width:75%;height:100%;border-radius:999px;background:#F5327F"></div></div>
 </div>
 
 <sc-if value="{{ isParentAcct }}" hint-placeholder-val="{{ false }}">
@@ -379,10 +383,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ buyBack }}" style="{{ backBtnStyle }}">{{ buyBackGlyph }}</div>
 <div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">사기(매수)</div>
-<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ buyStepNo }}</span> / 4</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ buyStepNo }}</span> / 3</div>
 </div>
 <div style="flex:none;display:flex;gap:5px;padding:0 20px 12px">
-<div style="{{ prog1 }}"></div><div style="{{ prog2 }}"></div><div style="{{ prog3 }}"></div><div style="{{ prog4 }}"></div>
+<div style="{{ prog1 }}"></div><div style="{{ prog2 }}"></div><div style="{{ prog3 }}"></div>
 </div>
 
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 0;display:flex;flex-direction:column;gap:12px">
@@ -420,7 +424,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <sc-if value="{{ showPad }}" hint-placeholder-val="{{ false }}">
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
 <sc-for list="{{ padKeys }}" as="k" hint-placeholder-count="12">
-<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -3px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)">{{ k.label }}</div>
+<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#F4F4FA;box-shadow:inset 0 0 0 1px #E4E6F1">{{ k.label }}</div>
 </sc-for>
 </div>
 </sc-if>
@@ -477,17 +481,8 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </sc-for>
 </div>
-</div>
-</sc-if>
 
-<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
-<div id="tut-buy3" style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:flex-start;gap:10px">
-<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)">
-<div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5">언제까지 가질 생각이야?</div>
-</div>
-</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">언제까지 가질 생각이야?</div>
 <div style="display:flex;flex-direction:column;gap:9px">
 <sc-for list="{{ planBtns }}" as="p" hint-placeholder-count="4">
 <div onClick="{{ p.pick }}" style="{{ p.style }}"><span style="font-size:19px">{{ p.emoji }}</span><span style="font-size:15.5px;font-weight:600;color:#01185A">{{ p.label }}</span></div>
@@ -495,8 +490,8 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <sc-if value="{{ showTarget }}" hint-placeholder-val="{{ false }}">
-<div style="background:#FFFFFF;border-radius:24px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="font-size:15px;font-weight:800;color:#01185A">목표 가격을 정해볼까?</div>
+<div style="background:#FFFFFF;border-radius:20px;padding:16px 18px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="font-size:15px;font-weight:700;color:#01185A">목표 가격을 정해볼까?</div>
 <div style="display:flex;gap:8px;margin-top:12px">
 <div onClick="{{ tgt5 }}" style="{{ tgtChip5 }}">+5%</div>
 <div onClick="{{ tgt10 }}" style="{{ tgtChip10 }}">+10%</div>
@@ -505,31 +500,59 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:14px;font-weight:600;color:#5C6280;margin-top:13px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ targetHint }}</div>
 </div>
 </sc-if>
-</div>
-</sc-if>
 
-<sc-if value="{{ isBuy4 }}" hint-placeholder-val="{{ false }}">
-<div id="tut-buy4" style="display:flex;flex-direction:column;gap:12px">
-<div style="background:#FDEFF5;border-radius:28px;padding:18px 20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)">
-<div style="font-size:13px;font-weight:700;color:#D5327A">내가 남긴 답</div>
-<div style="font-size:20px;font-weight:800;color:#01185A;line-height:1.55;margin-top:9px;text-wrap:pretty">{{ answerSentence }}</div>
-</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">하고 싶은 말 남겨둘래? <span style="font-size:13px;font-weight:500;color:#A9AEC4">(안 써도 괜찮아)</span></div>
+<input value="{{ buyMemo }}" onInput="{{ buyMemoInput }}" maxlength="50" placeholder="예: 월드투어 시작한대" style="width:100%;box-sizing:border-box;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="text-align:right;font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums;margin-top:-4px">{{ buyMemoCount }} / 50</div>
 
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>회사</span><span style="font-weight:800;color:#01185A">{{ stockName }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>사는 방법</span><span style="font-weight:800;color:#01185A;white-space:nowrap">{{ orderTypeText }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>살 수 있는 양</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ qtyText }}</span></div>
+<div style="background:#FFFFFF;border-radius:20px;padding:15px 17px;margin-top:2px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ qtyText }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>사는 방법</span><span style="font-weight:700;color:#01185A;white-space:nowrap">{{ orderTypeText }}</span></div>
 <div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:800;color:#01185A">주문 금액</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#01185A">주문 금액</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
+<div id="tut-buy3" style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none">
+<sc-for list="{{ balloons }}" as="b" hint-placeholder-count="5">
+<div style="{{ b.style }}">{{ b.emoji }}</div>
+</sc-for>
+<sc-for list="{{ confetti }}" as="c" hint-placeholder-count="14">
+<div style="{{ c.style }}"></div>
+</sc-for>
+</div>
+
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;width:100%">
+<img src="assets/mascot-bear.png" width="132" alt="키웅이" style="display:block;animation:kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.18))">
+<div style="font-size:14px;font-weight:700;color:#F5327F;letter-spacing:0.08em;margin-top:14px">{{ doneKicker }}</div>
+<div style="font-size:26px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;text-wrap:pretty">{{ doneHeadline }}</div>
+<div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ donePraise }}</div>
+
+<div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:22px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ doneStockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneQty }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>주문 금액</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneAmount }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>남은 지갑</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
+</div>
 </div>
 </div>
 </sc-if>
 
 </div>
 
+<sc-if value="{{ buyInProgress }}" hint-placeholder-val="{{ true }}">
 <div style="flex:none;padding:8px 16px 10px">
 <div id="tut-next" onClick="{{ buyNext }}" style="{{ buyCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ buyCtaLabel }}</span></div>
 </div>
+</sc-if>
+<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
+<div onClick="{{ goHome }}" style="{{ subCtaStyle }}">홈으로</div>
+<div id="tut-to-account" onClick="{{ goPortfolio }}" style="{{ mainCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
+</div>
+</sc-if>
 </div>
 </sc-if>
 
@@ -578,7 +601,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <sc-if value="{{ showSellPad }}" hint-placeholder-val="{{ false }}">
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
 <sc-for list="{{ sellPadKeys }}" as="k" hint-placeholder-count="12">
-<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -3px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)">{{ k.label }}</div>
+<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#F4F4FA;box-shadow:inset 0 0 0 1px #E4E6F1">{{ k.label }}</div>
 </sc-for>
 </div>
 <div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:10px;white-space:nowrap">가진 만큼까지만 팔 수 있어 (최대 {{ holdQtyText }})</div>
@@ -719,7 +742,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </div>
 <div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
-<div onClick="{{ goHome }}" style="flex:1;text-align:center;border-radius:999px;padding:17px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 9px 15px -5px rgba(35,25,80,0.2),inset 0 2px 3px rgba(255,255,255,1)">홈으로</div>
+<div onClick="{{ goHome }}" style="flex:1;text-align:center;border-radius:999px;padding:17px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#EFEFF5">홈으로</div>
 <div id="tut-to-account" onClick="{{ goPortfolio }}" style="flex:1.3;position:relative;border-radius:999px;padding:17px;text-align:center;font-size:17px;font-weight:800;color:#fff;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0) 92%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 14px 22px -9px rgba(214,54,124,0.4),inset 0 -20px 28px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
 </div>
 </div>
@@ -928,7 +951,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:12px;font-weight:500;color:#A9AEC4;line-height:1.65;text-align:center;padding:2px 6px 4px;text-wrap:pretty">누가 더 좋다는 뜻은 아니에요. 서로 왜 그렇게 했는지 이야기해 보세요.</div>
 </div>
 <div style="flex:none;display:flex;justify-content:center;padding:6px 16px 18px">
-<div onClick="{{ closeFam }}" style="width:230px;text-align:center;font-size:14px;font-weight:800;color:#fff;border-radius:18px;padding:13px 0;cursor:pointer;background:linear-gradient(180deg,#FF7FB8 0%,#D70082 100%);box-shadow:inset 0 2px 1px rgba(255,255,255,0.5),0 4px 0 #BF1257,0 10px 18px rgba(214,54,124,0.35)">성향 화면으로 돌아가기</div>
+<div onClick="{{ closeFam }}" style="width:230px;text-align:center;font-size:14px;font-weight:800;color:#fff;border-radius:18px;padding:13px 0;cursor:pointer;background:#D70082">성향 화면으로 돌아가기</div>
 </div>
 </sc-if>
 
@@ -990,7 +1013,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </div>
 <div style="flex:none;display:flex;justify-content:center;padding:0 16px 18px">
-<div onClick="{{ closeCards }}" style="width:230px;text-align:center;font-size:14px;font-weight:800;color:#fff;border-radius:18px;padding:13px 0;cursor:pointer;background:linear-gradient(180deg,#FF7FB8 0%,#D70082 100%);box-shadow:inset 0 2px 1px rgba(255,255,255,0.5),0 4px 0 #BF1257,0 10px 18px rgba(214,54,124,0.35)">성향 화면으로 돌아가기</div>
+<div onClick="{{ closeCards }}" style="width:230px;text-align:center;font-size:14px;font-weight:800;color:#fff;border-radius:18px;padding:13px 0;cursor:pointer;background:#D70082">성향 화면으로 돌아가기</div>
 </div>
 </sc-if>
 
@@ -1154,7 +1177,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <sc-if value="{{ c.editing }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
 <input value="{{ c.editDraft }}" onChange="{{ c.onEditDraft }}" style="flex:1;min-width:0;border:none;outline:none;background:#F2F3FA;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;color:#001E5A;font-family:inherit">
-<div onClick="{{ c.saveEdit }}" style="flex:none;font-size:11.5px;font-weight:800;color:#fff;padding:6px 11px;border-radius:999px;background:linear-gradient(180deg,#0A3272 0%,#001E5A 100%);cursor:pointer;white-space:nowrap">저장</div>
+<div onClick="{{ c.saveEdit }}" style="flex:none;font-size:11.5px;font-weight:800;color:#fff;padding:6px 11px;border-radius:999px;background:#001E5A;cursor:pointer;white-space:nowrap">저장</div>
 <div onClick="{{ c.cancelEdit }}" style="flex:none;font-size:11.5px;font-weight:700;color:#A9AEC4;padding:6px 9px;border-radius:999px;background:#F2F3FA;cursor:pointer;white-space:nowrap">취소</div>
 </div>
 </sc-if>
@@ -1299,7 +1322,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="width:330px;display:flex;flex-direction:column;gap:14px">
 <div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
 <div style="font-size:17px;font-weight:800;color:#01185A">연결된 프로토타입 · 1차</div>
-<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.7;margin-top:9px;text-wrap:pretty">홈 · 종목 탐색 · 종목 상세 · 차트/뉴스 상세 · 매수 4단계 · 매도 5단계 · 계좌 · 아카이브 2탭 · 랭킹이 전부 눌러서 진행됩니다. 사고팔면 지갑과 보유 종목이 실제로 바뀌고, 아카이브 수치도 그 기록에서 계산됩니다. 상태는 브라우저에 저장돼 새로고침해도 남습니다.</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.7;margin-top:9px;text-wrap:pretty">홈 · 종목 탐색 · 종목 상세 · 차트/뉴스 상세 · 매수 3단계 · 매도 5단계 · 계좌 · 아카이브 2탭 · 랭킹이 전부 눌러서 진행됩니다. 사고팔면 지갑과 보유 종목이 실제로 바뀌고, 아카이브 수치도 그 기록에서 계산됩니다. 상태는 브라우저에 저장돼 새로고침해도 남습니다.</div>
 <div style="margin-top:16px;padding-top:15px;border-top:1px solid #EFEFF5">
 <div style="font-size:13px;font-weight:700;color:#01185A">시연용 · 학교 시간 강제</div>
 <div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.6;margin-top:6px">실제 시각과 무관하게 잠금 상태를 보여줍니다. 자녀 계정에서만 효과가 있습니다.</div>
@@ -1543,13 +1566,15 @@ function rkRows(tab, upC, downC){
 const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
 const glass = 'background:#FFFFFF;box-shadow:0 2px 10px rgba(30,25,60,0.05)';
 const CTA_ON = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%),radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)";
-const CTA_OFF = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:linear-gradient(180deg,#D3D5E2 0%,#C3C6D6 60%,#B7BACC 100%);box-shadow:0 8px 14px -6px rgba(35,25,80,0.18),inset 0 2px 3px rgba(255,255,255,0.6)";
+const CTA_OFF = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:#C6C9D8";
+// 주된 버튼 옆에 서는 보조 버튼 (홈으로 같은 것)
+const SUB_CTA = "flex:1;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;cursor:pointer;background:#EFEFF5";
 
 class Component extends DCLogic {
   state = {
     screen: 'home', account: 'child',
     acc: { child:{name:'민지', cash:SEED, holdings:[], pending:[]}, parent:{name:'엄마', cash:SEED, holdings:[], pending:[]} },
-    sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0,
+    sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0, orderDone: null,
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
     sellStep: 1, sellDraft: { qty:0, reason:null, change:null, memo:'', memoSaved:false }, doneKind: 'buy', sellPick: 'all',
@@ -1602,7 +1627,7 @@ class Component extends DCLogic {
         const canOpenBuyReason = sameBuy && this.state.draft.amount > 0;
         const hasBuyPlan = !!this.state.draft.plan && (this.state.draft.plan !== 'plan_target' || this.state.draft.targetPct !== null);
         const canOpenBuyConfirmation = canOpenBuyReason && !!this.state.draft.reason && hasBuyPlan;
-        const buyStep = action.orderStep === 'confirmation' && canOpenBuyConfirmation ? 4 : (action.orderStep === 'reason' && canOpenBuyReason ? 2 : 1);
+        const buyStep = (action.orderStep === 'confirmation' && canOpenBuyConfirmation) || (action.orderStep === 'reason' && canOpenBuyReason) ? 2 : 1;
         this.set({ code:stock.code, screen:'buy', buyStep:buyStep, draft:sameBuy ? this.state.draft : this.blankDraft(), showPad:false, doneKind:'buy' });
       }
     }
@@ -1905,7 +1930,7 @@ class Component extends DCLogic {
         labelStyle: 'position:absolute;left:' + lx.toFixed(1) + '%;top:' + ly.toFixed(1) + '%;transform:translate(-50%,-50%);white-space:nowrap;cursor:pointer;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;' + (sel
           ? 'color:#fff;background:' + mInk + ';box-shadow:0 3px 8px ' + rgba(mInk, 0.35)
           : 'color:' + mInk + ';background:rgba(255,255,255,0.85);box-shadow:0 1px 3px ' + rgba(mInk, 0.18)),
-        barStyle: 'width:' + score + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,' + m.c + ' 0%,' + m.c + 'CC 100%)'
+        barStyle: 'width:' + score + '%;height:100%;border-radius:999px;background:' + m.c + ''
       };
     });
     const radarGrid = [0.25, 0.5, 0.75, 1].map(k => ({
@@ -2003,7 +2028,7 @@ class Component extends DCLogic {
         scoreStyle: 'font-size:18px;font-weight:900;color:' + sInk + ';font-variant-numeric:tabular-nums',
         trackStyle: 'height:9px;border-radius:999px;background:' + rgba(sInk, 0.1) + ';box-shadow:inset 0 1px 2px ' + rgba(sInk, 0.2) + ';overflow:hidden;margin-top:8px',
         noteStyle: 'font-size:13px;font-weight:500;color:' + rgba(sInk, 0.82) + ';line-height:1.6;margin-top:7px;text-wrap:pretty;white-space:pre-line',
-        barStyle: 'width:' + sc + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,' + TMETA[k].c + ' 0%,' + TMETA[k].c + 'C4 100%)'
+        barStyle: 'width:' + sc + '%;height:100%;border-radius:999px;background:' + TMETA[k].c + ''
       }))
     };
 
@@ -2071,7 +2096,7 @@ class Component extends DCLogic {
     const pnl = stockValue - cost;
     const pnlPct = cost > 0 ? pnl / cost * 100 : 0, heroPos = pnl >= 0;
 
-    const avat = (m, size) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:999px;background:url(' + m.face + ') center/cover no-repeat,linear-gradient(180deg,#FFFFFF 0%,#F1F2FA 100%);box-shadow:0 4px 9px -3px rgba(35,25,80,0.22),0 0 0 2px ' + m.col + '66';
+    const avat = (m, size) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:999px;background:url(' + m.face + ') center/cover no-repeat,#FFFFFF;box-shadow:0 4px 9px -3px rgba(35,25,80,0.22),0 0 0 2px ' + m.col + '66';
     const pctPill = v => 'flex:none;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;padding:4px 9px;border-radius:999px;color:' + (v >= 0 ? up : down) + ';background:' + (v >= 0 ? 'rgba(232,50,46,0.09)' : 'rgba(22,104,220,0.09)');
 
     const SECIMG = { auto:'auto', semi:'semi', food:'food', game:'game', enter:'enter', energy:'energy' };
@@ -2184,7 +2209,7 @@ class Component extends DCLogic {
         draft: cmtD[id] || '',
         onDraft: ev => { const v = ev.target.value; this.setState(st => ({ arcCmtDraft: Object.assign({}, st.arcCmtDraft || {}, { [id]: v }) })); },
         sendStyle: 'flex:none;font-size:12.5px;font-weight:800;padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;' + ((cmtD[id] || '').trim()
-          ? 'color:#fff;background:linear-gradient(180deg,#0A3272 0%,#001E5A 100%)'
+          ? 'color:#fff;background:#001E5A'
           : 'color:#B8BDD0;background:#F0F1F7'),
         send: () => {
           const v = (cmtD[id] || '').trim(); if (!v) return;
@@ -2252,8 +2277,8 @@ class Component extends DCLogic {
   }
   chip(on){
     return on
-      ? 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 62%,#EE4A8E 100%);box-shadow:0 8px 15px -5px rgba(214,54,124,0.45),inset 0 2px 3px rgba(255,255,255,0.45)'
-      : 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:600;color:#5C6280;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -4px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)';
+      ? 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:700;color:#fff;cursor:pointer;background:#F5327F'
+      : 'flex:1;text-align:center;padding:13px 0;border-radius:999px;font-size:14.5px;font-weight:600;color:#5C6280;cursor:pointer;background:#F1F2F8';
   }
   navItem(on){
     return 'flex:1;text-align:center;padding:9px 0 6px;cursor:pointer;color:' + (on ? '#F5327F' : '#A9AEC4');
@@ -2261,7 +2286,7 @@ class Component extends DCLogic {
   // 랭킹 화면의 이번 주 / 시즌 전체 토글
   rkSeg(on){
     return 'flex:1;display:flex;align-items:center;justify-content:center;border-radius:16px;font-size:13.5px;cursor:pointer;' + (on
-      ? 'font-weight:700;color:#01185A;background:linear-gradient(180deg,#FFFFFF 0%,#EFF1F9 100%);box-shadow:0 3px 8px rgba(0,0,0,0.22)'
+      ? 'font-weight:700;color:#01185A;background:#FFFFFF'
       : 'font-weight:600;color:rgba(255,255,255,0.7)');
   }
   // 종목 고르기 화면 네비 (밝은 배경)
@@ -2274,6 +2299,10 @@ class Component extends DCLogic {
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
     const rankTab = s.rankTab || 'week';
+    // 주문 직후 값 (3단계 축하 화면이 이걸로 문구를 만든다)
+    const od = s.orderDone || {};
+    const odQty = od.qty === undefined ? '' : ((Math.round(od.qty * 100) / 100) + '주');
+
     const arc = this.buildArchive();
     // 아카이브 성향 카드는 유형별 팔레트를 쓴다. arcInk 는 그 팔레트의 가장 진한 색.
     const arcPal = arc.pal, arcInk = arc.ink;
@@ -2299,8 +2328,7 @@ class Component extends DCLogic {
     const canBuy1 = amount > 0 && !overCash && !tooSmall;
 
     const nextOk = s.buyStep === 1 ? canBuy1
-      : s.buyStep === 2 ? !!s.draft.reason
-      : s.buyStep === 3 ? (!!s.draft.plan && (s.draft.plan !== 'plan_target' || s.draft.targetPct !== null))
+      : s.buyStep === 2 ? (!!s.draft.reason && !!s.draft.plan && (s.draft.plan !== 'plan_target' || s.draft.targetPct !== null))
       : true;
 
     const sentence = [reason ? reason.short : '', plan ? plan.short : ''].filter(Boolean).join(' · ');
@@ -2396,14 +2424,14 @@ class Component extends DCLogic {
         valueText: won(val),
         pnlText: (d >= 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '%',
         pnlStyle: 'font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:3px;white-space:nowrap;color:' + (d >= 0 ? up : down),
-        badgeStyle: 'width:40px;height:40px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:19px;background:linear-gradient(180deg,#FFFFFF 0%,#F2F3FA 100%);box-shadow:0 5px 10px -3px rgba(35,25,80,0.2),inset 0 1.5px 1px rgba(255,255,255,1),0 0 0 1.5px ' + sec.accent + '33',
+        badgeStyle: 'width:40px;height:40px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:19px;background:#F4F4FA;box-shadow:0 0 0 1.5px ' + sec.accent + '33',
         buyStyle: 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;' + (locked
           ? 'color:#B9BDCE;cursor:not-allowed;background:#F1F2F8'
-          : 'color:#01185A;cursor:pointer;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 6px 12px -4px rgba(35,25,80,0.18),inset 0 1.5px 1px rgba(255,255,255,1)'),
+          : 'color:#01185A;cursor:pointer;background:#F1F2F8'),
         sellStyle: 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;' + (locked
           ? 'color:#E4B7CD;cursor:not-allowed;background:#FAF2F6'
-          : 'color:#D5327A;cursor:pointer;background:linear-gradient(180deg,#FFFDFE 0%,#FDE9F2 100%);box-shadow:0 6px 12px -4px rgba(226,60,130,0.2),inset 0 1.5px 1px rgba(255,255,255,1)'),
-        buy: () => { if (locked) return; this.set({ code: x.code, screen: 'buy', buyStep: 1, draft: this.blankDraft(), showPad:false }); },
+          : 'color:#D5327A;cursor:pointer;background:#FDECF4'),
+        buy: () => { if (locked) return; this.set({ code: x.code, screen: 'buy', buyStep: 1, draft: this.blankDraft(), showPad:false, orderDone:null }); },
         sell: () => {
           if (locked) return;
           const order = [0,1,2,3,4];
@@ -2445,7 +2473,7 @@ class Component extends DCLogic {
     const reasonStats = REASONS.filter(r => cnt[r.code]).map(r => ({
       emoji: r.emoji, label: r.label, n: cnt[r.code],
       pct: Math.round(cnt[r.code] / myRecs.length * 100) + '%',
-      barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%)'
+      barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:#F5327F'
     })).sort((a, b) => b.n - a.n);
     const infoShare = myRecs.length ? myRecs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / myRecs.length : 0;
     const seasonShare = myRecs.length ? myRecs.filter(r => r.plan_code === 'plan_season').length / myRecs.length : 0;
@@ -2460,7 +2488,7 @@ class Component extends DCLogic {
       axis: a.axis, left: a.left, right: a.right,
       leftStyle: 'font-size:12.5px;font-weight:' + (a.child < 50 ? '600' : '500') + ';color:' + (a.child < 50 ? '#01185A' : '#B6BACB'),
       rightStyle: 'font-size:12.5px;font-weight:' + (a.child >= 50 ? '600' : '500') + ';color:' + (a.child >= 50 ? '#01185A' : '#B6BACB'),
-      barStyle: 'width:' + a.child + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,#0A2E7A 0%,#01185A 100%)'
+      barStyle: 'width:' + a.child + '%;height:100%;border-radius:999px;background:#01185A'
     }));
     const styleName = myRecs.length === 0 ? '아직 기록 전이야'
       : (AXES[4].child >= 60 ? '재빨리 개척자형!' : infoShare >= 0.6 ? '차근차근 탐험가형!' : '마음따라 모험가형!');
@@ -2468,10 +2496,10 @@ class Component extends DCLogic {
       ? '아직 산 게 없어. 한 번 사고 나면 이번 주 어떤 스타일이었는지 알려줄게.'
       : (m.name + '는 이번 주에 ' + myRecs.length + '번 샀어. ' + (infoShare >= 0.5 ? '뉴스나 그래프처럼 근거를 보고 고르는 편이었어.' : '마음이 끌리는 쪽으로 고르는 편이었어.'));
     const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8', emoji:'📦' };
-    const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:linear-gradient(180deg,#FFFFFF 0%,#F2F3FA 100%);box-shadow:0 6px 12px -3px rgba(35,25,80,0.2),inset 0 2px 1px rgba(255,255,255,1),0 0 0 1.5px ' + sec.accent + '33';
+    const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:#F4F4FA;box-shadow:0 0 0 1.5px ' + sec.accent + '33';
 
     const prog = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.buyStep ? '#F5327F' : '#DDDFEC');
-    const tabOn = 'font-size:13.5px;font-weight:700;padding:7px 15px;border-radius:999px;cursor:pointer;color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)';
+    const tabOn = 'font-size:13.5px;font-weight:700;padding:7px 15px;border-radius:999px;cursor:pointer;color:#fff;background:#F5327F;box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)';
     const tabOff = 'font-size:13.5px;font-weight:600;padding:7px 15px;border-radius:999px;cursor:pointer;color:#8E93A8';
 
     const padKeys = ['1','2','3','4','5','6','7','8','9','←','0','000'].map(k => ({
@@ -2490,8 +2518,8 @@ class Component extends DCLogic {
       isBuy: s.screen === 'buy', isDone: s.screen === 'done',
       isChart: s.screen === 'chart', isNews: s.screen === 'news',
       isPortfolio: s.screen === 'portfolio', isArchive: s.screen === 'archive',
-      isBuy1: s.buyStep === 1, isBuy2: s.buyStep === 2,
-      isBuy3: s.buyStep === 3, isBuy4: s.buyStep === 4,
+      isBuy1: s.buyStep === 1, isBuy2: s.buyStep === 2, isBuy3: s.buyStep === 3,
+      buyInProgress: s.buyStep < 3,
 
       meName: m.name, initial: m.name.charAt(0),
       totalAssetText: won(total), cashText: won(m.cash), navAccount: this.navItem(s.screen === 'portfolio'),
@@ -2507,8 +2535,8 @@ class Component extends DCLogic {
       sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순', emoji: '🔥' }].concat(u.sectors).map(x => ({
         name: x.name, emoji: x.emoji,
         style: 'display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:' + (x.id === s.sectorId ? '700' : '500') + ';white-space:nowrap;cursor:pointer;' + (x.id === s.sectorId
-          ? 'color:#fff;background:linear-gradient(180deg,#FF7FB4 0%,#F5327F 100%);box-shadow:0 6px 14px -4px rgba(245,50,127,0.5),0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)'
-          : 'color:#5C6280;background:linear-gradient(180deg,rgba(255,255,255,0.92) 0%,rgba(240,240,250,0.78) 100%);box-shadow:0 5px 12px -5px rgba(70,50,120,0.28),inset 0 1.5px 1px rgba(255,255,255,0.95),inset 0 0 0 1px rgba(120,110,180,0.10)'),
+          ? 'color:#fff;background:#F5327F'
+          : 'color:#5C6280;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)'),
         pick: () => this.set({ sectorId: x.id, cardIndex: 0 })
       })),
       // 등락률 순 보기에서는 칩이 이미 무슨 목록인지 말해주므로 제목을 비운다
@@ -2598,8 +2626,8 @@ class Component extends DCLogic {
       miniBadgeStyle: bigBadge(38, 13, 18),
 
       buyStepNo: s.buyStep,
-      prog1: prog(1), prog2: prog(2), prog3: prog(3), prog4: prog(4),
-      buyBackGlyph: s.buyStep === 1 ? '✕' : '‹',
+      prog1: prog(1), prog2: prog(2), prog3: prog(3),
+      buyBackGlyph: s.buyStep === 1 ? '✕' : (s.buyStep === 3 ? '✕' : '‹'),
       buyInputText: (byQty ? shares : amount).toLocaleString('ko-KR'),
       buyInputUnit: byQty ? '주' : '원',
       amountWon: won(amount), totalText: won(grand),
@@ -2636,7 +2664,7 @@ class Component extends DCLogic {
       reasonBtns: s.reasonOrder.map(i => REASONS[i]).map(r => ({
         emoji: r.emoji, label: r.label,
         style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:15px 9px;border-radius:24px;cursor:pointer;min-height:96px;justify-content:center;' + (s.draft.reason === r.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setDraft({ reason: r.code })
       })),
@@ -2644,7 +2672,7 @@ class Component extends DCLogic {
       planBtns: PLANS.map(p => ({
         emoji: p.emoji, label: p.label,
         style: 'display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;cursor:pointer;' + (s.draft.plan === p.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setDraft({ plan: p.code, targetPct: p.code === 'plan_target' ? s.draft.targetPct : null })
       })),
@@ -2654,12 +2682,44 @@ class Component extends DCLogic {
       targetHint: s.draft.targetPct && st ? ('지금 ' + st.price.toLocaleString('ko-KR') + '원 → 목표 ' + Math.round(st.price * (1 + s.draft.targetPct/100)).toLocaleString('ko-KR') + '원') : '몇 퍼센트 오르면 팔지 골라봐',
 
       answerSentence: sentence,
-      buyCtaLabel: s.buyStep === 4 ? '주문 넣기!' : '다음',
-      buyCtaStyle: (nextOk && !(locked && s.buyStep === 4)) ? CTA_ON : CTA_OFF,
+      buyMemo: s.draft.memo, buyMemoCount: s.draft.memo.length,
+      buyMemoInput: e => { const v = e.target.value.slice(0, 50); this.setDraft({ memo: v }); },
+      buyCtaLabel: s.buyStep === 2 ? '주문하기' : '다음',
+      buyCtaStyle: (nextOk && !(locked && s.buyStep === 2)) ? CTA_ON : CTA_OFF,
+      subCtaStyle: SUB_CTA, mainCtaStyle: 'flex:1.3;' + CTA_ON,
+
+      // ── 3단계 · 주문을 끝낸 축하 화면 ───────────────────────────────
+      doneKicker: od.limit ? '기다리는 주문에 넣었어' : '주문 완료!',
+      doneHeadline: od.name
+        ? (od.limit
+          ? (od.limit.toLocaleString('ko-KR') + '원이 되면\n' + od.name + ' ' + odQty + '를 살게요!')
+          : (od.name + ' ' + odQty + '를\n주문했어요!'))
+        : '주문했어요!',
+      donePraise: od.limit
+        ? '값이 목표에 닿을 때까지 키웅이가 지켜볼게.\n그동안 그 돈은 잠깐 맡아둘게!'
+        : '왜 샀는지까지 남긴 건 정말 잘한 거야.\n나중에 아카이브에서 오늘의 너를 다시 만나자!',
+      doneStockName: od.name || '',
+      doneQty: odQty,
+      doneAmount: won(od.amount || 0),
+      balloons: ['🎈','🎈','🎈','🎉','🎊'].map((e, i) => ({
+        emoji: e,
+        style: 'position:absolute;left:' + (8 + i * 21) + '%;bottom:-40px;font-size:' + (26 + (i % 3) * 7) + 'px;'
+          + '--kwx:' + (i % 2 ? '' : '-') + (10 + i * 6) + 'px;'
+          + 'animation:kwRise ' + (2.6 + i * 0.35) + 's ease-in ' + (i * 0.18) + 's forwards'
+      })),
+      confetti: Array.from({ length: 14 }, (_, i) => {
+        const col = ['#F5327F','#FFC53D','#4FC3F7','#7BE3A0','#9B8CFF','#FF8AD0'][i % 6];
+        return {
+          style: 'position:absolute;top:-20px;left:' + (4 + i * 6.8) + '%;width:' + (7 + (i % 3) * 3) + 'px;height:'
+            + (11 + (i % 4) * 3) + 'px;border-radius:2px;background:' + col + ';'
+            + '--kwx:' + (i % 2 ? '' : '-') + (14 + (i % 5) * 12) + 'px;'
+            + 'animation:kwFall ' + (2 + (i % 5) * 0.3) + 's linear ' + (i * 0.09) + 's forwards'
+        };
+      }),
       buyNext: () => {
         if (!nextOk) return;
-        if (locked && s.buyStep === 4) return;
-        if (s.buyStep < 4) { this.setState({ buyStep: s.buyStep + 1, showPad:false }); return; }
+        if (locked && s.buyStep === 2) return;
+        if (s.buyStep < 2) { this.setState({ buyStep: s.buyStep + 1, showPad:false }); return; }
         const isLimit = s.draft.orderType === 'limit';
         const nm = this.state.acc[this.state.account];
         const hold = nm.holdings.slice();
@@ -2685,15 +2745,20 @@ class Component extends DCLogic {
           reason_code: s.draft.reason,
           plan_code: s.draft.plan,
           plan_target_price: s.draft.targetPct ? Math.round(price * (1 + s.draft.targetPct/100)) : null,
-          memo: null, ts: new Date().toISOString()
+          memo: (s.draft.memo || '').trim() || null, ts: new Date().toISOString()
         };
         const acc2 = Object.assign({}, this.state.acc);
         acc2[this.state.account] = { name: nm.name, cash: nm.cash - grand, holdings: hold, pending: pend };
-        this.set({ acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, screen: 'done' });
+        // 축하 화면은 주문 직후 값으로 고정한다 (뒤에서 시세가 움직여도 문구가 바뀌지 않게)
+        this.set({
+          acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3,
+          orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null }
+        });
         if (!isLimit) this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
       },
       buyBack: () => {
-        if (s.buyStep === 4 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
+        if (s.buyStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
+        if (s.buyStep === 3) { this.set({ screen:'portfolio' }); return; }
         if (s.buyStep === 1) this.set({ screen:'detail' }); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
       },
 
@@ -2708,7 +2773,7 @@ class Component extends DCLogic {
       memoBtnLabel: (s.doneKind === 'sell' ? s.sellDraft.memoSaved : s.draft.memoSaved) ? '저장됐어 ✓' : '저장하기',
       memoBtnStyle: (s.doneKind === 'sell' ? s.sellDraft.memoSaved : s.draft.memoSaved)
         ? 'font-size:14px;font-weight:700;color:#8E93A8;padding:11px 18px;border-radius:999px;white-space:nowrap;background:#F1F2F8;box-shadow:inset 0 0 0 1px #E2E4EF'
-        : 'font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 62%,#EE4A8E 100%);box-shadow:0 8px 15px -5px rgba(214,54,124,0.45),inset 0 2px 3px rgba(255,255,255,0.45)',
+        : 'font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F5327F',
       saveMemo: () => {
         if (s.draft.memoSaved) return;
         const v = s.draft.memo.trim();
@@ -2828,7 +2893,7 @@ class Component extends DCLogic {
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
       compareAxes: AXES.map((a, i) => ({
         axis: a.axis, range: a.left + ' ↔ ' + a.right,
-        childBar: 'width:' + a.child + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%)',
+        childBar: 'width:' + a.child + '%;height:100%;border-radius:999px;background:#F5327F',
         parentBar: 'width:' + a.parent + '%;height:100%;border-radius:999px;background:#01185A'
       })),
       badgeCount: s.badges || 0,
@@ -2908,7 +2973,7 @@ class Component extends DCLogic {
       sellReasonBtns: s.sellReasonOrder ? s.sellReasonOrder.map(i => SELL_REASONS[i]).map(r => ({
         emoji: r.emoji, label: r.label,
         style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:15px 9px;border-radius:24px;cursor:pointer;min-height:96px;justify-content:center;' + (s.sellDraft.reason === r.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setSell({ reason: r.code })
       })) : [],
@@ -2919,7 +2984,7 @@ class Component extends DCLogic {
       changeBtns: CHANGES.map(c => ({
         emoji: c.emoji, label: c.label,
         style: 'display:flex;align-items:center;gap:12px;padding:15px 17px;border-radius:22px;cursor:pointer;' + (s.sellDraft.change === c.code
-          ? 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFAFC 44%,#FEF0F6 100%);box-shadow:0 10px 24px rgba(245,50,127,0.2),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 2px #F5327F'
+          ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setSell({ change: c.code })
       })),
@@ -2996,8 +3061,8 @@ class Component extends DCLogic {
       holdingCards: holdingCards,
       recordCount: s.records.length,
 
-      backBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:radial-gradient(ellipse 66% 56% at 50% -6%,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 9px 15px -5px rgba(35,25,80,0.2),inset 0 -12px 18px -9px rgba(255,255,255,0.9),inset 0 2px 3px rgba(255,255,255,1)',
-      stepPillStyle: 'min-width:58px;text-align:center;border-radius:999px;padding:8px 12px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#A9AEC4;background:linear-gradient(180deg,#FCFCFE 0%,#F5F6FB 36%,#ECEEF8 70%,#E4E6F2 100%);box-shadow:0 8px 13px -5px rgba(35,25,80,0.18),inset 0 1.5px 2px rgba(255,255,255,1)',
+      backBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
+      stepPillStyle: 'min-width:58px;text-align:center;border-radius:999px;padding:8px 12px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#A9AEC4;background:#F1F2F8',
 
       navStyle: 'flex:none;display:flex;padding-bottom:14px;background:linear-gradient(180deg,rgba(245,242,248,0) 0%,#F5F2F8 34%);box-shadow:0 -1px 0 rgba(1,24,90,0.06)',
       navHome: this.navItem(s.screen === 'home'),
@@ -3009,8 +3074,8 @@ class Component extends DCLogic {
       isParentAcct: s.account === 'parent',
       schoolLockOn: !!s.schoolLock,
       lockToggleStyle: s.schoolLock
-        ? 'width:52px;height:30px;border-radius:999px;flex:none;cursor:pointer;position:relative;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:inset 0 2px 4px rgba(150,20,80,0.25)'
-        : 'width:52px;height:30px;border-radius:999px;flex:none;cursor:pointer;position:relative;background:#DDDFEC;box-shadow:inset 0 2px 4px rgba(70,60,120,0.18)',
+        ? 'width:52px;height:30px;border-radius:999px;flex:none;cursor:pointer;position:relative;background:#F5327F'
+        : 'width:52px;height:30px;border-radius:999px;flex:none;cursor:pointer;position:relative;background:#DDDFEC',
       lockKnobStyle: 'position:absolute;top:3px;left:' + (s.schoolLock ? '25px' : '3px') + ';width:24px;height:24px;border-radius:999px;background:#fff;box-shadow:0 3px 6px rgba(35,25,80,0.28);transition:left .16s ease',
       toggleLock: () => this.set({ schoolLock: !s.schoolLock }),
       schoolStateText: this.isSchoolTime() ? '지금은 학교 시간' : '지금은 매매할 수 있는 시간',
@@ -3018,7 +3083,7 @@ class Component extends DCLogic {
       forceOn: () => this.set({ forceSchool:'on' }),
       forceOff: () => this.set({ forceSchool:'off' }),
       forceAutoStyle: devChip(s.forceSchool === 'auto'), forceOnStyle: devChip(s.forceSchool === 'on'), forceOffStyle: devChip(s.forceSchool === 'off'),
-      moreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1)',
+      moreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F1F2F8',
       ctaStyle: locked ? CTA_OFF : CTA_ON,
       openChart: () => this.logEvent('chart_detail_opened', 'chart'),
       openNews: () => this.logEvent('news_detail_opened', 'news'),
@@ -3033,7 +3098,7 @@ class Component extends DCLogic {
       newsBody: nd.body.map(t => ({ text: t })),
       newsPoints: nd.points.map((t, i) => ({
         text: t, n: i + 1,
-        numStyle: 'width:22px;height:22px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%);box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)'
+        numStyle: 'width:22px;height:22px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:#F5327F;box-shadow:0 4px 8px -2px rgba(214,54,124,0.4)'
       })),
 
       goHome: () => this.set({ screen:'home' }),
