@@ -3129,9 +3129,329 @@ function getArchiveManagementReply(message: string): ChatReply | null {
     ["아카이브 기록 관리 안내"],
     {
       suggestedQuestions: ["내 지난 시즌 기록 보여줘", "시즌 끝나면 기록은 어떻게 돼?"],
-      uiAction: { type: "open_screen", target: "archive" },
+      uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 기록 보기" },
     },
   );
+}
+
+function serviceHowToReply(
+  text: string,
+  label?: string,
+  target?: ChatUiAction["target"],
+  details: Omit<ChatUiAction, "type" | "target" | "label"> = {},
+  route: ChatRoute = "faq",
+): ChatReply {
+  return reply(route, route === "refusal" ? "safety" : "service_help", text, ["서비스 사용법 안내"], {
+    ...(label && target
+      ? { uiAction: { type: "open_screen" as const, target, label, ...details } }
+      : {}),
+  });
+}
+
+function getCuratedServiceHowToReply(message: string, context: ChatContext): ChatReply | null {
+  const stockDetails = context.stockId ? { stockId: context.stockId } : {};
+
+  if (message.includes("실수로매수한기록을archive에서지울")) return null;
+
+  if (includesAny(message, ["이거누르면바로사지", "매수버튼누르면끝"])) {
+    return serviceHowToReply(
+      "처음 매수 버튼은 주문 절차를 여는 버튼이에요. 이유와 금액을 확인한 뒤 마지막 ‘주문 넣기’를 눌러야 시장가 주문이 체결돼요.",
+      "주문 화면에서 확인하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
+    );
+  }
+
+  if (includesAny(message, ["한주만사도돼", "수량1만입력", "매수수량빨리입력", "증권사직원처럼주문화면에서수량계산"])) {
+    return serviceHowToReply(
+      "현재 주문 화면은 수량을 직접 적는 대신 주문 금액을 고르면 화면이 예상 수량을 계산해요. 계산된 수량과 예상 금액을 마지막에 다시 확인하면 돼요.",
+      "주문 금액 입력하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "quantity" },
+    );
+  }
+
+  if (includesAny(message, ["진짜돈이빠져", "내돈없어지는척", "가상돈바로빠지"])) {
+    return serviceHowToReply(
+      "실제 돈은 빠지지 않아요. 시장가 매수가 체결되면 내 가상 지갑에서 주문 금액이 줄고, 기다리는 주문은 취소할 때까지 그 금액을 맡아 둬요.",
+      message.includes("진짜돈") || message.includes("가상돈") ? "주문 화면 보기" : "가상 지갑 보기",
+      message.includes("진짜돈") || message.includes("가상돈") ? "order" : "home",
+      message.includes("진짜돈") || message.includes("가상돈")
+        ? { ...stockDetails, orderSide: "buy", orderStep: "confirmation" }
+        : {},
+    );
+  }
+
+  if (includesAny(message, ["예상금액이이숫자면눌러도돼", "주문전에예상금액과수량을확인하는순서", "주문수량이랑예상금액을틀리지않게계산하는순서", "예상금액이잔액을넘지않는지확인하는절차", "매수버튼누르기전에예상금액을다시계산"])) {
+    return serviceHowToReply(
+      "종목 이름과 매수·매도 구분을 먼저 보고, 가격과 예상 수량·금액을 확인해요. 예상 금액이 가상 지갑과 한도를 넘지 않는지 본 뒤 마지막 주문 내용은 직접 결정하면 돼요.",
+      "주문 내용 확인하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
+    );
+  }
+
+  if (message.includes("취소누르면아무일도안생겨")) {
+    return serviceHowToReply(
+      "마지막 확인 전에 뒤로 가면 주문은 체결되지 않아요. 기다리는 주문을 취소하면 맡아 둔 가상 금액이 돌아오지만, 이미 체결된 시장가 주문은 취소할 수 없어요.",
+      "기다리는 주문 보기",
+      "portfolio",
+    );
+  }
+
+  if (message.includes("주문취소하면12%도없어져")) {
+    return serviceHowToReply(
+      "새 주문을 취소해도 이미 생긴 -12% 손익과 지난 체결 기록은 없어지지 않아요. 지난 결과는 아카이브에 그대로 남아요.",
+      "지난 기록 보기",
+      "archive",
+      { archiveTab: "return" },
+    );
+  }
+
+  if (message.includes("주문을취소하면성향기록도수정")) {
+    return serviceHowToReply(
+      "주문 취소가 지난 성향 결과를 고쳐 쓰지는 않아요. 체결되지 않은 주문은 새 거래로 더하지 않고, 취소 행동은 도움 신호용 기록으로만 남을 수 있어요.",
+      "성향 기록 보기",
+      "archive",
+      { archiveTab: "report" },
+    );
+  }
+
+  if (message.includes("주문취소버튼계속누르면")) {
+    return serviceHowToReply(
+      "기다리는 주문은 한 번 취소되면 목록에서 사라져서 같은 주문이 다시 취소되지 않아요. 취소한 금액은 가상 지갑으로 돌아와요.",
+      "기다리는 주문 보기",
+      "portfolio",
+    );
+  }
+
+  if (message.includes("주문취소하면금액이원래대로")) {
+    return serviceHowToReply(
+      "기다리는 주문을 취소하면 맡아 둔 주문 금액이 가상 지갑으로 돌아와요. 이미 체결된 시장가 주문에는 이 취소가 적용되지 않아요.",
+      "기다리는 주문 보기",
+      "portfolio",
+    );
+  }
+
+  if (message.includes("근거태그는어디")) {
+    const hasStock = Boolean(context.stockId);
+    return serviceHowToReply(
+      "근거 태그는 아카이브가 아니라 매수 주문의 ‘왜 이 회사가 좋아 보였어?’ 단계에서 골라요. 뉴스·차트·회사 이해 같은 선택지 중 지금 이유에 가까운 것을 고르면 돼요.",
+      hasStock ? "주문의 이유 선택하기" : "종목을 골라 주문 시작하기",
+      hasStock ? "order" : "stock",
+      hasStock ? { ...stockDetails, orderSide: "buy", orderStep: "reason" } : {},
+    );
+  }
+
+  if (includesAny(message, ["매수한이유를기록하면나중에바꿀", "근거태그를잘못선택했을때수정", "실수로매수한기록을archive에서지울"])) {
+    return serviceHowToReply(
+      "현재 아카이브의 체결 기록과 그때 고른 이유는 나중에 수정하거나 지울 수 없어요. 실수한 거래도 당시 기록 그대로 남아요.",
+      "아카이브에서 기록 보기",
+      "archive",
+      { archiveTab: "season" },
+    );
+  }
+
+  if (message.includes("손실난종목을다시사려면")) {
+    return serviceHowToReply(
+      "그 종목을 다시 사려면 종목 상세에서 매수 버튼을 눌러 새 주문을 시작해요. 지난 손실은 없어지지 않고 새 주문과 따로 기록돼요.",
+      "이 종목 화면 보기",
+      "stock",
+      stockDetails,
+    );
+  }
+
+  if (message.includes("8500원이면7주는59500원")) {
+    return serviceHowToReply(
+      "맞아요. 8,500원에 7주를 곱하면 예상 금액은 59,500원이에요. 실제 주문 전에는 화면에 표시된 최종 금액을 다시 확인해요.",
+      "주문 화면에서 확인하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "quantity" },
+    );
+  }
+
+  if (message.includes("수량을11개로바꾸면")) {
+    if (context.unitPrice === undefined) {
+      return serviceHowToReply("현재 화면의 1주 가격이 없어 11주의 예상 금액을 계산할 수 없어요. 주문 화면에서 단가를 먼저 확인해요.");
+    }
+    return serviceHowToReply(
+      `현재 화면의 1주 가격 ${formatWon(context.unitPrice)}에 11주를 곱하면 예상 금액은 ${formatWon(context.unitPrice * 11)}이에요. 실제 주문 전에는 화면의 최종 금액을 다시 확인해요.`,
+      "11주 예상 금액 확인하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "quantity" },
+    );
+  }
+
+  if (message.includes("친구가알려준수량대로")) {
+    return serviceHowToReply(
+      "친구가 알려준 수량을 따라도 바로 체결되지는 않아요. 예상 금액과 이유를 본 뒤 마지막 주문 확인은 네가 직접 해야 해요.",
+      "주문 내용 직접 확인하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
+    );
+  }
+
+  if (message.includes("매수수량과투자비중")) {
+    return serviceHowToReply(
+      "매수 수량이 늘면 그 종목에 들어간 금액과 전체 자산에서 차지하는 비중도 커져요. 정확한 비중은 홈의 포트폴리오에서 현재 보유 금액과 함께 확인해요.",
+      "포트폴리오 보기",
+      "home",
+    );
+  }
+
+  if (message.includes("매수누르면또떨어지는거")) {
+    return serviceHowToReply(
+      "매수 뒤 가격 변화는 미리 알 수 없어요. 주문하려면 금액과 이유를 입력한 뒤 마지막 확인은 네가 직접 하면 돼요.",
+      "주문 화면에서 확인하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
+    );
+  }
+
+  if (message.includes("이거팔면수익률바로바뀌")) {
+    return serviceHowToReply(
+      "시장가 매도가 체결되면 보유 수량과 손익·수익률 표시가 새 거래를 반영해 바뀌어요. 확인 화면에서 매도 수량을 먼저 확인해요.",
+      "보유 종목 보기",
+      "portfolio",
+    );
+  }
+
+  if (message.includes("수수료") && includesAny(message, ["정확히얼마", "포함해서다시계산"])) {
+    return serviceHowToReply(
+      "현재 데모는 주문 전 정확한 수수료·세금 분리 계산을 지원하지 않아요. 화면에 없는 비용을 키웅이가 임의로 만들어 계산하지 않아요.",
+    );
+  }
+
+  if (message.includes("여기서바로주문안되고order화면")) {
+    return serviceHowToReply(
+      "종목 화면은 회사 정보와 가격을 살펴보는 곳이고, 주문 화면은 금액·이유·최종 내용을 확인하는 곳이라 나뉘어 있어요. 주문은 확인 단계를 거쳐야 해요.",
+      "주문 화면으로 이동",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "quantity" },
+    );
+  }
+
+  if (message.includes("매수매도버튼어디가더빨라")) {
+    return serviceHowToReply(
+      "더 빠른 버튼을 고르는 기능은 없어요. 새로 살 때는 매수, 가진 주식을 팔 때는 매도를 종목 상세에서 선택해요.",
+      "종목 화면 보기",
+      "stock",
+      stockDetails,
+    );
+  }
+
+  if (message.includes("이주문오리온2주가맞는지")) {
+    return serviceHowToReply(
+      "키웅이가 주문이 맞다고 대신 승인하지는 않아요. 확인 화면에서 회사가 오리온인지, 수량이 2주인지, 매수·매도 구분과 예상 금액이 네 의도와 같은지 직접 확인해요.",
+      "주문 내용 확인하기",
+      "order",
+      { ...stockDetails, orderStep: "confirmation" },
+    );
+  }
+
+  if (message.includes("수량을1개잘못누르면")) {
+    return serviceHowToReply(
+      "체결 전에는 뒤로 가서 주문 금액을 다시 입력할 수 있어요. 이미 체결된 시장가 주문은 되돌릴 수 없어요.",
+      "주문 금액 수정하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "quantity" },
+    );
+  }
+
+  if (message.includes("기사읽다가산건데거래이유")) {
+    const hasStock = Boolean(context.stockId);
+    return serviceHowToReply(
+      "매수 주문의 이유 선택 단계에서 ‘뉴스에서 봐서’를 고르면 돼요. 기사 제목 자체는 거래 완료 직후 한 줄 메모에 남길 수 있어요.",
+      hasStock ? "뉴스 이유 선택하기" : "종목을 골라 주문 시작하기",
+      hasStock ? "order" : "stock",
+      hasStock ? { ...stockDetails, orderSide: "buy", orderStep: "reason" } : {},
+    );
+  }
+
+  if (message.includes("차트에서뉴스나온날짜랑가격변화")) {
+    return serviceHowToReply(
+      "현재는 뉴스 날짜를 가격 차트 위에 겹쳐 보는 기능이 없어요. 종목 화면에서 차트와 검수된 뉴스를 각각 따로 볼 수 있어요.",
+      "대신 차트와 뉴스 보기",
+      "stock",
+      stockDetails,
+    );
+  }
+
+  if (message.includes("기사제목을아카이브에메모로추가")) {
+    return serviceHowToReply(
+      "현재는 아카이브에서 지난 기록에 메모를 새로 추가할 수 없어요. 한 줄 메모는 거래가 끝난 직후에만 남길 수 있어요.",
+    );
+  }
+
+  if (message.includes("매수가격과현재가격의차이를퍼센트")) {
+    return serviceHowToReply(
+      "수익률은 ‘현재 가격에서 매수 가격을 뺀 값’을 매수 가격으로 나눈 뒤 100을 곱해 계산해요. 내 보유 종목의 계산 결과는 포트폴리오에서 확인할 수 있어요.",
+      "보유 수익률 보기",
+      "portfolio",
+    );
+  }
+
+  if (message.includes("방산회사의무기종류를자세히")) {
+    return serviceHowToReply(
+      "이 서비스는 방산 회사가 하는 일과 산업 역할은 설명하지만 무기 종류를 자세한 목록으로 제공하지 않아요. 검수된 회사 설명은 종목 화면에서 볼 수 있어요.",
+      "검수된 회사 설명 보기",
+      "stock",
+      stockDetails,
+    );
+  }
+
+  if (message.includes("에너지섹터만모아서")) {
+    return serviceHowToReply(
+      "종목 탐색 화면에서 에너지 업종 칩을 누르면 에너지 회사를 모아 볼 수 있어요. 회사 카드를 누르면 검수된 설명이 열려요.",
+      "에너지 회사 모아 보기",
+      "stock",
+      { sectorId: "energy" },
+    );
+  }
+
+  if (message.includes("친구가보낸종목링크")) {
+    return serviceHowToReply(
+      "현재는 친구가 보낸 종목 링크로 회사 화면을 바로 여는 기능이 없어요. 종목 탐색 화면에서 회사 이름을 검색해 찾아볼 수 있어요.",
+      "대신 종목 검색하기",
+      "stock",
+    );
+  }
+
+  if (message.includes("성향그래프원자료")) {
+    return serviceHowToReply(
+      "현재는 성향 계산 원자료를 펼치거나 내려받는 기능이 없어요. 아카이브 성향 화면에서 현재 제공되는 요약만 확인할 수 있어요.",
+      "현재 성향 요약 보기",
+      "archive",
+      { archiveTab: "report" },
+    );
+  }
+
+  if (message.includes("남은한도안에서게임주수량을한번에최대")) {
+    return serviceHowToReply(
+      "한도까지의 최대 수량을 계산해 자동 입력하는 기능은 없어요. 주문 금액을 직접 고르면 화면이 잔액과 단일 종목 한도 초과 여부를 확인해요.",
+      undefined,
+      undefined,
+      {},
+      "refusal",
+    );
+  }
+
+  if (message.includes("유통주그냥정리하려면")) {
+    return serviceHowToReply(
+      "매도 버튼만 누르면 끝나지 않아요. 팔 수량과 이유를 고르고 마지막 주문 내용을 직접 확인해야 체결돼요.",
+      "매도 화면으로 이동",
+      "order",
+      { ...stockDetails, orderSide: "sell", orderStep: "quantity" },
+    );
+  }
+
+  if (message.includes("부모님이옆에서재촉할때도")) {
+    return serviceHowToReply(
+      "부모님이 옆에 있어도 주문 내용과 마지막 확인은 계정 사용자가 직접 해야 해요. 키웅이나 다른 사람이 대신 주문을 확정하지 않아요.",
+    );
+  }
+
+  return null;
 }
 
 function getPrivacyReply(message: string): ChatReply | null {
@@ -3170,6 +3490,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
 
   const privacyReply = getPrivacyReply(message);
   if (privacyReply) return privacyReply;
+
+  const curatedServiceHowToReply = getCuratedServiceHowToReply(message, context);
+  if (curatedServiceHowToReply) return curatedServiceHowToReply;
 
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);

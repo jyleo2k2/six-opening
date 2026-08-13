@@ -2,6 +2,23 @@ export const CHAT_SCREENS = ["home", "stock", "order", "archive"] as const;
 
 export type ChatScreen = (typeof CHAT_SCREENS)[number];
 
+export const CHAT_ACTION_TARGETS = [...CHAT_SCREENS, "portfolio"] as const;
+export type ChatActionTarget = (typeof CHAT_ACTION_TARGETS)[number];
+
+export const CHAT_ORDER_SIDES = ["buy", "sell"] as const;
+export type ChatOrderSide = (typeof CHAT_ORDER_SIDES)[number];
+
+export const CHAT_ORDER_STEPS = [
+  "quantity",
+  "reason",
+  "confirmation",
+  "memo",
+] as const;
+export type ChatOrderStep = (typeof CHAT_ORDER_STEPS)[number];
+
+export const CHAT_ARCHIVE_TABS = ["report", "return", "compare", "season"] as const;
+export type ChatArchiveTab = (typeof CHAT_ARCHIVE_TABS)[number];
+
 export type ChatContext = {
   screen: ChatScreen;
   stockId?: `KRX:${string}`;
@@ -12,7 +29,13 @@ export type ChatContext = {
 
 export type ChatUiAction = {
   type: "open_screen";
-  target: ChatScreen;
+  target: ChatActionTarget;
+  label?: string;
+  stockId?: `KRX:${string}`;
+  orderSide?: ChatOrderSide;
+  orderStep?: ChatOrderStep;
+  sectorId?: string;
+  archiveTab?: ChatArchiveTab;
 };
 
 export const STOCK_FACT_TOPICS = [

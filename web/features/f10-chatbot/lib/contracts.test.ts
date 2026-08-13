@@ -208,6 +208,33 @@ assert.equal(
 );
 
 assert.equal(isAllowedUiAction({ type: "open_screen", target: "archive" }), true);
+assert.equal(
+  isAllowedUiAction({
+    type: "open_screen",
+    target: "order",
+    label: "주문 수량 입력하기",
+    stockId: "KRX:005930",
+    orderSide: "buy",
+    orderStep: "quantity",
+  }),
+  true,
+);
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "stock", sectorId: "energy" }),
+  true,
+);
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "portfolio", label: "기다리는 주문 보기" }),
+  true,
+);
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "order", orderStep: "filled" }),
+  false,
+);
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "stock", sectorId: "../energy" }),
+  false,
+);
 assert.equal(isAllowedUiAction({ type: "open_url", target: "https://example.com" }), false);
 assert.deepEqual(
   sanitizeActionPayload({

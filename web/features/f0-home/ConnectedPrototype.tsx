@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
-import type { ChatContext } from "../../shared/types/chatbot";
+import type { ChatContext, ChatUiAction } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
 import { FeedScreen } from "../f11-feed";
 import {
@@ -14,6 +14,7 @@ import {
 const CHAT_CONTEXT_MESSAGE = "kiwoom:chat-context";
 const CHAT_BEHAVIOR_MESSAGE = "kiwoom:chat-behavior";
 const OPEN_STOCK_MESSAGE = "kiwoom:open-stock";
+const OPEN_CHAT_ACTION_MESSAGE = "kiwoom:open-chat-action";
 
 export function ConnectedPrototype() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -25,6 +26,13 @@ export function ConnectedPrototype() {
     setFeedOpen(false);
     iframeRef.current?.contentWindow?.postMessage(
       { type: OPEN_STOCK_MESSAGE, symbol },
+      window.location.origin,
+    );
+  };
+
+  const openChatAction = (action: ChatUiAction) => {
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: OPEN_CHAT_ACTION_MESSAGE, action },
       window.location.origin,
     );
   };
@@ -66,7 +74,7 @@ export function ConnectedPrototype() {
         title="키움 가족 모의투자 리그"
       />
       <div className="prototype-chat-overlay">
-        <F10ChatbotDemo context={chatContext} />
+        <F10ChatbotDemo context={chatContext} onUiAction={openChatAction} />
       </div>
 
       <button
