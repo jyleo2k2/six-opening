@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       result: "ok",
       userId: snapshot.userId,
       observationState: snapshot.observationState,
-      accuracyState: snapshot.accuracyState,
+      gradedTradeCount: snapshot.gradedTradeCount,
       narration: narration.source,
     }),
   );

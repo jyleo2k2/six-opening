@@ -28,8 +28,8 @@ export function fallbackNarration(snapshot: BehaviorProfileSnapshot): string {
     focus >= diversification
       ? "확신이 드는 곳에 모아 담는 스타일이에요."
       : "여러 곳에 조금씩 나눠 담는 스타일이에요.";
-  if (snapshot.accuracyState === "pending") {
-    return `${first} ${second} 새로 사고판 기록은 며칠 지나면 채점돼요.`;
+  if (snapshot.pendingTradeCount > 0) {
+    return `${first} ${second} 아직 채점 전인 거래는 점수에 들어가지 않았어요.`;
   }
   return `${first} ${second}`;
 }
@@ -42,7 +42,7 @@ function allowedNumbers(snapshot: BehaviorProfileSnapshot): (string | number)[] 
     intuition,
     focus,
     diversification,
-    ...(accuracy === null ? [] : [accuracy]),
+    accuracy,
     snapshot.sampleSize,
     snapshot.gradedTradeCount,
     snapshot.pendingTradeCount,
@@ -66,13 +66,12 @@ function narrationInput(snapshot: BehaviorProfileSnapshot): string {
     character: snapshot.character,
     characterLabel: snapshot.character ? CHARACTER_LABEL[snapshot.character] : null,
     starGrade: snapshot.starGrade,
-    accuracyState: snapshot.accuracyState,
     sampleSize: snapshot.sampleSize,
     gradedTradeCount: snapshot.gradedTradeCount,
     pendingTradeCount: snapshot.pendingTradeCount,
     reasonDistribution: snapshot.reasonDistribution,
   };
-  return `능력치는 10점 만점이고 근거력+직관력=10, 집중력+분산력=10이다. 정확력이 null이면 아직 채점 전이다.\n\n엔진 산출:\n${JSON.stringify(summary)}`;
+  return `능력치는 10점 만점이고 근거력+직관력=10, 집중력+분산력=10이다. 정확력은 기본 5점에서 채점된 거래가 맞으면 +1, 빗나가면 −1이다.\n\n엔진 산출:\n${JSON.stringify(summary)}`;
 }
 
 export async function generateProfileNarration(

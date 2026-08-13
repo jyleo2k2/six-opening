@@ -20,7 +20,8 @@ export const CASH_HEAVY_RATIO = 0.5;
 export const ACCURACY_WAIT_TRADING_DAYS = 5;
 // [가정] 표본 임계 — 제품 확정 시 상수만 바꾼다 (SPEC §4.2·§4.3).
 export const MIN_BUYS_FOR_PROFILE = 3;
-export const MIN_GRADED_FOR_ACCURACY = 3;
+// 정확력 시작점 — 채점된 거래가 없으면 이 값 그대로다 (2026-08-13 유저 확정).
+export const ACCURACY_BASE_SCORE = 5;
 
 /** app.html 이벤트명 → 3탭. 기업정보 탭(info_detail_opened)은 화면 출시 전에 미리 등록해 둔다. */
 export const TAB_BY_EVENT: Record<string, EvidenceTab> = {
@@ -100,13 +101,16 @@ function closeOnOrBefore(closes: DailyClose[], date: string): number | null {
 }
 
 export type AccuracyResult = {
-  accuracy: number | null;
+  accuracy: number;
   graded: number;
   pending: number;
   hits: number;
 };
 
-/** 정확력 = 체결 후 5거래일 종가 기준 적중률 × 10. 판정 가능 거래가 표본 미만이면 null */
+/**
+ * 정확력 = 기본 5점에서 채점된 거래마다 적중 +1·빗나감 −1 (0~10, 다른 능력치와 상·하한 동일).
+ * 채점은 체결 후 5거래일 종가 기준이며, 미경과·종가 없는 거래는 채점 전이라 점수에 반영하지 않는다.
+ */
 export function gradeAccuracy(
   buys: ProfileBuy[],
   sells: ProfileSell[],
@@ -138,7 +142,7 @@ export function gradeAccuracy(
     graded += 1;
     if (settle < sellPrice) hits += 1;
   }
-  const accuracy = graded >= MIN_GRADED_FOR_ACCURACY ? clampScore((hits / graded) * 10) : null;
+  const accuracy = clampScore(ACCURACY_BASE_SCORE + hits - (graded - hits));
   return { accuracy, graded, pending, hits };
 }
 
@@ -152,8 +156,7 @@ export function judgeCharacter(
   return focusLeads ? "challenger" : "explorer";
 }
 
-export function starGradeOf(accuracy: number | null): 1 | 2 | 3 | null {
-  if (accuracy === null) return null;
+export function starGradeOf(accuracy: number): 1 | 2 | 3 {
   if (accuracy >= 7) return 3;
   if (accuracy >= 4) return 2;
   return 1;
@@ -189,7 +192,6 @@ export function computeBehaviorProfile(input: BehaviorProfileInput): BehaviorPro
     abilities,
     character: ready ? judgeCharacter(abilities) : null,
     starGrade: ready ? starGradeOf(accuracy) : null,
-    accuracyState: accuracy === null ? "pending" : "graded",
     gradedTradeCount: graded,
     pendingTradeCount: pending,
     reasonDistribution,

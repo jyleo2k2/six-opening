@@ -17,8 +17,8 @@ export type BehaviorAbilities = {
   focus: number;
   /** 분산력 = 10 − focus */
   diversification: number;
-  /** 정확력 0~10. 적중 판정이 끝난 거래가 표본 미만이면 null */
-  accuracy: number | null;
+  /** 정확력 0~10. 기본 5점에서 시작해 채점된 거래가 적중하면 +1, 빗나가면 −1 */
+  accuracy: number;
 };
 
 export type BehaviorProfileSnapshot = {
@@ -29,10 +29,8 @@ export type BehaviorProfileSnapshot = {
   sampleSize: number;
   abilities: BehaviorAbilities;
   character: BehaviorCharacter | null;
-  /** 정확 등급 별 개수. accuracy 가 null 이면 null */
+  /** 정확 등급 별 개수. 관찰 초기면 null */
   starGrade: 1 | 2 | 3 | null;
-  /** pending 이면 정확력·별은 아직 채점 전이다 */
-  accuracyState: "graded" | "pending";
   /** 적중 판정이 끝난 거래 수 */
   gradedTradeCount: number;
   /** 5거래일 미경과 등으로 판정을 보류한 거래 수 */
