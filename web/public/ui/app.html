@@ -85,12 +85,12 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div onClick="{{ goPortfolio }}" style="margin-top:14px;text-align:center;border-radius:16px;padding:14px;font-size:15.5px;font-weight:800;color:#01185A;cursor:pointer;background:#F1F2F8">내 계좌 보기</div>
 </div>
 
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="padding:2px 4px">
 <div style="display:flex;justify-content:space-between;align-items:baseline">
 <span style="font-size:14px;font-weight:600;color:#01185A">시즌 진행</span>
 <span style="font-size:13.5px;font-weight:600;color:#8E93A8;font-variant-numeric:tabular-nums;white-space:nowrap"><b style="color:#F5327F">3주차</b> / 4주</span>
 </div>
-<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px;box-shadow:inset 0 0 0 1px #E4E6F1"><div style="width:75%;height:100%;border-radius:999px;background:#F5327F"></div></div>
+<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px"><div style="width:75%;height:100%;border-radius:999px;background:#F5327F"></div></div>
 </div>
 
 <sc-if value="{{ isParentAcct }}" hint-placeholder-val="{{ false }}">
@@ -416,6 +416,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <span style="font-size:20px;font-weight:800;color:#01185A">{{ buyInputUnit }}</span>
 </div>
 <div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px">{{ qtyHint }}</div>
+<div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:6px;white-space:nowrap">{{ buyMaxHint }}</div>
 <div style="display:flex;gap:8px;margin-top:16px">
 <sc-for list="{{ amtChips }}" as="c" hint-placeholder-count="4">
 <div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
@@ -561,17 +562,17 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ sellBack }}" style="{{ backBtnStyle }}">{{ sellBackGlyph }}</div>
 <div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">팔기(매도)</div>
-<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ sellStepNo }}</span> / 5</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ sellStepNo }}</span> / 3</div>
 </div>
 <div style="flex:none;display:flex;gap:5px;padding:0 20px 12px">
-<div style="{{ sProg1 }}"></div><div style="{{ sProg2 }}"></div><div style="{{ sProg3 }}"></div><div style="{{ sProg4 }}"></div><div style="{{ sProg5 }}"></div>
+<div style="{{ sProg1 }}"></div><div style="{{ sProg2 }}"></div><div style="{{ sProg3 }}"></div>
 </div>
 
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 0;display:flex;flex-direction:column;gap:12px">
 
 <sc-if value="{{ isSell1 }}" hint-placeholder-val="{{ true }}">
 <div id="tut-sell1" style="display:flex;flex-direction:column;gap:12px">
-<div style="background:#FFFFFF;border-radius:28px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:12px">
 <div style="{{ detailBadgeStyle }}">{{ stockEmoji }}</div>
 <div style="flex:1;min-width:0">
@@ -588,15 +589,20 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:16px;font-weight:800;color:#01185A">얼마나 팔까?</div>
-<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:16px 0 2px">
-<span style="font-size:32px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ sellQtyText }}</span>
-<span style="font-size:19px;font-weight:800;color:#01185A">주</span>
+<div style="display:flex;gap:6px;margin-top:12px">
+<div onClick="{{ pickSellByQty }}" style="{{ sellByQtyStyle }}">주 수로</div>
+<div onClick="{{ pickSellByAmount }}" style="{{ sellByAmountStyle }}">금액으로</div>
 </div>
-<div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px;white-space:nowrap">{{ sellAmountHint }}</div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:16px 0 4px">
+<span style="font-size:32px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ sellInputText }}</span>
+<span style="font-size:19px;font-weight:800;color:#01185A">{{ sellInputUnit }}</span>
+</div>
+<div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px;white-space:nowrap">{{ sellHint }}</div>
+<div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:6px;white-space:nowrap">{{ sellMaxHint }}</div>
 <div style="display:flex;gap:8px;margin-top:16px">
-<div onClick="{{ sellAll }}" style="{{ sellChipAll }}">전부</div>
-<div onClick="{{ sellHalf }}" style="{{ sellChipHalf }}">절반</div>
-<div onClick="{{ sellCustom }}" style="{{ sellChipCustom }}">직접</div>
+<sc-for list="{{ sellChips }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
+</sc-for>
 </div>
 <sc-if value="{{ showSellPad }}" hint-placeholder-val="{{ false }}">
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
@@ -604,9 +610,39 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#F4F4FA;box-shadow:inset 0 0 0 1px #E4E6F1">{{ k.label }}</div>
 </sc-for>
 </div>
-<div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:10px;white-space:nowrap">가진 만큼까지만 팔 수 있어 (최대 {{ holdQtyText }})</div>
 </sc-if>
 </div>
+
+<div style="background:#FFFFFF;border-radius:22px;padding:6px 8px;display:flex;gap:6px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div onClick="{{ pickSellMarket }}" style="{{ sellMktStyle }}">지금 가격에 바로</div>
+<div onClick="{{ pickSellLimit }}" style="{{ sellLimStyle }}">내가 정한 가격에</div>
+</div>
+
+<sc-if value="{{ showSellLimit }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="font-size:16px;font-weight:800;color:#01185A">얼마가 되면 팔까?</div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:14px 0 2px">
+<span style="font-size:30px;font-weight:800;color:#F5327F;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ sellLimitPriceText }}</span>
+<span style="font-size:18px;font-weight:800;color:#F5327F">원</span>
+</div>
+<div style="text-align:center;font-size:14px;font-weight:500;color:#7E849B;margin-top:9px;white-space:nowrap">{{ sellLimitDiffText }}</div>
+<div style="display:flex;gap:7px;margin-top:15px">
+<sc-for list="{{ sellLimitChips }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
+</sc-for>
+</div>
+<div style="display:flex;align-items:flex-start;gap:9px;background:#ECEDF7;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<span style="font-size:15px">🐻</span>
+<span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 팔게. 기다리는 동안 그 주식은 잠깐 맡아둘게.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasSellWarn }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:9px;background:#FFF1F6;border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
+<span style="font-size:15px">🐻</span><span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ sellWarnText }}</span>
+</div>
+</sc-if>
 </div>
 </sc-if>
 
@@ -619,21 +655,23 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </div>
 
-<div style="background:#FDEFF5;border-radius:30px;padding:20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)">
-<span style="display:inline-block;font-size:13px;font-weight:700;color:#F5327F;background:#FCE9F1;border-radius:999px;padding:6px 13px;white-space:nowrap;box-shadow:0 3px 7px rgba(200,60,130,0.14),inset 0 1.5px 1px rgba(255,255,255,1)">{{ retroAgoText }}</span>
+<div style="background:#FDEFF5;border-radius:26px;padding:20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)">
+<span style="display:inline-block;font-size:13px;font-weight:700;color:#F5327F;background:#FCE9F1;border-radius:999px;padding:6px 13px;white-space:nowrap">{{ retroAgoText }}</span>
 <div style="display:flex;gap:6px;margin-top:14px">
 <span style="font-size:26px;font-weight:800;color:#F5327F;line-height:0.85">“</span>
-<div style="flex:1;font-size:21px;font-weight:800;color:#01185A;line-height:1.5;letter-spacing:-0.01em;text-wrap:pretty">{{ retroSentence }}<span style="font-size:26px;color:#F5327F;line-height:0.85;margin-left:3px">”</span></div>
+<div style="flex:1;font-size:20px;font-weight:800;color:#01185A;line-height:1.5;letter-spacing:-0.01em;text-wrap:pretty">{{ retroSentence }}<span style="font-size:26px;color:#F5327F;line-height:0.85;margin-left:3px">”</span></div>
 </div>
-<sc-if value="{{ hasRetroMemo }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:flex-start;gap:8px;background:rgba(255,255,255,0.72);border-radius:16px;padding:12px 14px;margin-top:14px">
-<span style="font-size:14px">✍️</span>
-<span style="font-size:14.5px;font-weight:500;color:#5C6280;line-height:1.6">{{ retroMemo }}</span>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:16px">
+<sc-for list="{{ retroRows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;background:rgba(255,255,255,0.72);border-radius:14px;padding:11px 13px">
+<span style="flex:none;font-size:13px;font-weight:600;color:#A9739B;white-space:nowrap">{{ r.label }}</span>
+<span style="flex:1;min-width:0;text-align:right;font-size:14px;font-weight:700;color:#01185A;line-height:1.5;text-wrap:pretty">{{ r.value }}</span>
 </div>
-</sc-if>
+</sc-for>
+</div>
 </div>
 
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="background:#FFFFFF;border-radius:22px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="font-size:13.5px;font-weight:600;color:#8E93A8">지금은</div>
 <div style="display:flex;margin-top:12px">
 <div style="flex:1"><div style="font-size:12.5px;font-weight:500;color:#A9AEC4">수익률</div><div style="font-size:17px;font-weight:800;color:#5C6280;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ retroPnlText }}</div></div>
@@ -641,17 +679,8 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:1"><div style="font-size:12.5px;font-weight:500;color:#A9AEC4">남은 시즌</div><div style="font-size:17px;font-weight:800;color:#5C6280;margin-top:4px;white-space:nowrap">1주</div></div>
 </div>
 </div>
-</div>
-</sc-if>
 
-<sc-if value="{{ isSell3 }}" hint-placeholder-val="{{ false }}">
-<div id="tut-sell3" style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:flex-start;gap:10px">
-<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)">
-<div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5">왜 팔고 싶어?</div>
-</div>
-</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">왜 팔고 싶어?</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 <sc-for list="{{ sellReasonBtns }}" as="r" hint-placeholder-count="6">
 <div onClick="{{ r.pick }}" style="{{ r.style }}">
@@ -660,93 +689,83 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 </sc-for>
 </div>
+
+<sc-if value="{{ planMatched }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:22px;padding:16px 18px;box-shadow:0 2px 10px rgba(120,90,20,0.07)">
+<span style="font-size:32px;line-height:1">🏅</span>
+<div style="flex:1;min-width:0">
+<div style="font-size:16px;font-weight:800;color:#01185A">계획 실천 배지</div>
+<div style="font-size:13.5px;font-weight:600;color:#8A6B1F;margin-top:5px;line-height:1.55;text-wrap:pretty">처음 세운 생각을 기억하고 실천했네! 아카이브에 모아둘게.</div>
+</div>
 </div>
 </sc-if>
 
-<sc-if value="{{ isSell4 }}" hint-placeholder-val="{{ false }}">
-<div id="tut-sell4" style="display:flex;flex-direction:column;gap:12px">
-<sc-if value="{{ planMatched }}" hint-placeholder-val="{{ false }}">
-<div style="background:#FFF6E0;border-radius:30px;padding:26px 20px;text-align:center;box-shadow:0 2px 10px rgba(120,90,20,0.07)">
-<div style="font-size:58px;line-height:1">🏅</div>
-<div style="font-size:22px;font-weight:800;color:#01185A;margin-top:14px;letter-spacing:-0.01em">계획 실천 배지</div>
-<div style="font-size:16px;font-weight:600;color:#8A6B1F;margin-top:10px;line-height:1.6;text-wrap:pretty">처음 세운 생각을 기억하고 실천했네!</div>
-<div style="font-size:13.5px;font-weight:500;color:#A08640;margin-top:12px;line-height:1.6">아카이브에 모아둘게</div>
-</div>
-</sc-if>
 <sc-if value="{{ planChanged }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:flex-start;gap:10px">
-<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)">
-<div style="font-size:16px;font-weight:800;color:#01185A;line-height:1.55;text-wrap:pretty">{{ changeQuestion }}</div>
-<div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:6px">계획이 바뀌는 건 괜찮아!</div>
-</div>
-</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px;line-height:1.5;text-wrap:pretty">{{ changeQuestion }}</div>
+<div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:-6px">계획이 바뀌는 건 괜찮아!</div>
 <div style="display:flex;flex-direction:column;gap:9px">
 <sc-for list="{{ changeBtns }}" as="c" hint-placeholder-count="5">
 <div onClick="{{ c.pick }}" style="{{ c.style }}"><span style="font-size:19px">{{ c.emoji }}</span><span style="font-size:15px;font-weight:600;color:#01185A;line-height:1.4">{{ c.label }}</span></div>
 </sc-for>
 </div>
-</div>
-</sc-if>
-</div>
 </sc-if>
 
-<sc-if value="{{ isSell5 }}" hint-placeholder-val="{{ false }}">
-<div id="tut-sell5" style="display:flex;flex-direction:column;gap:12px">
-<div style="background:#FDEFF5;border-radius:28px;padding:18px 20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)">
-<div style="font-size:13px;font-weight:700;color:#D5327A">내가 남긴 답</div>
-<div style="font-size:20px;font-weight:800;color:#01185A;line-height:1.55;margin-top:9px;text-wrap:pretty">{{ sellSentence }}</div>
-</div>
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>회사</span><span style="font-weight:800;color:#01185A">{{ stockName }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>파는 양</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellQtyText }}주</span></div>
-<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>파는 값</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ stockPriceText }}</span></div>
+<div style="background:#FFFFFF;border-radius:20px;padding:15px 17px;margin-top:2px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellQtyText }}주</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>파는 방법</span><span style="font-weight:700;color:#01185A;white-space:nowrap">{{ sellOrderTypeText }}</span></div>
 <div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:800;color:#01185A">받게 되는 돈</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellProceedsText }}</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#01185A">받게 되는 돈</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellProceedsText }}</span></div>
 </div>
 </div>
 </sc-if>
 
-</div>
+<sc-if value="{{ isSell3 }}" hint-placeholder-val="{{ false }}">
+<div id="tut-sell3" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px">
+<img src="assets/mascot-bear.png" width="132" alt="키웅이" style="display:block;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.18))">
+<div style="font-size:14px;font-weight:700;color:#8E93A8;letter-spacing:0.08em;margin-top:14px">{{ sellDoneKicker }}</div>
+<div style="font-size:24px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;white-space:pre-line;text-wrap:pretty">{{ sellDoneHeadline }}</div>
+<div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ sellDoneNote }}</div>
 
-<div style="flex:none;padding:8px 16px 10px">
-<div id="tut-sell-next" onClick="{{ sellNext }}" style="{{ sellCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ sellCtaLabel }}</span></div>
-</div>
-</div>
-</sc-if>
-
-<sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:#FFFFFF">
-<div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px">
-<img src="assets/mascot-bear.png" width="150" alt="키웅이" style="display:block;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.2))">
-<div style="font-size:25px;font-weight:800;color:#01185A;margin-top:16px;text-align:center;letter-spacing:-0.01em;line-height:1.45;white-space:pre-line">{{ doneTitle }}</div>
-<div style="font-size:19px;font-weight:800;color:#F5327F;margin-top:14px;text-align:center;line-height:1.5;text-wrap:pretty">{{ doneSentence }}</div>
 <sc-if value="{{ hasBadge }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:11px;background:#FFF8E4;border-radius:20px;padding:13px 16px;margin-top:16px;width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)">
 <span style="font-size:26px">🏅</span>
 <span style="font-size:14.5px;font-weight:700;color:#8A6B1F;line-height:1.5">계획 실천 배지를 받았어!</span>
 </div>
 </sc-if>
-<div style="width:100%;background:#F4F4FA;border-radius:22px;padding:15px 17px;margin-top:22px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneQtyText }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>남은 지갑</span><span style="font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
+
+<div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:20px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneStock }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneQty }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneMoneyLabel }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneProceeds }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>남은 지갑</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
 </div>
-<div style="width:100%;margin-top:14px">
+
+<div style="width:100%;margin-top:16px">
 <div style="font-size:14px;font-weight:600;color:#5C6280">하고 싶은 말이 있으면 남겨둬 <span style="color:#A9AEC4;font-weight:500">(나중에 다시 보여줄게)</span></div>
-<input value="{{ memoValue }}" onInput="{{ memoInput }}" maxlength="50" placeholder="예: 월드투어 시작한대" style="width:100%;box-sizing:border-box;margin-top:9px;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
+<input value="{{ sellMemo }}" onInput="{{ sellMemoInput }}" maxlength="50" placeholder="예: 목표까지 와서 팔았어" style="width:100%;box-sizing:border-box;margin-top:9px;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:10px">
-<span style="font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums">{{ memoCount }} / 50</span>
-<div onClick="{{ saveMemo }}" style="{{ memoBtnStyle }}">{{ memoBtnLabel }}</div>
+<span style="font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums">{{ sellMemoCount }} / 50</span>
+<div onClick="{{ saveSellMemo }}" style="{{ sellMemoBtnStyle }}">{{ sellMemoBtnLabel }}</div>
 </div>
-</div>
-</div>
-<div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
-<div onClick="{{ goHome }}" style="flex:1;text-align:center;border-radius:999px;padding:17px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#EFEFF5">홈으로</div>
-<div id="tut-to-account" onClick="{{ goPortfolio }}" style="flex:1.3;position:relative;border-radius:999px;padding:17px;text-align:center;font-size:17px;font-weight:800;color:#fff;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0) 92%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 14px 22px -9px rgba(214,54,124,0.4),inset 0 -20px 28px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
 </div>
 </div>
 </sc-if>
+
+</div>
+
+<sc-if value="{{ sellInProgress }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;padding:8px 16px 10px">
+<div id="tut-sell-next" onClick="{{ sellNext }}" style="{{ sellCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ sellCtaLabel }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ isSell3 }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
+<div onClick="{{ goHome }}" style="{{ subCtaStyle }}">홈으로</div>
+<div onClick="{{ goPortfolio }}" style="{{ mainCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
 
 <sc-if value="{{ isPortfolio }}" hint-placeholder-val="{{ false }}">
 <div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
@@ -1322,7 +1341,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="width:330px;display:flex;flex-direction:column;gap:14px">
 <div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
 <div style="font-size:17px;font-weight:800;color:#01185A">연결된 프로토타입 · 1차</div>
-<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.7;margin-top:9px;text-wrap:pretty">홈 · 종목 탐색 · 종목 상세 · 차트/뉴스 상세 · 매수 3단계 · 매도 5단계 · 계좌 · 아카이브 2탭 · 랭킹이 전부 눌러서 진행됩니다. 사고팔면 지갑과 보유 종목이 실제로 바뀌고, 아카이브 수치도 그 기록에서 계산됩니다. 상태는 브라우저에 저장돼 새로고침해도 남습니다.</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.7;margin-top:9px;text-wrap:pretty">홈 · 종목 탐색 · 종목 상세 · 차트/뉴스 상세 · 매수 3단계 · 매도 3단계 · 계좌 · 아카이브 2탭 · 랭킹이 전부 눌러서 진행됩니다. 사고팔면 지갑과 보유 종목이 실제로 바뀌고, 아카이브 수치도 그 기록에서 계산됩니다. 상태는 브라우저에 저장돼 새로고침해도 남습니다.</div>
 <div style="margin-top:16px;padding-top:15px;border-top:1px solid #EFEFF5">
 <div style="font-size:13px;font-weight:700;color:#01185A">시연용 · 학교 시간 강제</div>
 <div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.6;margin-top:6px">실제 시각과 무관하게 잠금 상태를 보여줍니다. 자녀 계정에서만 효과가 있습니다.</div>
@@ -1577,7 +1596,9 @@ class Component extends DCLogic {
     sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0, orderDone: null,
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
-    sellStep: 1, sellDraft: { qty:0, reason:null, change:null, memo:'', memoSaved:false }, doneKind: 'buy', sellPick: 'all',
+    sellStep: 1, sellDone: null,
+    sellDraft: { sellBy:'qty', qty:0, amountInput:0, orderType:'market', limitPct:0, reason:null, change:null, memo:'', memoSaved:false },
+    sellPick: 'all',
     arcTab: 'report', traitPick: null, traitOpen: false,
     cardsOpen: false, cardActive: null, cardSheet: null, famOpen: false, famPick: 'all',
     retWho: 'all', retSecPick: null, retSecModal: null,
@@ -1620,15 +1641,15 @@ class Component extends DCLogic {
         const sameSell = this.state.screen === 'sell' && this.state.code === stock.code;
         const canOpenSellReason = sameSell && this.state.sellDraft.qty > 0;
         const canOpenSellConfirmation = canOpenSellReason && !!this.state.sellDraft.reason;
-        const sellStep = action.orderStep === 'confirmation' && canOpenSellConfirmation ? 5 : (action.orderStep === 'reason' && canOpenSellReason ? 3 : 1);
-        this.set({ code:stock.code, screen:'sell', sellStep:sellStep, sellReasonOrder:[0,1,2,3,4,5], doneKind:'sell' });
+        const sellStep = (action.orderStep === 'confirmation' && canOpenSellConfirmation) || (action.orderStep === 'reason' && canOpenSellReason) ? 2 : 1;
+        this.set({ code:stock.code, screen:'sell', sellStep:sellStep, sellReasonOrder:[0,1,2,3,4,5] });
       } else {
         const sameBuy = this.state.screen === 'buy' && this.state.code === stock.code;
         const canOpenBuyReason = sameBuy && this.state.draft.amount > 0;
         const hasBuyPlan = !!this.state.draft.plan && (this.state.draft.plan !== 'plan_target' || this.state.draft.targetPct !== null);
         const canOpenBuyConfirmation = canOpenBuyReason && !!this.state.draft.reason && hasBuyPlan;
         const buyStep = (action.orderStep === 'confirmation' && canOpenBuyConfirmation) || (action.orderStep === 'reason' && canOpenBuyReason) ? 2 : 1;
-        this.set({ code:stock.code, screen:'buy', buyStep:buyStep, draft:sameBuy ? this.state.draft : this.blankDraft(), showPad:false, doneKind:'buy' });
+        this.set({ code:stock.code, screen:'buy', buyStep:buyStep, draft:sameBuy ? this.state.draft : this.blankDraft(), showPad:false });
       }
     }
   }
@@ -1679,7 +1700,7 @@ class Component extends DCLogic {
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
-    const orderContextChanged = prevState && ['buy', 'sell', 'done'].indexOf(this.state.screen) >= 0 && (
+    const orderContextChanged = prevState && ['buy', 'sell'].indexOf(this.state.screen) >= 0 && (
       prevState.draft.amount !== this.state.draft.amount ||
       prevState.draft.orderType !== this.state.draft.orderType ||
       prevState.draft.limitPct !== this.state.draft.limitPct ||
@@ -1769,7 +1790,7 @@ class Component extends DCLogic {
       ? 'archive'
       : ['detail', 'chart', 'news'].indexOf(screen) >= 0
         ? 'stock'
-        : ['buy', 'sell', 'done'].indexOf(screen) >= 0
+        : ['buy', 'sell'].indexOf(screen) >= 0
           ? 'order'
           : 'home';
     const stock = this.stock();
@@ -1779,7 +1800,7 @@ class Component extends DCLogic {
       context.stockName = stock.name;
     }
     if (stock && chatScreen === 'order') {
-      const isSellOrder = screen === 'sell' || (screen === 'done' && this.state.doneKind === 'sell');
+      const isSellOrder = screen === 'sell';
       const unitPrice = isSellOrder
         ? stock.price
         : (this.state.draft.orderType === 'limit'
@@ -2268,7 +2289,13 @@ class Component extends DCLogic {
       const st = this.uni().stocks.filter(s => s.code === h.code)[0];
       return a + (st ? st.price * h.qty : 0);
     }, 0);
-    const reserved = (m.pending || []).reduce((a,p) => a + p.amount, 0);
+    const reserved = (m.pending || []).reduce((a, p) => {
+      if (p.side === 'sell') {
+        const st2 = this.uni().stocks.filter(x => x.code === p.code)[0];
+        return a + (st2 ? st2.price * p.qty : 0);
+      }
+      return a + (p.amount || 0);
+    }, 0);
     return m.cash + held + reserved;
   }
   polyline(pts, w, h){
@@ -2299,9 +2326,11 @@ class Component extends DCLogic {
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
     const rankTab = s.rankTab || 'week';
-    // 주문 직후 값 (3단계 축하 화면이 이걸로 문구를 만든다)
+    // 주문 직후 값 (매수 3단계 축하 화면과 매도 3단계 완료 화면이 이걸로 문구를 만든다)
     const od = s.orderDone || {};
     const odQty = od.qty === undefined ? '' : ((Math.round(od.qty * 100) / 100) + '주');
+    const sd = s.sellDone || {};
+    const sdQty = sd.qty === undefined ? '' : ((Math.round(sd.qty * 100) / 100) + '주');
 
     const arc = this.buildArchive();
     // 아카이브 성향 카드는 유형별 팔레트를 쓴다. arcInk 는 그 팔레트의 가장 진한 색.
@@ -2438,8 +2467,9 @@ class Component extends DCLogic {
           for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
           this.retroMs = 0; this.retroAt = null;
           this.set({ code: x.code, screen: 'sell', sellStep: 1, sellReasonOrder: order.concat([5]),
-            showSellPad: false, sellQtyStr: '', sellPick: 'all',
-            sellDraft: { qty: h.qty, reason:null, change:null, memo:'', memoSaved:false } });
+            showSellPad: false, sellQtyStr: '', sellPick: 'all', sellDone: null,
+            sellDraft: { sellBy:'qty', qty: h.qty, amountInput: 0, orderType:'market', limitPct: 0,
+              reason:null, change:null, memo:'', memoSaved:false } });
         }
       };
     }).filter(Boolean);
@@ -2456,11 +2486,24 @@ class Component extends DCLogic {
     const planMatch = this.judgePlanMatch(buyRec, price);
     const isFirstSell = buyRec ? !(s.sellRecords || []).some(r => r.linked_buy_order_id === buyRec.order_id) : true;
     const showJudge = isFirstSell && planMatch !== null;
-    const sellQty = s.sellDraft.qty;
+    // 매도도 매수와 같은 방식으로 넣는다 — 금액 또는 주 수, 시장가 또는 지정가
+    const sellLimPct = s.sellDraft.limitPct === null || s.sellDraft.limitPct === undefined ? 0 : s.sellDraft.limitPct;
+    const sellLimPrice = Math.round(price * (1 + sellLimPct / 100));
+    const sellExecPrice = s.sellDraft.orderType === 'limit' ? sellLimPrice : price;
+    const sellByQty = s.sellDraft.sellBy !== 'amount';
+    // 팔 수 있는 최대치는 가진 주 수다
+    const sellMaxQty = heldQty;
+    const sellWant = sellByQty
+      ? (s.sellDraft.qty || 0)
+      : (sellExecPrice > 0 ? (s.sellDraft.amountInput || 0) / sellExecPrice : 0);
+    const sellQty = Math.min(sellMaxQty, Math.max(0, sellWant));
+    const sellProceeds = sellQty * sellExecPrice;
+    const sellOver = sellWant > sellMaxQty + 0.0001;
+    const sellWarn = sellOver ? '가진 것보다 많이 팔 수는 없어!'
+      : (sellWant > 0 && sellQty < 0.01) ? '이 금액으로는 아직 팔 수 없어. 조금 더 올려볼까?' : '';
     const sellReason = SELL_REASONS.filter(r => r.code === s.sellDraft.reason)[0];
-    const sellOk = s.sellStep === 1 ? sellQty > 0
-      : s.sellStep === 3 ? !!s.sellDraft.reason
-      : s.sellStep === 4 ? (planMatch === true || !!s.sellDraft.change)
+    const sellOk = s.sellStep === 1 ? (sellQty > 0 && !sellOver)
+      : s.sellStep === 2 ? (!!s.sellDraft.reason && (!showJudge || planMatch === true || !!s.sellDraft.change))
       : true;
     const prog2 = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.sellStep ? '#F5327F' : '#DDDFEC');
     const devChip = on => 'flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:12.5px;font-weight:' + (on ? '800' : '600') + ';cursor:pointer;' + (on ? 'color:#fff;background:#01185A' : 'color:#6E7488;background:#F1F2F8');
@@ -2515,7 +2558,7 @@ class Component extends DCLogic {
 
     return {
       isHome: s.screen === 'home', isExplore: s.screen === 'explore', isDetail: s.screen === 'detail',
-      isBuy: s.screen === 'buy', isDone: s.screen === 'done',
+      isBuy: s.screen === 'buy',
       isChart: s.screen === 'chart', isNews: s.screen === 'news',
       isPortfolio: s.screen === 'portfolio', isArchive: s.screen === 'archive',
       isBuy1: s.buyStep === 1, isBuy2: s.buyStep === 2, isBuy3: s.buyStep === 3,
@@ -2636,6 +2679,10 @@ class Component extends DCLogic {
       qtyHint: byQty
         ? (shares > 0 && st ? (Math.round(shares * execPrice)).toLocaleString('ko-KR') + '원이 들어가' : '몇 주 살지 골라봐')
         : (amount > 0 && st ? (st.name + ' 약 ' + qty.toFixed(2) + '주' + (s.draft.orderType === 'limit' ? '를 살 수 있게 돼' : '를 살 수 있어')) : '얼마를 넣을지 골라봐'),
+      // 지갑과 주문 가격으로 최대 몇 주까지 살 수 있는지
+      buyMaxHint: (execPrice > 0 && m.cash > 0)
+        ? ('최대 ' + Math.floor(m.cash / execPrice) + '주까지 살 수 있어 · 지갑 ' + won(m.cash))
+        : '',
       byAmountStyle: this.chip(!byQty), byQtyStyle: this.chip(byQty),
       pickByAmount: () => { this.setDraft({ buyBy:'amount' }); this.setState({ showPad:false }); },
       pickByQty: () => { this.setDraft({ buyBy:'qty' }); this.setState({ showPad:false }); },
@@ -2760,41 +2807,6 @@ class Component extends DCLogic {
         if (s.buyStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
         if (s.buyStep === 3) { this.set({ screen:'portfolio' }); return; }
         if (s.buyStep === 1) this.set({ screen:'detail' }); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
-      },
-
-      doneTitle: s.doneKind === 'sell' ? '기록 완료!\n키웅이가 기억해둘게'
-        : (s.draft.orderType === 'limit' ? '기다리는 주문에 넣었어!' : '기록 완료!\n키웅이가 기억해둘게'),
-      doneSentence: s.doneKind === 'sell' ? (sellReason ? (sellReason.short + ' 팔았어') : '') : sentence,
-      doneQtyText: s.doneKind === 'sell' ? (sellQty.toFixed(2) + '주 팔았어')
-        : (s.draft.orderType === 'limit' ? (limPrice.toLocaleString('ko-KR') + '원이 되면 ' + qty.toFixed(2) + '주') : (qty.toFixed(2) + '주')),
-      hasBadge: s.doneKind === 'sell' && showJudge && planMatch === true,
-      memoValue: s.doneKind === 'sell' ? s.sellDraft.memo : s.draft.memo,
-      memoCount: (s.doneKind === 'sell' ? s.sellDraft.memo : s.draft.memo).length,
-      memoBtnLabel: (s.doneKind === 'sell' ? s.sellDraft.memoSaved : s.draft.memoSaved) ? '저장됐어 ✓' : '저장하기',
-      memoBtnStyle: (s.doneKind === 'sell' ? s.sellDraft.memoSaved : s.draft.memoSaved)
-        ? 'font-size:14px;font-weight:700;color:#8E93A8;padding:11px 18px;border-radius:999px;white-space:nowrap;background:#F1F2F8;box-shadow:inset 0 0 0 1px #E2E4EF'
-        : 'font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F5327F',
-      saveMemo: () => {
-        if (s.draft.memoSaved) return;
-        const v = s.draft.memo.trim();
-        if (s.doneKind === 'sell') { this.setSell({ memoSaved: true }); } else { this.setDraft({ memoSaved: true }); }
-        this.setState(x => {
-          const recs = x.doneKind === 'sell' ? x.sellRecords.slice() : x.records.slice();
-          if (recs.length) recs[recs.length - 1] = Object.assign({}, recs[recs.length - 1], { memo: v || null });
-          const evs = (x.events || []).concat(v ? [{ event:'memo_written', symbol: x.code, ts: new Date().toISOString() }] : []);
-          const n = Object.assign({}, x, x.doneKind === 'sell' ? { sellRecords: recs } : { records: recs }, { events: evs });
-          this.persist(n); return n;
-        });
-      },
-      memoInput: (e) => {
-        const v = e.target.value.slice(0, 50);
-        if (s.doneKind === 'sell') this.setSell({ memo: v }); else this.setDraft({ memo: v });
-        this.setState(x => {
-          const recs = x.records.slice();
-          if (recs.length) recs[recs.length - 1] = Object.assign({}, recs[recs.length - 1], { memo: v || null });
-          const n = Object.assign({}, x, { records: recs });
-          this.persist(n); return n;
-        });
       },
 
       // ── 성장 아카이브 ────────────────────────────────────────────────────
@@ -2930,42 +2942,97 @@ class Component extends DCLogic {
 
       isSell: s.screen === 'sell',
       isSell1: s.sellStep === 1, isSell2: s.sellStep === 2, isSell3: s.sellStep === 3,
-      isSell4: s.sellStep === 4, isSell5: s.sellStep === 5,
+      sellInProgress: s.sellStep < 3,
       sellStepNo: s.sellStep,
-      sProg1: prog2(1), sProg2: prog2(2), sProg3: prog2(3), sProg4: prog2(4), sProg5: prog2(5),
-      sellBackGlyph: s.sellStep === 1 ? '✕' : '‹',
+      sProg1: prog2(1), sProg2: prog2(2), sProg3: prog2(3),
+      sellBackGlyph: s.sellStep === 1 ? '✕' : (s.sellStep === 3 ? '✕' : '‹'),
       holdQtyText: heldQty.toFixed(2) + '주', holdAvgText: Math.round(heldAvg).toLocaleString('ko-KR') + '원',
       holdValueText: won(heldQty * price),
       holdPnlText: (heldPnl >= 0 ? '▲ +' : '▼ ') + Math.abs(Math.round(heldPnl)).toLocaleString('ko-KR') + '원',
       holdPnlStyle: 'font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:5px;white-space:nowrap;color:' + (heldPnl >= 0 ? up : down),
+
+      // ── 1단계 · 얼마나 팔까 (매수 1단계와 같은 방식) ────────────────
+      sellByQtyStyle: this.chip(sellByQty), sellByAmountStyle: this.chip(!sellByQty),
+      pickSellByQty: () => { this.setSell({ sellBy:'qty' }); this.setState({ showSellPad:false }); },
+      pickSellByAmount: () => { this.setSell({ sellBy:'amount' }); this.setState({ showSellPad:false }); },
+      sellInputText: sellByQty
+        ? (Math.round((s.sellDraft.qty || 0) * 100) / 100).toString()
+        : (s.sellDraft.amountInput || 0).toLocaleString('ko-KR'),
+      sellInputUnit: sellByQty ? '주' : '원',
+      sellHint: sellQty > 0
+        ? (won(sellProceeds) + '을 받게 돼')
+        : (sellByQty ? '몇 주 팔지 골라봐' : '얼마어치 팔지 골라봐'),
+      sellMaxHint: sellMaxQty > 0
+        ? ('최대 ' + (Math.floor(sellMaxQty * 100) / 100) + '주까지 팔 수 있어 · ' + won(sellMaxQty * sellExecPrice))
+        : '',
       sellQtyText: sellQty.toFixed(2),
-      sellAmountHint: sellQty > 0 ? (won(sellQty * price) + '을 받게 돼') : '얼마나 팔지 골라봐',
-      sellChipAll: this.chip(s.sellPick === 'all'),
-      sellChipHalf: this.chip(s.sellPick === 'half'),
-      sellChipCustom: this.chip(s.sellPick === 'custom'),
-      sellAll: () => { this.setState({ sellPick:'all', showSellPad:false, sellQtyStr:'' }); this.setSell({ qty: heldQty }); },
-      sellHalf: () => { this.setState({ sellPick:'half', showSellPad:false, sellQtyStr:'' }); this.setSell({ qty: heldQty / 2 }); },
-      sellCustom: () => { this.setState({ sellPick:'custom', showSellPad:true, sellQtyStr:'' }); this.setSell({ qty: 0 }); },
+      sellProceedsText: won(sellProceeds),
+      sellOrderTypeText: s.sellDraft.orderType === 'limit' ? (sellLimPrice.toLocaleString('ko-KR') + '원이 되면') : '지금 가격에 바로',
+      sellChips: (sellByQty
+        ? [{ k:'all', label:'전부', v: sellMaxQty }, { k:'half', label:'절반', v: sellMaxQty / 2 }]
+        : [{ k:'a3', label:'3만원', v: 30000 }, { k:'a5', label:'5만원', v: 50000 }]
+      ).map(c => ({
+        label: c.label,
+        style: this.chip(s.sellPick === c.k),
+        pick: () => {
+          this.setState({ sellPick: c.k, showSellPad:false, sellQtyStr:'' });
+          this.setSell(sellByQty ? { qty: c.v } : { amountInput: Math.min(c.v, Math.round(sellMaxQty * sellExecPrice)) });
+        }
+      })).concat([{
+        label: '직접', style: this.chip(s.sellPick === 'custom'),
+        pick: () => {
+          this.setState({ sellPick:'custom', showSellPad:true, sellQtyStr:'' });
+          this.setSell(sellByQty ? { qty: 0 } : { amountInput: 0 });
+        }
+      }]),
       showSellPad: !!s.showSellPad,
-      sellPadKeys: ['1','2','3','4','5','6','7','8','9','.','0','←'].map(k => ({
+      sellPadKeys: (sellByQty ? ['1','2','3','4','5','6','7','8','9','.','0','←'] : ['1','2','3','4','5','6','7','8','9','←','0','000']).map(k => ({
         label: k,
         tap: () => {
+          if (!sellByQty) {
+            const cur = String(s.sellDraft.amountInput || '');
+            const v = k === '←' ? cur.slice(0, -1) : cur + k;
+            this.setSell({ amountInput: Math.min(9999999, parseInt(v || '0', 10) || 0) });
+            return;
+          }
           const cur = s.sellQtyStr || '';
           let v;
           if (k === '←') v = cur.slice(0, -1);
           else if (k === '.') v = cur.indexOf('.') >= 0 ? cur : (cur === '' ? '0.' : cur + '.');
           else v = cur + k;
-          const n = Math.min(heldQty, parseFloat(v || '0') || 0);
           this.setState({ sellQtyStr: v });
-          this.setSell({ qty: n });
+          this.setSell({ qty: parseFloat(v || '0') || 0 });
         }
       })),
+      sellMktStyle: this.chip(s.sellDraft.orderType !== 'limit'),
+      sellLimStyle: this.chip(s.sellDraft.orderType === 'limit'),
+      pickSellMarket: () => this.setSell({ orderType:'market' }),
+      pickSellLimit: () => this.setSell({ orderType:'limit' }),
+      showSellLimit: s.sellDraft.orderType === 'limit',
+      sellLimitPriceText: sellLimPrice.toLocaleString('ko-KR'),
+      sellLimitDiffText: sellLimPct === 0 ? '지금 값 그대로야' : ('지금보다 ' + sellLimPct + '% 높은 값이야'),
+      // 팔 때는 지금보다 높은 값을 기다린다
+      sellLimitChips: [0, 3, 5, 10].map(v => ({
+        label: v === 0 ? '지금값' : ('+' + v + '%'),
+        style: this.chip(sellLimPct === v),
+        pick: () => this.setSell({ limitPct: v })
+      })),
+      hasSellWarn: !!sellWarn, sellWarnText: sellWarn,
 
+      // ── 2단계 · 사던 날의 기록 + 왜 파는지 ──────────────────────────
       retroAgoText: heldDays === 0 ? '오늘의 나' : (heldDays + '일 전의 나'),
       retroSentence: buyRec ? ([
         (REASONS.filter(r => r.code === buyRec.reason_code)[0] || {}).short,
         (PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).short
       ].filter(Boolean).join(',\n') + ' 샀어.') : '기록이 없어.',
+      // 매수 때 남긴 것들을 그대로 다시 보여준다
+      retroRows: buyRec ? [
+        { label: '산 날', value: (d => (d.getMonth() + 1) + '월 ' + d.getDate() + '일')(new Date(buyRec.ts)) },
+        { label: '산 만큼', value: (Math.round(buyRec.qty * 100) / 100) + '주 · ' + won(buyRec.amount_krw) },
+        { label: '왜 샀는지', value: (REASONS.filter(r => r.code === buyRec.reason_code)[0] || {}).label || '기록 없음' },
+        { label: '언제까지', value: (PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).label || '기록 없음' }
+      ].concat(buyRec.plan_target_price ? [{ label: '목표 가격', value: won(buyRec.plan_target_price) }] : [])
+       .concat(buyRec.memo ? [{ label: '그때 한 말', value: buyRec.memo }] : []) : [],
       hasRetroMemo: !!(buyRec && buyRec.memo), retroMemo: buyRec ? buyRec.memo : '',
       retroPnlText: (heldPct >= 0 ? '+' : '') + heldPct.toFixed(1) + '%',
       retroHeldText: heldDays === 0 ? '오늘' : (heldDays + '일'),
@@ -2990,47 +3057,93 @@ class Component extends DCLogic {
       })),
 
       sellSentence: sellReason ? (sellReason.short + ' 팔기로 했어') : '',
-      sellProceedsText: won(sellQty * price),
-      sellCtaLabel: s.sellStep === 5 ? '팔기!' : '다음',
-      sellCtaStyle: (sellOk && !(locked && s.sellStep === 5)) ? CTA_ON : CTA_OFF,
+      sellCtaLabel: s.sellStep === 2 ? '팔기' : '다음',
+      sellCtaStyle: (sellOk && !(locked && s.sellStep === 2)) ? CTA_ON : CTA_OFF,
+
+      // ── 3단계 · 매도 완료 (축하 연출 없음) ──────────────────────────
+      sellDoneKicker: sd.limit ? '기다리는 주문에 넣었어' : '매도 완료',
+      sellDoneHeadline: sd.name
+        ? (sd.limit
+          ? (sd.limit.toLocaleString('ko-KR') + '원이 되면\n' + sd.name + ' ' + sdQty + '를 팔게요')
+          : (sd.name + ' ' + sdQty + '를\n팔았어요'))
+        : '팔았어요',
+      sellDoneNote: sd.limit
+        ? '값이 목표에 닿을 때까지 키웅이가 지켜볼게.\n그동안 그 주식은 잠깐 맡아둘게.'
+        : '왜 팔았는지까지 남겨뒀어.\n아카이브에서 산 날과 판 날을 같이 볼 수 있어.',
+      sellDoneStock: sd.name || '',
+      sellDoneQty: sdQty,
+      sellDoneMoneyLabel: sd.limit ? '받게 될 돈' : '받은 돈',
+      sellDoneProceeds: won(sd.proceeds || 0),
+      hasBadge: !!sd.badge,
+      sellMemo: s.sellDraft.memo, sellMemoCount: s.sellDraft.memo.length,
+      sellMemoInput: e => { const v = e.target.value.slice(0, 50); this.setSell({ memo: v, memoSaved: false }); },
+      sellMemoBtnLabel: s.sellDraft.memoSaved ? '저장됐어 ✓' : '저장하기',
+      sellMemoBtnStyle: s.sellDraft.memoSaved
+        ? 'font-size:14px;font-weight:700;color:#8E93A8;padding:11px 18px;border-radius:999px;white-space:nowrap;background:#F1F2F8'
+        : 'font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F5327F',
+      saveSellMemo: () => {
+        if (s.sellDraft.memoSaved) return;
+        const v = (s.sellDraft.memo || '').trim();
+        this.setState(x => {
+          const recs = (x.sellRecords || []).slice();
+          if (recs.length) recs[recs.length - 1] = Object.assign({}, recs[recs.length - 1], { memo: v || null });
+          const n = Object.assign({}, x, {
+            sellRecords: recs,
+            sellDraft: Object.assign({}, x.sellDraft, { memoSaved: true })
+          });
+          this.persist(n); return n;
+        });
+      },
+
       sellBack: () => {
-        if (s.sellStep === 5 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'sell' });
+        if (s.sellStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'sell' });
+        if (s.sellStep === 3) { this.set({ screen:'portfolio' }); return; }
         if (s.sellStep === 1) this.set({ screen:'portfolio' }); else this.setState({ sellStep: s.sellStep - 1 });
       },
       sellNext: () => {
         if (!sellOk) return;
-        if (locked && s.sellStep === 5) return;
+        if (locked && s.sellStep === 2) return;
         if (s.sellStep === 1) { this.retroAt = Date.now(); this.setState({ sellStep: 2 }); return; }
-        if (s.sellStep === 2) { this.retroMs = this.retroAt ? Date.now() - this.retroAt : 0; this.setState({ sellStep: 3 }); return; }
-        if (s.sellStep === 3) { this.setState({ sellStep: showJudge ? 4 : 5 }); return; }
-        if (s.sellStep < 5) { this.setState({ sellStep: s.sellStep + 1 }); return; }
+        this.retroMs = this.retroAt ? Date.now() - this.retroAt : 0;
+        const isLimit = s.sellDraft.orderType === 'limit';
         const nm = this.state.acc[this.state.account];
         const hold = nm.holdings.slice();
+        const pend = (nm.pending || []).slice();
+        // 시장가든 지정가든 파는 주식은 바로 보유에서 빼둔다 (지정가는 예약으로 잡힌다)
         const idx = hold.map(h => h.code).indexOf(st.code);
         if (idx >= 0) {
           const left = hold[idx].qty - sellQty;
           if (left < 0.005) hold.splice(idx, 1); else hold[idx] = { code: hold[idx].code, qty: left, avg: hold[idx].avg };
         }
+        if (isLimit) pend.push({ id: 'ord_' + String(s.seq).padStart(4, '0'), code: st.code, side: 'sell', qty: sellQty, price: sellLimPrice });
         const rec = {
           order_id: 'ord_' + String(s.seq).padStart(4, '0'),
           user_id: s.account === 'child' ? 'child_minji' : 'parent_mom',
           symbol: st.code, qty: Math.round(sellQty * 10000) / 10000,
           linked_buy_order_id: buyRec ? buyRec.order_id : null,
+          order_type: isLimit ? 'limit' : 'market',
+          limit_price: isLimit ? sellLimPrice : null,
+          order_status: isLimit ? 'pending' : 'filled',
           sell_reason_code: s.sellDraft.reason,
           plan_match: planMatch,
           change_reason_code: (showJudge && planMatch === false) ? s.sellDraft.change : null,
           badge_awarded: showJudge && planMatch === true,
           retro_card_viewed_ms: this.retroMs || 0,
           pnl_pct_at_sell: Math.round(heldPct * 10) / 10,
-          held_days: heldDays, memo: null, ts: new Date().toISOString()
+          held_days: heldDays, avg: heldAvg, memo: null, ts: new Date().toISOString()
         };
         const acc2 = Object.assign({}, this.state.acc);
-        acc2[this.state.account] = { name: nm.name, cash: nm.cash + sellQty * price, holdings: hold, pending: nm.pending || [] };
+        acc2[this.state.account] = {
+          name: nm.name, cash: nm.cash + (isLimit ? 0 : sellProceeds), holdings: hold, pending: pend
+        };
         this.set({
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
-          seq: s.seq + 1, screen: 'done', doneKind: 'sell'
+          seq: s.seq + 1, sellStep: 3,
+          sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
+          sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, badge: showJudge && planMatch === true }
         });
+        if (isLimit) return;
         const behaviorEvent = { kind:'trade_filled', stockId:'KRX:' + st.code, side:'sell' };
         if (heldRow && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
           behaviorEvent.realizedPnlPct = (price - heldAvg) / heldAvg * 100;
@@ -3041,18 +3154,28 @@ class Component extends DCLogic {
       hasPending: (m.pending || []).length > 0,
       pendingCards: (m.pending || []).map(p => {
         const x = u.stocks.filter(y => y.code === p.code)[0];
+        const isSellOrder = p.side === 'sell';
         return {
           name: x ? x.name : p.code,
-          desc: p.price.toLocaleString('ko-KR') + '원이 되면 ' + won(p.amount) + ' 어치',
+          desc: p.price.toLocaleString('ko-KR') + '원이 되면 '
+            + (isSellOrder ? ((Math.round(p.qty * 100) / 100) + '주 팔기') : (won(p.amount) + ' 어치 사기')),
           cancel: () => {
             const nm2 = this.state.acc[this.state.account];
+            const hold2 = nm2.holdings.slice();
+            // 매도 예약을 취소하면 맡아뒀던 주식을 그대로 돌려준다
+            if (isSellOrder) {
+              const j = hold2.map(h => h.code).indexOf(p.code);
+              const back = this.lastBuy(p.code);
+              if (j >= 0) hold2[j] = { code: p.code, qty: hold2[j].qty + p.qty, avg: hold2[j].avg };
+              else hold2.push({ code: p.code, qty: p.qty, avg: back ? (back.amount_krw / (back.qty || 1)) : p.price });
+            }
             const acc3 = Object.assign({}, this.state.acc);
             acc3[this.state.account] = {
-              name: nm2.name, cash: nm2.cash + p.amount, holdings: nm2.holdings,
+              name: nm2.name, cash: nm2.cash + (isSellOrder ? 0 : (p.amount || 0)), holdings: hold2,
               pending: (nm2.pending || []).filter(q => q.id !== p.id)
             };
             this.set({ acc: acc3 });
-            this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + p.code, side:'buy' });
+            this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + p.code, side: isSellOrder ? 'sell' : 'buy' });
           }
         };
       }),
@@ -3105,10 +3228,10 @@ class Component extends DCLogic {
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
       goArchive: () => this.set({ screen:'archive' }),
-      startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false, doneKind:'buy' }); },
+      startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = { child:{name:'민지', cash:SEED, holdings:[], pending:[]}, parent:{name:'엄마', cash:SEED, holdings:[], pending:[]} };
-        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft(), doneKind:'buy' });
+        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft() });
       }
     };
   }

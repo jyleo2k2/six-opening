@@ -69,35 +69,21 @@
 
     { screen: 'tut-sell1', anchors: ['tut-sell1', 'tut-sell-next'],
       title: '얼마나 팔까',
-      what: '가진 것 중에 얼마나 팔지 골라. 전부 팔 수도 있고 조금만 팔 수도 있어.',
+      what: '가진 것 중에 얼마나 팔지 골라. 살 때처럼 주 수나 금액으로 넣을 수 있어.',
       term: '매도',
       concept: '주식을 파는 걸 매도라고 해. 팔면 그만큼 다시 돈으로 바뀌어서 지갑에 들어와. 다 팔지 않고 반만 파는 것도 방법이야. 오를지 내릴지 모를 때 반만 팔면 어느 쪽이 와도 덜 아쉬워.',
       go: 'tut-sell-next' },
 
     { screen: 'tut-sell2', anchors: ['tut-sell2', 'tut-sell-next'],
-      title: '얼마 벌었나 보기',
-      what: '살 때보다 올랐는지 내렸는지 여기서 보여줘.',
-      term: '수익과 손실',
-      concept: '산 값보다 오르면 수익, 내리면 손실이야. 손실이 났다고 실패한 건 아니야. 어른 투자자도 절반쯤은 틀려. 중요한 건 왜 그렇게 됐는지 알아보는 거야.',
-      go: 'tut-sell-next' },
-
-    { screen: 'tut-sell3', anchors: ['tut-sell3', 'tut-sell-next'],
-      title: '왜 파는지 고르기',
-      what: '이 회사를 왜 팔고 싶은지 골라.',
-      term: '매도 이유',
-      concept: '살 때 정한 계획대로 파는 건지, 아니면 무서워서 파는 건지 나눠 보는 게 중요해. 겁나서 파는 게 나쁜 건 아니지만, 그럴 때가 많으면 처음부터 조금만 사는 게 나을 수도 있어.',
-      go: 'tut-sell-next' },
-
-    { screen: 'tut-sell4', anchors: ['tut-sell4', 'tut-sell-next'],
-      title: '마음이 바뀐 이유',
-      what: '살 때 생각과 달라졌다면 무엇 때문인지 골라.',
+      title: '사던 날의 나 보기',
+      what: '살 때 왜 샀는지, 언제까지 갖고 있겠다고 했는지 다시 보여줄게. 그다음 왜 파는지 골라.',
       term: '되돌아보기',
-      concept: '살 때 "시즌 끝까지 갖고 있을래"라고 했는데 일주일 만에 팔았다면, 그 사이에 무슨 일이 있었던 거야. 그걸 적어두면 다음에 같은 실수를 덜 해.',
-      go: 'tut-sell-next' },
+      concept: '살 때 정한 계획대로 파는 건지, 아니면 무서워서 파는 건지 나눠 보는 게 중요해. 겁나서 파는 게 나쁜 건 아니지만, 그럴 때가 많으면 처음부터 조금만 사는 게 나을 수도 있어.',
+      hint: '다 고르면 팔기를 눌러', go: 'tut-sell-next' },
 
-    { screen: 'tut-sell5', anchors: ['tut-sell5', 'tut-sell-next'],
-      title: '팔기',
-      what: '마지막으로 확인하고 팔기를 누르면 끝이야.',
+    { screen: 'tut-sell3', anchors: ['tut-sell3'],
+      title: '팔았어요',
+      what: '판 것도 전부 남겨뒀어.',
       term: '기록',
       concept: '사고판 게 전부 아카이브에 쌓여. 언제 사서 언제 팔았는지, 그때 무슨 생각이었는지가 남아서 나중에 부모님과 같이 볼 수 있어. 이게 이 앱에서 제일 중요한 부분이야.' }
   ];
