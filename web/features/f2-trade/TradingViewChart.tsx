@@ -245,9 +245,8 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
     });
     let series: ISeriesApi<SeriesType, Time>;
     if (shownChartType === "line") {
-      const positive = points.at(-1)!.close >= points[0].close;
       const line = chart.addSeries(LineSeries, {
-        color: positive ? up : down,
+        color: up,
         lineWidth: 3,
         priceLineVisible: true,
         lastValueVisible: true,
