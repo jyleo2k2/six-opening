@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import { detectProactiveSignals } from "../../../shared/engine/proactive-help";
 import type { ChatBehaviorEvent } from "../../../shared/types/chatbot";
@@ -17,23 +18,66 @@ function parsedBehavior(value: unknown, now: number): ChatBehaviorEvent {
   return event;
 }
 
-test("주문 확인 취소 이벤트를 수신 시각으로 파싱한다", () => {
+test("매수 최종 확인 이탈 이벤트를 수신 시각으로 파싱한다", () => {
   assert.deepEqual(
     parseBehaviorEvent(
       {
-        kind: "order_confirmation_cancelled",
+        kind: "buy_confirmation_abandoned",
         stockId: "KRX:005930",
-        side: "buy",
         at: 1,
       },
       NOW,
     ),
     {
-      type: "order_confirmation_cancelled",
+      type: "buy_confirmation_abandoned",
       stockId: "KRX:005930",
-      side: "buy",
       at: NOW,
     },
+  );
+});
+
+test("프로토타입의 주문 화면 매수 취소만 최종 확인 이탈로 변환한다", () => {
+  const legacyEvent = {
+    kind: "order_confirmation_cancelled",
+    stockId: "KRX:005930",
+    side: "buy",
+  };
+  assert.deepEqual(parseBehaviorEvent(legacyEvent, NOW, { screen: "order" }), {
+    type: "buy_confirmation_abandoned",
+    stockId: "KRX:005930",
+    at: NOW,
+  });
+  assert.equal(parseBehaviorEvent(legacyEvent, NOW, { screen: "home" }), null);
+  assert.equal(
+    parseBehaviorEvent({ ...legacyEvent, side: "sell" }, NOW, { screen: "order" }),
+    null,
+  );
+});
+
+test("주문 방식 변경은 화면 맥락 갱신 전에도 market·limit 값만 받는다", () => {
+  const event = {
+    kind: "order_method_selected",
+    stockId: "KRX:005930",
+    orderFlowId: "buy_1",
+    orderType: "limit",
+  };
+  assert.deepEqual(parseBehaviorEvent(event, NOW, { screen: "order" }), {
+    type: "order_method_selected",
+    stockId: "KRX:005930",
+    orderFlowId: "buy_1",
+    orderType: "limit",
+    at: NOW,
+  });
+  assert.deepEqual(parseBehaviorEvent(event, NOW, { screen: "home" }), {
+    type: "order_method_selected",
+    stockId: "KRX:005930",
+    orderFlowId: "buy_1",
+    orderType: "limit",
+    at: NOW,
+  });
+  assert.equal(
+    parseBehaviorEvent({ ...event, orderType: "next" }, NOW, { screen: "order" }),
+    null,
   );
 });
 
@@ -147,22 +191,102 @@ test("잘못된 주문 숫자 필드만 제거한다", () => {
   }
 });
 
-test("매수·매도·매수 취소 3연속에서 switch 신호가 발화한다", () => {
+test("종목과 무관하게 매수 최종 확인 이탈 3회에서 buyHesitation 신호가 발화한다", () => {
   const events = [
     parsedBehavior(
-      { kind: "order_confirmation_cancelled", stockId: "KRX:005930", side: "buy" },
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:005930" },
+      NOW,
+    ),
+    {
+      type: "screen_entered" as const,
+      screen: "home" as const,
+      at: NOW + 1,
+    },
+    parsedBehavior(
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:005930" },
+      NOW + 2,
+    ),
+    parsedBehavior(
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:000660" },
+      NOW + 3,
+    ),
+  ];
+  assert.ok(detectProactiveSignals(events, NOW + 3).includes("buyHesitation"));
+});
+
+test("종목과 무관하게 최종 확인 이탈 2회까지는 발화하지 않는다", () => {
+  const events = [
+    parsedBehavior(
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:005930" },
       NOW,
     ),
     parsedBehavior(
-      { kind: "order_confirmation_cancelled", stockId: "KRX:005930", side: "sell" },
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:005930" },
+      NOW + 1,
+    ),
+  ];
+  assert.equal(detectProactiveSignals(events, NOW + 1).includes("buyHesitation"), false);
+});
+
+test("실제 유니버스 51종목 모두 5/5 뒤로가기 세 번에 발화한다", () => {
+  const universeSource = readFileSync(
+    new URL("../../../public/ui/assets/universe.js", import.meta.url),
+    "utf8",
+  );
+  const stockIds = Array.from(
+    universeSource.matchAll(/\['(\d{6})'/g),
+    (match) => `KRX:${match[1]}` as `KRX:${string}`,
+  );
+
+  assert.equal(stockIds.length, 51);
+  assert.equal(new Set(stockIds).size, 51);
+  for (const stockId of stockIds) {
+    const events = [
+      parseBehaviorEvent(
+        { kind: "order_confirmation_cancelled", stockId, side: "buy" },
+        NOW,
+        { screen: "order", stockId },
+      ),
+      parseBehaviorEvent(
+        { kind: "order_confirmation_cancelled", stockId, side: "buy" },
+        NOW + 1,
+        { screen: "order", stockId },
+      ),
+      parseBehaviorEvent(
+        { kind: "order_confirmation_cancelled", stockId, side: "buy" },
+        NOW + 2,
+        { screen: "order", stockId },
+      ),
+    ].filter((event): event is ChatBehaviorEvent => event !== null);
+
+    assert.equal(
+      detectProactiveSignals(events, NOW + 2).includes("buyHesitation"),
+      true,
+      stockId,
+    );
+  }
+});
+
+test("매수 체결 뒤 첫 이탈에는 buyHesitation 신호가 발화하지 않는다", () => {
+  const events = [
+    parsedBehavior(
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:005930" },
+      NOW,
+    ),
+    parsedBehavior(
+      { kind: "trade_filled", stockId: "KRX:005930", side: "buy" },
       NOW + 1,
     ),
     parsedBehavior(
-      { kind: "order_confirmation_cancelled", stockId: "KRX:005930", side: "buy" },
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:005930" },
       NOW + 2,
     ),
+    parsedBehavior(
+      { kind: "buy_confirmation_abandoned", stockId: "KRX:000660" },
+      NOW + 3,
+    ),
   ];
-  assert.ok(detectProactiveSignals(events, NOW + 2).includes("switch"));
+  assert.equal(detectProactiveSignals(events, NOW + 3).includes("buyHesitation"), false);
 });
 
 test("-12% 매도 체결 후 동일 종목 4회 재진입에서 lossRevisit 신호가 발화한다", () => {

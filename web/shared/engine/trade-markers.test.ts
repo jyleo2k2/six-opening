@@ -1,14 +1,11 @@
 import assert from "node:assert/strict";
-import { buildTradeMarkers, symbolTrades } from "./trade-markers";
-import type { Trade } from "../types/trade";
+import { buildTradeMarkers, type ChartTrade } from "./trade-markers";
 
-const base = { reason: "이 회사(제품)를 잘 알아", memo: "" } as const;
-
-const trades: Trade[] = [
-  { ...base, id: "c1", member: "child", symbol: "005930", side: "buy", quantity: 1, price: 70000, tradedAt: "2026-08-05T02:00:00.000Z" },
-  { ...base, id: "p1", member: "parent", symbol: "005930", side: "buy", quantity: 2, price: 72000, tradedAt: "2026-08-06T02:00:00.000Z" },
-  { ...base, id: "p2", member: "parent", symbol: "005930", side: "sell", quantity: 1, price: 74000, tradedAt: "2026-08-08T02:00:00.000Z" },
-  { ...base, id: "x1", member: "child", symbol: "000660", side: "buy", quantity: 1, price: 190000, tradedAt: "2026-08-07T02:00:00.000Z" },
+// `GET /api/trades?symbol=005930` 이 돌려주는 모양. 종목 필터와 수량 마스킹은 서버가 끝냈다.
+const trades: ChartTrade[] = [
+  { id: "c1", name: "김찬영", member: "child", side: "buy", price: 70000, quantity: 1, tradedAt: "2026-08-05T02:00:00.000Z" },
+  { id: "p1", name: "엄마", member: "parent", side: "buy", price: 72000, quantity: null, tradedAt: "2026-08-06T02:00:00.000Z" },
+  { id: "p2", name: "엄마", member: "parent", side: "sell", price: 74000, quantity: null, tradedAt: "2026-08-08T02:00:00.000Z" },
 ];
 
 const day = (iso: string) => Math.floor(new Date(iso).getTime() / 1000);
@@ -21,12 +18,7 @@ const candleTimes = [
   day("2026-08-08T00:00:00.000Z"),
 ];
 
-// 종목 필터 + 시간순 정렬
-const picked = symbolTrades(trades, "005930");
-assert.deepEqual(picked.map((trade) => trade.id), ["c1", "p1", "p2"]);
-assert.equal(symbolTrades(trades, "999999").length, 0);
-
-const markers = buildTradeMarkers({ trades: picked, viewer: "child", candleTimes });
+const markers = buildTradeMarkers({ trades, candleTimes });
 assert.equal(markers.length, 3);
 
 // 체결은 그 시각 이하의 마지막 봉에 붙는다 — 거래 순번이 아니라 실제 거래일 축이다
@@ -37,33 +29,23 @@ assert.equal(markers[2].time, day("2026-08-08T00:00:00.000Z"));
 // y 는 곧 체결가다. 라이브러리가 가격축에 그대로 얹는다
 assert.deepEqual(markers.map((marker) => marker.price), [70000, 72000, 74000]);
 assert.deepEqual(markers.map((marker) => marker.side), ["buy", "buy", "sell"]);
+assert.deepEqual(markers.map((marker) => marker.member), ["child", "parent", "parent"]);
 
-// 본인 마커에만 수량을 붙인다 — 타인 자산 규모 비노출 (v2.7 §10)
-assert.equal(markers[0].label, "민지 매수 1주");
+// 라벨의 이름은 profiles.name 을 그대로 쓴다. 수량은 서버가 남긴 것만 붙는다
+assert.equal(markers[0].label, "김찬영 매수 1주");
 assert.equal(markers[1].label, "엄마 매수");
 assert.equal(markers[2].label, "엄마 매도");
 
-// 부모 계정으로 보면 반대가 된다
-const parentView = buildTradeMarkers({ trades: picked, viewer: "parent", candleTimes });
-assert.equal(parentView[0].label, "민지 매수");
-assert.equal(parentView[1].label, "엄마 매수 2주");
-
-// 열람 계정을 모르면 아무에게도 수량을 붙이지 않는다
-const unknownViewer = buildTradeMarkers({ trades: picked, viewer: null, candleTimes });
-assert.deepEqual(
-  unknownViewer.map((marker) => marker.label),
-  ["민지 매수", "엄마 매수", "엄마 매도"],
-);
+// 응답 순서가 뒤집혀 와도 마커는 시간순이다
+const shuffled = buildTradeMarkers({ trades: [...trades].reverse(), candleTimes });
+assert.deepEqual(shuffled.map((marker) => marker.id), ["c1", "p1", "p2"]);
 
 // 첫 봉보다 이른 체결은 차트 범위 밖이라 버린다 — 없는 날짜에 찍으면 안 된다
-const older: Trade = { ...base, id: "old", member: "child", symbol: "005930", side: "buy", quantity: 1, price: 60000, tradedAt: "2026-07-01T02:00:00.000Z" };
-assert.equal(
-  buildTradeMarkers({ trades: [older], viewer: "child", candleTimes }).length,
-  0,
-);
+const older: ChartTrade = { id: "old", name: "김찬영", member: "child", side: "buy", price: 60000, quantity: 1, tradedAt: "2026-07-01T02:00:00.000Z" };
+assert.equal(buildTradeMarkers({ trades: [older], candleTimes }).length, 0);
 
 // 체결이 없거나 봉이 없으면 마커도 없다
-assert.deepEqual(buildTradeMarkers({ trades: [], viewer: "child", candleTimes }), []);
-assert.deepEqual(buildTradeMarkers({ trades: picked, viewer: "child", candleTimes: [] }), []);
+assert.deepEqual(buildTradeMarkers({ trades: [], candleTimes }), []);
+assert.deepEqual(buildTradeMarkers({ trades, candleTimes: [] }), []);
 
 console.log("trade marker tests passed");

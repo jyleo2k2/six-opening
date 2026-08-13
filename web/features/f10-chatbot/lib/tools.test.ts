@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { STOCKS } from "../../../shared/data/stocks";
 import { createReadOnlyToolRunner } from "./tools";
 import type { PersonalChatDataSource } from "./tools";
 import type { ChatSession } from "./session";
@@ -87,6 +88,20 @@ async function main() {
   );
   assert.equal(kiwoomBusiness.status, "ok");
   assert.equal(kiwoomBusiness.response.text.includes("주문을 중개"), true);
+
+  for (const stock of STOCKS) {
+    const stockResult = await runTool(
+      "approved_stock_facts",
+      { screen: "stock", stockId: stock.id, stockName: stock.name },
+      session,
+    );
+    assert.equal(stockResult.status, "ok", `${stock.name} 승인 응답이 없어`);
+    assert.deepEqual(
+      stockResult.response.uiAction,
+      { type: "open_screen", target: "stock", stockId: stock.id },
+      `${stock.name} 관련 화면 ID가 달라`,
+    );
+  }
 
   console.log("read-only chat tool tests passed");
 }

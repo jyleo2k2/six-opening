@@ -15,6 +15,7 @@ import type {
   ChatUiAction,
   ExplainChoice,
   ExplainTurn,
+  ProactiveSignal,
   StockExploreChoiceId,
   StockExploreTurn,
 } from "../../shared/types/chatbot";
@@ -56,6 +57,14 @@ type SheetDragState = {
   offsetY: number;
   velocityY: number;
 };
+type FloatingChatPosition = { x: number; y: number };
+type FloatingChatDragState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  origin: FloatingChatPosition;
+  moved: boolean;
+};
 
 const COPY = {
   service: "\ud0a4\uc6c0 \uac00\uc871 \ubaa8\uc758\ud22c\uc790 \ub9ac\uadf8",
@@ -67,9 +76,8 @@ const COPY = {
   orderQuantity: "\uc8fc\ubb38 \uc218\ub7c9",
   expectedAmount: "\uc608\uc0c1 \uae08\uc561 125,000\uc6d0",
   orderPractice: "주문 확인 연습",
-  orderPracticeDescription: "매수와 매도 확인을 취소한 행동은 도움 신호 판정에만 사용돼요.",
-  cancelBuy: "매수 확인 취소",
-  cancelSell: "매도 확인 취소",
+  orderPracticeDescription: "종목과 상관없이 매수 최종 확인 화면을 세 번 연이어 나가면 도움 신호가 나타나요.",
+  abandonBuy: "매수 최종 확인에서 뒤로가기",
   proactive: "\ud0a4\uc6c5\uc774\uc758 \uc120\uc81c \ub3c4\uc6c0",
   explain: "\uc0c1\ud669 \uc124\uba85",
   askDirectly: "\uc9c1\uc811 \uc9c8\ubb38",
@@ -87,6 +95,46 @@ const COPY = {
   openArchive: "아카이브에서 보기",
   avatar: "\uacf0",
 } as const;
+
+const PROACTIVE_BUBBLE_VISIBLE_MS = 8_000;
+const FLOATING_CHAT_RADIUS = 28;
+const PROACTIVE_BUBBLE_TOGGLE_COPY: Record<
+  ProactiveSignal,
+  { accept: string; decline: string }
+> = {
+  buyHesitation: { accept: "응!", decline: "아니" },
+  orderMethodConfusion: { accept: "그래!", decline: "싫어" },
+  dwell: { accept: "응!", decline: "아니" },
+  lossRevisit: { accept: "응!", decline: "아니" },
+};
+
+function defaultFloatingChatPosition(
+  prototypeScreen: PrototypeScreenRect | null,
+): FloatingChatPosition {
+  if (prototypeScreen) {
+    return {
+      x: prototypeScreen.left + prototypeScreen.width - 44 * prototypeScreen.scale,
+      y: prototypeScreen.top + prototypeScreen.height - 108 * prototypeScreen.scale,
+    };
+  }
+  const width = typeof window === "undefined" ? 390 : window.innerWidth;
+  const height = typeof window === "undefined" ? 844 : window.innerHeight;
+  return { x: width - 44, y: height - 108 };
+}
+
+function clampFloatingChatPosition(
+  position: FloatingChatPosition,
+  prototypeScreen: PrototypeScreenRect | null,
+): FloatingChatPosition {
+  const left = prototypeScreen?.left ?? 0;
+  const top = prototypeScreen?.top ?? 0;
+  const width = prototypeScreen?.width ?? (typeof window === "undefined" ? 390 : window.innerWidth);
+  const height = prototypeScreen?.height ?? (typeof window === "undefined" ? 844 : window.innerHeight);
+  return {
+    x: Math.min(left + width - FLOATING_CHAT_RADIUS, Math.max(left + FLOATING_CHAT_RADIUS, position.x)),
+    y: Math.min(top + height - FLOATING_CHAT_RADIUS, Math.max(top + FLOATING_CHAT_RADIUS, position.y)),
+  };
+}
 
 const SCREENS: Record<
   Screen,
@@ -226,19 +274,35 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
   const [isLoading, setIsLoading] = useState(false);
+  const [isBuyHesitationBubbleVisible, setIsBuyHesitationBubbleVisible] =
+    useState(false);
+  const [floatingChatPosition, setFloatingChatPosition] =
+    useState<FloatingChatPosition | null>(null);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
     useState<StockExploreActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const sheetDragRef = useRef<SheetDragState | null>(null);
+  const floatingChatDragRef = useRef<FloatingChatDragState | null>(null);
+  const suppressFloatingChatClickRef = useRef(false);
   const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
+  const signalVersion = useChatBehaviorStore((state) => state.activeSignalVersion);
   const recordBehaviorEvent = useChatBehaviorStore((state) => state.recordEvent);
   const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
-  const muteActiveSignal = useChatBehaviorStore((state) => state.muteActiveSignal);
 
   const currentScreen = SCREENS[screen];
+  const resolvedFloatingChatPosition = clampFloatingChatPosition(
+    floatingChatPosition ?? defaultFloatingChatPosition(prototypeScreen),
+    prototypeScreen,
+  );
+  const bubbleOpensLeft = resolvedFloatingChatPosition.x >=
+    (prototypeScreen
+      ? prototypeScreen.left + prototypeScreen.width / 2
+      : typeof window === "undefined"
+        ? 195
+        : window.innerWidth / 2);
   const chatContext = useMemo(
     () =>
       context ?? {
@@ -331,6 +395,20 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
+  useEffect(() => {
+    if (signal !== "buyHesitation") {
+      setIsBuyHesitationBubbleVisible(false);
+      return;
+    }
+
+    setIsBuyHesitationBubbleVisible(true);
+    const timer = window.setTimeout(
+      () => setIsBuyHesitationBubbleVisible(false),
+      PROACTIVE_BUBBLE_VISIBLE_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [signal, signalVersion]);
+
   function openChat() {
     setPrototypeScreen(
       getPrototypeScreenRect(window.innerWidth, window.innerHeight),
@@ -339,6 +417,70 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setIsSheetDragging(false);
     sheetDragRef.current = null;
     setIsOpen(true);
+  }
+
+  function openProactiveChat() {
+    if (!signal) {
+      openChat();
+      return;
+    }
+
+    setMessages((current) => [
+      ...current,
+      { role: "assistant", text: PROACTIVE_SCRIPTS[signal].text },
+    ]);
+    acceptActiveSignal();
+    openChat();
+    if (signal === "orderMethodConfusion") void ask("시장가가 뭐예요?");
+  }
+
+  function dismissProactiveHelp() {
+    setIsBuyHesitationBubbleVisible(false);
+    acceptActiveSignal();
+  }
+
+  function handleFloatingChatPointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    const origin = resolvedFloatingChatPosition;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    floatingChatDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      origin,
+      moved: false,
+    };
+  }
+
+  function handleFloatingChatPointerMove(event: ReactPointerEvent<HTMLButtonElement>) {
+    const drag = floatingChatDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const next = clampFloatingChatPosition(
+      { x: drag.origin.x + event.clientX - drag.startX, y: drag.origin.y + event.clientY - drag.startY },
+      prototypeScreen,
+    );
+    if (Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY) > 4) {
+      drag.moved = true;
+    }
+    setFloatingChatPosition(next);
+  }
+
+  function finishFloatingChatDrag(event: ReactPointerEvent<HTMLButtonElement>) {
+    const drag = floatingChatDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    suppressFloatingChatClickRef.current = drag.moved;
+    floatingChatDragRef.current = null;
+  }
+
+  function handleFloatingChatClick() {
+    if (suppressFloatingChatClickRef.current) {
+      suppressFloatingChatClickRef.current = false;
+      return;
+    }
+    if (signal) openProactiveChat();
+    else openChat();
   }
 
   function closeChat() {
@@ -601,11 +743,6 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     if (input.trim() && !isLoading) void ask(input);
   }
 
-  function dismissSignal() {
-    if (!signal) return;
-    muteActiveSignal(Date.now());
-  }
-
   function handleUiAction(action: ChatUiAction) {
     if (onUiAction) {
       onUiAction(action);
@@ -616,15 +753,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setStatus(`${action.label ?? "관련 화면"}으로 이동했어요`);
   }
 
-  function recordOrderCancellation(side: "buy" | "sell") {
+  function recordBuyConfirmationAbandonment() {
     if (!chatContext.stockId) return;
     recordBehaviorEvent({
-      type: "order_confirmation_cancelled",
+      type: "buy_confirmation_abandoned",
       stockId: chatContext.stockId,
-      side,
       at: Date.now(),
     });
-    setStatus(`${side === "buy" ? "매수" : "매도"} 확인을 취소했어요`);
+    setStatus("매수 최종 확인에서 뒤로갔어요");
   }
 
   return (
@@ -679,20 +815,13 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               <p className="mt-1 text-xs leading-5 text-ink/70">
                 {COPY.orderPracticeDescription}
               </p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="mt-3">
                 <button
-                  className="rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
-                  onClick={() => recordOrderCancellation("buy")}
+                  className="w-full rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
+                  onClick={recordBuyConfirmationAbandonment}
                   type="button"
                 >
-                  {COPY.cancelBuy}
-                </button>
-                <button
-                  className="rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
-                  onClick={() => recordOrderCancellation("sell")}
-                  type="button"
-                >
-                  {COPY.cancelSell}
+                  {COPY.abandonBuy}
                 </button>
               </div>
             </div>
@@ -700,53 +829,61 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         </section>
       </div>
 
-      {signal && (
+      {signal && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
         <aside
-          className="fixed bottom-24 left-1/2 z-20 w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-2xl border border-magenta/30 bg-white p-4 shadow-lg"
           aria-live="polite"
+          className="fixed z-20"
+          style={{
+            left: resolvedFloatingChatPosition.x + (bubbleOpensLeft ? 24 : -24),
+            top: resolvedFloatingChatPosition.y - 36,
+            width: prototypeScreen ? prototypeScreen.width / 2 : "50vw",
+            transform: bubbleOpensLeft
+              ? "translate(-100%, -100%)"
+              : "translateY(-100%)",
+          }}
         >
-          <div className="flex gap-3">
-            <div
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-navy text-lg text-white"
-              aria-hidden="true"
-            >
-              {COPY.avatar}
+          <div
+            className={`relative rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:size-4 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-[''] ${
+              bubbleOpensLeft ? "after:right-5" : "after:left-5"
+            }`}
+          >
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis px-1">
+              {PROACTIVE_SCRIPTS[signal].text}
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-navy/10 pt-3">
+              <button
+                className="rounded-xl bg-navy px-3 py-2 text-xs font-semibold text-white"
+                onClick={openProactiveChat}
+                type="button"
+              >
+                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].accept}
+              </button>
+              <button
+                className="rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
+                onClick={dismissProactiveHelp}
+                type="button"
+              >
+                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].decline}
+              </button>
             </div>
-            <div>
-              <p className="text-xs font-semibold text-magenta">
-                {COPY.proactive}
-              </p>
-              <p className="mt-1 text-sm font-semibold">
-                {PROACTIVE_SCRIPTS[signal].text}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-semibold">
-            <button
-              className="rounded-xl bg-navy px-2 py-3 text-white"
-              onClick={() => {
-                acceptActiveSignal();
-                openChat();
-              }}
-              type="button"
-            >
-              {COPY.askDirectly}
-            </button>
-            <button
-              className="rounded-xl bg-white px-2 py-3 text-ink ring-1 ring-gray/50"
-              onClick={dismissSignal}
-              type="button"
-            >
-              {COPY.dismiss}
-            </button>
           </div>
         </aside>
       )}
 
       <button
         aria-label={COPY.openChat}
-        className="fixed bottom-5 left-1/2 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
-        onClick={openChat}
+        className="fixed z-10 grid size-14 touch-none place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg cursor-grab active:cursor-grabbing"
+        onClick={handleFloatingChatClick}
+        onPointerCancel={finishFloatingChatDrag}
+        onPointerDown={handleFloatingChatPointerDown}
+        onPointerMove={handleFloatingChatPointerMove}
+        onPointerUp={finishFloatingChatDrag}
+        style={{
+          bottom: "auto",
+          left: resolvedFloatingChatPosition.x,
+          top: resolvedFloatingChatPosition.y,
+          transform: "translate(-50%, -50%)",
+        }}
         type="button"
       >
         {COPY.avatar}

@@ -6,7 +6,7 @@
     "build": "next build",
     "start": "next start",
     "seed:candles": "tsx scripts/seed-candles.ts",
-    "test": "tsx features/f2-trade/chart-data.test.ts && tsx features/f10-chatbot/lib/bottom-sheet.test.ts && tsx features/f10-chatbot/lib/contracts.test.ts && tsx features/f10-chatbot/lib/routing.test.ts && tsx features/f10-chatbot/lib/colloquial.test.ts && tsx features/f10-chatbot/lib/explain.test.ts && tsx features/f10-chatbot/lib/tools.test.ts && tsx features/f10-chatbot/lib/orchestrator.test.ts && tsx app/api/chat/route.test.ts && tsx app/api/quote/stock-candles.test.ts && tsx shared/engine/proactive-help.test.ts && tsx shared/engine/comment-filter.test.ts && tsx shared/engine/trade-markers.test.ts && tsx shared/store/prototype-trades.test.ts && tsx shared/llm/client.test.ts && tsx shared/llm/filter.test.ts && tsx shared/data/stocks.test.ts && tsx shared/data/chatbot-knowledge.test.ts && tsx shared/data/aviation-cosmetics-education.test.ts && tsx shared/data/game-education.test.ts && tsx shared/data/financial-education.test.ts && tsx shared/data/defense-education.test.ts && tsx shared/data/food-energy-education.test.ts && tsx shared/data/logistics-semiconductor-education.test.ts && tsx shared/data/automotive-shipbuilding-education.test.ts && tsx shared/data/entertainment-retail-education.test.ts"
+    "test": "tsx --test \"app/**/*.test.ts\" \"features/**/*.test.ts\" \"shared/**/*.test.ts\""
   },
   "dependencies": {
     "dotenv": "^17.4.2",

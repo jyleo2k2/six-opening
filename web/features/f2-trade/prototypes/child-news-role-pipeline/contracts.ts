@@ -25,10 +25,11 @@ export const SELECTOR_REJECT_CODES = [
 export type SelectorRejectCode = (typeof SELECTOR_REJECT_CODES)[number];
 export type NewsArticleScope = "market" | "company";
 export type NewsRole =
+  | "headline_screener"
   | "relevance_selector"
   | "child_news_editor"
   | "publication_reviewer";
-export type NewsReasoningEffort = "medium" | "high";
+export type NewsReasoningEffort = "medium" | "high" | "max";
 
 export type NewsSourceUnit = {
   id: string;
@@ -56,6 +57,20 @@ export type NewsUniverseCompany = {
 export type DifficultTerm = {
   term: string;
   sourceIds: string[];
+};
+
+export type HeadlineScreeningExample = {
+  title: string;
+  decision: "pass" | "reject";
+  reasonCodes: SelectorRejectCode[];
+  reason: string;
+};
+
+export type HeadlineScreenResult = {
+  articleId: string;
+  decision: "pass" | "reject";
+  reasonCodes: SelectorRejectCode[];
+  reasons: string[];
 };
 
 type SelectorBase = {
@@ -95,6 +110,9 @@ export const NEWS_BODY_ROLES = [
   "context",
 ] as const;
 
+export const CHILD_NEWS_SUMMARY_LINE_COUNT = 3;
+export const CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH = 36;
+
 export type NewsBodyRole = (typeof NEWS_BODY_ROLES)[number];
 
 export type ChildNewsDraft = {
@@ -115,6 +133,7 @@ export const REVIEW_CHECK_NAMES = [
   "directMateriality",
   "sourceFidelity",
   "focusAlignment",
+  "conciseThreeLineSummary",
   "noIrrelevantDetail",
   "attributionAndTiming",
   "allTermsEasy",
@@ -139,9 +158,20 @@ export type PublicationReview = {
   }>;
 };
 
+export type HeadlineScreenRoleRequest = {
+  role: "headline_screener";
+  reasoningEffort: "max";
+  article: Pick<
+    NewsSourceArticle,
+    "articleId" | "runDateKst" | "scope" | "title" | "publisher" | "publishedAt"
+  >;
+  universe: NewsUniverseCompany[];
+  examples: HeadlineScreeningExample[];
+};
+
 export type SelectorRoleRequest = {
   role: "relevance_selector";
-  reasoningEffort: "high";
+  reasoningEffort: "max";
   article: NewsSourceArticle;
   universe: NewsUniverseCompany[];
 };
@@ -169,13 +199,14 @@ export type EditorRoleRequest = {
 
 export type ReviewerRoleRequest = {
   role: "publication_reviewer";
-  reasoningEffort: "high";
+  reasoningEffort: "max";
   article: NewsSourceArticle;
   universe: NewsUniverseCompany[];
   draft: ChildNewsDraft;
 };
 
 export type NewsRoleRequest =
+  | HeadlineScreenRoleRequest
   | SelectorRoleRequest
   | EditorRoleRequest
   | ReviewerRoleRequest;
@@ -217,6 +248,7 @@ export const NEWS_EVALUATION_CRITERIA = [
   "notRoutineOrPromotional",
   "primarySubjectMatches",
   "noUnsupportedContext",
+  "conciseThreeLineSummary",
   "allTermsEasy",
   "factsMatchSource",
   "storageDecisionExplained",
@@ -325,6 +357,32 @@ function parseDifficultTerms(value: unknown) {
     terms.push({ term, sourceIds });
   }
   return terms;
+}
+
+export function parseHeadlineScreenResult(
+  value: unknown,
+): HeadlineScreenResult | null {
+  if (!isRecord(value)) return null;
+  const articleId = readString(value.articleId);
+  const reasons = readStringArray(value.reasons);
+  const rawReasonCodes = readStringArray(value.reasonCodes);
+  if (
+    articleId === null ||
+    reasons === null ||
+    rawReasonCodes === null ||
+    (value.decision !== "pass" && value.decision !== "reject") ||
+    !rawReasonCodes.every((code) =>
+      SELECTOR_REJECT_CODES.includes(code as SelectorRejectCode),
+    )
+  ) {
+    return null;
+  }
+  return {
+    articleId,
+    decision: value.decision,
+    reasonCodes: rawReasonCodes as SelectorRejectCode[],
+    reasons,
+  };
 }
 
 export function parseSelectorResult(value: unknown): SelectorResult | null {

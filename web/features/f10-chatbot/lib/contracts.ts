@@ -282,7 +282,7 @@ export function isAllowedUiAction(value: unknown): value is ChatUiAction {
     (label === undefined ||
       (typeof label === "string" && label.trim().length > 0 && label.length <= MAX_LABEL_LENGTH)) &&
     (stockId === undefined ||
-      (typeof stockId === "string" && /^KRX:\d{6}$/.test(stockId))) &&
+      (typeof stockId === "string" && STOCKS.some((stock) => stock.id === stockId))) &&
     (orderSide === undefined ||
       CHAT_ORDER_SIDES.includes(String(orderSide) as ChatUiAction["orderSide"] & string)) &&
     (orderStep === undefined ||

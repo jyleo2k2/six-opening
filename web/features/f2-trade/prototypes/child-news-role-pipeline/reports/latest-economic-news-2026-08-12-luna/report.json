@@ -4,12 +4,12 @@
   "runDateKst": "2026-08-12",
   "sourceRetrievedAt": "2026-08-12T01:33:39.485Z",
   "sourceBasis": "2026-08-12 네이버 뉴스 검색 후보의 제목·요약과 원문에서 확인한 핵심 사실 단위",
-  "generatedAt": "2026-08-13T01:55:24.609Z",
+  "generatedAt": "2026-08-13T07:19:04.648Z",
   "model": "gpt-5.6-luna",
   "articleCount": 10,
-  "expectationMatchedCount": 8,
-  "readyForStorageCount": 2,
-  "rejectedCount": 8,
+  "expectationMatchedCount": 9,
+  "readyForStorageCount": 3,
+  "rejectedCount": 7,
   "criteriaPassed": false,
   "cases": [
     {
@@ -39,68 +39,82 @@
       },
       "title": "삼성전자 4%·SK하이닉스 2% 상승…코스피 6500선 탈환[장중시황]",
       "sourceUrl": "https://www.news1.kr/finance/market-exr/6256503",
-      "pipelineStatus": "rejected",
-      "stage": "editor",
-      "reasonCodes": [
-        "UNEXPLAINED_TERM"
-      ],
-      "reasons": [
-        "바꿨다고 표시한 '주가'이 노출문에 남아 있습니다.",
-        "바꿨다고 표시한 '2%'이 노출문에 남아 있습니다."
-      ],
+      "pipelineStatus": "ready_for_storage",
+      "stage": "complete",
+      "reasonCodes": [],
+      "reasons": [],
       "expectation": {
         "expectedStatus": "ready_for_storage",
         "rationale": "당일 국내 장중 시황이다. 코스피 중심 사건만 남기고 코스닥 주변 사실을 홈 요약에 섞지 않아야 한다."
       },
-      "expectationMatched": false,
+      "expectationMatched": true,
       "criteria": {
         "allowedScope": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "허용 범위 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
+            "독립 출고 검수 allowedScope=true"
           ]
         },
         "notRoutineOrPromotional": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "일상·채용·행사·사회공헌·홍보 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
+            "선별자와 독립 검수자가 직접 중요 사건으로 통과"
           ]
         },
         "primarySubjectMatches": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "기사와 요약의 주인공 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
+            "독립 출고 검수 primarySubject=true"
           ]
         },
         "noUnsupportedContext": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "주변 사실 혼입 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
+            "독립 출고 검수 noIrrelevantDetail=true"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 conciseThreeLineSummary=true"
           ]
         },
         "allTermsEasy": {
           "outcome": "pass",
           "evidence": [
-            "전 용어 처리 위반을 UNEXPLAINED_TERM 코드로 닫힌 실패 처리"
+            "독립 출고 검수 allTermsEasy=true"
           ]
         },
         "factsMatchSource": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "숫자·날짜·출처 충실성 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
+            "독립 검수 sourceFidelity·attributionAndTiming=true"
           ]
         },
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/editor: 바꿨다고 표시한 '주가'이 노출문에 남아 있습니다. | 바꿨다고 표시한 '2%'이 노출문에 남아 있습니다."
+            "모든 게이트 통과로 ready_for_storage"
           ]
         }
       },
       "roleAttempts": [
         {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0079",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "당일 국내 시황과 선정 기업인 삼성전자·SK하이닉스의 주가 움직임을 다룬 기사이므로 본문을 확인한다."
+            ]
+          }
+        },
+        {
           "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0079",
@@ -108,14 +122,15 @@
             "kind": "market",
             "primaryStockIds": [],
             "eventType": "observed_market_move",
-            "focusStatement": "삼성전자와 SK하이닉스가 오르고 코스피가 6500선을 회복하는 등 국내 증시가 상승했다.",
+            "focusStatement": "삼성전자와 SK하이닉스 주가가 오르고 코스피가 6500선을 회복한 국내 장중 시장 흐름",
             "anchorSourceId": "S1",
             "includedSourceIds": [
-              "S1",
+              "S1"
+            ],
+            "excludedSourceIds": [
               "S2",
               "S3"
             ],
-            "excludedSourceIds": [],
             "difficultTerms": [
               {
                 "term": "주가",
@@ -124,145 +139,15 @@
                 ]
               },
               {
-                "term": "4%",
+                "term": "코스피",
                 "sourceIds": [
                   "S1"
-                ]
-              },
-              {
-                "term": "2%",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
-                "term": "코스피 6500선",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
-                "term": "코스닥",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "term": "반도체 소재·부품·장비 종목",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "term": "낙폭",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "term": "반도체 수출 흐름",
-                "sourceIds": [
-                  "S3"
-                ]
-              },
-              {
-                "term": "ADR",
-                "sourceIds": [
-                  "S3"
                 ]
               }
             ],
             "reasonCodes": [],
-            "reasons": []
-          }
-        },
-        {
-          "role": "child_news_editor",
-          "reasoningEffort": "medium",
-          "outcome": "returned",
-          "response": {
-            "articleId": "N0079",
-            "headline": {
-              "text": "삼성전자·SK하이닉스 오르고 국내 주요 주식시장 지수 6500 부근 회복",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            "homeSummary": {
-              "text": "12일 오전 삼성전자와 SK하이닉스의 주식 가격이 오르고 국내 주요 주식시장 지수가 6500 부근을 되찾았다.",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            "body": [
-              {
-                "role": "core_event",
-                "text": "12일 오전 삼성전자 주식 가격은 약 4%, SK하이닉스 주식 가격은 약 2% 올랐고, 국내 주요 주식시장 지수는 6500 부근을 회복했다.",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
-                "role": "context",
-                "text": "같은 시각 다른 주식시장에서도 반도체 재료·부품·장비 관련 회사 주식이 올랐고, 앞서 내렸던 폭을 줄였다.",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "role": "context",
-                "text": "기사에는 반도체를 해외에 파는 흐름과 미국에서 거래되는 SK하이닉스 주식 표시의 움직임이 배경으로 제시됐다.",
-                "sourceIds": [
-                  "S3"
-                ]
-              }
-            ],
-            "termTreatments": [
-              {
-                "term": "주가",
-                "treatment": "replaced",
-                "easyText": "주식 가격"
-              },
-              {
-                "term": "4%",
-                "treatment": "explained",
-                "easyText": "전체를 100으로 보았을 때 약 4만큼 변한 비율"
-              },
-              {
-                "term": "2%",
-                "treatment": "explained",
-                "easyText": "전체를 100으로 보았을 때 약 2만큼 변한 비율"
-              },
-              {
-                "term": "코스피 6500선",
-                "treatment": "replaced",
-                "easyText": "국내 주요 주식시장 지수 6500 부근"
-              },
-              {
-                "term": "코스닥",
-                "treatment": "replaced",
-                "easyText": "다른 주식시장"
-              },
-              {
-                "term": "반도체 소재·부품·장비 종목",
-                "treatment": "replaced",
-                "easyText": "반도체 재료·부품·장비 관련 회사 주식"
-              },
-              {
-                "term": "낙폭",
-                "treatment": "replaced",
-                "easyText": "앞서 내렸던 폭"
-              },
-              {
-                "term": "반도체 수출 흐름",
-                "treatment": "replaced",
-                "easyText": "반도체를 해외에 파는 흐름"
-              },
-              {
-                "term": "ADR",
-                "treatment": "replaced",
-                "easyText": "미국에서 거래되는 SK하이닉스 주식 표시"
-              }
+            "reasons": [
+              "당일 국내 장중 지수와 종목의 실제 상승 흐름을 직접 다룬 기사"
             ]
           }
         },
@@ -273,13 +158,13 @@
           "response": {
             "articleId": "N0079",
             "headline": {
-              "text": "삼성전자·SK하이닉스 오르고 국내 주식시장 상승",
+              "text": "코스피 6500선 회복, 삼성전자·SK하이닉스 주식값 상승",
               "sourceIds": [
                 "S1"
               ]
             },
             "homeSummary": {
-              "text": "12일 오전 삼성전자와 SK하이닉스의 주식값이 오르고 국내 대표 주가지수도 회복됐다.",
+              "text": "코스피 6500선이 회복됐고 삼성전자와 SK하이닉스 주식값이 올랐다.",
               "sourceIds": [
                 "S1"
               ]
@@ -287,23 +172,23 @@
             "body": [
               {
                 "role": "core_event",
-                "text": "12일 오전 삼성전자와 SK하이닉스의 주식값이 오르고 국내 대표 주가지수도 회복됐다.",
+                "text": "코스피 6500선이 회복됐다.",
                 "sourceIds": [
                   "S1"
                 ]
               },
               {
                 "role": "business_connection",
-                "text": "다른 국내 주가지수에서는 반도체에 쓰이는 재료·부품·기계를 만드는 회사들의 주식도 오르며 앞서 떨어진 폭을 줄였다.",
+                "text": "삼성전자 주식값 약 4%, SK하이닉스 약 2% 올랐다.",
                 "sourceIds": [
-                  "S2"
+                  "S1"
                 ]
               },
               {
                 "role": "context",
-                "text": "기사에서는 반도체를 해외에 파는 흐름과 미국 시장에서 거래된 SK하이닉스 주식의 움직임을 배경으로 들었다.",
+                "text": "코스피는 국내 주식시장을 대표하는 숫자야.",
                 "sourceIds": [
-                  "S3"
+                  "S1"
                 ]
               }
             ],
@@ -314,60 +199,275 @@
                 "easyText": "주식값"
               },
               {
-                "term": "4%",
-                "treatment": "replaced",
-                "easyText": "삼성전자 주식값이 오른 내용"
-              },
-              {
-                "term": "2%",
-                "treatment": "replaced",
-                "easyText": "SK하이닉스 주식값이 오른 내용"
-              },
-              {
-                "term": "코스피 6500선",
-                "treatment": "replaced",
-                "easyText": "국내 대표 주가지수의 회복"
-              },
-              {
-                "term": "코스닥",
-                "treatment": "replaced",
-                "easyText": "다른 국내 주가지수"
-              },
-              {
-                "term": "반도체 소재·부품·장비 종목",
-                "treatment": "replaced",
-                "easyText": "반도체에 쓰이는 재료·부품·기계를 만드는 회사들의 주식"
-              },
-              {
-                "term": "낙폭",
-                "treatment": "replaced",
-                "easyText": "앞서 떨어진 폭"
-              },
-              {
-                "term": "반도체 수출 흐름",
-                "treatment": "replaced",
-                "easyText": "반도체를 해외에 파는 흐름"
-              },
-              {
-                "term": "ADR",
-                "treatment": "replaced",
-                "easyText": "미국 시장에서 거래된 SK하이닉스 주식"
+                "term": "코스피",
+                "treatment": "explained",
+                "easyText": "코스피는 국내 주식시장을 대표하는 숫자야."
               }
             ]
+          }
+        },
+        {
+          "role": "publication_reviewer",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0079",
+            "independentKind": "market",
+            "primaryStockIds": [],
+            "eventType": "observed_market_move",
+            "focusStatement": "12일 오전 코스피 6500선 회복과 삼성전자·SK하이닉스 상승",
+            "anchorSourceIds": [
+              "S1"
+            ],
+            "checks": {
+              "allowedScope": true,
+              "primarySubject": true,
+              "directMateriality": true,
+              "sourceFidelity": false,
+              "focusAlignment": true,
+              "conciseThreeLineSummary": true,
+              "noIrrelevantDetail": true,
+              "attributionAndTiming": false,
+              "allTermsEasy": true,
+              "investmentSafety": true,
+              "noSentimentLabel": true
+            },
+            "issues": [
+              {
+                "code": "unsupported_context",
+                "explanation": "본문의 코스피 설명은 S1에 없는 내용인데 S1을 출처로 표시했다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "code": "timing_omission",
+                "explanation": "S1의 ‘12일 오전’이라는 시점이 제목·요약·본문에 유지되지 않았다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "role": "child_news_editor",
+          "reasoningEffort": "high",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0079",
+            "headline": {
+              "text": "12일 오전 삼성전자·SK하이닉스 주식값 오르고 코스피 6500선 회복",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "homeSummary": {
+              "text": "12일 오전 삼성전자 주식값은 약 4%, SK하이닉스는 약 2% 올랐고 코스피 6500선이 회복됐다.",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "body": [
+              {
+                "role": "core_event",
+                "text": "12일 오전 코스피 6500선이 회복됐다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "business_connection",
+                "text": "삼성전자 주식값은 약 4%, SK하이닉스는 약 2% 올랐다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "context",
+                "text": "코스피는 국내 주식시장을 대표하는 숫자야.",
+                "sourceIds": [
+                  "S1"
+                ]
+              }
+            ],
+            "termTreatments": [
+              {
+                "term": "주가",
+                "treatment": "replaced",
+                "easyText": "주식값"
+              },
+              {
+                "term": "코스피",
+                "treatment": "explained",
+                "easyText": "코스피는 국내 주식시장을 대표하는 숫자야."
+              }
+            ]
+          }
+        },
+        {
+          "role": "publication_reviewer",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0079",
+            "independentKind": "market",
+            "primaryStockIds": [],
+            "eventType": "observed_market_move",
+            "focusStatement": "코스피 6500선 회복과 삼성전자·SK하이닉스 상승",
+            "anchorSourceIds": [
+              "S1"
+            ],
+            "checks": {
+              "allowedScope": true,
+              "primarySubject": true,
+              "directMateriality": true,
+              "sourceFidelity": true,
+              "focusAlignment": true,
+              "conciseThreeLineSummary": true,
+              "noIrrelevantDetail": true,
+              "attributionAndTiming": true,
+              "allTermsEasy": true,
+              "investmentSafety": true,
+              "noSentimentLabel": true
+            },
+            "issues": []
           }
         }
       ],
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "N0079",
-        "stage": "editor",
-        "reasonCodes": [
-          "UNEXPLAINED_TERM"
-        ],
-        "reasons": [
-          "바꿨다고 표시한 '주가'이 노출문에 남아 있습니다.",
-          "바꿨다고 표시한 '2%'이 노출문에 남아 있습니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "N0079",
+          "runDateKst": "2026-08-12",
+          "scope": "market",
+          "title": "삼성전자 4%·SK하이닉스 2% 상승…코스피 6500선 탈환[장중시황]",
+          "publisher": "뉴스1",
+          "publishedAt": "2026-08-12T01:31:00.000Z",
+          "sourceUrl": "https://www.news1.kr/finance/market-exr/6256503",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "12일 오전 삼성전자 주가는 약 4%, SK하이닉스 주가는 약 2% 올랐고 코스피 6500선이 회복됐다."
+            },
+            {
+              "id": "S2",
+              "text": "같은 시각 코스닥의 반도체 소재·부품·장비 종목도 오르며 낙폭을 줄였다."
+            },
+            {
+              "id": "S3",
+              "text": "기사에서는 반도체 수출 흐름과 미국 시장에서 거래된 SK하이닉스 ADR의 움직임을 배경으로 들었다."
+            }
+          ]
+        },
+        "selection": {
+          "articleId": "N0079",
+          "primaryStockIds": [],
+          "focusStatement": "삼성전자와 SK하이닉스 주가가 오르고 코스피가 6500선을 회복한 국내 장중 시장 흐름",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1"
+          ],
+          "excludedSourceIds": [
+            "S2",
+            "S3"
+          ],
+          "difficultTerms": [
+            {
+              "term": "주가",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "코스피",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ],
+          "reasonCodes": [],
+          "reasons": [
+            "당일 국내 장중 지수와 종목의 실제 상승 흐름을 직접 다룬 기사"
+          ],
+          "decision": "accept",
+          "kind": "market",
+          "eventType": "observed_market_move"
+        },
+        "draft": {
+          "articleId": "N0079",
+          "headline": {
+            "text": "12일 오전 삼성전자·SK하이닉스 주식값 오르고 코스피 6500선 회복",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "12일 오전 삼성전자 주식값은 약 4%, SK하이닉스는 약 2% 올랐고 코스피 6500선이 회복됐다.",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "12일 오전 코스피 6500선이 회복됐다.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "core_event"
+            },
+            {
+              "text": "삼성전자 주식값은 약 4%, SK하이닉스는 약 2% 올랐다.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_connection"
+            },
+            {
+              "text": "코스피는 국내 주식시장을 대표하는 숫자야.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "context"
+            }
+          ],
+          "termTreatments": [
+            {
+              "term": "주가",
+              "easyText": "주식값",
+              "treatment": "replaced"
+            },
+            {
+              "term": "코스피",
+              "easyText": "코스피는 국내 주식시장을 대표하는 숫자야.",
+              "treatment": "explained"
+            }
+          ]
+        },
+        "review": {
+          "articleId": "N0079",
+          "independentKind": "market",
+          "primaryStockIds": [],
+          "eventType": "observed_market_move",
+          "focusStatement": "코스피 6500선 회복과 삼성전자·SK하이닉스 상승",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 2
       }
     },
@@ -402,74 +502,97 @@
       },
       "title": "대한-아시아나, 진짜 한 항공사로…12월 '통합 대한항공' 출범",
       "sourceUrl": "http://mbn.mk.co.kr/pages/news/newsView.php?category=mbn00009&news_seq_no=5211913",
-      "pipelineStatus": "ready_for_storage",
-      "stage": "complete",
-      "reasonCodes": [],
-      "reasons": [],
+      "pipelineStatus": "rejected",
+      "stage": "editor",
+      "reasonCodes": [
+        "UNEXPLAINED_TERM"
+      ],
+      "reasons": [
+        "선별된 어려운 용어를 모두 쉬운 말로 처리하지 않았습니다."
+      ],
       "expectation": {
         "expectedStatus": "ready_for_storage",
         "rationale": "선정 기업 두 곳이 직접 합병 당사자이고 주주총회 승인이라는 새 지배구조 사건이 확인된다."
       },
-      "expectationMatched": true,
+      "expectationMatched": false,
       "criteria": {
         "allowedScope": {
-          "outcome": "pass",
+          "outcome": "not_applicable",
           "evidence": [
-            "독립 출고 검수 allowedScope=true"
+            "허용 범위 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
           ]
         },
         "notRoutineOrPromotional": {
-          "outcome": "pass",
+          "outcome": "not_applicable",
           "evidence": [
-            "선별자와 독립 검수자가 직접 중요 사건으로 통과"
+            "일상·채용·행사·사회공헌·홍보 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
           ]
         },
         "primarySubjectMatches": {
-          "outcome": "pass",
+          "outcome": "not_applicable",
           "evidence": [
-            "독립 출고 검수 primarySubject=true"
+            "기사와 요약의 주인공 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
           ]
         },
         "noUnsupportedContext": {
-          "outcome": "pass",
+          "outcome": "not_applicable",
           "evidence": [
-            "독립 출고 검수 noIrrelevantDetail=true"
+            "주변 사실 혼입 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
           ]
         },
         "allTermsEasy": {
           "outcome": "pass",
           "evidence": [
-            "독립 출고 검수 allTermsEasy=true"
+            "전 용어 처리 위반을 UNEXPLAINED_TERM 코드로 닫힌 실패 처리"
           ]
         },
         "factsMatchSource": {
-          "outcome": "pass",
+          "outcome": "not_applicable",
           "evidence": [
-            "독립 검수 sourceFidelity·attributionAndTiming=true"
+            "숫자·날짜·출처 충실성 검증 전에 editor 단계에서 UNEXPLAINED_TERM로 종료"
           ]
         },
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "모든 게이트 통과로 ready_for_storage"
+            "rejected/editor: 선별된 어려운 용어를 모두 쉬운 말로 처리하지 않았습니다."
           ]
         }
       },
       "roleAttempts": [
         {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0085",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "대한항공·아시아나항공의 통합 출범이라는 선정 기업의 합병·지배구조 관련 중요 사건일 가능성이 있어 본문을 확인한다."
+            ]
+          }
+        },
+        {
           "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0085",
             "decision": "accept",
             "kind": "company",
             "primaryStockIds": [
-              "KRX:003490",
-              "KRX:020560"
+              "KRX:020560",
+              "KRX:003490"
             ],
             "eventType": "merger_or_ownership",
-            "focusStatement": "아시아나항공과 대한항공의 합병안이 주주총회에서 가결됐고, 12월 17일 통합 대한항공이 출범할 예정이다.",
+            "focusStatement": "아시아나항공의 주주총회에서 대한항공과의 합병안이 가결됐고, 두 회사는 12월 17일 통합 대한항공 출범을 예정했다.",
             "anchorSourceId": "S1",
             "includedSourceIds": [
               "S1",
@@ -481,9 +604,10 @@
             ],
             "difficultTerms": [
               {
-                "term": "임시 주주총회",
+                "term": "주주총회",
                 "sourceIds": [
-                  "S1"
+                  "S1",
+                  "S2"
                 ]
               },
               {
@@ -500,125 +624,20 @@
                 ]
               },
               {
-                "term": "주주총회 참석률",
+                "term": "참석률",
                 "sourceIds": [
                   "S2"
                 ]
               },
               {
-                "term": "81.9%",
+                "term": "찬성률",
                 "sourceIds": [
                   "S2"
-                ]
-              },
-              {
-                "term": "합병안 찬성률",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "term": "99.3%",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "term": "출범",
-                "sourceIds": [
-                  "S3"
                 ]
               }
             ],
             "reasonCodes": [],
-            "reasons": [
-              "대한항공과 아시아나항공이 합병의 직접 당사자이며, 주주총회에서 합병안이 가결된 새 지배구조 사건이 확인된다."
-            ]
-          }
-        },
-        {
-          "role": "child_news_editor",
-          "reasoningEffort": "medium",
-          "outcome": "returned",
-          "response": {
-            "articleId": "N0085",
-            "headline": {
-              "text": "아시아나항공과 대한항공을 하나로 합치는 계획, 주주 회의서 통과",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            "homeSummary": {
-              "text": "아시아나항공과 대한항공의 합병 계획이 12일 주주 회의에서 통과됐다.",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            "body": [
-              {
-                "role": "core_event",
-                "text": "아시아나항공과 대한항공을 하나로 합치는 계획이 12일 주주 회의에서 통과됐다.",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
-                "role": "context",
-                "text": "회의에 참석한 주주 비율은 81.9%였고, 계획에 찬성한 비율은 99.3%였다.",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "role": "business_connection",
-                "text": "두 회사는 12월 17일 하나가 된 대한항공을 시작할 예정이다.",
-                "sourceIds": [
-                  "S3"
-                ]
-              }
-            ],
-            "termTreatments": [
-              {
-                "term": "임시 주주총회",
-                "treatment": "replaced",
-                "easyText": "회사가 정한 날에 주주들이 모인 회의"
-              },
-              {
-                "term": "합병안",
-                "treatment": "replaced",
-                "easyText": "두 회사를 하나로 합치는 계획"
-              },
-              {
-                "term": "가결",
-                "treatment": "replaced",
-                "easyText": "회의에서 통과됨"
-              },
-              {
-                "term": "주주총회 참석률",
-                "treatment": "replaced",
-                "easyText": "주주 회의에 참석한 주주의 비율"
-              },
-              {
-                "term": "81.9%",
-                "treatment": "explained",
-                "easyText": "100명 가운데 81.9명이 참석했다는 뜻"
-              },
-              {
-                "term": "합병안 찬성률",
-                "treatment": "replaced",
-                "easyText": "두 회사를 합치는 계획에 찬성한 주주의 비율"
-              },
-              {
-                "term": "99.3%",
-                "treatment": "explained",
-                "easyText": "100명 가운데 99.3명이 찬성했다는 뜻"
-              },
-              {
-                "term": "출범",
-                "treatment": "replaced",
-                "easyText": "새 회사가 일을 시작함"
-              }
-            ]
+            "reasons": []
           }
         },
         {
@@ -628,13 +647,13 @@
           "response": {
             "articleId": "N0085",
             "headline": {
-              "text": "아시아나항공과 대한항공, 하나로 합치는 계획 통과",
+              "text": "아시아나항공, 대한항공 합치기 안 통과",
               "sourceIds": [
                 "S1"
               ]
             },
             "homeSummary": {
-              "text": "아시아나항공과 대한항공을 하나로 합치는 계획이 임시로 열린 주식 가진 사람들의 모임에서 통과됐다. 두 회사는 12월 17일 하나가 된 대한항공을 시작할 예정이라고 밝혔다.",
+              "text": "아시아나항공의 대한항공 합치기가 통과됐고, 통합 회사는 12월 17일 출범할 예정이다.",
               "sourceIds": [
                 "S1",
                 "S3"
@@ -643,73 +662,58 @@
             "body": [
               {
                 "role": "core_event",
-                "text": "아시아나항공과 대한항공을 하나로 합치는 계획이 임시로 열린 주식 가진 사람들의 모임에서 통과됐다.",
+                "text": "아시아나항공 주주들이 모인 회의에서 합치기 안이 통과됐다.",
                 "sourceIds": [
                   "S1"
                 ]
               },
               {
                 "role": "business_connection",
-                "text": "두 회사는 12월 17일 하나가 된 대한항공을 시작할 예정이라고 밝혔다.",
+                "text": "참석한 비율은 81.9%, 찬성한 비율은 99.3%였다.",
                 "sourceIds": [
-                  "S3"
+                  "S2"
                 ]
               },
               {
                 "role": "context",
-                "text": "아시아나항공이 공개한 모임 참석 비율은 81.9%였고, 두 회사를 하나로 합치는 계획에 찬성한 비율은 99.3%였다.",
+                "text": "두 회사는 12월 17일 통합 대한항공 출범을 예정했다.",
                 "sourceIds": [
-                  "S2"
+                  "S3"
                 ]
               }
             ],
             "termTreatments": [
               {
-                "term": "임시 주주총회",
+                "term": "주주총회",
                 "treatment": "replaced",
-                "easyText": "회사가 중요한 결정을 하려고 임시로 연 주식을 가진 사람들의 모임"
+                "easyText": "주주들이 모인 회의"
               },
               {
                 "term": "합병안",
                 "treatment": "replaced",
-                "easyText": "두 회사를 하나로 합치는 계획"
+                "easyText": "합치기 안"
               },
               {
                 "term": "가결",
                 "treatment": "replaced",
-                "easyText": "제안된 계획이 통과됨"
+                "easyText": "통과됐다"
               },
               {
-                "term": "주주총회 참석률",
-                "treatment": "explained",
-                "easyText": "주식을 가진 사람들의 모임에 참석한 사람의 비율"
-              },
-              {
-                "term": "81.9%",
-                "treatment": "explained",
-                "easyText": "모임에 참석한 사람의 비율이 81.9%라는 뜻"
-              },
-              {
-                "term": "합병안 찬성률",
-                "treatment": "explained",
-                "easyText": "두 회사를 하나로 합치는 계획에 찬성한 사람의 비율"
-              },
-              {
-                "term": "99.3%",
-                "treatment": "explained",
-                "easyText": "합치는 계획에 찬성한 사람의 비율이 99.3%라는 뜻"
-              },
-              {
-                "term": "출범",
+                "term": "참석률",
                 "treatment": "replaced",
-                "easyText": "새로운 회사가 일을 시작함"
+                "easyText": "참석한 비율"
+              },
+              {
+                "term": "찬성률",
+                "treatment": "replaced",
+                "easyText": "찬성한 비율"
               }
             ]
           }
         },
         {
           "role": "publication_reviewer",
-          "reasoningEffort": "high",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0085",
@@ -719,7 +723,7 @@
               "KRX:003490"
             ],
             "eventType": "merger_or_ownership",
-            "focusStatement": "아시아나항공과 대한항공의 합병안이 임시 주주총회에서 통과됐고, 두 회사는 12월 17일 통합 대한항공을 출범할 예정이라고 밝혔다.",
+            "focusStatement": "아시아나항공은 대한항공과의 합병안이 통과됐다고 밝혔고, 두 회사는 12월 17일 통합 대한항공을 출범할 예정이라고 밝혔다.",
             "anchorSourceIds": [
               "S1",
               "S3"
@@ -730,228 +734,111 @@
               "directMateriality": true,
               "sourceFidelity": true,
               "focusAlignment": true,
+              "conciseThreeLineSummary": true,
               "noIrrelevantDetail": true,
               "attributionAndTiming": true,
-              "allTermsEasy": true,
+              "allTermsEasy": false,
               "investmentSafety": true,
               "noSentimentLabel": true
             },
-            "issues": []
+            "issues": [
+              {
+                "code": "UNEXPLAINED_TERM",
+                "explanation": "본문 3행의 ‘출범’은 회사가 시작된다는 뜻의 어려운 표현인데, ‘시작’ 등 쉬운 말로 풀어 쓰지 않았다.",
+                "sourceIds": [
+                  "S3"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "role": "child_news_editor",
+          "reasoningEffort": "high",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0085",
+            "headline": {
+              "text": "아시아나항공과 대한항공의 합치기 안이 통과됐어요.",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "homeSummary": {
+              "text": "아시아나항공과 대한항공의 합치기 안이 통과됐고, 12월 17일 통합 대한항공을 시작할 예정이에요.",
+              "sourceIds": [
+                "S1",
+                "S3"
+              ]
+            },
+            "body": [
+              {
+                "role": "core_event",
+                "text": "아시아나항공 회사 주인 모임에서 대한항공과 합치기 안이 통과됐어요",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "business_connection",
+                "text": "참여 비율은 81.9%, 찬성 비율은 99.3%였어요.",
+                "sourceIds": [
+                  "S2"
+                ]
+              },
+              {
+                "role": "context",
+                "text": "두 회사는 12월 17일 통합 대한항공을 시작할 예정이에요.",
+                "sourceIds": [
+                  "S3"
+                ]
+              }
+            ],
+            "termTreatments": [
+              {
+                "term": "주주총회",
+                "treatment": "replaced",
+                "easyText": "회사 주인 모임"
+              },
+              {
+                "term": "합병안",
+                "treatment": "replaced",
+                "easyText": "합치기 안"
+              },
+              {
+                "term": "가결",
+                "treatment": "replaced",
+                "easyText": "통과"
+              },
+              {
+                "term": "참석률",
+                "treatment": "replaced",
+                "easyText": "참여 비율"
+              },
+              {
+                "term": "찬성률",
+                "treatment": "replaced",
+                "easyText": "찬성 비율"
+              },
+              {
+                "term": "출범",
+                "treatment": "replaced",
+                "easyText": "시작"
+              }
+            ]
           }
         }
       ],
       "pipelineResult": {
-        "status": "ready_for_storage",
-        "article": {
-          "articleId": "N0085",
-          "runDateKst": "2026-08-12",
-          "scope": "company",
-          "title": "대한-아시아나, 진짜 한 항공사로…12월 '통합 대한항공' 출범",
-          "publisher": "MBN",
-          "publishedAt": "2026-08-12T01:31:00.000Z",
-          "sourceUrl": "http://mbn.mk.co.kr/pages/news/newsView.php?category=mbn00009&news_seq_no=5211913",
-          "sourceUnits": [
-            {
-              "id": "S1",
-              "text": "아시아나항공은 12일 임시 주주총회에서 대한항공과의 합병안을 가결했다고 밝혔다."
-            },
-            {
-              "id": "S2",
-              "text": "아시아나항공이 공개한 주주총회 참석률은 81.9%, 합병안 찬성률은 99.3%였다."
-            },
-            {
-              "id": "S3",
-              "text": "두 회사는 12월 17일 통합 대한항공을 출범할 예정이라고 밝혔다."
-            },
-            {
-              "id": "S4",
-              "text": "대한항공은 2020년 11월 아시아나항공 인수를 공식화한 뒤 국내외 경쟁 당국의 기업결합 심사를 거쳤다."
-            }
-          ]
-        },
-        "selection": {
-          "articleId": "N0085",
-          "primaryStockIds": [
-            "KRX:003490",
-            "KRX:020560"
-          ],
-          "focusStatement": "아시아나항공과 대한항공의 합병안이 주주총회에서 가결됐고, 12월 17일 통합 대한항공이 출범할 예정이다.",
-          "anchorSourceId": "S1",
-          "includedSourceIds": [
-            "S1",
-            "S2",
-            "S3"
-          ],
-          "excludedSourceIds": [
-            "S4"
-          ],
-          "difficultTerms": [
-            {
-              "term": "임시 주주총회",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            {
-              "term": "합병안",
-              "sourceIds": [
-                "S1",
-                "S2"
-              ]
-            },
-            {
-              "term": "가결",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            {
-              "term": "주주총회 참석률",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "81.9%",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "합병안 찬성률",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "99.3%",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "출범",
-              "sourceIds": [
-                "S3"
-              ]
-            }
-          ],
-          "reasonCodes": [],
-          "reasons": [
-            "대한항공과 아시아나항공이 합병의 직접 당사자이며, 주주총회에서 합병안이 가결된 새 지배구조 사건이 확인된다."
-          ],
-          "decision": "accept",
-          "kind": "company",
-          "eventType": "merger_or_ownership"
-        },
-        "draft": {
-          "articleId": "N0085",
-          "headline": {
-            "text": "아시아나항공과 대한항공, 하나로 합치는 계획 통과",
-            "sourceIds": [
-              "S1"
-            ]
-          },
-          "homeSummary": {
-            "text": "아시아나항공과 대한항공을 하나로 합치는 계획이 임시로 열린 주식 가진 사람들의 모임에서 통과됐다. 두 회사는 12월 17일 하나가 된 대한항공을 시작할 예정이라고 밝혔다.",
-            "sourceIds": [
-              "S1",
-              "S3"
-            ]
-          },
-          "body": [
-            {
-              "text": "아시아나항공과 대한항공을 하나로 합치는 계획이 임시로 열린 주식 가진 사람들의 모임에서 통과됐다.",
-              "sourceIds": [
-                "S1"
-              ],
-              "role": "core_event"
-            },
-            {
-              "text": "두 회사는 12월 17일 하나가 된 대한항공을 시작할 예정이라고 밝혔다.",
-              "sourceIds": [
-                "S3"
-              ],
-              "role": "business_connection"
-            },
-            {
-              "text": "아시아나항공이 공개한 모임 참석 비율은 81.9%였고, 두 회사를 하나로 합치는 계획에 찬성한 비율은 99.3%였다.",
-              "sourceIds": [
-                "S2"
-              ],
-              "role": "context"
-            }
-          ],
-          "termTreatments": [
-            {
-              "term": "임시 주주총회",
-              "easyText": "회사가 중요한 결정을 하려고 임시로 연 주식을 가진 사람들의 모임",
-              "treatment": "replaced"
-            },
-            {
-              "term": "합병안",
-              "easyText": "두 회사를 하나로 합치는 계획",
-              "treatment": "replaced"
-            },
-            {
-              "term": "가결",
-              "easyText": "제안된 계획이 통과됨",
-              "treatment": "replaced"
-            },
-            {
-              "term": "주주총회 참석률",
-              "easyText": "주식을 가진 사람들의 모임에 참석한 사람의 비율",
-              "treatment": "explained"
-            },
-            {
-              "term": "81.9%",
-              "easyText": "모임에 참석한 사람의 비율이 81.9%라는 뜻",
-              "treatment": "explained"
-            },
-            {
-              "term": "합병안 찬성률",
-              "easyText": "두 회사를 하나로 합치는 계획에 찬성한 사람의 비율",
-              "treatment": "explained"
-            },
-            {
-              "term": "99.3%",
-              "easyText": "합치는 계획에 찬성한 사람의 비율이 99.3%라는 뜻",
-              "treatment": "explained"
-            },
-            {
-              "term": "출범",
-              "easyText": "새로운 회사가 일을 시작함",
-              "treatment": "replaced"
-            }
-          ]
-        },
-        "review": {
-          "articleId": "N0085",
-          "independentKind": "company",
-          "primaryStockIds": [
-            "KRX:020560",
-            "KRX:003490"
-          ],
-          "eventType": "merger_or_ownership",
-          "focusStatement": "아시아나항공과 대한항공의 합병안이 임시 주주총회에서 통과됐고, 두 회사는 12월 17일 통합 대한항공을 출범할 예정이라고 밝혔다.",
-          "anchorSourceIds": [
-            "S1",
-            "S3"
-          ],
-          "checks": {
-            "allowedScope": true,
-            "primarySubject": true,
-            "directMateriality": true,
-            "sourceFidelity": true,
-            "focusAlignment": true,
-            "noIrrelevantDetail": true,
-            "attributionAndTiming": true,
-            "allTermsEasy": true,
-            "investmentSafety": true,
-            "noSentimentLabel": true
-          },
-          "issues": []
-        },
+        "status": "rejected",
+        "articleId": "N0085",
+        "stage": "editor",
+        "reasonCodes": [
+          "UNEXPLAINED_TERM"
+        ],
+        "reasons": [
+          "선별된 어려운 용어를 모두 쉬운 말로 처리하지 않았습니다."
+        ],
         "editorAttempts": 2
       }
     },
@@ -984,11 +871,10 @@
         "ROUTINE_OR_PROMOTIONAL"
       ],
       "reasons": [
-        "채용·채용행사는 회사의 중요 사업 사건으로 게시하지 않습니다."
+        "CJ대한통운의 이색 채용설명회로, 제목상 채용 행사에 해당하며 직접적인 중요 사업 사건이 아니다."
       ],
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "prefilter",
         "acceptableReasonCodes": [
           "ROUTINE_OR_PROMOTIONAL"
         ],
@@ -1020,6 +906,12 @@
             "주변 사실 혼입 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
           ]
         },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
         "allTermsEasy": {
           "outcome": "not_applicable",
           "evidence": [
@@ -1035,11 +927,27 @@
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/prefilter: 채용·채용행사는 회사의 중요 사업 사건으로 게시하지 않습니다."
+            "rejected/prefilter: CJ대한통운의 이색 채용설명회로, 제목상 채용 행사에 해당하며 직접적인 중요 사업 사건이 아니다."
           ]
         }
       },
-      "roleAttempts": [],
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0173",
+            "decision": "reject",
+            "reasonCodes": [
+              "ROUTINE_OR_PROMOTIONAL"
+            ],
+            "reasons": [
+              "CJ대한통운의 이색 채용설명회로, 제목상 채용 행사에 해당하며 직접적인 중요 사업 사건이 아니다."
+            ]
+          }
+        }
+      ],
       "pipelineResult": {
         "status": "rejected",
         "articleId": "N0173",
@@ -1048,7 +956,7 @@
           "ROUTINE_OR_PROMOTIONAL"
         ],
         "reasons": [
-          "채용·채용행사는 회사의 중요 사업 사건으로 게시하지 않습니다."
+          "CJ대한통운의 이색 채용설명회로, 제목상 채용 행사에 해당하며 직접적인 중요 사업 사건이 아니다."
         ],
         "editorAttempts": 0
       }
@@ -1080,73 +988,82 @@
       },
       "title": "GS, 2분기 영업익 1.7조 전년비 253%↑",
       "sourceUrl": "http://www.smedaily.co.kr/news/articleView.html?idxno=361629",
-      "pipelineStatus": "rejected",
-      "stage": "reviewer",
-      "reasonCodes": [
-        "REVIEW_sourceFidelity",
-        "REVIEW_allTermsEasy",
-        "operating_profit_mischaracterized",
-        "unexplained_large_units"
-      ],
-      "reasons": [
-        "독립 검수 실패: sourceFidelity",
-        "독립 검수 실패: allTermsEasy",
-        "원문의 ‘영업이익’을 단순히 ‘사업으로 번 돈’이라고 표현해 비용을 뺀 이익이라는 의미가 본문에 충분히 전달되지 않는다.",
-        "본문에 ‘1.7조원’과 ‘253%’가 그대로 남아 있어 어린 독자가 금액 단위와 증가율을 이해하기 어렵다."
-      ],
+      "pipelineStatus": "ready_for_storage",
+      "stage": "complete",
+      "reasonCodes": [],
+      "reasons": [],
       "expectation": {
         "expectedStatus": "ready_for_storage",
-        "rationale": "실제 선정 51개 기업인 GS의 새 분기 실적이다. 영업이익·자원개발·석유화학·적자 등 남은 용어를 모두 쉽게 풀어야 한다."
+        "rationale": "실제 선정 51개 기업인 GS의 새 분기 실적이다. 영업이익·자원개발·석유화학·적자처럼 뜻을 바꾸면 사실이 달라지는 용어를 쉽게 풀어야 한다. %, 억원, 조원 표기 자체는 허용한다."
       },
-      "expectationMatched": false,
+      "expectationMatched": true,
       "criteria": {
         "allowedScope": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "허용 범위 검증 전에 reviewer 단계에서 REVIEW_sourceFidelity, REVIEW_allTermsEasy, operating_profit_mischaracterized, unexplained_large_units로 종료"
+            "독립 출고 검수 allowedScope=true"
           ]
         },
         "notRoutineOrPromotional": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "일상·채용·행사·사회공헌·홍보 검증 전에 reviewer 단계에서 REVIEW_sourceFidelity, REVIEW_allTermsEasy, operating_profit_mischaracterized, unexplained_large_units로 종료"
+            "선별자와 독립 검수자가 직접 중요 사건으로 통과"
           ]
         },
         "primarySubjectMatches": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "기사와 요약의 주인공 검증 전에 reviewer 단계에서 REVIEW_sourceFidelity, REVIEW_allTermsEasy, operating_profit_mischaracterized, unexplained_large_units로 종료"
+            "독립 출고 검수 primarySubject=true"
           ]
         },
         "noUnsupportedContext": {
-          "outcome": "not_applicable",
+          "outcome": "pass",
           "evidence": [
-            "주변 사실 혼입 검증 전에 reviewer 단계에서 REVIEW_sourceFidelity, REVIEW_allTermsEasy, operating_profit_mischaracterized, unexplained_large_units로 종료"
+            "독립 출고 검수 noIrrelevantDetail=true"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 conciseThreeLineSummary=true"
           ]
         },
         "allTermsEasy": {
           "outcome": "pass",
           "evidence": [
-            "전 용어 처리 위반을 REVIEW_allTermsEasy 코드로 닫힌 실패 처리"
+            "독립 출고 검수 allTermsEasy=true"
           ]
         },
         "factsMatchSource": {
           "outcome": "pass",
           "evidence": [
-            "숫자·날짜·출처 충실성 위반을 REVIEW_sourceFidelity 코드로 닫힌 실패 처리"
+            "독립 검수 sourceFidelity·attributionAndTiming=true"
           ]
         },
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/reviewer: 독립 검수 실패: sourceFidelity | 독립 검수 실패: allTermsEasy | 원문의 ‘영업이익’을 단순히 ‘사업으로 번 돈’이라고 표현해 비용을 뺀 이익이라는 의미가 본문에 충분히 전달되지 않는다. | 본문에 ‘1.7조원’과 ‘253%’가 그대로 남아 있어 어린 독자가 금액 단위와 증가율을 이해하기 어렵다."
+            "모든 게이트 통과로 ready_for_storage"
           ]
         }
       },
       "roleAttempts": [
         {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0359",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "선정 기업 GS의 2분기 영업이익과 전년 대비 증감이 제시된 실적 기사로 본문을 확인한다."
+            ]
+          }
+        },
+        {
           "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0359",
@@ -1156,31 +1073,18 @@
               "KRX:078930"
             ],
             "eventType": "earnings",
-            "focusStatement": "GS가 2분기 영업이익과 사업 부문별 실적을 발표했다.",
+            "focusStatement": "GS가 2분기 영업이익 1.7조원을 기록했다고 발표했다.",
             "anchorSourceId": "S1",
             "includedSourceIds": [
-              "S1",
+              "S1"
+            ],
+            "excludedSourceIds": [
               "S2",
               "S3"
             ],
-            "excludedSourceIds": [],
             "difficultTerms": [
               {
-                "term": "2분기",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
                 "term": "영업이익",
-                "sourceIds": [
-                  "S1",
-                  "S2",
-                  "S3"
-                ]
-              },
-              {
-                "term": "1.7조원",
                 "sourceIds": [
                   "S1"
                 ]
@@ -1190,68 +1094,28 @@
                 "sourceIds": [
                   "S1"
                 ]
-              },
-              {
-                "term": "253%",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
-                "term": "자원개발 부문",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "term": "국제 유가",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "term": "석유화학 부문",
-                "sourceIds": [
-                  "S3"
-                ]
-              },
-              {
-                "term": "원료 가격",
-                "sourceIds": [
-                  "S3"
-                ]
-              },
-              {
-                "term": "전 분기",
-                "sourceIds": [
-                  "S3"
-                ]
-              },
-              {
-                "term": "적자",
-                "sourceIds": [
-                  "S3"
-                ]
               }
             ],
             "reasonCodes": [],
-            "reasons": []
+            "reasons": [
+              "GS의 분기 영업이익 증가를 직접 확인한 실적 기사다."
+            ]
           }
         },
         {
           "role": "child_news_editor",
-          "reasoningEffort": "medium",
+          "reasoningEffort": "high",
           "outcome": "returned",
           "response": {
             "articleId": "N0359",
             "headline": {
-              "text": "GS, 두 번째 석 달 본업으로 번 돈 늘어",
+              "text": "GS, 2분기 장사로 번 돈 1.7조원 발표",
               "sourceIds": [
                 "S1"
               ]
             },
             "homeSummary": {
-              "text": "GS의 두 번째 석 달 본업으로 번 돈은 1.7조원(‘조원’은 매우 큰 금액을 세는 단위)으로, 지난해 같은 기간보다 253%(지난해 같은 기간과 비교해 늘어난 비율) 늘었다.",
+              "text": "GS는 2분기 장사로 번 돈이 1.7조원으로 지난해 같은 기간보다 253% 늘었다고 발표했다.",
               "sourceIds": [
                 "S1"
               ]
@@ -1259,88 +1123,43 @@
             "body": [
               {
                 "role": "core_event",
-                "text": "GS의 두 번째 석 달 본업으로 번 돈은 1.7조원(‘조원’은 매우 큰 금액을 세는 단위)으로, 지난해 같은 기간보다 253%(지난해 같은 기간과 비교해 늘어난 비율) 늘었다.",
+                "text": "GS가 2분기 장사로 번 돈을 발표했다.",
                 "sourceIds": [
                   "S1"
                 ]
               },
               {
                 "role": "business_connection",
-                "text": "GS에너지의 자원을 찾고 개발하는 사업은 세계 시장의 기름값이 오르면서 본업으로 번 돈이 늘었다.",
+                "text": "발표한 금액은 1.7조원이다.",
                 "sourceIds": [
-                  "S2"
+                  "S1"
                 ]
               },
               {
                 "role": "context",
-                "text": "반면 석유를 원료로 제품을 만드는 사업은 제품을 만들 때 쓰는 재료값 상승을 제품 가격에 충분히 반영하지 못해, 바로 앞선 석 달보다 번 돈보다 쓴 돈이 많은 상태로 바뀌었다.",
+                "text": "지난해 같은 기간보다 253% 늘었다.",
                 "sourceIds": [
-                  "S3"
+                  "S1"
                 ]
               }
             ],
             "termTreatments": [
               {
-                "term": "2분기",
-                "treatment": "replaced",
-                "easyText": "두 번째 석 달"
-              },
-              {
                 "term": "영업이익",
                 "treatment": "replaced",
-                "easyText": "본업으로 번 돈"
-              },
-              {
-                "term": "1.7조원",
-                "treatment": "explained",
-                "easyText": "1.7조원에서 ‘조원’은 매우 큰 금액을 세는 단위"
+                "easyText": "장사로 번 돈"
               },
               {
                 "term": "전년비",
                 "treatment": "replaced",
-                "easyText": "지난해 같은 기간과 비교해"
-              },
-              {
-                "term": "253%",
-                "treatment": "explained",
-                "easyText": "지난해 같은 기간과 비교해 늘어난 비율"
-              },
-              {
-                "term": "자원개발 부문",
-                "treatment": "replaced",
-                "easyText": "자원을 찾고 개발하는 사업"
-              },
-              {
-                "term": "국제 유가",
-                "treatment": "replaced",
-                "easyText": "세계 시장의 기름값"
-              },
-              {
-                "term": "석유화학 부문",
-                "treatment": "replaced",
-                "easyText": "석유를 원료로 제품을 만드는 사업"
-              },
-              {
-                "term": "원료 가격",
-                "treatment": "replaced",
-                "easyText": "제품을 만들 때 쓰는 재료값"
-              },
-              {
-                "term": "전 분기",
-                "treatment": "replaced",
-                "easyText": "바로 앞선 석 달"
-              },
-              {
-                "term": "적자",
-                "treatment": "replaced",
-                "easyText": "번 돈보다 쓴 돈이 많은 상태"
+                "easyText": "지난해 같은 기간보다"
               }
             ]
           }
         },
         {
           "role": "publication_reviewer",
-          "reasoningEffort": "high",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0359",
@@ -1349,7 +1168,7 @@
               "KRX:078930"
             ],
             "eventType": "earnings",
-            "focusStatement": "GS가 2분기 영업이익 1.7조원을 발표했으며, 지난해 같은 기간보다 253% 늘었다.",
+            "focusStatement": "GS가 2분기 영업이익 1.7조원이 전년보다 253% 늘었다고 발표했다.",
             "anchorSourceIds": [
               "S1"
             ],
@@ -1359,186 +1178,155 @@
               "directMateriality": true,
               "sourceFidelity": true,
               "focusAlignment": true,
+              "conciseThreeLineSummary": true,
               "noIrrelevantDetail": true,
-              "attributionAndTiming": false,
+              "attributionAndTiming": true,
               "allTermsEasy": true,
               "investmentSafety": true,
               "noSentimentLabel": true
             },
-            "issues": [
-              {
-                "code": "ATTRIBUTION_OMITTED",
-                "explanation": "원문은 GS가 실적을 발표했다고 밝혔지만, draft는 이를 GS의 확정 실적처럼 직접 서술해 발표 주체의 귀속을 유지하지 않았다.",
-                "sourceIds": [
-                  "S1"
-                ]
-              }
-            ]
-          }
-        },
-        {
-          "role": "child_news_editor",
-          "reasoningEffort": "high",
-          "outcome": "returned",
-          "response": {
-            "articleId": "N0359",
-            "headline": {
-              "text": "GS, 두 번째 분기 사업으로 번 돈 1.7조원이라고 발표",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            "homeSummary": {
-              "text": "GS는 두 번째 분기 사업으로 번 돈이 1.7조원이고, 지난해 같은 기간보다 253% 늘었다고 발표했다.",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            "body": [
-              {
-                "role": "core_event",
-                "text": "GS는 두 번째 분기에 사업으로 번 돈이 1.7조원이고, 지난해 같은 기간보다 253% 늘었다고 발표했다.",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
-                "role": "business_connection",
-                "text": "GS에너지의 땅속 자원을 찾고 개발하는 사업에서는 세계 시장의 기름값이 올랐고, 사업으로 번 돈도 늘었다.",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
-                "role": "context",
-                "text": "석유로 여러 제품을 만드는 사업에서는 제품을 만들 때 쓰는 재료값이 오른 것을 제품 가격에 충분히 반영하지 못했다. 이 사업의 결과는 바로 앞 기간과 달리 번 돈보다 쓴 돈이 많은 상태로 바뀌었다.",
-                "sourceIds": [
-                  "S3"
-                ]
-              }
-            ],
-            "termTreatments": [
-              {
-                "term": "2분기",
-                "treatment": "replaced",
-                "easyText": "한 해의 두 번째 기간"
-              },
-              {
-                "term": "영업이익",
-                "treatment": "replaced",
-                "easyText": "사업에서 번 돈에서 사업에 든 비용을 뺀 금액"
-              },
-              {
-                "term": "1.7조원",
-                "treatment": "explained",
-                "easyText": "사업으로 번 돈을 아주 큰 돈 단위로 나타낸 표현"
-              },
-              {
-                "term": "전년비",
-                "treatment": "replaced",
-                "easyText": "지난해 같은 기간과 비교한 변화"
-              },
-              {
-                "term": "253%",
-                "treatment": "explained",
-                "easyText": "지난해 같은 기간과 비교해 늘어난 정도를 비율로 나타낸 수치"
-              },
-              {
-                "term": "자원개발 부문",
-                "treatment": "replaced",
-                "easyText": "땅속 자원을 찾아 개발하는 사업 분야"
-              },
-              {
-                "term": "국제 유가",
-                "treatment": "replaced",
-                "easyText": "세계 시장에서 정해지는 기름값"
-              },
-              {
-                "term": "석유화학 부문",
-                "treatment": "replaced",
-                "easyText": "석유로 여러 제품을 만드는 사업 분야"
-              },
-              {
-                "term": "원료 가격",
-                "treatment": "replaced",
-                "easyText": "제품을 만들 때 쓰는 재료의 값"
-              },
-              {
-                "term": "전 분기",
-                "treatment": "replaced",
-                "easyText": "바로 앞의 기간"
-              },
-              {
-                "term": "적자",
-                "treatment": "replaced",
-                "easyText": "번 돈보다 쓴 돈이 많은 상태"
-              }
-            ]
-          }
-        },
-        {
-          "role": "publication_reviewer",
-          "reasoningEffort": "high",
-          "outcome": "returned",
-          "response": {
-            "articleId": "N0359",
-            "independentKind": "company",
-            "primaryStockIds": [
-              "KRX:078930"
-            ],
-            "eventType": "earnings",
-            "focusStatement": "GS가 두 번째 기간의 영업이익이 1.7조원으로 지난해 같은 기간보다 253% 늘었다고 발표했다.",
-            "anchorSourceIds": [
-              "S1"
-            ],
-            "checks": {
-              "allowedScope": true,
-              "primarySubject": true,
-              "directMateriality": true,
-              "sourceFidelity": false,
-              "focusAlignment": true,
-              "noIrrelevantDetail": true,
-              "attributionAndTiming": true,
-              "allTermsEasy": false,
-              "investmentSafety": true,
-              "noSentimentLabel": true
-            },
-            "issues": [
-              {
-                "code": "operating_profit_mischaracterized",
-                "explanation": "원문의 ‘영업이익’을 단순히 ‘사업으로 번 돈’이라고 표현해 비용을 뺀 이익이라는 의미가 본문에 충분히 전달되지 않는다.",
-                "sourceIds": [
-                  "S1"
-                ]
-              },
-              {
-                "code": "unexplained_large_units",
-                "explanation": "본문에 ‘1.7조원’과 ‘253%’가 그대로 남아 있어 어린 독자가 금액 단위와 증가율을 이해하기 어렵다.",
-                "sourceIds": [
-                  "S1"
-                ]
-              }
-            ]
+            "issues": []
           }
         }
       ],
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "N0359",
-        "stage": "reviewer",
-        "reasonCodes": [
-          "REVIEW_sourceFidelity",
-          "REVIEW_allTermsEasy",
-          "operating_profit_mischaracterized",
-          "unexplained_large_units"
-        ],
-        "reasons": [
-          "독립 검수 실패: sourceFidelity",
-          "독립 검수 실패: allTermsEasy",
-          "원문의 ‘영업이익’을 단순히 ‘사업으로 번 돈’이라고 표현해 비용을 뺀 이익이라는 의미가 본문에 충분히 전달되지 않는다.",
-          "본문에 ‘1.7조원’과 ‘253%’가 그대로 남아 있어 어린 독자가 금액 단위와 증가율을 이해하기 어렵다."
-        ],
-        "editorAttempts": 2
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "N0359",
+          "runDateKst": "2026-08-12",
+          "scope": "company",
+          "title": "GS, 2분기 영업익 1.7조 전년비 253%↑",
+          "publisher": "중소기업신문",
+          "publishedAt": "2026-08-12T01:24:00.000Z",
+          "sourceUrl": "http://www.smedaily.co.kr/news/articleView.html?idxno=361629",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "GS는 2분기 영업이익이 1.7조원으로 전년비 253% 늘었다고 발표했다."
+            },
+            {
+              "id": "S2",
+              "text": "GS에너지의 자원개발 부문은 국제 유가 상승에 따라 영업이익이 늘었다."
+            },
+            {
+              "id": "S3",
+              "text": "반면 석유화학 부문은 원료 가격 상승을 제품 가격에 충분히 반영하지 못해 전 분기보다 적자로 바뀌었다."
+            }
+          ]
+        },
+        "selection": {
+          "articleId": "N0359",
+          "primaryStockIds": [
+            "KRX:078930"
+          ],
+          "focusStatement": "GS가 2분기 영업이익 1.7조원을 기록했다고 발표했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1"
+          ],
+          "excludedSourceIds": [
+            "S2",
+            "S3"
+          ],
+          "difficultTerms": [
+            {
+              "term": "영업이익",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "전년비",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ],
+          "reasonCodes": [],
+          "reasons": [
+            "GS의 분기 영업이익 증가를 직접 확인한 실적 기사다."
+          ],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "N0359",
+          "headline": {
+            "text": "GS, 2분기 장사로 번 돈 1.7조원 발표",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "GS는 2분기 장사로 번 돈이 1.7조원으로 지난해 같은 기간보다 253% 늘었다고 발표했다.",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "GS가 2분기 장사로 번 돈을 발표했다.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "core_event"
+            },
+            {
+              "text": "발표한 금액은 1.7조원이다.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_connection"
+            },
+            {
+              "text": "지난해 같은 기간보다 253% 늘었다.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "context"
+            }
+          ],
+          "termTreatments": [
+            {
+              "term": "영업이익",
+              "easyText": "장사로 번 돈",
+              "treatment": "replaced"
+            },
+            {
+              "term": "전년비",
+              "easyText": "지난해 같은 기간보다",
+              "treatment": "replaced"
+            }
+          ]
+        },
+        "review": {
+          "articleId": "N0359",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:078930"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "GS가 2분기 영업이익 1.7조원이 전년보다 253% 늘었다고 발표했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
       }
     },
     {
@@ -1569,16 +1357,15 @@
       "title": "SK하이닉스 직장인 행복도 상위 3%…삼성전자는",
       "sourceUrl": "https://www.edaily.co.kr/news/newspath.asp?newsid=03939286645546664",
       "pipelineStatus": "rejected",
-      "stage": "selector",
+      "stage": "prefilter",
       "reasonCodes": [
         "NO_DIRECT_MATERIALITY"
       ],
       "reasons": [
-        "직장인 행복도 조사 결과일 뿐, 선정 기업의 실적·계약·생산·규제 등 허용된 직접 사건이 아니다."
+        "직장인 행복도 순위·비교는 직접적인 사업·재무·운영 중요 사건이 아닌 고용주 이미지성 내용이다."
       ],
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": [
           "ROUTINE_OR_PROMOTIONAL",
           "NO_DIRECT_MATERIALITY"
@@ -1596,62 +1383,60 @@
         "notRoutineOrPromotional": {
           "outcome": "not_applicable",
           "evidence": [
-            "일상·채용·행사·사회공헌·홍보 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY로 종료"
+            "일상·채용·행사·사회공헌·홍보 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "primarySubjectMatches": {
           "outcome": "not_applicable",
           "evidence": [
-            "기사와 요약의 주인공 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY로 종료"
+            "기사와 요약의 주인공 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "noUnsupportedContext": {
           "outcome": "not_applicable",
           "evidence": [
-            "주변 사실 혼입 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY로 종료"
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "allTermsEasy": {
           "outcome": "not_applicable",
           "evidence": [
-            "전 용어 처리 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY로 종료"
+            "전 용어 처리 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "factsMatchSource": {
           "outcome": "not_applicable",
           "evidence": [
-            "숫자·날짜·출처 충실성 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY로 종료"
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/selector: 직장인 행복도 조사 결과일 뿐, 선정 기업의 실적·계약·생산·규제 등 허용된 직접 사건이 아니다."
+            "rejected/prefilter: 직장인 행복도 순위·비교는 직접적인 사업·재무·운영 중요 사건이 아닌 고용주 이미지성 내용이다."
           ]
         }
       },
       "roleAttempts": [
         {
-          "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "role": "headline_screener",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0700",
             "decision": "reject",
-            "kind": "ineligible",
-            "primaryStockIds": [],
-            "eventType": "none",
-            "focusStatement": "",
-            "anchorSourceId": "",
-            "includedSourceIds": [],
-            "excludedSourceIds": [],
-            "difficultTerms": [],
             "reasonCodes": [
               "NO_DIRECT_MATERIALITY",
               "ROUTINE_OR_PROMOTIONAL"
             ],
             "reasons": [
-              "직장인 행복도 조사 결과일 뿐, 선정 기업의 실적·계약·생산·규제 등 허용된 직접 사건이 아니다."
+              "직장인 행복도 순위·비교는 직접적인 사업·재무·운영 중요 사건이 아닌 고용주 이미지성 내용이다."
             ]
           }
         }
@@ -1659,12 +1444,12 @@
       "pipelineResult": {
         "status": "rejected",
         "articleId": "N0700",
-        "stage": "selector",
+        "stage": "prefilter",
         "reasonCodes": [
           "NO_DIRECT_MATERIALITY"
         ],
         "reasons": [
-          "직장인 행복도 조사 결과일 뿐, 선정 기업의 실적·계약·생산·규제 등 허용된 직접 사건이 아니다."
+          "직장인 행복도 순위·비교는 직접적인 사업·재무·운영 중요 사건이 아닌 고용주 이미지성 내용이다."
         ],
         "editorAttempts": 0
       }
@@ -1730,6 +1515,12 @@
             "독립 출고 검수 noIrrelevantDetail=true"
           ]
         },
+        "conciseThreeLineSummary": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 conciseThreeLineSummary=true"
+          ]
+        },
         "allTermsEasy": {
           "outcome": "pass",
           "evidence": [
@@ -1751,8 +1542,21 @@
       },
       "roleAttempts": [
         {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0263",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "선정 기업 현대차의 노조 부분파업 돌입이라는 운영 관련 사건이 명시돼 있어 본문을 확인한다."
+            ]
+          }
+        },
+        {
           "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0263",
@@ -1762,7 +1566,7 @@
               "KRX:005380"
             ],
             "eventType": "material_operational_risk",
-            "focusStatement": "현대차 노동조합의 네 번째 부분파업이 차량 생산 일정에 영향을 줄 수 있다.",
+            "focusStatement": "현대자동차 노동조합이 네 번째 부분파업에 들어가 차량 생산 일정에 영향을 줄 수 있는 운영 위험이 발생했다.",
             "anchorSourceId": "S1",
             "includedSourceIds": [
               "S1",
@@ -1785,12 +1589,6 @@
                 ]
               },
               {
-                "term": "차량 생산 일정",
-                "sourceIds": [
-                  "S2"
-                ]
-              },
-              {
                 "term": "운영 위험",
                 "sourceIds": [
                   "S2"
@@ -1799,24 +1597,24 @@
             ],
             "reasonCodes": [],
             "reasons": [
-              "현대차의 생산에 직접 영향을 줄 수 있는 부분파업이 시작돼 중대한 운영 위험에 해당한다."
+              "현대자동차의 노동조합 파업이 시작됐고 차량 생산에 직접 영향을 줄 수 있는 운영 위험이 확인됐다."
             ]
           }
         },
         {
           "role": "child_news_editor",
-          "reasoningEffort": "medium",
+          "reasoningEffort": "high",
           "outcome": "returned",
           "response": {
             "articleId": "N0263",
             "headline": {
-              "text": "현대차 근로자 모임, 12일부터 네 번째로 일부 작업 멈춰",
+              "text": "현대차 직원 모임, 네 번째 일부 작업 중단",
               "sourceIds": [
                 "S1"
               ]
             },
             "homeSummary": {
-              "text": "현대차 근로자 모임이 12일부터 네 번째로 일부 작업을 멈췄다. 이번 일은 차를 만드는 계획에 영향을 줄 수 있다.",
+              "text": "현대차 직원 모임이 네 번째 일부 작업 중단을 시작했다. 차량 생산 일정에 영향을 줄 수 있다.",
               "sourceIds": [
                 "S1",
                 "S2"
@@ -1825,14 +1623,21 @@
             "body": [
               {
                 "role": "core_event",
-                "text": "현대차 근로자 모임이 12일부터 네 번째로 일부 작업을 멈췄다.",
+                "text": "현대차 직원 모임이 네 번째로 일부 시간만 일을 멈췄다.",
                 "sourceIds": [
                   "S1"
                 ]
               },
               {
                 "role": "business_connection",
-                "text": "이번 일은 현대차가 차를 만드는 계획에 직접 영향을 줄 수 있는 회사 운영상의 문제가 될 수 있다.",
+                "text": "차량 생산 일정에 영향을 줄 수 있다.",
+                "sourceIds": [
+                  "S2"
+                ]
+              },
+              {
+                "role": "context",
+                "text": "운영 위험은 일에 생길 수 있는 문제다.",
                 "sourceIds": [
                   "S2"
                 ]
@@ -1842,29 +1647,24 @@
               {
                 "term": "노동조합",
                 "treatment": "replaced",
-                "easyText": "회사에서 일하는 사람들의 모임"
+                "easyText": "직원 모임"
               },
               {
                 "term": "부분파업",
                 "treatment": "replaced",
-                "easyText": "일부 작업을 멈추는 일"
-              },
-              {
-                "term": "차량 생산 일정",
-                "treatment": "replaced",
-                "easyText": "차를 만드는 계획"
+                "easyText": "일부 시간만 일을 멈췄다"
               },
               {
                 "term": "운영 위험",
-                "treatment": "replaced",
-                "easyText": "회사 일을 진행하는 데 생길 수 있는 문제"
+                "treatment": "explained",
+                "easyText": "일에 생길 수 있는 문제"
               }
             ]
           }
         },
         {
           "role": "publication_reviewer",
-          "reasoningEffort": "high",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0263",
@@ -1873,7 +1673,7 @@
               "KRX:005380"
             ],
             "eventType": "material_operational_risk",
-            "focusStatement": "현대자동차 노동조합이 12일부터 네 번째 부분파업에 들어갔다.",
+            "focusStatement": "현대자동차 노동조합이 12일부터 네 번째 부분파업에 들어갔고, 차량 생산 일정에 직접 영향을 줄 수 있다.",
             "anchorSourceIds": [
               "S1",
               "S2"
@@ -1884,6 +1684,7 @@
               "directMateriality": true,
               "sourceFidelity": true,
               "focusAlignment": true,
+              "conciseThreeLineSummary": true,
               "noIrrelevantDetail": true,
               "attributionAndTiming": true,
               "allTermsEasy": true,
@@ -1924,7 +1725,7 @@
           "primaryStockIds": [
             "KRX:005380"
           ],
-          "focusStatement": "현대차 노동조합의 네 번째 부분파업이 차량 생산 일정에 영향을 줄 수 있다.",
+          "focusStatement": "현대자동차 노동조합이 네 번째 부분파업에 들어가 차량 생산 일정에 영향을 줄 수 있는 운영 위험이 발생했다.",
           "anchorSourceId": "S1",
           "includedSourceIds": [
             "S1",
@@ -1947,12 +1748,6 @@
               ]
             },
             {
-              "term": "차량 생산 일정",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
               "term": "운영 위험",
               "sourceIds": [
                 "S2"
@@ -1961,7 +1756,7 @@
           ],
           "reasonCodes": [],
           "reasons": [
-            "현대차의 생산에 직접 영향을 줄 수 있는 부분파업이 시작돼 중대한 운영 위험에 해당한다."
+            "현대자동차의 노동조합 파업이 시작됐고 차량 생산에 직접 영향을 줄 수 있는 운영 위험이 확인됐다."
           ],
           "decision": "accept",
           "kind": "company",
@@ -1970,13 +1765,13 @@
         "draft": {
           "articleId": "N0263",
           "headline": {
-            "text": "현대차 근로자 모임, 12일부터 네 번째로 일부 작업 멈춰",
+            "text": "현대차 직원 모임, 네 번째 일부 작업 중단",
             "sourceIds": [
               "S1"
             ]
           },
           "homeSummary": {
-            "text": "현대차 근로자 모임이 12일부터 네 번째로 일부 작업을 멈췄다. 이번 일은 차를 만드는 계획에 영향을 줄 수 있다.",
+            "text": "현대차 직원 모임이 네 번째 일부 작업 중단을 시작했다. 차량 생산 일정에 영향을 줄 수 있다.",
             "sourceIds": [
               "S1",
               "S2"
@@ -1984,40 +1779,42 @@
           },
           "body": [
             {
-              "text": "현대차 근로자 모임이 12일부터 네 번째로 일부 작업을 멈췄다.",
+              "text": "현대차 직원 모임이 네 번째로 일부 시간만 일을 멈췄다.",
               "sourceIds": [
                 "S1"
               ],
               "role": "core_event"
             },
             {
-              "text": "이번 일은 현대차가 차를 만드는 계획에 직접 영향을 줄 수 있는 회사 운영상의 문제가 될 수 있다.",
+              "text": "차량 생산 일정에 영향을 줄 수 있다.",
               "sourceIds": [
                 "S2"
               ],
               "role": "business_connection"
+            },
+            {
+              "text": "운영 위험은 일에 생길 수 있는 문제다.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "context"
             }
           ],
           "termTreatments": [
             {
               "term": "노동조합",
-              "easyText": "회사에서 일하는 사람들의 모임",
+              "easyText": "직원 모임",
               "treatment": "replaced"
             },
             {
               "term": "부분파업",
-              "easyText": "일부 작업을 멈추는 일",
-              "treatment": "replaced"
-            },
-            {
-              "term": "차량 생산 일정",
-              "easyText": "차를 만드는 계획",
+              "easyText": "일부 시간만 일을 멈췄다",
               "treatment": "replaced"
             },
             {
               "term": "운영 위험",
-              "easyText": "회사 일을 진행하는 데 생길 수 있는 문제",
-              "treatment": "replaced"
+              "easyText": "일에 생길 수 있는 문제",
+              "treatment": "explained"
             }
           ]
         },
@@ -2028,7 +1825,7 @@
             "KRX:005380"
           ],
           "eventType": "material_operational_risk",
-          "focusStatement": "현대자동차 노동조합이 12일부터 네 번째 부분파업에 들어갔다.",
+          "focusStatement": "현대자동차 노동조합이 12일부터 네 번째 부분파업에 들어갔고, 차량 생산 일정에 직접 영향을 줄 수 있다.",
           "anchorSourceIds": [
             "S1",
             "S2"
@@ -2039,6 +1836,7 @@
             "directMateriality": true,
             "sourceFidelity": true,
             "focusAlignment": true,
+            "conciseThreeLineSummary": true,
             "noIrrelevantDetail": true,
             "attributionAndTiming": true,
             "allTermsEasy": true,
@@ -2078,18 +1876,15 @@
       "title": "현대차그룹 'AI 가장 잘 쓰는 기업 도약'",
       "sourceUrl": "https://dealsite.co.kr/articles/167039",
       "pipelineStatus": "rejected",
-      "stage": "selector",
+      "stage": "prefilter",
       "reasonCodes": [
-        "NO_SELECTED_COMPANY",
         "ROUTINE_OR_PROMOTIONAL"
       ],
       "reasons": [
-        "현대차그룹이라는 그룹명만 언급되어 제공된 특정 상장사를 직접 식별할 수 없습니다.",
-        "인공지능 활용 사례 발표회와 목표 제시는 허용된 중대 사건에 해당하지 않습니다."
+        "AI 활용 기업으로 도약하겠다는 포부를 담은 홍보성 표현으로, 구체적인 사업·운영 사건이 제목에 확인되지 않는다."
       ],
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": [
           "ROUTINE_OR_PROMOTIONAL",
           "NO_DIRECT_MATERIALITY"
@@ -2101,7 +1896,7 @@
         "allowedScope": {
           "outcome": "not_applicable",
           "evidence": [
-            "허용 범위 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, ROUTINE_OR_PROMOTIONAL로 종료"
+            "허용 범위 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
           ]
         },
         "notRoutineOrPromotional": {
@@ -2111,63 +1906,55 @@
           ]
         },
         "primarySubjectMatches": {
-          "outcome": "pass",
+          "outcome": "not_applicable",
           "evidence": [
-            "기사와 요약의 주인공 위반을 NO_SELECTED_COMPANY 코드로 닫힌 실패 처리"
+            "기사와 요약의 주인공 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
           ]
         },
         "noUnsupportedContext": {
           "outcome": "not_applicable",
           "evidence": [
-            "주변 사실 혼입 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, ROUTINE_OR_PROMOTIONAL로 종료"
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
           ]
         },
         "allTermsEasy": {
           "outcome": "not_applicable",
           "evidence": [
-            "전 용어 처리 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, ROUTINE_OR_PROMOTIONAL로 종료"
+            "전 용어 처리 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
           ]
         },
         "factsMatchSource": {
           "outcome": "not_applicable",
           "evidence": [
-            "숫자·날짜·출처 충실성 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, ROUTINE_OR_PROMOTIONAL로 종료"
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
           ]
         },
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/selector: 현대차그룹이라는 그룹명만 언급되어 제공된 특정 상장사를 직접 식별할 수 없습니다. | 인공지능 활용 사례 발표회와 목표 제시는 허용된 중대 사건에 해당하지 않습니다."
+            "rejected/prefilter: AI 활용 기업으로 도약하겠다는 포부를 담은 홍보성 표현으로, 구체적인 사업·운영 사건이 제목에 확인되지 않는다."
           ]
         }
       },
       "roleAttempts": [
         {
-          "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "role": "headline_screener",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0337",
             "decision": "reject",
-            "kind": "ineligible",
-            "primaryStockIds": [],
-            "eventType": "none",
-            "focusStatement": "",
-            "anchorSourceId": "",
-            "includedSourceIds": [],
-            "excludedSourceIds": [
-              "S1",
-              "S2",
-              "S3"
-            ],
-            "difficultTerms": [],
             "reasonCodes": [
-              "NO_SELECTED_COMPANY",
               "ROUTINE_OR_PROMOTIONAL"
             ],
             "reasons": [
-              "현대차그룹이라는 그룹명만 언급되어 제공된 특정 상장사를 직접 식별할 수 없습니다.",
-              "인공지능 활용 사례 발표회와 목표 제시는 허용된 중대 사건에 해당하지 않습니다."
+              "AI 활용 기업으로 도약하겠다는 포부를 담은 홍보성 표현으로, 구체적인 사업·운영 사건이 제목에 확인되지 않는다."
             ]
           }
         }
@@ -2175,14 +1962,12 @@
       "pipelineResult": {
         "status": "rejected",
         "articleId": "N0337",
-        "stage": "selector",
+        "stage": "prefilter",
         "reasonCodes": [
-          "NO_SELECTED_COMPANY",
           "ROUTINE_OR_PROMOTIONAL"
         ],
         "reasons": [
-          "현대차그룹이라는 그룹명만 언급되어 제공된 특정 상장사를 직접 식별할 수 없습니다.",
-          "인공지능 활용 사례 발표회와 목표 제시는 허용된 중대 사건에 해당하지 않습니다."
+          "AI 활용 기업으로 도약하겠다는 포부를 담은 홍보성 표현으로, 구체적인 사업·운영 사건이 제목에 확인되지 않는다."
         ],
         "editorAttempts": 0
       }
@@ -2215,18 +2000,15 @@
       "title": "씽크풀, 키움증권 고객 대상 'AI투자챗봇' 오픈",
       "sourceUrl": "https://www.hankyung.com/article/202608126170O",
       "pipelineStatus": "rejected",
-      "stage": "selector",
+      "stage": "prefilter",
       "reasonCodes": [
-        "NO_SELECTED_COMPANY",
         "COMPANY_NOT_PRIMARY_SUBJECT"
       ],
       "reasons": [
-        "핵심 실행 주체인 씽크풀은 제공된 기업 목록에 없습니다.",
-        "키움증권은 서비스를 고객에게 제공하는 채널로만 언급되어 중심 사건의 주체가 아닙니다."
+        "키움증권은 서비스의 대상 고객 채널로만 언급됐고, 제목의 주인공은 씽크풀이다."
       ],
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": [
           "COMPANY_NOT_PRIMARY_SUBJECT",
           "NO_SELECTED_COMPANY"
@@ -2238,69 +2020,65 @@
         "allowedScope": {
           "outcome": "not_applicable",
           "evidence": [
-            "허용 범위 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, COMPANY_NOT_PRIMARY_SUBJECT로 종료"
+            "허용 범위 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT로 종료"
           ]
         },
         "notRoutineOrPromotional": {
           "outcome": "not_applicable",
           "evidence": [
-            "일상·채용·행사·사회공헌·홍보 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, COMPANY_NOT_PRIMARY_SUBJECT로 종료"
+            "일상·채용·행사·사회공헌·홍보 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT로 종료"
           ]
         },
         "primarySubjectMatches": {
           "outcome": "pass",
           "evidence": [
-            "기사와 요약의 주인공 위반을 NO_SELECTED_COMPANY, COMPANY_NOT_PRIMARY_SUBJECT 코드로 닫힌 실패 처리"
+            "기사와 요약의 주인공 위반을 COMPANY_NOT_PRIMARY_SUBJECT 코드로 닫힌 실패 처리"
           ]
         },
         "noUnsupportedContext": {
           "outcome": "not_applicable",
           "evidence": [
-            "주변 사실 혼입 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, COMPANY_NOT_PRIMARY_SUBJECT로 종료"
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT로 종료"
           ]
         },
         "allTermsEasy": {
           "outcome": "not_applicable",
           "evidence": [
-            "전 용어 처리 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, COMPANY_NOT_PRIMARY_SUBJECT로 종료"
+            "전 용어 처리 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT로 종료"
           ]
         },
         "factsMatchSource": {
           "outcome": "not_applicable",
           "evidence": [
-            "숫자·날짜·출처 충실성 검증 전에 selector 단계에서 NO_SELECTED_COMPANY, COMPANY_NOT_PRIMARY_SUBJECT로 종료"
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT로 종료"
           ]
         },
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/selector: 핵심 실행 주체인 씽크풀은 제공된 기업 목록에 없습니다. | 키움증권은 서비스를 고객에게 제공하는 채널로만 언급되어 중심 사건의 주체가 아닙니다."
+            "rejected/prefilter: 키움증권은 서비스의 대상 고객 채널로만 언급됐고, 제목의 주인공은 씽크풀이다."
           ]
         }
       },
       "roleAttempts": [
         {
-          "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "role": "headline_screener",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0651",
             "decision": "reject",
-            "kind": "ineligible",
-            "primaryStockIds": [],
-            "eventType": "none",
-            "focusStatement": "",
-            "anchorSourceId": "",
-            "includedSourceIds": [],
-            "excludedSourceIds": [],
-            "difficultTerms": [],
             "reasonCodes": [
-              "NO_SELECTED_COMPANY",
               "COMPANY_NOT_PRIMARY_SUBJECT"
             ],
             "reasons": [
-              "핵심 실행 주체인 씽크풀은 제공된 기업 목록에 없습니다.",
-              "키움증권은 서비스를 고객에게 제공하는 채널로만 언급되어 중심 사건의 주체가 아닙니다."
+              "키움증권은 서비스의 대상 고객 채널로만 언급됐고, 제목의 주인공은 씽크풀이다."
             ]
           }
         }
@@ -2308,14 +2086,12 @@
       "pipelineResult": {
         "status": "rejected",
         "articleId": "N0651",
-        "stage": "selector",
+        "stage": "prefilter",
         "reasonCodes": [
-          "NO_SELECTED_COMPANY",
           "COMPANY_NOT_PRIMARY_SUBJECT"
         ],
         "reasons": [
-          "핵심 실행 주체인 씽크풀은 제공된 기업 목록에 없습니다.",
-          "키움증권은 서비스를 고객에게 제공하는 채널로만 언급되어 중심 사건의 주체가 아닙니다."
+          "키움증권은 서비스의 대상 고객 채널로만 언급됐고, 제목의 주인공은 씽크풀이다."
         ],
         "editorAttempts": 0
       }
@@ -2349,11 +2125,10 @@
         "ROUTINE_OR_PROMOTIONAL"
       ],
       "reasons": [
-        "기부·후원·사회공헌은 주가 관련 회사 뉴스 범위에서 제외합니다."
+        "국립소방병원에 쉼터를 조성하고 소방관 회복을 지원하는 사회공헌 활동으로, 직접적인 중요 사업 사건이 아니다."
       ],
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "prefilter",
         "acceptableReasonCodes": [
           "ROUTINE_OR_PROMOTIONAL"
         ],
@@ -2385,6 +2160,12 @@
             "주변 사실 혼입 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
           ]
         },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
         "allTermsEasy": {
           "outcome": "not_applicable",
           "evidence": [
@@ -2400,11 +2181,27 @@
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/prefilter: 기부·후원·사회공헌은 주가 관련 회사 뉴스 범위에서 제외합니다."
+            "rejected/prefilter: 국립소방병원에 쉼터를 조성하고 소방관 회복을 지원하는 사회공헌 활동으로, 직접적인 중요 사업 사건이 아니다."
           ]
         }
       },
-      "roleAttempts": [],
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N0065",
+            "decision": "reject",
+            "reasonCodes": [
+              "ROUTINE_OR_PROMOTIONAL"
+            ],
+            "reasons": [
+              "국립소방병원에 쉼터를 조성하고 소방관 회복을 지원하는 사회공헌 활동으로, 직접적인 중요 사업 사건이 아니다."
+            ]
+          }
+        }
+      ],
       "pipelineResult": {
         "status": "rejected",
         "articleId": "N0065",
@@ -2413,7 +2210,7 @@
           "ROUTINE_OR_PROMOTIONAL"
         ],
         "reasons": [
-          "기부·후원·사회공헌은 주가 관련 회사 뉴스 범위에서 제외합니다."
+          "국립소방병원에 쉼터를 조성하고 소방관 회복을 지원하는 사회공헌 활동으로, 직접적인 중요 사업 사건이 아니다."
         ],
         "editorAttempts": 0
       }
@@ -2446,18 +2243,15 @@
       "title": "KF-21 미사일 수주전…한화에어로·현대로템·LIG 계열 경쟁",
       "sourceUrl": "https://dealsite.co.kr/articles/167016",
       "pipelineStatus": "rejected",
-      "stage": "selector",
+      "stage": "prefilter",
       "reasonCodes": [
-        "NO_DIRECT_MATERIALITY",
-        "INSUFFICIENT_EVIDENCE"
+        "NO_DIRECT_MATERIALITY"
       ],
       "reasons": [
-        "낙찰 기업이나 구속력 있는 계약이 정해지지 않아 수주 사건이 확인되지 않았습니다.",
-        "기업들의 경쟁과 기술·생산 계획 비교만 있어 허용된 직접 사건에 해당하지 않습니다."
+        "제목은 한화에어로스페이스·현대로템·LIG넥스원의 미사일 수주 경쟁만 밝히며, 낙찰이나 구속력 있는 계약을 확인하지 않는다."
       ],
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": [
           "NO_DIRECT_MATERIALITY",
           "INSUFFICIENT_EVIDENCE"
@@ -2469,69 +2263,65 @@
         "allowedScope": {
           "outcome": "pass",
           "evidence": [
-            "허용 범위 위반을 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE 코드로 닫힌 실패 처리"
+            "허용 범위 위반을 NO_DIRECT_MATERIALITY 코드로 닫힌 실패 처리"
           ]
         },
         "notRoutineOrPromotional": {
           "outcome": "not_applicable",
           "evidence": [
-            "일상·채용·행사·사회공헌·홍보 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+            "일상·채용·행사·사회공헌·홍보 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "primarySubjectMatches": {
           "outcome": "not_applicable",
           "evidence": [
-            "기사와 요약의 주인공 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+            "기사와 요약의 주인공 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "noUnsupportedContext": {
           "outcome": "not_applicable",
           "evidence": [
-            "주변 사실 혼입 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "allTermsEasy": {
           "outcome": "not_applicable",
           "evidence": [
-            "전 용어 처리 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+            "전 용어 처리 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "factsMatchSource": {
           "outcome": "not_applicable",
           "evidence": [
-            "숫자·날짜·출처 충실성 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 NO_DIRECT_MATERIALITY로 종료"
           ]
         },
         "storageDecisionExplained": {
           "outcome": "pass",
           "evidence": [
-            "rejected/selector: 낙찰 기업이나 구속력 있는 계약이 정해지지 않아 수주 사건이 확인되지 않았습니다. | 기업들의 경쟁과 기술·생산 계획 비교만 있어 허용된 직접 사건에 해당하지 않습니다."
+            "rejected/prefilter: 제목은 한화에어로스페이스·현대로템·LIG넥스원의 미사일 수주 경쟁만 밝히며, 낙찰이나 구속력 있는 계약을 확인하지 않는다."
           ]
         }
       },
       "roleAttempts": [
         {
-          "role": "relevance_selector",
-          "reasoningEffort": "high",
+          "role": "headline_screener",
+          "reasoningEffort": "max",
           "outcome": "returned",
           "response": {
             "articleId": "N0692",
             "decision": "reject",
-            "kind": "ineligible",
-            "primaryStockIds": [],
-            "eventType": "none",
-            "focusStatement": "",
-            "anchorSourceId": "",
-            "includedSourceIds": [],
-            "excludedSourceIds": [],
-            "difficultTerms": [],
             "reasonCodes": [
-              "NO_DIRECT_MATERIALITY",
-              "INSUFFICIENT_EVIDENCE"
+              "NO_DIRECT_MATERIALITY"
             ],
             "reasons": [
-              "낙찰 기업이나 구속력 있는 계약이 정해지지 않아 수주 사건이 확인되지 않았습니다.",
-              "기업들의 경쟁과 기술·생산 계획 비교만 있어 허용된 직접 사건에 해당하지 않습니다."
+              "제목은 한화에어로스페이스·현대로템·LIG넥스원의 미사일 수주 경쟁만 밝히며, 낙찰이나 구속력 있는 계약을 확인하지 않는다."
             ]
           }
         }
@@ -2539,14 +2329,12 @@
       "pipelineResult": {
         "status": "rejected",
         "articleId": "N0692",
-        "stage": "selector",
+        "stage": "prefilter",
         "reasonCodes": [
-          "NO_DIRECT_MATERIALITY",
-          "INSUFFICIENT_EVIDENCE"
+          "NO_DIRECT_MATERIALITY"
         ],
         "reasons": [
-          "낙찰 기업이나 구속력 있는 계약이 정해지지 않아 수주 사건이 확인되지 않았습니다.",
-          "기업들의 경쟁과 기술·생산 계획 비교만 있어 허용된 직접 사건에 해당하지 않습니다."
+          "제목은 한화에어로스페이스·현대로템·LIG넥스원의 미사일 수주 경쟁만 밝히며, 낙찰이나 구속력 있는 계약을 확인하지 않는다."
         ],
         "editorAttempts": 0
       }

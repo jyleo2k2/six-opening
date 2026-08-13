@@ -9,6 +9,7 @@ import {
   startExplain,
   startGuidedExplain,
 } from "./explain";
+import { toPoliteKorean } from "./polite";
 
 const per: ExplainScript = {
   id: "term:per",
@@ -16,8 +17,8 @@ const per: ExplainScript = {
   check: {
     question: "PER이 높으면 회사 가격은 버는 돈에 비해 어떤 걸까?",
     choices: [
-      { id: "expensive", label: "비싼 편이야" },
-      { id: "cheap", label: "싼 편이야" },
+      { id: "expensive", label: "비싼 편이에요" },
+      { id: "cheap", label: "싼 편이에요" },
       { id: "same", label: "똑같아" },
     ],
     answerId: "expensive",
@@ -40,12 +41,12 @@ const per: ExplainScript = {
 // ① 시작하면 피드백·1줄 설명·이해 확인 질문이 함께 나온다.
 const first = startExplain(per);
 assert.equal(first.kind, "turn");
-assert.equal(first.text, `궁금한 걸 잘 짚었어요 — ${per.brief}`);
+assert.equal(first.text, toPoliteKorean(`궁금한 걸 잘 짚었어요 — ${per.brief}`));
 assert.deepEqual(first.kind === "turn" ? first.turn : null, {
   scriptId: "term:per",
   stage: "brief",
-  prompt: per.check.question,
-  choices: per.check.choices,
+  prompt: toPoliteKorean(per.check.question),
+  choices: per.check.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
 });
 
 // ② 정답이면 구체적으로 피드백하고 다음 행동을 묻는다.
@@ -55,7 +56,7 @@ const correct = advanceExplain(per, {
   choiceId: "expensive",
 });
 assert.equal(correct?.kind, "turn");
-assert.equal(correct?.text, `맞아요, 그 단서를 잘 연결했어요. ${per.detail}`);
+assert.equal(correct?.text, toPoliteKorean(`맞아요, 그 단서를 잘 연결했어요. ${per.detail}`));
 assert.equal(correct?.kind === "turn" ? correct.turn.stage : null, "followup");
 
 // ③ 오답이면 추가 설명과 확인 질문으로 내려간다.
@@ -65,10 +66,10 @@ const wrong = advanceExplain(per, {
   choiceId: "cheap",
 });
 assert.equal(wrong?.kind, "turn");
-assert.equal(wrong?.text, `음, 그건 아니에요. ${per.adjust?.explanation}`);
+assert.equal(wrong?.text, toPoliteKorean(`음, 그건 아니에요. ${per.adjust?.explanation}`));
 assert.deepEqual(
   wrong?.kind === "turn" ? wrong.turn.choices : null,
-  per.adjust?.choices,
+  per.adjust?.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
 );
 assert.equal(wrong?.kind === "turn" ? wrong.turn.stage : null, "detail");
 
@@ -80,14 +81,14 @@ const understood = advanceExplain(per, {
 });
 assert.equal(understood?.kind, "turn");
 assert.equal(understood?.kind === "turn" ? understood.turn.stage : null, "followup");
-assert.equal(understood?.text.includes(per.detail), true);
+assert.equal(understood?.text.includes(toPoliteKorean(per.detail)), true);
 const example = advanceExplain(per, {
   scriptId: "term:per",
   stage: "detail",
   choiceId: "yes",
 });
 assert.equal(example?.kind, "turn");
-assert.equal(example?.text, `그럼 예를 들어볼게요. ${per.example}`);
+assert.equal(example?.text, toPoliteKorean(`그럼 예를 들어볼게요. ${per.example}`));
 assert.equal(example?.kind === "turn" ? example.turn.stage : null, "detail");
 
 // 후속 질문은 직접 질문 또는 명시적 종료만 허용한다.
@@ -178,7 +179,7 @@ const reask = reaskExplain(per, "detail");
 assert.equal(reask.kind, "turn");
 assert.equal(reask.kind === "turn" ? reask.turn.stage : null, "detail");
 assert.deepEqual(reask.kind === "turn" ? reask.turn.choices : null, [
-  { id: "no", label: "들어가지 않아" },
+  { id: "no", label: "들어가지 않아요" },
   { id: "yes", label: "들어가" },
 ]);
 

@@ -11,6 +11,7 @@ import {
   normalizeChoiceLabel,
   normalizeReply,
 } from "./colloquial";
+import { toPoliteKorean } from "./polite";
 
 const CONFIRM_PROMPT = "이제 알겠어요?";
 const CONFIRM_CHOICES: readonly ExplainChoice[] = [
@@ -44,8 +45,8 @@ const GUIDED_SCRIPT: ExplainScript = {
     answerId: "understood",
   },
   detail:
-    "괜찮아요 — 헷갈린 단어나 문장을 그대로 적어 주면 한 조각씩 다시 설명할게요.",
-  example: "궁금한 말을 그대로 적어 줘도 돼요.",
+    "괜찮아요 — 헷갈린 단어나 문장을 그대로 적어 주면 한 조각씩 다시 설명해 드릴게요.",
+  example: "궁금한 말을 그대로 적어 주셔도 돼요.",
 };
 
 /** 논문 §3.2.2의 Feedback 서브턴. 각 전이의 첫 고정 문장이며 3문장 예산에 포함된다. */
@@ -57,7 +58,7 @@ const FEEDBACK = {
 } as const;
 
 /** 타이핑을 알아듣지 못했을 때. 추측하지 않고 선택지를 다시 보여준다. */
-export const EXPLAIN_REASK = "아래에서 하나만 골라 줄래요?";
+export const EXPLAIN_REASK = "아래에서 하나만 골라 주세요.";
 
 export type ExplainStep =
   | { kind: "turn"; text: string; turn: ExplainTurn }
@@ -72,8 +73,13 @@ function turnStep(
 ): ExplainStep {
   return {
     kind: "turn",
-    text,
-    turn: { scriptId: script.id, stage, prompt, choices },
+    text: toPoliteKorean(text),
+    turn: {
+      scriptId: script.id,
+      stage,
+      prompt: toPoliteKorean(prompt),
+      choices: choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+    },
   };
 }
 
@@ -142,8 +148,12 @@ export function resolveTextReply(
   // 라벨은 해요체지만 아이는 반말로 칠 수 있다("들어가지 않아요" 버튼 → "들어가지 않아").
   // 끝의 "요"를 떼고 견주되, 두 선택지가 같아지면 추측하지 않고 되묻는다.
   const target = normalizeChoiceLabel(message);
+  const politeTarget = normalizeChoiceLabel(toPoliteKorean(message));
   const labelMatches = stageChoices(script, stage).filter(
-    (choice) => normalizeChoiceLabel(choice.label) === target,
+    (choice) =>
+      normalizeChoiceLabel(choice.label) === target ||
+      normalizeChoiceLabel(toPoliteKorean(choice.label)) === target ||
+      normalizeChoiceLabel(toPoliteKorean(choice.label)) === politeTarget,
   );
   if (labelMatches.length === 1) return labelMatches[0].id;
   if (labelMatches.length > 1) return null;
@@ -216,7 +226,7 @@ export function advanceExplain(
     }
     if (script.check.kind === "guiding") {
       return reply.choiceId === "ask"
-        ? { kind: "end", text: "좋아요, 헷갈린 말을 그대로 적어 줄래요?" }
+        ? { kind: "end", text: "좋아요, 헷갈린 말을 그대로 적어 주세요." }
         : { kind: "end", text: "좋아요, 궁금한 게 생기면 다시 불러 주세요." };
     }
     if (script.adjust) {
@@ -248,7 +258,7 @@ export function advanceExplain(
       return null;
     }
     return reply.choiceId === "ask"
-      ? { kind: "end", text: "좋아요, 다음에 궁금한 걸 그대로 적어 줄래요?" }
+      ? { kind: "end", text: "좋아요, 다음에 궁금한 걸 그대로 적어 주세요." }
       : { kind: "end", text: "좋아요, 궁금한 게 생기면 다시 불러 주세요." };
   }
 

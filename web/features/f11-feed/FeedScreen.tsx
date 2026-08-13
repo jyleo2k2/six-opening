@@ -11,13 +11,6 @@ import { Button, Card, PhoneShell, ScreenHeader, TabBar } from "../../shared/ui"
 /** 카드 제목에 회사명만 필요하다. 시세는 피드에 올리지 않는다. */
 const NAME_BY_SYMBOL = new Map(STOCKS.map((stock) => [stock.symbol, stock.name]));
 
-const CONFIDENCE_LABEL: Record<number, string> = {
-  25: "잘 모르겠어",
-  50: "조금",
-  75: "꽤",
-  100: "완전",
-};
-
 function formatWhen(value: string) {
   const date = new Date(value);
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
@@ -111,12 +104,6 @@ function TradeCard({ trade, viewer, comments, highlighted, onOpenChart }: {
           <dt className="shrink-0 text-ink/60">고른 이유</dt>
           <dd className="font-medium">{trade.reason}</dd>
         </div>
-        {trade.confidence && (
-          <div className="flex gap-2">
-            <dt className="shrink-0 text-ink/60">확신도</dt>
-            <dd className="font-medium">{CONFIDENCE_LABEL[trade.confidence]}</dd>
-          </div>
-        )}
         {trade.memo && (
           <div className="flex gap-2">
             <dt className="shrink-0 text-ink/60">한 줄 생각</dt>

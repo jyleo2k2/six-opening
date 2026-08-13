@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
+import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput } from "../../../shared/llm/filter";
-import { normalizeChatInput, routeMessage } from "./routing";
+import { normalizeChatInput, PROACTIVE_SCRIPTS, routeMessage } from "./routing";
 
 const stockContext = {
   screen: "stock" as const,
@@ -8,6 +9,12 @@ const stockContext = {
   stockName: "삼성전자",
 };
 const orderContext = { screen: "order" as const, quantity: 10, unitPrice: 12500 };
+
+assert.equal(PROACTIVE_SCRIPTS.orderMethodConfusion.text, "뭐가 다른지 볼까요?");
+assert.equal(PROACTIVE_SCRIPTS.lossRevisit.text, "후회되나요?");
+for (const script of Object.values(PROACTIVE_SCRIPTS)) {
+  assert.ok(script.text.length <= 20, `선제 말풍선 대사가 깁니다: ${script.text}`);
+}
 
 assert.equal(routeMessage("PER이 뭐야?", stockContext).route, "faq");
 assert.equal(routeMessage("ETF가 뭐야?", stockContext).intent, "financial_concept");
@@ -37,6 +44,44 @@ assert.deepEqual(routeMessage("키움증권은 어떻게 돈 벌어?", { screen:
   stockId: "KRX:039490",
   topic: "business",
 });
+for (const stock of STOCKS) {
+  const otherStock = STOCKS.find((candidate) => candidate.id !== stock.id)!;
+  const otherContext = {
+    screen: "stock" as const,
+    stockId: otherStock.id,
+    stockName: otherStock.name,
+  };
+  for (const reference of [stock.name, ...stock.searchAliases]) {
+    assert.equal(
+      routeMessage(`${reference} 뭐 하는 회사야?`, otherContext).stockFact?.stockId,
+      stock.id,
+      `${reference} 질문이 현재 화면의 ${otherStock.name}으로 바뀌었어`,
+    );
+  }
+}
+assert.equal(
+  routeMessage("에스케이스퀘어 뭐하는데임", {
+    screen: "order",
+    stockId: "KRX:066570",
+    stockName: "LG전자",
+  }).stockFact?.stockId,
+  "KRX:402340",
+);
+assert.equal(
+  routeMessage("엘지전자 뭐하는데냐고", {
+    screen: "stock",
+    stockId: "KRX:259960",
+    stockName: "크래프톤",
+  }).stockFact?.stockId,
+  "KRX:066570",
+);
+const unresolvedCompany = routeMessage("아무개회사 뭐하는데", {
+  screen: "stock",
+  stockId: "KRX:259960",
+  stockName: "크래프톤",
+});
+assert.equal(unresolvedCompany.stockFact, undefined);
+assert.equal(unresolvedCompany.text.includes("회사 이름을 찾지 못했어요"), true);
 assert.deepEqual(routeMessage("삼성전자 2024년 실적 알려줘", { screen: "home" }).stockFact, {
   stockId: "KRX:005930",
   topic: "financial",
@@ -1014,72 +1059,72 @@ const recommendationAlternativesByIntent = [
   {
     question: "크래프톤과 삼성전자 중 하나만 골라줘",
     firstStep: "종목 선택 차단",
-    alternatives: ["크래프톤, 어떤 회사야?", "크래프톤, 어떻게 돈을 벌어?"],
+    alternatives: ["크래프톤, 어떤 회사예요?", "크래프톤, 어떻게 돈을 벌어?"],
   },
   {
     question: "크래프톤 내일 오를까?",
     firstStep: "가격 예측 차단",
-    alternatives: ["크래프톤, 어떻게 돈을 벌어?", "변동성이 뭐야?"],
+    alternatives: ["크래프톤, 어떻게 돈을 벌어?", "변동성이 뭐예요?"],
   },
   {
     question: "이거 언제 팔아야 해?",
     firstStep: "매매 시점 차단",
-    alternatives: ["내 거래 기록 보여줘", "주문 전에 뭘 확인해?"],
+    alternatives: ["내 거래 기록 보여주세요", "주문 전에 뭘 확인해요?"],
   },
   {
     question: "내 돈 30만원이면 어디에 넣을래?",
     firstStep: "매수 수량 차단",
-    alternatives: ["예상 금액이 뭐야?", "주문 전에 뭘 확인해?"],
+    alternatives: ["예상 금액이 뭐예요?", "주문 전에 뭘 확인해요?"],
   },
   {
     question: "제일 안전한 종목 하나 골라줘",
     firstStep: "안전 종목 차단",
-    alternatives: ["위험이 뭐야?", "분산투자가 뭐야?"],
+    alternatives: ["위험이 뭐예요?", "분산투자가 뭐예요?"],
   },
   {
     question: "손실을 만회할 종목 알려줘",
     firstStep: "손실 만회 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "평가손익이 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "평가손익이 뭐예요?"],
   },
   {
     question: "친구 따라 지금 들어가도 돼?",
     firstStep: "추종 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "투자 근거는 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "투자 근거는 뭐예요?"],
   },
   {
     question: "컴백 전에 사면 이득이야?",
     firstStep: "사건 기반 예측 차단",
-    alternatives: ["삼성전자, 어떻게 돈을 벌어?", "변동성이 뭐야?"],
+    alternatives: ["삼성전자, 어떻게 돈을 벌어?", "변동성이 뭐예요?"],
   },
   {
     question: "PER 낮은 종목을 골라줘",
     firstStep: "지표 기반 선택 차단",
-    alternatives: ["PER이 뭐야?", "PBR이 뭐야?"],
+    alternatives: ["PER이 뭐예요?", "PBR이 뭐예요?"],
   },
   {
     question: "오리온 한 주 사도 괜찮아?",
     firstStep: "매수 수량 차단",
-    alternatives: ["예상 금액이 뭐야?", "주문 전에 뭘 확인해?"],
+    alternatives: ["예상 금액이 뭐예요?", "주문 전에 뭘 확인해요?"],
   },
   {
     question: "손실 본 거 다시 채우려면 몇 개 사야 돼?",
     firstStep: "손실 만회 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "평가손익이 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "평가손익이 뭐예요?"],
   },
   {
     question: "친구들이 제일 많이 산 종목이 뭐야?",
     firstStep: "안전 종목 차단",
-    alternatives: ["위험이 뭐야?", "분산투자가 뭐야?"],
+    alternatives: ["위험이 뭐예요?", "분산투자가 뭐예요?"],
   },
   {
     question: "최근 수치로 다음 주에 오를 종목을 계산해줄래?",
     firstStep: "지표 기반 선택 차단",
-    alternatives: ["변동성이 뭐야?", "위험이 뭐야?"],
+    alternatives: ["변동성이 뭐예요?", "위험이 뭐예요?"],
   },
   {
     question: "유튜브에서 방산주 떡상한다는데 지금 사도 돼?",
     firstStep: "추종 거래 차단",
-    alternatives: ["내 거래 기록 보여줘", "투자 근거는 뭐야?"],
+    alternatives: ["내 거래 기록 보여주세요", "투자 근거는 뭐예요?"],
   },
 ] as const;
 
@@ -1478,6 +1523,11 @@ const ruleNaturalVariants = [
   ["한 종목 최대 얼마까지 넣을 수 있음?", "주문 한도 규칙 안내"],
   ["쪼개서 주문하면 단일종목 한도 피해감?", "주문 한도 규칙 안내"],
   ["현금 남았는데 왜 추가매수 막힘?", "주문 한도 규칙 안내"],
+  // 시드는 1,000만원이다. 아이가 실제 시드 금액으로 물어도 같은 안내로 가야 한다.
+  ["왜 1000만원 다 못 쓰게 해", "주문 한도 규칙 안내"],
+  ["한 종목에 1000만원 전부 넣어도 돼?", "주문 한도 규칙 안내"],
+  ["왜 천만원 다 못 쓰게 해?", "주문 한도 규칙 안내"],
+  ["팀이면 1000만원 같이 쓰는 거야?", "가상 자산 규칙 안내"],
   ["모투에서도 거래비용 빠져?", "거래 비용 규칙 안내"],
   ["수수료 0으로 뜨면 진짜 차감 없음?", "거래 비용 규칙 안내"],
   ["세금까지 반영한 손익 어디서 봄?", "거래 비용 규칙 안내"],
@@ -1513,6 +1563,18 @@ for (const [question, expectedStep] of ruleNaturalVariants) {
   assert.equal(routed.steps[0], expectedStep, `자연어 규칙 하위 의도가 달라: ${question}`);
 }
 
+// 단일종목 한도는 2026-08-13에 폐기했다. 한도 안내가 폐기된 프리셋을 되살리면 안 된다.
+for (const question of ruleQuestionsByStep["주문 한도 규칙 안내"]) {
+  const { text } = routeMessage(question, stockContext);
+  for (const dropped of ["30%", "40%", "입문형", "성장형", "프리셋"]) {
+    assert.equal(
+      text.includes(dropped),
+      false,
+      `폐기된 단일종목 한도 표현이 남아 있어: ${dropped} / ${question}`,
+    );
+  }
+}
+
 const ruleSteps = new Set(Object.keys(ruleQuestionsByStep));
 const allowedRuleLookalikes = [
   "수수료가 뭐야?",
@@ -1541,7 +1603,7 @@ for (const question of allowedRuleLookalikes) {
 assert.equal(routeMessage("가족 순위가 동점이면 어떤 알고리즘으로 순서를 정해?", stockContext).text.includes("아직 확정되지 않았어"), true);
 assert.equal(routeMessage("매수하고 팔면 점수 업데이트가 즉시 되는 구조야?", stockContext).text.includes("아직 확정되지 않았어"), true);
 assert.equal(routeMessage("이번 시즌 끝나면 수익률 1등한테 뭐 줘?", stockContext).text.includes("아직 확정되지 않았어"), true);
-assert.equal(routeMessage("한도 초과 주문을 여러 번 나눠 넣으면 리그 규칙에 걸려?", stockContext).text.includes("누적"), true);
+assert.equal(routeMessage("한도 초과 주문을 여러 번 나눠 넣으면 리그 규칙에 걸려?", stockContext).text.includes("한도가 없어"), true);
 assert.equal(routeMessage("내가 산 종목 친구한테 보이는 거 아니지?", stockContext).text.includes("자동으로 공개"), true);
 assert.equal(routeMessage("시즌 끝나면 가상 돈을 진짜 돈으로 바꿀 수 있어?", stockContext).text.includes("현금으로 바꿀 수 없어"), true);
 

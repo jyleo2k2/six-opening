@@ -125,13 +125,23 @@ export const READ_ONLY_CHAT_TOOLS = [
 
 export type ReadOnlyChatToolName = (typeof READ_ONLY_CHAT_TOOLS)[number];
 
-export type ProactiveSignal = "switch" | "dwell" | "lossRevisit";
+export type ProactiveSignal =
+  | "buyHesitation"
+  | "orderMethodConfusion"
+  | "dwell"
+  | "lossRevisit";
 
 export type ChatBehaviorEvent =
   | {
-      type: "order_confirmation_cancelled";
+      type: "buy_confirmation_abandoned";
       stockId: string;
-      side: "buy" | "sell";
+      at: number;
+    }
+  | {
+      type: "order_method_selected";
+      stockId: string;
+      orderFlowId: string;
+      orderType: "market" | "limit";
       at: number;
     }
   | {
@@ -157,8 +167,4 @@ export type ChatBehaviorEvent =
 
 export type ProactiveSessionState = {
   lastActivityAt: number;
-  lastShownAt: number | null;
-  shownAtBySignal: Partial<Record<ProactiveSignal, number>>;
-  shownCount: number;
-  mutedSignals: ProactiveSignal[];
 };

@@ -6,20 +6,12 @@ import type {
 
 export const PROACTIVE_LIMITS = {
   dwellMs: 5 * 60 * 1000,
-  lossRevisitWindowMs: 5 * 60 * 1000,
-  minimumGapMs: 3 * 60 * 1000,
-  sameSignalGapMs: 10 * 60 * 1000,
   sessionIdleMs: 30 * 60 * 1000,
-  maximumPerSession: 2,
 } as const;
 
 export function createProactiveSession(now: number): ProactiveSessionState {
   return {
     lastActivityAt: now,
-    lastShownAt: null,
-    shownAtBySignal: {},
-    shownCount: 0,
-    mutedSignals: [],
   };
 }
 
@@ -39,25 +31,66 @@ export function detectProactiveSignals(
   now: number,
 ): ProactiveSignal[] {
   const signals: ProactiveSignal[] = [];
-  const cancellations = events.filter(
-    (event): event is Extract<ChatBehaviorEvent, { type: "order_confirmation_cancelled" }> =>
-      event.type === "order_confirmation_cancelled",
-  );
-  const recentCancellations = cancellations.slice(-3);
+  const latestEvent = events.at(-1);
+  let lastBuyFillIndex = -1;
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (event.type === "trade_filled" && event.side === "buy") {
+      lastBuyFillIndex = index;
+      break;
+    }
+  }
+  const recentAbandonedBuys = events
+    .slice(lastBuyFillIndex + 1)
+    .filter(
+      (event): event is Extract<
+        ChatBehaviorEvent,
+        { type: "buy_confirmation_abandoned" }
+      > => event.type === "buy_confirmation_abandoned",
+    )
+    .slice(-3);
 
   if (
-    recentCancellations.length === 3 &&
-    recentCancellations[0].side !== recentCancellations[1].side &&
-    recentCancellations[1].side !== recentCancellations[2].side
+    latestEvent?.type === "buy_confirmation_abandoned" &&
+    recentAbandonedBuys.length === 3
   ) {
-    signals.push("switch");
+    signals.push("buyHesitation");
   }
 
-  const dwell = [...events].reverse().find(
-    (event): event is Extract<ChatBehaviorEvent, { type: "screen_dwell_completed" }> =>
-      event.type === "screen_dwell_completed",
-  );
-  if (dwell && dwell.durationMs > PROACTIVE_LIMITS.dwellMs) {
+  if (latestEvent?.type === "order_method_selected") {
+    let lastOrderFlowBoundary = -1;
+    for (let index = events.length - 1; index >= 0; index -= 1) {
+      const event = events[index];
+      if (event.type === "screen_entered" && event.screen !== "order") {
+        lastOrderFlowBoundary = index;
+        break;
+      }
+    }
+    const orderMethodSelections = events.slice(lastOrderFlowBoundary + 1).filter(
+      (event): event is Extract<
+        ChatBehaviorEvent,
+        { type: "order_method_selected" }
+      > =>
+        event.type === "order_method_selected" &&
+        event.orderFlowId === latestEvent.orderFlowId,
+    );
+    const isAlternating = orderMethodSelections.every(
+      (event, index) =>
+        index === 0 ||
+        event.orderType !== orderMethodSelections[index - 1]?.orderType,
+    );
+
+    // 세 번째 실제 변경에서만 발화한다. 이 주문 흐름 안에서는 한 번만
+    // 보여 주므로 시간·횟수 기반 발화 제한을 둘 필요가 없다.
+    if (orderMethodSelections.length === 3 && isAlternating) {
+      signals.push("orderMethodConfusion");
+    }
+  }
+
+  if (
+    latestEvent?.type === "screen_dwell_completed" &&
+    latestEvent.durationMs > PROACTIVE_LIMITS.dwellMs
+  ) {
     signals.push("dwell");
   }
 
@@ -71,8 +104,10 @@ export function detectProactiveSignals(
 
   if (
     realizedLoss &&
-    now >= realizedLoss.at &&
-    now - realizedLoss.at <= PROACTIVE_LIMITS.lossRevisitWindowMs
+    latestEvent?.type === "screen_entered" &&
+    latestEvent.screen === "stock" &&
+    latestEvent.stockId === realizedLoss.stockId &&
+    now >= realizedLoss.at
   ) {
     const revisitCount = events.filter(
       (event) =>
@@ -82,7 +117,7 @@ export function detectProactiveSignals(
         event.at >= realizedLoss.at &&
         event.at <= now,
     ).length;
-    if (revisitCount >= 4) signals.push("lossRevisit");
+    if (revisitCount >= 2) signals.push("lossRevisit");
   }
 
   return signals;
@@ -90,53 +125,6 @@ export function detectProactiveSignals(
 
 export function selectProactiveSignal(
   signals: readonly ProactiveSignal[],
-  state: ProactiveSessionState,
-  now: number,
 ): ProactiveSignal | null {
-  if (state.shownCount >= PROACTIVE_LIMITS.maximumPerSession) return null;
-  if (
-    state.lastShownAt !== null &&
-    now - state.lastShownAt < PROACTIVE_LIMITS.minimumGapMs
-  ) {
-    return null;
-  }
-
-  return (
-    signals.find((signal) => {
-      if (state.mutedSignals.includes(signal)) return false;
-      const lastShownAt = state.shownAtBySignal[signal];
-      return (
-        lastShownAt === undefined ||
-        now - lastShownAt >= PROACTIVE_LIMITS.sameSignalGapMs
-      );
-    }) ?? null
-  );
-}
-
-export function markProactiveSignalShown(
-  state: ProactiveSessionState,
-  signal: ProactiveSignal,
-  now: number,
-): ProactiveSessionState {
-  return {
-    ...state,
-    lastActivityAt: now,
-    lastShownAt: now,
-    shownAtBySignal: { ...state.shownAtBySignal, [signal]: now },
-    shownCount: state.shownCount + 1,
-  };
-}
-
-export function muteProactiveSignal(
-  state: ProactiveSessionState,
-  signal: ProactiveSignal,
-  now: number,
-): ProactiveSessionState {
-  return {
-    ...state,
-    lastActivityAt: now,
-    mutedSignals: state.mutedSignals.includes(signal)
-      ? state.mutedSignals
-      : [...state.mutedSignals, signal],
-  };
+  return signals[0] ?? null;
 }

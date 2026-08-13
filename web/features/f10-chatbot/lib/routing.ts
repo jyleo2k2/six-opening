@@ -12,6 +12,7 @@ import type {
   ReadOnlyChatToolName,
   StockFactTopic,
 } from "../../../shared/types/chatbot";
+import { toPoliteKorean } from "./polite";
 
 export type { ChatContext, ProactiveSignal } from "../../../shared/types/chatbot";
 
@@ -611,14 +612,20 @@ const LIMIT_RULE_PATTERNS = [
   "주문금액왜막",
   "얼마까지살수",
   "얼마까지넣을수",
+  // 시드는 1,000만원이다. 아이가 예전 금액이나 줄임말로 물어도 같은 안내로 보낸다.
   "100만원다못",
   "100만원보다많이는주문못",
   "백만원다못",
+  "1000만원다못",
+  "1000만원보다많이는주문못",
+  "천만원다못",
   "한번에백주못사",
   "한종목에내돈전부",
   "한종목에돈다넣",
   "한종목에100만원전부",
   "한종목에백만원전부",
+  "한종목에1000만원전부",
+  "한종목에천만원전부",
   "현금남았는데왜추가매수",
   "돈남았는데왜더못사",
 ];
@@ -778,6 +785,8 @@ const VIRTUAL_MONEY_RULE_PATTERNS = [
   "투자금이합쳐",
   "백만원같이쓰",
   "100만원같이쓰",
+  "천만원같이쓰",
+  "1000만원같이쓰",
   "실제증권사계좌랑뭐가달라",
   "모의투자와실제계좌",
   "모투와실제계좌",
@@ -1113,6 +1122,43 @@ function findMentionedStock(message: string) {
       /^(?:은|는|이|가|을|를|의|도|에|에서|하고|뭐|무슨|어떤|알려)/.test(tail)
     );
   })?.stock;
+}
+
+const NAMED_STOCK_QUESTION_MARKERS = [
+  "회사는",
+  "회사에서",
+  "회사뭐",
+  "무슨회사",
+  "어떤회사",
+  "뭐하는",
+  "뭐임",
+  "무엇을만들",
+  "어떤일을해",
+  "어떻게돈을벌",
+  "어떻게벌",
+  "돈을벌",
+  "돈벌",
+  "수익구조",
+  "업종",
+  "산업역할",
+  "실적",
+  "매출",
+  "영업이익",
+  "순이익",
+] as const;
+
+function hasUnrecognizedStockName(message: string) {
+  if (findMentionedStock(message)) return false;
+  const markerIndex = NAMED_STOCK_QUESTION_MARKERS.reduce((earliest, marker) => {
+    const index = message.indexOf(marker);
+    return index > 0 && (earliest < 0 || index < earliest) ? index : earliest;
+  }, -1);
+  if (markerIndex < 0) return false;
+
+  const prefix = message.slice(0, markerIndex);
+  return !/^(?:(?:이회사|이종목|현재회사|보고있는회사|회사|검수된|과거|최근|작년|지난해|2024년))+$/.test(
+    prefix,
+  );
 }
 
 function containsPersonalAddress(message: string) {
@@ -2034,7 +2080,14 @@ function reply(
     >
   > = {},
 ): ChatReply {
-  return { route, intent, text, steps, ...extras };
+  return {
+    route,
+    intent,
+    text: toPoliteKorean(text),
+    steps,
+    ...extras,
+    suggestedQuestions: extras.suggestedQuestions?.map(toPoliteKorean),
+  };
 }
 
 function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
@@ -2920,25 +2973,25 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "limit": {
       step = "주문 한도 규칙 안내";
       target = "order";
-      questions = ["내 한도 프리셋은 뭐야?", "주문 가능 금액은 어떻게 계산해?"];
+      questions = ["주문 가능 금액은 어떻게 계산해?", "한 종목에 전부 넣어도 돼?"];
       if (includesAny(message, ["나눠", "쪼개", "여러번"])) {
-        text = "주문을 여러 번 나눠도 같은 종목에 넣은 금액을 누적으로 계산해. 단일 종목 한도를 넘는 주문은 나눈 횟수와 관계없이 차단돼.";
+        text = "주문을 여러 번 나눠 넣어도 괜찮아. 같은 종목에 넣을 수 있는 금액에 한도가 없어서, 남은 가상 현금 안에서면 몇 번이든 살 수 있어.";
       } else if (includesAny(message, ["부모님이정", "앱규칙이정", "누가정"])) {
-        text = "부모가 팀을 만들 때 입문형이나 성장형 프리셋을 고르고, 앱이 그 한도를 적용해. 주문마다 부모 승인을 받는 규칙은 없어.";
+        text = "한 종목에 얼마를 넣을지는 부모도 앱도 정하지 않아. 주문마다 부모 승인을 받는 규칙도 없고, 남은 가상 현금만 지키면 돼.";
       } else if (includesAny(message, ["엄마는되", "부모는되"])) {
-        text = "부모와 자녀에게 다른 한도 예외가 있다는 규칙은 아직 확정되지 않았어. 네 주문에는 현재 화면에 표시된 프리셋과 주문 가능 금액을 적용해.";
+        text = "부모와 자녀 규칙이 똑같아. 둘 다 한 종목에 넣는 금액에 제한이 없고, 각자 남은 가상 현금 안에서 주문할 수 있어.";
       } else if (includesAny(message, ["퍼센트", "비율"])) {
-        text = "단일 종목 한도는 프리셋 비율로 정해져 있어. 입문형은 30%, 성장형은 40%이고 정확한 허용 금액은 주문 화면에서 확인할 수 있어.";
+        text = "한 종목에 몇 퍼센트까지라는 제한은 없어. 남은 가상 현금 안에서면 한 종목에 전부 넣어도 주문돼.";
       } else if (includesAny(message, ["로그", "차감", "매수할때마다", "매수때마다"])) {
-        text = "매수하면 사용할 수 있는 가상 현금이 줄고, 단일 종목 한도는 그 종목에 넣은 금액을 누적으로 계산해. 체결 금액과 남은 금액은 주문·거래 내역에서 확인할 수 있어.";
+        text = "매수하면 사용할 수 있는 가상 현금이 그만큼 줄어. 종목별로 따로 쌓이는 한도는 없고, 체결 금액과 남은 금액은 주문·거래 내역에서 확인할 수 있어.";
       } else if (includesAny(message, ["방산", "에너지", "다른종목처럼"])) {
-        text = "현재 규칙에는 업종별 한도 예외가 없어. 허용된 모든 종목에 같은 입문형·성장형 프리셋을 적용해.";
+        text = "업종에 따라 다른 규칙은 없어. 허용된 종목이면 전부 똑같이 남은 가상 현금만큼 주문할 수 있어.";
       } else if (includesAny(message, ["백주", "100주", "최대수량"])) {
-        text = "주문 수량의 예상 금액이 남은 가상 현금이나 단일 종목 한도를 넘으면 차단돼. 정확한 최대 수량은 주문 화면의 가격과 주문 가능 금액으로 확인해 줘.";
+        text = "주문 금액이 남은 가상 현금을 넘으면 차단돼. 종목별 한도는 없으니 정확한 최대 수량은 주문 화면의 가격과 남은 금액으로 확인해 줘.";
       } else if (includesAny(message, ["얼마까지", "주문가능금액", "돈남았", "현금남았"])) {
-        text = "정확한 주문 가능 금액은 남은 가상 현금과 그 종목의 누적 한도를 함께 반영해 주문 화면에 표시돼. 현금이 남아도 단일 종목 한도에 닿으면 추가 주문이 막힐 수 있어.";
+        text = "남은 가상 현금만큼 주문할 수 있어. 종목별로 걸리는 한도가 없어서 현금이 남아 있으면 같은 종목도 이어서 살 수 있어.";
       } else {
-        text = "가족 리그에서는 각자 가상 100만원을 쓰고, 한 종목에는 입문형 30% 또는 성장형 40% 한도가 적용돼. 그래서 한 종목에 전부 주문할 수는 없어.";
+        text = "가족 리그에서는 각자 가상 1,000만원을 쓰고, 한 종목에 얼마를 넣을지는 제한이 없어. 남은 가상 현금 안에서면 한 종목에 전부 넣어도 돼.";
       }
       break;
     }
@@ -2975,7 +3028,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
       target = "archive";
       questions = ["시즌 끝나면 기록은 어떻게 돼?", "내 지난 시즌 기록 보여줘"];
       if (includesAny(message, ["봐야", "아카이브꼭"])) {
-        text = "아카이브를 다시 보는 것은 선택이야. 다만 주문할 때 고른 이유와 확신도 같은 질문식 기록은 주문 흐름에 포함돼 있어.";
+        text = "아카이브를 다시 보는 것은 선택이야. 다만 주문할 때 고른 이유와 예상 보유기간 같은 질문식 기록은 주문 흐름에 포함돼 있어.";
       } else if (includesAny(message, ["자동으로정리", "자동정리", "보유종목"])) {
         text = "시즌 마지막 거래일 종가로 결과를 확정한 뒤 가상 보유 자산은 리셋돼. 거래와 생각 기록은 시즌 아카이브에 남아.";
       } else if (includesAny(message, ["이어", "회사바꿔", "메모남"])) {
@@ -3047,11 +3100,11 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
       target = "home";
       questions = ["모의투자와 실제 계좌는 뭐가 달라?", "시즌 끝나면 가상 돈은 어떻게 돼?"];
       if (includesAny(message, ["합쳐", "같이쓰"])) {
-        text = "같은 가족 팀이어도 투자금은 합치지 않아. 구성원마다 각자의 가상 100만원 지갑으로 따로 투자해.";
+        text = "같은 가족 팀이어도 투자금은 합치지 않아. 구성원마다 각자의 가상 1,000만원 지갑으로 따로 투자해.";
       } else if (includesAny(message, ["진짜돈", "출금", "현금으로바꿀"])) {
         text = "리그의 가상 돈은 현금으로 바꿀 수 없어. 시즌 리워드가 있다면 가상 투자금과는 별도이고, 세부 내용은 확정 안내만 확인해야 해.";
       } else {
-        text = "모의투자 100만원은 실제 증권계좌 잔액과 연결되지 않은 가상 지갑이야. 실제 주식을 소유하거나 돈이 출금되는 주문이 아니야.";
+        text = "모의투자 1,000만원은 실제 증권계좌 잔액과 연결되지 않은 가상 지갑이야. 실제 주식을 소유하거나 돈이 출금되는 주문이 아니야.";
       }
       break;
     }
@@ -3578,6 +3631,21 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     context.screen === "stock" || context.screen === "order"
       ? STOCKS.find((stock) => stock.id === context.stockId)
       : undefined;
+  if (!mentionedStock && hasUnrecognizedStockName(message)) {
+    return reply(
+      "faq",
+      "service_help",
+      "말한 회사 이름을 찾지 못했어요. 회사 이름을 다시 적거나 51개 종목 탐색에서 골라 주세요.",
+      ["미등록 종목명 대체 차단"],
+      {
+        uiAction: {
+          type: "open_screen",
+          target: "stock",
+          label: "종목 탐색에서 회사 찾기",
+        },
+      },
+    );
+  }
   const stock = mentionedStock ?? contextStock;
   if (stock && (mentionedStock || includesAny(message, STOCK_PATTERNS))) {
     return reply("tool", "stock_facts", "", ["승인 종목 사실 조회"], {
@@ -3601,16 +3669,20 @@ export const PROACTIVE_SCRIPTS: Record<
   ProactiveSignal,
   { label: string; text: string }
 > = {
-  switch: {
-    label: "매수·매도 취소 반복",
-    text: "확인 화면을 여러 번 바꿔 봤네요. 매수와 매도의 차이를 같이 볼까요?",
+  buyHesitation: {
+    label: "매수 최종 확인 반복 이탈",
+    text: "살지 말지 고민돼요?",
+  },
+  orderMethodConfusion: {
+    label: "시장가·지정가 교차 변경",
+    text: "뭐가 다른지 볼까요?",
   },
   dwell: {
     label: "주문·상세 화면 5분 초과 체류",
-    text: "이 화면을 오래 살펴보고 있네요. 어디에서 막혔는지 같이 찾아볼까요?",
+    text: "어디가 헷갈려요?",
   },
   lossRevisit: {
     label: "손실 실현 종목 반복 조회",
-    text: "방금 본 종목을 다시 살펴보고 있네요. 어떤 점이 신경 쓰이는지 같이 찾아볼까요?",
+    text: "후회되나요?",
   },
 };

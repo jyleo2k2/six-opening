@@ -5,7 +5,9 @@ import { fileURLToPath } from "node:url";
 import type {
   NewsEvaluationCase,
   NewsEvaluationInput,
+  NewsRoleRequest,
   NewsUniverseCompany,
+  ReadyNews,
   RejectedNews,
 } from "./contracts";
 import {
@@ -20,6 +22,15 @@ const fixture = JSON.parse(
     resolve(
       here,
       "evaluation-fixtures/latest-economic-news-2026-08-12.json",
+    ),
+    "utf8",
+  ),
+) as NewsEvaluationInput;
+const latestFixture = JSON.parse(
+  readFileSync(
+    resolve(
+      here,
+      "evaluation-fixtures/latest-economic-news-2026-08-13.json",
     ),
     "utf8",
   ),
@@ -40,6 +51,35 @@ assert.equal(
   ),
   true,
 );
+assert.equal(latestFixture.schemaVersion, 1);
+assert.equal(latestFixture.cases.length, 10);
+assert.equal(new Set(latestFixture.cases.map((item) => item.caseId)).size, 10);
+assert.equal(
+  new Set(latestFixture.cases.map((item) => item.article.articleId)).size,
+  10,
+);
+assert.equal(
+  new Set(latestFixture.cases.map((item) => item.article.sourceUrl)).size,
+  10,
+);
+assert.equal(
+  latestFixture.cases.every(
+    (item) =>
+      item.article.runDateKst === latestFixture.runDateKst &&
+      item.article.sourceUrl.startsWith("http") &&
+      item.expectation.rationale.length > 0,
+  ),
+  true,
+);
+const previousUrls = new Set(
+  fixture.cases.map((item) => item.article.sourceUrl),
+);
+assert.equal(
+  latestFixture.cases.every(
+    (item) => !previousUrls.has(item.article.sourceUrl),
+  ),
+  true,
+);
 
 const routineCase = fixture.cases[2];
 const routineReject: RejectedNews = {
@@ -53,6 +93,7 @@ const routineReject: RejectedNews = {
 const evaluated = evaluateNewsResult(routineCase, routineReject);
 assert.equal(evaluated.expectationMatched, true);
 assert.equal(evaluated.criteria.notRoutineOrPromotional.outcome, "pass");
+assert.equal(evaluated.criteria.conciseThreeLineSummary.outcome, "not_applicable");
 assert.equal(evaluated.criteria.allTermsEasy.outcome, "not_applicable");
 assert.equal(evaluated.criteria.storageDecisionExplained.outcome, "pass");
 
@@ -82,8 +123,14 @@ const report = await runNewsEvaluation(
   routineCases,
   {
     universe,
-    runRole: async () => {
-      throw new Error("prefilter 이후 역할을 호출하면 안 됩니다.");
+    runRole: async (request: NewsRoleRequest) => {
+      assert.equal(request.role, "headline_screener");
+      return {
+        articleId: request.article.articleId,
+        decision: "reject",
+        reasonCodes: ["ROUTINE_OR_PROMOTIONAL"],
+        reasons: ["채용 행사는 게시하지 않습니다."],
+      };
     },
   },
   {
@@ -101,9 +148,95 @@ assert.equal(JSON.parse(JSON.stringify(report)).cases.length, 10);
 
 const html = renderNewsEvaluationHtml(report);
 assert.match(html, /<!doctype html>/u);
+assert.match(html, /서비스에 보이는 어린이 뉴스/u);
+assert.match(html, /현재 서비스에 노출할 통과 기사가 없습니다/u);
+assert.match(html, /검수 상세 보기/u);
 assert.match(html, /기대 일치 10건/u);
 assert.equal(html.includes("<검증>"), false);
 assert.equal(html.includes("&lt;검증&gt;"), true);
+
+const readyCase = fixture.cases[0];
+const readyResult: ReadyNews = {
+  status: "ready_for_storage",
+  article: readyCase.article,
+  selection: {
+    articleId: readyCase.article.articleId,
+    decision: "accept",
+    kind: "market",
+    primaryStockIds: [],
+    eventType: "observed_market_move",
+    focusStatement: "오늘 국내 시장의 움직임",
+    anchorSourceId: "S1",
+    includedSourceIds: ["S1"],
+    excludedSourceIds: readyCase.article.sourceUnits.slice(1).map((unit) => unit.id),
+    difficultTerms: [],
+    reasonCodes: [],
+    reasons: [],
+  },
+  draft: {
+    articleId: readyCase.article.articleId,
+    headline: { text: "<아이>가 읽는 오늘의 시장 뉴스", sourceIds: ["S1"] },
+    homeSummary: { text: "홈에서 먼저 읽는 한 줄 요약입니다.", sourceIds: ["S1"] },
+    body: [
+      { role: "core_event", text: "서비스 뉴스 상세에 보이는 본문입니다.", sourceIds: ["S1"] },
+      { role: "business_connection", text: "두 번째 핵심 사실을 짧게 보여줍니다.", sourceIds: ["S1"] },
+      { role: "context", text: "어려운 말은 마지막 줄에서 설명합니다.", sourceIds: ["S1"] },
+    ],
+    termTreatments: [],
+  },
+  review: {
+    articleId: readyCase.article.articleId,
+    independentKind: "market",
+    primaryStockIds: [],
+    eventType: "observed_market_move",
+    focusStatement: "오늘 국내 시장의 움직임",
+    anchorSourceIds: ["S1"],
+    checks: {
+      allowedScope: true,
+      primarySubject: true,
+      directMateriality: true,
+      sourceFidelity: true,
+      focusAlignment: true,
+      conciseThreeLineSummary: true,
+      noIrrelevantDetail: true,
+      attributionAndTiming: true,
+      allTermsEasy: true,
+      investmentSafety: true,
+      noSentimentLabel: true,
+    },
+    issues: [],
+  },
+  editorAttempts: 1,
+};
+const readyHtml = renderNewsEvaluationHtml({
+  ...report,
+  readyForStorageCount: 1,
+  rejectedCount: 9,
+  cases: [
+    evaluateNewsResult(readyCase, readyResult),
+    ...report.cases.slice(1),
+  ],
+});
+const auditStart = readyHtml.indexOf('<section class="audit">');
+const servicePreview = readyHtml.slice(0, auditStart);
+assert.ok(auditStart > readyHtml.indexOf('<section class="service-output"'));
+assert.match(readyHtml, /3줄 요약/u);
+assert.match(readyHtml, /서비스 뉴스 상세에 보이는 본문입니다/u);
+assert.match(readyHtml, /두 번째 핵심 사실을 짧게 보여줍니다/u);
+assert.match(readyHtml, /어려운 말은 마지막 줄에서 설명합니다/u);
+assert.equal(readyHtml.includes("<아이>"), false);
+assert.equal(readyHtml.includes("&lt;아이&gt;가 읽는 오늘의 시장 뉴스"), true);
+assert.equal(readyHtml.slice(0, auditStart).includes("채용설명회"), false);
+assert.equal(readyHtml.slice(0, auditStart).includes("홈에서 먼저 읽는 한 줄 요약입니다"), false);
+assert.match(
+  servicePreview,
+  /<a class="source-link" href="https:\/\/www\.news1\.kr\/finance\/market-exr\/6256503" rel="noreferrer">원문 보기/u,
+);
+assert.equal(servicePreview.includes('target="_blank"'), false);
+assert.equal(
+  (readyHtml.slice(0, auditStart).match(/<li>/gu) ?? []).length,
+  3,
+);
 
 await assert.rejects(
   () =>

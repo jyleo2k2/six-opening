@@ -217,7 +217,25 @@ async function main() {
   assert.equal(stockFacts.source, "tool");
   assert.equal(stockFacts.gate, "passed");
   assert.equal(isStockExploreAction(stockFacts.action), true);
-  assert.equal(stockFacts.response.text.startsWith("궁금한 회사를 잘 짚었어 —"), true);
+  assert.equal(stockFacts.response.text.startsWith("궁금한 회사를 잘 짚었어요. —"), true);
+
+  const mentionedKrafton = await createChatOutcome(
+    { message: "크래프톤 뭐 하는 회사야?", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(mentionedKrafton.action?.uiAction?.stockId, "KRX:259960");
+
+  const unresolvedCompany = await createChatOutcome(
+    { message: "아무개회사 뭐하는데", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(unresolvedCompany.source, "fixed");
+  assert.equal(unresolvedCompany.response.text.includes("회사 이름을 찾지 못했어요"), true);
+  assert.equal(unresolvedCompany.action?.uiAction?.target, "stock");
+  assert.equal(isExplainAction(unresolvedCompany.action), false);
+  assert.equal(modelCalls, 0);
 
   // 51종 모두 회사·사업·업종 세 주제만 한 번씩 제공하고 실적은 추천하지 않는다.
   for (const stock of STOCKS) {
@@ -237,6 +255,7 @@ async function main() {
       assert.equal(outcome.source, "tool", `${stock.name} ${turnIndex + 1}번째 주제가 Tool 응답이 아니야`);
       assert.equal(outcome.gate, "passed", `${stock.name} ${turnIndex + 1}번째 주제가 게이트를 통과하지 못했어`);
       assert.equal(isStockExploreAction(outcome.action), true, `${stock.name} 탐색 action이 없어`);
+      assert.equal(outcome.action?.uiAction?.stockId, stock.id, `${stock.name} 관련 화면 ID가 달라`);
       assert.equal(seenTexts.has(outcome.response.text), false, `${stock.name}에서 같은 설명이 반복됐어`);
       seenTexts.add(outcome.response.text);
       if (!isStockExploreAction(outcome.action)) break;

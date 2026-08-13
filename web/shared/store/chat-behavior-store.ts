@@ -5,8 +5,6 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import {
   createProactiveSession,
   detectProactiveSignals,
-  markProactiveSignalShown,
-  muteProactiveSignal,
   PROACTIVE_LIMITS,
   refreshProactiveSession,
   selectProactiveSignal,
@@ -23,9 +21,10 @@ type ChatBehaviorStore = {
   events: ChatBehaviorEvent[];
   proactiveSession: ProactiveSessionState;
   activeSignal: ProactiveSignal | null;
+  activeSignalVersion: number;
   recordEvent: (event: ChatBehaviorEvent) => void;
   acceptActiveSignal: () => void;
-  muteActiveSignal: (now: number) => void;
+  dismissActiveSignal: () => void;
   clearSession: (now: number) => void;
 };
 
@@ -35,6 +34,7 @@ export const useChatBehaviorStore = create<ChatBehaviorStore>()(
       events: [],
       proactiveSession: createProactiveSession(0),
       activeSignal: null,
+      activeSignalVersion: 0,
       recordEvent: (event) =>
         set((state) => {
           const sessionExpired =
@@ -48,43 +48,36 @@ export const useChatBehaviorStore = create<ChatBehaviorStore>()(
             state.proactiveSession,
             event.at,
           );
-          const activeSignal = sessionExpired ? null : state.activeSignal;
-
-          if (activeSignal) {
-            return { events, proactiveSession: refreshedSession, activeSignal };
-          }
-
-          const signal = selectProactiveSignal(
-            detectProactiveSignals(events, event.at),
-            refreshedSession,
-            event.at,
-          );
+          const signal = selectProactiveSignal(detectProactiveSignals(events, event.at));
+          const retainedEvents =
+            signal === "buyHesitation"
+              ? events.filter(
+                  (storedEvent) =>
+                    storedEvent.type !== "buy_confirmation_abandoned",
+                )
+              : events;
 
           return {
-            events,
-            proactiveSession: signal
-              ? markProactiveSignalShown(refreshedSession, signal, event.at)
-              : refreshedSession,
-            activeSignal: signal,
+            events: retainedEvents,
+            proactiveSession: refreshedSession,
+            activeSignal: signal ?? (sessionExpired ? null : state.activeSignal),
+            activeSignalVersion: signal
+              ? state.activeSignalVersion + 1
+              : state.activeSignalVersion,
           };
         }),
       acceptActiveSignal: () => set({ activeSignal: null }),
-      muteActiveSignal: (now) =>
-        set((state) => ({
-          activeSignal: null,
-          proactiveSession: state.activeSignal
-            ? muteProactiveSignal(state.proactiveSession, state.activeSignal, now)
-            : state.proactiveSession,
-        })),
+      dismissActiveSignal: () => set({ activeSignal: null }),
       clearSession: (now) =>
         set({
           events: [],
           proactiveSession: createProactiveSession(now),
           activeSignal: null,
+          activeSignalVersion: 0,
         }),
     }),
     {
-      name: "kiwoom-chat-behavior-v1",
+      name: "kiwoom-chat-behavior-unlimited-v1",
       storage: createJSONStorage(() => localStorage),
     },
   ),

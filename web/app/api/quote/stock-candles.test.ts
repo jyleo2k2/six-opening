@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { chartRetentionCutoff, syncStoredCandles } from "./stock-candles";
 
-test("분봉 보관 시작은 현재 시각 기준 정확히 2주 전이다", () => {
+test("분봉 조회 시작은 현재 시각 기준 정확히 이틀 전이다", () => {
   const now = new Date("2026-08-12T10:30:00+09:00");
-  assert.equal(chartRetentionCutoff("minute", now), Math.floor(new Date("2026-07-29T10:30:00+09:00").getTime() / 1000));
+  assert.equal(chartRetentionCutoff("minute", now), Math.floor(new Date("2026-08-10T10:30:00+09:00").getTime() / 1000));
 });
 
 test("일봉과 주봉 보관 시작은 한국 날짜의 1년·3년 전 자정이다", () => {

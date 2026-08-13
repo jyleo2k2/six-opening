@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { STOCKS } from "../../../shared/data/stocks";
 import {
   isAllowedUiAction,
   isExplainAction,
@@ -222,6 +223,17 @@ assert.equal(
 assert.equal(
   isAllowedUiAction({ type: "open_screen", target: "stock", sectorId: "energy" }),
   true,
+);
+for (const stock of STOCKS) {
+  assert.equal(
+    isAllowedUiAction({ type: "open_screen", target: "stock", stockId: stock.id }),
+    true,
+    `${stock.name} 화면 액션이 거부됐어`,
+  );
+}
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "stock", stockId: "KRX:999999" }),
+  false,
 );
 assert.equal(
   isAllowedUiAction({ type: "open_screen", target: "portfolio", label: "기다리는 주문 보기" }),

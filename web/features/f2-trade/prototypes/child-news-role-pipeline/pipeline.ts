@@ -1,8 +1,12 @@
 import { filterGeneratedText } from "../../../../shared/llm/filter";
 import {
+  CHILD_NEWS_SUMMARY_LINE_COUNT,
+  CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
+  NEWS_BODY_ROLES,
   REVIEW_CHECK_NAMES,
   type ChildNewsDraft,
   type EditorRoleRequest,
+  type HeadlineScreenResult,
   type NewsPipelineResult,
   type NewsRoleRequest,
   type NewsRoleRunner,
@@ -15,11 +19,13 @@ import {
   type SelectorAccept,
   type SelectorReject,
   parseChildNewsDraft,
+  parseHeadlineScreenResult,
   parsePublicationReview,
   parseSelectorResult,
 } from "./contracts";
+import { HEADLINE_SCREENING_EXAMPLES } from "./headline-screening-examples";
 
-const DEFAULT_ROLE_TIMEOUT_MS = 45_000;
+const DEFAULT_ROLE_TIMEOUT_MS = 90_000;
 const MAX_SOURCE_UNIT_LENGTH = 700;
 const MAX_EDITOR_ATTEMPTS = 2;
 
@@ -32,30 +38,68 @@ export type NewsPipelineDependencies = {
   maxEditorAttempts?: 1 | 2;
 };
 
-const ROUTINE_TITLE_RULES: Array<{ pattern: RegExp; message: string }> = [
-  {
-    pattern:
-      /(?:공개\s*채용|채용\s*(?:설명회|박람회|접수)|(?:신입|경력|인재).{0,12}(?:채용|모집))/u,
-    message: "채용·채용행사는 회사의 중요 사업 사건으로 게시하지 않습니다.",
-  },
-  {
-    pattern:
-      /(?:기부|봉사활동|사회공헌|후원\s*(?:확대|전달)|(?:소방|병원).{0,16}(?:지원|기증)|(?:구급차|재활장비).{0,12}기증)/u,
-    message: "기부·후원·사회공헌은 주가 관련 회사 뉴스 범위에서 제외합니다.",
-  },
-  {
-    pattern:
-      /(?:(?:사내|임직원).{0,20}(?:AI|인공지능).{0,20}(?:행사|교육|경진대회|해커톤|캠페인)|(?:AI|인공지능).{0,12}(?:경진대회|해커톤|아이디어대회))/iu,
-    message: "사내 AI 행사·교육은 회사의 중요 사업 사건으로 게시하지 않습니다.",
-  },
-];
-
 function normalizeText(value: string) {
   return value.normalize("NFKC").toLocaleLowerCase("ko-KR").trim();
 }
 
 function compactText(value: string) {
   return normalizeText(value).replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+function compactSummaryClaim(value: string) {
+  return compactText(
+    normalizeText(value)
+      .replace(/[.!?。！？]+$/gu, "")
+      .replace(/(?:습니다|입니다|이에요|예요|어요|아요|했어|였어|이야|야|다)$/u, ""),
+  );
+}
+
+function hasRedundantSummaryLines(lines: readonly string[]) {
+  const claims = lines.map(compactSummaryClaim);
+  return claims.some((claim, index) =>
+    claims.slice(index + 1).some((other) => {
+      if (claim === other) return true;
+      const shorter = claim.length <= other.length ? claim : other;
+      const longer = claim.length > other.length ? claim : other;
+      return shorter.length >= 12 && longer.includes(shorter);
+    })
+  );
+}
+
+function hasRepeatedMarketMove(
+  lines: readonly string[],
+  universe: readonly NewsUniverseCompany[],
+) {
+  const marketMove = /(?:오르|올랐|상승|내리|내렸|하락|회복)/u;
+  const subjects = unique([
+    "코스피",
+    "코스닥",
+    ...universe.flatMap(companyNames),
+  ]);
+  const lineSubjects = lines.map((line) => {
+    const normalized = compactText(line);
+    return subjects.filter((subject) =>
+      normalized.includes(compactText(subject)),
+    );
+  });
+
+  return lines.some((line, index) =>
+    marketMove.test(line) &&
+    lines.slice(index + 1).some((other, offset) =>
+      marketMove.test(other) &&
+      lineSubjects[index].some((subject) =>
+        lineSubjects[index + offset + 1].includes(subject),
+      )
+    )
+  );
+}
+
+function isEasyKospiExplanation(value: string) {
+  const normalized = normalizeText(value);
+  return /(?:국내|우리나라)/u.test(normalized) &&
+    normalized.includes("주식시장") &&
+    /(?:대표|나타내|보여)/u.test(normalized) &&
+    normalized.includes("숫자");
 }
 
 function unique(values: readonly string[]) {
@@ -70,6 +114,29 @@ function sameSet(left: readonly string[], right: readonly string[]) {
   if (left.length !== right.length) return false;
   const rightSet = new Set(right);
   return left.every((value) => rightSet.has(value));
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+}
+
+function termAppearsInVisibleText(text: string, term: string) {
+  const normalizedTerm = term.normalize("NFKC").trim();
+  if (!normalizedTerm) return false;
+  const particle = /[\p{L}\p{N}]$/u.test(normalizedTerm)
+    ? "(?:은|는|이|가|을|를|에|의|로|으로|와|과|도|만|에서)?"
+    : "";
+  return new RegExp(
+    `(?<![\\p{L}\\p{N}])${escapeRegExp(normalizedTerm)}${particle}(?![\\p{L}\\p{N}])`,
+    "u",
+  ).test(text.normalize("NFKC"));
+}
+
+function isFamiliarNumericNotation(term: string) {
+  const normalized = term.normalize("NFKC").replace(/\s+/gu, "");
+  return /^(?:%|억원|조원|[1-4]분기|\d[\d,.]*%|\d[\d,.]*(?:억|조)원)$/u.test(
+    normalized,
+  );
 }
 
 function splitLongPiece(text: string) {
@@ -196,12 +263,33 @@ function reject(
   };
 }
 
-function prefilterArticle(article: NewsSourceArticle): GateIssue[] {
-  if (article.scope !== "company") return [];
-  const rule = ROUTINE_TITLE_RULES.find(({ pattern }) => pattern.test(article.title));
-  return rule
-    ? [{ code: "ROUTINE_OR_PROMOTIONAL", message: rule.message }]
-    : [];
+function validateHeadlineScreen(
+  result: HeadlineScreenResult,
+  article: NewsSourceArticle,
+): GateIssue[] {
+  const issues: GateIssue[] = [];
+  if (result.articleId !== article.articleId) {
+    issues.push({
+      code: "INVALID_ROLE_OUTPUT",
+      message: "제목 선별 결과의 articleId가 다릅니다.",
+    });
+  }
+  if (result.reasons.length === 0 || result.reasons.some((reason) => !reason.trim())) {
+    issues.push({
+      code: "INVALID_ROLE_OUTPUT",
+      message: "제목 선별의 구체적인 판단 이유가 없습니다.",
+    });
+  }
+  if (
+    (result.decision === "pass" && result.reasonCodes.length > 0) ||
+    (result.decision === "reject" && result.reasonCodes.length === 0)
+  ) {
+    issues.push({
+      code: "INVALID_ROLE_OUTPUT",
+      message: "제목 선별의 결정과 사유 코드가 일치하지 않습니다.",
+    });
+  }
+  return issues;
 }
 
 function validateSelectorReject(
@@ -346,7 +434,15 @@ function validateSelectorAccept(
 }
 
 function extractNumbers(text: string) {
-  return text.match(/\d[\d,.]*%?/gu)?.map((value) => value.replace(/[,%]/gu, "")) ?? [];
+  return text.match(/\d[\d,.]*%?/gu)?.map((value) => {
+    const [integer, fraction] = value.replace(/[,%]/gu, "").split(".");
+    const normalizedInteger = integer.replace(/^0+(?=\d)/u, "");
+    if (fraction === undefined) return normalizedInteger;
+    const normalizedFraction = fraction.replace(/0+$/u, "");
+    return normalizedFraction
+      ? `${normalizedInteger}.${normalizedFraction}`
+      : normalizedInteger;
+  }) ?? [];
 }
 
 function visibleDraftText(draft: ChildNewsDraft, includeTerms = true) {
@@ -379,15 +475,29 @@ function validateDraft(
     issues.push({ code: "INVALID_DRAFT_SHAPE", message: "홈 요약은 1~180자여야 합니다." });
   }
   if (
-    draft.body.length < 2 ||
-    draft.body.length > 3 ||
+    draft.body.length !== CHILD_NEWS_SUMMARY_LINE_COUNT ||
     draft.body[0]?.role !== "core_event" ||
-    hasDuplicates(draft.body.map((block) => block.role)) ||
-    draft.body.some((block) => !block.text.trim() || block.text.length > 280)
+    draft.body.some((block, index) => block.role !== NEWS_BODY_ROLES[index]) ||
+    draft.body.some(
+      (block) =>
+        !block.text.trim() ||
+        block.text.length > CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
+    )
   ) {
     issues.push({
       code: "INVALID_DRAFT_SHAPE",
-      message: "본문은 중심 사건부터 시작하는 서로 다른 역할의 2~3개 짧은 문단이어야 합니다.",
+      message: `본문은 core_event, business_connection, context 순서의 3줄 요약이어야 하며 각 줄은 ${CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH}자 이하여야 합니다.`,
+    });
+  }
+  const summaryLines = draft.body.map((block) => block.text);
+  if (
+    hasRedundantSummaryLines(summaryLines) ||
+    (selection.kind === "market" &&
+      hasRepeatedMarketMove(summaryLines, universe))
+  ) {
+    issues.push({
+      code: "REDUNDANT_SUMMARY",
+      message: "3줄 요약에서 같은 사실을 반복하지 않아야 합니다.",
     });
   }
   if (
@@ -397,7 +507,7 @@ function validateDraft(
   ) {
     issues.push({
       code: "ANCHOR_MISSING_FROM_HOME",
-      message: "제목·홈 요약·첫 문단이 모두 중심 사건을 근거로 해야 합니다.",
+      message: "제목·홈 요약·첫 요약 줄이 모두 중심 사건을 근거로 해야 합니다.",
     });
   }
   if (
@@ -442,15 +552,32 @@ function validateDraft(
       message: "선별된 어려운 용어를 모두 쉬운 말로 처리하지 않았습니다.",
     });
   }
-  const articleTextOnly = compactText(visibleDraftText(draft, false));
+  const articleTextOnly = visibleDraftText(draft, false);
+  const serviceSummaryText = draft.body.map((block) => block.text).join("\n");
+  const compactServiceSummaryText = compactText(serviceSummaryText);
   for (const treatment of draft.termTreatments) {
+    if (!compactServiceSummaryText.includes(compactText(treatment.easyText))) {
+      issues.push({
+        code: "UNEXPLAINED_TERM",
+        message: `'${treatment.term}'의 쉬운 설명이 서비스 3줄 요약에 없습니다.`,
+      });
+    }
     if (
       treatment.treatment === "replaced" &&
-      articleTextOnly.includes(compactText(treatment.term))
+      termAppearsInVisibleText(articleTextOnly, treatment.term)
     ) {
       issues.push({
         code: "UNEXPLAINED_TERM",
         message: `바꿨다고 표시한 '${treatment.term}'이 노출문에 남아 있습니다.`,
+      });
+    }
+    if (
+      treatment.treatment === "explained" &&
+      !termAppearsInVisibleText(serviceSummaryText, treatment.term)
+    ) {
+      issues.push({
+        code: "UNEXPLAINED_TERM",
+        message: `설명할 '${treatment.term}' 이름이 서비스 3줄 요약에 없습니다.`,
       });
     }
   }
@@ -459,7 +586,32 @@ function validateDraft(
     .filter((unit) => allowedIds.has(unit.id))
     .map((unit) => unit.text)
     .join(" ");
-  const allowedNumbers = new Set(extractNumbers(selectedSourceText));
+  if (termAppearsInVisibleText(selectedSourceText, "코스피")) {
+    const kospiTreatment = draft.termTreatments.find(
+      (item) => compactText(item.term) === compactText("코스피"),
+    );
+    const hasKospiExplanationLine = draft.body.some(
+      (block) =>
+        termAppearsInVisibleText(block.text, "코스피") &&
+        isEasyKospiExplanation(block.text),
+    );
+    if (
+      !termAppearsInVisibleText(serviceSummaryText, "코스피") ||
+      kospiTreatment?.treatment !== "explained" ||
+      !isEasyKospiExplanation(kospiTreatment.easyText) ||
+      !hasKospiExplanationLine
+    ) {
+      issues.push({
+        code: "UNEXPLAINED_TERM",
+        message: "코스피는 이름을 유지하고 국내 주식시장을 대표하는 숫자라고 서비스 3줄 요약에서 설명해야 합니다.",
+      });
+    }
+  }
+  const allowedNumbers = new Set(
+    extractNumbers(
+      `${selectedSourceText} ${article.runDateKst} ${article.publishedAt}`,
+    ),
+  );
   if (extractNumbers(visibleText).some((number) => !allowedNumbers.has(number))) {
     issues.push({
       code: "UNSUPPORTED_NUMBER",
@@ -628,19 +780,67 @@ export async function processNewsCandidate(
     return reject(article.articleId, "input", inputIssues);
   }
 
-  const prefilterIssues = prefilterArticle(article);
-  if (prefilterIssues.length > 0) {
-    return reject(article.articleId, "prefilter", prefilterIssues);
+  const timeoutMs = dependencies.timeoutMs ?? DEFAULT_ROLE_TIMEOUT_MS;
+  let rawHeadlineScreen: unknown;
+  try {
+    rawHeadlineScreen = await invokeRole(
+      dependencies.runRole,
+      {
+        role: "headline_screener",
+        reasoningEffort: "max",
+        article: {
+          articleId: article.articleId,
+          runDateKst: article.runDateKst,
+          scope: article.scope,
+          title: article.title,
+          publisher: article.publisher,
+          publishedAt: article.publishedAt,
+        },
+        universe: dependencies.universe,
+        examples: HEADLINE_SCREENING_EXAMPLES,
+      },
+      timeoutMs,
+    );
+  } catch (error) {
+    return reject(article.articleId, "prefilter", [
+      {
+        code: "ROLE_ERROR",
+        message: error instanceof Error ? error.message : "제목 선별 호출에 실패했습니다.",
+      },
+    ]);
   }
 
-  const timeoutMs = dependencies.timeoutMs ?? DEFAULT_ROLE_TIMEOUT_MS;
+  const headlineScreen = parseHeadlineScreenResult(rawHeadlineScreen);
+  if (!headlineScreen) {
+    return reject(article.articleId, "prefilter", [
+      { code: "INVALID_ROLE_OUTPUT", message: "제목 선별 결과 스키마가 올바르지 않습니다." },
+    ]);
+  }
+  const headlineIssues = validateHeadlineScreen(headlineScreen, article);
+  if (headlineIssues.length > 0) {
+    return reject(article.articleId, "prefilter", headlineIssues);
+  }
+  if (headlineScreen.decision === "reject") {
+    return reject(
+      article.articleId,
+      "prefilter",
+      headlineScreen.reasons.map((message, index) => ({
+        code:
+          headlineScreen.reasonCodes[index] ??
+          headlineScreen.reasonCodes[0] ??
+          "HEADLINE_REJECTED",
+        message,
+      })),
+    );
+  }
+
   let rawSelection: unknown;
   try {
     rawSelection = await invokeRole(
       dependencies.runRole,
       {
         role: "relevance_selector",
-        reasoningEffort: "high",
+        reasoningEffort: "max",
         article,
         universe: dependencies.universe,
       },
@@ -655,13 +855,14 @@ export async function processNewsCandidate(
     ]);
   }
 
-  const selection = parseSelectorResult(rawSelection);
-  if (!selection) {
+  const parsedSelection = parseSelectorResult(rawSelection);
+  if (!parsedSelection) {
     return reject(article.articleId, "selector", [
       { code: "INVALID_ROLE_OUTPUT", message: "관련성 선별 결과 스키마가 올바르지 않습니다." },
     ]);
   }
-  if (selection.decision === "reject") {
+  if (parsedSelection.decision === "reject") {
+    const selection = parsedSelection;
     const invalidReject = validateSelectorReject(selection, article);
     if (invalidReject.length > 0) {
       return reject(article.articleId, "selector", invalidReject);
@@ -675,6 +876,13 @@ export async function processNewsCandidate(
       })),
     );
   }
+
+  const selection: SelectorAccept = {
+    ...parsedSelection,
+    difficultTerms: parsedSelection.difficultTerms.filter(
+      (item) => !isFamiliarNumericNotation(item.term),
+    ),
+  };
 
   const selectionIssues = validateSelectorAccept(
     selection,
@@ -700,7 +908,7 @@ export async function processNewsCandidate(
           article,
           selection,
           dependencies.universe,
-          attempt === 1 ? "medium" : "high",
+          "high",
           revisionReasons,
         ),
         timeoutMs,
@@ -749,7 +957,7 @@ export async function processNewsCandidate(
         dependencies.runRole,
         {
           role: "publication_reviewer",
-          reasoningEffort: "high",
+          reasoningEffort: "max",
           article,
           universe: dependencies.universe,
           draft,
