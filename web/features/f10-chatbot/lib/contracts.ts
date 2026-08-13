@@ -1,4 +1,8 @@
 import {
+  CHAT_ACTION_TARGETS,
+  CHAT_ARCHIVE_TABS,
+  CHAT_ORDER_SIDES,
+  CHAT_ORDER_STEPS,
   CHAT_SCREENS,
   type ChatContext,
   type ChatResponse,
@@ -269,7 +273,25 @@ export function isStockExploreAction(
 
 export function isAllowedUiAction(value: unknown): value is ChatUiAction {
   if (!isRecord(value) || value.type !== "open_screen") return false;
-  return CHAT_SCREENS.includes(String(value.target) as ChatScreen);
+  if (!CHAT_ACTION_TARGETS.includes(String(value.target) as ChatUiAction["target"])) {
+    return false;
+  }
+
+  const { label, stockId, orderSide, orderStep, sectorId, archiveTab } = value;
+  return (
+    (label === undefined ||
+      (typeof label === "string" && label.trim().length > 0 && label.length <= MAX_LABEL_LENGTH)) &&
+    (stockId === undefined ||
+      (typeof stockId === "string" && /^KRX:\d{6}$/.test(stockId))) &&
+    (orderSide === undefined ||
+      CHAT_ORDER_SIDES.includes(String(orderSide) as ChatUiAction["orderSide"] & string)) &&
+    (orderStep === undefined ||
+      CHAT_ORDER_STEPS.includes(String(orderStep) as ChatUiAction["orderStep"] & string)) &&
+    (sectorId === undefined ||
+      (typeof sectorId === "string" && /^[a-z][a-z0-9-]{0,31}$/.test(sectorId))) &&
+    (archiveTab === undefined ||
+      CHAT_ARCHIVE_TABS.includes(String(archiveTab) as ChatUiAction["archiveTab"] & string))
+  );
 }
 
 export function sanitizeActionPayload(
