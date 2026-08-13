@@ -65,6 +65,7 @@ export function parseBehaviorEvent(
   if (
     value.kind !== "buy_confirmation_abandoned" &&
     value.kind !== "order_confirmation_cancelled" &&
+    value.kind !== "order_method_selected" &&
     value.kind !== "trade_filled"
   ) {
     return null;
@@ -86,6 +87,24 @@ export function parseBehaviorEvent(
     return {
       type: "buy_confirmation_abandoned",
       stockId: value.stockId,
+      at: now,
+    };
+  }
+
+  if (value.kind === "order_method_selected") {
+    if (
+      context?.screen !== "order" ||
+      typeof value.orderFlowId !== "string" ||
+      !/^[a-z0-9_-]{1,80}$/i.test(value.orderFlowId) ||
+      (value.orderType !== "market" && value.orderType !== "limit")
+    ) {
+      return null;
+    }
+    return {
+      type: "order_method_selected",
+      stockId: value.stockId,
+      orderFlowId: value.orderFlowId,
+      orderType: value.orderType,
       at: now,
     };
   }

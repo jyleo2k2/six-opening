@@ -125,12 +125,23 @@ export const READ_ONLY_CHAT_TOOLS = [
 
 export type ReadOnlyChatToolName = (typeof READ_ONLY_CHAT_TOOLS)[number];
 
-export type ProactiveSignal = "buyHesitation" | "dwell" | "lossRevisit";
+export type ProactiveSignal =
+  | "buyHesitation"
+  | "orderMethodConfusion"
+  | "dwell"
+  | "lossRevisit";
 
 export type ChatBehaviorEvent =
   | {
       type: "buy_confirmation_abandoned";
       stockId: string;
+      at: number;
+    }
+  | {
+      type: "order_method_selected";
+      stockId: string;
+      orderFlowId: string;
+      orderType: "market" | "limit";
       at: number;
     }
   | {

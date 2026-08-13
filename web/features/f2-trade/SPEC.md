@@ -178,11 +178,14 @@ type SellRecord = {
 |---|---|---|
 | `stock_detail_viewed` | 사용자, 종목, 체류시간 | F9 탐색 깊이 |
 | `order_confirmation_cancelled` | 사용자, 종목, 매수/매도, 시각 | F10 `switch` 신호 |
+| `order_method_selected` | 종목, 주문 흐름 ID, 시장가/지정가, 시각 | F10 `orderMethodConfusion` 신호 |
 | `order_screen_dwell` | 사용자, 종목, 체류시간 | F10 `dwell` 신호 |
 | `trade_filled` | 거래 기록, 실현손익 | F9 스코어링·F10 `lossRevisit` 기준 |
 | `order_abandoned` | 이탈 단계 | 질문식 기록 이탈률 |
 
-- F10은 위 이벤트 중 `switch`, `dwell`, `lossRevisit` 판정에 승인된 필드만 사용한다.
+- F10은 위 이벤트 중 `switch`, `dwell`, `lossRevisit`, `orderMethodConfusion` 판정에 승인된 필드만 사용한다.
+- 한 주문 화면에서 이미 선택된 방식과 다른 시장가/지정가 버튼을 **세 번 연속으로 교차 변경**하고 주문 확인으로 넘어가지 않으면 `orderMethodConfusion`을 한 번 보낸다. 같은 버튼을 다시 누르는 것은 변경으로 세지 않으며, 주문 흐름 ID가 바뀌면 새 주문으로 계산한다.
+- 이 신호에는 시간 간격·세션 횟수 같은 자동 발화 제한을 적용하지 않는다. 대신 세 번째 변경 시점에만 한 번 보이므로, 같은 주문 화면에서 반복 노출되지 않는다.
 - 챗봇 대화는 F9 스코어링 입력이 아니다.
 - 수집 항목은 온보딩에서 고지한다.
 

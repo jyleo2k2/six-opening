@@ -54,6 +54,27 @@ test("프로토타입의 주문 화면 매수 취소만 최종 확인 이탈로 
   );
 });
 
+test("주문 방식 변경은 같은 주문 화면의 market·limit 값만 받는다", () => {
+  const event = {
+    kind: "order_method_selected",
+    stockId: "KRX:005930",
+    orderFlowId: "buy_1",
+    orderType: "limit",
+  };
+  assert.deepEqual(parseBehaviorEvent(event, NOW, { screen: "order" }), {
+    type: "order_method_selected",
+    stockId: "KRX:005930",
+    orderFlowId: "buy_1",
+    orderType: "limit",
+    at: NOW,
+  });
+  assert.equal(parseBehaviorEvent(event, NOW, { screen: "home" }), null);
+  assert.equal(
+    parseBehaviorEvent({ ...event, orderType: "next" }, NOW, { screen: "order" }),
+    null,
+  );
+});
+
 test("체결 이벤트의 실현손익을 포함하거나 생략한다", () => {
   assert.deepEqual(
     parseBehaviorEvent(

@@ -375,6 +375,21 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     openChat();
   }
 
+  function openOrderMethodConfusionChat() {
+    if (signal !== "orderMethodConfusion") {
+      openChat();
+      return;
+    }
+
+    setMessages((current) => [
+      ...current,
+      { role: "assistant", text: PROACTIVE_SCRIPTS.orderMethodConfusion.text },
+    ]);
+    acceptActiveSignal();
+    openChat();
+    void ask("시장가가 뭐야?");
+  }
+
   function closeChat() {
     setIsOpen(false);
     setSheetDragY(0);
@@ -769,10 +784,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
           <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-semibold">
             <button
               className="rounded-xl bg-navy px-2 py-3 text-white"
-              onClick={() => {
-                acceptActiveSignal();
-                openChat();
-              }}
+              onClick={
+                signal === "orderMethodConfusion"
+                  ? openOrderMethodConfusionChat
+                  : () => {
+                      acceptActiveSignal();
+                      openChat();
+                    }
+              }
               type="button"
             >
               {COPY.askDirectly}

@@ -3613,6 +3613,10 @@ export const PROACTIVE_SCRIPTS: Record<
     label: "매수 최종 확인 반복 이탈",
     text: "살지 말지 고민돼?",
   },
+  orderMethodConfusion: {
+    label: "시장가·지정가 교차 변경",
+    text: "시장가와 지정가 차이를 같이 볼까요?",
+  },
   dwell: {
     label: "주문·상세 화면 5분 초과 체류",
     text: "이 화면을 오래 살펴보고 있네요. 어디에서 막혔는지 같이 찾아볼까요?",
