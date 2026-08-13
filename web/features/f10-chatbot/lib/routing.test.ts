@@ -1513,6 +1513,18 @@ for (const [question, expectedStep] of ruleNaturalVariants) {
   assert.equal(routed.steps[0], expectedStep, `자연어 규칙 하위 의도가 달라: ${question}`);
 }
 
+// 단일종목 한도는 2026-08-13에 폐기했다. 한도 안내가 폐기된 프리셋을 되살리면 안 된다.
+for (const question of ruleQuestionsByStep["주문 한도 규칙 안내"]) {
+  const { text } = routeMessage(question, stockContext);
+  for (const dropped of ["30%", "40%", "입문형", "성장형", "프리셋"]) {
+    assert.equal(
+      text.includes(dropped),
+      false,
+      `폐기된 단일종목 한도 표현이 남아 있어: ${dropped} / ${question}`,
+    );
+  }
+}
+
 const ruleSteps = new Set(Object.keys(ruleQuestionsByStep));
 const allowedRuleLookalikes = [
   "수수료가 뭐야?",
@@ -1541,7 +1553,7 @@ for (const question of allowedRuleLookalikes) {
 assert.equal(routeMessage("가족 순위가 동점이면 어떤 알고리즘으로 순서를 정해?", stockContext).text.includes("아직 확정되지 않았어"), true);
 assert.equal(routeMessage("매수하고 팔면 점수 업데이트가 즉시 되는 구조야?", stockContext).text.includes("아직 확정되지 않았어"), true);
 assert.equal(routeMessage("이번 시즌 끝나면 수익률 1등한테 뭐 줘?", stockContext).text.includes("아직 확정되지 않았어"), true);
-assert.equal(routeMessage("한도 초과 주문을 여러 번 나눠 넣으면 리그 규칙에 걸려?", stockContext).text.includes("누적"), true);
+assert.equal(routeMessage("한도 초과 주문을 여러 번 나눠 넣으면 리그 규칙에 걸려?", stockContext).text.includes("한도가 없어"), true);
 assert.equal(routeMessage("내가 산 종목 친구한테 보이는 거 아니지?", stockContext).text.includes("자동으로 공개"), true);
 assert.equal(routeMessage("시즌 끝나면 가상 돈을 진짜 돈으로 바꿀 수 있어?", stockContext).text.includes("현금으로 바꿀 수 없어"), true);
 
