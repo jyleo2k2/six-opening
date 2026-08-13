@@ -1,0 +1,99 @@
+import {
+  CHAT_SCREENS,
+  type ChatBehaviorEvent,
+  type ChatContext,
+  type ChatScreen,
+} from "../../../shared/types/chatbot";
+
+const STOCK_ID_PATTERN = /^KRX:\d{6}$/;
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function parseChatContext(value: unknown): ChatContext | null {
+  if (!isRecord(value) || typeof value.screen !== "string") return null;
+  if (!CHAT_SCREENS.includes(value.screen as ChatScreen)) return null;
+
+  const screen = value.screen as ChatScreen;
+  if (screen === "home" || screen === "archive") return { screen };
+  if (
+    typeof value.stockId !== "string" ||
+    !STOCK_ID_PATTERN.test(value.stockId) ||
+    typeof value.stockName !== "string" ||
+    !value.stockName.trim() ||
+    value.stockName.length > 60
+  ) {
+    return null;
+  }
+
+  const context: ChatContext = {
+    screen,
+    stockId: value.stockId as ChatContext["stockId"],
+    stockName: value.stockName.trim(),
+  };
+
+  if (screen === "order") {
+    if (
+      typeof value.quantity === "number" &&
+      Number.isFinite(value.quantity) &&
+      Number.isInteger(value.quantity) &&
+      value.quantity >= 1 &&
+      value.quantity <= 100_000
+    ) {
+      context.quantity = value.quantity;
+    }
+    if (
+      typeof value.unitPrice === "number" &&
+      Number.isFinite(value.unitPrice) &&
+      value.unitPrice >= 1 &&
+      value.unitPrice <= 100_000_000
+    ) {
+      context.unitPrice = value.unitPrice;
+    }
+  }
+
+  return context;
+}
+
+export function parseBehaviorEvent(
+  value: unknown,
+  now: number,
+): ChatBehaviorEvent | null {
+  if (!isRecord(value)) return null;
+  if (
+    value.kind !== "order_confirmation_cancelled" &&
+    value.kind !== "trade_filled"
+  ) {
+    return null;
+  }
+  if (value.side !== "buy" && value.side !== "sell") return null;
+  if (typeof value.stockId !== "string" || !STOCK_ID_PATTERN.test(value.stockId)) {
+    return null;
+  }
+
+  if (value.kind === "order_confirmation_cancelled") {
+    return {
+      type: value.kind,
+      stockId: value.stockId,
+      side: value.side,
+      at: now,
+    };
+  }
+
+  const event: Extract<ChatBehaviorEvent, { type: "trade_filled" }> = {
+    type: value.kind,
+    stockId: value.stockId,
+    side: value.side,
+    at: now,
+  };
+  if (
+    typeof value.realizedPnlPct === "number" &&
+    Number.isFinite(value.realizedPnlPct) &&
+    value.realizedPnlPct >= -100 &&
+    value.realizedPnlPct <= 100
+  ) {
+    event.realizedPnlPct = value.realizedPnlPct;
+  }
+  return event;
+}

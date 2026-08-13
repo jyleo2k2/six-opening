@@ -1,43 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  CHAT_SCREENS,
-  type ChatContext,
-  type ChatScreen,
-} from "../../shared/types/chatbot";
+import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
+import type { ChatContext } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
 import { FeedScreen } from "../f11-feed";
+import {
+  isRecord,
+  parseBehaviorEvent,
+  parseChatContext,
+} from "./lib/prototype-bridge";
 
 const CHAT_CONTEXT_MESSAGE = "kiwoom:chat-context";
+const CHAT_BEHAVIOR_MESSAGE = "kiwoom:chat-behavior";
 const OPEN_STOCK_MESSAGE = "kiwoom:open-stock";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function parseChatContext(value: unknown): ChatContext | null {
-  if (!isRecord(value) || typeof value.screen !== "string") return null;
-  if (!CHAT_SCREENS.includes(value.screen as ChatScreen)) return null;
-
-  const screen = value.screen as ChatScreen;
-  if (screen !== "stock" && screen !== "order") return { screen };
-  if (
-    typeof value.stockId !== "string" ||
-    !/^KRX:\d{6}$/.test(value.stockId) ||
-    typeof value.stockName !== "string" ||
-    !value.stockName.trim() ||
-    value.stockName.length > 60
-  ) {
-    return null;
-  }
-
-  return {
-    screen,
-    stockId: value.stockId as `KRX:${string}`,
-    stockName: value.stockName.trim(),
-  };
-}
 
 export function ConnectedPrototype() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -54,22 +30,31 @@ export function ConnectedPrototype() {
   };
 
   useEffect(() => {
-    const receiveChatContext = (event: MessageEvent<unknown>) => {
+    const receivePrototypeMessage = (event: MessageEvent<unknown>) => {
       if (
         event.origin !== window.location.origin ||
         event.source !== iframeRef.current?.contentWindow ||
-        !isRecord(event.data) ||
-        event.data.type !== CHAT_CONTEXT_MESSAGE
+        !isRecord(event.data)
       ) {
         return;
       }
 
-      const nextContext = parseChatContext(event.data.context);
-      if (nextContext) setChatContext(nextContext);
+      if (event.data.type === CHAT_CONTEXT_MESSAGE) {
+        const nextContext = parseChatContext(event.data.context);
+        if (nextContext) setChatContext(nextContext);
+        return;
+      }
+
+      if (event.data.type === CHAT_BEHAVIOR_MESSAGE) {
+        const behaviorEvent = parseBehaviorEvent(event.data.event, Date.now());
+        if (behaviorEvent) {
+          useChatBehaviorStore.getState().recordEvent(behaviorEvent);
+        }
+      }
     };
 
-    window.addEventListener("message", receiveChatContext);
-    return () => window.removeEventListener("message", receiveChatContext);
+    window.addEventListener("message", receivePrototypeMessage);
+    return () => window.removeEventListener("message", receivePrototypeMessage);
   }, []);
 
   return (
