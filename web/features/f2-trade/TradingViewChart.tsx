@@ -360,8 +360,13 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
         }`}
         aria-label={`${symbol} ${shownPeriod === "minute" ? "분봉" : shownPeriod === "daily" ? "일봉" : "주봉"} TradingView ${shownChartType === "line" ? "선" : "캔들"} 차트`}
       />
+      {/*
+        z-[60] 이 있어야 보인다. lightweight-charts 는 자기 캔버스에 z-index 를 최대 50
+        까지 준다. 이 SVG 가 `auto` 로 남으면 좌표를 제대로 잡고도 캔버스 밑에 깔려
+        화면에 안 나온다.
+      */}
       {state === "ready" && placed.length > 0 && (
-        <svg className="pointer-events-none absolute left-0 top-0 h-[238px] w-full">
+        <svg className="pointer-events-none absolute left-0 top-0 z-[60] h-[238px] w-full">
           {placed.map((marker) => {
             const fill =
               marker.member === "child"
