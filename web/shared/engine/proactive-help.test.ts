@@ -11,12 +11,44 @@ import {
 import type { ChatBehaviorEvent } from "../types/chatbot";
 
 const now = 1_000_000_000;
-const switchEvents: ChatBehaviorEvent[] = [
-  { type: "order_confirmation_cancelled", stockId: "KRX:005930", side: "buy", at: now - 3 },
-  { type: "order_confirmation_cancelled", stockId: "KRX:005930", side: "sell", at: now - 2 },
-  { type: "order_confirmation_cancelled", stockId: "KRX:005930", side: "buy", at: now - 1 },
+const buyHesitationEvents: ChatBehaviorEvent[] = [
+  { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 3 },
+  { type: "screen_entered", screen: "home", at: now - 2 },
+  { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 1 },
 ];
-assert.deepEqual(detectProactiveSignals(switchEvents, now), ["switch"]);
+assert.deepEqual(detectProactiveSignals(buyHesitationEvents, now), ["buyHesitation"]);
+assert.deepEqual(detectProactiveSignals(buyHesitationEvents.slice(0, 2), now), []);
+assert.deepEqual(
+  detectProactiveSignals(
+    [
+      { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 3 },
+      { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 1 },
+    ],
+    now,
+  ),
+  [],
+);
+assert.deepEqual(
+  detectProactiveSignals(
+    [
+      { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 3 },
+      { type: "buy_confirmation_abandoned", stockId: "KRX:000660", at: now - 1 },
+    ],
+    now,
+  ),
+  [],
+);
+assert.deepEqual(
+  detectProactiveSignals(
+    [
+      { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 3 },
+      { type: "trade_filled", stockId: "KRX:005930", side: "buy", at: now - 2 },
+      { type: "buy_confirmation_abandoned", stockId: "KRX:005930", at: now - 1 },
+    ],
+    now,
+  ),
+  [],
+);
 
 const dwellEvents: ChatBehaviorEvent[] = [
   {
@@ -40,15 +72,15 @@ const lossEvents: ChatBehaviorEvent[] = [
 assert.deepEqual(detectProactiveSignals(lossEvents, now), ["lossRevisit"]);
 
 let session = createProactiveSession(now);
-assert.equal(selectProactiveSignal(["switch"], session, now), "switch");
-session = markProactiveSignalShown(session, "switch", now);
+assert.equal(selectProactiveSignal(["buyHesitation"], session, now), "buyHesitation");
+session = markProactiveSignalShown(session, "buyHesitation", now);
 assert.equal(selectProactiveSignal(["dwell"], session, now + PROACTIVE_LIMITS.minimumGapMs - 1), null);
-assert.equal(selectProactiveSignal(["switch"], session, now + PROACTIVE_LIMITS.sameSignalGapMs - 1), null);
+assert.equal(selectProactiveSignal(["buyHesitation"], session, now + PROACTIVE_LIMITS.sameSignalGapMs - 1), null);
 session = muteProactiveSignal(session, "dwell", now + PROACTIVE_LIMITS.minimumGapMs);
 assert.equal(selectProactiveSignal(["dwell"], session, now + PROACTIVE_LIMITS.sameSignalGapMs), null);
 
 session = markProactiveSignalShown(session, "lossRevisit", now + PROACTIVE_LIMITS.minimumGapMs);
-assert.equal(selectProactiveSignal(["switch"], session, now + PROACTIVE_LIMITS.sameSignalGapMs), null);
+assert.equal(selectProactiveSignal(["buyHesitation"], session, now + PROACTIVE_LIMITS.sameSignalGapMs), null);
 
 const reset = refreshProactiveSession(session, session.lastActivityAt + PROACTIVE_LIMITS.sessionIdleMs);
 assert.equal(reset.shownCount, 0);

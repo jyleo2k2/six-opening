@@ -67,9 +67,8 @@ const COPY = {
   orderQuantity: "\uc8fc\ubb38 \uc218\ub7c9",
   expectedAmount: "\uc608\uc0c1 \uae08\uc561 125,000\uc6d0",
   orderPractice: "주문 확인 연습",
-  orderPracticeDescription: "매수와 매도 확인을 취소한 행동은 도움 신호 판정에만 사용돼요.",
-  cancelBuy: "매수 확인 취소",
-  cancelSell: "매도 확인 취소",
+  orderPracticeDescription: "같은 종목의 매수 최종 확인 화면을 두 번 나가면 도움 신호가 나타나요.",
+  abandonBuy: "매수 최종 확인에서 뒤로가기",
   proactive: "\ud0a4\uc6c5\uc774\uc758 \uc120\uc81c \ub3c4\uc6c0",
   explain: "\uc0c1\ud669 \uc124\uba85",
   askDirectly: "\uc9c1\uc811 \uc9c8\ubb38",
@@ -87,6 +86,8 @@ const COPY = {
   openArchive: "아카이브에서 보기",
   avatar: "\uacf0",
 } as const;
+
+const PROACTIVE_BUBBLE_VISIBLE_MS = 8_000;
 
 const SCREENS: Record<
   Screen,
@@ -226,6 +227,8 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
   const [isLoading, setIsLoading] = useState(false);
+  const [isBuyHesitationBubbleVisible, setIsBuyHesitationBubbleVisible] =
+    useState(false);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
@@ -331,6 +334,20 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
+  useEffect(() => {
+    if (signal !== "buyHesitation") {
+      setIsBuyHesitationBubbleVisible(false);
+      return;
+    }
+
+    setIsBuyHesitationBubbleVisible(true);
+    const timer = window.setTimeout(
+      () => setIsBuyHesitationBubbleVisible(false),
+      PROACTIVE_BUBBLE_VISIBLE_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [signal]);
+
   function openChat() {
     setPrototypeScreen(
       getPrototypeScreenRect(window.innerWidth, window.innerHeight),
@@ -339,6 +356,20 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setIsSheetDragging(false);
     sheetDragRef.current = null;
     setIsOpen(true);
+  }
+
+  function openBuyHesitationChat() {
+    if (signal !== "buyHesitation") {
+      openChat();
+      return;
+    }
+
+    setMessages((current) => [
+      ...current,
+      { role: "assistant", text: PROACTIVE_SCRIPTS.buyHesitation.text },
+    ]);
+    acceptActiveSignal();
+    openChat();
   }
 
   function closeChat() {
@@ -616,15 +647,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setStatus(`${action.label ?? "관련 화면"}으로 이동했어요`);
   }
 
-  function recordOrderCancellation(side: "buy" | "sell") {
+  function recordBuyConfirmationAbandonment() {
     if (!chatContext.stockId) return;
     recordBehaviorEvent({
-      type: "order_confirmation_cancelled",
+      type: "buy_confirmation_abandoned",
       stockId: chatContext.stockId,
-      side,
       at: Date.now(),
     });
-    setStatus(`${side === "buy" ? "매수" : "매도"} 확인을 취소했어요`);
+    setStatus("매수 최종 확인에서 뒤로갔어요");
   }
 
   return (
@@ -679,20 +709,13 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               <p className="mt-1 text-xs leading-5 text-ink/70">
                 {COPY.orderPracticeDescription}
               </p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="mt-3">
                 <button
-                  className="rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
-                  onClick={() => recordOrderCancellation("buy")}
+                  className="w-full rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
+                  onClick={recordBuyConfirmationAbandonment}
                   type="button"
                 >
-                  {COPY.cancelBuy}
-                </button>
-                <button
-                  className="rounded-xl bg-white px-3 py-3 text-xs font-semibold text-navy ring-1 ring-gray/50"
-                  onClick={() => recordOrderCancellation("sell")}
-                  type="button"
-                >
-                  {COPY.cancelSell}
+                  {COPY.abandonBuy}
                 </button>
               </div>
             </div>
@@ -700,7 +723,26 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         </section>
       </div>
 
-      {signal && (
+      {signal === "buyHesitation" && isBuyHesitationBubbleVisible && (
+        <aside
+          aria-live="polite"
+          className="fixed z-20 -translate-x-full"
+          style={{
+            bottom: 148,
+            left: "min(calc(50% + 158px), calc(100% - 16px))",
+          }}
+        >
+          <button
+            className="relative whitespace-nowrap rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-navy shadow-lg ring-1 ring-magenta/20 after:absolute after:-bottom-2 after:right-5 after:size-4 after:rotate-45 after:bg-white after:content-['']"
+            onClick={openBuyHesitationChat}
+            type="button"
+          >
+            {PROACTIVE_SCRIPTS.buyHesitation.text}
+          </button>
+        </aside>
+      )}
+
+      {signal && signal !== "buyHesitation" && (
         <aside
           className="fixed bottom-24 left-1/2 z-20 w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-2xl border border-magenta/30 bg-white p-4 shadow-lg"
           aria-live="polite"
@@ -746,7 +788,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       <button
         aria-label={COPY.openChat}
         className="fixed bottom-5 left-1/2 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
-        onClick={openChat}
+        onClick={signal === "buyHesitation" ? openBuyHesitationChat : openChat}
         type="button"
       >
         {COPY.avatar}

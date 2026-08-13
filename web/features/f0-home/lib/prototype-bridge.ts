@@ -59,27 +59,38 @@ export function parseChatContext(value: unknown): ChatContext | null {
 export function parseBehaviorEvent(
   value: unknown,
   now: number,
+  context?: ChatContext,
 ): ChatBehaviorEvent | null {
   if (!isRecord(value)) return null;
   if (
+    value.kind !== "buy_confirmation_abandoned" &&
     value.kind !== "order_confirmation_cancelled" &&
     value.kind !== "trade_filled"
   ) {
     return null;
   }
-  if (value.side !== "buy" && value.side !== "sell") return null;
   if (typeof value.stockId !== "string" || !STOCK_ID_PATTERN.test(value.stockId)) {
     return null;
   }
 
-  if (value.kind === "order_confirmation_cancelled") {
+  if (value.kind === "buy_confirmation_abandoned") {
     return {
       type: value.kind,
       stockId: value.stockId,
-      side: value.side,
       at: now,
     };
   }
+
+  if (value.kind === "order_confirmation_cancelled") {
+    if (value.side !== "buy" || context?.screen !== "order") return null;
+    return {
+      type: "buy_confirmation_abandoned",
+      stockId: value.stockId,
+      at: now,
+    };
+  }
+
+  if (value.side !== "buy" && value.side !== "sell") return null;
 
   const event: Extract<ChatBehaviorEvent, { type: "trade_filled" }> = {
     type: value.kind,

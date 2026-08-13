@@ -3609,9 +3609,9 @@ export const PROACTIVE_SCRIPTS: Record<
   ProactiveSignal,
   { label: string; text: string }
 > = {
-  switch: {
-    label: "매수·매도 취소 반복",
-    text: "확인 화면을 여러 번 바꿔 봤네요. 매수와 매도의 차이를 같이 볼까요?",
+  buyHesitation: {
+    label: "매수 최종 확인 반복 이탈",
+    text: "살지 말지 고민돼?",
   },
   dwell: {
     label: "주문·상세 화면 5분 초과 체류",

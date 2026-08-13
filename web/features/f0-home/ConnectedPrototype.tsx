@@ -18,6 +18,7 @@ const OPEN_CHAT_ACTION_MESSAGE = "kiwoom:open-chat-action";
 
 export function ConnectedPrototype() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const chatContextRef = useRef<ChatContext>({ screen: "home" });
   const [chatContext, setChatContext] = useState<ChatContext>({ screen: "home" });
   const [feedOpen, setFeedOpen] = useState(false);
 
@@ -49,12 +50,19 @@ export function ConnectedPrototype() {
 
       if (event.data.type === CHAT_CONTEXT_MESSAGE) {
         const nextContext = parseChatContext(event.data.context);
-        if (nextContext) setChatContext(nextContext);
+        if (nextContext) {
+          chatContextRef.current = nextContext;
+          setChatContext(nextContext);
+        }
         return;
       }
 
       if (event.data.type === CHAT_BEHAVIOR_MESSAGE) {
-        const behaviorEvent = parseBehaviorEvent(event.data.event, Date.now());
+        const behaviorEvent = parseBehaviorEvent(
+          event.data.event,
+          Date.now(),
+          chatContextRef.current,
+        );
         if (behaviorEvent) {
           useChatBehaviorStore.getState().recordEvent(behaviorEvent);
         }
