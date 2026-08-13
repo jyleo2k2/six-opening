@@ -240,9 +240,6 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const signalVersion = useChatBehaviorStore((state) => state.activeSignalVersion);
   const recordBehaviorEvent = useChatBehaviorStore((state) => state.recordEvent);
   const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
-  const dismissActiveSignal = useChatBehaviorStore(
-    (state) => state.dismissActiveSignal,
-  );
 
   const currentScreen = SCREENS[screen];
   const chatContext = useMemo(
@@ -361,33 +358,19 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setIsOpen(true);
   }
 
-  function openBuyHesitationChat() {
-    if (signal !== "buyHesitation") {
+  function openProactiveChat() {
+    if (!signal) {
       openChat();
       return;
     }
 
     setMessages((current) => [
       ...current,
-      { role: "assistant", text: PROACTIVE_SCRIPTS.buyHesitation.text },
+      { role: "assistant", text: PROACTIVE_SCRIPTS[signal].text },
     ]);
     acceptActiveSignal();
     openChat();
-  }
-
-  function openOrderMethodConfusionChat() {
-    if (signal !== "orderMethodConfusion") {
-      openChat();
-      return;
-    }
-
-    setMessages((current) => [
-      ...current,
-      { role: "assistant", text: PROACTIVE_SCRIPTS.orderMethodConfusion.text },
-    ]);
-    acceptActiveSignal();
-    openChat();
-    void ask("시장가가 뭐야?");
+    if (signal === "orderMethodConfusion") void ask("시장가가 뭐야?");
   }
 
   function closeChat() {
@@ -650,11 +633,6 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     if (input.trim() && !isLoading) void ask(input);
   }
 
-  function dismissSignal() {
-    if (!signal) return;
-    dismissActiveSignal();
-  }
-
   function handleUiAction(action: ChatUiAction) {
     if (onUiAction) {
       onUiAction(action);
@@ -752,7 +730,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         >
           <button
             className="relative whitespace-nowrap rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-navy shadow-lg ring-1 ring-magenta/20 after:absolute after:-bottom-2 after:right-5 after:size-4 after:rotate-45 after:bg-white after:content-['']"
-            onClick={openBuyHesitationChat}
+            onClick={openProactiveChat}
             type="button"
           >
             {PROACTIVE_SCRIPTS.buyHesitation.text}
@@ -762,55 +740,45 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
 
       {signal && signal !== "buyHesitation" && (
         <aside
-          className="fixed bottom-24 left-1/2 z-20 w-[min(390px,calc(100vw-32px))] -translate-x-1/2 rounded-2xl border border-magenta/30 bg-white p-4 shadow-lg"
+          className={`fixed z-20 ${
+            prototypeScreen
+              ? ""
+              : "bottom-24 left-1/2 -translate-x-1/2"
+          }`}
           aria-live="polite"
+          style={
+            prototypeScreen
+              ? {
+                  left: prototypeScreen.left + prototypeScreen.width / 2,
+                  top:
+                    prototypeScreen.top +
+                    prototypeScreen.height -
+                    142 * prototypeScreen.scale,
+                  transform: "translateX(-50%)",
+                }
+              : undefined
+          }
         >
-          <div className="flex gap-3">
-            <div
-              className="grid size-10 shrink-0 place-items-center rounded-full bg-navy text-lg text-white"
+          <button
+            className="relative flex items-center gap-2 rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:left-1/2 after:size-4 after:-translate-x-1/2 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-['']"
+            onClick={openProactiveChat}
+            type="button"
+          >
+            <span
+              className="grid size-7 shrink-0 place-items-center rounded-full bg-navy text-xs text-white"
               aria-hidden="true"
             >
               {COPY.avatar}
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-magenta">
-                {COPY.proactive}
-              </p>
-              <p className="mt-1 text-sm font-semibold">
-                {PROACTIVE_SCRIPTS[signal].text}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-2 text-xs font-semibold">
-            <button
-              className="rounded-xl bg-navy px-2 py-3 text-white"
-              onClick={
-                signal === "orderMethodConfusion"
-                  ? openOrderMethodConfusionChat
-                  : () => {
-                      acceptActiveSignal();
-                      openChat();
-                    }
-              }
-              type="button"
-            >
-              {COPY.askDirectly}
-            </button>
-            <button
-              className="rounded-xl bg-white px-2 py-3 text-ink ring-1 ring-gray/50"
-              onClick={dismissSignal}
-              type="button"
-            >
-              {COPY.dismiss}
-            </button>
-          </div>
+            </span>
+            {PROACTIVE_SCRIPTS[signal].text}
+          </button>
         </aside>
       )}
 
       <button
         aria-label={COPY.openChat}
         className="fixed bottom-5 left-1/2 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
-        onClick={signal === "buyHesitation" ? openBuyHesitationChat : openChat}
+        onClick={signal ? openProactiveChat : openChat}
         type="button"
       >
         {COPY.avatar}
