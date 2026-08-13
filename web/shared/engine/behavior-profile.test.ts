@@ -78,22 +78,27 @@ const series = closes("005930", [
   ["2026-08-11", 90],
   ["2026-08-12", 91],
 ]);
-// 08-03 매수 100원 → 5거래일 뒤(08-10) 110원 = 적중
+// 08-03 매수 100원 → 5거래일 뒤(08-10) 110원 = 적중, 기본 5점 +1 = 6점
 const early = buy({ tradedAt: "2026-08-03T02:00:00.000Z" });
-assert.deepEqual(gradeAccuracy([early], [], series), { accuracy: null, graded: 1, pending: 0, hits: 1 });
-// 08-10 매수 → 남은 봉 2개뿐이라 판정 보류
+assert.deepEqual(gradeAccuracy([early], [], series), { accuracy: 6, graded: 1, pending: 0, hits: 1 });
+// 08-10 매수 → 남은 봉 2개뿐이라 채점 보류, 점수는 기본 5점 그대로
 const late = buy({ id: "b9", tradedAt: "2026-08-10T02:00:00.000Z" });
-assert.equal(gradeAccuracy([late], [], series).pending, 1);
+assert.deepEqual(gradeAccuracy([late], [], series), { accuracy: 5, graded: 0, pending: 1, hits: 0 });
 // 캔들이 아예 없는 종목도 보류
 assert.equal(gradeAccuracy([buy({ symbol: "999999" })], [], series).pending, 1);
 // 매도 — 08-04 매도(종가 101 근사) → 5거래일 뒤(08-11) 90 = 하락 적중
 const sell = { id: "s1", symbol: "005930", tradedAt: "2026-08-04T05:00:00.000Z", planMatch: true };
 assert.equal(gradeAccuracy([], [sell], series).hits, 1);
-// 표본 3건부터 점수가 나온다 — 적중 2/3 → 6.67 → 7점
+// 가감점 누적 — 적중 2·빗나감 1 → 5 + 2 − 1 = 6점
 const miss = buy({ id: "b3", price: 200, tradedAt: "2026-08-03T02:00:00.000Z" });
 const graded3 = gradeAccuracy([early, miss], [sell], series);
 assert.equal(graded3.graded, 3);
-assert.equal(graded3.accuracy, 7);
+assert.equal(graded3.accuracy, 6);
+// 상·하한은 다른 능력치와 같은 0~10 — 연속 적중·빗나감이 쌓여도 넘지 않는다
+const manyHits = Array.from({ length: 7 }, (unused, i) => buy({ id: `h${i}`, tradedAt: "2026-08-03T02:00:00.000Z" }));
+assert.equal(gradeAccuracy(manyHits, [], series).accuracy, 10);
+const manyMisses = Array.from({ length: 7 }, (unused, i) => buy({ id: `m${i}`, price: 200, tradedAt: "2026-08-03T02:00:00.000Z" }));
+assert.equal(gradeAccuracy(manyMisses, [], series).accuracy, 0);
 
 // 캐릭터 — 동점 5:5 는 근거·집중 귀속
 assert.equal(judgeCharacter({ evidence: 5, intuition: 5, focus: 5, diversification: 5 }), "sniper");
@@ -101,12 +106,11 @@ assert.equal(judgeCharacter({ evidence: 7, intuition: 3, focus: 4, diversificati
 assert.equal(judgeCharacter({ evidence: 3, intuition: 7, focus: 6, diversification: 4 }), "challenger");
 assert.equal(judgeCharacter({ evidence: 3, intuition: 7, focus: 4, diversification: 6 }), "explorer");
 
-// 별 등급 경계 — 7점부터 ★★★, 4점부터 ★★☆, null 은 null
+// 별 등급 경계 — 7점부터 ★★★, 4점부터 ★★☆
 assert.equal(starGradeOf(7), 3);
 assert.equal(starGradeOf(6), 2);
 assert.equal(starGradeOf(4), 2);
 assert.equal(starGradeOf(3), 1);
-assert.equal(starGradeOf(null), null);
 
 // 통합 — 매수 2건은 관찰 초기, 3건부터 캐릭터가 나온다
 const baseInput = {
@@ -134,10 +138,11 @@ assert.equal(ready.abilities.evidence, 3);
 assert.equal(ready.abilities.intuition, 7);
 assert.equal(ready.abilities.focus, 9);
 assert.equal(ready.character, "challenger");
-// 새 거래 3건은 5거래일 미경과·데이터 없음이 섞여 정확력은 판정 중이다
-assert.equal(ready.accuracyState, "pending");
-assert.equal(ready.abilities.accuracy, null);
-assert.equal(ready.starGrade, null);
+// 채점된 매수 1건이 빗나가 5 − 1 = 4점, 나머지는 보류로 점수에 반영되지 않는다
+assert.equal(ready.abilities.accuracy, 4);
+assert.equal(ready.gradedTradeCount, 1);
+assert.equal(ready.pendingTradeCount, 2);
+assert.equal(ready.starGrade, 2);
 assert.equal(ready.reasonDistribution.buy_news, 3);
 
 // kw_proto_v1 원본 매핑 — 체결만, 단가 도출, 계정 분리, 이벤트 매핑
