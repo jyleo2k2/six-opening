@@ -68,7 +68,25 @@ export const useChatBehaviorStore = create<ChatBehaviorStore>()(
             activeSignal: signal,
           };
         }),
-      acceptActiveSignal: () => set({ activeSignal: null }),
+      acceptActiveSignal: () =>
+        set((state) => {
+          if (state.activeSignal !== "buyHesitation") {
+            return { activeSignal: null };
+          }
+          const targetStockId = [...state.events]
+            .reverse()
+            .find((event) => event.type === "buy_confirmation_abandoned")?.stockId;
+          return {
+            activeSignal: null,
+            events: targetStockId
+              ? state.events.filter(
+                  (event) =>
+                    event.type !== "buy_confirmation_abandoned" ||
+                    event.stockId !== targetStockId,
+                )
+              : state.events,
+          };
+        }),
       muteActiveSignal: (now) =>
         set((state) => ({
           activeSignal: null,
@@ -84,7 +102,7 @@ export const useChatBehaviorStore = create<ChatBehaviorStore>()(
         }),
     }),
     {
-      name: "kiwoom-chat-behavior-v1",
+      name: "kiwoom-chat-behavior-buy-hesitation-v2",
       storage: createJSONStorage(() => localStorage),
     },
   ),

@@ -39,18 +39,34 @@ export function detectProactiveSignals(
   now: number,
 ): ProactiveSignal[] {
   const signals: ProactiveSignal[] = [];
-  const cancellations = events.filter(
-    (event): event is Extract<ChatBehaviorEvent, { type: "order_confirmation_cancelled" }> =>
-      event.type === "order_confirmation_cancelled",
+  const latestEvent = events.at(-1);
+  const abandonedBuys = events.filter(
+    (event): event is Extract<ChatBehaviorEvent, { type: "buy_confirmation_abandoned" }> =>
+      event.type === "buy_confirmation_abandoned",
   );
-  const recentCancellations = cancellations.slice(-3);
+  const recentAbandonedBuys = abandonedBuys.slice(-2);
 
   if (
-    recentCancellations.length === 3 &&
-    recentCancellations[0].side !== recentCancellations[1].side &&
-    recentCancellations[1].side !== recentCancellations[2].side
+    latestEvent?.type === "buy_confirmation_abandoned" &&
+    recentAbandonedBuys.length === 2 &&
+    recentAbandonedBuys[0].stockId === recentAbandonedBuys[1].stockId &&
+    events.some(
+      (event) =>
+        event.type === "screen_entered" &&
+        event.screen !== "order" &&
+        event.at > recentAbandonedBuys[0].at &&
+        event.at < recentAbandonedBuys[1].at,
+    ) &&
+    !events.some(
+      (event) =>
+        event.type === "trade_filled" &&
+        event.side === "buy" &&
+        event.stockId === recentAbandonedBuys[1].stockId &&
+        event.at > recentAbandonedBuys[0].at &&
+        event.at < recentAbandonedBuys[1].at,
+    )
   ) {
-    signals.push("switch");
+    signals.push("buyHesitation");
   }
 
   const dwell = [...events].reverse().find(
