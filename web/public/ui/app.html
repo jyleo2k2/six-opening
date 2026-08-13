@@ -1366,7 +1366,13 @@ class Component extends DCLogic {
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
-    if (!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) {
+    const orderContextChanged = prevState && ['buy', 'sell', 'done'].indexOf(this.state.screen) >= 0 && (
+      prevState.draft.amount !== this.state.draft.amount ||
+      prevState.draft.orderType !== this.state.draft.orderType ||
+      prevState.draft.limitPct !== this.state.draft.limitPct ||
+      prevState.sellDraft.qty !== this.state.sellDraft.qty
+    );
+    if (!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code || orderContextChanged) {
       this.notifyChatContext();
     }
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
@@ -1459,7 +1465,22 @@ class Component extends DCLogic {
       context.stockId = 'KRX:' + stock.code;
       context.stockName = stock.name;
     }
+    if (stock && chatScreen === 'order') {
+      const isSellOrder = screen === 'sell' || (screen === 'done' && this.state.doneKind === 'sell');
+      const unitPrice = isSellOrder
+        ? stock.price
+        : (this.state.draft.orderType === 'limit'
+          ? Math.round(stock.price * (1 + this.state.draft.limitPct / 100))
+          : stock.price);
+      const quantity = isSellOrder ? this.state.sellDraft.qty : this.state.draft.amount / unitPrice;
+      if (Number.isFinite(quantity) && quantity > 0) context.quantity = quantity;
+      if (Number.isFinite(unitPrice) && unitPrice > 0) context.unitPrice = unitPrice;
+    }
     window.parent.postMessage({ type:'kiwoom:chat-context', context:context }, window.location.origin);
+  }
+  notifyChatBehavior(event){
+    if (window.parent === window) return;
+    window.parent.postMessage({ type:'kiwoom:chat-behavior', event:event }, window.location.origin);
   }
   sectorOf(id){ return this.uni().sectors.filter(s => s.id === id)[0] || { accent:'#8E93A8', emoji:'📦', name:'' }; }
   totalAsset(){
@@ -1938,8 +1959,12 @@ class Component extends DCLogic {
         const acc2 = Object.assign({}, this.state.acc);
         acc2[this.state.account] = { name: nm.name, cash: nm.cash - grand, holdings: hold, pending: pend };
         this.set({ acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, screen: 'done' });
+        if (!isLimit) this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
       },
-      buyBack: () => { if (s.buyStep === 1) this.set({ screen:'detail' }); else this.setState({ buyStep: s.buyStep - 1, showPad:false }); },
+      buyBack: () => {
+        if (s.buyStep === 5 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
+        if (s.buyStep === 1) this.set({ screen:'detail' }); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
+      },
 
       doneTitle: s.doneKind === 'sell' ? '기록 완료!\n키웅이가 기억해둘게'
         : (s.draft.orderType === 'limit' ? '기다리는 주문에 넣었어!' : '기록 완료!\n키웅이가 기억해둘게'),
@@ -2092,7 +2117,10 @@ class Component extends DCLogic {
       sellProceedsText: won(sellQty * price),
       sellCtaLabel: s.sellStep === 5 ? '팔기!' : '다음',
       sellCtaStyle: (sellOk && !(locked && s.sellStep === 5)) ? CTA_ON : CTA_OFF,
-      sellBack: () => { if (s.sellStep === 1) this.set({ screen:'portfolio' }); else this.setState({ sellStep: s.sellStep - 1 }); },
+      sellBack: () => {
+        if (s.sellStep === 5 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'sell' });
+        if (s.sellStep === 1) this.set({ screen:'portfolio' }); else this.setState({ sellStep: s.sellStep - 1 });
+      },
       sellNext: () => {
         if (!sellOk) return;
         if (locked && s.sellStep === 5) return;
@@ -2127,6 +2155,11 @@ class Component extends DCLogic {
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, screen: 'done', doneKind: 'sell'
         });
+        const behaviorEvent = { kind:'trade_filled', stockId:'KRX:' + st.code, side:'sell' };
+        if (heldRow && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
+          behaviorEvent.realizedPnlPct = (price - heldAvg) / heldAvg * 100;
+        }
+        this.notifyChatBehavior(behaviorEvent);
       },
 
       hasPending: (m.pending || []).length > 0,
@@ -2143,6 +2176,7 @@ class Component extends DCLogic {
               pending: (nm2.pending || []).filter(q => q.id !== p.id)
             };
             this.set({ acc: acc3 });
+            this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + p.code, side:'buy' });
           }
         };
       }),
