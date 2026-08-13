@@ -1354,6 +1354,7 @@ class Component extends DCLogic {
   }
 
   componentDidMount(){
+    this.loadDbUser();
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
@@ -1441,7 +1442,66 @@ class Component extends DCLogic {
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
     }
+    if (prevState && prevState.screen !== this.state.screen) this.trackTabWindow(prevState.screen, this.state.screen);
   }
+
+  // --- Supabase 연동 -------------------------------------------------
+  // 화면은 지금처럼 localStorage 로 즉시 반응하고, 서버 저장은 뒤따라 보낸다.
+
+  loadDbUser(){
+    this.dbUser = null;
+    fetch('/api/account', { cache:'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && d.user_id) this.dbUser = d; })
+      .catch(() => {});
+  }
+
+  // 로그인한 사람의 계정(부모/자녀)에서 한 행동만 서버에 남긴다.
+  dbSyncable(){ return Boolean(this.dbUser) && this.state.account === this.dbUser.parent_child; }
+
+  postJson(path, body){
+    return fetch(path, {
+      method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body)
+    }).catch(() => {});
+  }
+
+  // 종목 카드 목록 진입 → 매수 화면 도달 구간을 잰다.
+  // 카드 목록을 떠나도 상세·차트·뉴스는 같은 구간이므로 창을 유지하고,
+  // 매수까지 가지 않고 빠져나가면 그 구간은 버린다.
+  trackTabWindow(prevScreen, screen){
+    if (screen === 'explore') {
+      if (!this.tabWin) this.tabWin = { openedAt: new Date(), count: 0 };
+      return;
+    }
+    if (!this.tabWin) return;
+    if (screen === 'buy') {
+      const win = this.tabWin;
+      this.tabWin = null;
+      const closedAt = new Date();
+      if (closedAt - win.openedAt < 10000) return;
+      if (!this.dbSyncable()) return;
+      this.postJson('/api/tab-view', {
+        opened_at: win.openedAt.toISOString(),
+        closed_at: closedAt.toISOString(),
+        tab_count: win.count
+      });
+      return;
+    }
+    if (['detail', 'chart', 'news'].indexOf(screen) < 0) this.tabWin = null;
+  }
+
+  bumpTabCount(){ if (this.tabWin) this.tabWin.count += 1; }
+
+  // 체결된 주문만 보낸다. 지정가 대기 주문은 체결 시점에 다시 부른다.
+  saveTrade(side, code, price, quantity, reason, confidence){
+    if (!this.dbSyncable()) return;
+    if (!code || !(price > 0) || !(quantity > 0)) return;
+    this.postJson('/api/trade', {
+      side: side, stock_code: code, price: price, quantity: quantity,
+      reason: reason || null, confidence: typeof confidence === 'number' ? confidence : null
+    });
+  }
+
   persist(next){
     try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq })); } catch(e){}
   }
@@ -2018,7 +2078,10 @@ class Component extends DCLogic {
         const acc2 = Object.assign({}, this.state.acc);
         acc2[this.state.account] = { name: nm.name, cash: nm.cash - grand, holdings: hold, pending: pend };
         this.set({ acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, screen: 'done' });
-        if (!isLimit) this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
+        if (!isLimit) {
+          this.saveTrade('buy', st.code, price, qty, s.draft.reason, s.draft.conf);
+          this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
+        }
       },
       buyBack: () => {
         if (s.buyStep === 5 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
@@ -2214,6 +2277,7 @@ class Component extends DCLogic {
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, screen: 'done', doneKind: 'sell'
         });
+        this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, null);
         const behaviorEvent = { kind:'trade_filled', stockId:'KRX:' + st.code, side:'sell' };
         if (heldRow && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
           behaviorEvent.realizedPnlPct = (price - heldAvg) / heldAvg * 100;
@@ -2268,8 +2332,8 @@ class Component extends DCLogic {
       forceAutoStyle: devChip(s.forceSchool === 'auto'), forceOnStyle: devChip(s.forceSchool === 'on'), forceOffStyle: devChip(s.forceSchool === 'off'),
       moreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1)',
       ctaStyle: locked ? CTA_OFF : CTA_ON,
-      openChart: () => this.logEvent('chart_detail_opened', 'chart'),
-      openNews: () => this.logEvent('news_detail_opened', 'news'),
+      openChart: () => { this.bumpTabCount(); this.logEvent('chart_detail_opened', 'chart'); },
+      openNews: () => { this.bumpTabCount(); this.logEvent('news_detail_opened', 'news'); },
       closeSub: () => this.closeSub(),
       chartLine: () => this.setChartType('line'), chartCandle: () => this.setChartType('candlestick'),
       chartLineStyle: this.chip(s.chartType === 'line'), chartCandleStyle: this.chip(s.chartType === 'candlestick'),
