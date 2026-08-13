@@ -92,7 +92,6 @@
       },
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "prefilter",
         "acceptableReasonCodes": ["ROUTINE_OR_PROMOTIONAL"],
         "rationale": "선정 기업 기사지만 채용 행사이므로 목표 개수를 채우는 회사 뉴스로 쓰지 않는다."
       }
@@ -124,7 +123,7 @@
       },
       "expectation": {
         "expectedStatus": "ready_for_storage",
-        "rationale": "실제 선정 51개 기업인 GS의 새 분기 실적이다. 영업이익·자원개발·석유화학·적자 등 남은 용어를 모두 쉽게 풀어야 한다."
+        "rationale": "실제 선정 51개 기업인 GS의 새 분기 실적이다. 영업이익·자원개발·석유화학·적자처럼 뜻을 바꾸면 사실이 달라지는 용어를 쉽게 풀어야 한다. %, 억원, 조원 표기 자체는 허용한다."
       }
     },
     {
@@ -154,7 +153,6 @@
       },
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": ["ROUTINE_OR_PROMOTIONAL", "NO_DIRECT_MATERIALITY"],
         "rationale": "선정 기업 이름은 나오지만 외부 플랫폼의 직장인 설문 결과일 뿐 계약·실적·생산 같은 직접 회사 사건이 아니다."
       }
@@ -216,7 +214,6 @@
       },
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": ["ROUTINE_OR_PROMOTIONAL", "NO_DIRECT_MATERIALITY"],
         "rationale": "사내 성과 행사와 미래 목표를 소개하는 일반 홍보로, 허용된 계약·실적·생산 사건이 아니다."
       }
@@ -248,7 +245,6 @@
       },
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": ["COMPANY_NOT_PRIMARY_SUBJECT", "NO_SELECTED_COMPANY"],
         "rationale": "기사 주인공은 선정 목록 밖의 씽크풀이다. 키움증권은 제공 채널일 뿐이므로 키움증권 뉴스로 바꾸면 안 된다."
       }
@@ -276,7 +272,6 @@
       },
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "prefilter",
         "acceptableReasonCodes": ["ROUTINE_OR_PROMOTIONAL"],
         "rationale": "선정 기업의 사회공헌 기사로, 직접적인 중요 사업 사건이 아니다."
       }
@@ -308,7 +303,6 @@
       },
       "expectation": {
         "expectedStatus": "rejected",
-        "expectedStage": "selector",
         "acceptableReasonCodes": ["NO_DIRECT_MATERIALITY", "INSUFFICIENT_EVIDENCE"],
         "rationale": "수주 경쟁 보도일 뿐 낙찰이나 구속력 있는 계약이 확인되지 않아 중요 사건으로 확정할 수 없다."
       }

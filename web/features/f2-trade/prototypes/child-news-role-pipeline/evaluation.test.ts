@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import type {
   NewsEvaluationCase,
   NewsEvaluationInput,
+  NewsRoleRequest,
   NewsUniverseCompany,
   RejectedNews,
 } from "./contracts";
@@ -82,8 +83,14 @@ const report = await runNewsEvaluation(
   routineCases,
   {
     universe,
-    runRole: async () => {
-      throw new Error("prefilter 이후 역할을 호출하면 안 됩니다.");
+    runRole: async (request: NewsRoleRequest) => {
+      assert.equal(request.role, "headline_screener");
+      return {
+        articleId: request.article.articleId,
+        decision: "reject",
+        reasonCodes: ["ROUTINE_OR_PROMOTIONAL"],
+        reasons: ["채용 행사는 게시하지 않습니다."],
+      };
     },
   },
   {

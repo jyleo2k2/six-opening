@@ -27,6 +27,20 @@ const citedTextSchema = {
 } as const;
 
 const ROLE_SCHEMAS: Record<NewsRole, Record<string, unknown>> = {
+  headline_screener: {
+    type: "object",
+    additionalProperties: false,
+    required: ["articleId", "decision", "reasonCodes", "reasons"],
+    properties: {
+      articleId: { type: "string" },
+      decision: { type: "string", enum: ["pass", "reject"] },
+      reasonCodes: {
+        type: "array",
+        items: { type: "string", enum: SELECTOR_REJECT_CODES },
+      },
+      reasons: stringArray,
+    },
+  },
   relevance_selector: {
     type: "object",
     additionalProperties: false,
@@ -177,7 +191,12 @@ export const runOpenAiNewsRole: NewsRoleRunner = async (request, signal) => {
     {
       model: LLM_MODEL,
       reasoning: { effort: reasoningEffort },
-      max_output_tokens: role === "child_news_editor" ? 6_000 : 8_000,
+      max_output_tokens:
+        role === "headline_screener"
+          ? 12_000
+          : role === "child_news_editor"
+            ? 6_000
+            : 20_000,
       instructions: NEWS_ROLE_PROMPTS[role],
       input: JSON.stringify(payload),
       text: {
@@ -194,7 +213,10 @@ export const runOpenAiNewsRole: NewsRoleRunner = async (request, signal) => {
   );
 
   if (!response.output_text.trim()) {
-    throw new Error(`${role} returned an empty response`);
+    const incompleteReason = response.incomplete_details?.reason;
+    throw new Error(
+      `${role} returned an empty response${incompleteReason ? ` (${incompleteReason})` : ""}`,
+    );
   }
   return JSON.parse(response.output_text) as unknown;
 };
