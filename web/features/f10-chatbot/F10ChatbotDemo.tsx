@@ -424,6 +424,11 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     if (signal === "orderMethodConfusion") void ask("시장가가 뭐예요?");
   }
 
+  function dismissProactiveHelp() {
+    setIsBuyHesitationBubbleVisible(false);
+    acceptActiveSignal();
+  }
+
   function handleFloatingChatPointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
     const origin = resolvedFloatingChatPosition;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -820,19 +825,35 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
           className="fixed z-20"
           style={{
             left: resolvedFloatingChatPosition.x + (bubbleOpensLeft ? 24 : -24),
-            top: resolvedFloatingChatPosition.y - 104,
-            transform: bubbleOpensLeft ? "translateX(-100%)" : undefined,
+            top: resolvedFloatingChatPosition.y - 36,
+            transform: bubbleOpensLeft
+              ? "translate(-100%, -100%)"
+              : "translateY(-100%)",
           }}
         >
-          <button
-            className={`relative whitespace-nowrap rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:size-4 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-[''] ${
+          <div
+            className={`relative rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:size-4 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-[''] ${
               bubbleOpensLeft ? "after:right-5" : "after:left-5"
             }`}
-            onClick={openProactiveChat}
-            type="button"
           >
-            {PROACTIVE_SCRIPTS[signal].text}
-          </button>
+            <p className="whitespace-nowrap px-1">{PROACTIVE_SCRIPTS[signal].text}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-navy/10 pt-3">
+              <button
+                className="rounded-xl bg-navy px-3 py-2 text-xs font-semibold text-white"
+                onClick={openProactiveChat}
+                type="button"
+              >
+                직접 질문
+              </button>
+              <button
+                className="rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
+                onClick={dismissProactiveHelp}
+                type="button"
+              >
+                괜찮아요
+              </button>
+            </div>
+          </div>
         </aside>
       )}
 
