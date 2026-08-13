@@ -81,46 +81,54 @@ async function main() {
   assert.equal((await buildProfilePayload({}, deps)).status, 400);
   assert.equal((await buildProfilePayload({ account: "hacker" }, deps)).status, 400);
 
-  // 자녀 — 매수 3건이라 캐릭터가 나오고, 새 거래 위주라 정확력은 판정 중이다
+  // 자녀 — 시드 매수 4건·매도 1건에 라이브 매수 3건이 합산된다
   const child = await buildProfilePayload({ account: "child", state: childState, narrate: false }, deps);
   assert.equal(child.status, 200);
   if (child.status !== 200) return;
   const snapshot = child.payload.snapshot;
   assert.equal(snapshot.userId, "child_minji");
   assert.equal(snapshot.observationState, "ready");
-  assert.equal(snapshot.sampleSize, 3);
-  // 근거력 = 2탭 유효 열람 매수 1/3 → 3점, 보완쌍 성립
-  assert.equal(snapshot.abilities.evidence, 3);
-  assert.equal(snapshot.abilities.intuition, 7);
-  // 1섹터(9점) − 현금비중 83% 패널티 2 = 7점
+  assert.equal(snapshot.sampleSize, 7);
+  // 시드 열람(크래프톤×2·하이브) + 라이브 열람(005930)으로 매수 7건 중 5건이 근거형 매수 → 7점
+  assert.equal(snapshot.abilities.evidence, 7);
+  assert.equal(snapshot.abilities.intuition, 3);
+  // 라이브 보유 1섹터(9점) − 현금비중 83% 패널티 2 = 7점
   assert.equal(snapshot.abilities.focus, 7);
-  assert.equal(snapshot.character, "challenger");
-  // 08-03 매수만 5거래일이 지나 채점(적중)됐고 표본 3건 미만이라 정확력은 null
+  assert.equal(snapshot.character, "sniper");
+  // 스텁 종가는 005930뿐이라 라이브 08-03 매수 1건만 채점(적중)되고 나머지는 보류
   assert.equal(snapshot.gradedTradeCount, 1);
   assert.equal(snapshot.abilities.accuracy, null);
   assert.equal(snapshot.accuracyState, "pending");
   assert.equal(snapshot.starGrade, null);
-  assert.equal(snapshot.confidencePattern.average, 50);
+  assert.equal(snapshot.confidencePattern.average, 54);
+  // 시드 병합 증거 — 시드 매수 이유가 분포에 들어온다
+  assert.equal(snapshot.reasonDistribution["내가 아는 회사라서"], 1);
   // narrate:false 는 Luna 를 부르지 않고 고정 폴백을 쓴다
   assert.equal(child.payload.narration.source, "fallback");
   assert.equal(child.payload.narration.text.includes("채점"), true);
 
-  // 부모 — 라이브 기록이 없어도 시드(매수 2건)가 합산되고, 3건 미만이라 관찰 초기다
+  // 부모 — 라이브 기록이 없어도 시드 매수 3건으로 캐릭터가 나온다
   const parent = await buildProfilePayload({ account: "parent", state: {}, narrate: false }, deps);
   assert.equal(parent.status, 200);
   if (parent.status !== 200) return;
-  assert.equal(parent.payload.snapshot.userId, "parent_mom");
-  assert.equal(parent.payload.snapshot.sampleSize, 2);
-  assert.equal(parent.payload.snapshot.observationState, "initial");
-  assert.equal(parent.payload.snapshot.character, null);
-  assert.equal(parent.payload.narration.text.includes("관찰 초기"), true);
+  const parentSnapshot = parent.payload.snapshot;
+  assert.equal(parentSnapshot.userId, "parent_mom");
+  assert.equal(parentSnapshot.sampleSize, 3);
+  assert.equal(parentSnapshot.observationState, "ready");
+  // 시드 열람만으로 매수 3건 전부 근거형(같은 종목의 이전 열람이 이어진다) → 10점
+  assert.equal(parentSnapshot.abilities.evidence, 10);
+  // 라이브 보유·현금이 없으면 전량 현금 취급 → 분산 우세 → 전략가
+  assert.equal(parentSnapshot.character, "strategist");
+  assert.equal(parentSnapshot.gradedTradeCount, 1);
+  assert.equal(parentSnapshot.abilities.accuracy, null);
+  assert.equal(parent.payload.narration.source, "fallback");
 
-  // 고정 폴백 문구도 공통 출력 게이트를 통과해야 한다 (SPEC §7)
+  // 고정 폴백 문구는 공통 출력 게이트를 통과해야 하고, 관찰 초기 문구도 준비돼 있다 (SPEC §7)
   assert.equal(gateChatOutput({ text: fallbackNarration(snapshot), source: "fixed" }).ok, true);
-  assert.equal(
-    gateChatOutput({ text: fallbackNarration(parent.payload.snapshot), source: "fixed" }).ok,
-    true,
-  );
+  assert.equal(gateChatOutput({ text: fallbackNarration(parentSnapshot), source: "fixed" }).ok, true);
+  const initialText = fallbackNarration({ ...snapshot, observationState: "initial" });
+  assert.equal(initialText.includes("관찰 초기"), true);
+  assert.equal(gateChatOutput({ text: initialText, source: "fixed" }).ok, true);
 
   // POST — 깨진 JSON 은 400
   const badJson = await POST(

@@ -12,7 +12,7 @@ import {
   profileEntriesFromTrades,
   type PrototypeAccount,
 } from "../../../shared/engine/behavior-profile";
-import { FAMILY_SEED_TRADES } from "../../../shared/store/family-trade-seed";
+import { FAMILY_SEED_TAB_VIEWS, FAMILY_SEED_TRADES } from "../../../shared/store/family-trade-seed";
 import type { BehaviorProfileSnapshot, DailyClose } from "../../../shared/types/behavior-profile";
 import { chartRetentionCutoff, readStoredCandles } from "../quote/stock-candles";
 import { getUniverseSnapshot } from "../universe/service";
@@ -73,6 +73,9 @@ export async function buildProfilePayload(
   const seed = profileEntriesFromTrades(FAMILY_SEED_TRADES, account);
   const buys = [...seed.buys, ...live.buys];
   const sells = [...seed.sells, ...live.sells];
+  const seedTabViews = FAMILY_SEED_TAB_VIEWS.filter((view) => view.member === account).map(
+    ({ tab, symbol, viewedAt, dwellMs }) => ({ tab, symbol, viewedAt, dwellMs }),
+  );
 
   const symbols = Array.from(
     new Set([...buys, ...sells].map((trade) => trade.symbol).filter(Boolean)),
@@ -103,7 +106,7 @@ export async function buildProfilePayload(
     periodEnd: today,
     buys,
     sells,
-    tabViews: live.tabViews,
+    tabViews: [...seedTabViews, ...live.tabViews],
     holdings: live.holdings,
     cash: live.cash,
     priceBySymbol,
