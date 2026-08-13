@@ -4,6 +4,7 @@ import {
   isAllowedUiAction,
   isExplainAction,
   isStockExploreAction,
+  isSectorExploreAction,
   parseChatRequest,
   sanitizeActionPayload,
 } from "./contracts";
@@ -222,6 +223,41 @@ assert.equal(
 );
 assert.equal(
   isAllowedUiAction({ type: "open_screen", target: "stock", sectorId: "energy" }),
+  true,
+);
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "stock", sectorId: "unknown" }),
+  false,
+);
+assert.deepEqual(
+  parseChatRequest({
+    message: "응",
+    context: { screen: "home" },
+    sectorExplore: { sectorId: "semiconductor", choiceId: "yes" },
+  }),
+  {
+    message: "응",
+    context: { screen: "home" },
+    sectorExplore: { sectorId: "semiconductor", choiceId: "yes" },
+  },
+);
+assert.equal(
+  parseChatRequest({
+    message: "응",
+    context: { screen: "home" },
+    sectorExplore: { sectorId: "unknown", choiceId: "yes" },
+  }),
+  null,
+);
+assert.equal(
+  isSectorExploreAction({
+    kind: "sector-explore",
+    turn: {
+      sectorId: "semiconductor",
+      prompt: "우리 종목 유니버스에서 반도체 회사도 볼래?",
+      choices: [{ id: "yes", label: "응" }, { id: "no", label: "아니" }],
+    },
+  }),
   true,
 );
 for (const stock of STOCKS) {

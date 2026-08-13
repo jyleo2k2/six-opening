@@ -12,11 +12,15 @@ import {
   type ExplainTurn,
   EXPLAIN_STAGES,
   STOCK_FACT_TOPICS,
+  SECTOR_EXPLORE_CHOICES,
+  type SectorExploreReply,
+  type SectorExploreTurn,
   type StockExploreReply,
   type StockExploreTurn,
   type StockFactTopic,
 } from "../../../shared/types/chatbot";
 import { STOCKS } from "../../../shared/data/stocks";
+import { SECTORS } from "../../../shared/data/sectors";
 import { findNextStockExploreTopic } from "./stock-explore";
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -39,6 +43,7 @@ export type ChatRequest = {
   context: ChatContext;
   explain?: ChatExplainReply;
   stockExplore?: StockExploreReply;
+  sectorExplore?: SectorExploreReply;
 };
 
 export type StandardChatActionPayload = Pick<
@@ -56,10 +61,16 @@ export type StockExploreActionPayload = {
   turn: StockExploreTurn;
 } & Pick<ChatResponse, "suggestedQuestions" | "uiAction">;
 
+export type SectorExploreActionPayload = {
+  kind: "sector-explore";
+  turn: SectorExploreTurn;
+} & Pick<ChatResponse, "suggestedQuestions" | "uiAction">;
+
 export type ChatActionPayload =
   | StandardChatActionPayload
   | ExplainActionPayload
-  | StockExploreActionPayload;
+  | StockExploreActionPayload
+  | SectorExploreActionPayload;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -166,6 +177,23 @@ function parseStockExploreReply(
   };
 }
 
+function parseSectorExploreReply(
+  value: unknown,
+): SectorExploreReply | null | undefined {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return null;
+  const { sectorId, choiceId } = value;
+  if (
+    typeof sectorId !== "string" ||
+    !SECTORS.some((sector) => sector.key === sectorId) ||
+    typeof choiceId !== "string" ||
+    !SECTOR_EXPLORE_CHOICES.includes(choiceId as SectorExploreReply["choiceId"])
+  ) {
+    return null;
+  }
+  return { sectorId, choiceId: choiceId as SectorExploreReply["choiceId"] };
+}
+
 export function parseChatRequest(value: unknown): ChatRequest | null {
   if (!isRecord(value) || hasClientIdentity(value)) return null;
   if (typeof value.message !== "string" || !isRecord(value.context)) return null;
@@ -196,10 +224,12 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
 
   const explain = parseExplainReply(value.explain);
   const stockExplore = parseStockExploreReply(value.stockExplore);
+  const sectorExplore = parseSectorExploreReply(value.sectorExplore);
   if (
     explain === null ||
     stockExplore === null ||
-    (explain !== undefined && stockExplore !== undefined)
+    sectorExplore === null ||
+    [explain, stockExplore, sectorExplore].filter((item) => item !== undefined).length > 1
   ) {
     return null;
   }
@@ -215,6 +245,7 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
     },
     ...(explain ? { explain } : {}),
     ...(stockExplore ? { stockExplore } : {}),
+    ...(sectorExplore ? { sectorExplore } : {}),
   };
 }
 
@@ -271,6 +302,27 @@ export function isStockExploreAction(
   );
 }
 
+export function isSectorExploreAction(
+  value: unknown,
+): value is SectorExploreActionPayload {
+  if (!isRecord(value) || value.kind !== "sector-explore" || !isRecord(value.turn)) return false;
+  const { sectorId, prompt, choices } = value.turn;
+  return (
+    typeof sectorId === "string" &&
+    SECTORS.some((sector) => sector.key === sectorId) &&
+    typeof prompt === "string" &&
+    Array.isArray(choices) &&
+    choices.length === 2 &&
+    choices.every(
+      (choice) =>
+        isRecord(choice) &&
+        typeof choice.id === "string" &&
+        SECTOR_EXPLORE_CHOICES.includes(choice.id as SectorExploreReply["choiceId"]) &&
+        typeof choice.label === "string",
+    )
+  );
+}
+
 export function isAllowedUiAction(value: unknown): value is ChatUiAction {
   if (!isRecord(value) || value.type !== "open_screen") return false;
   if (!CHAT_ACTION_TARGETS.includes(String(value.target) as ChatUiAction["target"])) {
@@ -288,7 +340,7 @@ export function isAllowedUiAction(value: unknown): value is ChatUiAction {
     (orderStep === undefined ||
       CHAT_ORDER_STEPS.includes(String(orderStep) as ChatUiAction["orderStep"] & string)) &&
     (sectorId === undefined ||
-      (typeof sectorId === "string" && /^[a-z][a-z0-9-]{0,31}$/.test(sectorId))) &&
+      (typeof sectorId === "string" && SECTORS.some((sector) => sector.key === sectorId))) &&
     (archiveTab === undefined ||
       CHAT_ARCHIVE_TABS.includes(String(archiveTab) as ChatUiAction["archiveTab"] & string))
   );
