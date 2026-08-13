@@ -15,6 +15,7 @@ import type {
   ChatUiAction,
   ExplainChoice,
   ExplainTurn,
+  ProactiveSignal,
   StockExploreChoiceId,
   StockExploreTurn,
 } from "../../shared/types/chatbot";
@@ -97,6 +98,15 @@ const COPY = {
 
 const PROACTIVE_BUBBLE_VISIBLE_MS = 8_000;
 const FLOATING_CHAT_RADIUS = 28;
+const PROACTIVE_BUBBLE_TOGGLE_COPY: Record<
+  ProactiveSignal,
+  { accept: string; decline: string }
+> = {
+  buyHesitation: { accept: "응!", decline: "아니" },
+  orderMethodConfusion: { accept: "그래!", decline: "싫어" },
+  dwell: { accept: "응!", decline: "아니" },
+  lossRevisit: { accept: "응!", decline: "아니" },
+};
 
 function defaultFloatingChatPosition(
   prototypeScreen: PrototypeScreenRect | null,
@@ -846,14 +856,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                 onClick={openProactiveChat}
                 type="button"
               >
-                그래!
+                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].accept}
               </button>
               <button
                 className="rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
                 onClick={dismissProactiveHelp}
                 type="button"
               >
-                싫어
+                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].decline}
               </button>
             </div>
           </div>
