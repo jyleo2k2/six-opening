@@ -217,7 +217,7 @@ async function main() {
   assert.equal(stockFacts.source, "tool");
   assert.equal(stockFacts.gate, "passed");
   assert.equal(isStockExploreAction(stockFacts.action), true);
-  assert.equal(stockFacts.response.text.startsWith("궁금한 회사를 잘 짚었어요 —"), true);
+  assert.equal(stockFacts.response.text.startsWith("궁금한 회사를 잘 짚었어요. —"), true);
 
   const mentionedKrafton = await createChatOutcome(
     { message: "크래프톤 뭐 하는 회사야?", context },
