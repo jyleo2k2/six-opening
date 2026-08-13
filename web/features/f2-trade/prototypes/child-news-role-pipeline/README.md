@@ -38,6 +38,7 @@
 - `run-evaluation.ts`: Luna 단일 모델로 고정 입력 10건을 실행하는 서버 전용 CLI
 - `run-evaluation.cjs`: 일반 Node 실행에서 Next의 `server-only` 경계를 유지하는 부트스트랩
 - `evaluation-fixtures/latest-economic-news-2026-08-12.json`: 최신 기사 후보에서 고정한 사람 기준표와 출처 사실 단위
+- `evaluation-fixtures/latest-economic-news-2026-08-13.json`: 앞선 표본과 URL이 겹치지 않는 두 번째 최신 기사 10건 기준표
 - `evaluation.test.ts`: 평가 판정·10건 제한·HTML 이스케이프 회귀 테스트
 
 ## 실행
@@ -58,7 +59,7 @@ cd web
 node --conditions=react-server --import tsx features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs
 ```
 
-기본 출력은 `reports/latest-economic-news-2026-08-12-luna/`의 `report.json`과 `index.html`이다. 같은 경로가 있으면 덮어쓰지 않으며 재실행은 `--overwrite`를 명시한다. HTML 첫 화면에는 `ready_for_storage` 기사의 제목과 겹치지 않는 3줄 요약을 실제 서비스 뉴스 카드 형태로만 보여준다. 홈 화면 전용 요약을 상세 카드에 다시 노출하지 않는다. 원문 근거 문장과 제목 선별·본문 선별·1~2차 편집·독립 검수의 실제 JSON, 거부 기사 판정은 아래 `검수 상세 보기`를 펼쳐 확인한다. 프로세스는 다음을 기사별로 남긴다.
+기본 출력은 `reports/latest-economic-news-2026-08-12-luna/`의 `report.json`과 `index.html`이다. 같은 경로가 있으면 덮어쓰지 않으며 재실행은 `--overwrite`를 명시한다. HTML 첫 화면에는 `ready_for_storage` 기사의 제목과 겹치지 않는 3줄 요약을 실제 서비스 뉴스 카드 형태로만 보여준다. 홈 화면 전용 요약을 상세 카드에 다시 노출하지 않는다. `원문 보기`는 새 창 팝업을 만들지 않고 같은 탭에서 출처 URL로 이동한다. 원문 근거 문장과 제목 선별·본문 선별·1~2차 편집·독립 검수의 실제 JSON, 거부 기사 판정은 아래 `검수 상세 보기`를 펼쳐 확인한다. 프로세스는 다음을 기사별로 남긴다.
 
 - 오늘 국내 시황 또는 선정 51개 기업의 직접 사건인지
 - 채용·행사·사회공헌·일반 홍보인지
@@ -90,6 +91,27 @@ node --conditions=react-server --import tsx features/f2-trade/prototypes/child-n
 - 불일치: 아시아나항공 합병 기사 편집자가 두 번의 시도에서도 선별된 어려운 용어 전체를 실제 3줄에 처리하지 못해 `UNEXPLAINED_TERM`으로 차단
 
 제목 선별 자체는 사람 기준표상 저장 대상 네 건을 모두 본문으로 넘겼다. 전체 파이프라인은 그중 한 건의 전 용어 처리가 실패했으므로 실제 저장을 허용하지 않는다. 모델 출력 원본과 재시도 결과는 JSON의 `roleAttempts`와 상세 HTML에서 확인할 수 있으며, Supabase 저장과 일일 수집기 연결은 후속 검증이 통과할 때까지 보류한다.
+
+### 2026-08-13 다른 기사 10건 재검증
+
+앞선 표본과 출처 URL이 겹치지 않는 당일 기사 10건을 아래 명령으로 실행했고, 결과는 `reports/latest-economic-news-2026-08-13-luna/`에 보존했다.
+
+```powershell
+cd web
+node --conditions=react-server --import tsx features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/latest-economic-news-2026-08-13.json
+```
+
+- 사람 기준표 일치: **8/10**
+- `ready_for_storage`: **3건** — 코스피 마감, 한국전력 실적, 백화점 3사 비교 중 신세계 실적
+- `rejected`: **7건**
+- 전체 판정: **실패** (`criteriaPassed: false`)
+- 코스피 기사 실제 3줄: `13일 코스피가 올라 마감했다.` / `다른 국내 주식시장 숫자도 0.29% 올랐다.` / `코스피는 국내 주식시장 대표 숫자야.`
+- 삼성전자 푸네 생산라인 기사는 통과 대상이지만 편집 응답이 출력 토큰 한도에서 비어 `ROLE_ERROR`로 닫힌 실패했다.
+- 백화점 3사 비교 기사는 사람 기준표에서 주인공 불일치로 거부했지만, 모델은 신세계 사실 단위만 골라 최종 통과시켰다. 기사 일부를 한 회사 뉴스로 분리해도 되는지는 대표님 검수 결정이 필요하다.
+- LG와 LG전자, 삼성생명과 삼성전자, 현대차 정몽구 재단과 현대차를 구분했고, 네이버·음악 홍보·포럼·정유사 합산 기사는 모두 거부했다.
+- 서비스 카드의 `원문 보기`는 정확한 출처 `href`를 유지하고 `target="_blank"`를 제거하는 회귀 테스트를 통과했다.
+
+실제 서비스 저장 연결은 하지 않았으며, 위 두 불일치를 해결하고 새 표본을 다시 통과하기 전까지 후속 단계로 남긴다.
 
 ## 운영 연결 전 남은 일
 

@@ -26,6 +26,15 @@ const fixture = JSON.parse(
     "utf8",
   ),
 ) as NewsEvaluationInput;
+const latestFixture = JSON.parse(
+  readFileSync(
+    resolve(
+      here,
+      "evaluation-fixtures/latest-economic-news-2026-08-13.json",
+    ),
+    "utf8",
+  ),
+) as NewsEvaluationInput;
 
 async function main() {
 
@@ -39,6 +48,35 @@ assert.equal(
       item.article.runDateKst === fixture.runDateKst &&
       item.article.sourceUrl.startsWith("http") &&
       item.expectation.rationale.length > 0,
+  ),
+  true,
+);
+assert.equal(latestFixture.schemaVersion, 1);
+assert.equal(latestFixture.cases.length, 10);
+assert.equal(new Set(latestFixture.cases.map((item) => item.caseId)).size, 10);
+assert.equal(
+  new Set(latestFixture.cases.map((item) => item.article.articleId)).size,
+  10,
+);
+assert.equal(
+  new Set(latestFixture.cases.map((item) => item.article.sourceUrl)).size,
+  10,
+);
+assert.equal(
+  latestFixture.cases.every(
+    (item) =>
+      item.article.runDateKst === latestFixture.runDateKst &&
+      item.article.sourceUrl.startsWith("http") &&
+      item.expectation.rationale.length > 0,
+  ),
+  true,
+);
+const previousUrls = new Set(
+  fixture.cases.map((item) => item.article.sourceUrl),
+);
+assert.equal(
+  latestFixture.cases.every(
+    (item) => !previousUrls.has(item.article.sourceUrl),
   ),
   true,
 );
@@ -180,6 +218,7 @@ const readyHtml = renderNewsEvaluationHtml({
   ],
 });
 const auditStart = readyHtml.indexOf('<section class="audit">');
+const servicePreview = readyHtml.slice(0, auditStart);
 assert.ok(auditStart > readyHtml.indexOf('<section class="service-output"'));
 assert.match(readyHtml, /3줄 요약/u);
 assert.match(readyHtml, /서비스 뉴스 상세에 보이는 본문입니다/u);
@@ -189,6 +228,11 @@ assert.equal(readyHtml.includes("<아이>"), false);
 assert.equal(readyHtml.includes("&lt;아이&gt;가 읽는 오늘의 시장 뉴스"), true);
 assert.equal(readyHtml.slice(0, auditStart).includes("채용설명회"), false);
 assert.equal(readyHtml.slice(0, auditStart).includes("홈에서 먼저 읽는 한 줄 요약입니다"), false);
+assert.match(
+  servicePreview,
+  /<a class="source-link" href="https:\/\/www\.news1\.kr\/finance\/market-exr\/6256503" rel="noreferrer">원문 보기/u,
+);
+assert.equal(servicePreview.includes('target="_blank"'), false);
 assert.equal(
   (readyHtml.slice(0, auditStart).match(/<li>/gu) ?? []).length,
   3,
