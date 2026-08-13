@@ -8,23 +8,28 @@
 
 ```text
 원문 후보
-  → 관련성 선별자(high)
-  → 선별 문장만 어린이 편집자에게 전달(medium, 필요 시 high 1회)
+  → 제목 1차 선별자(max, 정책 교정 제목 예시 제공)
+  → 통과 후보만 본문 관련성 선별자(max)
+  → 선별 문장만 어린이 편집자에게 전달(high, 필요 시 high 1회)
   → 결정적 근거·숫자·용어·안전 게이트
-  → 원문과 노출문만 보는 독립 출고 검수자(high)
+  → 원문과 노출문만 보는 독립 출고 검수자(max)
   → ready_for_storage 또는 rejected
 ```
 
+- 제목 단계의 `pass`는 저장 승인이 아니라 본문을 읽어 볼 후보라는 뜻이다. 제목만으로 명백한 채용·행사·사회공헌·홍보·미확정 경쟁·주체 불일치일 때만 `reject`한다.
+- 제목 선별자는 평가 10건과 겹치지 않는 `headline-screening-examples.ts`의 정책 교정용 통과·거부 예시를 함께 받는다. 이 예시 목록은 대표님 검수 전 초안이다.
 - 편집자는 원문 전체를 받지 않아 코스닥 동향·개발자 강연 같은 주변 사실을 되살릴 수 없다.
 - 채용·행사·사회공헌·사내 혁신·일반 홍보와 선정 기업이 고객·제공 채널로만 등장한 기사는 탈락한다.
 - 어려운 용어는 하나만 고르지 않고 선별 문장에 남은 항목을 모두 `replaced` 또는 `explained`로 처리한다.
+- `%`, 억원, 조원, 1~4분기 표기는 그 자체만으로 어려운 용어로 잡지 않고 원문 숫자와 일치하는지만 확인한다.
 - 한 단계라도 파싱 오류·시간 초과·판단 불일치가 나면 저장 후보가 되지 않는다.
 
 ## 파일
 
-- `pipeline.ts`: 문장 분리, 3역할 오케스트레이션, 결정적 게이트, 닫힌 실패
+- `pipeline.ts`: 문장 분리, 제목 선별과 3역할 오케스트레이션, 결정적 게이트, 닫힌 실패
 - `contracts.ts`: 역할 입출력 계약과 런타임 파서
 - `prompts.ts`: 역할별 프롬프트
+- `headline-screening-examples.ts`: 평가 입력과 겹치지 않는 정책 교정용 제목 판단 예시
 - `server.ts`: 서버 전용 OpenAI Responses API 실행기 진입점
 - `pipeline.test.ts`: 초점 이탈·일상 기사·용어 누락·검수 실패 회귀 테스트
 - `evaluation.ts`: 10건 기준표 대조, JSON 보고서 계약, 정적 HTML 렌더러
@@ -51,7 +56,7 @@ cd web
 node --conditions=react-server --import tsx features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs
 ```
 
-기본 출력은 `reports/latest-economic-news-2026-08-12-luna/`의 `report.json`과 `index.html`이다. 같은 경로가 있으면 덮어쓰지 않으며 재실행은 `--overwrite`를 명시한다. 프로세스는 다음을 기사별로 남긴다.
+기본 출력은 `reports/latest-economic-news-2026-08-12-luna/`의 `report.json`과 `index.html`이다. 같은 경로가 있으면 덮어쓰지 않으며 재실행은 `--overwrite`를 명시한다. 프로세스는 다음을 기사별로 남긴다. HTML에서 원문 근거 문장과 제목 선별·본문 선별·1~2차 편집·독립 검수의 실제 JSON을 접어서 확인할 수 있다.
 
 - 오늘 국내 시황 또는 선정 51개 기업의 직접 사건인지
 - 채용·행사·사회공헌·일반 홍보인지
@@ -65,17 +70,19 @@ node --conditions=react-server --import tsx features/f2-trade/prototypes/child-n
 
 이 평가는 모델 간 A/B가 아니다. 모든 역할은 `web/shared/llm`의 `gpt-5.6-luna`와 서버 전용 Responses API를 사용하고, 역할별 입력 격리와 결정적 게이트의 실제 품질을 검증한다.
 
-### 2026-08-13 실측 결과
+### 2026-08-13 제목 선별 추가 후 실측 결과
 
 `reports/latest-economic-news-2026-08-12-luna/`에 실제 Luna 실행 결과를 보존했다.
 
-- 사람 기준표 일치: **8/10**
-- `ready_for_storage`: **2건**
-- `rejected`: **8건**
+- 사람 기준표 일치: **9/10**
+- 제목 단계의 저장 대상 오거부: **0건**
+- 제목 단계: 본문 검토 후보 **5건**, 명백한 제외 **5건**
+- `ready_for_storage`: **3건**
+- `rejected`: **7건**
 - 전체 판정: **실패** (`criteriaPassed: false`)
-- 불일치: 당일 시황의 용어 처리 라벨 오류, GS 실적의 영업이익·큰 숫자 단위 설명 부족
+- 불일치: 현대차 파업 기사 재편집에서 제목 주체를 `현대차 노동조합`이 아닌 `현대차`로 바꿔 독립 검수에서 차단
 
-따라서 이 결과만으로 실제 저장을 허용하지 않는다. 모델 출력 원본과 재시도 결과는 JSON의 `roleAttempts`에서 확인할 수 있으며, Supabase 저장과 일일 수집기 연결은 후속 검증이 통과할 때까지 보류한다.
+제목 선별 자체는 저장할 기사 네 건을 모두 본문으로 넘겼다. 전체 파이프라인은 아직 한 건의 주체 보존 실패가 있으므로 실제 저장을 허용하지 않는다. 모델 출력 원본과 재시도 결과는 JSON의 `roleAttempts`와 상세 HTML에서 확인할 수 있으며, Supabase 저장과 일일 수집기 연결은 후속 검증이 통과할 때까지 보류한다.
 
 ## 운영 연결 전 남은 일
 

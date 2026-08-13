@@ -279,12 +279,48 @@ function safeHref(value: string) {
 }
 
 function renderCriterion(name: string, assessment: NewsCriterionAssessment) {
+  const labels: Record<string, string> = {
+    allowedScope: "허용 범위",
+    notRoutineOrPromotional: "일상·홍보 제외",
+    primarySubjectMatches: "주인공 일치",
+    noUnsupportedContext: "주변 사실 혼입 없음",
+    allTermsEasy: "용어 처리",
+    factsMatchSource: "숫자·날짜·출처 일치",
+    storageDecisionExplained: "최종 판정 설명",
+  };
   const mark = assessment.outcome === "pass"
     ? "통과"
     : assessment.outcome === "fail"
       ? "실패"
       : "해당 없음";
-  return `<li class="${assessment.outcome}"><strong>${escapeHtml(name)}</strong><span>${mark}</span><small>${escapeHtml(assessment.evidence.join(" · "))}</small></li>`;
+  return `<li class="${assessment.outcome}"><strong>${escapeHtml(labels[name] ?? name)}</strong><span>${mark}</span><small>${escapeHtml(assessment.evidence.join(" · "))}</small></li>`;
+}
+
+function renderRoleAttempts(item: NewsEvaluationCaseResult) {
+  const labels: Record<string, string> = {
+    headline_screener: "제목 1차 선별",
+    relevance_selector: "본문 관련성 선별",
+    child_news_editor: "어린이용 편집",
+    publication_reviewer: "독립 출고 검수",
+  };
+  return item.roleAttempts
+    .map((attempt, index) => {
+      const value = attempt.outcome === "returned"
+        ? attempt.response
+        : { error: attempt.error };
+      const rendered = JSON.stringify(value, null, 2) ?? String(value);
+      return `<details><summary>${index + 1}. ${escapeHtml(labels[attempt.role] ?? attempt.role)} · 추론 ${escapeHtml(attempt.reasoningEffort)} · ${escapeHtml(attempt.outcome)}</summary><pre>${escapeHtml(rendered)}</pre></details>`;
+    })
+    .join("");
+}
+
+function renderSourceUnits(item: NewsEvaluationCaseResult) {
+  return item.inputArticle.sourceUnits
+    .map(
+      (unit) =>
+        `<p class="source-unit"><strong>${escapeHtml(unit.id)}</strong> ${escapeHtml(unit.text)}</p>`,
+    )
+    .join("");
 }
 
 export function renderNewsEvaluationHtml(report: NewsEvaluationReport) {
@@ -296,9 +332,11 @@ export function renderNewsEvaluationHtml(report: NewsEvaluationReport) {
       const reason = item.reasons.length > 0
         ? `<p class="reason"><strong>판정 근거</strong> ${escapeHtml(item.reasons.join(" · "))}</p>`
         : "";
-      return `<article><header><span class="case">${escapeHtml(item.caseId)}</span><span class="status ${item.pipelineStatus}">${escapeHtml(item.pipelineStatus)}</span><span class="match ${item.expectationMatched ? "pass" : "fail"}">${item.expectationMatched ? "기대 일치" : "기대 불일치"}</span></header><h2>${escapeHtml(item.title)}</h2><p><a href="${safeHref(item.sourceUrl)}">원문 출처</a> · 단계 ${escapeHtml(item.stage)}${item.reasonCodes.length ? ` · ${escapeHtml(item.reasonCodes.join(", "))}` : ""}</p><p><strong>사람 기준표</strong> ${escapeHtml(item.expectation.rationale)}</p>${reason}<ul>${criteria}</ul></article>`;
+      const sourceUnits = renderSourceUnits(item);
+      const roleAttempts = renderRoleAttempts(item);
+      return `<article><header><span class="case">${escapeHtml(item.caseId)}</span><span class="status ${item.pipelineStatus}">${escapeHtml(item.pipelineStatus)}</span><span class="match ${item.expectationMatched ? "pass" : "fail"}">${item.expectationMatched ? "기대 일치" : "기대 불일치"}</span></header><h2>${escapeHtml(item.title)}</h2><p><a href="${safeHref(item.sourceUrl)}">원문 출처</a> · 단계 ${escapeHtml(item.stage)}${item.reasonCodes.length ? ` · ${escapeHtml(item.reasonCodes.join(", "))}` : ""}</p><p><strong>사람 기준표</strong> ${escapeHtml(item.expectation.expectedStatus)} — ${escapeHtml(item.expectation.rationale)}</p>${reason}<ul>${criteria}</ul><details><summary>원문 근거 문장</summary>${sourceUnits}</details><section class="attempts"><h3>역할별 판단과 초안</h3>${roleAttempts || "<p>모델 호출 없음</p>"}</section></article>`;
     })
     .join("");
 
-  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>어린이 뉴스 품질 평가 ${escapeHtml(report.runId)}</title><style>:root{color-scheme:light;font-family:system-ui,sans-serif;background:#f5f7fb;color:#172033}body{max-width:1100px;margin:0 auto;padding:32px 20px 80px}h1{margin-bottom:8px}.summary{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.summary span,header span{border-radius:999px;padding:6px 10px;background:#e7ebf3}article{background:#fff;border:1px solid #dce2ec;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 5px 20px #1720330b}article header{display:flex;gap:8px;align-items:center}.status.ready_for_storage,.match.pass,.pass span{background:#dff6e8;color:#166534}.status.rejected,.match.fail,.fail span{background:#fee2e2;color:#991b1b}.not_applicable span{background:#edf0f5;color:#536078}h2{font-size:1.12rem;margin:14px 0 8px}a{color:#3157c8}.reason{background:#fff7db;padding:10px;border-radius:8px}ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px}li{border:1px solid #e2e7ef;border-radius:10px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:6px}li span{padding:2px 7px;border-radius:999px;font-size:.78rem}small{grid-column:1/-1;color:#536078}</style></head><body><h1>어린이 뉴스 품질 평가</h1><p>${escapeHtml(report.runDateKst)} · ${escapeHtml(report.model)} · ${escapeHtml(report.runId)}</p><p>출처 스냅샷 ${escapeHtml(report.sourceRetrievedAt)} · ${escapeHtml(report.sourceBasis)}</p><section class="summary"><span>10건 중 기대 일치 ${report.expectationMatchedCount}건</span><span>ready ${report.readyForStorageCount}건</span><span>rejected ${report.rejectedCount}건</span><span>전체 판정 ${report.criteriaPassed ? "통과" : "실패"}</span></section>${cards}</body></html>`;
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>어린이 뉴스 품질 평가 ${escapeHtml(report.runId)}</title><style>:root{color-scheme:light;font-family:system-ui,sans-serif;background:#f5f7fb;color:#172033}body{max-width:1100px;margin:0 auto;padding:32px 20px 80px}h1{margin-bottom:8px}.summary{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}.summary span,header span{border-radius:999px;padding:6px 10px;background:#e7ebf3}article{background:#fff;border:1px solid #dce2ec;border-radius:16px;padding:20px;margin:16px 0;box-shadow:0 5px 20px #1720330b}article header{display:flex;gap:8px;align-items:center}.status.ready_for_storage,.match.pass,.pass span{background:#dff6e8;color:#166534}.status.rejected,.match.fail,.fail span{background:#fee2e2;color:#991b1b}.not_applicable span{background:#edf0f5;color:#536078}h2{font-size:1.12rem;margin:14px 0 8px}h3{font-size:1rem;margin:20px 0 8px}a{color:#3157c8}.reason{background:#fff7db;padding:10px;border-radius:8px}ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px}li{border:1px solid #e2e7ef;border-radius:10px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:6px}li span{padding:2px 7px;border-radius:999px;font-size:.78rem}small{grid-column:1/-1;color:#536078}details{border:1px solid #e2e7ef;border-radius:10px;padding:10px;margin:8px 0}summary{cursor:pointer;font-weight:650}.source-unit{margin:8px 0;padding:8px;background:#f7f9fc;border-radius:8px}pre{overflow:auto;white-space:pre-wrap;word-break:break-word;background:#101827;color:#e7eefc;border-radius:8px;padding:12px;font-size:.8rem}</style></head><body><h1>어린이 뉴스 품질 평가</h1><p>${escapeHtml(report.runDateKst)} · ${escapeHtml(report.model)} · ${escapeHtml(report.runId)}</p><p>출처 스냅샷 ${escapeHtml(report.sourceRetrievedAt)} · ${escapeHtml(report.sourceBasis)}</p><section class="summary"><span>10건 중 기대 일치 ${report.expectationMatchedCount}건</span><span>ready ${report.readyForStorageCount}건</span><span>rejected ${report.rejectedCount}건</span><span>전체 판정 ${report.criteriaPassed ? "통과" : "실패"}</span></section>${cards}</body></html>`;
 }
