@@ -50,6 +50,20 @@ assert.equal(samsung.symbol, "005930");
 assert.equal(findStock("우리은행")?.symbol, "316140");
 assert.equal(findStock("영웅문")?.symbol, "039490");
 
+const stockReferenceOwners = new Map<string, Set<string>>();
+for (const stock of STOCKS) {
+  for (const reference of [stock.name, ...stock.searchAliases]) {
+    assert.equal(findStock(reference)?.id, stock.id, `${reference} 별칭이 ${stock.name}을 찾지 못해`);
+    const normalized = reference.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}%]+/gu, "");
+    const owners = stockReferenceOwners.get(normalized) ?? new Set<string>();
+    owners.add(stock.id);
+    stockReferenceOwners.set(normalized, owners);
+  }
+}
+for (const [reference, owners] of stockReferenceOwners) {
+  assert.equal(owners.size, 1, `${reference} 별칭이 여러 종목에 겹쳐`);
+}
+
 for (const stock of STOCKS) {
   const education = findApprovedStockEducation(stock.id);
   assert.ok(education, `${stock.name} 승인 교육 데이터가 없어`);
