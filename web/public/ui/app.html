@@ -301,7 +301,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div onClick="{{ tfDaily }}" style="{{ tfDailyStyle }}">일봉</div>
 <div onClick="{{ tfWeekly }}" style="{{ tfWeeklyStyle }}">주봉</div>
 </div>
-<iframe title="{{ stockName }} TradingView 차트" src="{{ tradingViewChartUrl }}" width="330" height="264" loading="eager" style="display:block;margin-top:16px;border:0;background:#FFFFFF"></iframe>
+<iframe data-chart-frame="1" title="{{ stockName }} TradingView 차트" src="{{ tradingViewChartUrl }}" width="330" height="264" loading="eager" style="display:block;margin-top:16px;border:0;background:#FFFFFF"></iframe>
 </div>
 
 <div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:16px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
@@ -1359,10 +1359,40 @@ class Component extends DCLogic {
     this.receiveNavigation = (event) => { if (event.origin === window.location.origin) this.openRequestedScreen(event.data); };
     window.addEventListener('message', this.receiveNavigation);
 
+    // 차트 iframe 은 종목이 바뀔 때만 다시 연다. 기간·차트종류는 메시지로 넘겨
+    // 문서를 다시 열지 않고 바꾼다.
+    this.chartFrame = null;
+    // 값을 인자로 받는다. setState 직후에는 this.state 가 아직 이전 값이다.
+    this.postChartOptions = (overrides) => {
+      // DOM 에서 직접 찾는 것이 우선이다. 핸드셰이크를 한 번 놓쳐도 탭 전환은 살아 있어야 한다.
+      const frame = document.querySelector('iframe[data-chart-frame]');
+      const target = (frame && frame.contentWindow) || this.chartFrame;
+      if (!target) return;
+      const next = overrides || {};
+      target.postMessage(
+        {
+          type: 'kiwoom:chart-options',
+          period: next.period || this.state.tf,
+          chartType: next.chartType || this.state.chartType,
+        },
+        window.location.origin,
+      );
+    };
+    this.receiveChartReady = (event) => {
+      if (event.origin !== window.location.origin) return;
+      const data = event.data;
+      if (!data || data.type !== 'kiwoom:chart-ready') return;
+      // 종목이 바뀌면 새 문서가 다시 알려온다. 그때 현재 선택을 되돌려 준다.
+      this.chartFrame = event.source;
+      this.postChartOptions();
+    };
+    window.addEventListener('message', this.receiveChartReady);
+
   }
   componentWillUnmount(){
     if (this.liveRefreshTimer) clearInterval(this.liveRefreshTimer);
     if (this.receiveNavigation) window.removeEventListener('message', this.receiveNavigation);
+    if (this.receiveChartReady) window.removeEventListener('message', this.receiveChartReady);
   }
   componentDidUpdate(prevProps, prevState){
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
@@ -1413,6 +1443,12 @@ class Component extends DCLogic {
       const n = Object.assign({}, s, { tf: tf, events: (s.events || []).concat([ev]) });
       this.persist(n); return n;
     });
+    // 차트 iframe 에는 여기서 직접 알린다. 갱신 훅에 기대면 전환이 전달되지 않는다.
+    if (this.postChartOptions) this.postChartOptions({ period: tf });
+  }
+  setChartType(chartType){
+    this.set({ chartType: chartType });
+    if (this.postChartOptions) this.postChartOptions({ chartType: chartType });
   }
   isSchoolTime(){
     const f = this.state.forceSchool;
@@ -2191,11 +2227,13 @@ class Component extends DCLogic {
       openChart: () => this.logEvent('chart_detail_opened', 'chart'),
       openNews: () => this.logEvent('news_detail_opened', 'news'),
       closeSub: () => this.closeSub(),
-      chartLine: () => this.set({ chartType:'line' }), chartCandle: () => this.set({ chartType:'candlestick' }),
+      chartLine: () => this.setChartType('line'), chartCandle: () => this.setChartType('candlestick'),
       chartLineStyle: this.chip(s.chartType === 'line'), chartCandleStyle: this.chip(s.chartType === 'candlestick'),
       tfMinute: () => this.setTf('minute'), tfDaily: () => this.setTf('daily'), tfWeekly: () => this.setTf('weekly'),
       tfMinuteStyle: this.chip(s.tf === 'minute'), tfDailyStyle: this.chip(s.tf === 'daily'), tfWeeklyStyle: this.chip(s.tf === 'weekly'),
-      tradingViewChartUrl: st ? '/tradingview-chart?symbol=' + encodeURIComponent(st.code) + '&period=' + encodeURIComponent(s.tf) + '&type=' + encodeURIComponent(s.chartType) : '',
+      // 종목만 주소에 남긴다. 기간·차트종류가 주소에 있으면 탭을 누를 때마다 iframe 문서가
+      // 통째로 다시 열려 차트 번들과 데이터를 다시 받는다. 두 값은 postChartOptions 로 넘긴다.
+      tradingViewChartUrl: st ? '/tradingview-chart?symbol=' + encodeURIComponent(st.code) : '',
       sectorNameText: st ? this.sectorOf(st.sector).name : '',
       newsHeadline: nd.headline,
       newsBody: nd.body.map(t => ({ text: t })),

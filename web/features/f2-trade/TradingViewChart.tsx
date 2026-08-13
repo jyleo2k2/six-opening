@@ -14,6 +14,7 @@ import {
 } from "lightweight-charts";
 import {
   parseChartPoints,
+  type ChartPoint,
   type PrototypeChartPeriod,
   type PrototypeChartType,
 } from "./chart-data";
@@ -22,6 +23,13 @@ import { readPrototypeTrades } from "../../shared/store/prototype-trades";
 import type { FamilyMember } from "../../shared/types/trade";
 
 type LoadState = "loading" | "ready" | "error";
+
+/** 차트가 떴다고 app.html 에 알린다. 답으로 현재 기간·차트종류가 온다. */
+const CHART_READY_MESSAGE = "kiwoom:chart-ready";
+const CHART_OPTIONS_MESSAGE = "kiwoom:chart-options";
+
+const PERIODS: readonly PrototypeChartPeriod[] = ["minute", "daily", "weekly"];
+const CHART_TYPES: readonly PrototypeChartType[] = ["line", "candlestick"];
 
 /** 화면에 찍을 자리가 잡힌 마커. */
 type PlacedMarker = TradeMarker & { x: number; y: number };
@@ -77,135 +85,192 @@ function formatTime(time: Time, period: PrototypeChartPeriod) {
 
 export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
   symbol: string;
+  /** 첫 렌더용 기본값. 이후 값은 app.html 이 메시지로 바꾼다. */
   period: PrototypeChartPeriod;
+  /** 첫 렌더용 기본값. 이후 값은 app.html 이 메시지로 바꾼다. */
   chartType: PrototypeChartType;
   /** 열람 계정. 모르면 어느 마커에도 수량을 붙이지 않는다 (SPEC §6). */
   viewer?: FamilyMember | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
+  const [shown, setShown] = useState({ period, chartType });
+  const [points, setPoints] = useState<ChartPoint[] | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [placed, setPlaced] = useState<PlacedMarker[]>([]);
+  const { period: shownPeriod, chartType: shownChartType } = shown;
 
+  /**
+   * 기간·차트종류를 부모(app.html)에게서 메시지로 받는다.
+   *
+   * 예전에는 두 값이 iframe `src` 의 쿼리에 있어서, 분봉·일봉·주봉이나 선·캔들을 누를 때마다
+   * 이 문서가 통째로 다시 열렸다. 차트 번들을 다시 파싱하고 데이터도 다시 받았는데,
+   * 선↔캔들은 그릴 데이터가 완전히 같아서 그 왕복이 전부 헛일이었다.
+   */
+  useEffect(() => {
+    let answered = false;
+
+    const receive = (event: MessageEvent<unknown>) => {
+      if (event.origin !== window.location.origin) return;
+      const message = event.data as {
+        type?: unknown;
+        period?: unknown;
+        chartType?: unknown;
+      } | null;
+      if (!message || typeof message !== "object" || message.type !== CHART_OPTIONS_MESSAGE) return;
+      answered = true;
+
+      setShown((current) => {
+        const next = {
+          period: PERIODS.includes(message.period as PrototypeChartPeriod)
+            ? (message.period as PrototypeChartPeriod)
+            : current.period,
+          chartType: CHART_TYPES.includes(message.chartType as PrototypeChartType)
+            ? (message.chartType as PrototypeChartType)
+            : current.chartType,
+        };
+        return next.period === current.period && next.chartType === current.chartType
+          ? current
+          : next;
+      });
+    };
+
+    window.addEventListener("message", receive);
+
+    // 종목이 바뀌어 이 문서가 다시 열렸을 때도 부모의 현재 선택을 되받는다.
+    // 부모가 아직 수신 준비 전일 수 있어서, 답이 올 때까지 짧게 몇 번 더 알린다.
+    const announce = () => window.parent.postMessage({ type: CHART_READY_MESSAGE }, window.location.origin);
+    announce();
+    const retry = window.setInterval(() => {
+      if (answered) window.clearInterval(retry);
+      else announce();
+    }, 400);
+    const giveUp = window.setTimeout(() => window.clearInterval(retry), 4000);
+
+    return () => {
+      window.clearInterval(retry);
+      window.clearTimeout(giveUp);
+      window.removeEventListener("message", receive);
+    };
+  }, []);
+
+  // 데이터는 종목·기간에만 달려 있다. 선↔캔들 전환은 여기를 다시 타지 않는다.
   useEffect(() => {
     const controller = new AbortController();
+    setPoints(null);
     setState("loading");
     // 종목·기간이 바뀌면 이전 종목의 마커가 남아 있으면 안 된다.
     setPlaced([]);
 
-    fetch(`/api/quote/${encodeURIComponent(symbol)}/chart?period=${period}`, {
-      cache: "no-store",
+    fetch(`/api/quote/${encodeURIComponent(symbol)}/chart?period=${shownPeriod}`, {
       signal: controller.signal,
     })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("chart request failed")))
       .then((payload: unknown) => {
-        const points = parseChartPoints(payload);
-        if (!points.length) throw new Error("empty chart");
-
-        const container = containerRef.current;
-        if (!container || controller.signal.aborted) return;
-
-        chartRef.current?.remove();
-        const up = token("--color-up", "#E8322E");
-        const down = token("--color-down", "#1668DC");
-        const ink = token("--color-ink", "#1A2233");
-        const gray = token("--color-gray", "#BEBEBE");
-        const bg = token("--color-bg", "#F6F7FA");
-        const white = token("--color-white", "#FFFFFF");
-        const chart = createChart(container, {
-          width: container.clientWidth,
-          height: 238,
-          layout: {
-            background: { type: ColorType.Solid, color: white },
-            textColor: ink,
-            fontFamily: "Pretendard, Segoe UI, Malgun Gothic, sans-serif",
-            attributionLogo: false,
-          },
-          grid: { vertLines: { color: bg }, horzLines: { color: bg } },
-          rightPriceScale: { borderColor: gray },
-          timeScale: { borderColor: gray, timeVisible: period === "minute", secondsVisible: false },
-          localization: {
-            locale: "ko-KR",
-            priceFormatter: (price: number) => `${Math.round(price).toLocaleString("ko-KR")}원`,
-            timeFormatter: (time: Time) => formatTime(time, period),
-          },
-          crosshair: { vertLine: { color: gray }, horzLine: { color: gray } },
-        });
-        let series: ISeriesApi<SeriesType, Time>;
-        if (chartType === "line") {
-          const positive = points.at(-1)!.close >= points[0].close;
-          const line = chart.addSeries(LineSeries, {
-            color: positive ? up : down,
-            lineWidth: 3,
-            priceLineVisible: true,
-            lastValueVisible: true,
-          });
-          line.setData(points.map((point) => ({
-            time: point.time as UTCTimestamp,
-            value: point.close,
-          })));
-          series = line;
-        } else {
-          const candles = chart.addSeries(CandlestickSeries, {
-            upColor: up,
-            downColor: down,
-            borderUpColor: up,
-            borderDownColor: down,
-            wickUpColor: up,
-            wickDownColor: down,
-            priceLineVisible: true,
-            lastValueVisible: true,
-          });
-          candles.setData(points.map((point) => ({
-            time: point.time as UTCTimestamp,
-            open: point.open,
-            high: point.high,
-            low: point.low,
-            close: point.close,
-          })));
-          series = candles;
-        }
-
-        chart.timeScale().fitContent();
-
-        // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
-        const markers = buildTradeMarkers({
-          trades: symbolTrades(readPrototypeTrades(), symbol),
-          viewer,
-          candleTimes: points.map((point) => point.time),
-        });
-        // 스크롤·줌·리사이즈로 축이 움직이면 좌표를 다시 잡는다.
-        const reposition = () => setPlaced(placeMarkers(markers, chart, series));
-        reposition();
-        chart.timeScale().subscribeVisibleLogicalRangeChange(reposition);
-
-        const observer = new ResizeObserver(([entry]) => {
-          chart.applyOptions({ width: Math.max(1, Math.floor(entry.contentRect.width)) });
-          reposition();
-        });
-        observer.observe(container);
-        chartRef.current = chart;
-        setState("ready");
-
-        controller.signal.addEventListener("abort", () => {
-          observer.disconnect();
-          chart.timeScale().unsubscribeVisibleLogicalRangeChange(reposition);
-        }, { once: true });
+        const received = parseChartPoints(payload);
+        if (!received.length) throw new Error("empty chart");
+        setPoints(received);
       })
-      .catch((error: unknown) => {
+      .catch(() => {
         if (!controller.signal.aborted) setState("error");
       });
 
+    return () => controller.abort();
+  }, [shownPeriod, symbol]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!points || !container) return;
+
+    const up = token("--color-up", "#E8322E");
+    const down = token("--color-down", "#1668DC");
+    const ink = token("--color-ink", "#1A2233");
+    const gray = token("--color-gray", "#BEBEBE");
+    const bg = token("--color-bg", "#F6F7FA");
+    const white = token("--color-white", "#FFFFFF");
+    const chart = createChart(container, {
+      width: container.clientWidth,
+      height: 238,
+      layout: {
+        background: { type: ColorType.Solid, color: white },
+        textColor: ink,
+        fontFamily: "Pretendard, Segoe UI, Malgun Gothic, sans-serif",
+        attributionLogo: false,
+      },
+      grid: { vertLines: { color: bg }, horzLines: { color: bg } },
+      rightPriceScale: { borderColor: gray },
+      timeScale: { borderColor: gray, timeVisible: shownPeriod === "minute", secondsVisible: false },
+      localization: {
+        locale: "ko-KR",
+        priceFormatter: (price: number) => `${Math.round(price).toLocaleString("ko-KR")}원`,
+        timeFormatter: (time: Time) => formatTime(time, shownPeriod),
+      },
+      crosshair: { vertLine: { color: gray }, horzLine: { color: gray } },
+    });
+    let series: ISeriesApi<SeriesType, Time>;
+    if (shownChartType === "line") {
+      const positive = points.at(-1)!.close >= points[0].close;
+      const line = chart.addSeries(LineSeries, {
+        color: positive ? up : down,
+        lineWidth: 3,
+        priceLineVisible: true,
+        lastValueVisible: true,
+      });
+      line.setData(points.map((point) => ({
+        time: point.time as UTCTimestamp,
+        value: point.close,
+      })));
+      series = line;
+    } else {
+      const candles = chart.addSeries(CandlestickSeries, {
+        upColor: up,
+        downColor: down,
+        borderUpColor: up,
+        borderDownColor: down,
+        wickUpColor: up,
+        wickDownColor: down,
+        priceLineVisible: true,
+        lastValueVisible: true,
+      });
+      candles.setData(points.map((point) => ({
+        time: point.time as UTCTimestamp,
+        open: point.open,
+        high: point.high,
+        low: point.low,
+        close: point.close,
+      })));
+      series = candles;
+    }
+
+    chart.timeScale().fitContent();
+
+    // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
+    const markers = buildTradeMarkers({
+      trades: symbolTrades(readPrototypeTrades(), symbol),
+      viewer,
+      candleTimes: points.map((point) => point.time),
+    });
+    // 스크롤·줌·리사이즈로 축이 움직이면 좌표를 다시 잡는다.
+    const reposition = () => setPlaced(placeMarkers(markers, chart, series));
+    reposition();
+    chart.timeScale().subscribeVisibleLogicalRangeChange(reposition);
+
+    const observer = new ResizeObserver(([entry]) => {
+      chart.applyOptions({ width: Math.max(1, Math.floor(entry.contentRect.width)) });
+      reposition();
+    });
+    observer.observe(container);
+    setState("ready");
+
     return () => {
-      controller.abort();
-      chartRef.current?.remove();
-      chartRef.current = null;
+      observer.disconnect();
+      chart.timeScale().unsubscribeVisibleLogicalRangeChange(reposition);
+      chart.remove();
     };
-  }, [chartType, period, symbol, viewer]);
+  }, [points, shownChartType, shownPeriod, symbol, viewer]);
 
   return (
     <main className="relative h-[264px] w-full overflow-hidden bg-white">
-      <div ref={containerRef} className="h-[238px] w-full" role="img" aria-label={`${symbol} ${period === "minute" ? "분봉" : period === "daily" ? "일봉" : "주봉"} TradingView ${chartType === "line" ? "선" : "캔들"} 차트`} />
+      <div ref={containerRef} className="h-[238px] w-full" role="img" aria-label={`${symbol} ${shownPeriod === "minute" ? "분봉" : shownPeriod === "daily" ? "일봉" : "주봉"} TradingView ${shownChartType === "line" ? "선" : "캔들"} 차트`} />
       {state === "ready" && placed.length > 0 && (
         <svg className="pointer-events-none absolute left-0 top-0 h-[238px] w-full">
           {placed.map((marker) => {

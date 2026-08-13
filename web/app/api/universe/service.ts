@@ -47,7 +47,8 @@ async function refresh(preferredSymbol: string | null, includeChart: boolean) {
       : codes[quoteCursor++ % codes.length];
 
   try {
-    const quote = await getQuote(symbol);
+    // 카드 시세 폴링은 5초마다 돈다. 사용자가 누른 차트가 이 뒤에 밀리지 않도록 후순위로 보낸다.
+    const quote = await getQuote(symbol, true);
     warmQuotes[symbol] = {
       price: quote.price,
       rate: quote.rate,
