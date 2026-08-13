@@ -724,7 +724,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
           aria-live="polite"
           className="fixed z-20"
           style={{
-            bottom: 148,
+            bottom: 260,
             left: "min(calc(50% + 140px), calc(100% - 44px))",
             transform: "translateX(-82%)",
           }}
@@ -757,7 +757,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                   top:
                     prototypeScreen.top +
                     prototypeScreen.height -
-                    142 * prototypeScreen.scale,
+                    254 * prototypeScreen.scale,
                   transform: "translateX(-82%)",
                 }
               : undefined
