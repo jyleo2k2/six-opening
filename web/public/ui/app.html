@@ -124,6 +124,13 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="width:38px"></div>
 </div>
 
+<div style="flex:none;padding:0 16px 10px;display:flex;align-items:center;gap:8px">
+<input value="{{ stockQuery }}" onInput="{{ onStockQuery }}" placeholder="회사 이름으로 찾기" style="flex:1;min-width:0;box-sizing:border-box;border:0;outline:none;background:#FFFFFF;border-radius:14px;padding:12px 14px;font-family:'Pretendard',sans-serif;font-size:14.5px;font-weight:600;color:#01185A;box-shadow:0 1px 3px rgba(30,25,60,0.08)">
+<sc-if value="{{ hasStockQuery }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ clearStockQuery }}" style="flex:none;font-size:13px;font-weight:700;color:#8E93A8;padding:11px 13px;border-radius:14px;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)">지우기</div>
+</sc-if>
+</div>
+
 <div id="tut-chips" style="flex:none;overflow-x:auto;padding:2px 0 12px">
 <div style="display:flex;gap:8px;padding:0 16px;width:max-content">
 <sc-for list="{{ sectorChips }}" as="s" hint-placeholder-count="5">
@@ -136,6 +143,13 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <span style="font-size:13.5px;font-weight:600;color:#01185A;white-space:nowrap">{{ sectorTitle }}</span>
 <span style="font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">손가락으로 슉 밀어봐 →</span>
 </div>
+
+<sc-if value="{{ noCards }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;gap:9px">
+<div style="font-size:16px;font-weight:800;color:#01185A;text-align:center">{{ noCardsTitle }}</div>
+<div style="font-size:13.5px;font-weight:500;color:#8E93A8;line-height:1.6;text-align:center;text-wrap:pretty">{{ noCardsHint }}</div>
+</div>
+</sc-if>
 
 <div style="{{ stageStyle }}">
 <div id="tut-cards" ref="{{ cardsRef }}" onPointerDown="{{ cardsDown }}" onScroll="{{ cardsScroll }}" style="position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:33px;padding:2px 46px 6px;scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none">
@@ -226,7 +240,9 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ goExplore }}" style="{{ backBtnStyle }}">‹</div>
 <div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">{{ stockName }}</div>
-<div style="width:38px"></div>
+<div onClick="{{ toggleWatch }}" style="{{ watchBtnStyle }}">
+<svg width="21" height="19" viewBox="0 0 21 19" style="display:block"><path d="M10.5 17.5 2.6 9.9a4.6 4.6 0 1 1 7.9-4.4 4.6 4.6 0 1 1 7.9 4.4z" fill="{{ watchFill }}" stroke="{{ watchStroke }}" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+</div>
 </div>
 
 <div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:11px">
@@ -1586,6 +1602,7 @@ class Component extends DCLogic {
     screen: 'home', account: 'child',
     acc: { child:{name:'김찬영', cash:SEED, holdings:[], pending:[]}, parent:{name:'엄마', cash:SEED, holdings:[], pending:[]} },
     sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0, orderDone: null,
+    watchlist: [], stockQuery: '',
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
     sellStep: 1, sellDone: null,
@@ -1651,7 +1668,7 @@ class Component extends DCLogic {
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
     for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
-    this.setState(s => Object.assign({}, s, saved ? { acc:saved.acc, records:saved.records, sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq } : {}, { reasonOrder: order }), () => this.notifyChatContext());
+    this.setState(s => Object.assign({}, s, saved ? { acc:saved.acc, records:saved.records, sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq, watchlist:saved.watchlist || [] } : {}, { reasonOrder: order }), () => this.notifyChatContext());
     this.liveRefreshTimer = null;
     this.liveRefreshBusy = false;
     this.liveRefreshTick = () => {
@@ -1706,7 +1723,7 @@ class Component extends DCLogic {
     }
   }
   persist(next){
-    try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq })); } catch(e){}
+    try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq, watchlist: next.watchlist || [] })); } catch(e){}
   }
   set(patch){ this.setState(s => { const n = Object.assign({}, s, patch); this.persist(n); return n; }); }
   setDraft(patch){ this.setState(s => Object.assign({}, s, { draft: Object.assign({}, s.draft, patch) })); }
@@ -2402,10 +2419,19 @@ class Component extends DCLogic {
     const mixW = (hx, w) => { const n = parseInt(hx.slice(1), 16); const c = [(n>>16)&255,(n>>8)&255,n&255].map(v => Math.round(v + (255 - v) * w)); return '#' + c.map(v => v.toString(16).padStart(2,'0')).join(''); };
     const rgbOf = (hx) => { const n = parseInt(hx.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); };
     // 'rank' 는 섹터가 아니라 그날 등락률 순으로 51종 전체를 보는 모드다.
+    // 'watch' 는 하트를 눌러 담아둔 관심 기업만 보는 모드다.
     const isRank = s.sectorId === 'rank';
-    const baseList = isRank
-      ? u.stocks.slice().sort((a, b) => b.change - a.change)
-      : u.stocks.filter(x => x.sector === s.sectorId);
+    const isWatch = s.sectorId === 'watch';
+    const watch = s.watchlist || [];
+    const q = (s.stockQuery || '').trim().toLowerCase();
+    // 검색어가 있으면 섹터·관심 선택보다 검색이 앞선다
+    const baseList = q
+      ? u.stocks.filter(x => x.name.toLowerCase().indexOf(q) >= 0).sort((a, b) => b.change - a.change)
+      : isRank
+        ? u.stocks.slice().sort((a, b) => b.change - a.change)
+        : isWatch
+          ? u.stocks.filter(x => watch.indexOf(x.code) >= 0)
+          : u.stocks.filter(x => x.sector === s.sectorId);
     const list = baseList.map((x, ci) => {
       const sec = this.sectorOf(x.sector);
       const active = ci === s.cardIndex;
@@ -2604,7 +2630,7 @@ class Component extends DCLogic {
       pnlStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
 
       // 맨 앞은 섹터가 아니라 '오늘 많이 오른 순' 보기다
-      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순' }].concat(u.sectors).map(x => ({
+      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순' }, { id: 'watch', name: '관심 기업' }].concat(u.sectors).map(x => ({
         name: x.name,
         style: 'display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:' + (x.id === s.sectorId ? '700' : '500') + ';white-space:nowrap;cursor:pointer;' + (x.id === s.sectorId
           ? 'color:#fff;background:#F5327F'
@@ -2612,7 +2638,22 @@ class Component extends DCLogic {
         pick: () => this.set({ sectorId: x.id, cardIndex: 0 })
       })),
       // 등락률 순 보기에서는 칩이 이미 무슨 목록인지 말해주므로 제목을 비운다
-      sectorTitle: isRank ? '' : this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳',
+      sectorTitle: q ? ('"' + s.stockQuery.trim() + '" 검색 결과 ' + baseList.length + '곳')
+        : isRank ? ''
+        : isWatch ? ('관심 기업 ' + baseList.length + '곳')
+        : (this.sectorOf(s.sectorId).name + ' 회사 ' + u.stocks.filter(x => x.sector === s.sectorId).length + '곳'),
+
+      // 검색
+      stockQuery: s.stockQuery, hasStockQuery: !!q,
+      onStockQuery: e => { const v = e.target.value; this.setState({ stockQuery: v, cardIndex: 0 }); },
+      clearStockQuery: () => this.setState({ stockQuery: '', cardIndex: 0 }),
+
+      // 관심 기업이 비었거나 검색이 안 걸렸을 때
+      noCards: baseList.length === 0,
+      noCardsTitle: q ? '찾는 회사가 없어' : '아직 관심 기업이 없어',
+      noCardsHint: q ? '이름 일부만 넣어도 찾아줄게. 예를 들면 "삼성"'
+        : '회사를 눌러서 들어간 다음, 오른쪽 위 하트를 누르면 여기에 모여.',
+
       cards: list,
       // 종목이 많으면 도트가 화면을 넘친다. 현재 위치 주변만 창처럼 보여주고 양끝은 작게 흘린다.
       cardDots: (() => {
@@ -2686,6 +2727,17 @@ class Component extends DCLogic {
       },
 
       stockName: st ? st.name : '', stockEmoji: (sec.name || '').charAt(0),
+
+      // 관심 종목 — 누르기 전 회색, 담고 나면 빨강
+      watchBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
+      watchFill: (st && (s.watchlist || []).indexOf(st.code) >= 0) ? '#F5327F' : 'none',
+      watchStroke: (st && (s.watchlist || []).indexOf(st.code) >= 0) ? '#F5327F' : '#B8BDD0',
+      toggleWatch: () => {
+        if (!st) return;
+        const cur = this.state.watchlist || [];
+        const on = cur.indexOf(st.code) >= 0;
+        this.set({ watchlist: on ? cur.filter(c => c !== st.code) : cur.concat([st.code]) });
+      },
       stockPriceText: st ? st.price.toLocaleString('ko-KR') + '원' : '',
       stockChangeText: st ? ((st.change >= 0 ? '▲ ' : '▼ ') + Math.abs(st.change).toFixed(2) + '%') : '',
       detailChangeStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (st && st.change >= 0 ? up : down),
@@ -3258,7 +3310,7 @@ class Component extends DCLogic {
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = { child:{name:'김찬영', cash:SEED, holdings:[], pending:[]}, parent:{name:'엄마', cash:SEED, holdings:[], pending:[]} };
-        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft() });
+        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft(), watchlist: [] });
       }
     };
   }
