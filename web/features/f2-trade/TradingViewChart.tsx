@@ -42,6 +42,29 @@ const BADGE = 22;
 const TAIL = 7;
 
 /**
+ * 처음 보여줄 봉 개수.
+ *
+ * `fitContent()` 는 받아온 봉을 전부 330px 폭에 밀어 넣어서 일봉 1년치·주봉 3년치가
+ * 실오라기처럼 뭉개진다. 기간별로 최근 구간만 잘라 띄우면 봉 하나가 8px 안팎이 되어
+ * 캔들 몸통과 꼬리가 구분된다. 사용자는 그대로 왼쪽으로 스크롤해 과거를 볼 수 있다.
+ */
+const INITIAL_BARS: Record<PrototypeChartPeriod, number> = {
+  minute: 30,
+  daily: 36,
+  weekly: 30,
+};
+
+/** 최근 구간만 띄운다. 봉이 그보다 적으면 전체를 채운다. */
+function showRecentBars(chart: IChartApi, total: number, period: PrototypeChartPeriod) {
+  const span = INITIAL_BARS[period];
+  if (total <= span) {
+    chart.timeScale().fitContent();
+    return;
+  }
+  chart.timeScale().setVisibleLogicalRange({ from: total - span, to: total - 1 });
+}
+
+/**
  * 이 종목의 가족 전원 체결. F11 SPEC §6
  *
  * 본인 거래는 app.html 이 `localStorage` 에 쌓고, 엄마의 데모 거래는 코드 상수다.
@@ -255,7 +278,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
       series = candles;
     }
 
-    chart.timeScale().fitContent();
+    showRecentBars(chart, points.length, shownPeriod);
 
     // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
     const markers = buildTradeMarkers({
