@@ -92,7 +92,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <sc-if value="{{ isParentAcct }}" hint-placeholder-val="{{ false }}">
 <div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="display:flex;align-items:center;gap:13px">
-<span style="font-size:22px">🏫</span>
 <div style="flex:1;min-width:0">
 <div style="font-size:15.5px;font-weight:800;color:#01185A">학교 시간엔 매매 쉬기</div>
 <div style="font-size:13px;font-weight:500;color:#8E93A8;margin-top:4px;white-space:nowrap">평일 09:00~16:00 · 김찬영 계정에만</div>
@@ -109,10 +108,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -128,7 +127,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div id="tut-chips" style="flex:none;overflow-x:auto;padding:2px 0 12px">
 <div style="display:flex;gap:8px;padding:0 16px;width:max-content">
 <sc-for list="{{ sectorChips }}" as="s" hint-placeholder-count="5">
-<div onClick="{{ s.pick }}" style="{{ s.style }}"><span style="font-size:14px">{{ s.emoji }}</span><span>{{ s.name }}</span></div>
+<div onClick="{{ s.pick }}" style="{{ s.style }}"><span>{{ s.name }}</span></div>
 </sc-for>
 </div>
 </div>
@@ -214,10 +213,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyleX }}">
-<div onClick="{{ goHome }}" style="{{ navHomeX }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTradeX }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchiveX }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRankingX }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHomeX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTradeX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchiveX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRankingX }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -251,12 +250,12 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:9px"><span style="font-size:19px">🐻</span><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">이 회사는 뭘 해?</span></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">이 회사는 뭘 해?</span></div>
 <div style="font-size:16px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:10px;text-wrap:pretty">{{ stockDescLong }}</div>
 </div>
 
 <div style="background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:9px"><span style="font-size:19px">🗞️</span><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">요즘 무슨 일이 있었어?</span></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:17.5px;font-weight:800;color:#01185A;white-space:nowrap">요즘 무슨 일이 있었어?</span></div>
 <div style="font-size:16px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:10px;text-wrap:pretty">{{ stockNews }}</div>
 <div style="display:flex;align-items:center;justify-content:space-between;margin-top:13px">
 <span style="font-size:13px;font-weight:500;color:#A9AEC4">키움 뉴스를 어린이 눈높이로</span>
@@ -269,7 +268,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;padding:14px 16px 26px">
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
@@ -305,7 +303,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🐻</span><span style="font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap">캔들이 뭐야?</span></div>
+<div style="display:flex;align-items:center;gap:8px"><span style="font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap">캔들이 뭐야?</span></div>
 <div style="font-size:14px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:9px;text-wrap:pretty">막대 하나가 하루야. 그날 시작한 값보다 끝난 값이 높으면 <b style="color:#E8322E">빨간 막대</b>, 낮으면 <b style="color:#1668DC">파란 막대</b>가 돼. 위아래로 나온 선은 그날 가장 비쌌던 값과 가장 쌌던 값이야.</div>
 <div style="display:flex;gap:8px;margin-top:12px">
 <div style="flex:1;background:#FFF4F4;border-radius:14px;padding:11px 13px"><div style="font-size:12.5px;font-weight:600;color:#E8322E">빨간 막대</div><div style="font-size:12.5px;font-weight:500;color:#7E849B;margin-top:4px;line-height:1.5">그날 값이 올랐어</div></div>
@@ -316,7 +314,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="flex:none;padding:14px 16px 26px">
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
@@ -358,14 +355,12 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="display:flex;align-items:flex-start;gap:10px;background:#ECEDF7;border-radius:22px;padding:14px 16px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<span style="font-size:16px">🐻</span>
 <div style="flex:1;font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty">이건 이 회사가 좋다 나쁘다는 이야기가 아니야. 무슨 일이 있었는지만 알려주는 거야.</div>
 </div>
 </div>
 <div style="flex:none;padding:14px 16px 26px">
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;margin-bottom:11px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
@@ -396,7 +391,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <sc-if value="{{ isBuy1 }}" hint-placeholder-val="{{ true }}">
 <div id="tut-buy1" style="display:flex;flex-direction:column;gap:12px">
 <div style="display:flex;align-items:center;gap:9px;background:#ECEDF7;border-radius:20px;padding:12px 15px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<span style="font-size:16px">💰</span>
 <span style="font-size:14px;font-weight:600;color:#5C6280;white-space:nowrap">내 지갑</span>
 <span style="flex:1;text-align:right;font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span>
 </div>
@@ -447,7 +441,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div onClick="{{ lim0 }}" style="{{ limChip0 }}">지금값</div>
 </div>
 <div style="display:flex;align-items:flex-start;gap:9px;background:#ECEDF7;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<span style="font-size:15px">🐻</span>
 <span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 살게. 기다리는 동안 그 돈은 잠깐 맡아둘게.</span>
 </div>
 </div>
@@ -455,7 +448,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ hasWarn }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:9px;background:#FFF1F6;border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
-<span style="font-size:15px">🐻</span><span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ warnText }}</span>
+<span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ warnText }}</span>
 </div>
 </sc-if>
 </div>
@@ -473,8 +466,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 <sc-for list="{{ reasonBtns }}" as="r" hint-placeholder-count="6">
 <div onClick="{{ r.pick }}" style="{{ r.style }}">
-<div style="font-size:22px;line-height:1.1">{{ r.emoji }}</div>
-<div style="font-size:13.5px;font-weight:600;color:#01185A;margin-top:7px;line-height:1.4">{{ r.label }}</div>
+<div style="font-size:14.5px;font-weight:600;color:#01185A;line-height:1.45">{{ r.label }}</div>
 </div>
 </sc-for>
 </div>
@@ -482,7 +474,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">언제까지 가질 생각이야?</div>
 <div style="display:flex;flex-direction:column;gap:9px">
 <sc-for list="{{ planBtns }}" as="p" hint-placeholder-count="4">
-<div onClick="{{ p.pick }}" style="{{ p.style }}"><span style="font-size:19px">{{ p.emoji }}</span><span style="font-size:15.5px;font-weight:600;color:#01185A">{{ p.label }}</span></div>
+<div onClick="{{ p.pick }}" style="{{ p.style }}"><span style="font-size:15.5px;font-weight:600;color:#01185A">{{ p.label }}</span></div>
 </sc-for>
 </div>
 
@@ -628,7 +620,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </sc-for>
 </div>
 <div style="display:flex;align-items:flex-start;gap:9px;background:#ECEDF7;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<span style="font-size:15px">🐻</span>
 <span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 팔게. 기다리는 동안 그 주식은 잠깐 맡아둘게.</span>
 </div>
 </div>
@@ -636,7 +627,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ hasSellWarn }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:9px;background:#FFF1F6;border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
-<span style="font-size:15px">🐻</span><span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ sellWarnText }}</span>
+<span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ sellWarnText }}</span>
 </div>
 </sc-if>
 </div>
@@ -680,15 +671,13 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
 <sc-for list="{{ sellReasonBtns }}" as="r" hint-placeholder-count="6">
 <div onClick="{{ r.pick }}" style="{{ r.style }}">
-<div style="font-size:22px;line-height:1.1">{{ r.emoji }}</div>
-<div style="font-size:13.5px;font-weight:600;color:#01185A;margin-top:7px;line-height:1.4">{{ r.label }}</div>
+<div style="font-size:14.5px;font-weight:600;color:#01185A;line-height:1.45">{{ r.label }}</div>
 </div>
 </sc-for>
 </div>
 
 <sc-if value="{{ planMatched }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:22px;padding:16px 18px;box-shadow:0 2px 10px rgba(120,90,20,0.07)">
-<span style="font-size:32px;line-height:1">🏅</span>
 <div style="flex:1;min-width:0">
 <div style="font-size:16px;font-weight:800;color:#01185A">계획 실천 배지</div>
 <div style="font-size:13.5px;font-weight:600;color:#8A6B1F;margin-top:5px;line-height:1.55;text-wrap:pretty">처음 세운 생각을 기억하고 실천했네! 아카이브에 모아둘게.</div>
@@ -701,7 +690,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:-6px">계획이 바뀌는 건 괜찮아!</div>
 <div style="display:flex;flex-direction:column;gap:9px">
 <sc-for list="{{ changeBtns }}" as="c" hint-placeholder-count="5">
-<div onClick="{{ c.pick }}" style="{{ c.style }}"><span style="font-size:19px">{{ c.emoji }}</span><span style="font-size:15px;font-weight:600;color:#01185A;line-height:1.4">{{ c.label }}</span></div>
+<div onClick="{{ c.pick }}" style="{{ c.style }}"><span style="font-size:15px;font-weight:600;color:#01185A;line-height:1.4">{{ c.label }}</span></div>
 </sc-for>
 </div>
 </sc-if>
@@ -724,7 +713,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ hasBadge }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:11px;background:#FFF8E4;border-radius:20px;padding:13px 16px;margin-top:16px;width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)">
-<span style="font-size:26px">🏅</span>
 <span style="font-size:14.5px;font-weight:700;color:#8A6B1F;line-height:1.5">계획 실천 배지를 받았어!</span>
 </div>
 </sc-if>
@@ -783,7 +771,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ tradeLocked }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
-<span style="font-size:22px">🐻</span>
 <span style="font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty">지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
 </div>
 </sc-if>
@@ -831,7 +818,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <sc-if value="{{ noHoldings }}" hint-placeholder-val="{{ false }}">
 <div style="background:#FFFFFF;border-radius:26px;padding:34px 20px;text-align:center;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="font-size:40px">🪺</div>
 <div style="font-size:16px;font-weight:800;color:#01185A;margin-top:12px">아직 가진 회사가 없어</div>
 <div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:7px;line-height:1.6">모의투자에서 마음에 드는 회사를 찾아봐</div>
 </div>
@@ -839,10 +825,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -852,7 +838,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <div style="{{ rkHeadStyle }}">
 <div onClick="{{ goHome }}" style="{{ rkBackStyle }}">‹</div>
-<div style="{{ rkTitleStyle }}"><span style="font-size:20px;line-height:1">🏆</span><span>랭킹</span></div>
+<div style="{{ rkTitleStyle }}"><span>랭킹</span></div>
 <div style="{{ rkSegWrap }}">
 <div onClick="{{ pickWeek }}" style="{{ rkSegWeek }}">이번 주</div>
 <div onClick="{{ pickSeason }}" style="{{ rkSegSeason }}">시즌 전체</div>
@@ -893,10 +879,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -1011,7 +997,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="{{ c.descBoxStyle }}">
-<div style="{{ c.descIconStyle }}">💡</div>
 <div style="{{ c.descTextStyle }}">{{ c.desc }}</div>
 </div>
 </div>
@@ -1074,10 +1059,8 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <div style="{{ pickedStyle }}">
 <sc-if value="{{ pickedShowLead }}" hint-placeholder-val="{{ true }}">
-<div style="{{ pickedIconStyle }}">{{ pickedLeadIcon }}</div>
 </sc-if>
 <div style="{{ pickedHeadStyle }}">
-<div style="{{ pickedIconStyle }}">{{ pickedIcon }}</div>
 <sc-if value="{{ hasPick }}" hint-placeholder-val="{{ false }}"><span style="{{ pickedLabelStyle }}">{{ picked.label }}</span></sc-if>
 <sc-if value="{{ hasPick }}" hint-placeholder-val="{{ false }}"><span style="{{ pickedScoreStyle }}">{{ picked.score }}</span></sc-if>
 </div>
@@ -1109,9 +1092,8 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="{{ r.laneStyle }}">
 <div style="{{ r.nameStyle }}">{{ r.name }}</div>
 <div style="{{ r.runnerStyle }}">
-<div style="{{ r.dustStyle }}">{{ r.dust }}</div>
+<div style="{{ r.dashStyle }}"></div>
 <div style="{{ r.faceStyle }}"></div>
-<div style="{{ r.emojiStyle }}">{{ r.emoji }}</div>
 <div style="{{ r.pctStyle }}">{{ r.pctText }}</div>
 </div>
 </div>
@@ -1146,7 +1128,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 <sc-if value="{{ retNoHoldings }}" hint-placeholder-val="{{ false }}">
 <div style="background:#fff;border-radius:22px;padding:26px 20px;text-align:center;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="font-size:32px">🪺</div>
 <div style="font-size:14.5px;font-weight:800;color:#001E5A;margin-top:9px">아직 가진 회사가 없어</div>
 </div>
 </sc-if>
@@ -1192,7 +1173,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <div style="font-size:14.5px;font-weight:500;color:#3D4460;line-height:1.72;margin-top:13px;white-space:pre-line;text-wrap:pretty">{{ p.text }}</div>
 <div style="display:flex;align-items:center;justify-content:flex-end;gap:20px;margin-top:13px">
-<div onClick="{{ p.toggleCmt }}" style="{{ p.cmtBtnStyle }}"><span style="font-size:18px">💬</span><span>{{ p.cmtCount }}</span></div>
+<div onClick="{{ p.toggleCmt }}" style="{{ p.cmtBtnStyle }}"><span>댓글</span><span>{{ p.cmtCount }}</span></div>
 <div onClick="{{ p.like }}" style="{{ p.likeStyle }}"><span style="font-size:19px">{{ p.likeIcon }}</span><span>{{ p.likeCount }}</span></div>
 </div>
 <sc-if value="{{ p.cmtOpen }}" hint-placeholder-val="{{ false }}">
@@ -1308,10 +1289,10 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </sc-if>
 
 <div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:19px;line-height:1.15">🏠</div><div style="font-size:12px;font-weight:600;margin-top:2px">홈</div></div>
-<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:19px;line-height:1.15">📈</div><div style="font-size:12px;font-weight:600;margin-top:2px">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:19px;line-height:1.15">📔</div><div style="font-size:12px;font-weight:600;margin-top:2px">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:19px;line-height:1.15">🏆</div><div style="font-size:12px;font-weight:600;margin-top:2px">랭킹</div></div>
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
 </div>
 </sc-if>
@@ -1330,7 +1311,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <sc-for list="{{ traits }}" as="t" hint-placeholder-count="4">
 <div style="{{ tsPal.row }}">
 <div style="display:flex;align-items:center;gap:9px">
-<div style="{{ tsPal.icon }}">{{ t.icon }}</div>
 <div style="{{ tsPal.label }}">{{ t.label }}</div>
 <div style="{{ tsPal.score }}">{{ t.score }}</div>
 </div>
@@ -1389,33 +1369,33 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 const SEED = 10000000, FEE = 0.00015;
 
 const REASONS = [
-  { code:'buy_news',      emoji:'📰', label:'뉴스에서 봐서',            short:'뉴스를 보고' },
-  { code:'buy_chart',     emoji:'📈', label:'그래프가 좋아 보여서',      short:'그래프를 보고' },
-  { code:'buy_familiar',  emoji:'🛒', label:'내가 아는 회사라서',        short:'내가 아는 회사라서' },
-  { code:'buy_ranking',   emoji:'🏆', label:'인기 순위에서 봐서',        short:'인기 순위를 보고' },
-  { code:'buy_social',    emoji:'🗣', label:'친구·가족이 말해줘서',      short:'친구·가족 말을 듣고' },
-  { code:'buy_intuition', emoji:'🤷', label:'그냥 느낌이 좋아서',        short:'느낌이 좋아서' }
+  { code:'buy_news',      label:'뉴스에서 봐서',            short:'뉴스를 보고' },
+  { code:'buy_chart',     label:'그래프가 좋아 보여서',      short:'그래프를 보고' },
+  { code:'buy_familiar',  label:'내가 아는 회사라서',        short:'내가 아는 회사라서' },
+  { code:'buy_ranking',   label:'인기 순위에서 봐서',        short:'인기 순위를 보고' },
+  { code:'buy_social',    label:'친구·가족이 말해줘서',      short:'친구·가족 말을 듣고' },
+  { code:'buy_intuition', label:'그냥 느낌이 좋아서',        short:'느낌이 좋아서' }
 ];
 const PLANS = [
-  { code:'plan_short',  emoji:'📅', label:'이번 주만',                    short:'이번 주만' },
-  { code:'plan_season', emoji:'🏁', label:'시즌 끝까지',                  short:'시즌 끝까지' },
-  { code:'plan_target', emoji:'🎯', label:'내가 정한 목표 가격이 되면',   short:'목표 가격이 되면' },
-  { code:'plan_none',   emoji:'🤷', label:'아직 모르겠어',                short:'아직 모르겠지만' }
+  { code:'plan_short',  label:'이번 주만',                    short:'이번 주만' },
+  { code:'plan_season', label:'시즌 끝까지',                  short:'시즌 끝까지' },
+  { code:'plan_target', label:'내가 정한 목표 가격이 되면',   short:'목표 가격이 되면' },
+  { code:'plan_none',   label:'아직 모르겠어',                short:'아직 모르겠지만' }
 ];
 const SELL_REASONS = [
-  { code:'sell_target_hit', emoji:'🎯', label:'목표한 만큼 와서',        short:'목표한 만큼 와서' },
-  { code:'sell_plan_time',  emoji:'🏁', label:'정한 날짜가 돼서',        short:'정한 날짜가 돼서' },
-  { code:'sell_rebalance',  emoji:'🔄', label:'더 좋아 보이는 회사를 찾아서', short:'더 좋아 보이는 회사를 찾아서' },
-  { code:'sell_fear_drop',  emoji:'😟', label:'더 떨어질까 봐',          short:'더 떨어질까 봐' },
-  { code:'sell_anxiety',    emoji:'😰', label:'그냥 불안해서',           short:'그냥 불안해서' },
-  { code:'sell_liquidity',  emoji:'💰', label:'다른 데 쓸 돈이 필요해서', short:'다른 데 쓸 돈이 필요해서' }
+  { code:'sell_target_hit', label:'목표한 만큼 와서',        short:'목표한 만큼 와서' },
+  { code:'sell_plan_time',  label:'정한 날짜가 돼서',        short:'정한 날짜가 돼서' },
+  { code:'sell_rebalance',  label:'더 좋아 보이는 회사를 찾아서', short:'더 좋아 보이는 회사를 찾아서' },
+  { code:'sell_fear_drop',  label:'더 떨어질까 봐',          short:'더 떨어질까 봐' },
+  { code:'sell_anxiety',    label:'그냥 불안해서',           short:'그냥 불안해서' },
+  { code:'sell_liquidity',  label:'다른 데 쓸 돈이 필요해서', short:'다른 데 쓸 돈이 필요해서' }
 ];
 const CHANGES = [
-  { code:'change_new_info',       emoji:'📰', label:'새로운 소식을 알게 됐어' },
-  { code:'change_view_shift',     emoji:'🏢', label:'회사에 대한 생각이 바뀌었어' },
-  { code:'change_price_emotion',  emoji:'📉', label:'가격이 움직여서 불안해졌어' },
-  { code:'change_alternative',    emoji:'🔄', label:'다른 회사가 더 좋아 보였어' },
-  { code:'change_plan_revision',  emoji:'🙋', label:'처음 계획이 나와 맞지 않았어' }
+  { code:'change_new_info',       label:'새로운 소식을 알게 됐어' },
+  { code:'change_view_shift',     label:'회사에 대한 생각이 바뀌었어' },
+  { code:'change_price_emotion',  label:'가격이 움직여서 불안해졌어' },
+  { code:'change_alternative',    label:'다른 회사가 더 좋아 보였어' },
+  { code:'change_plan_revision',  label:'처음 계획이 나와 맞지 않았어' }
 ];
 const SHORT_TERM_DAYS = 7;
 const NEWS = {
@@ -1439,22 +1419,22 @@ const NEWS = {
 // img 가 있으면 실제 가족사진, 없으면 마스코트 이모지 + 색으로 대신한다.
 // 사진 가족과 이모지 가족은 순위와 상관없이 섞어 둔다. '우리 가족'만 family1로 고정.
 const RK_FAMS = {
-  '우리 가족':   { img:'assets/profiles/family1.jpg',  emoji:'🐮', a:'#FFFFFF', b:'#FFE6F1' },
-  '별빛 가족':   {                                     emoji:'🐻', a:'#FFE6D6', b:'#F8C9A6' },
-  '초록곰 가족': { img:'assets/profiles/family2.jpg',  emoji:'🐸', a:'#DFF6E4', b:'#B6E7C2' },
-  '바다별 가족': {                                     emoji:'🐧', a:'#DCEBFF', b:'#B6D6FA' },
-  '달토끼 가족': { img:'assets/profiles/family3.jpg',  emoji:'🐰', a:'#F5EEFF', b:'#DED0F7' },
-  '해바라기 가족': {                                   emoji:'🦁', a:'#FFF4D6', b:'#FBE1A2' },
-  '구름섬 가족': { img:'assets/profiles/family4.jpg',  emoji:'🐨', a:'#EDF1F7', b:'#D2DCE8' },
-  '무지개 가족': { img:'assets/profiles/family5.jpg',  emoji:'🐼', a:'#F7ECFF', b:'#E2CBF7' },
-  '밤톨 가족':   {                                     emoji:'🦊', a:'#FFE9DA', b:'#F9CBA6' },
-  '민들레 가족': { img:'assets/profiles/family6.jpg',  emoji:'🐥', a:'#FFF7DA', b:'#FAE7A4' },
-  '도토리 가족': { img:'assets/profiles/family7.jpg',  emoji:'🐿️', a:'#F6EEE4', b:'#E4CFB6' },
-  '눈송이 가족': {                                     emoji:'🐻‍❄️', a:'#EFF6FF', b:'#D3E6F7' },
-  '파랑새 가족': { img:'assets/profiles/family8.jpg',  emoji:'🐦', a:'#E7F4FF', b:'#C4E1F7' },
-  '산들바람 가족': {                                   emoji:'🦉', a:'#F2F0E6', b:'#DCD7C2' },
-  '반짝별 가족': { img:'assets/profiles/family9.jpg',  emoji:'🐝', a:'#FFF6E0', b:'#F8E0A8' },
-  '씨앗 가족':   { img:'assets/profiles/family10.jpg', emoji:'🐢', a:'#EDF7EC', b:'#CBE6C6' }
+  '우리 가족':   { img:'assets/profiles/family1.jpg',  a:'#FFFFFF', b:'#FFE6F1' },
+  '별빛 가족':   {                                     a:'#FFE6D6', b:'#F8C9A6' },
+  '초록곰 가족': { img:'assets/profiles/family2.jpg',  a:'#DFF6E4', b:'#B6E7C2' },
+  '바다별 가족': {                                     a:'#DCEBFF', b:'#B6D6FA' },
+  '달토끼 가족': { img:'assets/profiles/family3.jpg',  a:'#F5EEFF', b:'#DED0F7' },
+  '해바라기 가족': {                                   a:'#FFF4D6', b:'#FBE1A2' },
+  '구름섬 가족': { img:'assets/profiles/family4.jpg',  a:'#EDF1F7', b:'#D2DCE8' },
+  '무지개 가족': { img:'assets/profiles/family5.jpg',  a:'#F7ECFF', b:'#E2CBF7' },
+  '밤톨 가족':   {                                     a:'#FFE9DA', b:'#F9CBA6' },
+  '민들레 가족': { img:'assets/profiles/family6.jpg',  a:'#FFF7DA', b:'#FAE7A4' },
+  '도토리 가족': { img:'assets/profiles/family7.jpg',  a:'#F6EEE4', b:'#E4CFB6' },
+  '눈송이 가족': {                                     a:'#EFF6FF', b:'#D3E6F7' },
+  '파랑새 가족': { img:'assets/profiles/family8.jpg',  a:'#E7F4FF', b:'#C4E1F7' },
+  '산들바람 가족': {                                   a:'#F2F0E6', b:'#DCD7C2' },
+  '반짝별 가족': { img:'assets/profiles/family9.jpg',  a:'#FFF6E0', b:'#F8E0A8' },
+  '씨앗 가족':   { img:'assets/profiles/family10.jpg', a:'#EDF7EC', b:'#CBE6C6' }
 };
 const RK_LEAGUES = {
   week: [
@@ -1518,7 +1498,7 @@ function rkPodium(tab){
   // 화면 왼쪽부터 2등 · 1등 · 3등 순으로 그린다.
   return [2, 1, 3].map(rank => {
     const row = (RK_LEAGUES[tab] || RK_LEAGUES.week)[rank - 1];
-    const f = RK_FAMS[row.name] || { emoji:'🐣', a:'#FFFFFF', b:'#E9E9F0' };
+    const f = RK_FAMS[row.name] || { a:'#FFFFFF', b:'#E9E9F0' };
     const g = RK_POD[rank];
     const ring = row.me
       ? '0 0 0 3px #F5327F,0 0 18px rgba(245,50,127,0.55)'
@@ -1528,8 +1508,8 @@ function rkPodium(tab){
       + 'px;border-radius:2px;background:linear-gradient(180deg,#4E86DC 0%,#2A5BA8 100%);'
       + 'clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%);transform-origin:50% 0;';
     return {
-      rank: rank, name: row.name, pct: row.pct, emoji: f.img ? '' : f.emoji,
-      crown: rank === 1 ? '👑' : '',
+      rank: rank, name: row.name, pct: row.pct, emoji: f.img ? '' : row.name.charAt(0),
+      crown: '',
       step: row.step || '',
       slotStyle: 'position:absolute;' + g.slot + ';display:flex;flex-direction:column;align-items:center;pointer-events:none',
       crownStyle: rank === 1
@@ -1566,10 +1546,10 @@ function rkPodium(tab){
 
 function rkRows(tab, upC, downC){
   return (RK_LEAGUES[tab] || RK_LEAGUES.week).slice(3).map((row, i) => {
-    const f = RK_FAMS[row.name] || { emoji:'🐣', a:'#FFFFFF', b:'#E9E9F0' };
+    const f = RK_FAMS[row.name] || { a:'#FFFFFF', b:'#E9E9F0' };
     const me = !!row.me, neg = row.pct.charAt(0) === '-';
     return {
-      rank: i + 4, name: row.name, pct: row.pct, emoji: f.img ? '' : f.emoji, step: row.step || '',
+      rank: i + 4, name: row.name, pct: row.pct, emoji: f.img ? '' : row.name.charAt(0), step: row.step || '',
       rowStyle: 'flex:none;height:64px;display:flex;align-items:center;padding:0 18px 0 10px;border-radius:28px;' + (me
         ? 'background:linear-gradient(180deg,#FF7FB8 0%,#F5327F 62%,#E01D6B 100%);'
           + 'box-shadow:0 14px 26px -8px rgba(224,29,107,0.42),inset 0 1px 0 rgba(255,255,255,0.35)'
@@ -1828,7 +1808,7 @@ class Component extends DCLogic {
     if (window.parent === window) return;
     window.parent.postMessage({ type:'kiwoom:chat-behavior', event:event }, window.location.origin);
   }
-  sectorOf(id){ return this.uni().sectors.filter(s => s.id === id)[0] || { accent:'#8E93A8', emoji:'📦', name:'' }; }
+  sectorOf(id){ return this.uni().sectors.filter(s => s.id === id)[0] || { accent:'#8E93A8', name:'' }; }
 
   // 카드 모아보기 가로 레일 — 가운데 온 카드를 활성으로 잡는다.
   cardRail(){ return document.querySelector('.kwcardrail'); }
@@ -1933,11 +1913,11 @@ class Component extends DCLogic {
 
     const TLBL = ['집중', '분산', '정확', '직관', '근거'];
     const TMETA = [
-      { icon:'🎯', c:'#FFC53D', desc:'확신한 곳에 몰아 담은 정도예요. 담은 섹터가 적고 현금이 적을수록 높아요.' },
-      { icon:'🧺', c:'#4FC3F7', desc:'여러 곳에 나눠 담은 정도예요. 집중의 반대쪽 축이에요.' },
-      { icon:'🔮', c:'#7BE3A0', desc:'사고판 시점이 맞았는지예요. 산 뒤 오르거나 판 뒤 내리면 올라가요.' },
-      { icon:'⚡', c:'#FF8AD0', desc:'느낌으로 빠르게 결정한 비율이에요. 근거의 반대쪽 축이에요.' },
-      { icon:'🔍', c:'#9B8CFF', desc:'사기 전에 뉴스·기업정보·차트를 확인하고 결정한 비율이에요.' }
+      { c:'#FFC53D', desc:'확신한 곳에 몰아 담은 정도예요. 담은 섹터가 적고 현금이 적을수록 높아요.' },
+      { c:'#4FC3F7', desc:'여러 곳에 나눠 담은 정도예요. 집중의 반대쪽 축이에요.' },
+      { c:'#7BE3A0', desc:'사고판 시점이 맞았는지예요. 산 뒤 오르거나 판 뒤 내리면 올라가요.' },
+      { c:'#FF8AD0', desc:'느낌으로 빠르게 결정한 비율이에요. 근거의 반대쪽 축이에요.' },
+      { c:'#9B8CFF', desc:'사기 전에 뉴스·기업정보·차트를 확인하고 결정한 비율이에요.' }
     ];
 
     const mine = scoresOf('child_minji');
@@ -1955,7 +1935,7 @@ class Component extends DCLogic {
       const a = (-90 + i * 72) * Math.PI / 180;
       const lx = (CX + R * 1.32 * Math.cos(a)) / 160 * 100, ly = (CY + R * 1.32 * Math.sin(a)) / 160 * 100;
       return {
-        label: TLBL[i], icon: m.icon, score: score, desc: m.desc,
+        label: TLBL[i], score: score, desc: m.desc,
         ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
         dotR: sel ? 4.2 : 2.6, dotFill: sel ? '#FFFFFF' : mInk,
         select: e => { if (e && e.stopPropagation) e.stopPropagation(); this.set({ traitPick: sel ? null : i }); },
@@ -2160,7 +2140,7 @@ class Component extends DCLogic {
       const gp = g.cost > 0 ? (g.value - g.cost) / g.cost * 100 : 0;
       const on = g.id === secPick, img = secImg(g.id);
       return {
-        name: g.key, emoji: img ? '' : g.emoji,
+        name: g.key, emoji: img ? '' : g.key.charAt(0),
         countText: g.rows.length + '개 종목',
         pctText: pctTxt(gp),
         pctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:8px;color:' + (gp >= 0 ? up : down),
@@ -2213,7 +2193,7 @@ class Component extends DCLogic {
         toggleCmt: () => this.set({ arcCmtOpen: Object.assign({}, cmtOpen, { [id]: !cmtOpen[id] }) }),
         cmtBtnStyle: 'display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;color:' + (cmtOpen[id] ? '#0A3272' : '#A9AEC4'),
         likeCount: liked ? 1 : 0,
-        likeIcon: liked ? '♥' : '♡',
+        likeIcon: '좋아요',
         likeStyle: 'display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;color:' + (liked ? accent : '#A9AEC4'),
         like: () => this.set({ arcLikes: Object.assign({}, s.arcLikes || {}, { [id]: !liked }) }),
         comments: list.map((c, i) => {
@@ -2278,8 +2258,7 @@ class Component extends DCLogic {
       const ring = r.m.col;
       return {
         name: r.m.name,
-        emoji: !r.has ? '🙂' : (minus ? '😰' : (r.pct > 0 ? '😄' : '🙂')),
-        dust: r.has && Math.abs(r.pct) > 0.05 ? '💨' : '',
+        // 방향은 얼굴 반전과 뒤로 흐르는 모션선으로만 알린다
         pctText: r.has ? ((r.pct >= 0 ? '+' : '−') + Math.abs(r.pct).toFixed(1) + '%') : '아직',
         laneStyle: 'position:relative;height:' + LANE_H + 'px;box-shadow:inset 0 -1px 0 #E4E6F1',
         nameStyle: 'position:absolute;left:8px;top:6px;z-index:3;font-size:11px;font-weight:700;color:#8E93A8;white-space:nowrap;'
@@ -2287,12 +2266,12 @@ class Component extends DCLogic {
         // 주자 묶음 — 마이너스면 통째로 좌우 반전해 왼쪽을 보게 한다
         runnerStyle: 'position:absolute;left:' + at.toFixed(1) + '%;top:50%;transform:translate(-50%,-50%)'
           + (minus ? ' scaleX(-1)' : '') + ';display:flex;align-items:center;gap:4px;transition:left 0.4s ease',
-        dustStyle: 'font-size:13px;opacity:0.5;line-height:1',
+        dashStyle: (r.has && Math.abs(r.pct) > 0.05)
+          ? 'width:14px;height:12px;flex:none;border-radius:2px;opacity:0.45;background:repeating-linear-gradient(to bottom,' + ring + ' 0 2px,transparent 2px 5px)'
+          : 'display:none',
         faceStyle: 'width:34px;height:34px;flex:none;border-radius:999px;background:url(' + r.m.face + ') center/cover no-repeat,#EDEFF6;'
           + 'box-shadow:0 0 0 2.5px ' + ring + (r.has ? '' : '55') + ',0 2px 6px rgba(30,25,60,0.18)'
           + (r.has ? '' : ';filter:grayscale(0.6);opacity:0.6'),
-        emojiStyle: 'position:absolute;left:22px;top:-9px;font-size:15px;line-height:1;pointer-events:none'
-          + (minus ? ';transform:scaleX(-1)' : ''),
         pctStyle: 'position:absolute;left:50%;top:34px;transform:translateX(-50%)' + (minus ? ' scaleX(-1)' : '')
           + ';font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:'
           + (!r.has ? '#B8BDD0' : (r.pct >= 0 ? up : down))
@@ -2329,7 +2308,7 @@ class Component extends DCLogic {
       retFeed: retFeed,
       retFeedLabel: who === 'all' ? '가족 피드' : byKey[who].name + '의 피드',
       secModal: secModal,
-      secModalEmoji: secModal ? (secModalImg ? '' : secModal.emoji) : '',
+      secModalEmoji: secModal ? (secModalImg ? '' : secModal.key.charAt(0)) : '',
       secModalIconStyle: 'width:56px;height:56px;flex:none;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;background:' + (secModalImg ? 'url(' + secModalImg + ') center/74% no-repeat,' : '') + '#F5F6FB',
       secModalName: secModal ? secModal.key : '',
       secModalCount: secModal ? secModal.rows.length + '개 종목' : '',
@@ -2503,7 +2482,7 @@ class Component extends DCLogic {
       const pct = cost > 0 ? d / cost * 100 : 0;
       const sec = this.sectorOf(x.sector);
       return {
-        name: x.name, emoji: sec.emoji,
+        name: x.name, emoji: (sec.name || '').charAt(0),
         qtyText: h.qty.toFixed(2) + '주',
         avgText: Math.round(h.avg).toLocaleString('ko-KR') + '원',
         valueText: won(val),
@@ -2594,7 +2573,7 @@ class Component extends DCLogic {
     const coachText = myRecs.length === 0
       ? '아직 산 게 없어. 한 번 사고 나면 이번 주 어떤 스타일이었는지 알려줄게.'
       : (m.name + '는 이번 주에 ' + myRecs.length + '번 샀어. ' + (infoShare >= 0.5 ? '뉴스나 그래프처럼 근거를 보고 고르는 편이었어.' : '마음이 끌리는 쪽으로 고르는 편이었어.'));
-    const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8', emoji:'📦' };
+    const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8' };
     const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:#F4F4FA;box-shadow:0 0 0 1.5px ' + sec.accent + '33';
 
     const prog = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.buyStep ? '#F5327F' : '#DDDFEC');
@@ -2625,8 +2604,8 @@ class Component extends DCLogic {
       pnlStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
 
       // 맨 앞은 섹터가 아니라 '오늘 많이 오른 순' 보기다
-      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순', emoji: '🔥' }].concat(u.sectors).map(x => ({
-        name: x.name, emoji: x.emoji,
+      sectorChips: [{ id: 'rank', name: '오늘 많이 오른 순' }].concat(u.sectors).map(x => ({
+        name: x.name,
         style: 'display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:' + (x.id === s.sectorId ? '700' : '500') + ';white-space:nowrap;cursor:pointer;' + (x.id === s.sectorId
           ? 'color:#fff;background:#F5327F'
           : 'color:#5C6280;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)'),
@@ -2706,7 +2685,7 @@ class Component extends DCLogic {
         window.addEventListener('pointercancel', up);
       },
 
-      stockName: st ? st.name : '', stockEmoji: sec.emoji,
+      stockName: st ? st.name : '', stockEmoji: (sec.name || '').charAt(0),
       stockPriceText: st ? st.price.toLocaleString('ko-KR') + '원' : '',
       stockChangeText: st ? ((st.change >= 0 ? '▲ ' : '▼ ') + Math.abs(st.change).toFixed(2) + '%') : '',
       detailChangeStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (st && st.change >= 0 ? up : down),
@@ -2759,15 +2738,15 @@ class Component extends DCLogic {
       hasWarn: !!warn, warnText: warn,
 
       reasonBtns: s.reasonOrder.map(i => REASONS[i]).map(r => ({
-        emoji: r.emoji, label: r.label,
-        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:15px 9px;border-radius:24px;cursor:pointer;min-height:96px;justify-content:center;' + (s.draft.reason === r.code
+        label: r.label,
+        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 10px;border-radius:20px;cursor:pointer;min-height:64px;justify-content:center;' + (s.draft.reason === r.code
           ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setDraft({ reason: r.code })
       })),
 
       planBtns: PLANS.map(p => ({
-        emoji: p.emoji, label: p.label,
+        label: p.label,
         style: 'display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;cursor:pointer;' + (s.draft.plan === p.code
           ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
@@ -2886,10 +2865,7 @@ class Component extends DCLogic {
       // 축을 누르면 그 축 설명, 안 눌렀으면 유형 설명
       picked: arcPicked, hasPick: arcHasPick,
       pickedText: arcHasPick ? arcWrap(arcPicked.desc) : arc.type.desc.replace(/\s*\n\s*/g, ' '),
-      pickedIcon: arcHasPick ? arcPicked.icon : '💡',
-      pickedLeadIcon: arcHasPick ? '' : '💡',
       pickedShowLead: !arcHasPick,
-      pickedIconStyle: 'width:28px;height:28px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:15px;background:rgba(255,255,255,0.75);box-shadow:0 1px 3px ' + arcRgba(0.2),
       pickedHeadStyle: arcHasPick ? 'display:flex;align-items:center;justify-content:center;gap:7px' : 'display:none',
       pickedLabelStyle: 'font-size:13.5px;font-weight:800;color:' + arcInk,
       pickedScoreStyle: 'font-size:14px;font-weight:900;color:' + arcInk + ';font-variant-numeric:tabular-nums',
@@ -3089,8 +3065,8 @@ class Component extends DCLogic {
       retroHeldText: heldDays === 0 ? '오늘' : (heldDays + '일'),
 
       sellReasonBtns: s.sellReasonOrder ? s.sellReasonOrder.map(i => SELL_REASONS[i]).map(r => ({
-        emoji: r.emoji, label: r.label,
-        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:15px 9px;border-radius:24px;cursor:pointer;min-height:96px;justify-content:center;' + (s.sellDraft.reason === r.code
+        label: r.label,
+        style: 'display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 10px;border-radius:20px;cursor:pointer;min-height:64px;justify-content:center;' + (s.sellDraft.reason === r.code
           ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
         pick: () => this.setSell({ reason: r.code })
@@ -3100,7 +3076,7 @@ class Component extends DCLogic {
       hasBadgeNow: showJudge && planMatch === true,
       changeQuestion: buyRec ? ('처음에는 ' + ((PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).short || '') + ' 가지려고 했었네. 무엇이 달라졌어?') : '무엇이 달라졌어?',
       changeBtns: CHANGES.map(c => ({
-        emoji: c.emoji, label: c.label,
+        label: c.label,
         style: 'display:flex;align-items:center;gap:12px;padding:15px 17px;border-radius:22px;cursor:pointer;' + (s.sellDraft.change === c.code
           ? 'background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F'
           : glass),
