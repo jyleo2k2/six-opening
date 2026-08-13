@@ -1,5 +1,8 @@
 import { filterGeneratedText } from "../../../../shared/llm/filter";
 import {
+  CHILD_NEWS_SUMMARY_LINE_COUNT,
+  CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
+  NEWS_BODY_ROLES,
   REVIEW_CHECK_NAMES,
   type ChildNewsDraft,
   type EditorRoleRequest,
@@ -41,6 +44,62 @@ function normalizeText(value: string) {
 
 function compactText(value: string) {
   return normalizeText(value).replace(/[^\p{L}\p{N}]+/gu, "");
+}
+
+function compactSummaryClaim(value: string) {
+  return compactText(
+    normalizeText(value)
+      .replace(/[.!?。！？]+$/gu, "")
+      .replace(/(?:습니다|입니다|이에요|예요|어요|아요|했어|였어|이야|야|다)$/u, ""),
+  );
+}
+
+function hasRedundantSummaryLines(lines: readonly string[]) {
+  const claims = lines.map(compactSummaryClaim);
+  return claims.some((claim, index) =>
+    claims.slice(index + 1).some((other) => {
+      if (claim === other) return true;
+      const shorter = claim.length <= other.length ? claim : other;
+      const longer = claim.length > other.length ? claim : other;
+      return shorter.length >= 12 && longer.includes(shorter);
+    })
+  );
+}
+
+function hasRepeatedMarketMove(
+  lines: readonly string[],
+  universe: readonly NewsUniverseCompany[],
+) {
+  const marketMove = /(?:오르|올랐|상승|내리|내렸|하락|회복)/u;
+  const subjects = unique([
+    "코스피",
+    "코스닥",
+    ...universe.flatMap(companyNames),
+  ]);
+  const lineSubjects = lines.map((line) => {
+    const normalized = compactText(line);
+    return subjects.filter((subject) =>
+      normalized.includes(compactText(subject)),
+    );
+  });
+
+  return lines.some((line, index) =>
+    marketMove.test(line) &&
+    lines.slice(index + 1).some((other, offset) =>
+      marketMove.test(other) &&
+      lineSubjects[index].some((subject) =>
+        lineSubjects[index + offset + 1].includes(subject),
+      )
+    )
+  );
+}
+
+function isEasyKospiExplanation(value: string) {
+  const normalized = normalizeText(value);
+  return /(?:국내|우리나라)/u.test(normalized) &&
+    normalized.includes("주식시장") &&
+    /(?:대표|나타내|보여)/u.test(normalized) &&
+    normalized.includes("숫자");
 }
 
 function unique(values: readonly string[]) {
@@ -416,15 +475,29 @@ function validateDraft(
     issues.push({ code: "INVALID_DRAFT_SHAPE", message: "홈 요약은 1~180자여야 합니다." });
   }
   if (
-    draft.body.length < 2 ||
-    draft.body.length > 3 ||
+    draft.body.length !== CHILD_NEWS_SUMMARY_LINE_COUNT ||
     draft.body[0]?.role !== "core_event" ||
-    hasDuplicates(draft.body.map((block) => block.role)) ||
-    draft.body.some((block) => !block.text.trim() || block.text.length > 280)
+    draft.body.some((block, index) => block.role !== NEWS_BODY_ROLES[index]) ||
+    draft.body.some(
+      (block) =>
+        !block.text.trim() ||
+        block.text.length > CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
+    )
   ) {
     issues.push({
       code: "INVALID_DRAFT_SHAPE",
-      message: "본문은 중심 사건부터 시작하는 서로 다른 역할의 2~3개 짧은 문단이어야 합니다.",
+      message: `본문은 core_event, business_connection, context 순서의 3줄 요약이어야 하며 각 줄은 ${CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH}자 이하여야 합니다.`,
+    });
+  }
+  const summaryLines = draft.body.map((block) => block.text);
+  if (
+    hasRedundantSummaryLines(summaryLines) ||
+    (selection.kind === "market" &&
+      hasRepeatedMarketMove(summaryLines, universe))
+  ) {
+    issues.push({
+      code: "REDUNDANT_SUMMARY",
+      message: "3줄 요약에서 같은 사실을 반복하지 않아야 합니다.",
     });
   }
   if (
@@ -434,7 +507,7 @@ function validateDraft(
   ) {
     issues.push({
       code: "ANCHOR_MISSING_FROM_HOME",
-      message: "제목·홈 요약·첫 문단이 모두 중심 사건을 근거로 해야 합니다.",
+      message: "제목·홈 요약·첫 요약 줄이 모두 중심 사건을 근거로 해야 합니다.",
     });
   }
   if (
@@ -480,7 +553,15 @@ function validateDraft(
     });
   }
   const articleTextOnly = visibleDraftText(draft, false);
+  const serviceSummaryText = draft.body.map((block) => block.text).join("\n");
+  const compactServiceSummaryText = compactText(serviceSummaryText);
   for (const treatment of draft.termTreatments) {
+    if (!compactServiceSummaryText.includes(compactText(treatment.easyText))) {
+      issues.push({
+        code: "UNEXPLAINED_TERM",
+        message: `'${treatment.term}'의 쉬운 설명이 서비스 3줄 요약에 없습니다.`,
+      });
+    }
     if (
       treatment.treatment === "replaced" &&
       termAppearsInVisibleText(articleTextOnly, treatment.term)
@@ -490,12 +571,42 @@ function validateDraft(
         message: `바꿨다고 표시한 '${treatment.term}'이 노출문에 남아 있습니다.`,
       });
     }
+    if (
+      treatment.treatment === "explained" &&
+      !termAppearsInVisibleText(serviceSummaryText, treatment.term)
+    ) {
+      issues.push({
+        code: "UNEXPLAINED_TERM",
+        message: `설명할 '${treatment.term}' 이름이 서비스 3줄 요약에 없습니다.`,
+      });
+    }
   }
 
   const selectedSourceText = article.sourceUnits
     .filter((unit) => allowedIds.has(unit.id))
     .map((unit) => unit.text)
     .join(" ");
+  if (termAppearsInVisibleText(selectedSourceText, "코스피")) {
+    const kospiTreatment = draft.termTreatments.find(
+      (item) => compactText(item.term) === compactText("코스피"),
+    );
+    const hasKospiExplanationLine = draft.body.some(
+      (block) =>
+        termAppearsInVisibleText(block.text, "코스피") &&
+        isEasyKospiExplanation(block.text),
+    );
+    if (
+      !termAppearsInVisibleText(serviceSummaryText, "코스피") ||
+      kospiTreatment?.treatment !== "explained" ||
+      !isEasyKospiExplanation(kospiTreatment.easyText) ||
+      !hasKospiExplanationLine
+    ) {
+      issues.push({
+        code: "UNEXPLAINED_TERM",
+        message: "코스피는 이름을 유지하고 국내 주식시장을 대표하는 숫자라고 서비스 3줄 요약에서 설명해야 합니다.",
+      });
+    }
+  }
   const allowedNumbers = new Set(
     extractNumbers(
       `${selectedSourceText} ${article.runDateKst} ${article.publishedAt}`,

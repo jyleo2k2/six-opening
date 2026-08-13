@@ -55,6 +55,7 @@ const routineReject: RejectedNews = {
 const evaluated = evaluateNewsResult(routineCase, routineReject);
 assert.equal(evaluated.expectationMatched, true);
 assert.equal(evaluated.criteria.notRoutineOrPromotional.outcome, "pass");
+assert.equal(evaluated.criteria.conciseThreeLineSummary.outcome, "not_applicable");
 assert.equal(evaluated.criteria.allTermsEasy.outcome, "not_applicable");
 assert.equal(evaluated.criteria.storageDecisionExplained.outcome, "pass");
 
@@ -140,6 +141,8 @@ const readyResult: ReadyNews = {
     homeSummary: { text: "홈에서 먼저 읽는 한 줄 요약입니다.", sourceIds: ["S1"] },
     body: [
       { role: "core_event", text: "서비스 뉴스 상세에 보이는 본문입니다.", sourceIds: ["S1"] },
+      { role: "business_connection", text: "두 번째 핵심 사실을 짧게 보여줍니다.", sourceIds: ["S1"] },
+      { role: "context", text: "어려운 말은 마지막 줄에서 설명합니다.", sourceIds: ["S1"] },
     ],
     termTreatments: [],
   },
@@ -156,6 +159,7 @@ const readyResult: ReadyNews = {
       directMateriality: true,
       sourceFidelity: true,
       focusAlignment: true,
+      conciseThreeLineSummary: true,
       noIrrelevantDetail: true,
       attributionAndTiming: true,
       allTermsEasy: true,
@@ -177,12 +181,18 @@ const readyHtml = renderNewsEvaluationHtml({
 });
 const auditStart = readyHtml.indexOf('<section class="audit">');
 assert.ok(auditStart > readyHtml.indexOf('<section class="service-output"'));
-assert.match(readyHtml, /한눈에 보기/u);
-assert.match(readyHtml, /홈에서 먼저 읽는 한 줄 요약입니다/u);
+assert.match(readyHtml, /3줄 요약/u);
 assert.match(readyHtml, /서비스 뉴스 상세에 보이는 본문입니다/u);
+assert.match(readyHtml, /두 번째 핵심 사실을 짧게 보여줍니다/u);
+assert.match(readyHtml, /어려운 말은 마지막 줄에서 설명합니다/u);
 assert.equal(readyHtml.includes("<아이>"), false);
 assert.equal(readyHtml.includes("&lt;아이&gt;가 읽는 오늘의 시장 뉴스"), true);
 assert.equal(readyHtml.slice(0, auditStart).includes("채용설명회"), false);
+assert.equal(readyHtml.slice(0, auditStart).includes("홈에서 먼저 읽는 한 줄 요약입니다"), false);
+assert.equal(
+  (readyHtml.slice(0, auditStart).match(/<li>/gu) ?? []).length,
+  3,
+);
 
 await assert.rejects(
   () =>

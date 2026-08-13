@@ -14,6 +14,7 @@ const defaultInput = resolve(
   here,
   "evaluation-fixtures/latest-economic-news-2026-08-12.json",
 );
+const EVALUATION_ROLE_TIMEOUT_MS = 180_000;
 
 function option(name: string) {
   const index = process.argv.indexOf(name);
@@ -65,7 +66,11 @@ async function main() {
   }));
   const report = await runNewsEvaluation(
     input.cases,
-    { runRole: runOpenAiNewsRole, universe },
+    {
+      runRole: runOpenAiNewsRole,
+      universe,
+      timeoutMs: EVALUATION_ROLE_TIMEOUT_MS,
+    },
     {
       runId: input.runId,
       runDateKst: input.runDateKst,

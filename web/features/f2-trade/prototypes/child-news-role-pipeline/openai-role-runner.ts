@@ -2,6 +2,8 @@ import "server-only";
 
 import { LLM_MODEL, getLlmClient } from "../../../../shared/llm/client";
 import {
+  CHILD_NEWS_SUMMARY_LINE_COUNT,
+  CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
   MATERIAL_EVENT_TYPES,
   NEWS_BODY_ROLES,
   REVIEW_CHECK_NAMES,
@@ -106,13 +108,19 @@ const ROLE_SCHEMAS: Record<NewsRole, Record<string, unknown>> = {
       homeSummary: citedTextSchema,
       body: {
         type: "array",
+        minItems: CHILD_NEWS_SUMMARY_LINE_COUNT,
+        maxItems: CHILD_NEWS_SUMMARY_LINE_COUNT,
         items: {
           type: "object",
           additionalProperties: false,
           required: ["role", "text", "sourceIds"],
           properties: {
             role: { type: "string", enum: NEWS_BODY_ROLES },
-            text: { type: "string" },
+            text: {
+              type: "string",
+              minLength: 1,
+              maxLength: CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
+            },
             sourceIds: stringArray,
           },
         },

@@ -110,6 +110,9 @@ export const NEWS_BODY_ROLES = [
   "context",
 ] as const;
 
+export const CHILD_NEWS_SUMMARY_LINE_COUNT = 3;
+export const CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH = 36;
+
 export type NewsBodyRole = (typeof NEWS_BODY_ROLES)[number];
 
 export type ChildNewsDraft = {
@@ -130,6 +133,7 @@ export const REVIEW_CHECK_NAMES = [
   "directMateriality",
   "sourceFidelity",
   "focusAlignment",
+  "conciseThreeLineSummary",
   "noIrrelevantDetail",
   "attributionAndTiming",
   "allTermsEasy",
@@ -244,6 +248,7 @@ export const NEWS_EVALUATION_CRITERIA = [
   "notRoutineOrPromotional",
   "primarySubjectMatches",
   "noUnsupportedContext",
+  "conciseThreeLineSummary",
   "allTermsEasy",
   "factsMatchSource",
   "storageDecisionExplained",
