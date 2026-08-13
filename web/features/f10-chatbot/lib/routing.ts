@@ -12,6 +12,7 @@ import type {
   ReadOnlyChatToolName,
   StockFactTopic,
 } from "../../../shared/types/chatbot";
+import { toPoliteKorean } from "./polite";
 
 export type { ChatContext, ProactiveSignal } from "../../../shared/types/chatbot";
 
@@ -2079,7 +2080,14 @@ function reply(
     >
   > = {},
 ): ChatReply {
-  return { route, intent, text, steps, ...extras };
+  return {
+    route,
+    intent,
+    text: toPoliteKorean(text),
+    steps,
+    ...extras,
+    suggestedQuestions: extras.suggestedQuestions?.map(toPoliteKorean),
+  };
 }
 
 function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
@@ -3663,7 +3671,7 @@ export const PROACTIVE_SCRIPTS: Record<
 > = {
   buyHesitation: {
     label: "매수 최종 확인 반복 이탈",
-    text: "살지 말지 고민돼?",
+    text: "살지 말지 고민돼요?",
   },
   orderMethodConfusion: {
     label: "시장가·지정가 교차 변경",
