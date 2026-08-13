@@ -905,22 +905,36 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="display:flex;flex-direction:column;gap:11px">
 <div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:28px;padding:19px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
 <div style="display:flex;align-items:center;justify-content:space-between">
-<span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.65)">이번 주</span>
+<span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.65)">이번 시즌</span>
 <span style="font-size:12.5px;font-weight:700;color:#fff;background:#F5327F;border-radius:999px;padding:6px 12px;white-space:nowrap">정답은 없어!</span>
 </div>
-<div style="font-size:21px;font-weight:800;margin-top:11px;letter-spacing:-0.01em;line-height:1.4">{{ meName }}는 <span style="color:#FF8AD0">{{ styleName }}</span></div>
-<div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:9px;line-height:1.6">유형은 매주 새로 뽑아 — 계속 바뀌어도 괜찮아</div>
+<div style="display:flex;align-items:center;gap:13px;margin-top:13px">
+<span style="font-size:44px;line-height:1;flex:none">{{ charEmoji }}</span>
+<div style="min-width:0">
+<div style="font-size:21px;font-weight:800;letter-spacing:-0.01em;line-height:1.35">{{ meName }}는 <span style="color:#FF8AD0">{{ styleName }}</span></div>
+<div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.6">{{ judgeLine }}</div>
+</div>
+</div>
+<sc-if value="{{ hasStarBadge }}" hint-placeholder-val="{{ false }}">
+<div style="display:inline-block;font-size:12px;font-weight:600;background:rgba(255,255,255,0.14);border-radius:999px;padding:6px 12px;margin-top:11px">⏳ {{ starBadge }}</div>
+</sc-if>
+<div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:9px;line-height:1.6">캐릭터는 시즌마다 새로 뽑아 — 계속 바뀌어도 괜찮아</div>
 </div>
 
 <div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="font-size:16px;font-weight:800;color:#01185A">나의 5가지 스타일</div>
-<sc-for list="{{ axes }}" as="a" hint-placeholder-count="5">
-<div style="margin-top:13px">
-<div style="font-size:12px;font-weight:600;color:#A9AEC4">{{ a.axis }}</div>
-<div style="height:10px;border-radius:999px;background:#EAEBF4;overflow:hidden;margin-top:7px;box-shadow:inset 0 2px 3px rgba(70,60,120,0.12)"><div style="{{ a.barStyle }}"></div></div>
-<div style="display:flex;justify-content:space-between;margin-top:6px"><span style="{{ a.leftStyle }}">{{ a.left }}</span><span style="{{ a.rightStyle }}">{{ a.right }}</span></div>
-</div>
-</sc-for>
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:16px;font-weight:800;color:#01185A">내 능력치 오각형</span><span style="font-size:12.5px;font-weight:500;color:#A9AEC4">10점 만점</span></div>
+<svg width="270" height="230" viewBox="0 0 270 230" style="display:block;margin:8px auto 0">
+<polygon points="{{ radarRingInner }}" fill="none" stroke="#F0F1F7" stroke-width="1"></polygon>
+<polygon points="{{ radarRingMid }}" fill="none" stroke="#EAEBF4" stroke-width="1"></polygon>
+<polygon points="{{ radarOutline }}" fill="none" stroke="#DDDFEC" stroke-width="1.5"></polygon>
+<polygon points="{{ radarData }}" fill="rgba(246,99,161,0.22)" stroke="#F5327F" stroke-width="2.5" stroke-linejoin="round"></polygon>
+<text x="135" y="16" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText0 }}</text>
+<text x="232" y="90" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText1 }}</text>
+<text x="197" y="218" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText2 }}</text>
+<text x="73" y="218" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText3 }}</text>
+<text x="38" y="90" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText4 }}</text>
+</svg>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;text-align:center;margin-top:4px">근거+직관 = 10 · 집중+분산 = 10 — 오른쪽으로 기울면 근거·집중</div>
 </div>
 
 <div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
@@ -943,7 +957,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </div>
 
 <div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="display:flex;align-items:center;gap:9px"><span style="font-size:18px">🐻</span><span style="font-size:16px;font-weight:800;color:#01185A">키웅이가 본 이번 주</span></div>
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:18px">🐻</span><span style="font-size:16px;font-weight:800;color:#01185A">키웅이가 본 이번 시즌</span></div>
 <div style="font-size:15px;font-weight:500;color:#5C6280;line-height:1.8;margin-top:10px;text-wrap:pretty">{{ coachText }}</div>
 </div>
 </div>
@@ -987,17 +1001,35 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <span style="font-size:15px">🔒</span><span style="font-size:13.5px;font-weight:600;color:#5C6280">양쪽이 공개에 동의했어요</span>
 </div>
 <div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<div style="display:flex;gap:16px"><span style="font-size:13.5px;font-weight:700;color:#F5327F">■ 민지</span><span style="font-size:13.5px;font-weight:700;color:#01185A">■ 엄마</span></div>
-<sc-for list="{{ compareAxes }}" as="a" hint-placeholder-count="5">
-<div style="margin-top:15px">
-<div style="font-size:12.5px;font-weight:600;color:#01185A">{{ a.axis }} <span style="font-weight:500;color:#B6BACB">{{ a.range }}</span></div>
-<div style="height:9px;border-radius:999px;background:#EAEBF4;overflow:hidden;margin-top:7px"><div style="{{ a.childBar }}"></div></div>
-<div style="height:9px;border-radius:999px;background:#EAEBF4;overflow:hidden;margin-top:4px"><div style="{{ a.parentBar }}"></div></div>
+<div style="display:flex;gap:10px">
+<div style="flex:1;text-align:center;background:#FDF2F7;border-radius:18px;padding:14px 8px">
+<div style="font-size:13px;font-weight:700;color:#F5327F">{{ childName }}</div>
+<div style="font-size:34px;margin-top:7px;line-height:1">{{ compareChildEmoji }}</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:7px">{{ compareChildName }}</div>
+<div style="font-size:12.5px;font-weight:600;color:#8E93A8;margin-top:3px">{{ compareChildStar }}</div>
+</div>
+<div style="flex:1;text-align:center;background:#F1F3FA;border-radius:18px;padding:14px 8px">
+<div style="font-size:13px;font-weight:700;color:#01185A">{{ parentName }}</div>
+<div style="font-size:34px;margin-top:7px;line-height:1">{{ compareParentEmoji }}</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:7px">{{ compareParentName }}</div>
+<div style="font-size:12.5px;font-weight:600;color:#8E93A8;margin-top:3px">{{ compareParentStar }}</div>
+</div>
+</div>
+<div style="display:flex;align-items:baseline;gap:8px;margin-top:15px;padding-bottom:7px;border-bottom:1px solid #F0F1F7">
+<span style="flex:1;font-size:12px;font-weight:600;color:#A9AEC4">능력치</span>
+<span style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#F5327F">{{ childName }}</span>
+<span style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#01185A">{{ parentName }}</span>
+</div>
+<sc-for list="{{ compareRows }}" as="a" hint-placeholder-count="5">
+<div style="display:flex;align-items:baseline;gap:8px;margin-top:11px">
+<span style="flex:1;font-size:13.5px;font-weight:600;color:#5C6280">{{ a.label }}</span>
+<span style="width:64px;text-align:right;font-size:13.5px;font-weight:700;color:#F5327F;font-variant-numeric:tabular-nums">{{ a.childText }}</span>
+<span style="width:64px;text-align:right;font-size:13.5px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums">{{ a.parentText }}</span>
 </div>
 </sc-for>
 </div>
 <div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:26px;padding:18px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
-<div style="font-size:17px;font-weight:800;line-height:1.55;text-wrap:pretty">민지는 재빨리, 엄마는 진득하게.<br>스타일이 달라요.</div>
+<div style="font-size:17px;font-weight:800;line-height:1.55;text-wrap:pretty">{{ compareHeadline }}</div>
 <div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);margin-top:10px;line-height:1.65;text-wrap:pretty">어느 쪽이 더 좋다는 뜻은 아니에요. 오늘 저녁에 서로 왜 그렇게 했는지 물어보세요.</div>
 </div>
 </div>
@@ -1294,13 +1326,22 @@ const glass = 'background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 
 const CTA_ON = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%),radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)";
 const CTA_OFF = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:linear-gradient(180deg,#D3D5E2 0%,#C3C6D6 60%,#B7BACC 100%);box-shadow:0 8px 14px -6px rgba(35,25,80,0.18),inset 0 2px 3px rgba(255,255,255,0.6)";
 
+// 시드 2주치 거래(shared/store/family-trade-seed.ts와 동일)의 결과 잔고.
+// 민지: 매수 891,000 − 매도 회수 230,500 / 엄마: 매수 690,750 − 매도 회수 231,000.
+// 보유 평균단가는 시드 체결가 기준이다. 여기 값을 바꾸면 시드 파일과 함께 바꾼다.
+const seedAccounts = () => ({
+  child:  { name:'민지', cash: SEED - 660500, holdings: [ { code:'259960', qty:2, avg:232000 }, { code:'352820', qty:1, avg:181000 } ], pending:[] },
+  parent: { name:'엄마', cash: SEED - 459750, holdings: [ { code:'005930', qty:1, avg:240000 }, { code:'011200', qty:10, avg:21075 } ], pending:[] }
+});
+
 class Component extends DCLogic {
   state = {
     screen: 'home', account: 'child',
-    acc: { child:{name:'민지', cash:SEED, holdings:[], pending:[]}, parent:{name:'엄마', cash:SEED, holdings:[], pending:[]} },
+    acc: seedAccounts(),
     sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0,
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
+    profiles: null, profileStatus: 'idle',
     sellStep: 1, sellDraft: { qty:0, reason:null, change:null, memo:'', memoSaved:false }, doneKind: 'buy', arcTab: 'report', sellPick: 'all',
     schoolLock: true, forceSchool: 'auto', rankTab: 'week',
     reasonOrder: [0,1,2,3,4,5]
@@ -1326,6 +1367,36 @@ class Component extends DCLogic {
     }
   }
 
+  // 성향 스냅샷(F9)은 서버 엔진이 계산한다. 두 계정을 한 번에 받아 두면 계정 전환·가족 비교에 재요청이 없다.
+  // 체결이 새로 나면 profiles 를 비워 다음 아카이브 진입에서 다시 계산한다.
+  loadProfiles(){
+    if (this.profileBusy || this.state.profileStatus === 'loading' || this.state.profileStatus === 'ready') return;
+    this.profileBusy = true;
+    this.setState(s => Object.assign({}, s, { profileStatus: 'loading' }));
+    const snap = this.state;
+    const ask = (account, narrate) => fetch('/api/profile', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ account: account, narrate: narrate, state: { acc: snap.acc, records: snap.records, sellRecords: snap.sellRecords || [], events: snap.events || [] } })
+    }).then(r => r.ok ? r.json() : null);
+    // 1차는 서술 없이 즉시 받아 화면을 채우고(룰 기반 폴백 서술 포함), Luna 서술은 도착하는 대로 바꿔 끼운다.
+    Promise.all([ask('child', false), ask('parent', false)])
+      .then(pair => {
+        if (!pair[0] || !pair[1]) throw new Error('profile unavailable');
+        this.setState(s => Object.assign({}, s, { profiles: { child: pair[0], parent: pair[1] }, profileStatus: 'ready' }));
+        return Promise.all([ask('child', true), ask('parent', true)]);
+      })
+      .then(pair => {
+        if (!pair || !pair[0] || !pair[1]) return;
+        this.setState(s => s.profileStatus === 'ready'
+          ? Object.assign({}, s, { profiles: { child: pair[0], parent: pair[1] } })
+          : s);
+      })
+      .catch(() => {
+        this.setState(s => s.profileStatus === 'ready' ? s : Object.assign({}, s, { profileStatus: 'error' }));
+      })
+      .finally(() => { this.profileBusy = false; });
+  }
+
   openRequestedScreen(data){
     if (!data) return;
     if (data.type === 'kiwoom:open-stock' && /^\d{6}$/.test(String(data.symbol))) {
@@ -1345,6 +1416,7 @@ class Component extends DCLogic {
     } else if (action.target === 'archive') {
       const archiveTabs = ['report', 'return', 'compare', 'season'];
       this.set({ screen:'archive', arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report' });
+      this.loadProfiles();
     } else if (action.target === 'stock') {
       const sector = (this.uni().sectors || []).filter(x => x.id === action.sectorId)[0];
       if (sector) this.set({ screen:'explore', sectorId:sector.id, cardIndex:0 });
@@ -1834,27 +1906,82 @@ class Component extends DCLogic {
       pct: Math.round(cnt[r.code] / myRecs.length * 100) + '%',
       barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%)'
     })).sort((a, b) => b.n - a.n);
-    const infoShare = myRecs.length ? myRecs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / myRecs.length : 0;
-    const avgConf = myRecs.length ? myRecs.reduce((a, r) => a + r.confidence_raw, 0) / myRecs.length : 50;
-    const seasonShare = myRecs.length ? myRecs.filter(r => r.plan_code === 'plan_season').length / myRecs.length : 0;
-    const AXES = [
-      { axis:'집중–분산', left:'한우물형', right:'골고루형', child: Math.min(95, 30 + (m.holdings.length * 18)), parent: 41 },
-      { axis:'속도',      left:'진득이형', right:'재빨리형', child: Math.round(30 + (1 - seasonShare) * 55), parent: 22 },
-      { axis:'신중함',    left:'직진형',   right:'돌다리형', child: Math.round(20 + infoShare * 60), parent: 79 },
-      { axis:'손실 대응', left:'버티기형', right:'갈아타기형', child: Math.round(30 + ((s.sellRecords || []).filter(r => r.sell_reason_code === 'sell_fear_drop' || r.sell_reason_code === 'sell_anxiety').length ? 45 : 15)), parent: 35 },
-      { axis:'탐험심',    left:'익숙함형', right:'개척자형', child: Math.min(95, 35 + myRecs.length * 12), parent: 30 }
+    // 성향은 서버 엔진(BehaviorProfileSnapshot)이 계산한다. 여기서는 표시만 한다.
+    const CHARACTER_CARD = {
+      sniper: { emoji:'🎯', name:'저격수' }, strategist: { emoji:'🧩', name:'전략가' },
+      challenger: { emoji:'⚡', name:'승부사' }, explorer: { emoji:'🦋', name:'탐험가' }
+    };
+    const ABILITY_ROWS = [
+      { key:'accuracy', label:'정확력' }, { key:'evidence', label:'근거력' }, { key:'focus', label:'집중력' },
+      { key:'diversification', label:'분산력' }, { key:'intuition', label:'직관력' }
     ];
-    const axes = AXES.map(a => ({
-      axis: a.axis, left: a.left, right: a.right,
-      leftStyle: 'font-size:12.5px;font-weight:' + (a.child < 50 ? '600' : '500') + ';color:' + (a.child < 50 ? '#01185A' : '#B6BACB'),
-      rightStyle: 'font-size:12.5px;font-weight:' + (a.child >= 50 ? '600' : '500') + ';color:' + (a.child >= 50 ? '#01185A' : '#B6BACB'),
-      barStyle: 'width:' + a.child + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,#0A2E7A 0%,#01185A 100%)'
+    const profs = s.profiles || {};
+    const myProf = profs[s.account] || null;
+    const mySnap = myProf ? myProf.snapshot : null;
+    const profLoading = s.profileStatus === 'loading' || s.profileStatus === 'idle';
+    const profError = s.profileStatus === 'error';
+    const isInitial = !!mySnap && mySnap.observationState === 'initial';
+    const character = mySnap && !isInitial && mySnap.character ? CHARACTER_CARD[mySnap.character] : null;
+    const starTextOf = grade => grade === 3 ? '★★★' : grade === 2 ? '★★☆' : grade === 1 ? '★☆☆' : '';
+    // 오각형 레이더 — 위 꼭짓점부터 시계방향으로 정확력·근거력·집중력·분산력·직관력 (오른쪽 기울면 근거·집중).
+    const radarPoint = (i, ratio) => {
+      const angle = (-90 + i * 72) * Math.PI / 180;
+      const r = 86 * Math.max(0, Math.min(1, ratio));
+      return (135 + r * Math.cos(angle)).toFixed(1) + ',' + (118 + r * Math.sin(angle)).toFixed(1);
+    };
+    const radarRing = ratio => ABILITY_ROWS.map((row, i) => radarPoint(i, ratio)).join(' ');
+    const abilityValue = key => {
+      const v = mySnap ? mySnap.abilities[key] : 0;
+      return typeof v === 'number' ? v : 0;
+    };
+    const radarData = ABILITY_ROWS.map((row, i) => radarPoint(i, abilityValue(row.key) / 10)).join(' ');
+    const abilityText = row => {
+      if (!mySnap) return row.label;
+      if (row.key === 'accuracy' && mySnap.abilities.accuracy === null) return row.label + ' 판정 중';
+      return row.label + ' ' + abilityValue(row.key);
+    };
+    const cmp = (a, b) => a > b ? ' > ' : a < b ? ' < ' : ' = ';
+    const judgeLine = character
+      ? '근거 ' + mySnap.abilities.evidence + cmp(mySnap.abilities.evidence, mySnap.abilities.intuition) + '직관 ' + mySnap.abilities.intuition
+        + ' → ' + (mySnap.abilities.evidence >= mySnap.abilities.intuition ? '근거형' : '직관형')
+        + ' · 집중 ' + mySnap.abilities.focus + cmp(mySnap.abilities.focus, mySnap.abilities.diversification) + '분산 ' + mySnap.abilities.diversification
+        + ' → ' + (mySnap.abilities.focus >= mySnap.abilities.diversification ? '집중형' : '분산형')
+      : isInitial ? '매수 기록이 3건 모이면 캐릭터가 정해져'
+      : profError ? '아카이브를 나갔다 다시 들어와 봐'
+      : '기록을 불러오는 중이야';
+    const styleName = profLoading ? '기록 살펴보는 중…'
+      : profError ? '지금은 못 불러왔어'
+      : character ? (character.name + (mySnap.starGrade ? ' ' + starTextOf(mySnap.starGrade) : '')) : '아직 관찰 초기야';
+    const charEmoji = character ? character.emoji : (profLoading ? '⏳' : '🌱');
+    const starBadge = character && mySnap.starGrade === null ? '별 판정 중 — 사고판 지 5거래일이 지나면 채점돼' : '';
+    const coachText = profLoading ? '키웅이가 기록을 살펴보고 있어…'
+      : (myProf && myProf.narration && myProf.narration.text) ? myProf.narration.text
+      : '기록이 모이면 이번 시즌 이야기를 들려줄게.';
+    const childSnap = profs.child ? profs.child.snapshot : null;
+    const parentSnap = profs.parent ? profs.parent.snapshot : null;
+    const compareSide = snapX => {
+      if (!snapX) return { emoji:'⏳', name:'불러오는 중', star:'' };
+      if (snapX.observationState === 'initial' || !snapX.character) return { emoji:'🌱', name:'관찰 초기', star:'' };
+      const card = CHARACTER_CARD[snapX.character];
+      return { emoji: card.emoji, name: card.name, star: snapX.starGrade ? starTextOf(snapX.starGrade) : '별 판정 중' };
+    };
+    const compareChild = compareSide(childSnap);
+    const compareParent = compareSide(parentSnap);
+    const compareCell = (snapX, row) => {
+      if (!snapX) return '—';
+      if (row.key === 'accuracy' && snapX.abilities.accuracy === null) return '판정 중';
+      const v = snapX.abilities[row.key];
+      return typeof v === 'number' ? v + '점' : '—';
+    };
+    const compareRows = ABILITY_ROWS.map(row => ({
+      label: row.label,
+      childText: compareCell(childSnap, row),
+      parentText: compareCell(parentSnap, row)
     }));
-    const styleName = myRecs.length === 0 ? '아직 기록 전이야'
-      : (AXES[4].child >= 60 ? '재빨리 개척자형!' : infoShare >= 0.6 ? '차근차근 탐험가형!' : '마음따라 모험가형!');
-    const coachText = myRecs.length === 0
-      ? '아직 산 게 없어. 한 번 사고 나면 이번 주 어떤 스타일이었는지 알려줄게.'
-      : (m.name + '는 이번 주에 ' + myRecs.length + '번 샀어. ' + (infoShare >= 0.5 ? '뉴스나 그래프처럼 근거를 보고 고르는 편이었어.' : '마음이 끌리는 쪽으로 고르는 편이었어.') + (avgConf >= 70 ? ' 자신감도 꽤 높았고.' : avgConf <= 35 ? ' 조심스럽게 고른 편이야.' : ''));
+    const compareHeadline = childSnap && parentSnap && childSnap.character && parentSnap.character
+      ? s.acc.child.name + '는 ' + CHARACTER_CARD[childSnap.character].name + ', ' + s.acc.parent.name + '는 ' + CHARACTER_CARD[parentSnap.character].name + '. '
+        + (childSnap.character === parentSnap.character ? '같은 캐릭터여도 오각형 모양이 달라요.' : '스타일이 달라요.')
+      : '두 사람의 기록이 모이는 중이에요.';
     const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8', emoji:'📦' };
     const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:linear-gradient(180deg,#FFFFFF 0%,#F2F3FA 100%);box-shadow:0 6px 12px -3px rgba(35,25,80,0.2),inset 0 2px 1px rgba(255,255,255,1),0 0 0 1.5px ' + sec.accent + '33';
 
@@ -2095,7 +2222,7 @@ class Component extends DCLogic {
         };
         const acc2 = Object.assign({}, this.state.acc);
         acc2[this.state.account] = { name: nm.name, cash: nm.cash - grand, holdings: hold, pending: pend };
-        this.set({ acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, screen: 'done' });
+        this.set({ acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, screen: 'done', profiles: null, profileStatus: 'idle' });
         if (!isLimit) {
           this.saveTrade('buy', st.code, price, qty, s.draft.reason, s.draft.conf);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
@@ -2148,21 +2275,28 @@ class Component extends DCLogic {
       tabReportStyle: arcTab(!s.arcTab || s.arcTab === 'report'), tabReturnStyle: arcTab(s.arcTab === 'return'),
       tabCompareStyle: arcTab(s.arcTab === 'compare'), tabSeasonStyle: arcTab(s.arcTab === 'season'),
       styleName: styleName,
-      axes: axes,
+      charEmoji: charEmoji,
+      judgeLine: judgeLine,
+      hasStarBadge: !!starBadge, starBadge: starBadge,
+      radarRingInner: radarRing(1 / 3), radarRingMid: radarRing(2 / 3),
+      radarOutline: radarRing(1), radarData: radarData,
+      abilityText0: abilityText(ABILITY_ROWS[0]), abilityText1: abilityText(ABILITY_ROWS[1]),
+      abilityText2: abilityText(ABILITY_ROWS[2]), abilityText3: abilityText(ABILITY_ROWS[3]),
+      abilityText4: abilityText(ABILITY_ROWS[4]),
       hasReasons: reasonStats.length > 0, noReasons: reasonStats.length === 0,
       reasonStats: reasonStats,
       coachText: coachText,
       pnlPctText: (pnl >= 0 ? '+' : '') + (pnl / SEED * 100).toFixed(2) + '%',
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      compareAxes: AXES.map((a, i) => ({
-        axis: a.axis, range: a.left + ' ↔ ' + a.right,
-        childBar: 'width:' + a.child + '%;height:100%;border-radius:999px;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 100%)',
-        parentBar: 'width:' + a.parent + '%;height:100%;border-radius:999px;background:#01185A'
-      })),
+      childName: s.acc.child.name, parentName: s.acc.parent.name,
+      compareChildEmoji: compareChild.emoji, compareChildName: compareChild.name, compareChildStar: compareChild.star,
+      compareParentEmoji: compareParent.emoji, compareParentName: compareParent.name, compareParentStar: compareParent.star,
+      compareRows: compareRows,
+      compareHeadline: compareHeadline,
       badgeCount: s.badges || 0,
       sellCount: (s.sellRecords || []).length,
       memoRecordCount: s.records.filter(r => r.memo).length + (s.sellRecords || []).filter(r => r.memo).length,
-      detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened').length,
+      detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened' || e.event === 'info_detail_opened').length,
 
       isRanking: s.screen === 'ranking',
       // 랭킹 화면만 상단이 남색이라 상태바 아이콘을 흰색으로 바꾼다.
@@ -2293,7 +2427,8 @@ class Component extends DCLogic {
         this.set({
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
-          seq: s.seq + 1, screen: 'done', doneKind: 'sell'
+          seq: s.seq + 1, screen: 'done', doneKind: 'sell',
+          profiles: null, profileStatus: 'idle'
         });
         this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, null);
         const behaviorEvent = { kind:'trade_filled', stockId:'KRX:' + st.code, side:'sell' };
@@ -2371,10 +2506,10 @@ class Component extends DCLogic {
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
-      goArchive: () => this.set({ screen:'archive' }),
+      goArchive: () => { this.set({ screen:'archive' }); this.loadProfiles(); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false, doneKind:'buy' }); },
       resetAll: () => {
-        const fresh = { child:{name:'민지', cash:SEED, holdings:[], pending:[]}, parent:{name:'엄마', cash:SEED, holdings:[], pending:[]} };
+        const fresh = seedAccounts();
         this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft(), doneKind:'buy' });
       }
     };
