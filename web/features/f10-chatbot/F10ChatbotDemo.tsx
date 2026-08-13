@@ -67,7 +67,7 @@ const COPY = {
   orderQuantity: "\uc8fc\ubb38 \uc218\ub7c9",
   expectedAmount: "\uc608\uc0c1 \uae08\uc561 125,000\uc6d0",
   orderPractice: "주문 확인 연습",
-  orderPracticeDescription: "같은 종목의 매수 최종 확인 화면을 두 번 나가면 도움 신호가 나타나요.",
+  orderPracticeDescription: "종목과 상관없이 매수 최종 확인 화면을 세 번 연이어 나가면 도움 신호가 나타나요.",
   abandonBuy: "매수 최종 확인에서 뒤로가기",
   proactive: "\ud0a4\uc6c5\uc774\uc758 \uc120\uc81c \ub3c4\uc6c0",
   explain: "\uc0c1\ud669 \uc124\uba85",
