@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput } from "../../../shared/llm/filter";
-import { normalizeChatInput, routeMessage } from "./routing";
+import { normalizeChatInput, PROACTIVE_SCRIPTS, routeMessage } from "./routing";
 
 const stockContext = {
   screen: "stock" as const,
@@ -9,6 +9,12 @@ const stockContext = {
   stockName: "삼성전자",
 };
 const orderContext = { screen: "order" as const, quantity: 10, unitPrice: 12500 };
+
+assert.equal(PROACTIVE_SCRIPTS.orderMethodConfusion.text, "뭐가 다른지 볼까요?");
+assert.equal(PROACTIVE_SCRIPTS.lossRevisit.text, "후회되나요?");
+for (const script of Object.values(PROACTIVE_SCRIPTS)) {
+  assert.ok(script.text.length <= 20, `선제 말풍선 대사가 깁니다: ${script.text}`);
+}
 
 assert.equal(routeMessage("PER이 뭐야?", stockContext).route, "faq");
 assert.equal(routeMessage("ETF가 뭐야?", stockContext).intent, "financial_concept");
