@@ -77,6 +77,15 @@ export async function buildProfilePayload(
     ({ tab, symbol, viewedAt, dwellMs }) => ({ tab, symbol, viewedAt, dwellMs }),
   );
 
+  // 시세 조회가 먼저다: kiwoom 모듈이 이때 루트 .env 를 프로세스에 로드하고,
+  // 뒤이은 보관 종가 조회(Supabase)가 같은 env 를 쓴다. 순서를 바꾸면 첫 요청의
+  // 정확력이 전부 판정 보류가 된다.
+  let priceBySymbol: Record<string, number> = {};
+  try {
+    priceBySymbol = await deps.loadPrices();
+  } catch {
+    // 시세가 없으면 엔진이 평균단가로 평가한다.
+  }
   const symbols = Array.from(
     new Set([...buys, ...sells].map((trade) => trade.symbol).filter(Boolean)),
   );
@@ -91,12 +100,6 @@ export async function buildProfilePayload(
       }
     }),
   );
-  let priceBySymbol: Record<string, number> = {};
-  try {
-    priceBySymbol = await deps.loadPrices();
-  } catch {
-    // 시세가 없으면 엔진이 평균단가로 평가한다.
-  }
 
   const tradedDates = [...buys, ...sells].map((trade) => kstDateOf(trade.tradedAt)).sort();
   const today = kstDateOf(new Date().toISOString());
