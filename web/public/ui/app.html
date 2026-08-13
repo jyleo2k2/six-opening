@@ -1075,7 +1075,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:1010}}">
-const SEED = 10000000, FEE = 0.00015, LIMIT = 0.30;
+const SEED = 10000000, FEE = 0.00015;
 
 const REASONS = [
   { code:'buy_news',      emoji:'📰', label:'뉴스에서 봐서',            short:'뉴스를 보고' },
@@ -1530,14 +1530,11 @@ class Component extends DCLogic {
     const execPrice = s.draft.orderType === 'limit' ? limPrice : price;
     const qty = execPrice > 0 ? amount / execPrice : 0;
     const grand = amount;
-    const heldVal = st ? (m.holdings.filter(h => h.code === st.code)[0] || { qty:0 }).qty * price : 0;
     const overCash = grand > m.cash;
-    const overLimit = total > 0 && (heldVal + amount) > total * LIMIT;
     const tooSmall = amount > 0 && qty < 0.01;
     const warn = overCash ? '지갑보다 많이 살 수는 없어!'
-      : overLimit ? '한 회사에는 지갑의 30%까지만 담을 수 있어'
       : tooSmall ? '이 금액으로는 아직 살 수 없어. 조금 더 올려볼까?' : '';
-    const canBuy1 = amount > 0 && !overCash && !overLimit && !tooSmall;
+    const canBuy1 = amount > 0 && !overCash && !tooSmall;
 
     const nextOk = s.buyStep === 1 ? canBuy1
       : s.buyStep === 2 ? !!s.draft.reason
