@@ -8,7 +8,7 @@ import {
   kstDateOf,
   parsePrototypeProfileInput,
   profileEntriesFromTrades,
-  starGradeOf,
+  accuracyLevelOf,
   viewedTabCount,
 } from "./behavior-profile";
 import type { DailyClose, ProfileBuy, ProfileTabView } from "../types/behavior-profile";
@@ -78,27 +78,28 @@ const series = closes("005930", [
   ["2026-08-11", 90],
   ["2026-08-12", 91],
 ]);
-// 08-03 매수 100원 → 5거래일 뒤(08-10) 110원 = 적중, 기본 5점 +1 = 6점
+// 08-03 매수 100원 → 5거래일 뒤(08-10) 110원 = 적중, 1건 중 1건 = 100%
 const early = buy({ tradedAt: "2026-08-03T02:00:00.000Z" });
-assert.deepEqual(gradeAccuracy([early], [], series), { accuracy: 6, graded: 1, pending: 0, hits: 1 });
-// 08-10 매수 → 남은 봉 2개뿐이라 채점 보류, 점수는 기본 5점 그대로
+assert.deepEqual(gradeAccuracy([early], [], series), { accuracy: 100, level: 3, graded: 1, pending: 0, hits: 1 });
+// 08-10 매수 → 남은 봉 2개뿐이라 채점 보류, 채점 0건이면 기본 50% 레벨 2
 const late = buy({ id: "b9", tradedAt: "2026-08-10T02:00:00.000Z" });
-assert.deepEqual(gradeAccuracy([late], [], series), { accuracy: 5, graded: 0, pending: 1, hits: 0 });
+assert.deepEqual(gradeAccuracy([late], [], series), { accuracy: 50, level: 2, graded: 0, pending: 1, hits: 0 });
 // 캔들이 아예 없는 종목도 보류
 assert.equal(gradeAccuracy([buy({ symbol: "999999" })], [], series).pending, 1);
 // 매도 — 08-04 매도(종가 101 근사) → 5거래일 뒤(08-11) 90 = 하락 적중
 const sell = { id: "s1", symbol: "005930", tradedAt: "2026-08-04T05:00:00.000Z", planMatch: true };
 assert.equal(gradeAccuracy([], [sell], series).hits, 1);
-// 가감점 누적 — 적중 2·빗나감 1 → 5 + 2 − 1 = 6점
+// 적중률 반올림 — 3건 중 2적중 = 66.67% → 67%, 레벨은 반올림 전 비율(2/3 경계 포함)로 3
 const miss = buy({ id: "b3", price: 200, tradedAt: "2026-08-03T02:00:00.000Z" });
 const graded3 = gradeAccuracy([early, miss], [sell], series);
 assert.equal(graded3.graded, 3);
-assert.equal(graded3.accuracy, 6);
-// 상·하한은 다른 능력치와 같은 0~10 — 연속 적중·빗나감이 쌓여도 넘지 않는다
+assert.equal(graded3.accuracy, 67);
+assert.equal(graded3.level, 3);
+// 전부 적중 = 100%, 전부 빗나감 = 0%
 const manyHits = Array.from({ length: 7 }, (unused, i) => buy({ id: `h${i}`, tradedAt: "2026-08-03T02:00:00.000Z" }));
-assert.equal(gradeAccuracy(manyHits, [], series).accuracy, 10);
+assert.deepEqual([gradeAccuracy(manyHits, [], series).accuracy, gradeAccuracy(manyHits, [], series).level], [100, 3]);
 const manyMisses = Array.from({ length: 7 }, (unused, i) => buy({ id: `m${i}`, price: 200, tradedAt: "2026-08-03T02:00:00.000Z" }));
-assert.equal(gradeAccuracy(manyMisses, [], series).accuracy, 0);
+assert.deepEqual([gradeAccuracy(manyMisses, [], series).accuracy, gradeAccuracy(manyMisses, [], series).level], [0, 1]);
 
 // 캐릭터 — 동점 5:5 는 근거·집중 귀속
 assert.equal(judgeCharacter({ evidence: 5, intuition: 5, focus: 5, diversification: 5 }), "sniper");
@@ -106,11 +107,13 @@ assert.equal(judgeCharacter({ evidence: 7, intuition: 3, focus: 4, diversificati
 assert.equal(judgeCharacter({ evidence: 3, intuition: 7, focus: 6, diversification: 4 }), "challenger");
 assert.equal(judgeCharacter({ evidence: 3, intuition: 7, focus: 4, diversification: 6 }), "explorer");
 
-// 별 등급 경계 — 7점부터 ★★★, 4점부터 ★★☆
-assert.equal(starGradeOf(7), 3);
-assert.equal(starGradeOf(6), 2);
-assert.equal(starGradeOf(4), 2);
-assert.equal(starGradeOf(3), 1);
+// 레벨 경계 — 적중 비율 2/3 이상 레벨 3, 1/3 이상 레벨 2 (경계 포함). 유저 예시: 5건 중 4적중 = 80% → 레벨 3
+assert.equal(accuracyLevelOf(4 / 5), 3);
+assert.equal(accuracyLevelOf(2 / 3), 3);
+assert.equal(accuracyLevelOf(0.66), 2);
+assert.equal(accuracyLevelOf(1 / 3), 2);
+assert.equal(accuracyLevelOf(0.32), 1);
+assert.equal(accuracyLevelOf(0), 1);
 
 // 통합 — 매수 2건은 관찰 초기, 3건부터 캐릭터가 나온다
 const baseInput = {
@@ -128,7 +131,7 @@ const baseInput = {
 const initial = computeBehaviorProfile({ ...baseInput, buys: [b1, b2] });
 assert.equal(initial.observationState, "initial");
 assert.equal(initial.character, null);
-assert.equal(initial.starGrade, null);
+assert.equal(initial.level, null);
 
 const ready = computeBehaviorProfile({ ...baseInput, buys: [b1, b2, buy({ id: "b4", symbol: "035420" })] });
 assert.equal(ready.observationState, "ready");
@@ -138,11 +141,11 @@ assert.equal(ready.abilities.evidence, 3);
 assert.equal(ready.abilities.intuition, 7);
 assert.equal(ready.abilities.focus, 9);
 assert.equal(ready.character, "challenger");
-// 채점된 매수 1건이 빗나가 5 − 1 = 4점, 나머지는 보류로 점수에 반영되지 않는다
-assert.equal(ready.abilities.accuracy, 4);
+// 채점된 매수 1건이 빗나가 적중률 0% 레벨 1, 나머지 보류 거래는 반영되지 않는다
+assert.equal(ready.abilities.accuracy, 0);
 assert.equal(ready.gradedTradeCount, 1);
 assert.equal(ready.pendingTradeCount, 2);
-assert.equal(ready.starGrade, 2);
+assert.equal(ready.level, 1);
 assert.equal(ready.reasonDistribution.buy_news, 3);
 
 // kw_proto_v1 원본 매핑 — 체결만, 단가 도출, 계정 분리, 이벤트 매핑

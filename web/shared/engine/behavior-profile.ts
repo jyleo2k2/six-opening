@@ -20,8 +20,11 @@ export const CASH_HEAVY_RATIO = 0.5;
 export const ACCURACY_WAIT_TRADING_DAYS = 5;
 // [가정] 표본 임계 — 제품 확정 시 상수만 바꾼다 (SPEC §4.2·§4.3).
 export const MIN_BUYS_FOR_PROFILE = 3;
-// 정확력 시작점 — 채점된 거래가 없으면 이 값 그대로다 (2026-08-13 유저 확정).
-export const ACCURACY_BASE_SCORE = 5;
+// [가정] 채점된 거래가 없을 때의 기본 적중 비율 — 레벨 2 구간의 중앙에서 시작한다.
+export const ACCURACY_DEFAULT_RATIO = 0.5;
+// 레벨 분기 — 적중 비율 2/3 이상 레벨 3, 1/3 이상 레벨 2 (2026-08-13 유저 확정, 경계 포함은 [가정]).
+export const ACCURACY_LEVEL_3_RATIO = 2 / 3;
+export const ACCURACY_LEVEL_2_RATIO = 1 / 3;
 
 /** app.html 이벤트명 → 3탭. 기업정보 탭(info_detail_opened)은 화면 출시 전에 미리 등록해 둔다. */
 export const TAB_BY_EVENT: Record<string, EvidenceTab> = {
@@ -101,15 +104,18 @@ function closeOnOrBefore(closes: DailyClose[], date: string): number | null {
 }
 
 export type AccuracyResult = {
+  /** 적중률 퍼센트 0~100, 소수점 반올림 */
   accuracy: number;
+  level: 1 | 2 | 3;
   graded: number;
   pending: number;
   hits: number;
 };
 
 /**
- * 정확력 = 기본 5점에서 채점된 거래마다 적중 +1·빗나감 −1 (0~10, 다른 능력치와 상·하한 동일).
- * 채점은 체결 후 5거래일 종가 기준이며, 미경과·종가 없는 거래는 채점 전이라 점수에 반영하지 않는다.
+ * 정확력 = 채점된 거래의 적중률 퍼센트(0~100, 소수점 반올림). 예: 5건 중 4건 적중 = 80%.
+ * 레벨은 적중 비율 1/3·2/3 을 분기로 1·2·3 이며, 채점은 체결 후 5거래일 종가 기준이다.
+ * 미경과·종가 없는 거래는 채점 전이라 반영하지 않고, 채점이 하나도 없으면 기본 비율 50%로 시작한다.
  */
 export function gradeAccuracy(
   buys: ProfileBuy[],
@@ -142,8 +148,15 @@ export function gradeAccuracy(
     graded += 1;
     if (settle < sellPrice) hits += 1;
   }
-  const accuracy = clampScore(ACCURACY_BASE_SCORE + hits - (graded - hits));
-  return { accuracy, graded, pending, hits };
+  const ratio = graded > 0 ? hits / graded : ACCURACY_DEFAULT_RATIO;
+  return { accuracy: Math.round(ratio * 100), level: accuracyLevelOf(ratio), graded, pending, hits };
+}
+
+/** 적중 비율 → 레벨. 반올림 전 비율로 판정해 66.7% 경계가 흔들리지 않게 한다 */
+export function accuracyLevelOf(ratio: number): 1 | 2 | 3 {
+  if (ratio >= ACCURACY_LEVEL_3_RATIO) return 3;
+  if (ratio >= ACCURACY_LEVEL_2_RATIO) return 2;
+  return 1;
 }
 
 /** 두 쌍의 우세로 캐릭터 결정. 5:5 동점은 근거·집중 쪽으로 귀속한다 */
@@ -156,16 +169,10 @@ export function judgeCharacter(
   return focusLeads ? "challenger" : "explorer";
 }
 
-export function starGradeOf(accuracy: number): 1 | 2 | 3 {
-  if (accuracy >= 7) return 3;
-  if (accuracy >= 4) return 2;
-  return 1;
-}
-
 export function computeBehaviorProfile(input: BehaviorProfileInput): BehaviorProfileSnapshot {
   const evidence = computeEvidence(input.buys, input.tabViews);
   const focus = computeFocus(input.holdings, input.cash, input.priceBySymbol, input.sectorBySymbol);
-  const { accuracy, graded, pending } = gradeAccuracy(input.buys, input.sells, input.dailyClosesBySymbol);
+  const { accuracy, level, graded, pending } = gradeAccuracy(input.buys, input.sells, input.dailyClosesBySymbol);
   const abilities: BehaviorAbilities = {
     evidence,
     intuition: 10 - evidence,
@@ -191,7 +198,7 @@ export function computeBehaviorProfile(input: BehaviorProfileInput): BehaviorPro
     sampleSize: input.buys.length,
     abilities,
     character: ready ? judgeCharacter(abilities) : null,
-    starGrade: ready ? starGradeOf(accuracy) : null,
+    level: ready ? level : null,
     gradedTradeCount: graded,
     pendingTradeCount: pending,
     reasonDistribution,

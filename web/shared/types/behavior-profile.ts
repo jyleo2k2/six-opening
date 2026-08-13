@@ -17,7 +17,7 @@ export type BehaviorAbilities = {
   focus: number;
   /** 분산력 = 10 − focus */
   diversification: number;
-  /** 정확력 0~10. 기본 5점에서 시작해 채점된 거래가 적중하면 +1, 빗나가면 −1 */
+  /** 정확력 = 채점된 거래의 적중률 퍼센트 0~100 (소수점 반올림). 채점 0건이면 50 */
   accuracy: number;
 };
 
@@ -29,8 +29,8 @@ export type BehaviorProfileSnapshot = {
   sampleSize: number;
   abilities: BehaviorAbilities;
   character: BehaviorCharacter | null;
-  /** 정확 등급 별 개수. 관찰 초기면 null */
-  starGrade: 1 | 2 | 3 | null;
+  /** 정확 레벨 — 적중 비율 1/3·2/3 분기. 관찰 초기면 null */
+  level: 1 | 2 | 3 | null;
   /** 적중 판정이 끝난 거래 수 */
   gradedTradeCount: number;
   /** 5거래일 미경과 등으로 판정을 보류한 거래 수 */
