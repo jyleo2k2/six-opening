@@ -92,15 +92,23 @@ function placeMarkers(
   markers: readonly TradeMarker[],
   chart: IChartApi,
   series: ISeriesApi<SeriesType, Time>,
+  paneWidth: number,
 ): PlacedMarker[] {
   const timeScale = chart.timeScale();
+  // 뱃지는 x 를 가운데로 잡으므로 양 끝에서 반 칸을 물린다. 오늘 산 종목은 마지막
+  // 봉에 붙는데, 클램프가 없으면 뱃지 오른쪽 절반이 가격축 숫자 위를 덮는다.
+  const half = BADGE / 2;
   const placed: PlacedMarker[] = [];
   for (const marker of markers) {
     const x = timeScale.timeToCoordinate(marker.time as UTCTimestamp);
     const y = series.priceToCoordinate(marker.price);
     // 스크롤·줌으로 화면 밖에 나간 체결은 좌표가 없다. 그리지 않는다.
     if (x === null || y === null) continue;
-    placed.push({ ...marker, x, y });
+    placed.push({
+      ...marker,
+      x: paneWidth > BADGE ? Math.min(Math.max(x, half), paneWidth - half) : x,
+      y,
+    });
   }
   return placed;
 }
@@ -134,6 +142,8 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
   const [points, setPoints] = useState<ChartPoint[] | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [placed, setPlaced] = useState<PlacedMarker[]>([]);
+  /** 이 종목에서 찾은 체결 수. `placed` 와 갈리면 좌표를 못 잡았다는 뜻이다. */
+  const [found, setFound] = useState(0);
   const { period: shownPeriod, chartType: shownChartType } = shown;
 
   /**
@@ -197,6 +207,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
     setState("loading");
     // 종목·기간이 바뀌면 이전 종목의 마커가 남아 있으면 안 된다.
     setPlaced([]);
+    setFound(0);
 
     fetch(`/api/quote/${encodeURIComponent(symbol)}/chart?period=${shownPeriod}`, {
       signal: controller.signal,
@@ -225,7 +236,8 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
     const bg = token("--color-bg", "#F6F7FA");
     const white = token("--color-white", "#FFFFFF");
     const chart = createChart(container, {
-      width: container.clientWidth,
+      // 폭 0 으로 만들면 시간축이 계산되지 않아 timeToCoordinate 가 계속 null 을 준다.
+      width: Math.max(1, container.clientWidth),
       height: 238,
       layout: {
         background: { type: ColorType.Solid, color: white },
@@ -277,18 +289,26 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
       series = candles;
     }
 
-    showRecentBars(chart, points.length, shownPeriod);
-
     // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
     const markers = buildTradeMarkers({
       trades: familyTradesFor(symbol),
       viewer,
       candleTimes: points.map((point) => point.time),
     });
-    // 스크롤·줌·리사이즈로 축이 움직이면 좌표를 다시 잡는다.
-    const reposition = () => setPlaced(placeMarkers(markers, chart, series));
-    reposition();
+    setFound(markers.length);
+
+    /**
+     * 좌표는 차트가 배치를 마친 뒤에만 옳다.
+     *
+     * `timeToCoordinate` 는 시간축이 아직 폭을 못 잡았거나 보이는 범위 밖이면 `null` 을
+     * 준다. 그 상태로 읽으면 마커가 통째로 빠지거나 옛 축 기준 x 에 찍힌다. 그래서
+     * 구독을 **범위를 바꾸기 전에** 걸어 두고, 첫 계산도 한 프레임 뒤로 미룬다.
+     */
+    const reposition = () =>
+      setPlaced(placeMarkers(markers, chart, series, chart.paneSize().width));
     chart.timeScale().subscribeVisibleLogicalRangeChange(reposition);
+    showRecentBars(chart, points.length, shownPeriod);
+    const frame = requestAnimationFrame(reposition);
 
     const observer = new ResizeObserver(([entry]) => {
       chart.applyOptions({ width: Math.max(1, Math.floor(entry.contentRect.width)) });
@@ -298,6 +318,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
     setState("ready");
 
     return () => {
+      cancelAnimationFrame(frame);
       observer.disconnect();
       chart.timeScale().unsubscribeVisibleLogicalRangeChange(reposition);
       chart.remove();
@@ -306,7 +327,18 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
 
   return (
     <main className="relative h-[264px] w-full overflow-hidden bg-white">
-      <div ref={containerRef} className="h-[238px] w-full" role="img" aria-label={`${symbol} ${shownPeriod === "minute" ? "분봉" : shownPeriod === "daily" ? "일봉" : "주봉"} TradingView ${shownChartType === "line" ? "선" : "캔들"} 차트`} />
+      {/*
+        `data-trade-markers` 는 진단용이다. 마커가 안 보일 때 "이 종목에 체결이 없다"와
+        "체결은 찾았는데 좌표를 못 잡았다"를 화면을 안 고치고 구분한다.
+        예: found=2 placed=0 이면 좌표 계산이 실패한 것이다.
+      */}
+      <div
+        ref={containerRef}
+        className="h-[238px] w-full"
+        role="img"
+        data-trade-markers={`${found}/${placed.length}`}
+        aria-label={`${symbol} ${shownPeriod === "minute" ? "분봉" : shownPeriod === "daily" ? "일봉" : "주봉"} TradingView ${shownChartType === "line" ? "선" : "캔들"} 차트`}
+      />
       {state === "ready" && placed.length > 0 && (
         <svg className="pointer-events-none absolute left-0 top-0 h-[238px] w-full">
           {placed.map((marker) => {
