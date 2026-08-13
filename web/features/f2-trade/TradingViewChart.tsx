@@ -29,6 +29,9 @@ type PlacedMarker = TradeMarker & { x: number; y: number };
 /** 뱃지 한 변. 원본 시안(서비스 개요 HTML)의 22×22 rx=6 을 따른다. */
 const BADGE = 22;
 
+/** 체결가를 가리키는 꼬리 높이. 뱃지 변에 맞닿는다. */
+const TAIL = 7;
+
 /**
  * 가족 매매 지점 마커. F11 SPEC §6
  *
@@ -210,13 +213,22 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
               marker.member === "child"
                 ? "var(--color-trade-child)"
                 : "var(--color-trade-parent)";
-            // 뱃지 한가운데가 체결가다. 봉 위아래로 밀지 않는다.
+            // 말풍선 꼬리처럼 뱃지 변에 붙는다. 꼭짓점이 체결가를 가리키고
+            // 밑변은 뱃지 모서리와 정확히 맞닿는다 — 같은 fill 이라 이음매가 안 보인다.
+            // 밑변 너비(10)가 rx=6 으로 둥글린 모서리 사이 평평한 구간 안에 들어간다.
+            const badgeY =
+              marker.side === "buy" ? marker.y + TAIL : marker.y - TAIL - BADGE;
+            const base = marker.side === "buy" ? marker.y + TAIL : marker.y - TAIL;
             return (
               <g key={marker.id}>
                 <title>{marker.label}</title>
+                <polygon
+                  points={`${marker.x - 5},${base} ${marker.x + 5},${base} ${marker.x},${marker.y}`}
+                  fill={fill}
+                />
                 <rect
                   x={marker.x - BADGE / 2}
-                  y={marker.y - BADGE / 2}
+                  y={badgeY}
                   width={BADGE}
                   height={BADGE}
                   rx={6}
@@ -224,7 +236,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
                 />
                 <text
                   x={marker.x}
-                  y={marker.y}
+                  y={badgeY + BADGE / 2}
                   fontSize={12}
                   fontWeight={700}
                   fill="#fff"
