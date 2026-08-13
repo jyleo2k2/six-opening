@@ -18,10 +18,11 @@ import {
   type PrototypeChartPeriod,
   type PrototypeChartType,
 } from "./chart-data";
-import { buildTradeMarkers, symbolTrades, type TradeMarker } from "../../shared/engine/trade-markers";
-import { readPrototypeTrades } from "../../shared/store/prototype-trades";
-import { FAMILY_SEED_TRADES } from "../../shared/store/family-trade-seed";
-import type { FamilyMember, Trade } from "../../shared/types/trade";
+import {
+  buildTradeMarkers,
+  type ChartTrade,
+  type TradeMarker,
+} from "../../shared/engine/trade-markers";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -65,50 +66,30 @@ function showRecentBars(chart: IChartApi, total: number, period: PrototypeChartP
 }
 
 /**
- * 이 종목의 가족 전원 체결. F11 SPEC §6
- *
- * 본인 거래는 app.html 이 `localStorage` 에 쌓고, 엄마의 데모 거래는 코드 상수다.
- * 이 차트는 app.html 안의 iframe 이라 같은 오리진이고, 그래서 부모를 거치지 않고
- * 그 키를 직접 읽는다 — 별도 투자 스토어를 두면 저장소가 갈려 카드와 차트 값이
- * 어긋난다.
- *
- * 피드는 두 출처를 합쳐 보여주는데 차트가 `localStorage` 만 읽으면 엄마 마커가
- * 구조적으로 빠진다. "가족 전원 체결 지점" 이라는 규칙과 어긋나므로 같은 두
- * 출처를 여기서도 합친다.
- */
-function familyTradesFor(symbol: string) {
-  const merged: Trade[] = [...readPrototypeTrades(), ...FAMILY_SEED_TRADES];
-  return symbolTrades(merged, symbol);
-}
-
-/**
  * 마커를 찍을 화면 좌표를 잡는다.
  *
  * 라이브러리 기본 마커는 모양이 원·사각·화살표뿐이라 시안의 "꼬리 붙은 둥근 뱃지
  * + 흰 B/S" 를 못 그린다. 대신 차트가 주는 좌표 변환만 빌려 SVG 를 차트 위에 얹는다.
  * 시안 마크업을 그대로 쓸 수 있고, 나중에 탭·툴팁을 붙일 때도 DOM 이벤트로 끝난다.
+ *
+ * **받은 x 를 그대로 쓴다.** 예전에는 뱃지가 가격축 숫자를 덮지 않게 x 를 페인 안쪽으로
+ * 잘라 붙였는데, 그러면 차트를 드래그해 체결일이 오른쪽 끝을 지날 때 뱃지가 그 자리에
+ * 눌러앉아 거래일이 아닌 날짜를 가리켰다. 마커가 답해야 하는 질문이 "언제 샀고 언제
+ * 팔았나" 이므로 날짜가 어긋나는 쪽이 더 나쁘다. 가격축은 SVG 폭으로 막는다 (SPEC §6).
  */
 function placeMarkers(
   markers: readonly TradeMarker[],
   chart: IChartApi,
   series: ISeriesApi<SeriesType, Time>,
-  paneWidth: number,
 ): PlacedMarker[] {
   const timeScale = chart.timeScale();
-  // 뱃지는 x 를 가운데로 잡으므로 양 끝에서 반 칸을 물린다. 오늘 산 종목은 마지막
-  // 봉에 붙는데, 클램프가 없으면 뱃지 오른쪽 절반이 가격축 숫자 위를 덮는다.
-  const half = BADGE / 2;
   const placed: PlacedMarker[] = [];
   for (const marker of markers) {
     const x = timeScale.timeToCoordinate(marker.time as UTCTimestamp);
     const y = series.priceToCoordinate(marker.price);
     // 스크롤·줌으로 화면 밖에 나간 체결은 좌표가 없다. 그리지 않는다.
     if (x === null || y === null) continue;
-    placed.push({
-      ...marker,
-      x: paneWidth > BADGE ? Math.min(Math.max(x, half), paneWidth - half) : x,
-      y,
-    });
+    placed.push({ ...marker, x, y });
   }
   return placed;
 }
@@ -141,22 +122,24 @@ function formatTime(time: Time, period: PrototypeChartPeriod) {
   }).format(new Date(time * 1000));
 }
 
-export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
+export function TradingViewChart({ symbol, period, chartType }: {
   symbol: string;
   /** 첫 렌더용 기본값. 이후 값은 app.html 이 메시지로 바꾼다. */
   period: PrototypeChartPeriod;
   /** 첫 렌더용 기본값. 이후 값은 app.html 이 메시지로 바꾼다. */
   chartType: PrototypeChartType;
-  /** 열람 계정. 모르면 어느 마커에도 수량을 붙이지 않는다 (SPEC §6). */
-  viewer?: FamilyMember | null;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState({ period, chartType });
   const [points, setPoints] = useState<ChartPoint[] | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   const [placed, setPlaced] = useState<PlacedMarker[]>([]);
+  /** 이 종목의 가족 체결. `GET /api/trades` 가 유일한 출처다 (F11 SPEC §6.1). */
+  const [trades, setTrades] = useState<ChartTrade[]>([]);
   /** 이 종목에서 찾은 체결 수. `placed` 와 갈리면 좌표를 못 잡았다는 뜻이다. */
   const [found, setFound] = useState(0);
+  /** 가격축을 뺀 차트 폭. 마커 SVG 를 여기까지만 그려 축을 덮지 않게 한다. */
+  const [paneWidth, setPaneWidth] = useState(0);
   const { period: shownPeriod, chartType: shownChartType } = shown;
 
   /**
@@ -238,6 +221,24 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
     return () => controller.abort();
   }, [shownPeriod, symbol]);
 
+  /**
+   * 이 종목의 가족 체결. 기간·차트종류와 무관하므로 종목이 바뀔 때만 다시 받는다.
+   *
+   * 로그인 전(401)이나 조회 실패에는 빈 목록으로 둔다. 마커가 없는 차트는 정상이고,
+   * 여기서 옛 출처로 되돌아가면 저장소가 다시 갈린다 (SPEC §6.1).
+   */
+  useEffect(() => {
+    const controller = new AbortController();
+    setTrades([]);
+
+    fetch(`/api/trades?symbol=${encodeURIComponent(symbol)}`, { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error("trades request failed"))))
+      .then((payload: { trades?: ChartTrade[] }) => setTrades(payload.trades ?? []))
+      .catch(() => {});
+
+    return () => controller.abort();
+  }, [symbol]);
+
   useEffect(() => {
     const container = containerRef.current;
     if (!points || !container) return;
@@ -304,8 +305,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
 
     // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
     const markers = buildTradeMarkers({
-      trades: familyTradesFor(symbol),
-      viewer,
+      trades,
       candleTimes: points.map((point) => point.time),
     });
     setFound(markers.length);
@@ -325,8 +325,12 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
      */
     let frame = 0;
     const follow = () => {
-      const next = placeMarkers(markers, chart, series, chart.paneSize().width);
+      const next = placeMarkers(markers, chart, series);
       setPlaced((current) => (samePlacement(current, next) ? current : next));
+      setPaneWidth((current) => {
+        const width = chart.paneSize().width;
+        return current === width ? current : width;
+      });
       frame = requestAnimationFrame(follow);
     };
     frame = requestAnimationFrame(follow);
@@ -342,7 +346,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
       observer.disconnect();
       chart.remove();
     };
-  }, [points, shownChartType, shownPeriod, symbol, viewer]);
+  }, [points, shownChartType, shownPeriod, symbol, trades]);
 
   return (
     <main className="relative h-[264px] w-full overflow-hidden bg-white">
@@ -364,9 +368,16 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
         z-[60] 이 있어야 보인다. lightweight-charts 는 자기 캔버스에 z-index 를 최대 50
         까지 준다. 이 SVG 가 `auto` 로 남으면 좌표를 제대로 잡고도 캔버스 밑에 깔려
         화면에 안 나온다.
+
+        폭은 가격축을 뺀 페인 폭이다. SVG 는 제 뷰포트 밖을 그리지 않으므로, 체결일이
+        오른쪽 끝을 지나면 뱃지가 가격축 숫자를 덮는 대신 여기서 잘린다. 마커 x 를
+        페인 안으로 밀어 넣지 않는 이유이기도 하다 (SPEC §6).
       */}
-      {state === "ready" && placed.length > 0 && (
-        <svg className="pointer-events-none absolute left-0 top-0 z-[60] h-[238px] w-full">
+      {state === "ready" && placed.length > 0 && paneWidth > 0 && (
+        <svg
+          className="pointer-events-none absolute left-0 top-0 z-[60] h-[238px]"
+          width={paneWidth}
+        >
           {placed.map((marker) => {
             const fill =
               marker.member === "child"
