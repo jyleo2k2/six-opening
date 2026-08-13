@@ -45,6 +45,17 @@ export async function insertRow<T>(table: string, row: Record<string, unknown>):
   return ((await response.json()) as T[])[0];
 }
 
+/**
+ * PostgREST 삭제. `params` 는 반드시 대상을 좁히는 필터를 담아야 한다 —
+ * 빈 필터로 부르면 테이블 전체가 지워진다.
+ */
+export async function deleteRows(table: string, params: Record<string, string>): Promise<void> {
+  const keys = Object.keys(params);
+  if (keys.length === 0) throw new Error("deleteRows 에는 필터가 필요합니다.");
+  const query = new URLSearchParams(params);
+  await supabaseFetch(`rest/v1/${table}?${query}`, { method: "DELETE" });
+}
+
 /** SECURITY DEFINER 함수 호출. 잔액·보유수량·거래기록을 한 트랜잭션에서 처리한다. */
 export async function callRpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const response = await supabaseFetch(`rest/v1/rpc/${fn}`, {
