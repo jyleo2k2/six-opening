@@ -6,7 +6,6 @@ import type {
 
 export const PROACTIVE_LIMITS = {
   dwellMs: 5 * 60 * 1000,
-  lossRevisitWindowMs: 5 * 60 * 1000,
   sessionIdleMs: 30 * 60 * 1000,
 } as const;
 
@@ -108,8 +107,7 @@ export function detectProactiveSignals(
     latestEvent?.type === "screen_entered" &&
     latestEvent.screen === "stock" &&
     latestEvent.stockId === realizedLoss.stockId &&
-    now >= realizedLoss.at &&
-    now - realizedLoss.at <= PROACTIVE_LIMITS.lossRevisitWindowMs
+    now >= realizedLoss.at
   ) {
     const revisitCount = events.filter(
       (event) =>
@@ -119,7 +117,7 @@ export function detectProactiveSignals(
         event.at >= realizedLoss.at &&
         event.at <= now,
     ).length;
-    if (revisitCount >= 4) signals.push("lossRevisit");
+    if (revisitCount >= 2) signals.push("lossRevisit");
   }
 
   return signals;
