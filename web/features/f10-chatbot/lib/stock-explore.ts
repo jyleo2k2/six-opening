@@ -4,6 +4,7 @@ import {
   type StockExploreTurn,
   type StockFactTopic,
 } from "../../../shared/types/chatbot";
+import { toPoliteKorean } from "./polite";
 
 export const STOCK_EXPLORE_TOPICS = [
   "company",
@@ -63,12 +64,12 @@ export function advanceStockExplore(
 
   const nextTopic = findNextStockExploreTopic(reply.shownTopics);
   if (reply.choiceId === "done") {
-    return { kind: "end", text: "좋아, 여기까지 볼게. 궁금한 종목이 생기면 이름을 말해 줘." };
+    return { kind: "end", text: toPoliteKorean("좋아, 여기까지 볼게. 궁금한 종목이 생기면 이름을 말해 줘.") };
   }
   if (reply.choiceId === "ask-other") {
     return nextTopic
       ? null
-      : { kind: "end", text: "좋아, 다른 종목 이름과 궁금한 점을 적어 줄래?" };
+      : { kind: "end", text: toPoliteKorean("좋아, 다른 종목 이름과 궁금한 점을 적어 줄래?") };
   }
   if (reply.choiceId !== nextTopic) return null;
   return {
