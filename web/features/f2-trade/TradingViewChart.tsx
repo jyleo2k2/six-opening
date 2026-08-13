@@ -25,9 +25,6 @@ import type { FamilyMember } from "../../shared/types/trade";
 
 type LoadState = "loading" | "ready" | "error";
 
-/** 마커를 누르면 최상위 React 가 그 거래의 피드 카드를 연다. F11 SPEC §6 */
-const OPEN_TRADE_MESSAGE = "kiwoom:open-trade";
-
 /**
  * 가족 매매 지점을 차트에 얹는다. F11 SPEC §6
  *
@@ -176,15 +173,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
             parent: token("--color-navy", "#001E5A"),
           },
         });
-        // 마커를 누르면 최상위 React 가 그 거래의 피드 카드를 열고 강조한다.
-        chart.subscribeClick((param) => {
-          const tradeId = param.hoveredObjectId;
-          if (typeof tradeId !== "string") return;
-          window.top?.postMessage(
-            { type: OPEN_TRADE_MESSAGE, tradeId },
-            window.location.origin,
-          );
-        });
+        // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
 
         chart.timeScale().fitContent();
 
