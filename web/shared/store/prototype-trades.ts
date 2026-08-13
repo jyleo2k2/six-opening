@@ -40,7 +40,6 @@ type PrototypeRecord = {
   order_status?: unknown;
   reason_code?: unknown;
   sell_reason_code?: unknown;
-  confidence_raw?: unknown;
   memo?: unknown;
   ts?: unknown;
 };
@@ -48,16 +47,6 @@ type PrototypeRecord = {
 function toNumber(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
-}
-
-/** app.html 의 확신도 슬라이더는 0~100 연속값이다. F3 계약의 4단계로 내린다. */
-function toConfidence(value: unknown): Trade["confidence"] {
-  const raw = Number(value);
-  if (!Number.isFinite(raw)) return undefined;
-  if (raw <= 37) return 25;
-  if (raw <= 62) return 50;
-  if (raw <= 87) return 75;
-  return 100;
 }
 
 function toTrade(record: PrototypeRecord, side: Trade["side"]): Trade | null {
@@ -80,7 +69,6 @@ function toTrade(record: PrototypeRecord, side: Trade["side"]): Trade | null {
     quantity,
     price,
     reason: REASON_LABEL[code] ?? code,
-    confidence: toConfidence(record.confidence_raw),
     memo: typeof record.memo === "string" ? record.memo : "",
     tradedAt: String(record.ts ?? new Date().toISOString()),
   };

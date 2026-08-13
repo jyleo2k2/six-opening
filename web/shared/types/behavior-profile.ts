@@ -38,10 +38,8 @@ export type BehaviorProfileSnapshot = {
   /** 5거래일 미경과 등으로 판정을 보류한 거래 수 */
   pendingTradeCount: number;
   reasonDistribution: Record<string, number>;
-  confidencePattern: {
-    average: number;
-    actionAlignment: number;
-  };
+  /** 계획대로 판 매도의 비율 0~1. 판정 가능한 매도가 없으면 0 */
+  actionAlignment: number;
   observationState: "initial" | "ready";
 };
 
@@ -52,8 +50,6 @@ export type ProfileBuy = {
   price: number;
   quantity: number;
   reason: string | null;
-  /** 확신도 슬라이더 원값 0~100 */
-  confidence: number | null;
   tradedAt: string;
 };
 

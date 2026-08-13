@@ -3028,7 +3028,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
       target = "archive";
       questions = ["시즌 끝나면 기록은 어떻게 돼?", "내 지난 시즌 기록 보여줘"];
       if (includesAny(message, ["봐야", "아카이브꼭"])) {
-        text = "아카이브를 다시 보는 것은 선택이야. 다만 주문할 때 고른 이유와 확신도 같은 질문식 기록은 주문 흐름에 포함돼 있어.";
+        text = "아카이브를 다시 보는 것은 선택이야. 다만 주문할 때 고른 이유와 예상 보유기간 같은 질문식 기록은 주문 흐름에 포함돼 있어.";
       } else if (includesAny(message, ["자동으로정리", "자동정리", "보유종목"])) {
         text = "시즌 마지막 거래일 종가로 결과를 확정한 뒤 가상 보유 자산은 리셋돼. 거래와 생각 기록은 시즌 아카이브에 남아.";
       } else if (includesAny(message, ["이어", "회사바꿔", "메모남"])) {

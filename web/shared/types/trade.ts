@@ -8,7 +8,6 @@ export type Holding = { symbol: string; quantity: number; averagePrice: number }
 export type ReasonRecord = {
   side: TradeSide;
   reason: string;
-  confidence?: 25 | 50 | 75 | 100;
   memo: string;
 };
 

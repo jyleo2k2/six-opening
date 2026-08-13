@@ -39,7 +39,7 @@ const seedComments: TradeComment[] = [
     id: "seed-comment-1",
     tradeId: "seed-parent-2",
     author: "child",
-    body: "엄마는 왜 확신이 50이야? 뉴스 봤으면 더 확신 있는 거 아니야?",
+    body: "엄마는 왜 이 회사를 골랐어? 뉴스에서 봤어?",
     createdAt: "2026-08-06T09:20:00.000Z",
   },
   {

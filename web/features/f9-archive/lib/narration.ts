@@ -46,7 +46,6 @@ function allowedNumbers(snapshot: BehaviorProfileSnapshot): (string | number)[] 
     snapshot.sampleSize,
     snapshot.gradedTradeCount,
     snapshot.pendingTradeCount,
-    snapshot.confidencePattern.average,
     10,
     5,
     3,
@@ -72,7 +71,6 @@ function narrationInput(snapshot: BehaviorProfileSnapshot): string {
     gradedTradeCount: snapshot.gradedTradeCount,
     pendingTradeCount: snapshot.pendingTradeCount,
     reasonDistribution: snapshot.reasonDistribution,
-    confidenceAverage: snapshot.confidencePattern.average,
   };
   return `능력치는 10점 만점이고 근거력+직관력=10, 집중력+분산력=10이다. 정확력이 null이면 아직 채점 전이다.\n\n엔진 산출:\n${JSON.stringify(summary)}`;
 }

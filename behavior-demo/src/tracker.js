@@ -262,8 +262,8 @@ export class Tracker {
       .reduce((a, b) => a + (b.duration_ms || 0), 0)
 
     // --- 파생 지표 --------------------------------------------
-    // 확신도: 판단이 빠르고 정보를 덜 열어볼수록 높음
-    // 탐색도: 판단이 느리고 정보를 많이/깊게 볼수록 높음
+    // 탐색도: 판단이 느리고 정보를 많이/깊게 볼수록 높음. 저장·표시하는 유일한 파생 지표다.
+    // confidence 는 behavior_type 사분면을 가르는 내부 계산값일 뿐 저장하지 않는다.
     const detailOpens = new Set(detailOpenEvents.map((e) => e.ticker)).size
     const viewCount = views.length || 1
     const speedScore = avgSwipeMs == null ? 0.5 : clamp01(1 - (avgSwipeMs - 300) / 2000)
@@ -342,7 +342,6 @@ export class Tracker {
       section_share: sectionShare,
       taps_total: taps.length,
 
-      confidence_index: confidence,
       exploration_index: exploration,
       behavior_type: behaviorType,
       decision_style: decisionStyle,

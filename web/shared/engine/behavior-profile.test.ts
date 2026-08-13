@@ -20,7 +20,6 @@ const buy = (over: Partial<ProfileBuy>): ProfileBuy => ({
   price: 100,
   quantity: 1,
   reason: "buy_news",
-  confidence: 50,
   tradedAt: "2026-08-05T02:00:00.000Z",
   ...over,
 });
@@ -140,7 +139,6 @@ assert.equal(ready.accuracyState, "pending");
 assert.equal(ready.abilities.accuracy, null);
 assert.equal(ready.starGrade, null);
 assert.equal(ready.reasonDistribution.buy_news, 3);
-assert.equal(ready.confidencePattern.average, 50);
 
 // kw_proto_v1 원본 매핑 — 체결만, 단가 도출, 계정 분리, 이벤트 매핑
 const rawState = {
@@ -157,7 +155,6 @@ const rawState = {
       qty: 2,
       order_status: "filled",
       reason_code: "buy_intuition",
-      confidence_raw: 25,
       ts: "2026-08-05T02:00:00.000Z",
     },
     { order_id: "ord_0002", user_id: "child_minji", symbol: "000660", amount_krw: 90_000, qty: 1, order_status: "pending", ts: "2026-08-05T03:00:00.000Z" },
@@ -188,13 +185,12 @@ assert.equal(parsePrototypeProfileInput(null, "child").buys.length, 0);
 
 // F11 시드(Trade) → 엔진 표본
 const seed: Trade[] = [
-  { id: "seed-1", member: "parent", symbol: "005930", side: "buy", quantity: 2, price: 240_000, reason: "이 회사(제품)를 잘 알아", confidence: 75, memo: "", tradedAt: "2026-08-04T01:12:00.000Z" },
+  { id: "seed-1", member: "parent", symbol: "005930", side: "buy", quantity: 2, price: 240_000, reason: "이 회사(제품)를 잘 알아", memo: "", tradedAt: "2026-08-04T01:12:00.000Z" },
   { id: "seed-2", member: "parent", symbol: "011200", side: "sell", quantity: 5, price: 21_400, reason: "목표한 만큼 와서", memo: "", tradedAt: "2026-08-06T04:35:00.000Z" },
   { id: "seed-3", member: "child", symbol: "035420", side: "buy", quantity: 1, price: 90_000, reason: "뉴스에서 봤어", memo: "", tradedAt: "2026-08-07T01:00:00.000Z" },
 ];
 const parentEntries = profileEntriesFromTrades(seed, "parent");
 assert.equal(parentEntries.buys.length, 1);
-assert.equal(parentEntries.buys[0].confidence, 75);
 assert.equal(parentEntries.sells.length, 1);
 assert.equal(profileEntriesFromTrades(seed, "child").buys.length, 1);
 

@@ -756,8 +756,7 @@ function Summary({ tracker, log }) {
         <Row k="가장 오래 본 섹션" v={s.top_section ? SECTION_LABEL[s.top_section] : '—'} />
         <Row k="이름만 매수 비율" v={s.name_only_buy_rate == null ? '—' : pct(s.name_only_buy_rate)} hl />
         <Row k="판단 유형" v={s.decision_style ?? '—'} hl />
-        <Row k="확신 지수" v={s.confidence_index ?? '판정보류 (결정 3건 필요)'} hl />
-        <Row k="탐색 지수" v={s.exploration_index ?? '—'} hl />
+        <Row k="탐색 지수" v={s.exploration_index ?? '판정보류 (결정 3건 필요)'} hl />
         <Row k="행동 유형" v={s.behavior_type ?? '—'} hl />
       </tbody>
     </table>

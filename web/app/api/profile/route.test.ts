@@ -43,7 +43,6 @@ const childState = {
       qty: 2,
       order_status: "filled",
       reason_code: "buy_news",
-      confidence_raw: 25,
       ts: "2026-08-03T02:00:00.000Z",
     },
     {
@@ -54,7 +53,6 @@ const childState = {
       qty: 1,
       order_status: "filled",
       reason_code: "buy_intuition",
-      confidence_raw: 50,
       ts: "2026-08-12T02:00:00.000Z",
     },
     {
@@ -65,7 +63,6 @@ const childState = {
       qty: 1,
       order_status: "filled",
       reason_code: "buy_familiar",
-      confidence_raw: 75,
       ts: "2026-08-12T03:00:00.000Z",
     },
   ],
@@ -100,7 +97,6 @@ async function main() {
   assert.equal(snapshot.abilities.accuracy, null);
   assert.equal(snapshot.accuracyState, "pending");
   assert.equal(snapshot.starGrade, null);
-  assert.equal(snapshot.confidencePattern.average, 54);
   // 시드 병합 증거 — 시드 매수 이유가 분포에 들어온다
   assert.equal(snapshot.reasonDistribution["내가 아는 회사라서"], 1);
   // narrate:false 는 Luna 를 부르지 않고 고정 폴백을 쓴다
