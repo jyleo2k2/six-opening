@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FormEvent,
+  PointerEvent as ReactPointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
 import type {
@@ -19,6 +26,13 @@ import {
   type StandardChatActionPayload,
   type StockExploreActionPayload,
 } from "./lib/contracts";
+import {
+  getPrototypeScreenRect,
+  PROTOTYPE_PHONE,
+  PROTOTYPE_SHEET_HEIGHT,
+  type PrototypeScreenRect,
+  shouldDismissBottomSheet,
+} from "./lib/bottom-sheet";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
@@ -32,6 +46,14 @@ type Message = {
   explainTurn?: ExplainTurn;
   stockExploreTurn?: StockExploreTurn;
   uiAction?: ChatUiAction;
+};
+type SheetDragState = {
+  pointerId: number;
+  startY: number;
+  lastY: number;
+  lastAt: number;
+  offsetY: number;
+  velocityY: number;
 };
 
 const COPY = {
@@ -195,6 +217,10 @@ function MessageBubble({
 export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
   const [screen, setScreen] = useState<Screen>(context?.screen ?? "stock");
   const [isOpen, setIsOpen] = useState(false);
+  const [prototypeScreen, setPrototypeScreen] =
+    useState<PrototypeScreenRect | null>(null);
+  const [sheetDragY, setSheetDragY] = useState(0);
+  const [isSheetDragging, setIsSheetDragging] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
@@ -204,6 +230,7 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
   const [stockExploreAction, setStockExploreAction] =
     useState<StockExploreActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const sheetDragRef = useRef<SheetDragState | null>(null);
   const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
   const recordBehaviorEvent = useChatBehaviorStore((state) => state.recordEvent);
@@ -230,6 +257,18 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
   useEffect(() => {
     if (context) setScreen(context.screen);
   }, [context]);
+
+  useEffect(() => {
+    const syncPrototypeScreen = () => {
+      setPrototypeScreen(
+        getPrototypeScreenRect(window.innerWidth, window.innerHeight),
+      );
+    };
+
+    syncPrototypeScreen();
+    window.addEventListener("resize", syncPrototypeScreen);
+    return () => window.removeEventListener("resize", syncPrototypeScreen);
+  }, []);
 
   useEffect(() => {
     const enteredAt = Date.now();
@@ -291,6 +330,103 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
+  function openChat() {
+    setPrototypeScreen(
+      getPrototypeScreenRect(window.innerWidth, window.innerHeight),
+    );
+    setSheetDragY(0);
+    setIsSheetDragging(false);
+    sheetDragRef.current = null;
+    setIsOpen(true);
+  }
+
+  function closeChat() {
+    setIsOpen(false);
+    setSheetDragY(0);
+    setIsSheetDragging(false);
+    sheetDragRef.current = null;
+  }
+
+  function handleSheetPointerDown(
+    event: ReactPointerEvent<HTMLDivElement>,
+  ) {
+    if (!event.isPrimary || event.button !== 0) return;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    sheetDragRef.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      lastY: event.clientY,
+      lastAt: event.timeStamp,
+      offsetY: 0,
+      velocityY: 0,
+    };
+    setIsSheetDragging(true);
+  }
+
+  function handleSheetPointerMove(
+    event: ReactPointerEvent<HTMLDivElement>,
+  ) {
+    const drag = sheetDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    event.preventDefault();
+    const scale = prototypeScreen?.scale || 1;
+    const offsetY = Math.min(
+      PROTOTYPE_SHEET_HEIGHT,
+      Math.max(0, (event.clientY - drag.startY) / scale),
+    );
+    const elapsed = event.timeStamp - drag.lastAt;
+    if (elapsed > 0) {
+      const sampleVelocity =
+        ((event.clientY - drag.lastY) / elapsed / scale) * 1_000;
+      drag.velocityY = drag.velocityY * 0.65 + sampleVelocity * 0.35;
+    }
+    drag.lastY = event.clientY;
+    drag.lastAt = event.timeStamp;
+    drag.offsetY = offsetY;
+    setSheetDragY(offsetY);
+  }
+
+  function finishSheetDrag(
+    event: ReactPointerEvent<HTMLDivElement>,
+    cancelled = false,
+  ) {
+    const drag = sheetDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const scale = prototypeScreen?.scale || 1;
+    const offsetY = Math.min(
+      PROTOTYPE_SHEET_HEIGHT,
+      Math.max(0, (event.clientY - drag.startY) / scale),
+    );
+    const elapsed = event.timeStamp - drag.lastAt;
+    const velocityY =
+      elapsed > 0
+        ? drag.velocityY * 0.65 +
+          ((event.clientY - drag.lastY) / elapsed / scale) * 1_000 * 0.35
+        : drag.velocityY;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    sheetDragRef.current = null;
+    setIsSheetDragging(false);
+
+    if (
+      !cancelled &&
+      shouldDismissBottomSheet({
+        distance: offsetY,
+        velocity: velocityY,
+      })
+    ) {
+      closeChat();
+      return;
+    }
+
+    setSheetDragY(0);
+  }
+
   async function ask(
     question: string,
     explainChoiceId?: string,
@@ -311,7 +447,7 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
       { role: "user", text: question },
       { role: "assistant", text: "" },
     ]);
-    setIsOpen(true);
+    openChat();
     setInput("");
     setStatus("질문을 보내는 중");
     setExplainAction(null);
@@ -471,7 +607,7 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
 
   function handleUiAction(action: ChatUiAction) {
     setScreen(action.target);
-    setIsOpen(false);
+    closeChat();
     setStatus(`${SCREENS[action.target].label} 화면으로 이동했어요`);
   }
 
@@ -585,7 +721,7 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
               className="rounded-xl bg-navy px-2 py-3 text-white"
               onClick={() => {
                 acceptActiveSignal();
-                setIsOpen(true);
+                openChat();
               }}
               type="button"
             >
@@ -605,108 +741,160 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
       <button
         aria-label={COPY.openChat}
         className="fixed bottom-5 left-1/2 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
-        onClick={() => setIsOpen(true)}
+        onClick={openChat}
         type="button"
       >
         {COPY.avatar}
       </button>
 
-      {isOpen && (
-        <section
-          aria-label={COPY.title}
-          className="fixed inset-x-0 bottom-0 z-30 mx-auto flex h-[min(72dvh,720px)] max-w-[430px] flex-col overflow-hidden rounded-t-[24px] bg-white shadow-2xl"
+      {isOpen && prototypeScreen && (
+        <div
+          className="pointer-events-auto fixed z-30 overflow-hidden"
+          style={{
+            left: prototypeScreen.left,
+            top: prototypeScreen.top,
+            width: prototypeScreen.width,
+            height: prototypeScreen.height,
+            borderRadius: 40 * prototypeScreen.scale,
+          }}
         >
-          <div className="flex shrink-0 items-center justify-between border-b border-gray/40 px-5 py-4">
-            <div>
-              <p className="text-base font-bold text-navy">{COPY.title}</p>
-              <p className="mt-0.5 text-xs text-ink/60">{COPY.subtitle}</p>
-              <p className="mt-1 text-xs text-ink/60">{COPY.aiNotice}</p>
-            </div>
-            <button
-              className="rounded-lg px-3 py-2 text-sm font-semibold text-ink"
-              onClick={() => setIsOpen(false)}
-              type="button"
+          <button
+            aria-label={COPY.close}
+            className="absolute inset-0 z-0 cursor-default bg-navy/20 backdrop-blur-[1px]"
+            onClick={closeChat}
+            type="button"
+          />
+
+          <section
+            aria-labelledby="kiwoong-chat-title"
+            aria-modal="true"
+            className={`absolute bottom-0 left-0 z-10 flex flex-col overflow-hidden rounded-t-[28px] bg-white shadow-2xl ${
+              isSheetDragging
+                ? ""
+                : "transition-transform duration-200 ease-out motion-reduce:transition-none"
+            }`}
+            role="dialog"
+            style={{
+              width: PROTOTYPE_PHONE.screenWidth,
+              height: PROTOTYPE_SHEET_HEIGHT,
+              transform: `scale(${prototypeScreen.scale}) translateY(${sheetDragY}px)`,
+              transformOrigin: "bottom left",
+              willChange: "transform",
+            }}
+          >
+            <div
+              className="flex h-7 shrink-0 touch-none cursor-grab items-center justify-center active:cursor-grabbing"
+              onPointerCancel={(event) => finishSheetDrag(event, true)}
+              onPointerDown={handleSheetPointerDown}
+              onPointerMove={handleSheetPointerMove}
+              onPointerUp={finishSheetDrag}
             >
-              {COPY.close}
-            </button>
-          </div>
-
-          <div ref={messagesRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
-            {messages.length === 0 && (
-              <MessageBubble
-                message={{ role: "assistant", text: COPY.greeting }}
-                onAction={handleUiAction}
-                onQuestion={(question) => {
-                  if (!isLoading) void ask(question);
-                }}
-                onExplainChoice={(choice) => {
-                  if (!isLoading) void ask(choice.label, choice.id);
-                }}
-                onStockExploreChoice={(question, choiceId) => {
-                  if (!isLoading) void ask(question, undefined, choiceId);
-                }}
-                actionsDisabled={isLoading}
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-12 rounded-full bg-gray/60"
               />
-            )}
-            {messages.map((message, index) => (
-              <MessageBubble
-                key={index}
-                message={message}
-                onAction={handleUiAction}
-                onQuestion={(question) => {
-                  if (!isLoading) void ask(question);
-                }}
-                onExplainChoice={(choice) => {
-                  if (!isLoading) void ask(choice.label, choice.id);
-                }}
-                onStockExploreChoice={(question, choiceId) => {
-                  if (!isLoading) void ask(question, undefined, choiceId);
-                }}
-                actionsDisabled={isLoading || index !== messages.length - 1}
-              />
-            ))}
-          </div>
+            </div>
 
-          <div className="shrink-0 border-t border-gray/40 px-4 py-3">
-            <p className="mb-3 rounded-xl bg-bg px-3 py-2 text-xs text-ink/70">
-              <span className="font-semibold text-navy">{COPY.status}: </span>
-              {status}
-            </p>
-            <p className="mb-2 text-xs font-semibold text-navy">
-              {COPY.recommended}
-            </p>
-            <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-              {currentScreen.chips.map((question) => (
-                <button
-                  className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
-                  key={question}
-                  disabled={isLoading}
-                  onClick={() => void ask(question)}
-                  type="button"
+            <div className="flex shrink-0 items-center justify-between border-b border-gray/40 px-5 pb-4">
+              <div>
+                <p
+                  className="text-base font-bold text-navy"
+                  id="kiwoong-chat-title"
                 >
-                  {question}
-                </button>
+                  {COPY.title}
+                </p>
+                <p className="mt-0.5 text-xs text-ink/60">{COPY.subtitle}</p>
+                <p className="mt-1 text-xs text-ink/60">{COPY.aiNotice}</p>
+              </div>
+              <button
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-ink"
+                onClick={closeChat}
+                type="button"
+              >
+                {COPY.close}
+              </button>
+            </div>
+
+            <div
+              ref={messagesRef}
+              className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4"
+            >
+              {messages.length === 0 && (
+                <MessageBubble
+                  message={{ role: "assistant", text: COPY.greeting }}
+                  onAction={handleUiAction}
+                  onQuestion={(question) => {
+                    if (!isLoading) void ask(question);
+                  }}
+                  onExplainChoice={(choice) => {
+                    if (!isLoading) void ask(choice.label, choice.id);
+                  }}
+                  onStockExploreChoice={(question, choiceId) => {
+                    if (!isLoading) void ask(question, undefined, choiceId);
+                  }}
+                  actionsDisabled={isLoading}
+                />
+              )}
+              {messages.map((message, index) => (
+                <MessageBubble
+                  key={index}
+                  message={message}
+                  onAction={handleUiAction}
+                  onQuestion={(question) => {
+                    if (!isLoading) void ask(question);
+                  }}
+                  onExplainChoice={(choice) => {
+                    if (!isLoading) void ask(choice.label, choice.id);
+                  }}
+                  onStockExploreChoice={(question, choiceId) => {
+                    if (!isLoading) void ask(question, undefined, choiceId);
+                  }}
+                  actionsDisabled={isLoading || index !== messages.length - 1}
+                />
               ))}
             </div>
 
-            <form className="flex gap-2" onSubmit={submit}>
-              <input
-                aria-label={COPY.input}
-                className="min-w-0 flex-1 rounded-xl bg-bg px-3 py-3 text-sm outline-none ring-magenta focus:ring-2"
-                onChange={(event) => setInput(event.target.value)}
-                placeholder={COPY.input}
-                value={input}
-              />
-              <button
-                className="rounded-xl bg-magenta px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
-                disabled={!input.trim() || isLoading}
-                type="submit"
-              >
-                {COPY.send}
-              </button>
-            </form>
-          </div>
-        </section>
+            <div className="shrink-0 border-t border-gray/40 px-4 py-3">
+              <p className="mb-3 rounded-xl bg-bg px-3 py-2 text-xs text-ink/70">
+                <span className="font-semibold text-navy">{COPY.status}: </span>
+                {status}
+              </p>
+              <p className="mb-2 text-xs font-semibold text-navy">
+                {COPY.recommended}
+              </p>
+              <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+                {currentScreen.chips.map((question) => (
+                  <button
+                    className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                    key={question}
+                    disabled={isLoading}
+                    onClick={() => void ask(question)}
+                    type="button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+
+              <form className="flex gap-2" onSubmit={submit}>
+                <input
+                  aria-label={COPY.input}
+                  className="min-w-0 flex-1 rounded-xl bg-bg px-3 py-3 text-sm outline-none ring-magenta focus:ring-2"
+                  onChange={(event) => setInput(event.target.value)}
+                  placeholder={COPY.input}
+                  value={input}
+                />
+                <button
+                  className="rounded-xl bg-magenta px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
+                  disabled={!input.trim() || isLoading}
+                  type="submit"
+                >
+                  {COPY.send}
+                </button>
+              </form>
+            </div>
+          </section>
+        </div>
       )}
     </main>
   );
