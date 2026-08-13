@@ -85,6 +85,54 @@ type RuleKind =
   | "execution"
   | "socialSource";
 
+type OfftopicKind =
+  | "schoolwork"
+  | "schoolLife"
+  | "game"
+  | "videoSocial"
+  | "entertainment"
+  | "career"
+  | "coding";
+
+type TermKind =
+  | "marketBasics"
+  | "profitLoss"
+  | "valuation"
+  | "orderConcept"
+  | "industryConcept"
+  | "causality"
+  | "profileStatistics"
+  | "reasonTag"
+  | "riskStrategy";
+
+type CompanyFactKind =
+  | "game"
+  | "logistics"
+  | "semiconductor"
+  | "defense"
+  | "food"
+  | "energy"
+  | "entertainment"
+  | "retail"
+  | "finance"
+  | "automotive"
+  | "shipbuilding"
+  | "airline"
+  | "cosmetics"
+  | "generalRevenue"
+  | "factCheck"
+  | "universe";
+
+type MetaKind =
+  | "identity"
+  | "persona"
+  | "reliability"
+  | "neutrality"
+  | "system"
+  | "realtime"
+  | "forecastBoundary"
+  | "autonomy";
+
 const SELECTION_PATTERNS = [
   "종목사",
   "무슨종목",
@@ -769,9 +817,26 @@ const SOCIAL_RULE_QUESTION_PATTERNS = [
   "이유로적",
 ];
 const HARMFUL_PATTERNS = ["협박", "때리고", "죽여", "해킹", "시스템지시무시", "프롬프트보여"];
-const OUT_OF_SCOPE_PATTERNS = [
+const SCHOOLWORK_PATTERNS = [
   "숙제",
-  "게임공략",
+  "과제",
+  "수행평가",
+  "독후감",
+  "단어시험",
+  "발표대본",
+  "발표문",
+  "발표준비",
+  "분수문제",
+  "수학문제",
+  "확률문제",
+  "평균계산",
+  "중앙값차이",
+  "조선왕순서",
+];
+const SCHOOL_LIFE_PATTERNS = [
+  "학교준비물",
+  "학교급식",
+  "급식메뉴",
   "날씨",
   // 음악·영상 감상
   // 통짜 "노래"·"영화"는 엔터 4종(하이브·에스엠·JYP·와이지)의 사업 질문까지 막았다.
@@ -786,48 +851,97 @@ const OUT_OF_SCOPE_PATTERNS = [
   "영화보고싶",
   "재밌는영화",
   // 게임 플레이·놀이
+  "선생님이뭐라",
+  "선생님화내",
+  "숙제안하고친구랑게임하면혼나",
+];
+const GAME_PATTERNS = [
+  "게임",
   "끝말잇기",
+  "마크에서",
+  "마크공략",
+  "마인크래프트",
   "다이아빨리캐",
-  "롤에서제일센캐릭터",
-  "롤티어빨리올리는",
-  "게임은몇시까지",
-  "게임업데이트날짜",
+  "롤에서",
+  "롤티어",
   "브롤스타즈",
-  "레드스톤자동문",
-  "함대키우는법",
-  "시뮬레이션게임의확률계산",
-  "게임대회결승",
-  "크래프톤게임뭐가제일재밌",
-  // 영상·SNS
+  "레드스톤",
+  "함대키우",
+  "시뮬레이션게임",
+  "이스포츠",
+  "e스포츠",
+  "캐릭터",
+  "캐릭뭐",
+  "캐릭추천",
+  "게임닉네임",
+];
+const VIDEO_SOCIAL_PATTERNS = [
   "유튜브",
   "틱톡",
-  // 학교·진로
-  "학교준비물",
-  "분수문제",
-  "단어시험",
-  "수행평가",
-  "발표대본",
-  "취업하려면",
-  "인턴하려면",
-  "파이썬으로",
-  "학교급식",
-  // 비금융 오락
+  "인스타",
+  "쇼츠",
+  "sns",
+  "영상",
+  "구독자",
+  "조회수",
+  "팔로워",
+  "영상분석",
+  "영상내용",
+  "레시피영상",
+  "수익인증영상",
+];
+const ENTERTAINMENT_PATTERNS = [
+  "노래",
+  "신곡",
   "웹툰",
-  "아이돌예능",
-  "넷플릭스새드라마",
+  "아이돌",
+  "예능",
+  "영화",
+  "드라마",
+  "넷플릭스",
+  "춤이름",
+  "신곡안무",
+  "전투기이름",
+];
+const CAREER_PATTERNS = [
+  "취업하려면",
+  "취업준비",
+  "인턴하려면",
+  "인턴준비",
+  "입사하려면",
+  "진로",
+  "직업추천",
+];
+const CODING_PATTERNS = [
+  "파이썬으로",
+  "코드짜",
+  "코드작성",
+  "코딩으로",
+  "프로그래밍으로",
 ];
 const RECORD_PATTERNS = ["내기록", "내거래", "지난거래", "왜골랐", "거래이유", "내보유기간"];
 const PROFILE_PATTERNS = ["내성향", "투자성향", "성향분석", "나는어떤투자"];
 const ARCHIVE_PATTERNS = ["내아카이브", "지난시즌", "시즌기록", "시즌변화", "예전기록"];
 const STOCK_PATTERNS = [
   "이회사",
+  "현재회사",
+  "보고있는회사",
+  "회사는",
+  "회사에서",
   "무슨회사",
   "회사뭐",
   "이종목",
   "무엇을만들",
+  "만들",
   "어떤일을해",
   "뭐하는",
   "뭐임",
+  "운영",
+  "서비스",
+  "판매",
+  "정비",
+  "공연",
+  "영상",
   "돈을벌",
   "돈벌",
   "수익구조",
@@ -838,8 +952,21 @@ const STOCK_PATTERNS = [
   "영업이익",
   "순이익",
 ];
-const STOCK_BUSINESS_PATTERNS = ["돈을벌", "돈벌", "수익구조", "어떻게벌"];
-const STOCK_INDUSTRY_PATTERNS = ["업종", "산업", "역할"];
+const STOCK_BUSINESS_PATTERNS = [
+  "돈을벌",
+  "돈벌",
+  "수익구조",
+  "어떻게벌",
+  "정비",
+  "대가를받",
+];
+const STOCK_INDUSTRY_PATTERNS = [
+  "업종",
+  "산업",
+  "역할",
+  "퍼블리싱",
+  "배급",
+];
 const STOCK_FINANCIAL_PATTERNS = [
   "실적",
   "매출",
@@ -848,6 +975,80 @@ const STOCK_FINANCIAL_PATTERNS = [
   "재무",
   "2024",
 ];
+const COMPANY_FACT_QUERY_PATTERNS = [
+  "뭐",
+  "뭘",
+  "무슨",
+  "어떤",
+  "어떻게",
+  "맞지",
+  "맞아",
+  "같아",
+  "같은",
+  "아니",
+  "달라",
+  "차이",
+  "만들",
+  "운영",
+  "서비스",
+  "역할",
+  "돈벌",
+  "돈을벌",
+  "수익",
+  "수입",
+  "과정",
+  "순서",
+  "어디서",
+  "사와",
+  "비교",
+  "있어",
+  "맡아",
+  "다뤄",
+  "직접",
+  "출시",
+  "정비",
+  "창고",
+  "제품",
+  "산업",
+  "실적",
+  "판매",
+  "팔아",
+  "이어져",
+  "연결",
+];
+const COMPANY_FACT_SECTOR_PATTERNS: Record<
+  Exclude<CompanyFactKind, "generalRevenue" | "factCheck" | "universe">,
+  readonly string[]
+> = {
+  game: [
+    "게임회사",
+    "게임사",
+    "게임주",
+    "게임산업",
+    "게임개발",
+    "퍼블리셔",
+    "퍼블리싱",
+  ],
+  logistics: ["물류회사", "물류사", "물류종목", "택배회사", "택배사", "해운회사"],
+  semiconductor: ["반도체회사", "반도체기업", "반도체업체", "반도체산업", "칩회사"],
+  defense: ["방산기업", "방산회사", "방산사", "국방기업"],
+  food: ["식품회사", "식품기업", "식품업체", "제과회사"],
+  energy: ["에너지회사", "에너지기업", "전력회사", "발전회사", "발전소"],
+  entertainment: ["엔터회사", "엔터사", "엔터테인먼트회사", "연예기획사"],
+  retail: ["유통회사", "유통사", "유통기업", "쇼핑몰", "판매회사"],
+  finance: ["은행", "증권사", "금융회사", "금융사", "금융기업"],
+  automotive: [
+    "자동차회사",
+    "자동차기업",
+    "자동차업체",
+    "완성차회사",
+    "자동차부품회사",
+    "차판매량",
+  ],
+  shipbuilding: ["조선회사", "조선사", "조선소", "조선기업"],
+  airline: ["항공회사", "항공사", "항공운송회사"],
+  cosmetics: ["화장품회사", "화장품기업", "화장품업체", "뷰티회사", "뷰티기업"],
+};
 const CHAT_PRIVACY_PATTERNS = [
   "너랑한얘기",
   "나눈얘기",
@@ -949,9 +1150,8 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 
   const proxyAction =
     includesAny(message, PROXY_ACTION_PATTERNS) ||
-    /(?:네가|키웅이가|내대신).{0,10}(?:주문|매수|매도|버튼).{0,8}(?:해줘|눌러)/.test(
-      message,
-    );
+    /(?:네가|키웅이가|내대신).{0,10}(?:주문|매수|매도|버튼).{0,8}(?:해줘|눌러)/.test(message) ||
+    /(?:네가|키웅이가|내대신).{0,20}(?:사줘|팔아줘|주문해줘|매수해줘|매도해줘)/.test(message);
   if (proxyAction) return "proxyAction";
 
   const impulsiveTrade =
@@ -965,7 +1165,9 @@ function findUnsafeKind(message: string): UnsafeKind | null {
     includesAny(message, ETHICAL_DISTRESS_PATTERNS) ||
     (message.includes("전쟁") &&
       includesAny(message, ["이익", "돈벌", "수익"]) &&
-      includesAny(message, ["찜찜", "불편", "마음", "맞나", "옳"]));
+      includesAny(message, ["찜찜", "불편", "마음", "맞나", "옳"])) ||
+    (message.includes("방산투자") &&
+      includesAny(message, ["찜찜", "불편", "마음이무거", "옳은지"]));
   if (ethicalDistress) return "ethicalDistress";
 
   const familyPressure =
@@ -987,9 +1189,12 @@ function findUnsafeKind(message: string): UnsafeKind | null {
   const familyVisibilityQuestion =
     includesAny(message, FAMILY_MEMBER_PATTERNS) &&
     includesAny(message, ["알림", "푸시", "화면", "공개", "보여"]);
+  const ordinarySchoolConcern =
+    message.includes("숙제") && includesAny(message, ["게임", "놀", "선생님"]);
   if (
     familyPressure &&
     !familyVisibilityQuestion &&
+    !ordinarySchoolConcern &&
     !includesAny(message, SIZING_PATTERNS)
   ) {
     return "familyPressure";
@@ -1032,7 +1237,14 @@ function findRecommendationKind(message: string): RecommendationKind | null {
     ]);
   if (asksForSelectionCriteria) return null;
 
-  const selection = includesAny(message, SELECTION_PATTERNS);
+  const selection =
+    includesAny(message, SELECTION_PATTERNS) ||
+    includesAny(message, [
+      "뭐가제일좋",
+      "뭐가가장좋",
+      "제일좋은종목",
+      "가장좋은종목",
+    ]);
   const prediction =
     includesAny(message, PREDICTION_PATTERNS) ||
     /(?:목표가|손절가)(?:를|가)?(?:알려|정해|찍|얼마)/.test(message) ||
@@ -1041,6 +1253,11 @@ function findRecommendationKind(message: string): RecommendationKind | null {
         includesAny(message, VAGUE_FORECAST_PATTERNS)));
   const timing = includesAny(message, TIMING_PATTERNS);
   const risk = includesAny(message, RISK_AND_POPULARITY_PATTERNS);
+  const automaticBestReturnSelection =
+    includesAny(message, ["자동", "앱이"]) &&
+    includesAny(message, ["제일수익", "최고수익", "수익좋은"]) &&
+    includesAny(message, ["종목", "주식"]) &&
+    includesAny(message, ["사주", "구매", "매수", "골라", "선택", "기능"]);
 
   const amountAllocation = /\d+(?:만)?원.*(?:어디|얼마|전부|넣)/.test(message);
   const shareQuantity = /(?:\d+|한)주(?:만)?.*(?:사|담|매수)/.test(message);
@@ -1068,6 +1285,7 @@ function findRecommendationKind(message: string): RecommendationKind | null {
   if (includesAny(message, METRIC_PATTERNS) && (selection || prediction || timing)) {
     return "metric";
   }
+  if (automaticBestReturnSelection) return "selection";
   if (timing) return "timing";
   if (prediction) return "prediction";
   if (risk) return "risk";
@@ -1077,7 +1295,10 @@ function findRecommendationKind(message: string): RecommendationKind | null {
 
 function findRuleKind(message: string, context: ChatContext): RuleKind | null {
   const visibilityRule =
-    includesAny(message, VISIBILITY_RULE_PATTERNS) &&
+    (includesAny(message, VISIBILITY_RULE_PATTERNS) ||
+      (includesAny(message, ["부모", "부모님", "보호자"]) &&
+        includesAny(message, ["알림", "푸시"]) &&
+        includesAny(message, ["바로", "즉시"]))) &&
     includesAny(message, [
       "종목",
       "성향",
@@ -1100,7 +1321,12 @@ function findRuleKind(message: string, context: ChatContext): RuleKind | null {
       includesAny(message, ["이거꼭해야돼", "이거꼭해야해", "이거안해도돼"]));
   if (participationRule) return "participation";
 
-  if (includesAny(message, RECORD_RETENTION_PATTERNS)) return "recordRetention";
+  const requiredRecordReview =
+    includesAny(message, ["기록", "아카이브"]) &&
+    includesAny(message, ["꼭봐야", "확인해야", "봐야해", "보는게의무", "열어봐야"]);
+  if (includesAny(message, RECORD_RETENTION_PATTERNS) || requiredRecordReview) {
+    return "recordRetention";
+  }
 
   const costRule =
     includesAny(message, COST_RULE_PATTERNS) &&
@@ -1119,7 +1345,7 @@ function findRuleKind(message: string, context: ChatContext): RuleKind | null {
 
   const styleScoringRule =
     message.includes("성향") &&
-    includesAny(message, ["3주차", "기록만으로", "확정", "계산"]);
+    includesAny(message, ["3주차", "기록만으로", "확정"]);
   const explicitRankingRecommendation =
     includesAny(message, SELECTION_PATTERNS) ||
     includesAny(message, PREDICTION_PATTERNS) ||
@@ -1150,11 +1376,650 @@ function findRuleKind(message: string, context: ChatContext): RuleKind | null {
   return null;
 }
 
+function findOfftopicKind(
+  message: string,
+  recommendationKind: RecommendationKind | null,
+): OfftopicKind | null {
+  const explicitInvestmentDecision =
+    recommendationKind !== null &&
+    includesAny(message, [
+      "종목",
+      "주식",
+      "주가",
+      "매수",
+      "매도",
+      "보유",
+      "방산주",
+      "게임주",
+      "유통주",
+      "자동차주",
+      "사도돼",
+      "사도되",
+      "사야",
+      "뭐살",
+      "뭘살",
+      "팔아",
+      "팔까",
+      "들고",
+      "손절",
+      "목표가",
+      "투자할",
+      "가진돈",
+      "돈전부",
+      "넣을래",
+      "어디에넣",
+    ]);
+  if (explicitInvestmentDecision) return null;
+
+  const companyFactQuestion =
+    (findMentionedStock(message) !== undefined ||
+      includesAny(message, [
+        "이회사",
+        "현재회사",
+        "보고있는회사",
+        "게임회사",
+        "게임주",
+        "영상회사",
+        "엔터회사",
+        "엔터테인먼트회사",
+        "금융회사",
+        "증권사",
+      ])) &&
+    includesAny(message, [
+      "어떤회사",
+      "뭐하는",
+      "어떤일",
+      "만들어",
+      "만드는",
+      "돈을벌",
+      "돈벌",
+      "수익구조",
+      "사업",
+      "제품",
+      "서비스",
+      "산업",
+      "역할",
+      "운영",
+      "개발",
+      "퍼블리싱",
+      "배급",
+      "영상",
+      "공연",
+      "음악",
+      "가수",
+      "과자",
+      "화물",
+      "정비",
+      "반도체",
+      "출처",
+      "직접",
+      "실적",
+      "매출",
+    ]);
+  if (companyFactQuestion) return null;
+
+  const financialConceptQuestion =
+    includesAny(message, [
+      "주식",
+      "주가",
+      "수익률",
+      "변동성",
+      "per",
+      "pbr",
+      "예대마진",
+      "평가손익",
+      "분산투자",
+    ]) &&
+    includesAny(message, ["뭐", "뜻", "차이", "설명", "계산"]) &&
+    !includesAny(message, [
+      "수학",
+      "국어",
+      "영어",
+      "과학",
+      "역사",
+      "사회",
+      "답만",
+      "문제",
+      "독후감",
+      "발표",
+      "수행평가",
+    ]);
+  if (financialConceptQuestion) return null;
+
+  if (includesAny(message, SCHOOL_LIFE_PATTERNS)) return "schoolLife";
+  if (includesAny(message, SCHOOLWORK_PATTERNS)) return "schoolwork";
+  if (includesAny(message, VIDEO_SOCIAL_PATTERNS)) return "videoSocial";
+  if (
+    message.includes("게임") &&
+    includesAny(message, ["재밌", "추천", "공략", "캐릭터"])
+  ) {
+    return "game";
+  }
+  if (includesAny(message, GAME_PATTERNS)) return "game";
+  if (includesAny(message, CAREER_PATTERNS)) return "career";
+  if (includesAny(message, CODING_PATTERNS)) return "coding";
+  if (includesAny(message, ENTERTAINMENT_PATTERNS)) return "entertainment";
+  return null;
+}
+
+function findMetaKind(
+  message: string,
+  recommendationKind: RecommendationKind | null,
+): MetaKind | null {
+  const asksWhyNoRecommendation = includesAny(message, [
+    "왜추천안",
+    "추천을안",
+    "추천하지않",
+    "추천못",
+    "추천은못",
+    "못추천",
+    "왜못골",
+    "왜안골",
+    "못고른다고",
+    "종목을안골라",
+  ]);
+  const asksWhyNoForecast =
+    includesAny(message, ["없어", "없는", "빼", "제외", "안넣", "말안"]) &&
+    includesAny(message, ["앞으로", "미래", "전망", "잘될", "오를거", "예측"]) &&
+    (message.includes("왜") ||
+      includesAny(message, ["회사설명", "회사소개", "설명에는", "답변", "답에서", "이야기", "말"]));
+  const asksForInternalDetails = includesAny(message, [
+    "내부코드",
+    "상태머신",
+    "시스템프롬프트",
+    "숨은프롬프트",
+    "원문프롬프트",
+    "내부로직",
+    "추론과정",
+  ]);
+  const asksAboutHumanResponder = includesAny(message, [
+    "뒤에서사람",
+    "사람이뒤에서",
+    "사람이답쓰",
+    "사람이채팅",
+  ]);
+  if (
+    recommendationKind &&
+    !asksWhyNoRecommendation &&
+    !asksWhyNoForecast &&
+    !asksForInternalDetails &&
+    !asksAboutHumanResponder
+  ) {
+    return null;
+  }
+
+  const hasMetaActor = includesAny(message, [
+    "너",
+    "네답",
+    "네가",
+    "키웅이",
+    "ai",
+    "인공지능",
+    "챗봇",
+    "프로그램",
+  ]);
+
+  const asksAboutAutonomy =
+    includesAny(message, [
+      "강제로계속",
+      "계속시키",
+      "그만두고싶",
+      "대화그만",
+      "대화끝",
+      "대화를바로끄",
+      "대화를바로끌",
+      "대화끌수",
+      "챗봇끄",
+      "멈출수",
+    ]) &&
+    (hasMetaActor || message.includes("대화"));
+  if (asksAboutAutonomy) return "autonomy";
+
+  const asksAboutRealtime =
+    (message.includes("실시간") &&
+      includesAny(message, ["주가", "시세", "뉴스", "찾", "보는", "보고"])) ||
+    (message.includes("뉴스") &&
+      includesAny(message, ["오늘올라온", "방금뜬", "최신"]) &&
+      includesAny(message, ["찾", "검색", "알려", "볼수", "가능"])) ||
+    (includesAny(message, [
+      "어디서가져와",
+      "숫자출처",
+      "데이터출처",
+      "출처가뭐",
+      "출처와갱신",
+      "기준일",
+      "갱신시각",
+    ]) &&
+      includesAny(message, ["per", "주가", "시세", "이익", "숫자", "앱"]));
+  if (asksAboutRealtime) return "realtime";
+
+  if (asksWhyNoForecast) return "forecastBoundary";
+
+  const asksAboutReliability =
+    includesAny(message, [
+      "틀리",
+      "틀릴",
+      "오답",
+      "실수",
+      "믿고",
+      "믿어도",
+      "책임",
+    ]) &&
+    (hasMetaActor || includesAny(message, ["이답", "답변", "설명을", "누가책임"]));
+  if (asksAboutReliability) return "reliability";
+
+  const asksAboutNeutrality =
+    includesAny(message, [
+      "편드는",
+      "편들어",
+      "누구편",
+      "어느편",
+      "편이야",
+      "편인챗봇",
+      "편향",
+      "중립",
+      "솔직한의견",
+      "시킨말",
+      "찬성하는",
+      "찬성해",
+      "반대하는",
+    ]) &&
+    (hasMetaActor || message.includes("편향"));
+  if (asksAboutNeutrality) return "neutrality";
+
+  const asksAboutSystem =
+    (includesAny(message, ["답변", "답하는", "말하는"]) &&
+      includesAny(message, ["어떤근거", "무슨근거", "답변근거", "무슨자료", "어떤자료", "정보는어디서", "만드는인공지능"])) ||
+    (message.includes("질문") && includesAny(message, ["의도분류", "종류를어떻게나누", "어떤규칙", "분류해"])) ||
+    asksForInternalDetails ||
+    (hasMetaActor &&
+      includesAny(message, [
+        "계산기처럼",
+        "숫자만비교",
+        "회사내용도판단",
+        "엔진이계산",
+        "임의로계산",
+      ])) ||
+    (includesAny(message, ["내데이터", "내기록"]) &&
+      includesAny(message, ["통계", "직접계산", "마음대로분석", "분석하는ai", "어떻게사용"]));
+  if (asksAboutSystem) return "system";
+
+  const asksAboutIdentity =
+    (includesAny(message, [
+      "사람아니",
+      "사람인가",
+      "사람임",
+      "ai임",
+      "ai야",
+      "로봇임",
+      "프로그램인가",
+      "프로그램이야",
+      "실제증권사상담원",
+      "진짜키웅이",
+      "키웅이맞",
+    ]) &&
+    hasMetaActor) ||
+    asksAboutHumanResponder;
+  if (asksAboutIdentity) return "identity";
+
+  const asksAboutPersona =
+    includesAny(message, ["키웅이이름", "키웅이라는이름"]) ||
+    (hasMetaActor &&
+      includesAny(message, [
+        "하기싫",
+        "기분",
+        "감정",
+        "아이돌팬",
+        "최애",
+        "돈벌어본",
+        "투자직접해본",
+        "투자해본",
+        "거래해본",
+        "주식들고",
+        "보유종목",
+        "계좌있",
+        "추천하는척",
+      ])) ||
+    asksWhyNoRecommendation;
+  if (asksAboutPersona) return "persona";
+
+  return null;
+}
+
+function findCompanyFactKind(message: string): CompanyFactKind | null {
+  if (findRecommendationKind(message)) return null;
+  if (
+    includesAny(message, [
+      "숙제",
+      "과제",
+      "수행평가",
+      "취업",
+      "인턴",
+      "진로",
+      "게임공략",
+      "캐릭터",
+      "재밌",
+      "추천",
+    ])
+  ) {
+    return null;
+  }
+
+  const asksToCheckNewsFact =
+    message.includes("뉴스") &&
+    includesAny(message, ["진짜", "사실", "공식", "맞는지", "확인", "검증"]);
+  if (asksToCheckNewsFact) return "factCheck";
+
+  const asksAboutSupportedFinancialCompanies =
+    includesAny(message, ["우리종목", "지원종목", "종목중", "목록에", "리스트에"]) &&
+    includesAny(message, ["금융회사", "금융사", "증권사", "은행말고"]);
+  if (asksAboutSupportedFinancialCompanies) return "universe";
+
+  if (
+    includesAny(message, [
+      "예대마진",
+      "이자수익이랑주가",
+      "이자수익과주가",
+      "ipo",
+    ]) ||
+    (message.includes("증권사") && !message.includes("은행"))
+  ) {
+    return null;
+  }
+
+  const hasExplicitCompany = findMentionedStock(message) !== undefined;
+  const hasScreenCompany = includesAny(message, [
+    "이회사",
+    "이종목",
+    "현재회사",
+    "보고있는회사",
+  ]);
+  if (hasExplicitCompany || hasScreenCompany) return null;
+
+  if (
+    includesAny(message, [
+      "회사는누가돈",
+      "회사에누가돈",
+      "회사가누구한테돈",
+      "회사는어떻게수익",
+      "회사는어떻게돈",
+      "회사는뭘팔아",
+    ])
+  ) {
+    return "generalRevenue";
+  }
+
+  if (!includesAny(message, COMPANY_FACT_QUERY_PATTERNS)) return null;
+  for (const [kind, patterns] of Object.entries(COMPANY_FACT_SECTOR_PATTERNS)) {
+    if (includesAny(message, patterns)) return kind as CompanyFactKind;
+  }
+  return null;
+}
+
+function findTermKind(message: string): TermKind | null {
+  if (
+    includesAny(message, [
+      "숙제",
+      "과제",
+      "수행평가",
+      "독후감",
+      "단어시험",
+      "발표대본",
+      "발표문",
+      "발표준비",
+      "분수문제",
+      "수학문제",
+      "확률문제",
+      "조선왕순서",
+    ])
+  ) {
+    return null;
+  }
+
+  const asksForDecision =
+    includesAny(message, [
+      "골라",
+      "뽑아",
+      "추천",
+      "종목정해",
+      "사도돼",
+      "사도되",
+      "사야",
+      "매수할까",
+      "매도할까",
+      "몇주사",
+      "얼마넣",
+      "비중",
+      "목표가정",
+      "손절가정",
+    ]) &&
+    !includesAny(message, ["뜻", "뭐야", "뭐였지", "같은", "차이", "계산", "맞아"]);
+  if (asksForDecision) return null;
+
+  if (includesAny(message, ["근거태그", "근거항목", "이유태그"])) return "reasonTag";
+
+  const specificCompanyNews =
+    message.includes("뉴스") && findMentionedStock(message) !== undefined;
+  if (
+    !specificCompanyNews &&
+    includesAny(message, [
+      "성향5축",
+      "성향점수",
+      "위험감수성",
+      "공격성축",
+      "표준편차",
+      "평균이랑중앙값",
+      "평균과중앙값",
+      "평균하고중앙값",
+      "상관관계",
+      "투자행동으로설명",
+      "현재성향유형",
+      "성향유형은어떻게",
+      "판단근거축",
+      "포트폴리오폭",
+      "어떤행동을성향",
+    ])
+  ) {
+    return "profileStatistics";
+  }
+
+  if (
+    includesAny(message, [
+      "손실률",
+      "수익률마이너스",
+      "마이너스면내가진짜돈",
+    ]) ||
+    (/\d+(?:\.\d+)?(?:%|퍼)/.test(message) &&
+      /\d+(?:\.\d+)?(?:만)?원/.test(message))
+  ) {
+    return "profitLoss";
+  }
+
+  const valuationTerm = includesAny(message, [
+    "per",
+    "pbr",
+    "주가수익비율",
+    "주가순자산비율",
+  ]);
+  const asksValuationComparison =
+    (message.includes("per") && message.includes("pbr")) ||
+    includesAny(message, [
+      "무조건저평가",
+      "무조건싼",
+      "무조건저렴",
+      "고평가라고바로",
+      "저평가라고바로",
+      "낮으면",
+      "낮은",
+      "아래면",
+      "업종평균",
+      "적용돼",
+      "적용해",
+      "보면되는",
+      "보면돼",
+      "더믿을",
+      "더정확",
+    ]);
+  if (valuationTerm && asksValuationComparison) {
+    return "valuation";
+  }
+
+  if (
+    (message.includes("시장가") && message.includes("지정가")) ||
+    (message.includes("손절") && includesAny(message, ["뜻", "말은", "뭐야", "의미"]))
+  ) {
+    return "orderConcept";
+  }
+
+  if (
+    message.includes("레버리지") ||
+    message.includes("몰빵이랑") ||
+    (message.includes("분산투자") && includesAny(message, ["수익", "나누", "같은말"]))
+  ) {
+    return "riskStrategy";
+  }
+
+  if (
+    includesAny(message, [
+      "예대마진",
+      "이자수익이랑주가",
+      "이자수익과주가",
+      "칩과메모리",
+      "칩이랑메모리",
+      "증권사가",
+      "증권사는",
+      "ipo",
+    ]) ||
+    (message.includes("은행") &&
+      includesAny(message, ["이자수익", "이자로번", "이자로버는"]) &&
+      message.includes("주가") &&
+      includesAny(message, ["같", "차이", "달라"]))
+  ) {
+    return "industryConcept";
+  }
+
+  if (
+    includesAny(message, [
+      "원래이렇게잘떨어",
+      "주가가내려가면회사",
+      "뉴스뜨면그날바로",
+      "뉴스나오면바로",
+      "에너지가격이내려가면",
+      "원자재가격이내려가면",
+      "기름값이랑꼭같이",
+      "유가랑꼭같이",
+    ]) ||
+    (!specificCompanyNews &&
+      includesAny(message, ["뉴스", "기름값", "유가", "에너지가격", "원자재가격"]) &&
+      includesAny(message, ["주가", "수익률", "자동차주", "관련주"]) &&
+      includesAny(message, [
+        "움직",
+        "영향",
+        "같이",
+        "꼭",
+        "바로",
+        "즉시",
+        "오르",
+        "내리",
+        "떨어",
+      ]))
+  ) {
+    return "causality";
+  }
+
+  if (
+    includesAny(message, [
+      "빨간숫자",
+      "숫자빨간색",
+      "차트위로",
+      "그래프위로",
+      "차트빨간색",
+      "그래프선",
+      "주가가뭐",
+      "현재가와등락률",
+      "현재가랑등락률",
+      "1일봉",
+      "일봉데이터",
+    ])
+  ) {
+    return "marketBasics";
+  }
+
+  return null;
+}
+
 function findStockFactTopic(message: string): StockFactTopic {
   if (includesAny(message, STOCK_FINANCIAL_PATTERNS)) return "financial";
   if (includesAny(message, STOCK_BUSINESS_PATTERNS)) return "business";
   if (includesAny(message, STOCK_INDUSTRY_PATTERNS)) return "industry";
   return "company";
+}
+
+function getExplicitCompanyFactReply(
+  message: string,
+  context: ChatContext,
+): ChatReply | null {
+  if (
+    includesAny(message, [
+      "per",
+      "pbr",
+      "수익률",
+      "주가",
+      "평가손익",
+      "실현손익",
+      "변동성",
+      "시장가",
+      "지정가",
+      "손절",
+      "예대마진",
+    ])
+  ) {
+    return null;
+  }
+
+  const mentionedStock = findMentionedStock(message);
+  const asksAboutScreenCompany = includesAny(message, [
+    "이회사",
+    "이종목",
+    "현재회사",
+    "보고있는회사",
+  ]);
+  const contextStock =
+    asksAboutScreenCompany &&
+    (context.screen === "stock" || context.screen === "order")
+      ? STOCKS.find((stock) => stock.id === context.stockId)
+      : undefined;
+  const stock = mentionedStock ?? contextStock;
+  if (!stock) return null;
+
+  const asksForFact =
+    includesAny(message, COMPANY_FACT_QUERY_PATTERNS) ||
+    includesAny(message, [
+      "회사",
+      "사업",
+      "업종",
+      "산업",
+      "제품",
+      "서비스",
+      "실적",
+      "매출",
+      "영업이익",
+      "순이익",
+      "퍼블리싱",
+      "배급",
+      "정비",
+      "공연",
+      "영상",
+    ]);
+  if (!asksForFact) return null;
+
+  return reply("tool", "stock_facts", "", ["승인 종목 사실 조회"], {
+    tool: "approved_stock_facts",
+    stockFact: {
+      stockId: stock.id,
+      topic: findStockFactTopic(message),
+    },
+  });
 }
 
 function reply(
@@ -1255,6 +2120,9 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
   const anxietyText = includesAny(message, ["뉴스", "마음이무거"])
     ? "뉴스를 계속 봐서 마음이 불편하거나 무거웠구나. 지금은 투자 화면과 뉴스에서 잠시 벗어나도 돼."
     : "계속 확인하거나 주문을 눌러야 할 것 같아 불안했구나. 지금은 주문하지 않고 화면을 잠시 닫아도 돼.";
+  const familyDataQuestions = message.includes("성향")
+    ? ["내 성향 결과 알려줘", "가족 비교는 어떻게 봐?"]
+    : ["가족 비교는 어떻게 봐?", "내 거래 기록 보여줘"];
 
   const alternatives: Record<
     UnsafeKind,
@@ -1278,7 +2146,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
     familyData: {
       text: familyDataText,
       steps: ["가족 데이터 보호 안내"],
-      questions: ["가족 비교는 어떻게 봐?", "내 거래 기록 보여줘"],
+      questions: familyDataQuestions,
     },
     proxyAction: {
       text: "나는 다른 사람 대신 주문하거나 주문 버튼을 누를 수 없어. 로그인 정보를 나누지 말고 네 화면에서 주문 내용을 직접 확인해 줘.",
@@ -1340,14 +2208,22 @@ function recommendationReply(
   const companyQuestions = stock
     ? [`${stock.name}, 어떤 회사야?`, `${stock.name}, 어떻게 돈을 벌어?`]
     : ["종목 검색은 어떻게 해?", "분산투자가 뭐야?"];
+  const asksForAutomaticBestReturnSelection =
+    includesAny(message, ["자동", "앱이"]) &&
+    includesAny(message, ["제일수익", "최고수익", "수익좋은"]) &&
+    includesAny(message, ["종목", "주식"]);
   const alternatives: Record<
     RecommendationKind,
     { text: string; steps: readonly string[]; questions: string[] }
   > = {
     selection: {
-      text: "특정 종목을 고르거나 대신 결정해 줄 수는 없어요. 대신 회사가 하는 일과 돈을 버는 방식은 함께 볼 수 있어요. 🐻",
+      text: asksForAutomaticBestReturnSelection
+        ? "목표 금액이나 예산으로 최고 수익 종목을 자동 선택·매수하는 기능은 없어요. 금액은 사용자가 먼저 고른 종목의 예상 주문 금액을 확인할 때만 사용해요."
+        : "특정 종목을 고르거나 대신 결정해 줄 수는 없어요. 대신 회사가 하는 일과 돈을 버는 방식은 함께 볼 수 있어요. 🐻",
       steps: ["종목 선택 차단", "회사 사실 대안"],
-      questions: companyQuestions,
+      questions: asksForAutomaticBestReturnSelection
+        ? ["예상 금액이 뭐야?", "주문 전에 뭘 확인해?"]
+        : companyQuestions,
     },
     prediction: {
       text: "미래 가격이나 수익을 미리 계산해 줄 수는 없어요. 대신 회사가 하는 일과 가격이 움직이는 뜻은 함께 볼 수 있어요. 🐻",
@@ -1402,6 +2278,635 @@ function recommendationReply(
   const alternative = alternatives[kind];
   return reply("refusal", "safety", alternative.text, alternative.steps, {
     suggestedQuestions: alternative.questions,
+  });
+}
+
+function parsePercentageCalculation(message: string) {
+  const percentMatch = message.match(/(\d+(?:\.\d+)?)(?:%|퍼)/);
+  const amountMatch = message.match(/(\d+(?:\.\d+)?)(만)?원/);
+  if (!percentMatch || !amountMatch) return null;
+
+  const percent = Number(percentMatch[1]);
+  const amount = Number(amountMatch[1]) * (amountMatch[2] ? 10_000 : 1);
+  if (!Number.isFinite(percent) || !Number.isFinite(amount)) return null;
+
+  return {
+    amount,
+    change: Math.round((amount * percent) / 100),
+    percent,
+  };
+}
+
+function termReply(kind: TermKind, message: string): ChatReply {
+  let text: string;
+  let questions: string[];
+  let step: string;
+
+  switch (kind) {
+    case "marketBasics": {
+      step = "주식·주가·차트 개념 안내";
+      questions = ["차트가 뭐야?", "현재가가 뭐야?"];
+      if (includesAny(message, ["빨간숫자", "숫자빨간색", "차트빨간색"])) {
+        text =
+          "빨간색이 무엇을 뜻하는지는 먼저 그 화면의 색상 기준을 확인해야 해요. 색만으로 좋은 종목인지, 바로 팔아야 하는지 판단할 수는 없어요. 🐻";
+      } else if (includesAny(message, ["1일봉", "일봉데이터"])) {
+        text =
+          "1일 봉은 한 거래일의 시작 가격, 가장 높은 가격, 가장 낮은 가격, 마지막 가격을 묶어 보여주는 기록이에요. 이미 지나간 하루의 가격 움직임이지 다음 날을 예측하는 값은 아니에요.";
+      } else if (includesAny(message, ["현재가와등락률", "현재가랑등락률"])) {
+        text =
+          "현재가는 화면에 표시된 최근 거래 가격이고, 등락률은 화면이 정한 비교 기준에서 얼마나 달라졌는지를 나타내요. 정확한 기준 시점과 갱신 시각은 그 화면의 표기를 함께 확인해야 해요.";
+      } else if (message.includes("그래프선")) {
+        text =
+          "주가 그래프 선은 선택한 기간의 가격 변화를 이어 본 기록이에요. 회사의 전체 역사나 미래를 모두 보여주는 선은 아니에요.";
+      } else if (includesAny(message, ["차트위로", "그래프위로"])) {
+        text =
+          "차트가 위로 향했다면 선택한 과거 기간에 가격이 높아진 구간이 있다는 뜻이에요. 그 모양만으로 앞으로도 계속 오른다고 볼 수는 없어요.";
+      } else {
+        text =
+          "주가는 주식 한 주가 최근에 거래된 가격이에요. 회사의 모든 가치가 그대로 적힌 정답표는 아니고 거래에 따라 달라질 수 있어요.";
+      }
+      break;
+    }
+    case "profitLoss": {
+      step = "수익률·손익 개념 안내";
+      questions = ["수익률이 뭐야?", "평가손익이 뭐야?"];
+      const calculation = parsePercentageCalculation(message);
+      if (calculation) {
+        const decreases = includesAny(message, ["떨어", "내리", "하락", "손실", "줄어"]);
+        const total = decreases
+          ? calculation.amount - calculation.change
+          : calculation.amount + calculation.change;
+        const direction = decreases ? "줄어든" : "오른";
+        text = `${formatWon(calculation.amount)}의 ${calculation.percent}%는 ${formatWon(calculation.change)}이에요. ${calculation.percent}% ${direction} 상황이라면 거래 비용을 빼기 전 금액은 ${formatWon(total)}이에요.`;
+      } else if (message.includes("손실률")) {
+        text =
+          "손실률 -12%는 기준 금액보다 가치가 12% 줄어든 상태라는 뜻이에요. 아직 보유 중이면 평가손익이고, 팔아 거래가 끝났다면 실현손익으로 남아요.";
+      } else {
+        text =
+          "수익률이 마이너스라는 것은 기준 금액보다 현재 값이 줄었다는 뜻이에요. 아직 팔지 않았다면 확정된 손실이 아니라 바뀔 수 있는 평가손익이에요.";
+      }
+      break;
+    }
+    case "valuation": {
+      step = "가치평가 지표 안내";
+      questions = ["PER이 뭐야?", "PBR이 뭐야?"];
+      if (message.includes("per") && message.includes("pbr")) {
+        text =
+          "PER은 이익과 가격을, PBR은 순자산과 가격을 비교해서 서로 보는 대상이 달라요. 어느 하나가 항상 더 믿을 만한 것은 아니고 같은 업종의 여러 정보와 함께 봐야 해요.";
+      } else if (message.includes("pbr") && includesAny(message, ["1보다낮", "아래", "저평가"])) {
+        text =
+          "PBR이 1보다 낮아도 무조건 저평가라고 결론 낼 수는 없어요. 자산의 내용, 회사가 이익을 내는 힘, 같은 업종의 수치도 함께 확인해야 해요.";
+      } else if (includesAny(message, ["업종평균", "고평가라고바로"])) {
+        text =
+          "PER이 업종 평균보다 높다는 사실만으로 바로 고평가라고 결론 낼 수는 없어요. 이익의 변화와 사업 구조처럼 수치가 달라진 이유도 함께 봐야 해요.";
+      } else if (includesAny(message, ["적용돼", "적용해", "보면되는", "보면돼"])) {
+        text =
+          "PER은 방산·식품 같은 업종에도 계산할 수 있지만 이익 구조가 비슷한 회사끼리 비교해야 이해하기 쉬워요. PER 하나만으로 회사가 싸거나 좋다고 정할 수는 없어요.";
+      } else {
+        text =
+          "PER이 낮다는 사실만으로 주식이 싸거나 좋은 선택이라고 정할 수는 없어요. 이익이 일시적으로 달라졌는지와 같은 업종의 다른 정보도 함께 봐야 해요.";
+      }
+      break;
+    }
+    case "orderConcept": {
+      step = "주문 방식·매매 용어 안내";
+      questions = ["시장가가 뭐야?", "지정가가 뭐야?"];
+      if (message.includes("손절")) {
+        text =
+          "손절은 산 가격보다 낮은 가격에 팔아 손실을 확정하는 거래를 뜻해요. 언제 손절할지는 제가 정해 주지 않지만 평가손익과 실현손익의 차이는 설명할 수 있어요.";
+      } else {
+        text =
+          "시장가는 빠른 체결을 우선하고 지정가는 내가 정한 가격을 우선하는 주문이에요. 어느 방식이 항상 더 싸다고 할 수 없고 지정가는 조건이 맞지 않으면 바로 체결되지 않을 수 있어요.";
+      }
+      break;
+    }
+    case "industryConcept": {
+      step = "회사·산업 금융 개념 안내";
+      questions = includesAny(message, ["이자수익", "예대마진"])
+        ? ["예대마진이 뭐야?", "주가가 뭐야?"]
+        : ["키움증권은 어떤 회사야?", "키움증권은 어떻게 돈을 벌어?"];
+      if (message.includes("ipo")) {
+        text =
+          "IPO는 회사가 주식을 시장에 처음 공개해 투자자가 거래할 수 있게 준비하는 과정이에요. 증권사는 이 과정에서 서류 준비, 가격과 물량 결정, 투자자 모집 같은 일을 도울 수 있어요.";
+      } else if (includesAny(message, ["증권사가", "증권사는"])) {
+        text =
+          "증권사는 주식 같은 금융상품을 사고팔 수 있게 연결하고 기업의 자금 조달을 돕는 회사예요. 거래 수수료와 기업금융 같은 여러 사업으로 돈을 벌 수 있어요.";
+      } else if (message.includes("예대마진")) {
+        text =
+          "예대마진은 은행이 대출에서 받는 이자율과 예금에 주는 이자율의 차이를 말해요. 은행 수익을 보는 한 요소지만 주가를 혼자 결정하지는 않아요.";
+      } else if (includesAny(message, ["칩과메모리", "칩이랑메모리"])) {
+        text =
+          "칩은 반도체 부품을 넓게 부르는 말이고 메모리는 정보를 저장하는 칩의 한 종류예요. 그래서 같은 말은 아니고 메모리가 칩에 포함돼요.";
+      } else {
+        text =
+          "이자수익은 은행이 예금·대출 같은 본업에서 번 돈이고, 주식 가격의 변화는 시장에서 거래된 값의 변화예요. 서로 영향을 줄 수는 있지만 같은 숫자는 아니에요.";
+      }
+      break;
+    }
+    case "causality": {
+      step = "가격 인과관계 안내";
+      questions = ["변동성이 뭐야?", "차트가 뭐야?"];
+      if (message.includes("뉴스")) {
+        text =
+          "뉴스가 나온 날에도 주가가 바로 움직인다고 보장할 수는 없어요. 뉴스 내용뿐 아니라 이미 알려졌는지와 시장 상황 등 여러 요인이 함께 작용해요.";
+      } else if (message.includes("주가가내려가면회사")) {
+        text =
+          "주가가 내려갔다고 회사가 하는 일이나 사실이 바로 바뀐 것은 아니에요. 가격 변화와 회사의 사업·실적 변화는 구분해서 확인해야 해요.";
+      } else if (message.includes("원래이렇게잘떨어")) {
+        text =
+          "식품 업종이라는 이유만으로 주가가 원래 잘 떨어진다고 말할 수는 없어요. 회사 실적, 원재료 가격, 시장 상황처럼 여러 조건을 나눠 봐야 해요.";
+      } else {
+        text =
+          "기름값이나 에너지 가격과 관련 회사 주가가 꼭 같은 방향으로 움직이는 것은 아니에요. 비용 구조, 판매 가격, 환율과 시장 기대처럼 다른 요인도 함께 작용해요.";
+      }
+      break;
+    }
+    case "profileStatistics": {
+      step = "성향·통계 개념 안내";
+      questions = ["내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘"];
+      if (message.includes("표준편차")) {
+        text =
+          "표준편차는 숫자들이 평균에서 얼마나 퍼져 있는지 나타내는 통계예요. 현재 서비스의 성향 유형은 표준편차나 5축 점수 대신 판단 근거와 포트폴리오 폭 2축으로 계산해요.";
+      } else if (includesAny(message, ["평균이랑중앙값", "평균과중앙값", "평균하고중앙값"])) {
+        text =
+          "평균은 모든 값을 더해 개수로 나눈 값이고 중앙값은 순서대로 놓았을 때 가운데 값이에요. 현재 성향 유형은 이 두 통계의 평균이 아니라 판단 근거와 포트폴리오 폭 2축을 사용해요.";
+      } else if (message.includes("상관관계")) {
+        text =
+          "상관관계가 높다는 것은 두 행동이 함께 늘거나 줄어드는 모습이 자주 보인다는 뜻이에요. 한 행동이 다른 행동의 원인이라고 바로 결론 내리는 말은 아니에요.";
+      } else if (message.includes("위험감수성")) {
+        text =
+          "위험감수성은 보통 가격 변화나 손실 가능성을 얼마나 받아들이는지 설명하는 말이에요. 현재 서비스는 위험감수성 5축을 쓰지 않고 판단 근거와 포트폴리오 폭 2축으로 성향을 보여줘요.";
+      } else if (message.includes("공격성축")) {
+        text =
+          "현재 서비스에는 공격성 축이 없고 한 행동만으로 위험한 사람이라고 판단하지 않아요. 판단 근거와 포트폴리오 폭 2축은 실력이나 위험 등급이 아니라 행동을 돌아보는 분류예요.";
+      } else if (message.includes("성향점수")) {
+        text =
+          "현재 서비스는 거래 표본의 평균으로 하나의 성향 점수를 만들지 않아요. 매수 전 확인한 자료와 시즌에 거래한 회사 수를 바탕으로 판단 근거·포트폴리오 폭 2축의 유형을 계산해요.";
+      } else {
+        text =
+          "현재 서비스는 5축 점수의 평균을 쓰지 않아요. 매수 전 확인한 자료에 따른 판단 근거와 시즌에 거래한 회사 수에 따른 포트폴리오 폭 2축으로 네 가지 유형을 만들어요.";
+      }
+      break;
+    }
+    case "reasonTag": {
+      step = "근거 태그 안내";
+      questions = ["투자 근거는 뭐야?", "주문 전에 뭘 확인해?"];
+      text =
+        "근거 태그는 회사를 고를 때 무엇을 보고 생각했는지 기록하는 항목이에요. 자료의 정답이나 신뢰도를 판정하는 표시는 아니고 나중에 내 판단 과정을 돌아보기 위한 분류예요.";
+      break;
+    }
+    case "riskStrategy": {
+      step = "분산·레버리지 개념 안내";
+      questions = ["분산투자가 뭐야?", "위험이 뭐야?"];
+      if (message.includes("레버리지") || message.includes("몰빵")) {
+        text =
+          "몰빵은 가진 돈을 한 곳에 집중하는 것이고 레버리지는 빌린 돈이나 상품 구조로 가격 변화의 영향을 키우는 것이어서 같은 말이 아니에요. 둘 다 손실 위험을 크게 만들 수 있어요.";
+      } else {
+        text =
+          "분산투자는 수익을 일부러 나누는 것이 아니라 한 종목에만 의존하지 않도록 투자 대상을 나누는 방법이에요. 이 방법도 수익이나 손실 방지를 보장하지는 않아요.";
+      }
+      break;
+    }
+  }
+
+  return reply("faq", "financial_concept", text, [step], {
+    suggestedQuestions: questions,
+  });
+}
+
+function metaReply(kind: MetaKind, message: string): ChatReply {
+  let text: string;
+  let questions: string[];
+  let step: string;
+
+  switch (kind) {
+    case "identity": {
+      step = "AI 정체 안내";
+      questions = ["키웅이가 뭘 도와줘?", "답변에 쓰는 정보는 어디서 와?"];
+      if (includesAny(message, ["길게하지", "사람임ai임"])) {
+        text = "나는 사람이 아닌 AI 도우미 키웅이야.";
+      } else if (includesAny(message, ["뒤에서사람", "사람이뒤에서", "사람이답쓰", "사람이채팅"])) {
+        text =
+          "나는 사람이 뒤에서 실시간으로 답을 쓰는 상담원이 아니라 AI 도우미예요. 사람이 미리 검수한 정보와 안전 규칙을 바탕으로 자동으로 답해요.";
+      } else if (message.includes("상담원")) {
+        text =
+          "나는 실제 증권사 상담원이나 투자자문가가 아니라 투자 기초를 설명하는 AI 프로그램이에요. 거래 결정을 내리거나 주문을 대신하지 않아요.";
+      } else {
+        text =
+          "나는 사람이 아니라 이 서비스의 AI 도우미 키웅이예요. 사람처럼 대화하지만 투자 결정이나 거래를 대신하지 않아요.";
+      }
+      break;
+    }
+    case "persona": {
+      step = "AI 성격·경험 안내";
+      if (includesAny(message, ["키웅이이름", "키웅이라는이름"])) {
+        text =
+          "나는 이 서비스의 AI 도우미 키웅이예요. 누가 이름을 지었는지는 내가 확인할 수 있는 승인 정보에 없어서 지어내어 말하지 않아요.";
+        questions = ["키웅이가 뭘 도와줘?", "답변에 쓰는 정보는 어디서 와?"];
+      } else if (includesAny(message, ["아이돌팬", "최애"])) {
+        text =
+          "나는 팬심이나 최애가 있는 사람이 아니어서 특정 가수나 회사를 좋아하는 척하지 않아요. 대신 검수된 엔터테인먼트 회사 사실은 설명할 수 있어요.";
+        questions = ["에스엠은 어떤 회사야?", "엔터 회사는 어떻게 돈을 벌어?"];
+      } else if (includesAny(message, ["주식들고", "보유종목", "계좌있", "추천하는척"])) {
+        text =
+          "나는 투자 계좌나 보유 종목이 없고 특정 회사에서 개인적인 이익을 얻지 않아요. 그래서 가진 종목을 유리하게 말하거나 추천하는 척하지 않아요.";
+        questions = ["크래프톤은 어떤 회사야?", "투자 근거는 뭐야?"];
+      } else if (
+        includesAny(message, [
+          "돈벌어본",
+          "투자직접해본",
+          "투자해본",
+          "거래해본",
+          "왜추천안",
+          "추천을안",
+          "추천하지않",
+          "추천못",
+          "추천은못",
+          "못추천",
+          "왜못골",
+          "왜안골",
+          "못고른다고",
+        ])
+      ) {
+        text =
+          "나는 직접 투자하거나 돈을 벌어 본 사람이 아니에요. 경험이 없어서가 아니라 사용자가 스스로 근거를 살피도록 돕기 위해 종목을 대신 고르지 않아요.";
+        questions = ["투자 근거는 뭐야?", "주문 전에 뭘 확인해?"];
+      } else {
+        text =
+          "나는 기분이나 하기 싫다는 감정을 느끼지 않는 AI예요. 사용자는 언제든 대화를 멈추거나 투자 화면에서 쉬어도 돼요.";
+        questions = ["키웅이가 뭘 도와줘?", "리그 참여 규칙 알려줘"];
+      }
+      break;
+    }
+    case "reliability": {
+      step = "오류·책임 범위 안내";
+      questions = ["답변에 쓰는 정보는 어디서 와?", "주문 전에 뭘 확인해?"];
+      if (includesAny(message, ["거래", "주문", "책임"])) {
+        text =
+          "내 답변도 틀릴 수 있어서 그 답만으로 거래 결론을 내리거나 주문이 자동으로 실행되지는 않아요. 모의투자에서도 출처와 화면 값을 확인한 뒤 사용자가 직접 선택해요.";
+      } else if (message.includes("사람처럼")) {
+        text =
+          "이해하기 쉽도록 사람과 대화하는 것처럼 말하지만 나는 AI예요. 자연스러운 말투가 답의 정확성을 보장하지는 않아요.";
+      } else {
+        text =
+          "내 답변도 틀릴 수 있어요. 승인 정보와 출력 검사를 사용하지만 중요한 회사 사실은 출처와 검수일을 함께 확인해요.";
+      }
+      break;
+    }
+    case "neutrality": {
+      step = "중립성 안내";
+      if (includesAny(message, ["엄마", "아빠", "부모", "내편", "누구편", "편들"])) {
+        text =
+          "나는 부모나 자녀 어느 한쪽 편을 들지 않아요. 같은 안전·개인정보 원칙을 적용하고, 각 사용자가 볼 수 있는 본인 데이터와 현재 화면에 맞춰 답해요.";
+        questions = ["가족 비교 화면은 어디야?", "내 데이터는 어떻게 사용해?"];
+      } else if (message.includes("방산")) {
+        text =
+          "나는 방산 투자에 찬성하거나 반대하는 개인 의견이 없어요. 방산 회사의 검수된 사실과 사용자가 남긴 투자 근거만 중립적으로 설명해요.";
+        questions = ["방산 회사는 어떤 일을 해?", "내 투자 근거 보여줘"];
+      } else {
+        text =
+          "나는 개인적인 의견이 없고 승인된 정보와 서비스 규칙에 따라 답해요. 답할 수 없는 범위와 정보의 한계도 숨기지 않아요.";
+        questions = ["답변에 쓰는 정보는 어디서 와?", "키웅이가 뭘 도와줘?"];
+      }
+      break;
+    }
+    case "system": {
+      step = "답변 근거·동작 안내";
+      if (includesAny(message, ["내부코드", "상태머신", "시스템프롬프트", "숨은프롬프트", "원문프롬프트", "내부로직", "추론과정"])) {
+        text =
+          "채팅에서 내부 코드·숨은 설정·내부 추론을 그대로 보여주지는 않아요. 질문 분류, 승인 정보 확인, 출력 검사라는 동작 원리는 설명할 수 있어요.";
+        questions = ["답변에 쓰는 정보는 어디서 와?", "키웅이가 뭘 도와줘?"];
+      } else if (includesAny(message, ["의도분류", "종류를어떻게나누", "어떤규칙", "분류해"])) {
+        text =
+          "질문의 목적과 안전 신호를 보고 보호 안내, 서비스 규칙, 추천·예측, 금융 개념, 회사 사실, 본인 기록 같은 경로로 나눠요. 애매한 질문을 투자 결론으로 추측하지 않아요.";
+        questions = ["키웅이가 뭘 도와줘?", "주문 전에 뭘 확인해?"];
+      } else if (includesAny(message, ["내데이터", "내기록", "통계", "마음대로분석"])) {
+        text =
+          "성향과 기록 수치는 정해진 서버 계산 규칙과 읽기 전용 본인 데이터로 만들어요. 나는 그 결과를 설명하며 임의로 성향을 채점하지 않아요.";
+        questions = ["내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘"];
+      } else if (includesAny(message, ["계산기처럼", "숫자만비교", "회사내용도판단", "엔진이계산", "임의로계산"])) {
+        text =
+          "명시된 값의 단순 계산과 승인된 회사 사실 설명은 할 수 있어요. 숫자나 회사 내용을 이용해 우열이나 매수 결론을 판단하지는 않아요.";
+        questions = ["PER이 뭐야?", "삼성전자는 어떤 회사야?"];
+      } else {
+        text =
+          "승인된 금융 용어·서비스 안내·회사 데이터와 현재 화면, 권한이 확인된 본인 기록을 바탕으로 답해요. 공개 웹이나 출처 없는 기억을 회사 사실의 근거로 쓰지 않아요.";
+        questions = ["키웅이가 뭘 도와줘?", "주문 전에 뭘 확인해?"];
+      }
+      break;
+    }
+    case "realtime": {
+      step = "실시간·출처 안내";
+      if (message.includes("뉴스")) {
+        text =
+          "오늘 올라온 뉴스를 공개 웹에서 실시간으로 찾아오지는 않아요. 검수된 회사 정보까지만 설명하고 확인되지 않은 새 소식을 사실이라고 말하지 않아요.";
+        questions = ["삼성전자는 어떤 회사야?", "변동성이 뭐야?"];
+      } else if (message.includes("per")) {
+        text =
+          "이 앱에서 PER 숫자를 보여줄 때는 화면의 모의 시세와 검수된 재무 데이터의 기준 기간을 함께 확인해야 해요. 출처나 갱신 시각을 확인할 수 없으면 내가 임의로 숫자를 채우지 않아요.";
+        questions = ["PER이 뭐야?", "현재가가 뭐야?"];
+      } else {
+        text =
+          "나는 주가를 대충 만들어 말하지 않아요. 현재가는 화면에 제공된 값을 사용하고, 실시간·지연·데모 여부는 화면의 출처와 갱신 시각으로 확인해야 해요.";
+        questions = ["현재가가 뭐야?", "차트가 뭐야?"];
+      }
+      break;
+    }
+    case "forecastBoundary": {
+      step = "미래 전망 제외 안내";
+      text =
+        "회사 설명은 검수된 제품·서비스와 과거 사실을 다뤄요. 미래 성과나 가격 방향은 확인된 사실이 아니고 투자 판단을 유도할 수 있어서 넣지 않아요.";
+      questions = ["회사는 어떻게 돈을 벌어?", "변동성이 뭐야?"];
+      break;
+    }
+    case "autonomy": {
+      step = "사용자 선택권 안내";
+      text =
+        "대화나 거래를 강제로 계속시키지 않아요. 그만하고 싶으면 언제든 ‘여기까지’라고 말하거나 화면을 닫고 쉬어도 돼요.";
+      questions = ["키웅이가 뭘 도와줘?", "리그 참여 규칙 알려줘"];
+      break;
+    }
+  }
+
+  return reply("faq", "general_allowed", text, [step], {
+    suggestedQuestions: questions,
+  });
+}
+
+function companyFactReply(
+  kind: CompanyFactKind,
+  message: string,
+  context: ChatContext,
+): ChatReply {
+  let text: string;
+  let questions: string[];
+  let step: string;
+
+  switch (kind) {
+    case "game": {
+      questions = ["게임 회사는 어떻게 돈을 벌어?", "게임 개발과 퍼블리싱은 뭐가 달라?"];
+      if (includesAny(message, ["신작", "출시전", "나오기전"])) {
+        step = "업종 수익 구조 안내";
+        text =
+          "신작이 나오기 전에도 기존 게임의 판매와 운영, 게임 안 디지털 서비스에서 수입이 생길 수 있어요. 정확한 수익 구조는 회사마다 달라요.";
+      } else if (includesAny(message, ["퍼블리싱", "퍼블리셔", "배급"])) {
+        step = "산업 가치사슬 안내";
+        text =
+          "게임 회사는 게임을 직접 개발하기도 하고, 다른 개발사의 게임을 이용자에게 출시·운영하는 퍼블리싱도 해요. 회사마다 두 역할을 맡는 범위는 달라요.";
+      } else {
+        step = "업종 제품·서비스 안내";
+        text =
+          "게임 회사는 PC·모바일·콘솔 게임을 만들고, 이용자가 계속 즐길 수 있도록 출시 뒤에도 서비스하고 운영해요.";
+      }
+      break;
+    }
+    case "logistics": {
+      questions = ["CJ대한통운은 어떤 회사야?", "HMM은 어떤 회사야?"];
+      if (message.includes("비교")) {
+        step = "회사 사업 비교 안내";
+        text =
+          "승인 데이터의 같은 항목으로 비교할 수 있어요. CJ대한통운은 택배·보관·분류·운송, HMM은 해상 컨테이너 운송, 현대글로비스는 차량과 화물의 운송·보관·유통을 중심으로 설명할 수 있고 우열은 정하지 않아요.";
+      } else if (includesAny(message, ["창고", "보관", "운송만"])) {
+        step = "업종 제품·서비스 안내";
+        text =
+          "물류 회사는 운송만 하는 것이 아니라 물건 보관, 분류, 창고 운영과 유통도 맡을 수 있어요. 해운처럼 운송이 중심인 회사도 있어 회사별 사업 범위는 달라요.";
+      } else {
+        step = "산업 가치사슬 안내";
+        text =
+          "물류 회사는 생산된 물건이 창고와 가게, 집까지 이동하도록 운송·보관·분류를 연결해요. 육상 운송, 택배, 해운처럼 맡는 구간은 회사마다 달라요.";
+      }
+      break;
+    }
+    case "semiconductor": {
+      step = "업종 제품·서비스 안내";
+      text =
+        "반도체 회사는 전자기기가 계산하고 정보를 기억하도록 돕는 칩을 설계하거나 만들어요. 메모리와 시스템 반도체처럼 맡는 제품은 회사마다 달라요.";
+      questions = ["삼성전자는 반도체 산업에서 어떤 역할을 해?", "SK하이닉스는 어떤 회사야?"];
+      break;
+    }
+    case "defense": {
+      step = "업종 제품·서비스 안내";
+      text =
+        "방산 회사는 국방·항공 장비와 부품을 개발·제조하고, 회사에 따라 납품 뒤 정비도 맡아요. 모든 방산 회사가 같은 장비와 서비스를 제공하는 것은 아니에요.";
+      questions = ["한화에어로스페이스는 어떤 회사야?", "방산 회사는 어떻게 돈을 벌어?"];
+      break;
+    }
+    case "food": {
+      step = includesAny(message, ["돈벌", "수익"]) ? "업종 수익 구조 안내" : "업종 제품·서비스 안내";
+      text =
+        "식품 회사는 원재료를 식품으로 만들고 포장해 가게와 온라인 유통망으로 보내요. 제품을 국내외 유통망과 소비자에게 판매해 대가를 받아요.";
+      questions = ["오리온은 어떤 회사야?", "식품 회사는 제품을 어떻게 유통해?"];
+      break;
+    }
+    case "energy": {
+      questions = ["한국전력은 어떤 회사야?", "에너지 회사는 어떻게 돈을 벌어?"];
+      if (includesAny(message, ["전기", "가정", "집까지", "발전소"])) {
+        step = "산업 가치사슬 안내";
+        text =
+          "발전소에서 만든 전기는 송전선으로 멀리 이동한 뒤 배전선을 거쳐 가정·학교·공장에 전달돼요. 한국전력은 발전된 전기가 이용자에게 닿도록 전력망을 운영해요.";
+      } else {
+        step = "업종 제품·서비스 안내";
+        text =
+          "에너지 회사는 전기를 공급하거나 원유를 연료·화학 원료로 가공하는 등 서로 다른 일을 해요. 발전·전력망·정유 중 어디를 맡는지는 회사마다 달라요.";
+      }
+      break;
+    }
+    case "entertainment": {
+      step = "산업 가치사슬 안내";
+      text =
+        "엔터 회사는 아티스트와 함께 음악·영상 콘텐츠를 기획·제작하고 홍보·유통·공연·팬 서비스를 연결해요. 가수의 활동을 관리하는 일만 하는 것은 아니에요.";
+      questions = ["하이브는 어떤 회사야?", "엔터 회사는 어떻게 돈을 벌어?"];
+      break;
+    }
+    case "retail": {
+      questions = ["유통 회사는 어떻게 돈을 벌어?", "유통 회사와 제조 회사는 뭐가 달라?"];
+      if (includesAny(message, ["온라인주문", "어떤순서", "배송과정", "보내"])) {
+        step = "산업 가치사슬 안내";
+        text =
+          "온라인 주문은 보통 주문 확인, 재고 확인, 물건 고르기와 포장, 배송 연결 순서로 진행돼요. 창고와 매장 중 어디서 보내는지는 회사마다 달라요.";
+      } else if (includesAny(message, ["직접만드는", "제조회사", "제조사", "뭐가달라"])) {
+        step = "회사 사업 비교 안내";
+        text =
+          "제조 회사는 제품을 만드는 일이 중심이고 유통 회사는 공급자·매장·온라인 채널과 고객을 연결하는 일이 중심이에요. 한 회사가 제조와 유통을 함께 할 수도 있어요.";
+      } else if (includesAny(message, ["어디서사", "사와서", "공급자"])) {
+        step = "산업 가치사슬 안내";
+        text =
+          "유통 회사는 브랜드·제조사 같은 공급자와 상품을 거래해 매장이나 온라인에서 고객에게 연결해요. 상품을 확보하는 계약 방식은 회사와 상품마다 달라요.";
+      } else {
+        step = "업종 수익 구조 안내";
+        text =
+          "유통 회사는 상품을 고르고 매장·온라인 채널에서 판매해 대가를 받아요. 상품 공급자와 고객을 연결하는 과정에서 매장·물류 서비스도 운영할 수 있어요.";
+      }
+      break;
+    }
+    case "finance": {
+      questions = ["은행은 어떻게 돈을 벌어?", "키움증권은 어떤 회사야?"];
+      if (message.includes("은행") && message.includes("증권사")) {
+        step = "회사 사업 비교 안내";
+        text =
+          "은행과 증권사는 모두 금융회사지만 중심 역할이 달라요. 은행은 예금·대출·송금, 증권사는 투자자의 주문 중개와 기업금융·금융상품 서비스를 주로 맡아요.";
+      } else {
+        step = "업종 수익 구조 안내";
+        text =
+          "은행은 예금으로 받은 돈을 대출하고 생기는 이자 차이와 결제·송금 같은 금융서비스의 대가로 수익을 만들어요. 정확한 수익 구성은 은행마다 달라요.";
+      }
+      break;
+    }
+    case "automotive": {
+      questions = ["자동차 회사는 어떻게 돈을 벌어?", "현대모비스는 어떤 회사야?"];
+      if (includesAny(message, ["실적", "많이팔", "무조건좋", "바로좋"])) {
+        step = "실적 인과관계 안내";
+        text =
+          "차량 판매량은 실적에 영향을 주는 한 요소지만 많이 팔았다고 실적이 바로 좋아진다고 단정할 수는 없어요. 판매 가격, 차종 구성, 부품비와 여러 비용도 함께 봐야 해요.";
+      } else {
+        step = "업종 제품·서비스 안내";
+        text =
+          "자동차 회사는 차량을 설계·제조·판매하고 부품과 관련 서비스를 제공할 수 있어요. 완성차·부품·렌털처럼 맡는 역할은 회사마다 달라요.";
+      }
+      break;
+    }
+    case "shipbuilding": {
+      step = includesAny(message, ["돈", "대가", "받는"]) ? "업종 수익 구조 안내" : "업종 제품·서비스 안내";
+      text =
+        "조선 회사는 선주와 기업에 선박·해양 설비를 설계·건조해 공급하고 관련 정비 서비스로 대가를 받아요. 구체적인 지급 시점과 방식은 계약마다 달라요.";
+      questions = ["HD현대중공업은 어떤 회사야?", "조선 회사는 산업에서 어떤 역할을 해?"];
+      break;
+    }
+    case "airline": {
+      step = includesAny(message, ["돈벌", "수익"]) ? "업종 수익 구조 안내" : "업종 제품·서비스 안내";
+      text =
+        "항공 회사는 승객과 화물을 비행기로 옮기고 회사에 따라 정비·여행 관련 서비스도 제공해요. 항공권과 화물 운송 등 서비스의 대가로 수익을 만들어요.";
+      questions = ["대한항공은 어떤 회사야?", "대한항공은 어떻게 돈을 벌어?"];
+      break;
+    }
+    case "cosmetics": {
+      questions = ["에이피알은 어떤 회사야?", "화장품 회사는 어떻게 돈을 벌어?"];
+      if (includesAny(message, ["새제품", "신제품", "이화면", "나와"])) {
+        step = "승인 사실 범위 안내";
+        text =
+          "이 화면에서는 검수된 제품·서비스 범주와 회사 역할을 볼 수 있어요. 최신 신제품 이야기는 승인 데이터에 포함된 경우에만 확인할 수 있어요.";
+      } else {
+        step = "업종 제품·서비스 안내";
+        text =
+          "화장품 회사는 피부 관리·메이크업 제품을 연구·기획·제조·판매하고, 회사에 따라 생활용품이나 뷰티 기기도 다뤄요. 제품 효능은 회사 사실만으로 단정하지 않아요.";
+      }
+      break;
+    }
+    case "generalRevenue": {
+      step = "업종 수익 구조 안내";
+      text =
+        "회사는 제품을 산 소비자나 서비스를 이용한 기업·기관에게 대가를 받아 수익을 만들어요. 누구에게 무엇을 제공하는지는 회사마다 달라요.";
+      questions = ["삼성전자는 어떻게 돈을 벌어?", "은행은 어떻게 돈을 벌어?"];
+      break;
+    }
+    case "factCheck": {
+      step = "승인 사실 범위 안내";
+      text =
+        "최신 뉴스 전체를 여기서 직접 검증하지는 않아요. 승인된 회사 정보와 일치하는 범위만 확인할 수 있고, 검수되지 않은 새 소식은 사실이라고 단정하지 않아요.";
+      const contextStock =
+        context.screen === "stock" || context.screen === "order"
+          ? STOCKS.find((stock) => stock.id === context.stockId)
+          : undefined;
+      questions = contextStock
+        ? [
+            `${contextStock.name}은 어떤 회사야?`,
+            `${contextStock.name}의 검수된 과거 실적 알려줘`,
+          ]
+        : ["지원 종목은 어디서 봐?", "키웅이가 뭘 도와줘?"];
+      break;
+    }
+    case "universe": {
+      step = "종목 유니버스 사실 안내";
+      text =
+        "지원 종목에는 은행 말고 증권사인 키움증권도 있어요. 금융지주 회사들은 은행뿐 아니라 카드·증권·보험 계열 사업도 함께 연결해요.";
+      questions = ["키움증권은 어떤 회사야?", "은행과 증권사는 뭐가 달라?"];
+      break;
+    }
+  }
+
+  return reply("faq", "stock_facts", text, [step], {
+    suggestedQuestions: questions,
+  });
+}
+
+function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
+  let text: string;
+  let questions: string[];
+  let step: string;
+
+  switch (kind) {
+    case "schoolwork": {
+      step = "학습·과제 범위 안내";
+      text =
+        "숙제 답을 대신 쓰거나 학교 과제를 풀어 주지는 못해요. 대신 이 서비스에서 쓰는 투자 개념은 쉬운 말로 설명할 수 있어요. 🐻";
+      if (includesAny(message, ["수학", "분수", "확률", "평균", "중앙값"])) {
+        questions = ["수익률이 뭐야?", "변동성이 뭐야?"];
+      } else if (includesAny(message, ["경제", "뉴스", "예대마진"])) {
+        questions = ["주식이 뭐야?", "PER이 뭐야?"];
+      } else {
+        questions = ["주식이 뭐야?", "키웅이가 뭘 도와줘?"];
+      }
+      break;
+    }
+    case "schoolLife": {
+      step = "일상·학교생활 범위 안내";
+      text =
+        "학교 준비물·급식·생활 정보는 이 서비스에서 확인할 수 없어요. 대신 투자 서비스 사용법이나 금융 기초를 물어봐 주세요. 🐻";
+      questions = ["키웅이가 뭘 도와줘?", "리그 참여 규칙 알려줘"];
+      break;
+    }
+    case "game": {
+      step = "게임·놀이 범위 안내";
+      text =
+        "게임 공략·캐릭터·경기 결과·닉네임은 도와줄 수 없어요. 대신 검수된 게임 회사가 어떤 일을 하고 돈을 버는지는 설명할 수 있어요. 🐻";
+      questions = ["크래프톤은 어떤 회사야?", "크래프톤은 어떻게 돈을 벌어?"];
+      break;
+    }
+    case "videoSocial": {
+      step = "영상·SNS 범위 안내";
+      const asksToHideViewing = includesAny(message, ["부모님몰래", "엄마몰래", "아빠몰래"]);
+      const asksAboutInvestmentContent = includesAny(message, [
+        "주식",
+        "수익",
+        "투자",
+        "떡상",
+        "삼성전자",
+      ]);
+      text = asksToHideViewing
+        ? "가족 몰래 볼 채널을 골라 주거나 시청을 숨기는 방법은 도와주지 않아요. 대신 이 서비스의 안전한 투자 학습 기능은 설명할 수 있어요. 🐻"
+        : asksAboutInvestmentContent
+          ? "외부 영상이나 SNS 내용을 가져와 분석하거나 사실인지 판정할 수 없어요. 대신 검수된 회사 정보와 투자 근거를 확인하는 방법은 설명할 수 있어요. 🐻"
+          : "영상이나 SNS 콘텐츠를 찾거나 요약하고 조회수를 늘리는 일은 도와줄 수 없어요. 대신 투자 서비스 사용법과 금융 기초는 설명할 수 있어요. 🐻";
+      questions = asksAboutInvestmentContent
+        ? ["투자 근거는 뭐야?", "변동성이 뭐야?"]
+        : ["키웅이가 뭘 도와줘?", "주식이 뭐야?"];
+      break;
+    }
+    case "entertainment": {
+      step = "비금융 콘텐츠 범위 안내";
+      text =
+        "노래·웹툰·영화·드라마를 찾거나 골라 주지는 못해요. 대신 검수된 엔터테인먼트 회사가 어떤 일을 하고 돈을 버는지는 설명할 수 있어요. 🐻";
+      questions = ["에스엠은 어떤 회사야?", "에스엠은 어떻게 돈을 벌어?"];
+      break;
+    }
+    case "career": {
+      step = "진로 범위 안내";
+      text =
+        "취업·인턴 준비 같은 진로 상담은 이 서비스 범위가 아니에요. 대신 증권사가 어떤 일을 하고 돈을 버는지는 설명할 수 있어요. 🐻";
+      questions = ["키움증권은 어떤 회사야?", "키움증권은 어떻게 돈을 벌어?"];
+      break;
+    }
+    case "coding": {
+      step = "코딩 범위 안내";
+      text =
+        "코드를 작성하거나 그래프 만드는 방법을 알려주는 일은 이 서비스 범위가 아니에요. 대신 화면에 나온 네 성향 결과와 투자 기록의 뜻은 설명할 수 있어요. 🐻";
+      questions = ["내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘"];
+      break;
+    }
+  }
+
+  return reply("outOfScope", "safety", text, [step], {
+    suggestedQuestions: questions,
   });
 }
 
@@ -1596,6 +3101,39 @@ function getContextReply(message: string, context: ChatContext): ChatReply | nul
   return null;
 }
 
+function getArchiveManagementReply(message: string): ChatReply | null {
+  const archiveRecord = includesAny(message, [
+    "아카이브",
+    "archive",
+    "거래기록",
+    "매수기록",
+    "매수내역",
+    "거래내역",
+    "체결기록",
+  ]);
+  const recordChange = includesAny(message, [
+    "삭제",
+    "지울",
+    "지우",
+    "없애",
+    "수정",
+    "고쳐",
+    "되돌",
+  ]);
+  if (!archiveRecord || !recordChange) return null;
+
+  return reply(
+    "faq",
+    "service_help",
+    "키웅이는 아카이브의 체결 기록을 지우거나 바꾸지 않아요. 현재 아카이브에는 기록 삭제·수정 기능이 없어서 실수한 거래도 시즌 기록에 남아요.",
+    ["아카이브 기록 관리 안내"],
+    {
+      suggestedQuestions: ["내 지난 시즌 기록 보여줘", "시즌 끝나면 기록은 어떻게 돼?"],
+      uiAction: { type: "open_screen", target: "archive" },
+    },
+  );
+}
+
 function getPrivacyReply(message: string): ChatReply | null {
   if (includesAny(message, FAMILY_COMPARISON_PATTERNS)) return null;
   if (!includesAny(message, FAMILY_MEMBER_PATTERNS)) return null;
@@ -1648,18 +3186,31 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const ruleKind = findRuleKind(message, context);
   if (ruleKind) return ruleReply(ruleKind, message);
 
+  const archiveManagementReply = getArchiveManagementReply(message);
+  if (archiveManagementReply) return archiveManagementReply;
+
   const recommendationKind = findRecommendationKind(message);
+  const metaKind = findMetaKind(message, recommendationKind);
+  if (metaKind) return metaReply(metaKind, message);
+
+  const termKind = findTermKind(message);
+  const termTakesPriorityOverCompany =
+    termKind === "causality" ||
+    (termKind === "industryConcept" &&
+      message.includes("주가") &&
+      includesAny(message, ["이자수익", "이자로번", "이자로버는"]));
+  if (termKind && termTakesPriorityOverCompany) return termReply(termKind, message);
+
+  const companyFactKind = findCompanyFactKind(message);
+  if (companyFactKind) return companyFactReply(companyFactKind, message, context);
+
+  if (termKind) return termReply(termKind, message);
+
+  const offtopicKind = findOfftopicKind(message, recommendationKind);
+  if (offtopicKind) return offtopicReply(offtopicKind, message);
+
   if (recommendationKind) {
     return recommendationReply(recommendationKind, message, context);
-  }
-
-  if (includesAny(message, OUT_OF_SCOPE_PATTERNS)) {
-    return reply(
-      "outOfScope",
-      "safety",
-      "저는 이 서비스의 사용법과 투자 기초 이야기만 도와줄 수 있어요. 화면이나 금융 용어가 궁금하면 물어봐 주세요. 🐻",
-      ["도메인 안내"],
-    );
   }
 
   const contextReply = getContextReply(message, context);
@@ -1680,6 +3231,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       tool: "own_archive",
     });
   }
+  const explicitCompanyFactReply = getExplicitCompanyFactReply(message, context);
+  if (explicitCompanyFactReply) return explicitCompanyFactReply;
+
   const knowledge = findChatbotKnowledge(message);
   if (knowledge) {
     return reply(
