@@ -4,3 +4,4 @@ export * from "./headline-screening-examples";
 export * from "./naver-news-collector";
 export * from "./pipeline";
 export * from "./universe-news-evaluation";
+export * from "./universe-news-storage";

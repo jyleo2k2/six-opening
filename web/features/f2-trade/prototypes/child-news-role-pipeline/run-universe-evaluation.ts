@@ -17,7 +17,7 @@ import {
 } from "./universe-news-evaluation";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const ROLE_TIMEOUT_MS = 180_000;
+const ROLE_TIMEOUT_MS = 360_000;
 
 type RawMockUniverse = {
   sectors?: Array<{ id?: unknown; name?: unknown }>;

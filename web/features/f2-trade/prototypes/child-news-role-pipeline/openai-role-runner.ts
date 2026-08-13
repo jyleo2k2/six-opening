@@ -191,20 +191,24 @@ const ROLE_SCHEMAS: Record<NewsRole, Record<string, unknown>> = {
   },
 };
 
+export const NEWS_ROLE_OUTPUT_TOKEN_BUDGET: Record<NewsRole, number> = {
+  headline_screener: 32_000,
+  relevance_selector: 48_000,
+  child_news_editor: 32_000,
+  publication_reviewer: 48_000,
+};
+
+const MAX_OUTPUT_TOKEN_RETRY_BUDGET = 64_000;
+
 /** 서버 코드에서만 주입하는 기본 Responses API 역할 실행기다. */
 export const runOpenAiNewsRole: NewsRoleRunner = async (request, signal) => {
   const client = getLlmClient();
   const { role, reasoningEffort, ...payload } = request;
-  const response = await client.responses.create(
-    {
+  const createResponse = (maxOutputTokens: number) =>
+    client.responses.create({
       model: LLM_MODEL,
       reasoning: { effort: reasoningEffort },
-      max_output_tokens:
-        role === "headline_screener"
-          ? 12_000
-          : role === "child_news_editor"
-            ? 6_000
-            : 20_000,
+      max_output_tokens: maxOutputTokens,
       instructions: NEWS_ROLE_PROMPTS[role],
       input: JSON.stringify(payload),
       text: {
@@ -216,14 +220,21 @@ export const runOpenAiNewsRole: NewsRoleRunner = async (request, signal) => {
           schema: ROLE_SCHEMAS[role],
         },
       },
-    },
-    { signal },
-  );
+    }, { signal });
 
-  if (!response.output_text.trim()) {
+  let response = await createResponse(NEWS_ROLE_OUTPUT_TOKEN_BUDGET[role]);
+  if (
+    response.status === "incomplete" &&
+    response.incomplete_details?.reason === "max_output_tokens" &&
+    !signal.aborted
+  ) {
+    response = await createResponse(MAX_OUTPUT_TOKEN_RETRY_BUDGET);
+  }
+
+  if (response.status === "incomplete" || !response.output_text.trim()) {
     const incompleteReason = response.incomplete_details?.reason;
     throw new Error(
-      `${role} returned an empty response${incompleteReason ? ` (${incompleteReason})` : ""}`,
+      `${role} returned an incomplete response${incompleteReason ? ` (${incompleteReason})` : ""}`,
     );
   }
   return JSON.parse(response.output_text) as unknown;
