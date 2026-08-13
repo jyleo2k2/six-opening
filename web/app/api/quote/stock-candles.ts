@@ -69,8 +69,18 @@ function toPoint(row: CandleRow): ChartPoint {
   };
 }
 
+/**
+ * 분봉 조회 구간. 분봉은 보관하지 않으므로 이 값은 곧 키움에서 몇 페이지를 받느냐다.
+ *
+ * 14일이면 4천 봉 가까이 되고 연속조회가 다섯 번 넘게 돈다. 요청 간격이 2.6초라 그게
+ * 그대로 첫 진입 대기시간이었다. 1분봉 차트가 2주치를 보여줄 이유도 없다.
+ */
+const MINUTE_WINDOW_DAYS = 2;
+
 export function chartRetentionCutoff(period: ChartPeriod, now = new Date()) {
-  if (period === "minute") return Math.floor((now.getTime() - 14 * 24 * 60 * 60 * 1000) / 1000);
+  if (period === "minute") {
+    return Math.floor((now.getTime() - MINUTE_WINDOW_DAYS * 24 * 60 * 60 * 1000) / 1000);
+  }
 
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
