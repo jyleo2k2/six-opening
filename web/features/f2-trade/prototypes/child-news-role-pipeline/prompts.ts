@@ -16,7 +16,11 @@ export const NEWS_ROLE_PROMPTS: Record<NewsRole, string> = {
 
 통과 시 중심 사건은 하나만 정한다. anchorSourceId와 includedSourceIds에는 그 사건을 어린이에게 설명하는 데 꼭 필요한 문장만 넣고, 코스닥 동향·개발자 강연 같은 주변 사실은 excludedSourceIds로 보낸다. 모든 source id를 included 또는 excluded 중 정확히 한 곳에 넣어라.
 
-includedSourceIds에 남은 표현 중 10~13세가 바로 이해하기 어려운 금융·회계·정책·산업 용어, 약어, 낯선 단위 결합 표현을 모두 difficultTerms에 잡아라. 한 단어만 떼어 의미가 흐려지면 '400기가급 국제연구망'처럼 이해해야 할 표현 덩어리로 잡는다. 문맥에 뜻이 없으면 뜻을 지어내지 말고 해당 문장을 제외하라.
+market 통과 결과의 primaryStockIds는 기사에 개별 회사가 등장해도 항상 빈 배열이다. market은 국내 시장 움직임이 주체이며, 개별 회사 ID는 company 기사에서만 넣는다.
+
+includedSourceIds에 남은 표현 중 10~13세가 바로 이해하기 어려운 금융·회계·정책·산업 용어, 약어, 낯선 단위 결합 표현을 모두 difficultTerms에 잡아라. 주가, 주주·주주총회, 코스피·코스닥, 영업이익, 전년비, 적자처럼 뉴스에서 흔해도 어린이에게 뜻풀이가 필요한 말은 빼지 마라. 조원·억원, %, 기가급처럼 숫자에 붙어 크기나 비율을 나타내는 단위도 모두 잡는다. 한 단어만 떼어 의미가 흐려지면 '400기가급 국제연구망'처럼 이해해야 할 표현 덩어리로 잡는다. 문맥에 뜻이 없으면 뜻을 지어내지 말고 해당 문장을 제외하라.
+
+difficultTerms의 term은 sourceIds로 가리킨 included source unit 안에 실제로 이어져 있는 문자열이어야 한다. 조사나 다른 단어를 건너뛰어 새 표현을 조합하지 말고, sourceUnits가 아닌 기사 제목에만 있는 표현도 등록하지 마라.
 
 reject이면 kind는 ineligible, eventType은 none, primaryStockIds·includedSourceIds·difficultTerms는 빈 배열, focusStatement·anchorSourceId는 빈 문자열로 두고 reasonCodes와 reasons를 채워라. 개수를 맞추기 위해 기준을 낮추지 마라.`,
 
@@ -28,7 +32,13 @@ headline, homeSummary, 첫 body 문장은 모두 selection.anchorSourceId의 중
 
 모든 문장은 sourceIds를 달고, sourceUnits에 없는 숫자·원인·평가를 추가하지 마라. '영향을 줄 수 있다'처럼 주가 방향을 암시하지 말고, 회사의 매출·비용·생산·소유 관계와 어떤 사실이 연결되는지만 쉬운 말로 설명한다.
 
+원문이 두 사실을 함께 관측했을 뿐이면 '-면서', '덕분에', '때문에', '힘입어'로 원인과 결과를 만들지 말고 각각 나란히 말한다. 주가, 코스피·코스닥, 영업이익, 전년비, 적자 같은 말은 selection.difficultTerms에 빠졌더라도 노출문에서 더 쉬운 말로 바꿔라.
+
+원문이 단순 사실로 적은 내용을 '회사가 밝혔다', '회사가 설명했다', '누군가 말했다'로 바꾸지 마라. 발언·발표 주체와 시점은 sourceUnits에 명시된 그대로만 쓴다. 쉬운 말로 바꾸는 과정에서도 주주처럼 새로운 어려운 용어를 도입하지 마라.
+
 selection.difficultTerms의 모든 항목을 termTreatments에서 정확히 한 번 처리한다. replaced는 본문 전체에서 더 쉬운 말로 바꾼 경우, explained는 원래 용어가 필요해 easyText로 뜻을 풀어 쓴 경우다. easyText는 화면에 보여도 이해되는 완전한 쉬운 설명이어야 한다. 어려운 용어 하나만 고르지 말고 남아 있는 어려운 표현을 전부 처리한다.
+
+원문 숫자를 노출문에 유지하면 treatment는 replaced가 아니라 explained다. 숫자를 설명하려고 예시 숫자, 계산식, 환산값을 새로 만들지 말고 sourceUnits에 있는 숫자만 사용한다. 조원·억원과 %처럼 숫자에 붙은 큰 금액·비율 단위도 빠짐없이 쉬운 말로 설명한다.
 
 호재·악재, 긍정·부정 분류, 추천, 매수·매도·보유 지시, 매매 시점, 목표가, 수익률·주가 전망을 쓰지 마라. revisionReasons가 있으면 해당 문제만 고치되 새 사실을 추가하지 마라.`,
 
@@ -37,6 +47,8 @@ selection.difficultTerms의 모든 항목을 termTreatments에서 정확히 한 
 너는 작성자와 분리된 독립 출고 검수자다. 선별자의 판단이나 자체 점수는 보지 않는다. 원문 전체, 51개 기업 목록, 실제 노출될 draft만 읽고 처음부터 다시 판정한다.
 
 먼저 원문에서 독립적으로 kind, 실제 주체인 상장사, 사건 유형, 중심 사건과 그 근거인 anchorSourceIds를 뽑는다. 회사 이름이 등장한다는 이유만으로 주체로 인정하지 않는다. 고객·제공 채널·후원·그룹 관계만 있으면 ineligible이다. 오늘 시황 또는 직접적인 중요 회사 사건이 아니면 allowedScope, primarySubject 또는 directMateriality를 false로 둔다.
+
+independentKind가 market이면 개별 회사가 사례로 나와도 primaryStockIds는 항상 빈 배열이다. market의 주체는 국내 시장 움직임이며 회사 ID는 company 판정에서만 넣는다.
 
 draft의 제목·홈 요약·첫 문장이 독립적으로 찾은 중심 사건과 맞는지, 주변 사실이 앞서지 않는지, 모든 주장과 숫자가 원문에 있는지, 주장·계획·시점의 귀속이 유지됐는지 검사한다. 남은 금융·회계·정책·산업 용어와 약어, 낯선 단위 표현을 10~13세가 이해할 수 있게 모두 바꾸거나 설명했는지도 검사한다.
 

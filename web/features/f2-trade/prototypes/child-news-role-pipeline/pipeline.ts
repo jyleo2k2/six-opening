@@ -435,9 +435,7 @@ function validateDraft(
   if (
     hasDuplicates(treatedTerms) ||
     !sameSet(expectedTerms, treatedTerms) ||
-    draft.termTreatments.some(
-      (item) => !item.easyText.trim() || item.easyText.trim().length < 4,
-    )
+    draft.termTreatments.some((item) => !item.easyText.trim())
   ) {
     issues.push({
       code: "UNEXPLAINED_TERM",

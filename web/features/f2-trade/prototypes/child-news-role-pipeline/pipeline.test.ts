@@ -298,6 +298,57 @@ async function testAllTermsAndRetry() {
   assert.equal(revisionReasons[1].some((reason) => reason.includes("어려운 용어")), true);
 }
 
+async function testShortEasyReplacementAccepted() {
+  const target = article(
+    "short-easy-term",
+    "삼성전자 주가 상승",
+    ["삼성전자 주가가 올랐다."],
+    "market",
+  );
+  const selection = accepted(target, {
+    primaryStockIds: [],
+    eventType: "observed_market_move",
+    focusStatement: "삼성전자 주가가 올랐다.",
+    difficultTerms: [{ term: "주가", sourceIds: ["S1"] }],
+  });
+  const edited = draft(target, "S1", {
+    headline: { text: "삼성전자 주식값 상승", sourceIds: ["S1"] },
+    homeSummary: {
+      text: "삼성전자 주식값이 올랐어요.",
+      sourceIds: ["S1"],
+    },
+    body: [
+      {
+        role: "core_event",
+        text: "삼성전자 주식값이 올랐어요.",
+        sourceIds: ["S1"],
+      },
+      {
+        role: "context",
+        text: "이날 시장에서 확인된 움직임이에요.",
+        sourceIds: ["S1"],
+      },
+    ],
+    termTreatments: [
+      { term: "주가", treatment: "replaced", easyText: "주식값" },
+    ],
+  });
+
+  const result = await processNewsCandidate(target, {
+    universe,
+    runRole: async (request) => {
+      if (request.role === "relevance_selector") return selection;
+      if (request.role === "child_news_editor") return edited;
+      return approvedReview(target, {
+        primaryStockIds: [],
+        eventType: "observed_market_move",
+      });
+    },
+  });
+
+  assert.equal(result.status, "ready_for_storage");
+}
+
 async function testReviewerFailClosedAndNoQuotaFill() {
   const target = article(
     "08",
@@ -380,6 +431,7 @@ async function main() {
   await testRoutinePrefilters();
   await testSecondaryCompanyRejected();
   await testAllTermsAndRetry();
+  await testShortEasyReplacementAccepted();
   await testReviewerFailClosedAndNoQuotaFill();
   await testMalformedOutputFailsClosed();
   console.log("news role pipeline regression tests passed");
