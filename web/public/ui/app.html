@@ -293,22 +293,15 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <span style="{{ detailChangeStyle }}">{{ stockChangeText }}</span>
 </div>
 <div style="display:flex;gap:7px;margin-top:15px">
-<div onClick="{{ tfDay }}" style="{{ tfDayStyle }}">일봉</div>
-<div onClick="{{ tfWeek }}" style="{{ tfWeekStyle }}">주봉</div>
-<div onClick="{{ tfMonth }}" style="{{ tfMonthStyle }}">월봉</div>
+<div onClick="{{ chartLine }}" style="{{ chartLineStyle }}">선차트</div>
+<div onClick="{{ chartCandle }}" style="{{ chartCandleStyle }}">캔들차트</div>
 </div>
-<svg width="330" height="240" viewBox="0 0 330 240" style="display:block;margin-top:16px">
-<line x1="0" y1="30" x2="330" y2="30" stroke="#EEEFF6" stroke-width="1"></line>
-<line x1="0" y1="90" x2="330" y2="90" stroke="#EEEFF6" stroke-width="1"></line>
-<line x1="0" y1="150" x2="330" y2="150" stroke="#EEEFF6" stroke-width="1"></line>
-<line x1="0" y1="210" x2="330" y2="210" stroke="#EEEFF6" stroke-width="1"></line>
-<sc-for list="{{ candles }}" as="k" hint-placeholder-count="26">
-<g><line x1="{{ k.x }}" y1="{{ k.hy }}" x2="{{ k.x }}" y2="{{ k.ly }}" stroke="{{ k.color }}" stroke-width="1.4"></line><rect x="{{ k.bx }}" y="{{ k.by }}" width="8" height="{{ k.bh }}" rx="1.5" fill="{{ k.color }}"></rect></g>
-</sc-for>
-</svg>
-<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:#A9AEC4;margin-top:8px">
-<span>{{ tfLabelFrom }}</span><span>오늘</span>
+<div style="display:flex;gap:7px;margin-top:9px">
+<div onClick="{{ tfMinute }}" style="{{ tfMinuteStyle }}">분봉</div>
+<div onClick="{{ tfDaily }}" style="{{ tfDailyStyle }}">일봉</div>
+<div onClick="{{ tfWeekly }}" style="{{ tfWeeklyStyle }}">주봉</div>
 </div>
+<iframe title="{{ stockName }} TradingView 차트" src="{{ tradingViewChartUrl }}" width="330" height="264" loading="eager" style="display:block;margin-top:16px;border:0;background:#FFFFFF"></iframe>
 </div>
 
 <div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:16px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
@@ -1275,7 +1268,7 @@ class Component extends DCLogic {
     acc: { child:{name:'민지', cash:SEED, holdings:[], pending:[]}, parent:{name:'엄마', cash:SEED, holdings:[], pending:[]} },
     sectorId: 'semi', code: null, buyStep: 1, showPad: false, cardIndex: 0,
     draft: this.blankDraft(),
-    records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'day',
+    records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
     sellStep: 1, sellDraft: { qty:0, reason:null, change:null, memo:'', memoSaved:false }, doneKind: 'buy', arcTab: 'report', sellPick: 'all',
     schoolLock: true, forceSchool: 'auto', rankTab: 'week',
     reasonOrder: [0,1,2,3,4,5]
@@ -1327,37 +1320,6 @@ class Component extends DCLogic {
     };
     window.addEventListener('message', this.receiveOpenStock);
 
-    // 캔들은 /api/quote/{종목}/chart 가 준다 (보관 DB → 키움 → 픽스처 순).
-    // 월봉 API 는 없으므로 주봉을 달 단위로 묶는다.
-    this.candleCache = {};
-    this.candleLoading = {};
-    this.loadCandles = (code, tf) => {
-      const key = code + ':' + tf;
-      if (!code || this.candleCache[key] || this.candleLoading[key]) return;
-      this.candleLoading[key] = true;
-      fetch('/api/quote/' + encodeURIComponent(code) + '/chart?period=' + (tf === 'day' ? 'daily' : 'weekly'), { cache:'no-store' })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          const points = (data && data.points) || [];
-          if (!points.length) return;
-          const bars = tf === 'month' ? this.groupByMonth(points) : points;
-          this.candleCache[key] = bars.slice(-26).map(p => ({ o:p.open, h:p.high, l:p.low, c:p.close }));
-          this.forceUpdate();
-        })
-        .catch(() => {})
-        .finally(() => { delete this.candleLoading[key]; });
-    };
-  }
-  groupByMonth(points){
-    const months = new Map();
-    points.forEach(p => {
-      const kst = new Date((p.time + 9 * 3600) * 1000);
-      const key = kst.getUTCFullYear() + '-' + kst.getUTCMonth();
-      const bar = months.get(key);
-      if (!bar) months.set(key, { open:p.open, high:p.high, low:p.low, close:p.close });
-      else { bar.high = Math.max(bar.high, p.high); bar.low = Math.min(bar.low, p.low); bar.close = p.close; }
-    });
-    return Array.from(months.values());
   }
   componentWillUnmount(){
     if (this.liveRefreshTimer) clearInterval(this.liveRefreshTimer);
@@ -1378,7 +1340,6 @@ class Component extends DCLogic {
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
     }
-    if (this.state.code && this.loadCandles) this.loadCandles(this.state.code, this.state.tf);
   }
   persist(next){
     try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq })); } catch(e){}
@@ -1660,24 +1621,6 @@ class Component extends DCLogic {
 
     const ND = (u.newsDetail || {});
     const nd = (st && ND[st.sector]) || { headline:'', body:[], points:[] };
-    let candleBars = [];
-    const bars = st ? (this.candleCache && this.candleCache[st.code + ':' + s.tf]) : null;
-    if (st) this.loadCandles && this.loadCandles(st.code, s.tf);
-    if (bars && bars.length) {
-      const hi = Math.max.apply(null, bars.map(b => b.h));
-      const lo = Math.min.apply(null, bars.map(b => b.l));
-      const span = (hi - lo) || 1;
-      const Y = v => (232 - (v - lo) / span * 224).toFixed(1);
-      candleBars = bars.map((b, i) => {
-        const x = 10 + i * 12.3;
-        const top = Y(Math.max(b.o, b.c)), bot = Y(Math.min(b.o, b.c));
-        return {
-          x: (x + 4).toFixed(1), hy: Y(b.h), ly: Y(b.l),
-          bx: x.toFixed(1), by: top, bh: Math.max(1.5, bot - top).toFixed(1),
-          color: b.c >= b.o ? '#E8322E' : '#1668DC'
-        };
-      });
-    }
     const heldRow = st ? (m.holdings.filter(h => h.code === st.code)[0] || null) : null;
     const heldQty = heldRow ? heldRow.qty : 0;
     const heldAvg = heldRow ? heldRow.avg : 0;
@@ -2212,10 +2155,11 @@ class Component extends DCLogic {
       openChart: () => this.logEvent('chart_detail_opened', 'chart'),
       openNews: () => this.logEvent('news_detail_opened', 'news'),
       closeSub: () => this.closeSub(),
-      tfDay: () => this.setTf('day'), tfWeek: () => this.setTf('week'), tfMonth: () => this.setTf('month'),
-      tfDayStyle: this.chip(s.tf === 'day'), tfWeekStyle: this.chip(s.tf === 'week'), tfMonthStyle: this.chip(s.tf === 'month'),
-      tfLabelFrom: s.tf === 'day' ? '26일 전' : s.tf === 'week' ? '26주 전' : '26달 전',
-      candles: candleBars,
+      chartLine: () => this.set({ chartType:'line' }), chartCandle: () => this.set({ chartType:'candlestick' }),
+      chartLineStyle: this.chip(s.chartType === 'line'), chartCandleStyle: this.chip(s.chartType === 'candlestick'),
+      tfMinute: () => this.setTf('minute'), tfDaily: () => this.setTf('daily'), tfWeekly: () => this.setTf('weekly'),
+      tfMinuteStyle: this.chip(s.tf === 'minute'), tfDailyStyle: this.chip(s.tf === 'daily'), tfWeeklyStyle: this.chip(s.tf === 'weekly'),
+      tradingViewChartUrl: st ? '/tradingview-chart?symbol=' + encodeURIComponent(st.code) + '&period=' + encodeURIComponent(s.tf) + '&type=' + encodeURIComponent(s.chartType) : '',
       sectorNameText: st ? this.sectorOf(st.sector).name : '',
       newsHeadline: nd.headline,
       newsBody: nd.body.map(t => ({ text: t })),
