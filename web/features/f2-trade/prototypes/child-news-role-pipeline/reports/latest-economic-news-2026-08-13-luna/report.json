@@ -1,0 +1,2186 @@
+{
+  "schemaVersion": 1,
+  "runId": "latest-economic-news-2026-08-13-luna",
+  "runDateKst": "2026-08-13",
+  "sourceRetrievedAt": "2026-08-13T07:30:00.000Z",
+  "sourceBasis": "2026-08-13 웹 검색 결과와 각 원문에서 확인한 제목·발행 시각·핵심 사실 단위",
+  "generatedAt": "2026-08-13T08:07:29.882Z",
+  "model": "gpt-5.6-luna",
+  "articleCount": 10,
+  "expectationMatchedCount": 8,
+  "readyForStorageCount": 3,
+  "rejectedCount": 7,
+  "criteriaPassed": false,
+  "cases": [
+    {
+      "caseId": "01-market-close-kospi-definition",
+      "inputArticle": {
+        "articleId": "N1001",
+        "runDateKst": "2026-08-13",
+        "scope": "market",
+        "title": "상승 마감한 코스피·코스닥",
+        "publisher": "뉴스핌",
+        "publishedAt": "2026-08-13T06:49:00.000Z",
+        "sourceUrl": "https://www.newspim.com/news/view/20260813001115",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "13일 코스피는 전날보다 234.30포인트(3.56%) 오른 6813.34에 마감했다."
+          },
+          {
+            "id": "S2",
+            "text": "같은 날 코스닥은 2.46포인트(0.29%) 오른 1419.4에 마감했다."
+          },
+          {
+            "id": "S3",
+            "text": "서울 외환시장에서 원·달러 환율은 7.7원 내린 1416.1원에 마감했다."
+          }
+        ]
+      },
+      "title": "상승 마감한 코스피·코스닥",
+      "sourceUrl": "https://www.newspim.com/news/view/20260813001115",
+      "pipelineStatus": "ready_for_storage",
+      "stage": "complete",
+      "reasonCodes": [],
+      "reasons": [],
+      "expectation": {
+        "expectedStatus": "ready_for_storage",
+        "rationale": "당일 국내 마감 시황이다. 코스피를 주인공으로 삼고 코스피가 국내 주식시장을 대표하는 숫자라는 설명을 넣되, 코스닥과 환율을 주변 사실로 반복해서 섞지 않아야 한다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 allowedScope=true"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "pass",
+          "evidence": [
+            "선별자와 독립 검수자가 직접 중요 사건으로 통과"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 primarySubject=true"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 noIrrelevantDetail=true"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 conciseThreeLineSummary=true"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 allTermsEasy=true"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 검수 sourceFidelity·attributionAndTiming=true"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "모든 게이트 통과로 ready_for_storage"
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1001",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "당일 국내 증시 마감 동향을 다룬 제목이므로 본문을 확인한다."
+            ]
+          }
+        },
+        {
+          "role": "relevance_selector",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1001",
+            "decision": "accept",
+            "kind": "market",
+            "primaryStockIds": [],
+            "eventType": "observed_market_move",
+            "focusStatement": "13일 국내 증시에서 코스피와 코스닥이 상승 마감했다.",
+            "anchorSourceId": "S1",
+            "includedSourceIds": [
+              "S1",
+              "S2"
+            ],
+            "excludedSourceIds": [
+              "S3"
+            ],
+            "difficultTerms": [
+              {
+                "term": "코스피",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "term": "코스닥",
+                "sourceIds": [
+                  "S2"
+                ]
+              }
+            ],
+            "reasonCodes": [],
+            "reasons": []
+          }
+        },
+        {
+          "role": "child_news_editor",
+          "reasoningEffort": "high",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1001",
+            "headline": {
+              "text": "13일 코스피가 3.56% 올라 마감",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "homeSummary": {
+              "text": "13일 코스피와 다른 주식시장 숫자가 올랐다.",
+              "sourceIds": [
+                "S1",
+                "S2"
+              ]
+            },
+            "body": [
+              {
+                "role": "core_event",
+                "text": "13일 코스피가 올라 마감했다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "business_connection",
+                "text": "다른 국내 주식시장 숫자도 0.29% 올랐다.",
+                "sourceIds": [
+                  "S2"
+                ]
+              },
+              {
+                "role": "context",
+                "text": "코스피는 국내 주식시장 대표 숫자야.",
+                "sourceIds": [
+                  "S1"
+                ]
+              }
+            ],
+            "termTreatments": [
+              {
+                "term": "코스피",
+                "treatment": "explained",
+                "easyText": "코스피는 국내 주식시장 대표 숫자야."
+              },
+              {
+                "term": "코스닥",
+                "treatment": "replaced",
+                "easyText": "다른 국내 주식시장 숫자"
+              }
+            ]
+          }
+        },
+        {
+          "role": "publication_reviewer",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1001",
+            "independentKind": "market",
+            "primaryStockIds": [],
+            "eventType": "observed_market_move",
+            "focusStatement": "13일 코스피와 코스닥이 상승 마감했다.",
+            "anchorSourceIds": [
+              "S1",
+              "S2"
+            ],
+            "checks": {
+              "allowedScope": true,
+              "primarySubject": true,
+              "directMateriality": true,
+              "sourceFidelity": true,
+              "focusAlignment": true,
+              "conciseThreeLineSummary": true,
+              "noIrrelevantDetail": true,
+              "attributionAndTiming": true,
+              "allTermsEasy": true,
+              "investmentSafety": true,
+              "noSentimentLabel": true
+            },
+            "issues": []
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "N1001",
+          "runDateKst": "2026-08-13",
+          "scope": "market",
+          "title": "상승 마감한 코스피·코스닥",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-08-13T06:49:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260813001115",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "13일 코스피는 전날보다 234.30포인트(3.56%) 오른 6813.34에 마감했다."
+            },
+            {
+              "id": "S2",
+              "text": "같은 날 코스닥은 2.46포인트(0.29%) 오른 1419.4에 마감했다."
+            },
+            {
+              "id": "S3",
+              "text": "서울 외환시장에서 원·달러 환율은 7.7원 내린 1416.1원에 마감했다."
+            }
+          ]
+        },
+        "selection": {
+          "articleId": "N1001",
+          "primaryStockIds": [],
+          "focusStatement": "13일 국내 증시에서 코스피와 코스닥이 상승 마감했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2"
+          ],
+          "excludedSourceIds": [
+            "S3"
+          ],
+          "difficultTerms": [
+            {
+              "term": "코스피",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "코스닥",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "market",
+          "eventType": "observed_market_move"
+        },
+        "draft": {
+          "articleId": "N1001",
+          "headline": {
+            "text": "13일 코스피가 3.56% 올라 마감",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "13일 코스피와 다른 주식시장 숫자가 올랐다.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "13일 코스피가 올라 마감했다.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "core_event"
+            },
+            {
+              "text": "다른 국내 주식시장 숫자도 0.29% 올랐다.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_connection"
+            },
+            {
+              "text": "코스피는 국내 주식시장 대표 숫자야.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "context"
+            }
+          ],
+          "termTreatments": [
+            {
+              "term": "코스피",
+              "easyText": "코스피는 국내 주식시장 대표 숫자야.",
+              "treatment": "explained"
+            },
+            {
+              "term": "코스닥",
+              "easyText": "다른 국내 주식시장 숫자",
+              "treatment": "replaced"
+            }
+          ]
+        },
+        "review": {
+          "articleId": "N1001",
+          "independentKind": "market",
+          "primaryStockIds": [],
+          "eventType": "observed_market_move",
+          "focusStatement": "13일 코스피와 코스닥이 상승 마감했다.",
+          "anchorSourceIds": [
+            "S1",
+            "S2"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "caseId": "02-samsung-pune-production-line",
+      "inputArticle": {
+        "articleId": "N1002",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "삼성 印 푸네에 ‘AI 냉각기지’…연 6500대 쏟아낸다",
+        "publisher": "에너지경제신문",
+        "publishedAt": "2026-08-13T00:51:00.000Z",
+        "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813025512326",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "삼성전자는 인도 푸네에 데이터센터용 냉방·공기관리 설비 생산라인을 완공했다."
+          },
+          {
+            "id": "S2",
+            "text": "생산시설 면적은 1만3826제곱미터이고, 냉방 설비를 연간 최대 6500대 생산할 수 있다."
+          },
+          {
+            "id": "S3",
+            "text": "삼성전자는 올해 초 설비 구축을 시작해 약 6개월 만에 양산 체계를 갖췄다고 밝혔다."
+          }
+        ]
+      },
+      "title": "삼성 印 푸네에 ‘AI 냉각기지’…연 6500대 쏟아낸다",
+      "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813025512326",
+      "pipelineStatus": "rejected",
+      "stage": "editor",
+      "reasonCodes": [
+        "ROLE_ERROR"
+      ],
+      "reasons": [
+        "child_news_editor returned an empty response (max_output_tokens)"
+      ],
+      "expectation": {
+        "expectedStatus": "ready_for_storage",
+        "rationale": "선정 기업 삼성전자가 실제 생산라인을 완공한 직접 사건이다. 푸네·데이터센터·냉방 설비·양산처럼 어린이가 모를 수 있는 말을 빠짐없이 쉽게 풀어야 한다."
+      },
+      "expectationMatched": false,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "허용 범위 검증 전에 editor 단계에서 ROLE_ERROR로 종료"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "일상·채용·행사·사회공헌·홍보 검증 전에 editor 단계에서 ROLE_ERROR로 종료"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "기사와 요약의 주인공 검증 전에 editor 단계에서 ROLE_ERROR로 종료"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "주변 사실 혼입 검증 전에 editor 단계에서 ROLE_ERROR로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 editor 단계에서 ROLE_ERROR로 종료"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "전 용어 처리 검증 전에 editor 단계에서 ROLE_ERROR로 종료"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "숫자·날짜·출처 충실성 검증 전에 editor 단계에서 ROLE_ERROR로 종료"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "rejected/editor: child_news_editor returned an empty response (max_output_tokens)"
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1002",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "‘삼성’의 인도 푸네 AI 냉각기지와 연간 생산량을 다룬 생산·설비 관련 제목으로, 선정 기업의 직접 사업 사건인지 원문 확인이 필요하다."
+            ]
+          }
+        },
+        {
+          "role": "relevance_selector",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1002",
+            "decision": "accept",
+            "kind": "company",
+            "primaryStockIds": [
+              "KRX:005930"
+            ],
+            "eventType": "sales_or_production",
+            "focusStatement": "삼성전자가 인도 푸네에 데이터센터용 냉방·공기관리 설비 생산라인을 완공했으며, 연간 최대 6500대를 생산할 수 있다.",
+            "anchorSourceId": "S1",
+            "includedSourceIds": [
+              "S1",
+              "S2"
+            ],
+            "excludedSourceIds": [
+              "S3"
+            ],
+            "difficultTerms": [
+              {
+                "term": "데이터센터용 냉방·공기관리 설비",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "term": "생산라인",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "term": "생산시설 면적",
+                "sourceIds": [
+                  "S2"
+                ]
+              },
+              {
+                "term": "제곱미터",
+                "sourceIds": [
+                  "S2"
+                ]
+              }
+            ],
+            "reasonCodes": [],
+            "reasons": [
+              "삼성전자가 생산시설 완공과 연간 생산 가능 물량을 직접 밝혔다."
+            ]
+          }
+        },
+        {
+          "role": "child_news_editor",
+          "reasoningEffort": "high",
+          "outcome": "error",
+          "error": "child_news_editor returned an empty response (max_output_tokens)"
+        }
+      ],
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "N1002",
+        "stage": "editor",
+        "reasonCodes": [
+          "ROLE_ERROR"
+        ],
+        "reasons": [
+          "child_news_editor returned an empty response (max_output_tokens)"
+        ],
+        "editorAttempts": 1
+      }
+    },
+    {
+      "caseId": "03-kepco-quarterly-earnings",
+      "inputArticle": {
+        "articleId": "N1003",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "한전, 올해 2분기 영업익 1조1286억원…전년比 47.2%↓",
+        "publisher": "에너지경제신문",
+        "publishedAt": "2026-08-12T08:27:00.000Z",
+        "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260812021142119",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "한국전력의 2026년 2분기 영업이익은 1조1286억원으로 지난해 같은 기간보다 47.2% 줄었다."
+          },
+          {
+            "id": "S2",
+            "text": "매출은 21조9189억원으로 0.1% 줄었고, 순이익은 2775억원으로 76.4% 줄었다."
+          },
+          {
+            "id": "S3",
+            "text": "한국전력은 전기 판매량이 조금 줄고 연료비가 늘어난 점을 영업이익 감소 원인으로 들었다."
+          }
+        ]
+      },
+      "title": "한전, 올해 2분기 영업익 1조1286억원…전년比 47.2%↓",
+      "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260812021142119",
+      "pipelineStatus": "ready_for_storage",
+      "stage": "complete",
+      "reasonCodes": [],
+      "reasons": [],
+      "expectation": {
+        "expectedStatus": "ready_for_storage",
+        "rationale": "선정 기업 한국전력의 확정 분기 실적이다. 조원·억원·퍼센트 표기 자체는 그대로 쓰고 영업이익·매출·순이익·연료비의 뜻을 쉬운 말로 설명해야 한다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 allowedScope=true"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "pass",
+          "evidence": [
+            "선별자와 독립 검수자가 직접 중요 사건으로 통과"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 primarySubject=true"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 noIrrelevantDetail=true"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 conciseThreeLineSummary=true"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 allTermsEasy=true"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 검수 sourceFidelity·attributionAndTiming=true"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "모든 게이트 통과로 ready_for_storage"
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1003",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "선정 기업 한국전력의 올해 2분기 영업이익과 전년 대비 변동을 다룬 실적 기사이므로 본문을 확인한다."
+            ]
+          }
+        },
+        {
+          "role": "relevance_selector",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1003",
+            "decision": "accept",
+            "kind": "company",
+            "primaryStockIds": [
+              "KRX:015760"
+            ],
+            "eventType": "earnings",
+            "focusStatement": "한국전력의 2026년 2분기 영업이익이 전년 동기보다 47.2% 감소했다.",
+            "anchorSourceId": "S1",
+            "includedSourceIds": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "excludedSourceIds": [],
+            "difficultTerms": [
+              {
+                "term": "영업이익",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "term": "매출",
+                "sourceIds": [
+                  "S2"
+                ]
+              },
+              {
+                "term": "순이익",
+                "sourceIds": [
+                  "S2"
+                ]
+              }
+            ],
+            "reasonCodes": [],
+            "reasons": []
+          }
+        },
+        {
+          "role": "child_news_editor",
+          "reasoningEffort": "high",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1003",
+            "headline": {
+              "text": "한국전력 2분기 영업으로 번 돈 47.2% 감소",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "homeSummary": {
+              "text": "한국전력의 2분기 영업으로 번 돈은 1조1286억원으로 지난해 같은 기간보다 47.2% 줄었다.",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "body": [
+              {
+                "role": "core_event",
+                "text": "한국전력의 2분기 영업으로 번 돈이 줄었다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "business_connection",
+                "text": "영업으로 번 돈은 1조1286억원, 47.2% 줄었다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "context",
+                "text": "판매로 들어온 돈은 0.1%, 남은 돈은 76.4% 줄었다.",
+                "sourceIds": [
+                  "S2"
+                ]
+              }
+            ],
+            "termTreatments": [
+              {
+                "term": "영업이익",
+                "treatment": "replaced",
+                "easyText": "영업으로 번 돈"
+              },
+              {
+                "term": "매출",
+                "treatment": "replaced",
+                "easyText": "판매로 들어온 돈"
+              },
+              {
+                "term": "순이익",
+                "treatment": "replaced",
+                "easyText": "남은 돈"
+              }
+            ]
+          }
+        },
+        {
+          "role": "publication_reviewer",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1003",
+            "independentKind": "company",
+            "primaryStockIds": [
+              "KRX:015760"
+            ],
+            "eventType": "earnings",
+            "focusStatement": "한국전력의 2026년 2분기 영업이익이 1조1286억원으로 전년 동기보다 47.2% 감소했다.",
+            "anchorSourceIds": [
+              "S1"
+            ],
+            "checks": {
+              "allowedScope": true,
+              "primarySubject": true,
+              "directMateriality": true,
+              "sourceFidelity": true,
+              "focusAlignment": true,
+              "conciseThreeLineSummary": false,
+              "noIrrelevantDetail": true,
+              "attributionAndTiming": true,
+              "allTermsEasy": true,
+              "investmentSafety": true,
+              "noSentimentLabel": true
+            },
+            "issues": [
+              {
+                "code": "redundant_summary",
+                "explanation": "첫째 줄과 둘째 줄이 영업이익 감소라는 같은 사실을 일반 설명과 숫자 설명으로 반복한다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "role": "child_news_editor",
+          "reasoningEffort": "high",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1003",
+            "headline": {
+              "text": "한국전력 2026년 2분기 본업에서 번 돈 47.2% 줄어",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "homeSummary": {
+              "text": "한국전력의 2026년 2분기 본업에서 번 돈은 1조1286억원으로 지난해 같은 기간보다 47.2% 줄었다.",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "body": [
+              {
+                "role": "core_event",
+                "text": "한국전력의 2026년 2분기 본업에서 번 돈이 줄었다.",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "business_connection",
+                "text": "판매액은 21조9189억원, 남은 돈은 2775억원이다.",
+                "sourceIds": [
+                  "S2"
+                ]
+              },
+              {
+                "role": "context",
+                "text": "한국전력은 전기 판매량 감소와 연료비 증가를 원인으로 들었다.",
+                "sourceIds": [
+                  "S3"
+                ]
+              }
+            ],
+            "termTreatments": [
+              {
+                "term": "영업이익",
+                "treatment": "replaced",
+                "easyText": "본업에서 번 돈"
+              },
+              {
+                "term": "매출",
+                "treatment": "replaced",
+                "easyText": "판매액"
+              },
+              {
+                "term": "순이익",
+                "treatment": "replaced",
+                "easyText": "남은 돈"
+              }
+            ]
+          }
+        },
+        {
+          "role": "publication_reviewer",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1003",
+            "independentKind": "company",
+            "primaryStockIds": [
+              "KRX:015760"
+            ],
+            "eventType": "earnings",
+            "focusStatement": "한국전력의 2026년 2분기 영업이익이 1조1286억원으로 전년 동기보다 47.2% 감소했다.",
+            "anchorSourceIds": [
+              "S1"
+            ],
+            "checks": {
+              "allowedScope": true,
+              "primarySubject": true,
+              "directMateriality": true,
+              "sourceFidelity": true,
+              "focusAlignment": true,
+              "conciseThreeLineSummary": true,
+              "noIrrelevantDetail": true,
+              "attributionAndTiming": true,
+              "allTermsEasy": true,
+              "investmentSafety": true,
+              "noSentimentLabel": true
+            },
+            "issues": []
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "N1003",
+          "runDateKst": "2026-08-13",
+          "scope": "company",
+          "title": "한전, 올해 2분기 영업익 1조1286억원…전년比 47.2%↓",
+          "publisher": "에너지경제신문",
+          "publishedAt": "2026-08-12T08:27:00.000Z",
+          "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260812021142119",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "한국전력의 2026년 2분기 영업이익은 1조1286억원으로 지난해 같은 기간보다 47.2% 줄었다."
+            },
+            {
+              "id": "S2",
+              "text": "매출은 21조9189억원으로 0.1% 줄었고, 순이익은 2775억원으로 76.4% 줄었다."
+            },
+            {
+              "id": "S3",
+              "text": "한국전력은 전기 판매량이 조금 줄고 연료비가 늘어난 점을 영업이익 감소 원인으로 들었다."
+            }
+          ]
+        },
+        "selection": {
+          "articleId": "N1003",
+          "primaryStockIds": [
+            "KRX:015760"
+          ],
+          "focusStatement": "한국전력의 2026년 2분기 영업이익이 전년 동기보다 47.2% 감소했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            {
+              "term": "영업이익",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "매출",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "순이익",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "N1003",
+          "headline": {
+            "text": "한국전력 2026년 2분기 본업에서 번 돈 47.2% 줄어",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "한국전력의 2026년 2분기 본업에서 번 돈은 1조1286억원으로 지난해 같은 기간보다 47.2% 줄었다.",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "한국전력의 2026년 2분기 본업에서 번 돈이 줄었다.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "core_event"
+            },
+            {
+              "text": "판매액은 21조9189억원, 남은 돈은 2775억원이다.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_connection"
+            },
+            {
+              "text": "한국전력은 전기 판매량 감소와 연료비 증가를 원인으로 들었다.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context"
+            }
+          ],
+          "termTreatments": [
+            {
+              "term": "영업이익",
+              "easyText": "본업에서 번 돈",
+              "treatment": "replaced"
+            },
+            {
+              "term": "매출",
+              "easyText": "판매액",
+              "treatment": "replaced"
+            },
+            {
+              "term": "순이익",
+              "easyText": "남은 돈",
+              "treatment": "replaced"
+            }
+          ]
+        },
+        "review": {
+          "articleId": "N1003",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:015760"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "한국전력의 2026년 2분기 영업이익이 1조1286억원으로 전년 동기보다 47.2% 감소했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 2
+      }
+    },
+    {
+      "caseId": "04-department-store-mixed-subject",
+      "inputArticle": {
+        "articleId": "N1004",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "외국인 관광객에 웃은 백화점 빅3, 대규모 투자로 ‘미래 대비’",
+        "publisher": "에너지경제신문",
+        "publishedAt": "2026-08-13T01:07:00.000Z",
+        "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813022482121",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "신세계백화점의 2분기 순매출은 7385억원으로 17.5% 늘고 영업이익은 1088억원으로 53.5% 늘었다."
+          },
+          {
+            "id": "S2",
+            "text": "기사는 롯데백화점과 현대백화점의 2분기 실적도 함께 비교했다."
+          },
+          {
+            "id": "S3",
+            "text": "기사는 세 백화점의 점포 개편과 앞으로의 투자 계획도 함께 다뤘다."
+          }
+        ]
+      },
+      "title": "외국인 관광객에 웃은 백화점 빅3, 대규모 투자로 ‘미래 대비’",
+      "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813022482121",
+      "pipelineStatus": "ready_for_storage",
+      "stage": "complete",
+      "reasonCodes": [],
+      "reasons": [],
+      "expectation": {
+        "expectedStatus": "rejected",
+        "acceptableReasonCodes": [
+          "COMPANY_NOT_PRIMARY_SUBJECT",
+          "NO_DIRECT_MATERIALITY"
+        ],
+        "rationale": "신세계 수치는 있지만 기사 전체의 주인공은 백화점 세 곳이다. 한 회사 기사처럼 잘라 저장하면 기사 주인공과 요약 주인공이 달라지므로 이번 표본에서는 거부한다."
+      },
+      "expectationMatched": false,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 allowedScope=true"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "pass",
+          "evidence": [
+            "선별자와 독립 검수자가 직접 중요 사건으로 통과"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 primarySubject=true"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 noIrrelevantDetail=true"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 conciseThreeLineSummary=true"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 출고 검수 allTermsEasy=true"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "pass",
+          "evidence": [
+            "독립 검수 sourceFidelity·attributionAndTiming=true"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "모든 게이트 통과로 ready_for_storage"
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1004",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "백화점 빅3의 대규모 투자가 선정 기업의 직접적인 사업·재무 사건인지 제목만으로 확정할 수 없어 본문을 확인한다."
+            ]
+          }
+        },
+        {
+          "role": "relevance_selector",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1004",
+            "decision": "accept",
+            "kind": "company",
+            "primaryStockIds": [
+              "KRX:004170"
+            ],
+            "eventType": "earnings",
+            "focusStatement": "신세계백화점의 2분기 순매출은 7385억원, 영업이익은 1088억원으로 각각 17.5%, 53.5% 늘었다.",
+            "anchorSourceId": "S1",
+            "includedSourceIds": [
+              "S1"
+            ],
+            "excludedSourceIds": [
+              "S2",
+              "S3"
+            ],
+            "difficultTerms": [
+              {
+                "term": "순매출",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "term": "영업이익",
+                "sourceIds": [
+                  "S1"
+                ]
+              }
+            ],
+            "reasonCodes": [],
+            "reasons": []
+          }
+        },
+        {
+          "role": "child_news_editor",
+          "reasoningEffort": "high",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1004",
+            "headline": {
+              "text": "신세계백화점, 2분기 매출·이익 늘어",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "homeSummary": {
+              "text": "신세계백화점의 2분기 순매출은 7385억원, 영업이익은 1088억원으로 각각 17.5%, 53.5% 늘었다.",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            "body": [
+              {
+                "role": "core_event",
+                "text": "신세계백화점 2분기 매출·이익 증가",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "business_connection",
+                "text": "순매출 7385억원, 영업이익 1088억원",
+                "sourceIds": [
+                  "S1"
+                ]
+              },
+              {
+                "role": "context",
+                "text": "순매출은 판매로 번 돈, 영업이익은 장사로 남긴 돈",
+                "sourceIds": [
+                  "S1"
+                ]
+              }
+            ],
+            "termTreatments": [
+              {
+                "term": "순매출",
+                "treatment": "explained",
+                "easyText": "판매로 번 돈"
+              },
+              {
+                "term": "영업이익",
+                "treatment": "explained",
+                "easyText": "장사로 남긴 돈"
+              }
+            ]
+          }
+        },
+        {
+          "role": "publication_reviewer",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1004",
+            "independentKind": "company",
+            "primaryStockIds": [
+              "KRX:004170"
+            ],
+            "eventType": "earnings",
+            "focusStatement": "신세계백화점의 2분기 순매출과 영업이익이 각각 17.5%, 53.5% 증가했다.",
+            "anchorSourceIds": [
+              "S1"
+            ],
+            "checks": {
+              "allowedScope": true,
+              "primarySubject": true,
+              "directMateriality": true,
+              "sourceFidelity": true,
+              "focusAlignment": true,
+              "conciseThreeLineSummary": true,
+              "noIrrelevantDetail": true,
+              "attributionAndTiming": true,
+              "allTermsEasy": true,
+              "investmentSafety": true,
+              "noSentimentLabel": true
+            },
+            "issues": []
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "N1004",
+          "runDateKst": "2026-08-13",
+          "scope": "company",
+          "title": "외국인 관광객에 웃은 백화점 빅3, 대규모 투자로 ‘미래 대비’",
+          "publisher": "에너지경제신문",
+          "publishedAt": "2026-08-13T01:07:00.000Z",
+          "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813022482121",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "신세계백화점의 2분기 순매출은 7385억원으로 17.5% 늘고 영업이익은 1088억원으로 53.5% 늘었다."
+            },
+            {
+              "id": "S2",
+              "text": "기사는 롯데백화점과 현대백화점의 2분기 실적도 함께 비교했다."
+            },
+            {
+              "id": "S3",
+              "text": "기사는 세 백화점의 점포 개편과 앞으로의 투자 계획도 함께 다뤘다."
+            }
+          ]
+        },
+        "selection": {
+          "articleId": "N1004",
+          "primaryStockIds": [
+            "KRX:004170"
+          ],
+          "focusStatement": "신세계백화점의 2분기 순매출은 7385억원, 영업이익은 1088억원으로 각각 17.5%, 53.5% 늘었다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1"
+          ],
+          "excludedSourceIds": [
+            "S2",
+            "S3"
+          ],
+          "difficultTerms": [
+            {
+              "term": "순매출",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "N1004",
+          "headline": {
+            "text": "신세계백화점, 2분기 매출·이익 늘어",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "신세계백화점의 2분기 순매출은 7385억원, 영업이익은 1088억원으로 각각 17.5%, 53.5% 늘었다.",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "신세계백화점 2분기 매출·이익 증가",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "core_event"
+            },
+            {
+              "text": "순매출 7385억원, 영업이익 1088억원",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_connection"
+            },
+            {
+              "text": "순매출은 판매로 번 돈, 영업이익은 장사로 남긴 돈",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "context"
+            }
+          ],
+          "termTreatments": [
+            {
+              "term": "순매출",
+              "easyText": "판매로 번 돈",
+              "treatment": "explained"
+            },
+            {
+              "term": "영업이익",
+              "easyText": "장사로 남긴 돈",
+              "treatment": "explained"
+            }
+          ]
+        },
+        "review": {
+          "articleId": "N1004",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:004170"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "신세계백화점의 2분기 순매출과 영업이익이 각각 17.5%, 53.5% 증가했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "caseId": "05-refinery-industry-aggregate",
+      "inputArticle": {
+        "articleId": "N1005",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "중동 공백 메우는 K-윤활기유…정유업계, 글로벌 핵심 공급망 부상",
+        "publisher": "에너지경제신문",
+        "publishedAt": "2026-08-13T06:13:00.000Z",
+        "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813020432399",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "국내 정유사 네 곳의 2분기 윤활유 사업 합산 매출은 4조2992억원, 합산 영업이익은 1조7084억원이라고 기사는 전했다."
+          },
+          {
+            "id": "S2",
+            "text": "합산 대상에는 SK이노베이션과 S-OIL뿐 아니라 GS칼텍스와 HD현대오일뱅크도 들어간다."
+          },
+          {
+            "id": "S3",
+            "text": "기사의 합산 수치만으로는 네 회사 가운데 한 회사의 매출과 이익을 따로 알 수 없다."
+          }
+        ]
+      },
+      "title": "중동 공백 메우는 K-윤활기유…정유업계, 글로벌 핵심 공급망 부상",
+      "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813020432399",
+      "pipelineStatus": "rejected",
+      "stage": "selector",
+      "reasonCodes": [
+        "NO_DIRECT_MATERIALITY",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "reasons": [
+        "네 정유사의 합산 수치만 제시되어 SK이노베이션이나 S-OIL의 개별 실적을 확인할 수 없다.",
+        "선정 기업의 독립적인 새 사건이나 직접적인 영향이 충분히 입증되지 않았다."
+      ],
+      "expectation": {
+        "expectedStatus": "rejected",
+        "acceptableReasonCodes": [
+          "COMPANY_NOT_PRIMARY_SUBJECT",
+          "NO_DIRECT_MATERIALITY",
+          "INSUFFICIENT_EVIDENCE"
+        ],
+        "rationale": "선정 기업 두 곳이 포함되지만 정유사 네 곳의 합산 수치만 제시한다. 특정 선정 기업의 직접 사건으로 귀속할 근거가 부족하므로 저장하지 않는다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "pass",
+          "evidence": [
+            "허용 범위 위반을 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE 코드로 닫힌 실패 처리"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "일상·채용·행사·사회공헌·홍보 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "기사와 요약의 주인공 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "주변 사실 혼입 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "전 용어 처리 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "숫자·날짜·출처 충실성 검증 전에 selector 단계에서 NO_DIRECT_MATERIALITY, INSUFFICIENT_EVIDENCE로 종료"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "rejected/selector: 네 정유사의 합산 수치만 제시되어 SK이노베이션이나 S-OIL의 개별 실적을 확인할 수 없다. | 선정 기업의 독립적인 새 사건이나 직접적인 영향이 충분히 입증되지 않았다."
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1005",
+            "decision": "pass",
+            "reasonCodes": [],
+            "reasons": [
+              "정유업계의 윤활기유 공급망 변화가 선정 기업의 생산·판매에 직접 연결되는지 본문 확인이 필요하다."
+            ]
+          }
+        },
+        {
+          "role": "relevance_selector",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1005",
+            "decision": "reject",
+            "kind": "ineligible",
+            "primaryStockIds": [],
+            "eventType": "none",
+            "focusStatement": "",
+            "anchorSourceId": "",
+            "includedSourceIds": [],
+            "excludedSourceIds": [
+              "S1",
+              "S2",
+              "S3"
+            ],
+            "difficultTerms": [],
+            "reasonCodes": [
+              "NO_DIRECT_MATERIALITY",
+              "INSUFFICIENT_EVIDENCE"
+            ],
+            "reasons": [
+              "네 정유사의 합산 수치만 제시되어 SK이노베이션이나 S-OIL의 개별 실적을 확인할 수 없다.",
+              "선정 기업의 독립적인 새 사건이나 직접적인 영향이 충분히 입증되지 않았다."
+            ]
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "N1005",
+        "stage": "selector",
+        "reasonCodes": [
+          "NO_DIRECT_MATERIALITY",
+          "INSUFFICIENT_EVIDENCE"
+        ],
+        "reasons": [
+          "네 정유사의 합산 수치만 제시되어 SK이노베이션이나 S-OIL의 개별 실적을 확인할 수 없다.",
+          "선정 기업의 독립적인 새 사건이나 직접적인 영향이 충분히 입증되지 않았다."
+        ],
+        "editorAttempts": 0
+      }
+    },
+    {
+      "caseId": "06-lg-holding-not-lg-electronics",
+      "inputArticle": {
+        "articleId": "N1006",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "LG 2분기 영업이익 5천330억원…작년 동기 대비 92.5%↑",
+        "publisher": "매일경제 증권",
+        "publishedAt": "2026-08-13T05:33:00.000Z",
+        "sourceUrl": "https://stock.mk.co.kr/news/view/1141552",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "지주회사 LG의 2분기 영업이익은 5330억원으로 지난해 같은 기간보다 92.5% 늘었다."
+          },
+          {
+            "id": "S2",
+            "text": "지주회사 LG의 2분기 매출은 2조1396억원, 순이익은 5338억원이다."
+          },
+          {
+            "id": "S3",
+            "text": "기사에서 실적을 발표한 주체는 LG전자가 아니라 지주회사 LG다."
+          }
+        ]
+      },
+      "title": "LG 2분기 영업이익 5천330억원…작년 동기 대비 92.5%↑",
+      "sourceUrl": "https://stock.mk.co.kr/news/view/1141552",
+      "pipelineStatus": "rejected",
+      "stage": "prefilter",
+      "reasonCodes": [
+        "NO_SELECTED_COMPANY"
+      ],
+      "reasons": [
+        "제목의 주체는 ‘LG’로, 선정 기업인 LG전자 또는 LG생활건강으로 특정되지 않는다."
+      ],
+      "expectation": {
+        "expectedStatus": "rejected",
+        "acceptableReasonCodes": [
+          "NO_SELECTED_COMPANY",
+          "COMPANY_NOT_PRIMARY_SUBJECT"
+        ],
+        "rationale": "선정 기업은 LG전자이고 기사 주인공은 별도 상장회사인 지주회사 LG다. 이름이 비슷하다는 이유로 LG전자 뉴스로 바꾸면 안 된다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "허용 범위 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "일상·채용·행사·사회공헌·홍보 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "pass",
+          "evidence": [
+            "기사와 요약의 주인공 위반을 NO_SELECTED_COMPANY 코드로 닫힌 실패 처리"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "전 용어 처리 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "rejected/prefilter: 제목의 주체는 ‘LG’로, 선정 기업인 LG전자 또는 LG생활건강으로 특정되지 않는다."
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1006",
+            "decision": "reject",
+            "reasonCodes": [
+              "NO_SELECTED_COMPANY"
+            ],
+            "reasons": [
+              "제목의 주체는 ‘LG’로, 선정 기업인 LG전자 또는 LG생활건강으로 특정되지 않는다."
+            ]
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "N1006",
+        "stage": "prefilter",
+        "reasonCodes": [
+          "NO_SELECTED_COMPANY"
+        ],
+        "reasons": [
+          "제목의 주체는 ‘LG’로, 선정 기업인 LG전자 또는 LG생활건강으로 특정되지 않는다."
+        ],
+        "editorAttempts": 0
+      }
+    },
+    {
+      "caseId": "07-naver-outside-universe",
+      "inputArticle": {
+        "articleId": "N1007",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "네이버, '바다 위 AI 데이터센터'에 베팅…美 판탈라사 투자",
+        "publisher": "조선비즈",
+        "publishedAt": "2026-08-13T02:29:00.000Z",
+        "sourceUrl": "https://biz.chosun.com/it-science/ict/2026/08/13/CJV6FZ5JMFFWNMM25K4MW5OJLY/",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "네이버는 바다 위 인공지능 데이터센터를 개발하는 미국 스타트업 판탈라사에 투자했다."
+          },
+          {
+            "id": "S2",
+            "text": "판탈라사는 파도 에너지와 바닷물을 전력과 냉각에 활용하는 데이터센터를 개발하고 있다."
+          },
+          {
+            "id": "S3",
+            "text": "기사의 투자 주체와 주인공은 네이버다."
+          }
+        ]
+      },
+      "title": "네이버, '바다 위 AI 데이터센터'에 베팅…美 판탈라사 투자",
+      "sourceUrl": "https://biz.chosun.com/it-science/ict/2026/08/13/CJV6FZ5JMFFWNMM25K4MW5OJLY/",
+      "pipelineStatus": "rejected",
+      "stage": "prefilter",
+      "reasonCodes": [
+        "NO_SELECTED_COMPANY"
+      ],
+      "reasons": [
+        "제목의 주체인 네이버가 선정 51개 기업에 포함되지 않는다."
+      ],
+      "expectation": {
+        "expectedStatus": "rejected",
+        "acceptableReasonCodes": [
+          "NO_SELECTED_COMPANY"
+        ],
+        "rationale": "실제 투자 사건이지만 네이버는 현재 선정 51개 기업에 없다. 흥미롭다는 이유로 대상 범위를 넓히지 않는다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "허용 범위 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "일상·채용·행사·사회공헌·홍보 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "pass",
+          "evidence": [
+            "기사와 요약의 주인공 위반을 NO_SELECTED_COMPANY 코드로 닫힌 실패 처리"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "전 용어 처리 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "rejected/prefilter: 제목의 주체인 네이버가 선정 51개 기업에 포함되지 않는다."
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1007",
+            "decision": "reject",
+            "reasonCodes": [
+              "NO_SELECTED_COMPANY"
+            ],
+            "reasons": [
+              "제목의 주체인 네이버가 선정 51개 기업에 포함되지 않는다."
+            ]
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "N1007",
+        "stage": "prefilter",
+        "reasonCodes": [
+          "NO_SELECTED_COMPANY"
+        ],
+        "reasons": [
+          "제목의 주체인 네이버가 선정 51개 기업에 포함되지 않는다."
+        ],
+        "editorAttempts": 0
+      }
+    },
+    {
+      "caseId": "08-hyundai-music-promotion",
+      "inputArticle": {
+        "articleId": "N1008",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "현대차, 키라라와 손잡고 제조 기술을 음악으로…'정련' 공개",
+        "publisher": "스페셜경제",
+        "publishedAt": "2026-08-13T06:06:00.000Z",
+        "sourceUrl": "https://www.speconomy.com/news/articleView.html?idxno=416864",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "현대차는 전자음악가 키라라와 협업해 자동차 제조 기술을 표현한 음악을 공개했다."
+          },
+          {
+            "id": "S2",
+            "text": "이 프로젝트는 음악과 영상으로 현대차의 제조 기술을 소개한다."
+          },
+          {
+            "id": "S3",
+            "text": "기사에는 확정된 판매 실적, 생산 변화, 계약 체결 같은 사업 사건이 제시되지 않았다."
+          }
+        ]
+      },
+      "title": "현대차, 키라라와 손잡고 제조 기술을 음악으로…'정련' 공개",
+      "sourceUrl": "https://www.speconomy.com/news/articleView.html?idxno=416864",
+      "pipelineStatus": "rejected",
+      "stage": "prefilter",
+      "reasonCodes": [
+        "ROUTINE_OR_PROMOTIONAL"
+      ],
+      "reasons": [
+        "음악가와 협업해 제조 기술을 음악 콘텐츠로 공개한 홍보성 활동이며, 직접적인 생산·판매·계약 사건이 제목에 드러나지 않는다."
+      ],
+      "expectation": {
+        "expectedStatus": "rejected",
+        "acceptableReasonCodes": [
+          "ROUTINE_OR_PROMOTIONAL",
+          "NO_DIRECT_MATERIALITY"
+        ],
+        "rationale": "선정 기업 현대차 기사지만 음악·영상으로 회사를 알리는 홍보 프로젝트다. 서비스 뉴스 개수를 채우려고 통과시키지 않는다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "허용 범위 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "pass",
+          "evidence": [
+            "일상·채용·행사·사회공헌·홍보 위반을 ROUTINE_OR_PROMOTIONAL 코드로 닫힌 실패 처리"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "기사와 요약의 주인공 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "전 용어 처리 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "rejected/prefilter: 음악가와 협업해 제조 기술을 음악 콘텐츠로 공개한 홍보성 활동이며, 직접적인 생산·판매·계약 사건이 제목에 드러나지 않는다."
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1008",
+            "decision": "reject",
+            "reasonCodes": [
+              "ROUTINE_OR_PROMOTIONAL"
+            ],
+            "reasons": [
+              "음악가와 협업해 제조 기술을 음악 콘텐츠로 공개한 홍보성 활동이며, 직접적인 생산·판매·계약 사건이 제목에 드러나지 않는다."
+            ]
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "N1008",
+        "stage": "prefilter",
+        "reasonCodes": [
+          "ROUTINE_OR_PROMOTIONAL"
+        ],
+        "reasons": [
+          "음악가와 협업해 제조 기술을 음악 콘텐츠로 공개한 홍보성 활동이며, 직접적인 생산·판매·계약 사건이 제목에 드러나지 않는다."
+        ],
+        "editorAttempts": 0
+      }
+    },
+    {
+      "caseId": "09-hyundai-foundation-forum",
+      "inputArticle": {
+        "articleId": "N1009",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "현대차 정몽구 재단, 제2회 ‘AI 시대의 기후테크 혁신 포럼’ 개최",
+        "publisher": "현대자동차그룹",
+        "publishedAt": "2026-08-13T00:00:00.000Z",
+        "sourceUrl": "https://www.hyundaimotorgroup.com/ko/news/hyundai-motor-chung-mong-koo-ai-climate-tech-forum-2",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "현대차 정몽구 재단은 여러 기관과 함께 두 번째 기후기술 혁신 포럼을 열었다."
+          },
+          {
+            "id": "S2",
+            "text": "행사에는 약 60명이 참석해 기후기술 기업의 자금 마련 방안을 논의했다."
+          },
+          {
+            "id": "S3",
+            "text": "행사의 주최 주체는 현대차가 아니라 현대차 정몽구 재단이다."
+          }
+        ]
+      },
+      "title": "현대차 정몽구 재단, 제2회 ‘AI 시대의 기후테크 혁신 포럼’ 개최",
+      "sourceUrl": "https://www.hyundaimotorgroup.com/ko/news/hyundai-motor-chung-mong-koo-ai-climate-tech-forum-2",
+      "pipelineStatus": "rejected",
+      "stage": "prefilter",
+      "reasonCodes": [
+        "COMPANY_NOT_PRIMARY_SUBJECT",
+        "ROUTINE_OR_PROMOTIONAL"
+      ],
+      "reasons": [
+        "제목의 주체는 현대차가 아니라 현대차 정몽구 재단이다.",
+        "재단이 개최하는 기후테크 포럼 행사로, 선정 기업의 직접적인 중요 사업 사건이 아니다."
+      ],
+      "expectation": {
+        "expectedStatus": "rejected",
+        "acceptableReasonCodes": [
+          "ROUTINE_OR_PROMOTIONAL",
+          "NO_SELECTED_COMPANY",
+          "COMPANY_NOT_PRIMARY_SUBJECT"
+        ],
+        "rationale": "일반 포럼 행사이며 주인공도 선정 기업 현대차가 아닌 재단이다. 현대차 이름이 제목에 있다는 이유로 회사 뉴스로 저장하면 안 된다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "허용 범위 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT, ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "pass",
+          "evidence": [
+            "일상·채용·행사·사회공헌·홍보 위반을 ROUTINE_OR_PROMOTIONAL 코드로 닫힌 실패 처리"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "pass",
+          "evidence": [
+            "기사와 요약의 주인공 위반을 COMPANY_NOT_PRIMARY_SUBJECT 코드로 닫힌 실패 처리"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT, ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT, ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "전 용어 처리 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT, ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 COMPANY_NOT_PRIMARY_SUBJECT, ROUTINE_OR_PROMOTIONAL로 종료"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "rejected/prefilter: 제목의 주체는 현대차가 아니라 현대차 정몽구 재단이다. | 재단이 개최하는 기후테크 포럼 행사로, 선정 기업의 직접적인 중요 사업 사건이 아니다."
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1009",
+            "decision": "reject",
+            "reasonCodes": [
+              "COMPANY_NOT_PRIMARY_SUBJECT",
+              "ROUTINE_OR_PROMOTIONAL"
+            ],
+            "reasons": [
+              "제목의 주체는 현대차가 아니라 현대차 정몽구 재단이다.",
+              "재단이 개최하는 기후테크 포럼 행사로, 선정 기업의 직접적인 중요 사업 사건이 아니다."
+            ]
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "N1009",
+        "stage": "prefilter",
+        "reasonCodes": [
+          "COMPANY_NOT_PRIMARY_SUBJECT",
+          "ROUTINE_OR_PROMOTIONAL"
+        ],
+        "reasons": [
+          "제목의 주체는 현대차가 아니라 현대차 정몽구 재단이다.",
+          "재단이 개최하는 기후테크 포럼 행사로, 선정 기업의 직접적인 중요 사업 사건이 아니다."
+        ],
+        "editorAttempts": 0
+      }
+    },
+    {
+      "caseId": "10-samsung-life-not-electronics",
+      "inputArticle": {
+        "articleId": "N1010",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "삼성생명, 상반기 순이익 1조8935억원…전년 동기比 35.8%↑",
+        "publisher": "에너지경제신문",
+        "publishedAt": "2026-08-13T05:52:00.000Z",
+        "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813021412468",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "삼성생명의 2026년 상반기 순이익은 1조8935억원으로 지난해 같은 기간보다 35.8% 늘었다."
+          },
+          {
+            "id": "S2",
+            "text": "삼성생명의 상반기 영업이익은 1조9804억원으로 18.6% 늘었다."
+          },
+          {
+            "id": "S3",
+            "text": "기사에서 실적을 발표한 주체는 삼성전자가 아니라 보험회사 삼성생명이다."
+          }
+        ]
+      },
+      "title": "삼성생명, 상반기 순이익 1조8935억원…전년 동기比 35.8%↑",
+      "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813021412468",
+      "pipelineStatus": "rejected",
+      "stage": "prefilter",
+      "reasonCodes": [
+        "NO_SELECTED_COMPANY"
+      ],
+      "reasons": [
+        "제목의 대상인 삼성생명이 선정 기업 목록에 포함되어 있지 않다."
+      ],
+      "expectation": {
+        "expectedStatus": "rejected",
+        "acceptableReasonCodes": [
+          "NO_SELECTED_COMPANY",
+          "COMPANY_NOT_PRIMARY_SUBJECT"
+        ],
+        "rationale": "선정 기업은 삼성전자이고 기사 주인공은 삼성생명이다. 삼성이라는 공통 이름만 보고 삼성전자 뉴스로 바꾸지 않아야 한다."
+      },
+      "expectationMatched": true,
+      "criteria": {
+        "allowedScope": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "허용 범위 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "notRoutineOrPromotional": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "일상·채용·행사·사회공헌·홍보 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "primarySubjectMatches": {
+          "outcome": "pass",
+          "evidence": [
+            "기사와 요약의 주인공 위반을 NO_SELECTED_COMPANY 코드로 닫힌 실패 처리"
+          ]
+        },
+        "noUnsupportedContext": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "주변 사실 혼입 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "conciseThreeLineSummary": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "겹치지 않는 3줄 요약 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "allTermsEasy": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "전 용어 처리 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "factsMatchSource": {
+          "outcome": "not_applicable",
+          "evidence": [
+            "숫자·날짜·출처 충실성 검증 전에 prefilter 단계에서 NO_SELECTED_COMPANY로 종료"
+          ]
+        },
+        "storageDecisionExplained": {
+          "outcome": "pass",
+          "evidence": [
+            "rejected/prefilter: 제목의 대상인 삼성생명이 선정 기업 목록에 포함되어 있지 않다."
+          ]
+        }
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "N1010",
+            "decision": "reject",
+            "reasonCodes": [
+              "NO_SELECTED_COMPANY"
+            ],
+            "reasons": [
+              "제목의 대상인 삼성생명이 선정 기업 목록에 포함되어 있지 않다."
+            ]
+          }
+        }
+      ],
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "N1010",
+        "stage": "prefilter",
+        "reasonCodes": [
+          "NO_SELECTED_COMPANY"
+        ],
+        "reasons": [
+          "제목의 대상인 삼성생명이 선정 기업 목록에 포함되어 있지 않다."
+        ],
+        "editorAttempts": 0
+      }
+    }
+  ]
+}

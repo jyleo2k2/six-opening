@@ -26,6 +26,15 @@ const fixture = JSON.parse(
     "utf8",
   ),
 ) as NewsEvaluationInput;
+const latestFixture = JSON.parse(
+  readFileSync(
+    resolve(
+      here,
+      "evaluation-fixtures/latest-economic-news-2026-08-13.json",
+    ),
+    "utf8",
+  ),
+) as NewsEvaluationInput;
 
 async function main() {
 
@@ -42,6 +51,35 @@ assert.equal(
   ),
   true,
 );
+assert.equal(latestFixture.schemaVersion, 1);
+assert.equal(latestFixture.cases.length, 10);
+assert.equal(new Set(latestFixture.cases.map((item) => item.caseId)).size, 10);
+assert.equal(
+  new Set(latestFixture.cases.map((item) => item.article.articleId)).size,
+  10,
+);
+assert.equal(
+  new Set(latestFixture.cases.map((item) => item.article.sourceUrl)).size,
+  10,
+);
+assert.equal(
+  latestFixture.cases.every(
+    (item) =>
+      item.article.runDateKst === latestFixture.runDateKst &&
+      item.article.sourceUrl.startsWith("http") &&
+      item.expectation.rationale.length > 0,
+  ),
+  true,
+);
+const previousUrls = new Set(
+  fixture.cases.map((item) => item.article.sourceUrl),
+);
+assert.equal(
+  latestFixture.cases.every(
+    (item) => !previousUrls.has(item.article.sourceUrl),
+  ),
+  true,
+);
 
 const routineCase = fixture.cases[2];
 const routineReject: RejectedNews = {
@@ -55,6 +93,7 @@ const routineReject: RejectedNews = {
 const evaluated = evaluateNewsResult(routineCase, routineReject);
 assert.equal(evaluated.expectationMatched, true);
 assert.equal(evaluated.criteria.notRoutineOrPromotional.outcome, "pass");
+assert.equal(evaluated.criteria.conciseThreeLineSummary.outcome, "not_applicable");
 assert.equal(evaluated.criteria.allTermsEasy.outcome, "not_applicable");
 assert.equal(evaluated.criteria.storageDecisionExplained.outcome, "pass");
 
@@ -140,6 +179,8 @@ const readyResult: ReadyNews = {
     homeSummary: { text: "홈에서 먼저 읽는 한 줄 요약입니다.", sourceIds: ["S1"] },
     body: [
       { role: "core_event", text: "서비스 뉴스 상세에 보이는 본문입니다.", sourceIds: ["S1"] },
+      { role: "business_connection", text: "두 번째 핵심 사실을 짧게 보여줍니다.", sourceIds: ["S1"] },
+      { role: "context", text: "어려운 말은 마지막 줄에서 설명합니다.", sourceIds: ["S1"] },
     ],
     termTreatments: [],
   },
@@ -156,6 +197,7 @@ const readyResult: ReadyNews = {
       directMateriality: true,
       sourceFidelity: true,
       focusAlignment: true,
+      conciseThreeLineSummary: true,
       noIrrelevantDetail: true,
       attributionAndTiming: true,
       allTermsEasy: true,
@@ -176,13 +218,25 @@ const readyHtml = renderNewsEvaluationHtml({
   ],
 });
 const auditStart = readyHtml.indexOf('<section class="audit">');
+const servicePreview = readyHtml.slice(0, auditStart);
 assert.ok(auditStart > readyHtml.indexOf('<section class="service-output"'));
-assert.match(readyHtml, /한눈에 보기/u);
-assert.match(readyHtml, /홈에서 먼저 읽는 한 줄 요약입니다/u);
+assert.match(readyHtml, /3줄 요약/u);
 assert.match(readyHtml, /서비스 뉴스 상세에 보이는 본문입니다/u);
+assert.match(readyHtml, /두 번째 핵심 사실을 짧게 보여줍니다/u);
+assert.match(readyHtml, /어려운 말은 마지막 줄에서 설명합니다/u);
 assert.equal(readyHtml.includes("<아이>"), false);
 assert.equal(readyHtml.includes("&lt;아이&gt;가 읽는 오늘의 시장 뉴스"), true);
 assert.equal(readyHtml.slice(0, auditStart).includes("채용설명회"), false);
+assert.equal(readyHtml.slice(0, auditStart).includes("홈에서 먼저 읽는 한 줄 요약입니다"), false);
+assert.match(
+  servicePreview,
+  /<a class="source-link" href="https:\/\/www\.news1\.kr\/finance\/market-exr\/6256503" rel="noreferrer">원문 보기/u,
+);
+assert.equal(servicePreview.includes('target="_blank"'), false);
+assert.equal(
+  (readyHtml.slice(0, auditStart).match(/<li>/gu) ?? []).length,
+  3,
+);
 
 await assert.rejects(
   () =>
