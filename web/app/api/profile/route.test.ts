@@ -92,10 +92,10 @@ async function main() {
   // 라이브 보유 1섹터(9점) − 현금비중 83% 패널티 2 = 7점
   assert.equal(snapshot.abilities.focus, 7);
   assert.equal(snapshot.character, "sniper");
-  // 스텁 종가는 005930뿐이라 라이브 08-03 매수 1건만 채점(적중) → 기본 5점 +1 = 6점
+  // 스텁 종가는 005930뿐이라 라이브 08-03 매수 1건만 채점(적중) → 1/1 = 100% 레벨 3
   assert.equal(snapshot.gradedTradeCount, 1);
-  assert.equal(snapshot.abilities.accuracy, 6);
-  assert.equal(snapshot.starGrade, 2);
+  assert.equal(snapshot.abilities.accuracy, 100);
+  assert.equal(snapshot.level, 3);
   // 시드 병합 증거 — 시드 매수 이유가 분포에 들어온다
   assert.equal(snapshot.reasonDistribution["내가 아는 회사라서"], 1);
   // narrate:false 는 Luna 를 부르지 않고 고정 폴백을 쓴다
@@ -114,10 +114,10 @@ async function main() {
   assert.equal(parentSnapshot.abilities.evidence, 10);
   // 라이브 보유·현금이 없으면 전량 현금 취급 → 분산 우세 → 전략가
   assert.equal(parentSnapshot.character, "strategist");
-  // 채점 1건 빗나감 → 기본 5점 −1 = 4점
+  // 채점 1건 빗나감 → 0/1 = 0% 레벨 1
   assert.equal(parentSnapshot.gradedTradeCount, 1);
-  assert.equal(parentSnapshot.abilities.accuracy, 4);
-  assert.equal(parentSnapshot.starGrade, 2);
+  assert.equal(parentSnapshot.abilities.accuracy, 0);
+  assert.equal(parentSnapshot.level, 1);
   assert.equal(parent.payload.narration.source, "fallback");
 
   // 고정 폴백 문구는 공통 출력 게이트를 통과해야 하고, 관찰 초기 문구도 준비돼 있다 (SPEC §7)
