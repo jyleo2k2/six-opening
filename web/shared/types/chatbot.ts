@@ -61,6 +61,20 @@ export type StockExploreTurn = {
   choices: readonly { id: StockExploreChoiceId; label: string }[];
 };
 
+export const SECTOR_EXPLORE_CHOICES = ["yes", "no"] as const;
+export type SectorExploreChoiceId = (typeof SECTOR_EXPLORE_CHOICES)[number];
+
+export type SectorExploreReply = {
+  sectorId: string;
+  choiceId: SectorExploreChoiceId;
+};
+
+export type SectorExploreTurn = {
+  sectorId: string;
+  prompt: string;
+  choices: readonly { id: SectorExploreChoiceId; label: string }[];
+};
+
 export const EXPLAIN_STAGES = ["brief", "detail", "example", "followup"] as const;
 
 export type ExplainStage = (typeof EXPLAIN_STAGES)[number];

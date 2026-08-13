@@ -28,6 +28,7 @@ import {
   startStockExplore,
   type StockExploreStep,
 } from "./stock-explore";
+import { createSectorExploreTurn, resolveSectorExplore } from "./sector-explore";
 import { runReadOnlyTool, type ToolExecution } from "./tools";
 
 export const CHAT_FALLBACK =
@@ -177,6 +178,15 @@ function resolveStockExploreStep(
   return null;
 }
 
+function resolveSectorExploreStep(
+  request: ChatRequest,
+  routed: ReturnType<typeof routeMessage>,
+) {
+  if (routed.route === "refusal" || routed.route === "safety" || routed.route === "outOfScope") return null;
+  if (request.sectorExplore) return resolveSectorExplore(request.sectorExplore) ?? "invalid";
+  return null;
+}
+
 function dapieFeedback(
   route: ChatRoute,
   intent: ChatIntent,
@@ -198,6 +208,7 @@ export async function createChatOutcome(
   const routed = routeMessage(request.message, request.context);
   const explainStep = resolveExplainStep(request, routed);
   const stockExploreStep = resolveStockExploreStep(request, routed);
+  const sectorExploreStep = resolveSectorExploreStep(request, routed);
   let response: ChatResponse = {
     text: routed.text,
     suggestedQuestions: routed.suggestedQuestions,
@@ -208,11 +219,16 @@ export async function createChatOutcome(
   let failure: ChatOutcome["failure"];
   let explainAction: ChatActionPayload | undefined;
   let stockExploreAction: ChatActionPayload | undefined;
+  let sectorExploreAction: ChatActionPayload | undefined;
   let simplerFallbackText: string | undefined;
 
   onStatus("질문을 안전하게 확인하는 중");
 
-  if (stockExploreStep === "invalid") {
+  if (sectorExploreStep === "invalid") {
+    response = { text: "그 섹터 선택은 이어 갈 수 없어요. 섹터 이름을 다시 물어봐 줘." };
+  } else if (sectorExploreStep !== null) {
+    response = sectorExploreStep;
+  } else if (stockExploreStep === "invalid") {
     response = {
       text: "그 종목 정보 단계는 이어 갈 수 없어. 종목 이름과 궁금한 점을 다시 적어 줘.",
     };
@@ -350,6 +366,10 @@ export async function createChatOutcome(
     }
   }
 
+  if (sectorExploreStep === null && routed.sectorFact) {
+    sectorExploreAction = { kind: "sector-explore", turn: createSectorExploreTurn(routed.sectorFact.sectorId) };
+  }
+
   const protectedRoute =
     routed.route === "refusal" ||
     routed.route === "safety" ||
@@ -358,6 +378,7 @@ export async function createChatOutcome(
   if (
     explainStep === null &&
     stockExploreStep === null &&
+    sectorExploreStep === null &&
     !protectedRoute &&
     !directServiceHelp
   ) {
@@ -384,7 +405,9 @@ export async function createChatOutcome(
     ? sanitizeActionPayload(response)
     : undefined;
   const outputAction = safeOutput
-    ? stockExploreAction
+    ? sectorExploreAction
+      ? { ...standardAction, ...sectorExploreAction }
+      : stockExploreAction
       ? { ...standardAction, ...stockExploreAction }
       : explainAction
         ? { ...standardAction, ...explainAction }

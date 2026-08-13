@@ -4,6 +4,7 @@ import {
   findChatbotKnowledge,
 } from "../../../shared/data/chatbot-knowledge";
 import { STOCKS } from "../../../shared/data/stocks";
+import { SECTORS, type SectorKey } from "../../../shared/data/sectors";
 import type {
   ChatContext,
   ExplainScript,
@@ -29,6 +30,7 @@ export type ChatIntent =
   | "financial_concept"
   | "service_help"
   | "stock_facts"
+  | "sector_facts"
   | "own_records"
   | "own_profile"
   | "own_archive"
@@ -48,6 +50,7 @@ export type ChatReply = {
     stockId: `KRX:${string}`;
     topic: StockFactTopic;
   };
+  sectorFact?: { sectorId: SectorKey };
 };
 
 type RecommendationKind =
@@ -1124,6 +1127,30 @@ function findMentionedStock(message: string) {
   })?.stock;
 }
 
+const SECTOR_MATCHERS = SECTORS.flatMap((sector) => [
+  { sector, name: normalizeChatInput(sector.label) },
+  ...(sector.key === "finance" ? [{ sector, name: "금융" }] : []),
+  ...(sector.key === "entertainment" ? [{ sector, name: "엔터" }] : []),
+]);
+
+function findMentionedSector(message: string) {
+  return SECTOR_MATCHERS.find((entry) => message.includes(entry.name))?.sector;
+}
+
+function getSectorFactReply(message: string): ChatReply | null {
+  if (findMentionedStock(message)) return null;
+  if (includesAny(message, ["숙제", "과제", "수행평가", "시험", "왕", "역사"])) return null;
+  if (includesAny(message, ["per", "pbr", "주가", "고평가", "저평가", "수익률", "매수", "매도"])) return null;
+  const sector = findMentionedSector(message);
+  if (!sector) return null;
+  if (!includesAny(message, ["섹터", "업종"])) {
+    return null;
+  }
+  return reply("faq", "sector_facts", sector.summary, ["승인 섹터 교육 데이터 확인"], {
+    sectorFact: { sectorId: sector.key },
+  });
+}
+
 const NAMED_STOCK_QUESTION_MARKERS = [
   "회사는",
   "회사에서",
@@ -2076,7 +2103,7 @@ function reply(
   extras: Partial<
     Pick<
       ChatReply,
-      "suggestedQuestions" | "tool" | "uiAction" | "explainScript" | "stockFact"
+      "suggestedQuestions" | "tool" | "uiAction" | "explainScript" | "stockFact" | "sectorFact"
     >
   > = {},
 ): ChatReply {
@@ -3578,6 +3605,8 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   if (termKind && termTakesPriorityOverCompany) return termReply(termKind, message);
 
   const companyFactKind = findCompanyFactKind(message);
+  const sectorFactReply = termKind ? null : getSectorFactReply(message);
+  if (sectorFactReply) return sectorFactReply;
   if (companyFactKind) return companyFactReply(companyFactKind, message, context);
 
   if (termKind) return termReply(termKind, message);

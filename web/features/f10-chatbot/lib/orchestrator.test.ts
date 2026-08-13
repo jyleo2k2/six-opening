@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { CHATBOT_KNOWLEDGE } from "../../../shared/data/chatbot-knowledge";
 import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput, SAFE_REFUSAL } from "../../../shared/llm/filter";
-import { isExplainAction, isStockExploreAction } from "./contracts";
+import { isExplainAction, isSectorExploreAction, isStockExploreAction } from "./contracts";
 import { CHAT_FALLBACK, createChatOutcome } from "./orchestrator";
 import { advanceExplain } from "./explain";
 import type { ChatSession } from "./session";
@@ -218,6 +218,28 @@ async function main() {
   assert.equal(stockFacts.gate, "passed");
   assert.equal(isStockExploreAction(stockFacts.action), true);
   assert.equal(stockFacts.response.text.startsWith("궁금한 회사를 잘 짚었어요. —"), true);
+
+  const sector = await createChatOutcome(
+    { message: "반도체 섹터는 뭐 하는 곳이야?", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(sector.response.text.includes("전자기기"), true);
+  assert.equal(isSectorExploreAction(sector.action), true);
+  if (!isSectorExploreAction(sector.action)) throw new Error("sector explore action missing");
+  assert.equal(sector.action.turn.sectorId, "semiconductor");
+
+  const sectorYes = await createChatOutcome(
+    {
+      message: "응",
+      context,
+      sectorExplore: { sectorId: sector.action.turn.sectorId, choiceId: "yes" },
+    },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(sectorYes.response.text.includes("삼성전자"), true);
+  assert.equal(sectorYes.action?.uiAction?.sectorId, "semiconductor");
 
   const mentionedKrafton = await createChatOutcome(
     { message: "크래프톤 뭐 하는 회사야?", context },

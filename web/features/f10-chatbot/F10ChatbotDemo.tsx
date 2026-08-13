@@ -16,6 +16,8 @@ import type {
   ExplainChoice,
   ExplainTurn,
   ProactiveSignal,
+  SectorExploreChoiceId,
+  SectorExploreTurn,
   StockExploreChoiceId,
   StockExploreTurn,
 } from "../../shared/types/chatbot";
@@ -23,9 +25,11 @@ import {
   isAllowedUiAction,
   isExplainAction,
   isStockExploreAction,
+  isSectorExploreAction,
   type ExplainActionPayload,
   type StandardChatActionPayload,
   type StockExploreActionPayload,
+  type SectorExploreActionPayload,
 } from "./lib/contracts";
 import {
   getPrototypeScreenRect,
@@ -52,6 +56,7 @@ type Message = {
   suggestedQuestions?: string[];
   explainTurn?: ExplainTurn;
   stockExploreTurn?: StockExploreTurn;
+  sectorExploreTurn?: SectorExploreTurn;
   uiAction?: ChatUiAction;
 };
 type SheetDragState = {
@@ -177,6 +182,7 @@ function MessageBubble({
   onQuestion,
   onExplainChoice,
   onStockExploreChoice,
+  onSectorExploreChoice,
   actionsDisabled,
 }: {
   message: Message;
@@ -187,6 +193,7 @@ function MessageBubble({
     question: string,
     choiceId: StockExploreChoiceId,
   ) => void;
+  onSectorExploreChoice: (question: string, choiceId: SectorExploreChoiceId) => void;
   actionsDisabled: boolean;
 }) {
   const userMessage = message.role === "user";
@@ -263,6 +270,22 @@ function MessageBubble({
             ))}
           </div>
         )}
+        {!userMessage && message.sectorExploreTurn && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <p className="w-full text-xs text-ink/70">{message.sectorExploreTurn.prompt}</p>
+            {message.sectorExploreTurn.choices.map((choice) => (
+              <button
+                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy disabled:opacity-50"
+                disabled={actionsDisabled}
+                key={choice.id}
+                onClick={() => onSectorExploreChoice(choice.label, choice.id)}
+                type="button"
+              >
+                {choice.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -324,6 +347,8 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
     useState<StockExploreActionPayload | null>(null);
+  const [sectorExploreAction, setSectorExploreAction] =
+    useState<SectorExploreActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const sheetDragRef = useRef<SheetDragState | null>(null);
   const floatingChatDragRef = useRef<FloatingChatDragState | null>(null);
@@ -616,9 +641,11 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     question: string,
     explainChoiceId?: string,
     stockExploreChoiceId?: StockExploreChoiceId,
+    sectorExploreChoiceId?: SectorExploreChoiceId,
   ) {
     const explainTurn = explainAction?.turn;
     const stockExploreTurn = stockExploreAction?.turn;
+    const sectorExploreTurn = sectorExploreAction?.turn;
     const previousMessage = messages.at(-1);
     const previousAnswer =
       explainTurn?.scriptId === "flow:guided" &&
@@ -636,11 +663,13 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     setStatus("질문을 보내는 중");
     setExplainAction(null);
     setStockExploreAction(null);
+    setSectorExploreAction(null);
     setIsLoading(true);
     const startedAt = Date.now();
     let bufferedText = "";
     let pendingExplainAction: ExplainActionPayload | null = null;
     let pendingStockExploreAction: StockExploreActionPayload | null = null;
+    let pendingSectorExploreAction: SectorExploreActionPayload | null = null;
     let pendingStandardAction: StandardChatActionPayload | null = null;
 
     try {
@@ -668,6 +697,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                   stockId: stockExploreTurn.stockId,
                   shownTopics: stockExploreTurn.shownTopics,
                   choiceId: stockExploreChoiceId,
+                },
+              }
+            : {}),
+          ...(sectorExploreTurn && sectorExploreChoiceId
+            ? {
+                sectorExplore: {
+                  sectorId: sectorExploreTurn.sectorId,
+                  choiceId: sectorExploreChoiceId,
                 },
               }
             : {}),
@@ -710,6 +747,10 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               pendingStockExploreAction = value;
               continue;
             }
+            if (isSectorExploreAction(value)) {
+              pendingSectorExploreAction = value;
+              continue;
+            }
 
             pendingStandardAction = value as StandardChatActionPayload;
           }
@@ -722,6 +763,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
 
       setExplainAction(pendingExplainAction);
       setStockExploreAction(pendingStockExploreAction);
+      setSectorExploreAction(pendingSectorExploreAction);
       setMessages((current) => [
         ...current,
         {
@@ -748,6 +790,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                   ? { uiAction: pendingStockExploreAction.uiAction }
                   : {}),
               }
+            : {}),
+          ...(pendingSectorExploreAction
+            ? { sectorExploreTurn: pendingSectorExploreAction.turn }
             : {}),
           ...(pendingStandardAction
             ? {
@@ -1014,6 +1059,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                   onStockExploreChoice={(question, choiceId) => {
                     if (!isLoading) void ask(question, undefined, choiceId);
                   }}
+                  onSectorExploreChoice={(question, choiceId) => {
+                    if (!isLoading) void ask(question, undefined, undefined, choiceId);
+                  }}
                   actionsDisabled={isLoading}
                 />
               )}
@@ -1030,6 +1078,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                   }}
                   onStockExploreChoice={(question, choiceId) => {
                     if (!isLoading) void ask(question, undefined, choiceId);
+                  }}
+                  onSectorExploreChoice={(question, choiceId) => {
+                    if (!isLoading) void ask(question, undefined, undefined, choiceId);
                   }}
                   actionsDisabled={isLoading || index !== messages.length - 1}
                 />
