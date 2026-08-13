@@ -53,20 +53,13 @@
       go: 'tut-next' },
 
     { screen: 'tut-buy3', anchors: ['tut-buy3', 'tut-next'],
-      title: '얼마나 확신해?',
-      what: '얼마나 자신 있는지 막대를 밀어서 알려줘.',
-      term: '확신도',
-      concept: '아주 확신할 때랑 그냥 느낌이 좋을 때는 다르게 행동하는 게 좋아. 확신이 크지 않으면 조금만 사보는 것도 방법이야. 나중에 진짜 잘 맞았는지 같이 확인해 볼 거야.',
-      go: 'tut-next' },
-
-    { screen: 'tut-buy4', anchors: ['tut-buy4', 'tut-next'],
       title: '언제까지 가질까',
       what: '얼마나 오래 갖고 있을 생각인지 골라.',
       term: '투자 계획',
       concept: '미리 정해두면 가격이 흔들릴 때 덜 놀라. 계획 없이 사면 조금 내렸을 때 겁나서 팔고, 조금 올랐을 때 아쉬워서 못 팔아. 언제까지 가질지 먼저 정하는 게 어른 투자자들이 하는 방법이야.',
       go: 'tut-next' },
 
-    { screen: 'tut-buy5', anchors: ['tut-buy5', 'tut-next'],
+    { screen: 'tut-buy4', anchors: ['tut-buy4', 'tut-next'],
       title: '주문 넣기',
       what: '고른 내용을 마지막으로 확인하고 주문 넣기를 누르면 끝이야.',
       term: '체결',
