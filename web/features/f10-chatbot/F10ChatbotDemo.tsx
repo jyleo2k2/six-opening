@@ -38,6 +38,7 @@ import { PROACTIVE_SCRIPTS } from "./lib/routing";
 type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
   context?: ChatContext;
+  onUiAction?: (action: ChatUiAction) => void;
 };
 type Message = {
   role: "assistant" | "user";
@@ -157,7 +158,7 @@ function MessageBubble({
             onClick={() => onAction(uiAction)}
             type="button"
           >
-            {uiAction.target === "archive" ? COPY.openArchive : COPY.relatedScreen}
+            {uiAction.label ?? (uiAction.target === "archive" ? COPY.openArchive : COPY.relatedScreen)}
           </button>
         )}
         {!userMessage && Boolean(message.suggestedQuestions?.length) && (
@@ -214,7 +215,7 @@ function MessageBubble({
   );
 }
 
-export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
+export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}) {
   const [screen, setScreen] = useState<Screen>(context?.screen ?? "stock");
   const [isOpen, setIsOpen] = useState(false);
   const [prototypeScreen, setPrototypeScreen] =
@@ -606,9 +607,13 @@ export function F10ChatbotDemo({ context }: F10ChatbotDemoProps = {}) {
   }
 
   function handleUiAction(action: ChatUiAction) {
-    setScreen(action.target);
+    if (onUiAction) {
+      onUiAction(action);
+    } else if (action.target !== "portfolio") {
+      setScreen(action.target);
+    }
     closeChat();
-    setStatus(`${SCREENS[action.target].label} 화면으로 이동했어요`);
+    setStatus(`${action.label ?? "관련 화면"}으로 이동했어요`);
   }
 
   function recordOrderCancellation(side: "buy" | "sell") {

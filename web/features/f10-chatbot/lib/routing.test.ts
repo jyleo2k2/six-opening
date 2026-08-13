@@ -1545,4 +1545,89 @@ assert.equal(routeMessage("한도 초과 주문을 여러 번 나눠 넣으면 �
 assert.equal(routeMessage("내가 산 종목 친구한테 보이는 거 아니지?", stockContext).text.includes("자동으로 공개"), true);
 assert.equal(routeMessage("시즌 끝나면 가상 돈을 진짜 돈으로 바꿀 수 있어?", stockContext).text.includes("현금으로 바꿀 수 없어"), true);
 
+const howtoContexts = {
+  home: { screen: "home" as const },
+  stock: stockContext,
+  order: {
+    screen: "order" as const,
+    stockId: "KRX:005930" as const,
+    stockName: "삼성전자",
+    quantity: 7,
+    unitPrice: 8500,
+  },
+  archive: { screen: "archive" as const },
+};
+
+const howtoQuestions = [
+  ["이거 누르면 바로 사지는거야?", "order"],
+  ["한 주만 사도 돼?", "order"],
+  ["매수 누르면 진짜 돈이 빠져도 돼?", "order"],
+  ["수량 1만 입력해도 괜찮아?", "order"],
+  ["예상금액이 이 숫자면 눌러도 돼?", "order"],
+  ["취소 누르면 아무 일도 안 생겨도 돼?", "portfolio"],
+  ["이 버튼 누르면 내 돈 없어지는 척해?", "home"],
+  ["매수 수량 빨리 입력하는 법 뭐야?", "order"],
+  ["근거 태그는 어디에서 선택하나요?", "stock"],
+  ["제가 매수한 이유를 기록하면 나중에 바꿀 수 있나요?", "archive"],
+  ["주문 전에 예상 금액과 수량을 확인하는 순서는요?", "order"],
+  ["매수 버튼 누르면 끝?", "order"],
+  ["손실 난 종목을 다시 사려면 어디 눌러?", "stock"],
+  ["주문 취소하면 -12%도 없어져?", "archive"],
+  ["1주에 8,500원이면 7주는 59,500원 맞아?", "order"],
+  ["수량을 11개로 바꾸면 예상 금액이 몇 원이야?", "order"],
+  ["친구가 알려준 수량대로 누르면 바로 매수되는 거지?", "order"],
+  ["매수 수량과 투자 비중은 어떻게 연결돼?", "home"],
+  ["주문을 취소하면 성향 기록도 수정돼?", "archive"],
+  ["매수 누르면 또 떨어지는 거 아님? 어떻게 눌러", "order"],
+  ["이거 팔면 수익률 바로 바뀌어?", "portfolio"],
+  ["수수료가 정확히 얼마 빠지는지 주문 전에 볼 수 있어?", null],
+  ["주문 수량이랑 예상 금액을 틀리지 않게 계산하는 순서가 뭐야?", "order"],
+  ["왜 여기서 바로 주문 안 되고 order 화면으로 가야 해?", "order"],
+  ["매수 매도 버튼 어디가 더 빨라?", "stock"],
+  ["주문 전에 예상 금액이 잔액을 넘지 않는지 확인하는 절차를 알려 주세요.", "order"],
+  ["근거 태그를 잘못 선택했을 때 수정하면 기존 투자 기록도 바뀌나요?", "archive"],
+  ["주문 취소 버튼 계속 누르면 시스템 고장 나냐?", "portfolio"],
+  ["이 주문 오리온 2주가 맞는지 한 번만 확인해 주실래요?", "order"],
+  ["수량을 1개 잘못 누르면 바로 되돌릴 수 있어요?", "order"],
+  ["주문 취소하면 금액이 원래대로 돌아오는 게 맞나요?", "portfolio"],
+  ["매수 버튼 누르기 전에 예상 금액을 다시 계산해도 되나요?", "order"],
+  ["실수로 매수한 기록을 archive에서 지울 수 있나요?", "archive"],
+  ["기사 읽다가 산 건데 거래 이유에 뉴스 봤다고 어떻게 남겨?", "stock"],
+  ["차트에서 뉴스 나온 날짜랑 가격 변화를 같이 겹쳐서 볼 수 있어?", "stock"],
+  ["내가 본 기사 제목을 아카이브에 메모로 추가할 수 있어?", null],
+  ["매수 누르면 가상 돈 바로 빠지는 거 맞지?", "order"],
+  ["주문 화면 예상 금액에 수수료까지 포함해서 다시 계산할 수 있나?", null],
+  ["내 매수 가격과 현재 가격의 차이를 퍼센트로 직접 계산하면 어떻게 돼?", "portfolio"],
+  ["이 앱은 방산 회사의 무기 종류를 자세히 알려주는 곳이야?", "stock"],
+  ["에너지 섹터만 모아서 회사 설명을 읽으려면 어디를 눌러?", "stock"],
+  ["친구가 보낸 종목 링크를 누르면 그 회사 화면으로 바로 들어가?", "stock"],
+  ["증권사 직원처럼 주문 화면에서 수량 계산은 어떻게 해?", "order"],
+  ["성향 그래프 원자료를 어디서 펼쳐서 봐?", "archive"],
+  ["남은 한도 안에서 게임주 수량을 한 번에 최대로 넣으려면?", null],
+  ["유통주 그냥 정리하려면 매도 버튼만 누르면 돼?", "order"],
+  ["부모님이 옆에서 재촉할 때도 주문 확인을 내가 직접 해야 해?", null],
+] as const;
+
+assert.equal(howtoQuestions.length, 47);
+for (const [question, expectedTarget] of howtoQuestions) {
+  const screen = question.includes("아카이브") || question.includes("archive") || question.includes("성향 그래프")
+    ? "archive"
+    : question.includes("근거 태그는 어디") || question.includes("기사 읽다가 산 건데")
+      ? "archive"
+    : question.includes("차트") || question.includes("섹터") || question.includes("종목 링크") || question.includes("방산 회사")
+      ? "stock"
+      : "order";
+  const routed = routeMessage(question, howtoContexts[screen]);
+  assert.notEqual(routed.route, "fallback", `사용법 원문이 모델 경로로 빠져: ${question}`);
+  assert.equal(
+    gateChatOutput({ text: routed.text, source: "fixed" }).ok,
+    true,
+    `사용법 응답이 출력 게이트를 통과하지 못해: ${question}`,
+  );
+  assert.equal(routed.uiAction?.target ?? null, expectedTarget, `사용법 버튼 목적지가 달라: ${question}`);
+  if (routed.uiAction) {
+    assert.equal(Boolean(routed.uiAction.label), true, `사용법 버튼 라벨이 없어: ${question}`);
+  }
+}
+
 console.log("routing tests passed");
