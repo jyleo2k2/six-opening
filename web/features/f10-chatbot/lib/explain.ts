@@ -149,7 +149,9 @@ export function resolveTextReply(
   // 끝의 "요"를 떼고 견주되, 두 선택지가 같아지면 추측하지 않고 되묻는다.
   const target = normalizeChoiceLabel(message);
   const labelMatches = stageChoices(script, stage).filter(
-    (choice) => normalizeChoiceLabel(choice.label) === target,
+    (choice) =>
+      normalizeChoiceLabel(choice.label) === target ||
+      normalizeChoiceLabel(toPoliteKorean(choice.label)) === target,
   );
   if (labelMatches.length === 1) return labelMatches[0].id;
   if (labelMatches.length > 1) return null;
