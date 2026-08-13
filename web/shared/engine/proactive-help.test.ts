@@ -2,8 +2,6 @@ import assert from "node:assert/strict";
 import {
   createProactiveSession,
   detectProactiveSignals,
-  markProactiveSignalShown,
-  muteProactiveSignal,
   PROACTIVE_LIMITS,
   refreshProactiveSession,
   selectProactiveSignal,
@@ -61,6 +59,13 @@ const dwellEvents: ChatBehaviorEvent[] = [
   },
 ];
 assert.deepEqual(detectProactiveSignals(dwellEvents, now), ["dwell"]);
+assert.deepEqual(
+  detectProactiveSignals([
+    ...dwellEvents,
+    { type: "screen_entered", screen: "home", at: now + 1 },
+  ], now + 1),
+  [],
+);
 
 const lossEvents: ChatBehaviorEvent[] = [
   { type: "trade_filled", stockId: "KRX:005930", side: "sell", realizedPnlPct: -10, at: now - 100 },
@@ -72,20 +77,24 @@ const lossEvents: ChatBehaviorEvent[] = [
   })),
 ];
 assert.deepEqual(detectProactiveSignals(lossEvents, now), ["lossRevisit"]);
+assert.deepEqual(
+  detectProactiveSignals([
+    ...lossEvents,
+    { type: "screen_entered", screen: "home", at: now + 1 },
+  ], now + 1),
+  [],
+);
 
 let session = createProactiveSession(now);
-assert.equal(selectProactiveSignal(["buyHesitation"], session, now), "buyHesitation");
-session = markProactiveSignalShown(session, "buyHesitation", now);
-assert.equal(selectProactiveSignal(["dwell"], session, now + PROACTIVE_LIMITS.minimumGapMs - 1), null);
-assert.equal(selectProactiveSignal(["buyHesitation"], session, now + PROACTIVE_LIMITS.sameSignalGapMs - 1), null);
-session = muteProactiveSignal(session, "dwell", now + PROACTIVE_LIMITS.minimumGapMs);
-assert.equal(selectProactiveSignal(["dwell"], session, now + PROACTIVE_LIMITS.sameSignalGapMs), null);
-
-session = markProactiveSignalShown(session, "lossRevisit", now + PROACTIVE_LIMITS.minimumGapMs);
-assert.equal(selectProactiveSignal(["buyHesitation"], session, now + PROACTIVE_LIMITS.sameSignalGapMs), null);
+assert.equal(selectProactiveSignal(["buyHesitation"]), "buyHesitation");
+assert.equal(selectProactiveSignal(["buyHesitation"]), "buyHesitation");
+assert.equal(selectProactiveSignal(["dwell"]), "dwell");
+assert.equal(selectProactiveSignal(["lossRevisit"]), "lossRevisit");
+assert.equal(selectProactiveSignal([]), null);
 
 const reset = refreshProactiveSession(session, session.lastActivityAt + PROACTIVE_LIMITS.sessionIdleMs);
-assert.equal(reset.shownCount, 0);
-assert.deepEqual(reset.mutedSignals, []);
+assert.deepEqual(reset, {
+  lastActivityAt: session.lastActivityAt + PROACTIVE_LIMITS.sessionIdleMs,
+});
 
 console.log("proactive help tests passed");
