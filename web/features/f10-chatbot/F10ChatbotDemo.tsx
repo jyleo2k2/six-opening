@@ -56,6 +56,14 @@ type SheetDragState = {
   offsetY: number;
   velocityY: number;
 };
+type FloatingChatPosition = { x: number; y: number };
+type FloatingChatDragState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  origin: FloatingChatPosition;
+  moved: boolean;
+};
 
 const COPY = {
   service: "\ud0a4\uc6c0 \uac00\uc871 \ubaa8\uc758\ud22c\uc790 \ub9ac\uadf8",
@@ -88,6 +96,35 @@ const COPY = {
 } as const;
 
 const PROACTIVE_BUBBLE_VISIBLE_MS = 8_000;
+const FLOATING_CHAT_RADIUS = 28;
+
+function defaultFloatingChatPosition(
+  prototypeScreen: PrototypeScreenRect | null,
+): FloatingChatPosition {
+  if (prototypeScreen) {
+    return {
+      x: prototypeScreen.left + prototypeScreen.width - 44 * prototypeScreen.scale,
+      y: prototypeScreen.top + prototypeScreen.height - 108 * prototypeScreen.scale,
+    };
+  }
+  const width = typeof window === "undefined" ? 390 : window.innerWidth;
+  const height = typeof window === "undefined" ? 844 : window.innerHeight;
+  return { x: width - 44, y: height - 108 };
+}
+
+function clampFloatingChatPosition(
+  position: FloatingChatPosition,
+  prototypeScreen: PrototypeScreenRect | null,
+): FloatingChatPosition {
+  const left = prototypeScreen?.left ?? 0;
+  const top = prototypeScreen?.top ?? 0;
+  const width = prototypeScreen?.width ?? (typeof window === "undefined" ? 390 : window.innerWidth);
+  const height = prototypeScreen?.height ?? (typeof window === "undefined" ? 844 : window.innerHeight);
+  return {
+    x: Math.min(left + width - FLOATING_CHAT_RADIUS, Math.max(left + FLOATING_CHAT_RADIUS, position.x)),
+    y: Math.min(top + height - FLOATING_CHAT_RADIUS, Math.max(top + FLOATING_CHAT_RADIUS, position.y)),
+  };
+}
 
 const SCREENS: Record<
   Screen,
@@ -229,12 +266,16 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const [isLoading, setIsLoading] = useState(false);
   const [isBuyHesitationBubbleVisible, setIsBuyHesitationBubbleVisible] =
     useState(false);
+  const [floatingChatPosition, setFloatingChatPosition] =
+    useState<FloatingChatPosition | null>(null);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
     useState<StockExploreActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const sheetDragRef = useRef<SheetDragState | null>(null);
+  const floatingChatDragRef = useRef<FloatingChatDragState | null>(null);
+  const suppressFloatingChatClickRef = useRef(false);
   const lastScreenEntryRef = useRef<{ screen: Screen; at: number } | null>(null);
   const signal = useChatBehaviorStore((state) => state.activeSignal);
   const signalVersion = useChatBehaviorStore((state) => state.activeSignalVersion);
@@ -242,6 +283,16 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
 
   const currentScreen = SCREENS[screen];
+  const resolvedFloatingChatPosition = clampFloatingChatPosition(
+    floatingChatPosition ?? defaultFloatingChatPosition(prototypeScreen),
+    prototypeScreen,
+  );
+  const bubbleOpensLeft = resolvedFloatingChatPosition.x >=
+    (prototypeScreen
+      ? prototypeScreen.left + prototypeScreen.width / 2
+      : typeof window === "undefined"
+        ? 195
+        : window.innerWidth / 2);
   const chatContext = useMemo(
     () =>
       context ?? {
@@ -371,6 +422,50 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     acceptActiveSignal();
     openChat();
     if (signal === "orderMethodConfusion") void ask("시장가가 뭐예요?");
+  }
+
+  function handleFloatingChatPointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    const origin = resolvedFloatingChatPosition;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    floatingChatDragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      origin,
+      moved: false,
+    };
+  }
+
+  function handleFloatingChatPointerMove(event: ReactPointerEvent<HTMLButtonElement>) {
+    const drag = floatingChatDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const next = clampFloatingChatPosition(
+      { x: drag.origin.x + event.clientX - drag.startX, y: drag.origin.y + event.clientY - drag.startY },
+      prototypeScreen,
+    );
+    if (Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY) > 4) {
+      drag.moved = true;
+    }
+    setFloatingChatPosition(next);
+  }
+
+  function finishFloatingChatDrag(event: ReactPointerEvent<HTMLButtonElement>) {
+    const drag = floatingChatDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    suppressFloatingChatClickRef.current = drag.moved;
+    floatingChatDragRef.current = null;
+  }
+
+  function handleFloatingChatClick() {
+    if (suppressFloatingChatClickRef.current) {
+      suppressFloatingChatClickRef.current = false;
+      return;
+    }
+    if (signal) openProactiveChat();
+    else openChat();
   }
 
   function closeChat() {
@@ -719,52 +814,20 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         </section>
       </div>
 
-      {signal === "buyHesitation" && isBuyHesitationBubbleVisible && (
+      {signal && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
         <aside
           aria-live="polite"
           className="fixed z-20"
           style={{
-            bottom: 260,
-            left: "min(calc(50% + 140px), calc(100% - 44px))",
-            transform: "translateX(-82%)",
+            left: resolvedFloatingChatPosition.x + (bubbleOpensLeft ? 24 : -24),
+            top: resolvedFloatingChatPosition.y - 104,
+            transform: bubbleOpensLeft ? "translateX(-100%)" : undefined,
           }}
         >
           <button
-            className="relative whitespace-nowrap rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-navy shadow-lg ring-1 ring-magenta/20 after:absolute after:-bottom-2 after:right-5 after:size-4 after:rotate-45 after:bg-white after:content-['']"
-            onClick={openProactiveChat}
-            type="button"
-          >
-            {PROACTIVE_SCRIPTS.buyHesitation.text}
-          </button>
-        </aside>
-      )}
-
-      {signal && signal !== "buyHesitation" && (
-        <aside
-          className={`fixed z-20 ${
-            prototypeScreen
-              ? ""
-              : "bottom-24 left-1/2 -translate-x-1/2"
-          }`}
-          aria-live="polite"
-          style={
-            prototypeScreen
-              ? {
-                  left:
-                    prototypeScreen.left +
-                    prototypeScreen.width -
-                    44 * prototypeScreen.scale,
-                  top:
-                    prototypeScreen.top +
-                    prototypeScreen.height -
-                    254 * prototypeScreen.scale,
-                  transform: "translateX(-82%)",
-                }
-              : undefined
-          }
-        >
-          <button
-            className="relative whitespace-nowrap rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:right-5 after:size-4 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-['']"
+            className={`relative whitespace-nowrap rounded-2xl border border-magenta/30 bg-white px-4 py-3 text-left text-sm font-semibold text-navy shadow-[0_10px_24px_rgba(0,30,90,0.18)] after:absolute after:-bottom-2 after:size-4 after:rotate-45 after:border-b after:border-r after:border-magenta/30 after:bg-white after:content-[''] ${
+              bubbleOpensLeft ? "after:right-5" : "after:left-5"
+            }`}
             onClick={openProactiveChat}
             type="button"
           >
@@ -775,8 +838,18 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
 
       <button
         aria-label={COPY.openChat}
-        className="fixed bottom-5 left-1/2 z-10 grid size-14 -translate-x-1/2 place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg"
-        onClick={signal ? openProactiveChat : openChat}
+        className="fixed z-10 grid size-14 touch-none place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg cursor-grab active:cursor-grabbing"
+        onClick={handleFloatingChatClick}
+        onPointerCancel={finishFloatingChatDrag}
+        onPointerDown={handleFloatingChatPointerDown}
+        onPointerMove={handleFloatingChatPointerMove}
+        onPointerUp={finishFloatingChatDrag}
+        style={{
+          bottom: "auto",
+          left: resolvedFloatingChatPosition.x,
+          top: resolvedFloatingChatPosition.y,
+          transform: "translate(-50%, -50%)",
+        }}
         type="button"
       >
         {COPY.avatar}
