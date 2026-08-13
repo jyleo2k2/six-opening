@@ -128,6 +128,9 @@ test("통과 기사만 같은 article_id의 원문·요약·인용으로 적재 
   assert.match(sql, /insert into public\.news_source_units/u);
   assert.match(sql, /insert into public\.news_publications/u);
   assert.match(sql, /insert into public\.news_citations/u);
+  assert.match(sql, /NEWS_SOURCE_PUBLICATION_OUTPUT_MISMATCH/u);
+  assert.match(sql, /where not exists \(\s*select 1 from public\.news_source_units/u);
+  assert.match(sql, /where not exists \(\s*select 1 from public\.news_citations/u);
   assert.match(sql, /'S1_1'/u);
   assert.doesNotMatch(sql, /'S1\.1'/u);
   assert.match(sql, /join public\.news_articles as article on article\.id = publication\.article_id/u);

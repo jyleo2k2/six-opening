@@ -179,6 +179,11 @@ join (
   source_key, source_unit_id, ordinal, source_text, source_text_hash,
   is_selected, is_anchor
 ) on unit.source_key = article.source_key
+where not exists (
+  select 1 from public.news_source_units as existing
+  where existing.article_id = article.id
+    and existing.source_unit_id = unit.source_unit_id
+)
 on conflict (article_id, source_unit_id) do nothing;`;
 }
 
@@ -201,7 +206,59 @@ join (
     ${rows.join(",\n    ")}
 ) as subject(source_key, stock_code) on subject.source_key = article.source_key
 join public.stocks as stock on stock.stock_code = subject.stock_code
+where not exists (
+  select 1 from public.news_article_stocks as existing
+  where existing.article_id = article.id
+    and existing.stock_id = stock.stock_id
+)
 on conflict (article_id, stock_id) do nothing;`;
+}
+
+function renderExistingPublicationGuard(items: readonly ReadyStorageItem[]) {
+  if (items.length === 0) return "-- 기존 publication 동일성 검사를 생략합니다.";
+  const values = items.map(({ ready, sourceKey }) => {
+    const codes = [...ready.selection.primaryStockIds]
+      .map((stockId) => stockId.replace(/^KRX:/u, ""))
+      .sort();
+    return `(
+      ${sqlText(sourceKey)}, ${sqlText(ready.selection.eventType)},
+      ${sqlTextArray(codes)}, ${sqlText(ready.selection.focusStatement)},
+      ${sqlText(ready.draft.headline.text)}, ${sqlText(ready.draft.homeSummary.text)},
+      ${sqlText(ready.draft.body[0].text)}, ${sqlText(ready.draft.body[1].text)},
+      ${sqlText(ready.draft.body[2].text)}, ${sqlJson(ready.draft.termTreatments)}
+    )`;
+  }).join(",\n      ");
+  return `do $$
+begin
+  if exists (
+    select 1
+    from public.news_articles as article
+    join public.news_publications as publication
+      on publication.article_id = article.id
+    join (
+      values
+      ${values}
+    ) as expected(
+      source_key, event_type, stock_codes, focus_statement,
+      headline, home_summary, summary_line_1, summary_line_2,
+      summary_line_3, term_treatments
+    ) on expected.source_key = article.source_key
+    where publication.selector_event_type <> expected.event_type
+      or publication.reviewer_event_type <> expected.event_type
+      or publication.selector_stock_codes <> expected.stock_codes
+      or publication.reviewer_stock_codes <> expected.stock_codes
+      or publication.focus_statement <> expected.focus_statement
+      or publication.headline <> expected.headline
+      or publication.home_summary <> expected.home_summary
+      or publication.summary_line_1 <> expected.summary_line_1
+      or publication.summary_line_2 <> expected.summary_line_2
+      or publication.summary_line_3 <> expected.summary_line_3
+      or publication.term_treatments <> expected.term_treatments
+  ) then
+    raise exception 'NEWS_SOURCE_PUBLICATION_OUTPUT_MISMATCH';
+  end if;
+end;
+$$;`;
 }
 
 function renderPublicationInsert(items: readonly ReadyStorageItem[]) {
@@ -292,6 +349,12 @@ join (
     ${rows.join(",\n    ")}
 ) as citation(source_key, output_field, source_unit_id)
   on citation.source_key = article.source_key
+where not exists (
+  select 1 from public.news_citations as existing
+  where existing.publication_id = publication.id
+    and existing.output_field = citation.output_field
+    and existing.source_unit_id = citation.source_unit_id
+)
 on conflict (publication_id, output_field, source_unit_id) do nothing;`;
 }
 
@@ -348,6 +411,8 @@ begin;
 ${renderRunInsert(report, criteriaPassed)}
 
 ${renderArticleInsert(report, items)}
+
+${renderExistingPublicationGuard(items)}
 
 ${renderSourceUnitInsert(items)}
 

@@ -36,6 +36,7 @@ export type NewsPipelineDependencies = {
   universe: NewsUniverseCompany[];
   timeoutMs?: number;
   maxEditorAttempts?: 1 | 2;
+  requiredPrimaryStockId?: string;
 };
 
 function normalizeText(value: string) {
@@ -891,6 +892,17 @@ export async function processNewsCandidate(
   );
   if (selectionIssues.length > 0) {
     return reject(article.articleId, "selector", selectionIssues);
+  }
+  if (
+    dependencies.requiredPrimaryStockId &&
+    !selection.primaryStockIds.includes(dependencies.requiredPrimaryStockId)
+  ) {
+    return reject(article.articleId, "selector", [
+      {
+        code: "TARGET_STOCK_NOT_PRIMARY",
+        message: "이 기사의 실제 주인공이 이 행의 대상 종목과 일치하지 않습니다.",
+      },
+    ]);
   }
 
   const maxAttempts = Math.min(
