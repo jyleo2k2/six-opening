@@ -3675,14 +3675,14 @@ export const PROACTIVE_SCRIPTS: Record<
   },
   orderMethodConfusion: {
     label: "시장가·지정가 교차 변경",
-    text: "시장가와 지정가 차이를 같이 볼까요?",
+    text: "뭐가 다른지 볼까요?",
   },
   dwell: {
     label: "주문·상세 화면 5분 초과 체류",
-    text: "이 화면을 오래 살펴보고 있네요. 어디에서 막혔는지 같이 찾아볼까요?",
+    text: "어디가 헷갈려요?",
   },
   lossRevisit: {
     label: "손실 실현 종목 반복 조회",
-    text: "방금 본 종목을 다시 살펴보고 있네요. 어떤 점이 신경 쓰이는지 같이 찾아볼까요?",
+    text: "후회되나요?",
   },
 };

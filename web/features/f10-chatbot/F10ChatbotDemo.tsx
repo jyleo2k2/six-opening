@@ -826,6 +826,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
           style={{
             left: resolvedFloatingChatPosition.x + (bubbleOpensLeft ? 24 : -24),
             top: resolvedFloatingChatPosition.y - 36,
+            width: prototypeScreen ? prototypeScreen.width / 2 : "50vw",
             transform: bubbleOpensLeft
               ? "translate(-100%, -100%)"
               : "translateY(-100%)",
@@ -836,7 +837,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               bubbleOpensLeft ? "after:right-5" : "after:left-5"
             }`}
           >
-            <p className="whitespace-nowrap px-1">{PROACTIVE_SCRIPTS[signal].text}</p>
+            <p className="whitespace-nowrap overflow-hidden text-ellipsis px-1">
+              {PROACTIVE_SCRIPTS[signal].text}
+            </p>
             <div className="mt-3 grid grid-cols-2 gap-2 border-t border-navy/10 pt-3">
               <button
                 className="rounded-xl bg-navy px-3 py-2 text-xs font-semibold text-white"
