@@ -86,7 +86,11 @@ export function createReadOnlyToolRunner(
           status: "ok",
           response: {
             text: textByTopic[stockFactTopic],
-            uiAction: { type: "open_screen", target: "stock" },
+            uiAction: {
+              type: "open_screen",
+              target: "stock",
+              stockId: approvedEducation.stockId,
+            },
           },
           evidence: approvedEducation.sources.map((source) => source.url),
         };
@@ -106,7 +110,7 @@ export function createReadOnlyToolRunner(
         status: "ok",
         response: {
           text: `${stock.companySummary} 일상에서는 ${stock.everydayTouchpoints[0]} 만날 수 있어요.`,
-          uiAction: { type: "open_screen", target: "stock" },
+          uiAction: { type: "open_screen", target: "stock", stockId: stock.id },
         },
         evidence: [stock.id],
       };
