@@ -212,6 +212,86 @@ export type ReadyNews = {
 
 export type NewsPipelineResult = ReadyNews | RejectedNews;
 
+export const NEWS_EVALUATION_CRITERIA = [
+  "allowedScope",
+  "notRoutineOrPromotional",
+  "primarySubjectMatches",
+  "noUnsupportedContext",
+  "allTermsEasy",
+  "factsMatchSource",
+  "storageDecisionExplained",
+] as const;
+
+export type NewsEvaluationCriterion =
+  (typeof NEWS_EVALUATION_CRITERIA)[number];
+
+export type NewsEvaluationExpectation = {
+  expectedStatus: NewsPipelineResult["status"];
+  expectedStage?: NewsPipelineStage;
+  acceptableReasonCodes?: string[];
+  rationale: string;
+};
+
+export type NewsEvaluationCase = {
+  caseId: string;
+  article: NewsSourceArticle;
+  expectation: NewsEvaluationExpectation;
+};
+
+export type NewsEvaluationInput = {
+  schemaVersion: 1;
+  runId: string;
+  runDateKst: string;
+  retrievedAt: string;
+  sourceBasis: string;
+  cases: NewsEvaluationCase[];
+};
+
+export type NewsCriterionAssessment = {
+  outcome: "pass" | "fail" | "not_applicable";
+  evidence: string[];
+};
+
+export type NewsEvaluationRoleAttempt = {
+  role: NewsRole;
+  reasoningEffort: NewsReasoningEffort;
+  outcome: "returned" | "error";
+  response?: unknown;
+  error?: string;
+};
+
+export type NewsEvaluationCaseResult = {
+  caseId: string;
+  inputArticle: NewsSourceArticle;
+  title: string;
+  sourceUrl: string;
+  pipelineStatus: NewsPipelineResult["status"];
+  stage: NewsPipelineStage | "complete";
+  reasonCodes: string[];
+  reasons: string[];
+  expectation: NewsEvaluationExpectation;
+  expectationMatched: boolean;
+  criteria: Record<NewsEvaluationCriterion, NewsCriterionAssessment>;
+  roleAttempts: NewsEvaluationRoleAttempt[];
+  pipelineResult: NewsPipelineResult;
+};
+
+export type NewsEvaluationReport = {
+  schemaVersion: 1;
+  runId: string;
+  runDateKst: string;
+  sourceRetrievedAt: string;
+  sourceBasis: string;
+  generatedAt: string;
+  model: "gpt-5.6-luna";
+  articleCount: number;
+  expectationMatchedCount: number;
+  readyForStorageCount: number;
+  rejectedCount: number;
+  criteriaPassed: boolean;
+  cases: NewsEvaluationCaseResult[];
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
