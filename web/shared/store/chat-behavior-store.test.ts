@@ -63,7 +63,7 @@ async function run() {
     realizedPnlPct: -12,
     at: start + 9,
   });
-  for (let offset = 10; offset <= 13; offset += 1) {
+  for (let offset = 10; offset <= 11; offset += 1) {
     useChatBehaviorStore.getState().recordEvent({
       type: "screen_entered",
       screen: "stock",

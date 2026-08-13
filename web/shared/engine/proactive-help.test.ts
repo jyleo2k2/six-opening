@@ -146,15 +146,22 @@ assert.deepEqual(
 );
 
 const lossEvents: ChatBehaviorEvent[] = [
-  { type: "trade_filled", stockId: "KRX:005930", side: "sell", realizedPnlPct: -10, at: now - 100 },
-  ...Array.from({ length: 4 }, (_, index) => ({
+  {
+    type: "trade_filled",
+    stockId: "KRX:005930",
+    side: "sell",
+    realizedPnlPct: -10,
+    at: now - 6 * 60 * 1000,
+  },
+  ...Array.from({ length: 2 }, (_, index) => ({
     type: "screen_entered" as const,
     screen: "stock" as const,
     stockId: "KRX:005930",
-    at: now - 4 + index,
+    at: now - 2 + index,
   })),
 ];
 assert.deepEqual(detectProactiveSignals(lossEvents, now), ["lossRevisit"]);
+assert.deepEqual(detectProactiveSignals(lossEvents.slice(0, 2), now), []);
 assert.deepEqual(
   detectProactiveSignals([
     ...lossEvents,
