@@ -1,8 +1,9 @@
 # f3-reason — 매매 기록 폼
 
 - 이 디렉터리의 `AGENTS.md`와 `CLAUDE.md`는 한 쌍이다. 둘 중 하나를 수정하면 같은 작업에서 짝 파일도 동일하게 수정하고 완료 전 비교한다.
-- 이 폴더만 수정하고 f2용 공개 컴포넌트를 export한다. F2·F3 단일 스펙: `web/features/f2-trade/SPEC.md`.
-- 매수는 근거+예상 보유기간 필수, 매도는 근거 필수, 메모는 선택이다. 확신도는 쓰지 않는다.
-- 저장은 `shared/store` 액션을 사용한다. 기록은 F9 입력이며 F10은 승인된 선제 신호만 쓴다.
+- F2·F3 단일 스펙은 `web/features/f2-trade/SPEC.md`다. 이 폴더는 현재 가드만 있고 런타임 컴포넌트나 export가 없다.
+- 실제 질문식 기록 폼은 `web/public/ui/app.html`의 매수·매도 단계 안에 있다. 명시적인 이관 작업 없이 빈 폴더에 두 번째 폼이나 저장소를 만들지 않는다.
+- 현재 매수는 이유 6개와 보유계획 4개(사용자가 정한 목표가격 계획 포함)가 필수이고, 매도는 이유 6개가 필수다. 확신도는 화면·기록·DB에 없다.
+- 즉시 기록은 `localStorage["kw_proto_v1"]`의 `records`·`sellRecords`가 소유하며 F9 `/api/profile` 입력으로 전달된다.
 - 시험·점수·정답처럼 표현하지 않는다.
-- 완료: f2 흐름에서 기록 저장 + `npm run build`.
+- 완료: `app.html` 실제 흐름과 `SPEC.md` 계약 일치 + 관련 테스트 + `npm run build`.
