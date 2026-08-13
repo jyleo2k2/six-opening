@@ -56,7 +56,7 @@ cd web
 node --conditions=react-server --import tsx features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs
 ```
 
-기본 출력은 `reports/latest-economic-news-2026-08-12-luna/`의 `report.json`과 `index.html`이다. 같은 경로가 있으면 덮어쓰지 않으며 재실행은 `--overwrite`를 명시한다. 프로세스는 다음을 기사별로 남긴다. HTML에서 원문 근거 문장과 제목 선별·본문 선별·1~2차 편집·독립 검수의 실제 JSON을 접어서 확인할 수 있다.
+기본 출력은 `reports/latest-economic-news-2026-08-12-luna/`의 `report.json`과 `index.html`이다. 같은 경로가 있으면 덮어쓰지 않으며 재실행은 `--overwrite`를 명시한다. HTML 첫 화면에는 `ready_for_storage` 기사의 제목·홈 요약·본문을 실제 서비스 뉴스 카드 형태로만 보여준다. 원문 근거 문장과 제목 선별·본문 선별·1~2차 편집·독립 검수의 실제 JSON, 거부 기사 판정은 아래 `검수 상세 보기`를 펼쳐 확인한다. 프로세스는 다음을 기사별로 남긴다.
 
 - 오늘 국내 시황 또는 선정 51개 기업의 직접 사건인지
 - 채용·행사·사회공헌·일반 홍보인지
