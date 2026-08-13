@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { gateComment } from "../engine/comment-filter";
+import { FAMILY_SEED_TRADES } from "./family-trade-seed";
 import type { FamilyMember, Trade, TradeComment } from "../types/trade";
 
 /**
@@ -30,44 +31,8 @@ type Store = {
   ) => { ok: true } | { ok: false; message: string };
 };
 
-/** 데모 시드 — 엄마의 2주치 거래. 자녀 계정에서 피드가 비어 보이지 않게 한다. */
-const seedParentTrades: Trade[] = [
-  {
-    id: "seed-parent-1",
-    member: "parent",
-    symbol: "005930",
-    side: "buy",
-    quantity: 2,
-    price: 70800,
-    reason: "이 회사(제품)를 잘 알아",
-    confidence: 75,
-    memo: "갤럭시를 오래 써서 사업을 이해하기 쉬웠어.",
-    tradedAt: "2026-08-04T01:12:00.000Z",
-  },
-  {
-    id: "seed-parent-2",
-    member: "parent",
-    symbol: "003230",
-    side: "buy",
-    quantity: 5,
-    price: 62400,
-    reason: "뉴스에서 봤어",
-    confidence: 50,
-    memo: "해외 매출 기사를 봤는데 확신까지는 아니었어.",
-    tradedAt: "2026-08-06T04:35:00.000Z",
-  },
-  {
-    id: "seed-parent-3",
-    member: "parent",
-    symbol: "005930",
-    side: "sell",
-    quantity: 1,
-    price: 73900,
-    reason: "목표한 만큼 올랐어",
-    memo: "처음 생각한 만큼 와서 절반만 정리했어.",
-    tradedAt: "2026-08-08T05:02:00.000Z",
-  },
-];
+// 시드는 상수라 `family-trade-seed` 가 소유한다. 차트도 같은 값을 읽어야 하는데
+// 그 모듈만 import 하면 이 스토어가 차트 iframe 에서 또 생성되지 않는다.
 
 const seedComments: TradeComment[] = [
   {
@@ -90,7 +55,7 @@ export const useFamilyFeedStore = create<Store>()(
   persist(
     (set, get) => ({
       viewer: "child",
-      familyTrades: seedParentTrades,
+      familyTrades: FAMILY_SEED_TRADES,
       comments: seedComments,
       setViewer: (viewer) => set({ viewer }),
       addComment: (trade, body) => {

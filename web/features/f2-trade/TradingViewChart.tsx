@@ -20,7 +20,8 @@ import {
 } from "./chart-data";
 import { buildTradeMarkers, symbolTrades, type TradeMarker } from "../../shared/engine/trade-markers";
 import { readPrototypeTrades } from "../../shared/store/prototype-trades";
-import type { FamilyMember } from "../../shared/types/trade";
+import { FAMILY_SEED_TRADES } from "../../shared/store/family-trade-seed";
+import type { FamilyMember, Trade } from "../../shared/types/trade";
 
 type LoadState = "loading" | "ready" | "error";
 
@@ -41,15 +42,28 @@ const BADGE = 22;
 const TAIL = 7;
 
 /**
- * 가족 매매 지점 마커. F11 SPEC §6
+ * 이 종목의 가족 전원 체결. F11 SPEC §6
  *
- * 라이브러리 기본 마커는 모양이 원·사각·화살표뿐이라 시안의 "삼각 포인터 + 둥근 뱃지
+ * 본인 거래는 app.html 이 `localStorage` 에 쌓고, 엄마의 데모 거래는 코드 상수다.
+ * 이 차트는 app.html 안의 iframe 이라 같은 오리진이고, 그래서 부모를 거치지 않고
+ * 그 키를 직접 읽는다 — 별도 투자 스토어를 두면 저장소가 갈려 카드와 차트 값이
+ * 어긋난다.
+ *
+ * 피드는 두 출처를 합쳐 보여주는데 차트가 `localStorage` 만 읽으면 엄마 마커가
+ * 구조적으로 빠진다. "가족 전원 체결 지점" 이라는 규칙과 어긋나므로 같은 두
+ * 출처를 여기서도 합친다.
+ */
+function familyTradesFor(symbol: string) {
+  const merged: Trade[] = [...readPrototypeTrades(), ...FAMILY_SEED_TRADES];
+  return symbolTrades(merged, symbol);
+}
+
+/**
+ * 마커를 찍을 화면 좌표를 잡는다.
+ *
+ * 라이브러리 기본 마커는 모양이 원·사각·화살표뿐이라 시안의 "꼬리 붙은 둥근 뱃지
  * + 흰 B/S" 를 못 그린다. 대신 차트가 주는 좌표 변환만 빌려 SVG 를 차트 위에 얹는다.
  * 시안 마크업을 그대로 쓸 수 있고, 나중에 탭·툴팁을 붙일 때도 DOM 이벤트로 끝난다.
- *
- * 거래 원본은 app.html 이 `localStorage` 에 쌓는다. 이 차트는 app.html 안의 iframe 이라
- * 같은 오리진이고, 그래서 부모를 거치지 않고 그 키를 직접 읽는다. 별도 투자 스토어를
- * 두면 저장소가 갈려 카드와 차트 값이 어긋난다.
  */
 function placeMarkers(
   markers: readonly TradeMarker[],
@@ -245,7 +259,7 @@ export function TradingViewChart({ symbol, period, chartType, viewer = null }: {
 
     // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
     const markers = buildTradeMarkers({
-      trades: symbolTrades(readPrototypeTrades(), symbol),
+      trades: familyTradesFor(symbol),
       viewer,
       candleTimes: points.map((point) => point.time),
     });
