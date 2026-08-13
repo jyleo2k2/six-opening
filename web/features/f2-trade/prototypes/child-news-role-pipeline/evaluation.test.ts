@@ -7,6 +7,7 @@ import type {
   NewsEvaluationInput,
   NewsRoleRequest,
   NewsUniverseCompany,
+  ReadyNews,
   RejectedNews,
 } from "./contracts";
 import {
@@ -108,9 +109,80 @@ assert.equal(JSON.parse(JSON.stringify(report)).cases.length, 10);
 
 const html = renderNewsEvaluationHtml(report);
 assert.match(html, /<!doctype html>/u);
+assert.match(html, /서비스에 보이는 어린이 뉴스/u);
+assert.match(html, /현재 서비스에 노출할 통과 기사가 없습니다/u);
+assert.match(html, /검수 상세 보기/u);
 assert.match(html, /기대 일치 10건/u);
 assert.equal(html.includes("<검증>"), false);
 assert.equal(html.includes("&lt;검증&gt;"), true);
+
+const readyCase = fixture.cases[0];
+const readyResult: ReadyNews = {
+  status: "ready_for_storage",
+  article: readyCase.article,
+  selection: {
+    articleId: readyCase.article.articleId,
+    decision: "accept",
+    kind: "market",
+    primaryStockIds: [],
+    eventType: "observed_market_move",
+    focusStatement: "오늘 국내 시장의 움직임",
+    anchorSourceId: "S1",
+    includedSourceIds: ["S1"],
+    excludedSourceIds: readyCase.article.sourceUnits.slice(1).map((unit) => unit.id),
+    difficultTerms: [],
+    reasonCodes: [],
+    reasons: [],
+  },
+  draft: {
+    articleId: readyCase.article.articleId,
+    headline: { text: "<아이>가 읽는 오늘의 시장 뉴스", sourceIds: ["S1"] },
+    homeSummary: { text: "홈에서 먼저 읽는 한 줄 요약입니다.", sourceIds: ["S1"] },
+    body: [
+      { role: "core_event", text: "서비스 뉴스 상세에 보이는 본문입니다.", sourceIds: ["S1"] },
+    ],
+    termTreatments: [],
+  },
+  review: {
+    articleId: readyCase.article.articleId,
+    independentKind: "market",
+    primaryStockIds: [],
+    eventType: "observed_market_move",
+    focusStatement: "오늘 국내 시장의 움직임",
+    anchorSourceIds: ["S1"],
+    checks: {
+      allowedScope: true,
+      primarySubject: true,
+      directMateriality: true,
+      sourceFidelity: true,
+      focusAlignment: true,
+      noIrrelevantDetail: true,
+      attributionAndTiming: true,
+      allTermsEasy: true,
+      investmentSafety: true,
+      noSentimentLabel: true,
+    },
+    issues: [],
+  },
+  editorAttempts: 1,
+};
+const readyHtml = renderNewsEvaluationHtml({
+  ...report,
+  readyForStorageCount: 1,
+  rejectedCount: 9,
+  cases: [
+    evaluateNewsResult(readyCase, readyResult),
+    ...report.cases.slice(1),
+  ],
+});
+const auditStart = readyHtml.indexOf('<section class="audit">');
+assert.ok(auditStart > readyHtml.indexOf('<section class="service-output"'));
+assert.match(readyHtml, /한눈에 보기/u);
+assert.match(readyHtml, /홈에서 먼저 읽는 한 줄 요약입니다/u);
+assert.match(readyHtml, /서비스 뉴스 상세에 보이는 본문입니다/u);
+assert.equal(readyHtml.includes("<아이>"), false);
+assert.equal(readyHtml.includes("&lt;아이&gt;가 읽는 오늘의 시장 뉴스"), true);
+assert.equal(readyHtml.slice(0, auditStart).includes("채용설명회"), false);
 
 await assert.rejects(
   () =>
