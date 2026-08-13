@@ -32,6 +32,9 @@ jobs:
         env:
           KIWOOM_APP_KEY: ${{ secrets.KIWOOM_APP_KEY }}
           KIWOOM_SECRET_KEY: ${{ secrets.KIWOOM_SECRET_KEY }}
-          KIWOOM_ENV: ${{ vars.KIWOOM_ENV || 'real' }}
+          # 지금 발급된 앱키는 모의투자 전용이다. real 로 붙으면 토큰 발급이 8030
+          # "투자구분(실전/모의)이 달라서 Appkey를 사용할수가 없습니다" 로 막힌다.
+          # 시세·차트 조회 API 는 모의 서버도 실제 시장 데이터를 주므로 mock 으로 충분하다.
+          KIWOOM_ENV: ${{ vars.KIWOOM_ENV || 'mock' }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
