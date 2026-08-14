@@ -1887,7 +1887,9 @@ class Component extends DCLogic {
     if (this.state.screen === 'detail' && this.state.code && (!prevState || prevState.screen !== 'detail' || prevState.code !== this.state.code)) {
       this.loadNews(this.state.code);
     }
-    if (prevState && prevState.screen !== this.state.screen) this.trackTabWindow(prevState.screen, this.state.screen);
+    if (prevState && (prevState.screen !== this.state.screen || prevState.code !== this.state.code)) {
+      this.trackTabView(prevState.screen, prevState.code, this.state.screen, this.state.code);
+    }
   }
 
   // --- Supabase 연동 -------------------------------------------------
@@ -1969,7 +1971,6 @@ class Component extends DCLogic {
   openNewsItem(item){
     const code = this.state.code;
     if (!code || !this.validNewsItem(item, code)) return;
-    this.bumpTabCount();
     this.setState(s => Object.assign({}, s, { activeNewsId:item.newsId, activeNews:item }));
     this.logEvent('news_detail_opened', 'news');
     fetch('/api/news/' + encodeURIComponent(String(item.newsId)), { cache:'no-store' })
@@ -1999,32 +2000,36 @@ class Component extends DCLogic {
     }).catch(() => {});
   }
 
-  // 종목 카드 목록 진입 → 매수 화면 도달 구간을 잰다.
-  // 카드 목록을 떠나도 상세·차트·뉴스는 같은 구간이므로 창을 유지하고,
-  // 매수까지 가지 않고 빠져나가면 그 구간은 버린다.
-  trackTabWindow(prevScreen, screen){
-    if (screen === 'explore') {
-      if (!this.tabWin) this.tabWin = { openedAt: new Date(), count: 0 };
-      return;
-    }
-    if (!this.tabWin) return;
-    if (screen === 'buy') {
-      const win = this.tabWin;
-      this.tabWin = null;
+  // 종목별 기업정보(detail)·차트·뉴스 체류를 잰다. 한 카테고리에서 나갈 때
+  // 10초 이상 머물렀으면 그 종목의 방문 기록에 쌓아 두고, 실제 매수가
+  // 체결될 때(flushTabViews) 한 번에 서버로 보낸다. 방문마다 상한 없이 쌓인다.
+  trackTabView(prevScreen, prevCode, screen, code){
+    const CATS = ['detail', 'chart', 'news'];
+    const open = this.tabOpen;
+    if (open) {
+      this.tabOpen = null;
       const closedAt = new Date();
-      if (closedAt - win.openedAt < 10000) return;
-      if (!this.dbSyncable()) return;
-      this.postJson('/api/tab-view', {
-        opened_at: win.openedAt.toISOString(),
-        closed_at: closedAt.toISOString(),
-        tab_count: win.count
-      });
-      return;
+      if (closedAt - open.at >= 10000) {
+        const views = this.tabViews || (this.tabViews = {});
+        (views[open.code] || (views[open.code] = [])).push({
+          opened_at: open.at.toISOString(),
+          closed_at: closedAt.toISOString()
+        });
+      }
     }
-    if (['detail', 'chart', 'news'].indexOf(screen) < 0) this.tabWin = null;
+    if (CATS.indexOf(screen) >= 0 && code) {
+      this.tabOpen = { code: code, at: new Date() };
+    }
   }
 
-  bumpTabCount(){ if (this.tabWin) this.tabWin.count += 1; }
+  // 10초 판정은 여기서도 하지만 서버가 다시 확인한다. 초 자체는 서버에 저장하지 않는다.
+  flushTabViews(code){
+    const views = this.tabViews && this.tabViews[code];
+    if (!views || !views.length) return;
+    delete this.tabViews[code];
+    if (!this.dbSyncable()) return;
+    this.postJson('/api/tab-view', { stock_code: code, views: views });
+  }
 
   // 체결된 주문만 보낸다. 지정가 대기 주문은 체결 시점에 다시 부른다.
   saveTrade(side, code, price, quantity, reason){
@@ -3181,6 +3186,7 @@ class Component extends DCLogic {
         });
         if (!isLimit) {
           this.saveTrade('buy', st.code, price, qty, s.draft.reason);
+          this.flushTabViews(st.code);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
         }
       },
@@ -3571,7 +3577,7 @@ class Component extends DCLogic {
       newsMoreLabel: newsItem ? '뉴스 자세히 보기' : (newsStatus === 'error' ? '다시 불러오기' : (newsStatus === 'empty' ? '새 소식 없음' : '불러오는 중')),
       newsMoreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1);cursor:' + (newsItem || newsStatus === 'error' ? 'pointer' : 'default') + ';opacity:' + (newsItem || newsStatus === 'error' ? '1' : '0.58'),
       ctaStyle: locked ? CTA_OFF : CTA_ON,
-      openChart: () => { this.bumpTabCount(); this.logEvent('chart_detail_opened', 'chart'); },
+      openChart: () => { this.logEvent('chart_detail_opened', 'chart'); },
       openNews: () => { if (newsItem) this.openNewsItem(newsItem); else if (st && newsStatus === 'error') this.loadNews(st.code); },
       closeSub: () => this.closeSub(),
       chartLine: () => this.setChartType('line'), chartCandle: () => this.setChartType('candlestick'),
