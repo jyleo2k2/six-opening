@@ -79,9 +79,17 @@ const TAIL = 10;
  *
  * `paneHeight` 는 컨테이너 높이(238)가 아니라 `chart.paneSize().height` 다. 두 축을 뺀
  * 값이라 시간축 위에서 정확히 멈춘다.
+ *
+ * 뱃지뿐 아니라 **꼬리가 뻗는 쪽**도 여유를 남긴다. 체결가가 지금 보이는 봉들의
+ * 가격 범위를 크게 벗어나면(예: 예전 체결이 지금보다 훨씬 싸거나 비쌌던 경우)
+ * `priceToCoordinate` 가 페인 밖 좌표를 주고, 뱃지는 끝에 눌러앉는다. 꼬리 길이만큼
+ * 더 여유를 안 두면 뱃지는 끝에 딱 붙었는데 꼬리만 SVG 뷰포트 밖으로 삐져나가
+ * 통째로 잘려 안 보인다 — 매수는 아래로, 매도는 위로 `TAIL` 만큼 더 물러선다.
  */
-function clampBadgeTop(top: number, paneHeight: number) {
-  return Math.min(Math.max(top, 0), paneHeight - BADGE);
+function clampBadgeTop(top: number, paneHeight: number, side: TradeMarker["side"]) {
+  const min = side === "sell" ? TAIL : 0;
+  const max = side === "buy" ? paneHeight - BADGE - TAIL : paneHeight - BADGE;
+  return Math.min(Math.max(top, min), max);
 }
 
 /**
@@ -532,6 +540,7 @@ export function TradingViewChart({ symbol, period, chartType }: {
               const badgeY = clampBadgeTop(
                 marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP,
                 pane.height,
+                marker.side,
               );
               const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
               const tip = marker.side === "buy" ? base + TAIL : base - TAIL;
