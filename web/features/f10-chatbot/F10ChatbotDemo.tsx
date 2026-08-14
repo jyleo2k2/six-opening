@@ -1173,12 +1173,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               (isOverDismissTargetNow
                 ? DISMISS_TARGET_ARMED_DIAMETER_PX
                 : DISMISS_TARGET_DIAMETER_PX) * dismissTargetScale,
+            // 버튼이 마젠타라 활성색까지 마젠타면 겹쳤을 때 한 덩어리로 보인다.
+            // 진한 회색(ink)으로 채워 위에 올라온 버튼과 대비를 준다.
             background: isOverDismissTargetNow
-              ? "var(--color-magenta)"
+              ? "var(--color-ink)"
               : "rgb(26 34 51 / 0.55)",
             borderColor: isOverDismissTargetNow ? "#fff" : "rgb(255 255 255 / 0.55)",
             boxShadow: isOverDismissTargetNow
-              ? "0 0 0 8px rgb(215 0 130 / 0.18), 0 12px 26px -6px rgb(215 0 130 / 0.55)"
+              ? "0 0 0 8px rgb(26 34 51 / 0.16), 0 12px 26px -6px rgb(26 34 51 / 0.5)"
               : "none",
             backdropFilter: "blur(6px)",
           }}
