@@ -581,7 +581,46 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
   }),
 } satisfies Record<string, ExplainScript>;
 
-export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
+// 8월 14일에 추가한 화면 용어도 용어별 DAPIE 흐름으로 설명한다.
+function screenTermScript(id: string, brief: string): ExplainScript {
+  return termScript(id, {
+    brief,
+    check: {
+      question: "이 말은 화면의 무엇을 확인하는 데 쓰일까?",
+      choices: [
+        { id: "screen-meaning", label: "화면에 보이는 뜻" },
+        { id: "price-prediction", label: "앞으로의 가격" },
+        { id: "trade-advice", label: "사고파는 답" },
+      ],
+      answerId: "screen-meaning",
+    },
+    adjust: {
+      explanation: "맞히는 시험이 아니야. 화면에 적힌 말의 뜻을 함께 확인하는 거야.",
+      question: "이 용어를 볼 때 먼저 확인할 것은 무엇일까?",
+      choices: [
+        { id: "meaning", label: "그 말이 가리키는 화면 정보" },
+        { id: "prediction", label: "미래 가격을 맞히는 법" },
+      ],
+      answerId: "meaning",
+    },
+    detail: brief,
+    example: "화면에서 이 말을 발견하면, 그 숫자나 기록이 무엇을 보여주는지 차례로 읽어 보면 돼.",
+  });
+}
+
+const CHART_EXPLAIN_SCRIPTS: Record<string, ExplainScript> = {
+  "line-chart": termScript("line-chart", { brief: "선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트야.", check: { question: "선차트에서 이어지는 것은 무엇일까?", choices: [{ id: "price", label: "가격의 흐름" }, { id: "company", label: "회사 이름" }, { id: "news", label: "뉴스 제목" }], answerId: "price" }, adjust: { explanation: "점마다의 가격을 선으로 이어 보면 흐름을 읽기 쉬워.", question: "선은 무엇의 흐름을 보여줄까?", choices: [{ id: "price", label: "가격" }, { id: "advice", label: "매수 조언" }], answerId: "price" }, detail: "선차트는 가격이 어떻게 움직였는지 보기 위한 그림이지, 다음 가격을 알려 주는 그림은 아니야.", example: "점들을 연필로 이어 그린 선처럼, 시간마다의 가격 점을 연결한 모습이야." }),
+  "candle-chart": termScript("candle-chart", { brief: "캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트야.", check: { question: "캔들 하나는 무엇을 함께 보여줄까?", choices: [{ id: "four-prices", label: "시작·끝·높음·낮음" }, { id: "future", label: "미래 가격" }, { id: "company", label: "회사 소개" }], answerId: "four-prices" }, adjust: { explanation: "캔들은 한 기간 안에서 가격이 어디서 시작해 어디까지 움직였는지 담아.", question: "캔들이 담는 것은 무엇일까?", choices: [{ id: "range", label: "그 기간의 가격 움직임" }, { id: "recommendation", label: "매매 추천" }], answerId: "range" }, detail: "캔들의 몸통과 꼬리는 과거 한 기간 안의 가격 범위를 보여줘.", example: "하루 동안 가장 높이와 낮이를 표시한 막대처럼 보면 돼." }),
+  "minute-chart": termScript("minute-chart", { brief: "분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트야.", check: { question: "분봉 한 개는 어느 기간을 나타낼까?", choices: [{ id: "minutes", label: "몇 분" }, { id: "day", label: "하루" }, { id: "week", label: "한 주" }], answerId: "minutes" }, adjust: { explanation: "분봉의 '분'은 시계의 분처럼 짧은 시간을 뜻해.", question: "분봉은 시간을 어떻게 나눌까?", choices: [{ id: "short", label: "짧은 몇 분" }, { id: "long", label: "몇 달" }], answerId: "short" }, detail: "몇 분으로 나누는 방법만 달라질 뿐, 과거 가격을 보는 차트라는 점은 같아.", example: "수업 시간을 몇 분 단위로 나눠 보는 시간표와 비슷해." }),
+  "daily-chart": termScript("daily-chart", { brief: "일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트야.", check: { question: "일봉 한 개는 어느 기간을 나타낼까?", choices: [{ id: "day", label: "하루" }, { id: "minutes", label: "몇 분" }, { id: "week", label: "한 주" }], answerId: "day" }, adjust: { explanation: "일봉의 '일'은 하루를 뜻해.", question: "일봉은 무엇을 한 묶음으로 볼까?", choices: [{ id: "day", label: "하루" }, { id: "month", label: "한 달" }], answerId: "day" }, detail: "하루 안의 시작값과 끝값, 높고 낮은 값을 한 막대에 담아 과거 흐름을 볼 수 있어.", example: "하루 일기를 한 장으로 정리하듯, 하루 가격 움직임을 한 개로 보는 거야." }),
+  "weekly-chart": termScript("weekly-chart", { brief: "주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트야.", check: { question: "주봉 한 개는 어느 기간을 나타낼까?", choices: [{ id: "week", label: "한 주" }, { id: "day", label: "하루" }, { id: "minutes", label: "몇 분" }], answerId: "week" }, adjust: { explanation: "주봉의 '주'는 한 주를 뜻해.", question: "주봉은 무엇을 한 묶음으로 볼까?", choices: [{ id: "week", label: "한 주" }, { id: "hour", label: "한 시간" }], answerId: "week" }, detail: "한 주의 가격 움직임을 한 막대에 담아 더 긴 과거 흐름을 살펴볼 수 있어.", example: "한 주 동안의 기록을 한 칸에 모아 보는 달력과 비슷해." }),
+};
+
+const DAPIE_SCREEN_TERM_IDS = new Set([
+  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character", "season-record",
+]);
+
+export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "stock", kind: "glossary", triggers: ["주식"], answer: "주식은 회사의 작은 조각이라고 생각하면 돼요. 주식을 가진 사람은 그 회사의 주주가 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.stock, status: reviewed },
   { id: "shareholder", kind: "glossary", triggers: ["주주"], answer: "주주는 회사의 주식을 가진 사람이에요. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.shareholder, status: reviewed },
   { id: "stock-item", kind: "glossary", triggers: ["종목"], answer: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해요. 여기서는 각 회사의 주식이 하나의 종목이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["stock-item"], status: reviewed },
@@ -843,7 +882,11 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
   { id: "holding-period", kind: "faq", triggers: ["예상 보유기간", "보유 기간", "언제까지 가질 생각"], answer: "보유 기간은 주식을 얼마나 오래 가지고 있을지 생각해 본 기간이에요. 꼭 지켜야 하는 약속이나 자동 매도 조건은 아니에요.", actionTarget: "order", status: reviewed },
   { id: "buy-day-record", kind: "faq", triggers: ["사던 날의 나"], answer: "사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간, 처음 정한 가격을 다시 보여주는 화면이에요. 지금 생각과 어떻게 달라졌는지 돌아보게 도와줘요.", actionTarget: "order", status: reviewed },
   { id: "plan-badge", kind: "faq", triggers: ["계획 실천 배지"], answer: "계획 실천 배지는 처음 남긴 매도 계획과 맞게 팔았을 때 받는 기록용 배지예요. 수익이나 투자 실력을 평가하는 상은 아니에요.", actionTarget: "archive", status: reviewed },
-  { id: "line-candle-chart", kind: "faq", triggers: ["선차트", "캔들차트", "캔들", "분봉", "일봉", "주봉"], answer: "선차트는 가격을 선으로 이어 보여주고, 캔들차트는 시작값·끝값·가장 높고 낮은 값을 막대로 보여줘요. 분봉·일봉·주봉은 막대 하나가 나타내는 시간을 고르는 방법이에요.", actionTarget: "stock", status: reviewed },
+  { id: "line-chart", kind: "faq", triggers: ["선차트"], answer: "선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요. 과거 가격의 흐름을 보는 그림이지 다음 가격을 알려 주지는 않아요.", actionTarget: "stock", status: reviewed },
+  { id: "candle-chart", kind: "faq", triggers: ["캔들차트", "캔들"], answer: "캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요. 막대 하나가 담는 시간은 분봉·일봉·주봉으로 따로 고를 수 있어요.", actionTarget: "stock", status: reviewed },
+  { id: "minute-chart", kind: "faq", triggers: ["분봉"], answer: "분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요. 짧은 시간 단위로 과거 가격을 살펴볼 때 써요.", actionTarget: "stock", status: reviewed },
+  { id: "daily-chart", kind: "faq", triggers: ["일봉"], answer: "일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요. 하루의 시작값과 끝값, 높고 낮은 값을 함께 볼 수 있어요.", actionTarget: "stock", status: reviewed },
+  { id: "weekly-chart", kind: "faq", triggers: ["주봉"], answer: "주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요. 여러 날의 과거 흐름을 한 묶음으로 살펴볼 수 있어요.", actionTarget: "stock", status: reviewed },
   { id: "delayed-price", kind: "faq", triggers: ["15분 지연 시세"], answer: "15분 지연 시세는 실제 시장 가격이 화면에 약 15분 늦게 표시된다는 뜻이에요. 지금 시장에서 거래되는 가격과 다를 수 있어요.", actionTarget: "stock", status: reviewed },
   { id: "child-news", kind: "faq", triggers: ["어린이 뉴스", "오늘 국내 시황", "원문 보기"], answer: "어린이 뉴스는 회사나 시장에서 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 기사나 자료를 직접 확인할 수 있고, 뉴스는 매수·매도 답을 주지 않아요.", actionTarget: "stock", status: reviewed },
   { id: "season", kind: "faq", triggers: ["시즌 진행", "남은 시즌", "시즌"], answer: "시즌은 가족이 같은 기간 동안 모의투자하고 기록을 쌓는 활동 기간이에요. 현재 한 시즌은 4주이고, 남은 기간은 홈의 시즌 진행 표시에서 확인할 수 있어요.", actionTarget: "home", status: reviewed },
@@ -872,7 +915,15 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = [
   { id: "price-location", kind: "faq", triggers: ["현재가 어디", "가격 어디", "주가 어디"], answer: "종목 상세 화면에서 현재가와 가격 변화를 볼 수 있어요. 현재가는 계속 바뀔 수 있으니 화면에 표시된 시각도 함께 확인해요.", actionTarget: "stock", status: reviewed },
   { id: "cash-balance", kind: "faq", triggers: ["남은 돈", "잔액", "모의투자금"], answer: "홈의 포트폴리오에서 남은 모의투자금을 확인할 수 있어요. 가족이 함께 쓰는 돈이 아니라 계정마다 따로 관리돼요.", actionTarget: "home", status: reviewed },
   { id: "chatbot-role", kind: "faq", triggers: ["키웅이가 뭘", "챗봇이 뭘", "뭘 도와줘"], answer: "저는 금융 기초, 화면 사용법, 검수된 회사 정보와 기록을 쉽게 설명해 줘요. 종목을 골라 주거나 언제 사고팔지 정해 주지는 않아요. 🐻", status: reviewed },
-];
+] satisfies readonly ChatbotKnowledgeEntry[]).map((entry) =>
+  entry.kind === "faq" && DAPIE_SCREEN_TERM_IDS.has(entry.id)
+    ? {
+        ...entry,
+        explainScript:
+          CHART_EXPLAIN_SCRIPTS[entry.id] ?? screenTermScript(entry.id, entry.answer),
+      }
+    : entry,
+);
 
 function normalize(value: string) {
   return value.replaceAll(" ", "").toLowerCase();

@@ -10,11 +10,15 @@ assert.ok(
     (entry) => entry.explainScript?.id === `term:${entry.id}`,
   ),
 );
-assert.ok(
-  CHATBOT_KNOWLEDGE.filter((entry) => entry.kind === "faq").every(
-    (entry) => entry.explainScript === undefined,
-  ),
-);
+const DAPIE_SCREEN_TERM_IDS = [
+  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character", "season-record",
+];
+for (const id of DAPIE_SCREEN_TERM_IDS) {
+  assert.equal(
+    CHATBOT_KNOWLEDGE.find((entry) => entry.id === id)?.explainScript?.id,
+    `term:${id}`,
+  );
+}
 assert.equal(findChatbotKnowledge("PER이 뭐야?")?.id, "per");
 assert.equal(findChatbotKnowledge("이 회사 비싼지 어떻게 알아?")?.id, "per");
 assert.equal(findChatbotKnowledge("평가 손익이 뭐야?")?.id, "unrealized-profit");
@@ -38,5 +42,15 @@ assert.equal(findChatbotKnowledge("목표 가격이 뭐야?")?.id, "goal-price")
 assert.equal(findChatbotKnowledge("사던 날의 나가 뭐야?")?.id, "buy-day-record");
 assert.equal(findChatbotKnowledge("성향이 뭐야?")?.id, "profile-definition");
 assert.equal(findChatbotKnowledge("시즌 기록이 뭐야?")?.id, "season-record");
+
+assert.equal(findChatbotKnowledge("선차트가 뭐야")?.id, "line-chart");
+assert.equal(findChatbotKnowledge("캔들차트가 뭐야")?.id, "candle-chart");
+assert.equal(findChatbotKnowledge("분봉이 뭐야")?.id, "minute-chart");
+assert.equal(findChatbotKnowledge("일봉이 뭐야")?.id, "daily-chart");
+assert.equal(findChatbotKnowledge("주봉이 뭐야")?.id, "weekly-chart");
+assert.notEqual(
+  findChatbotKnowledge("분봉이 뭐야")?.explainScript?.check.question,
+  findChatbotKnowledge("주봉이 뭐야")?.explainScript?.check.question,
+);
 
 console.log("chatbot knowledge tests passed");
