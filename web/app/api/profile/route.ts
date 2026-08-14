@@ -32,9 +32,12 @@ export type ProfileRouteDeps = {
   loadPrices(): Promise<Record<string, number>>;
   loadDailyCloses(symbol: string): Promise<DailyClose[]>;
   narrate(snapshot: BehaviorProfileSnapshot): Promise<ProfileNarration>;
+  /** 주간 카드의 마지막 주와 보유 스냅샷 기준일. 테스트가 고정할 수 있게 주입받는다 */
+  now(): Date;
 };
 
 const defaultDeps: ProfileRouteDeps = {
+  now: () => new Date(),
   async loadPrices() {
     const snapshot = await getUniverseSnapshot(null, false);
     return Object.fromEntries(
@@ -101,12 +104,10 @@ export async function buildProfilePayload(
     }),
   );
 
-  const tradedDates = [...buys, ...sells].map((trade) => kstDateOf(trade.tradedAt)).sort();
-  const today = kstDateOf(new Date().toISOString());
+  // periodStart 는 엔진이 첫 거래일로 채운다. 주간 카드는 그 주부터 오늘까지 만들어진다.
   const snapshot = computeBehaviorProfile({
     userId: USER_ID_BY_ACCOUNT[account],
-    periodStart: tradedDates[0] ?? today,
-    periodEnd: today,
+    periodEnd: kstDateOf(deps.now().toISOString()),
     buys,
     sells,
     tabViews: [...seedTabViews, ...live.tabViews],
@@ -143,8 +144,9 @@ export async function POST(request: NextRequest) {
       event: "f9_profile",
       result: "ok",
       userId: snapshot.userId,
-      observationState: snapshot.observationState,
-      gradedTradeCount: snapshot.gradedTradeCount,
+      observation: snapshot.cumulative.observation,
+      gradedTradeCount: snapshot.cumulative.samples.graded,
+      weeks: snapshot.weeks.length,
       narration: narration.source,
     }),
   );

@@ -158,6 +158,18 @@ function formatTime(time: Time, period: PrototypeChartPeriod) {
   if (typeof time !== "number") return String(time);
   return new Intl.DateTimeFormat("ko-KR", {
     timeZone: "Asia/Seoul",
+    // 분봉은 하루 안에서만 움직이므로 날짜 없이 시:분만 보여준다.
+    ...(period === "minute"
+      ? { hour: "2-digit", minute: "2-digit" }
+      : { month: "numeric", day: "numeric" }),
+  }).format(new Date(time * 1000));
+}
+
+/** 크로스헤어 시간바는 눈금과 달리 분봉에서도 월.일을 같이 보여준다. */
+function formatCrosshairTime(time: Time, period: PrototypeChartPeriod) {
+  if (typeof time !== "number") return String(time);
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
     month: "numeric",
     day: "numeric",
     ...(period === "minute" ? { hour: "2-digit", minute: "2-digit" } : {}),
@@ -348,11 +360,17 @@ export function TradingViewChart({ symbol, period, chartType }: {
       },
       grid: { vertLines: { color: bg }, horzLines: { color: bg } },
       rightPriceScale: { borderColor: gray },
-      timeScale: { borderColor: gray, timeVisible: shownPeriod === "minute", secondsVisible: false },
+      timeScale: {
+        borderColor: gray,
+        timeVisible: shownPeriod === "minute",
+        secondsVisible: false,
+        // lightweight-charts 기본 눈금 포맷터는 UTC 그대로 찍어 KST 와 9시간 어긋난다.
+        tickMarkFormatter: (time: Time) => formatTime(time, shownPeriod),
+      },
       localization: {
         locale: "ko-KR",
         priceFormatter: (price: number) => `${Math.round(price).toLocaleString("ko-KR")}원`,
-        timeFormatter: (time: Time) => formatTime(time, shownPeriod),
+        timeFormatter: (time: Time) => formatCrosshairTime(time, shownPeriod),
       },
       crosshair: { vertLine: { color: gray }, horzLine: { color: gray } },
     });

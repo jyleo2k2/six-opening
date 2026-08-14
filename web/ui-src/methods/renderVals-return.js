@@ -116,7 +116,7 @@
         window.addEventListener('pointercancel', up);
       },
 
-      stockName: st ? st.name : '', stockEmoji: (sec.name || '').charAt(0),
+      stockName: st ? st.name : '', stockEmoji: st && !logos[st.code] ? (sec.name || '').charAt(0) : '',
 
       // 관심 종목 — 누르기 전 회색, 담고 나면 분홍
       watchBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
@@ -136,7 +136,9 @@
       stockSparkBig: st ? this.polyline(st.spark, 336, 112) : '',
       stockDescLong: st ? (st.name + this.topic(st.name) + ' ' + st.desc + '.') : '',
       stockNews: newsItem ? newsItem.headline : (newsStatus === 'error' ? '뉴스를 불러오지 못했어. 다시 눌러 줘.' : (newsStatus === 'empty' ? '아직 검수를 통과한 새 소식이 없어.' : '검수를 통과한 새 소식을 찾고 있어.')),
-      detailBadgeStyle: bigBadge(52, 18, 25),
+      detailBadgeStyle: bigBadge(52, 18, 25) + (st && logos[st.code]
+        ? ';background-color:#F4F4FA;background-image:url(' + logos[st.code] + ');background-position:center;background-size:contain;background-repeat:no-repeat'
+        : ''),
       miniBadgeStyle: bigBadge(38, 13, 18),
 
       buyStepNo: s.buyStep,
@@ -296,6 +298,7 @@
         });
         if (!isLimit) {
           this.saveTrade('buy', st.code, price, qty, s.draft.reason);
+          this.flushTabViews(st.code);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
         }
       },
@@ -686,7 +689,7 @@
       newsMoreLabel: newsItem ? '뉴스 자세히 보기' : (newsStatus === 'error' ? '다시 불러오기' : (newsStatus === 'empty' ? '새 소식 없음' : '불러오는 중')),
       newsMoreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1);cursor:' + (newsItem || newsStatus === 'error' ? 'pointer' : 'default') + ';opacity:' + (newsItem || newsStatus === 'error' ? '1' : '0.58'),
       ctaStyle: locked ? CTA_OFF : CTA_ON,
-      openChart: () => { this.bumpTabCount(); this.logEvent('chart_detail_opened', 'chart'); },
+      openChart: () => { this.logEvent('chart_detail_opened', 'chart'); },
       openNews: () => { if (newsItem) this.openNewsItem(newsItem); else if (st && newsStatus === 'error') this.loadNews(st.code); },
       closeSub: () => this.closeSub(),
       chartLine: () => this.setChartType('line'), chartCandle: () => this.setChartType('candlestick'),

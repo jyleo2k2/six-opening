@@ -87,12 +87,41 @@ export function resolveCharacter(scores, level) {
   return { key, level: level || accuracyLevelOf(accuracy / 100) };
 }
 
+/**
+ * 로그인 사용자 행동 데이터(F9-archive SPEC §3.2 대체 입력)로 캐릭터를 정한다.
+ * tab_count 합계가 근거·직관, 거래 종목 수가 집중·분산을 정하고 두 우세의
+ * 조합으로 캐릭터가 나온다. 정확·레벨은 이 함수의 범위 밖이다.
+ *
+ * @param {number} tabCountTotal `stock_tab_views.tab_count` 합계. 0~1 → 직관 우세, 2 이상 → 근거 우세
+ * @param {number} distinctSymbolCount 거래한 종목 수. 2 이하 → 집중 우세, 3 이상 → 분산 우세
+ * @returns {"sniper"|"strategist"|"fighter"|"explorer"}
+ */
+export function resolveCharacterFromBehaviorSignals(tabCountTotal, distinctSymbolCount) {
+  const evidenceLeads = tabCountTotal >= 2;
+  const focusLeads = distinctSymbolCount <= 2;
+  if (evidenceLeads) return focusLeads ? "sniper" : "strategist";
+  return focusLeads ? "fighter" : "explorer";
+}
+
 // ── 정확 채점 ──────────────────────────────────────────────────────────
 // 체결 5거래일 뒤 종가로 맞았는지 본다. 매수는 오르면, 매도는 내리면 적중이다.
 
 /** ISO 시각 → KST 날짜(YYYY-MM-DD). 일봉 `date` 와 같은 축이다. */
 export function kstDateOf(iso) {
   return new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
+}
+
+// ── 카드 모아보기 주 경계 ──────────────────────────────────────────────
+// 화면(로컬 records)과 서버(Supabase transactions)가 같은 주를 같은 카드로
+// 묶으려면 월요일 경계를 한 곳에서만 정해야 한다. 호스트 타임존에 기대지 않도록
+// kstDateOf 처럼 +9시간 뒤 UTC getter 로 KST 벽시계 값을 읽는다.
+
+/** ISO 시각 → 그 시각이 속한 KST 주의 월요일 날짜(YYYY-MM-DD). */
+export function weekStartKstOf(iso) {
+  const kst = new Date(new Date(iso).getTime() + 9 * 3600000);
+  const mondayOffset = (kst.getUTCDay() + 6) % 7; // 0=월요일
+  kst.setUTCDate(kst.getUTCDate() - mondayOffset);
+  return kst.toISOString().slice(0, 10);
 }
 
 /** `date` 다음 거래일부터 세어 `days` 번째 종가. 아직 안 지났으면 null */

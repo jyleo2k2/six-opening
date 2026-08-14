@@ -5,6 +5,7 @@ import type {
   RejectedNews,
 } from "./contracts";
 import type {
+  CollectedArticleCandidate,
   CollectedStockNewsCandidate,
   UniverseNewsCollection,
 } from "./naver-news-collector";
@@ -12,6 +13,7 @@ import {
   processNewsCandidate,
   type NewsPipelineDependencies,
 } from "./pipeline";
+import { selectVisibleTermTreatments } from "./visible-term-treatments";
 
 export type CurrentMockNews = {
   sectorKey: string;
@@ -30,6 +32,12 @@ export type UniverseNewsCaseResult = {
   selectionScore: number;
   selectionSignals: string[];
   inputArticle: CollectedStockNewsCandidate["article"];
+  pipelineResult: NewsPipelineResult;
+  roleAttempts: NewsEvaluationRoleAttempt[];
+  articleAttempts?: UniverseNewsArticleAttempt[];
+};
+
+export type UniverseNewsArticleAttempt = CollectedArticleCandidate & {
   pipelineResult: NewsPipelineResult;
   roleAttempts: NewsEvaluationRoleAttempt[];
 };
@@ -94,6 +102,13 @@ function targetStockGate(
   return result;
 }
 
+function canFallbackAfter(result: NewsPipelineResult) {
+  return result.status === "rejected" &&
+    !result.reasonCodes.some((code) =>
+      code === "ROLE_ERROR" || code === "PIPELINE_EXECUTION_ERROR"
+    );
+}
+
 function buildReport(
   collection: UniverseNewsCollection,
   cases: UniverseNewsCaseResult[],
@@ -147,66 +162,87 @@ export async function runUniverseNewsEvaluation(
   for (const candidate of collection.candidates) {
     const existing = existingByStock.get(candidate.stock.stockId);
     if (existing) {
-      if (existing.inputArticle.articleId !== candidate.article.articleId) {
+      const candidateArticleIds = new Set([
+        candidate.article.articleId,
+        ...(candidate.fallbackCandidates ?? []).map((item) => item.article.articleId),
+      ]);
+      if (!candidateArticleIds.has(existing.inputArticle.articleId)) {
         throw new Error(`${candidate.stock.name}: 재개 결과와 입력 기사 ID가 다릅니다.`);
       }
       cases.push(existing);
       continue;
     }
 
-    const roleAttempts: NewsEvaluationRoleAttempt[] = [];
-    const observedRunRole: NewsRoleRunner = async (request, signal) => {
-      try {
-        const response = await dependencies.runRole(request, signal);
-        roleAttempts.push({
-          role: request.role,
-          reasoningEffort: request.reasoningEffort,
-          outcome: "returned",
-          response,
-        });
-        return response;
-      } catch (error) {
-        roleAttempts.push({
-          role: request.role,
-          reasoningEffort: request.reasoningEffort,
-          outcome: "error",
-          error: error instanceof Error ? error.message : "알 수 없는 역할 실행 오류",
-        });
-        throw error;
-      }
-    };
-
-    let pipelineResult: NewsPipelineResult;
-    try {
-      pipelineResult = targetStockGate(
-        await processNewsCandidate(candidate.article, {
-          ...dependencies,
-          runRole: observedRunRole,
-          requiredPrimaryStockId: candidate.stock.stockId,
-        }),
-        candidate.stock.stockId,
-      );
-    } catch (error) {
-      pipelineResult = {
-        status: "rejected",
-        articleId: candidate.article.articleId,
-        stage: "input",
-        reasonCodes: ["PIPELINE_EXECUTION_ERROR"],
-        reasons: [error instanceof Error ? error.message : "파이프라인 실행 중 알 수 없는 오류가 발생했습니다."],
-        editorAttempts: 0,
+    const articleCandidates: CollectedArticleCandidate[] = [
+      {
+        selectionScore: candidate.selectionScore,
+        selectionSignals: candidate.selectionSignals,
+        article: candidate.article,
+      },
+      ...(candidate.fallbackCandidates ?? []),
+    ];
+    const articleAttempts: UniverseNewsArticleAttempt[] = [];
+    for (const articleCandidate of articleCandidates) {
+      const roleAttempts: NewsEvaluationRoleAttempt[] = [];
+      const observedRunRole: NewsRoleRunner = async (request, signal) => {
+        try {
+          const response = await dependencies.runRole(request, signal);
+          roleAttempts.push({
+            role: request.role,
+            reasoningEffort: request.reasoningEffort,
+            outcome: "returned",
+            response,
+          });
+          return response;
+        } catch (error) {
+          roleAttempts.push({
+            role: request.role,
+            reasoningEffort: request.reasoningEffort,
+            outcome: "error",
+            error: error instanceof Error ? error.message : "알 수 없는 역할 실행 오류",
+          });
+          throw error;
+        }
       };
+
+      let pipelineResult: NewsPipelineResult;
+      try {
+        pipelineResult = targetStockGate(
+          await processNewsCandidate(articleCandidate.article, {
+            ...dependencies,
+            runRole: observedRunRole,
+            requiredPrimaryStockId: candidate.stock.stockId,
+          }),
+          candidate.stock.stockId,
+        );
+      } catch (error) {
+        pipelineResult = {
+          status: "rejected",
+          articleId: articleCandidate.article.articleId,
+          stage: "input",
+          reasonCodes: ["PIPELINE_EXECUTION_ERROR"],
+          reasons: [error instanceof Error ? error.message : "파이프라인 실행 중 알 수 없는 오류가 발생했습니다."],
+          editorAttempts: 0,
+        };
+      }
+      articleAttempts.push({ ...articleCandidate, pipelineResult, roleAttempts });
+      if (!canFallbackAfter(pipelineResult)) break;
     }
+
+    const selectedAttempt = articleAttempts.at(-1);
+    if (!selectedAttempt) throw new Error(`${candidate.stock.name}: 평가할 기사 후보가 없습니다.`);
 
     const latest: UniverseNewsCaseResult = {
       stock: candidate.stock,
       searchUrl: candidate.searchUrl,
       inspectedArticleUrls: candidate.inspectedArticleUrls,
       candidateCount: candidate.candidateCount,
-      selectionScore: candidate.selectionScore,
-      selectionSignals: candidate.selectionSignals,
-      inputArticle: candidate.article,
-      pipelineResult,
-      roleAttempts,
+      selectionScore: selectedAttempt.selectionScore,
+      selectionSignals: selectedAttempt.selectionSignals,
+      inputArticle: selectedAttempt.article,
+      pipelineResult: selectedAttempt.pipelineResult,
+      roleAttempts: selectedAttempt.roleAttempts,
+      articleAttempts,
     };
     cases.push(latest);
     await options.onCaseCompleted?.(buildReport(collection, cases), latest);
@@ -255,10 +291,25 @@ function renderMockSide(mock: CurrentMockNews | undefined) {
   </section>`;
 }
 
-function renderRoleAttempts(item: UniverseNewsCaseResult) {
-  return item.roleAttempts.map((attempt, index) => {
+function renderRoleAttempts(attempts: readonly NewsEvaluationRoleAttempt[]) {
+  return attempts.map((attempt, index) => {
     const output = attempt.outcome === "returned" ? attempt.response : { error: attempt.error };
     return `<details><summary>${index + 1}. ${escapeHtml(PIPELINE_ROLE_LABELS[attempt.role] ?? attempt.role)} · 추론 ${escapeHtml(attempt.reasoningEffort)} · ${escapeHtml(attempt.outcome)}</summary><pre>${escapeHtml(JSON.stringify(output, null, 2) ?? String(output))}</pre></details>`;
+  }).join("");
+}
+
+function renderArticleAttempts(item: UniverseNewsCaseResult) {
+  const attempts = item.articleAttempts ?? [{
+    selectionScore: item.selectionScore,
+    selectionSignals: item.selectionSignals,
+    article: item.inputArticle,
+    pipelineResult: item.pipelineResult,
+    roleAttempts: item.roleAttempts,
+  }];
+  return attempts.map((attempt, index) => {
+    const result = attempt.pipelineResult;
+    const status = result.status === "ready_for_storage" ? "통과" : `거부 · ${result.reasonCodes.join(", ")}`;
+    return `<details><summary>${index + 1}번째 후보 · ${escapeHtml(formatPublishedAt(attempt.article.publishedAt))} · ${escapeHtml(status)}</summary><p><b>${escapeHtml(attempt.article.title)}</b></p><p>선택 점수 ${attempt.selectionScore}</p>${renderRoleAttempts(attempt.roleAttempts) || "<p>모델 호출 전에 거부되었습니다.</p>"}</details>`;
   }).join("");
 }
 
@@ -272,10 +323,11 @@ function renderActualSide(item: UniverseNewsCaseResult) {
     </section>`;
   }
   const lines = result.draft.body.map((line) => line.text);
+  const visibleTerms = selectVisibleTermTreatments(result.draft);
   return `<section class="side actual-side ready-side">
     <div class="side-title"><span>실제 파이프라인</span><small class="ready-badge">통과</small></div>
     <div class="short-card"><small>짧은 뉴스 카드 · 같은 headline</small><p>${escapeHtml(result.draft.headline.text)}</p></div>
-    <div class="detail-card"><small>자세히 보기 · 같은 headline</small><h3>${escapeHtml(result.draft.headline.text)}</h3><ol>${renderLines(lines)}</ol><div class="terms price-link"><b>왜 주가와 관련 있어?</b><p>${escapeHtml(result.draft.priceConnection.text)}</p><small>${result.draft.priceConnection.basis === "article_fact" ? "기사에서 확인된 연결" : "사건 유형에 따른 교육 설명"}</small></div>${result.draft.termTreatments.length > 0 ? `<div class="terms"><b>기사 속 말 배우기</b>${result.draft.termTreatments.map((term) => `<p><span>${escapeHtml(term.term)}</span> ${escapeHtml(term.easyText)}</p>`).join("")}</div>` : ""}</div>
+    <div class="detail-card"><small>자세히 보기 · 같은 headline</small><h3>${escapeHtml(result.draft.headline.text)}</h3><ol>${renderLines(lines)}</ol><div class="terms price-link"><b>왜 주가와 관련 있어?</b><p>${escapeHtml(result.draft.priceConnection.text)}</p><small>${result.draft.priceConnection.basis === "article_fact" ? "기사에서 확인된 연결" : "사건 유형에 따른 교육 설명"}</small></div>${visibleTerms.length > 0 ? `<div class="terms"><b>기사 속 말 배우기 · 최대 3개</b>${visibleTerms.map((term) => `<p><span>${escapeHtml(term.term)}</span> ${escapeHtml(term.easyText)}</p>`).join("")}</div>` : ""}</div>
   </section>`;
 }
 
@@ -287,7 +339,7 @@ function renderCase(item: UniverseNewsCaseResult, mock: CurrentMockNews | undefi
     <header><div><span class="market">${escapeHtml(item.stock.market)}</span><h2>${escapeHtml(item.stock.name)}</h2><small>${escapeHtml(item.stock.symbol)} · ${escapeHtml(mock?.sectorName ?? item.stock.sector)}</small></div><span class="result ${status}">${status === "ready" ? "ready_for_storage" : "rejected"}</span></header>
     <div class="candidate"><div><small>실제 검사 기사</small><h3>${escapeHtml(item.inputArticle.title)}</h3><p>${escapeHtml(item.inputArticle.publisher)} · ${escapeHtml(formatPublishedAt(item.inputArticle.publishedAt))}</p></div><a href="${safeHref(item.inputArticle.sourceUrl)}" target="_blank" rel="noreferrer">원문 보기 ↗</a></div>
     <div class="compare-grid">${renderMockSide(mock)}${renderActualSide(item)}</div>
-    <details class="audit"><summary>후보 선택·원문 근거·에이전트 판단 보기</summary><div class="audit-content"><section><h4>후보 선택</h4><p>검색 후보 ${item.candidateCount}건 중 점수 ${item.selectionScore}</p><ul>${item.selectionSignals.map((signal) => `<li>${escapeHtml(signal)}</li>`).join("")}</ul><a href="${safeHref(item.searchUrl)}" target="_blank" rel="noreferrer">검색 결과 확인 ↗</a></section><section><h4>원문 근거 문장</h4>${evidence}</section><section><h4>역할별 출력</h4>${renderRoleAttempts(item) || "<p>모델 호출 전에 거부되었습니다.</p>"}</section></div></details>
+    <details class="audit"><summary>후보 선택·원문 근거·에이전트 판단 보기</summary><div class="audit-content"><section><h4>후보 선택</h4><p>검색 후보 ${item.candidateCount}건 중 최종 점수 ${item.selectionScore}</p><ul>${item.selectionSignals.map((signal) => `<li>${escapeHtml(signal)}</li>`).join("")}</ul><a href="${safeHref(item.searchUrl)}" target="_blank" rel="noreferrer">검색 결과 확인 ↗</a></section><section><h4>최종 원문 근거 문장</h4>${evidence}</section><section><h4>기사 폴백 기록</h4>${renderArticleAttempts(item)}</section></div></details>
   </article>`;
 }
 

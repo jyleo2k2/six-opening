@@ -48,8 +48,10 @@
       explorer:   { name:'탐험가', img:'explorer',   pal:['#B2D2C7','#87B6A7','#619484','#1B3F35'],
         desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
     };
-    const typeOf = (sc, level) => {
-      const decided = resolveCharacter(sc, level);
+    // overrideKey 가 있으면 로그인 사용자의 실제 Supabase 행동 데이터(F9-archive SPEC §3.2 대체
+    // 입력)로 정한 캐릭터를 그대로 쓴다. 다섯 축 막대·레벨 산식은 바뀌지 않는다.
+    const typeOf = (sc, level, overrideKey) => {
+      const decided = overrideKey ? { key: overrideKey, level: level } : resolveCharacter(sc, level);
       const t = TYPES[decided.key], lv = decided.level;
       return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
     };
@@ -65,7 +67,8 @@
     ];
 
     const mine = scoresOf('child_minji');
-    const myType = typeOf(mine.list, mine.grade.level);
+    const behaviorCharacter = this.dbBehavior && this.dbBehavior.character;
+    const myType = typeOf(mine.list, mine.grade.level, behaviorCharacter);
     const MPL = myType.pal, mInk = MPL[3];
 
     const R = 48, CX = 80, CY = 80;
@@ -106,19 +109,29 @@
     myRecs.forEach(r => { const k = monday(r.ts).getTime(); (weeks[k] || (weeks[k] = [])).push(r); });
     const thisMon = monday(Date.now()).getTime();
     if (!weeks[thisMon]) weeks[thisMon] = [];
+    // Supabase 지난 주차 카드(loadSeasonCards, F9-archive SPEC §3.1 재사용) — 로컬에
+    // 기록이 없는 지난 주만 채운다. 이번 주는 항상 로컬 계산을 쓴다.
+    const dbWeeks = (this.dbSeasonCards && this.dbSeasonCards.weeks) || [];
+    dbWeeks.forEach(w => {
+      const k = new Date(w.weekStart + 'T00:00:00').getTime();
+      if (k !== thisMon && !weeks[k]) weeks[k] = { fromDb: true, count: w.count, scores: w.scores };
+    });
     const weekKeys = Object.keys(weeks).map(Number).sort((a, b) => a - b);
     const WEEKS = weekKeys.map(k => {
-      const recs = weeks[k], isNow = k === thisMon;
+      const raw = weeks[k], isNow = k === thisMon, fromDb = !Array.isArray(raw);
+      const count = fromDb ? raw.count : raw.length;
       let list;
       // 지난 주 카드는 그 주 기록만으로 다시 낸다. 정확은 그 시점 채점이 없어 기본값이다.
       if (isNow) list = mine.list;
-      else list = computeAbilityScores(recs, sectorOfCode).scores;
-      const t = typeOf(list);
+      else if (fromDb) list = raw.scores;
+      else list = computeAbilityScores(raw, sectorOfCode).scores;
+      // 이번 주 카드는 위에서 낸 myType(행동 데이터 오버라이드 포함)과 같은 캐릭터를 써야 한다.
+      const t = isNow ? myType : typeOf(list);
       const mon = new Date(k), sun = new Date(k + 6 * 86400000);
       return {
         week: isNow ? '이번 주' : (mon.getMonth() + 1) + '월 ' + Math.ceil((mon.getDate() + 6) / 7) + '주차',
         date: md(mon) + ' – ' + md(sun),
-        title: t.title, img: t.img, desc: recs.length === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
+        title: t.title, img: t.img, desc: count === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
         scores: list
       };
     });

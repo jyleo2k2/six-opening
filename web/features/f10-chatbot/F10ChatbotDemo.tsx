@@ -1001,7 +1001,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   function handleUiAction(action: ChatUiAction) {
     if (onUiAction) {
       onUiAction(action);
-    } else if (action.target !== "portfolio") {
+    } else if (action.target !== "portfolio" && action.target !== "ranking") {
       setScreen(action.target);
     }
     closeChat();

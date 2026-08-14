@@ -1634,12 +1634,41 @@ function resolveCharacter(scores, level) {
   return { key, level: level || accuracyLevelOf(accuracy / 100) };
 }
 
+/**
+ * 로그인 사용자 행동 데이터(F9-archive SPEC §3.2 대체 입력)로 캐릭터를 정한다.
+ * tab_count 합계가 근거·직관, 거래 종목 수가 집중·분산을 정하고 두 우세의
+ * 조합으로 캐릭터가 나온다. 정확·레벨은 이 함수의 범위 밖이다.
+ *
+ * @param {number} tabCountTotal `stock_tab_views.tab_count` 합계. 0~1 → 직관 우세, 2 이상 → 근거 우세
+ * @param {number} distinctSymbolCount 거래한 종목 수. 2 이하 → 집중 우세, 3 이상 → 분산 우세
+ * @returns {"sniper"|"strategist"|"fighter"|"explorer"}
+ */
+function resolveCharacterFromBehaviorSignals(tabCountTotal, distinctSymbolCount) {
+  const evidenceLeads = tabCountTotal >= 2;
+  const focusLeads = distinctSymbolCount <= 2;
+  if (evidenceLeads) return focusLeads ? "sniper" : "strategist";
+  return focusLeads ? "fighter" : "explorer";
+}
+
 // ── 정확 채점 ──────────────────────────────────────────────────────────
 // 체결 5거래일 뒤 종가로 맞았는지 본다. 매수는 오르면, 매도는 내리면 적중이다.
 
 /** ISO 시각 → KST 날짜(YYYY-MM-DD). 일봉 `date` 와 같은 축이다. */
 function kstDateOf(iso) {
   return new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
+}
+
+// ── 카드 모아보기 주 경계 ──────────────────────────────────────────────
+// 화면(로컬 records)과 서버(Supabase transactions)가 같은 주를 같은 카드로
+// 묶으려면 월요일 경계를 한 곳에서만 정해야 한다. 호스트 타임존에 기대지 않도록
+// kstDateOf 처럼 +9시간 뒤 UTC getter 로 KST 벽시계 값을 읽는다.
+
+/** ISO 시각 → 그 시각이 속한 KST 주의 월요일 날짜(YYYY-MM-DD). */
+function weekStartKstOf(iso) {
+  const kst = new Date(new Date(iso).getTime() + 9 * 3600000);
+  const mondayOffset = (kst.getUTCDay() + 6) % 7; // 0=월요일
+  kst.setUTCDate(kst.getUTCDate() - mondayOffset);
+  return kst.toISOString().slice(0, 10);
 }
 
 /** `date` 다음 거래일부터 세어 `days` 번째 종가. 아직 안 지났으면 null */
@@ -1763,16 +1792,29 @@ class Component extends DCLogic {
     const stock = stockCode ? (this.uni().stocks || []).filter(x => x.code === stockCode)[0] : this.stock();
     if (action.target === 'home') {
       this.set({ screen:'home' });
+    } else if (action.target === 'ranking') {
+      this.set({ screen:'ranking' });
     } else if (action.target === 'portfolio') {
       this.set({ screen:'portfolio' });
     } else if (action.target === 'archive') {
       const archiveTabs = ['report', 'return'];
-      this.set({ screen:'archive', arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report' });
+      this.set({
+        screen:'archive',
+        arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report',
+        cardsOpen: action.archiveOverlay === 'cards',
+        cardSheet: null,
+        famOpen: false,
+      });
       this.loadDailyCloses();
     } else if (action.target === 'stock') {
-      const sector = (this.uni().sectors || []).filter(x => x.id === action.sectorId)[0];
-      if (sector) this.set({ screen:'explore', sectorId:sector.id, cardIndex:0 });
-      else if (stock) this.set({ code:stock.code, screen:'detail' });
+      const stockFilters = ['rank', 'watch'].concat((this.uni().sectors || []).map(x => x.id));
+      if (action.stockView === 'explore' || stockFilters.indexOf(action.sectorId) >= 0) {
+        this.set({
+          screen:'explore',
+          ...(stockFilters.indexOf(action.sectorId) >= 0 ? { sectorId: action.sectorId } : {}),
+          cardIndex:0,
+        });
+      } else if (stock) this.set({ code:stock.code, screen:'detail' });
       else this.set({ screen:'explore' });
     } else if (action.target === 'order') {
       if (!stock) { this.set({ screen:'explore' }); return; }
@@ -1797,6 +1839,8 @@ class Component extends DCLogic {
 
   componentDidMount(){
     this.loadDbUser();
+    this.loadBehaviorProfile();
+    this.loadSeasonCards();
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
@@ -1887,7 +1931,9 @@ class Component extends DCLogic {
     if (this.state.screen === 'detail' && this.state.code && (!prevState || prevState.screen !== 'detail' || prevState.code !== this.state.code)) {
       this.loadNews(this.state.code);
     }
-    if (prevState && prevState.screen !== this.state.screen) this.trackTabWindow(prevState.screen, this.state.screen);
+    if (prevState && (prevState.screen !== this.state.screen || prevState.code !== this.state.code)) {
+      this.trackTabView(prevState.screen, prevState.code, this.state.screen, this.state.code);
+    }
   }
 
   // --- Supabase 연동 -------------------------------------------------
@@ -1901,6 +1947,24 @@ class Component extends DCLogic {
       .catch(() => {});
   }
 
+  // F9-archive SPEC §3.2 대체 입력 — 로그인 사용자의 Supabase 행동 데이터로 낸 캐릭터.
+  // 표본이 없거나 비로그인이면 null 로 남고, buildArchive() 가 기존 로컬 계산으로 폴백한다.
+  loadBehaviorProfile(){
+    this.dbBehavior = null;
+    fetch('/api/profile/behavior', { cache:'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && d.character) { this.dbBehavior = d; this.forceUpdate(); } })
+      .catch(() => {});
+  }
+  // F9-archive — Supabase transactions 기반 지난 주차 카드. 로그인 아니거나 표본이
+  // 없으면 null 로 남고, buildArchive() 는 로컬 records 주차만으로 카드 모아보기를 그린다.
+  loadSeasonCards(){
+    this.dbSeasonCards = null;
+    fetch('/api/profile/season-cards', { cache:'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && Array.isArray(d.weeks) && d.weeks.length) { this.dbSeasonCards = d; this.forceUpdate(); } })
+      .catch(() => {});
+  }
   validNewsItem(item, stockCode){
     if (!item || !Number.isSafeInteger(item.newsId) || item.newsId <= 0 || !Number.isSafeInteger(item.articleId) || item.articleId <= 0) return false;
     if (item.scope !== 'company') return false;
@@ -1969,7 +2033,6 @@ class Component extends DCLogic {
   openNewsItem(item){
     const code = this.state.code;
     if (!code || !this.validNewsItem(item, code)) return;
-    this.bumpTabCount();
     this.setState(s => Object.assign({}, s, { activeNewsId:item.newsId, activeNews:item }));
     this.logEvent('news_detail_opened', 'news');
     fetch('/api/news/' + encodeURIComponent(String(item.newsId)), { cache:'no-store' })
@@ -1999,32 +2062,36 @@ class Component extends DCLogic {
     }).catch(() => {});
   }
 
-  // 종목 카드 목록 진입 → 매수 화면 도달 구간을 잰다.
-  // 카드 목록을 떠나도 상세·차트·뉴스는 같은 구간이므로 창을 유지하고,
-  // 매수까지 가지 않고 빠져나가면 그 구간은 버린다.
-  trackTabWindow(prevScreen, screen){
-    if (screen === 'explore') {
-      if (!this.tabWin) this.tabWin = { openedAt: new Date(), count: 0 };
-      return;
-    }
-    if (!this.tabWin) return;
-    if (screen === 'buy') {
-      const win = this.tabWin;
-      this.tabWin = null;
+  // 종목별 기업정보(detail)·차트·뉴스 체류를 잰다. 한 카테고리에서 나갈 때
+  // 10초 이상 머물렀으면 그 종목의 방문 기록에 쌓아 두고, 실제 매수가
+  // 체결될 때(flushTabViews) 한 번에 서버로 보낸다. 방문마다 상한 없이 쌓인다.
+  trackTabView(prevScreen, prevCode, screen, code){
+    const CATS = ['detail', 'chart', 'news'];
+    const open = this.tabOpen;
+    if (open) {
+      this.tabOpen = null;
       const closedAt = new Date();
-      if (closedAt - win.openedAt < 10000) return;
-      if (!this.dbSyncable()) return;
-      this.postJson('/api/tab-view', {
-        opened_at: win.openedAt.toISOString(),
-        closed_at: closedAt.toISOString(),
-        tab_count: win.count
-      });
-      return;
+      if (closedAt - open.at >= 10000) {
+        const views = this.tabViews || (this.tabViews = {});
+        (views[open.code] || (views[open.code] = [])).push({
+          opened_at: open.at.toISOString(),
+          closed_at: closedAt.toISOString()
+        });
+      }
     }
-    if (['detail', 'chart', 'news'].indexOf(screen) < 0) this.tabWin = null;
+    if (CATS.indexOf(screen) >= 0 && code) {
+      this.tabOpen = { code: code, at: new Date() };
+    }
   }
 
-  bumpTabCount(){ if (this.tabWin) this.tabWin.count += 1; }
+  // 10초 판정은 여기서도 하지만 서버가 다시 확인한다. 초 자체는 서버에 저장하지 않는다.
+  flushTabViews(code){
+    const views = this.tabViews && this.tabViews[code];
+    if (!views || !views.length) return;
+    delete this.tabViews[code];
+    if (!this.dbSyncable()) return;
+    this.postJson('/api/tab-view', { stock_code: code, views: views });
+  }
 
   // 체결된 주문만 보낸다. 지정가 대기 주문은 체결 시점에 다시 부른다.
   saveTrade(side, code, price, quantity, reason){
@@ -2149,6 +2216,12 @@ class Component extends DCLogic {
   bindCardRail(el){
     if (!el || el === this.railEl) return;
     this.railEl = el;
+    // 카드 모아보기를 여는 순간 이 콜백이 레일 DOM 과 함께 바로 실행된다. openCards()
+    // 의 jumpCard() 호출은 이 레일이 아직 없을 때 일어날 수 있어 여기서도 한 번 더
+    // 현재 카드로 맞춘다. 다시 열 때(레일이 새로 생길 때)도 이 분기를 함께 탄다.
+    if (this.state.cardActive !== undefined && this.state.cardActive !== null) {
+      this.jumpCard(this.state.cardActive);
+    }
     el.addEventListener('scroll', () => {
       const mid = el.scrollLeft + el.clientWidth / 2;
       let best = 0, bd = 1e9;
@@ -2158,6 +2231,14 @@ class Component extends DCLogic {
       }
       if (best !== this.state.cardActive) this.setState({ cardActive: best });
     }, { passive: true });
+  }
+  jumpCard(index){
+    const card = this.railEl && this.railEl.children[index];
+    if (card) card.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+  }
+  snapCard(index){
+    const card = this.railEl && this.railEl.children[index];
+    if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
 
   /**
@@ -2216,8 +2297,10 @@ class Component extends DCLogic {
       explorer:   { name:'탐험가', img:'explorer',   pal:['#B2D2C7','#87B6A7','#619484','#1B3F35'],
         desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
     };
-    const typeOf = (sc, level) => {
-      const decided = resolveCharacter(sc, level);
+    // overrideKey 가 있으면 로그인 사용자의 실제 Supabase 행동 데이터(F9-archive SPEC §3.2 대체
+    // 입력)로 정한 캐릭터를 그대로 쓴다. 다섯 축 막대·레벨 산식은 바뀌지 않는다.
+    const typeOf = (sc, level, overrideKey) => {
+      const decided = overrideKey ? { key: overrideKey, level: level } : resolveCharacter(sc, level);
       const t = TYPES[decided.key], lv = decided.level;
       return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
     };
@@ -2233,7 +2316,8 @@ class Component extends DCLogic {
     ];
 
     const mine = scoresOf('child_minji');
-    const myType = typeOf(mine.list, mine.grade.level);
+    const behaviorCharacter = this.dbBehavior && this.dbBehavior.character;
+    const myType = typeOf(mine.list, mine.grade.level, behaviorCharacter);
     const MPL = myType.pal, mInk = MPL[3];
 
     const R = 48, CX = 80, CY = 80;
@@ -2274,19 +2358,29 @@ class Component extends DCLogic {
     myRecs.forEach(r => { const k = monday(r.ts).getTime(); (weeks[k] || (weeks[k] = [])).push(r); });
     const thisMon = monday(Date.now()).getTime();
     if (!weeks[thisMon]) weeks[thisMon] = [];
+    // Supabase 지난 주차 카드(loadSeasonCards, F9-archive SPEC §3.1 재사용) — 로컬에
+    // 기록이 없는 지난 주만 채운다. 이번 주는 항상 로컬 계산을 쓴다.
+    const dbWeeks = (this.dbSeasonCards && this.dbSeasonCards.weeks) || [];
+    dbWeeks.forEach(w => {
+      const k = new Date(w.weekStart + 'T00:00:00').getTime();
+      if (k !== thisMon && !weeks[k]) weeks[k] = { fromDb: true, count: w.count, scores: w.scores };
+    });
     const weekKeys = Object.keys(weeks).map(Number).sort((a, b) => a - b);
     const WEEKS = weekKeys.map(k => {
-      const recs = weeks[k], isNow = k === thisMon;
+      const raw = weeks[k], isNow = k === thisMon, fromDb = !Array.isArray(raw);
+      const count = fromDb ? raw.count : raw.length;
       let list;
       // 지난 주 카드는 그 주 기록만으로 다시 낸다. 정확은 그 시점 채점이 없어 기본값이다.
       if (isNow) list = mine.list;
-      else list = computeAbilityScores(recs, sectorOfCode).scores;
-      const t = typeOf(list);
+      else if (fromDb) list = raw.scores;
+      else list = computeAbilityScores(raw, sectorOfCode).scores;
+      // 이번 주 카드는 위에서 낸 myType(행동 데이터 오버라이드 포함)과 같은 캐릭터를 써야 한다.
+      const t = isNow ? myType : typeOf(list);
       const mon = new Date(k), sun = new Date(k + 6 * 86400000);
       return {
         week: isNow ? '이번 주' : (mon.getMonth() + 1) + '월 ' + Math.ceil((mon.getDate() + 6) / 7) + '주차',
         date: md(mon) + ' – ' + md(sun),
-        title: t.title, img: t.img, desc: recs.length === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
+        title: t.title, img: t.img, desc: count === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
         scores: list
       };
     });
@@ -3001,7 +3095,7 @@ class Component extends DCLogic {
         window.addEventListener('pointercancel', up);
       },
 
-      stockName: st ? st.name : '', stockEmoji: (sec.name || '').charAt(0),
+      stockName: st ? st.name : '', stockEmoji: st && !logos[st.code] ? (sec.name || '').charAt(0) : '',
 
       // 관심 종목 — 누르기 전 회색, 담고 나면 분홍
       watchBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
@@ -3021,7 +3115,9 @@ class Component extends DCLogic {
       stockSparkBig: st ? this.polyline(st.spark, 336, 112) : '',
       stockDescLong: st ? (st.name + this.topic(st.name) + ' ' + st.desc + '.') : '',
       stockNews: newsItem ? newsItem.headline : (newsStatus === 'error' ? '뉴스를 불러오지 못했어. 다시 눌러 줘.' : (newsStatus === 'empty' ? '아직 검수를 통과한 새 소식이 없어.' : '검수를 통과한 새 소식을 찾고 있어.')),
-      detailBadgeStyle: bigBadge(52, 18, 25),
+      detailBadgeStyle: bigBadge(52, 18, 25) + (st && logos[st.code]
+        ? ';background-color:#F4F4FA;background-image:url(' + logos[st.code] + ');background-position:center;background-size:contain;background-repeat:no-repeat'
+        : ''),
       miniBadgeStyle: bigBadge(38, 13, 18),
 
       buyStepNo: s.buyStep,
@@ -3181,6 +3277,7 @@ class Component extends DCLogic {
         });
         if (!isLimit) {
           this.saveTrade('buy', st.code, price, qty, s.draft.reason);
+          this.flushTabViews(st.code);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
         }
       },
@@ -3571,7 +3668,7 @@ class Component extends DCLogic {
       newsMoreLabel: newsItem ? '뉴스 자세히 보기' : (newsStatus === 'error' ? '다시 불러오기' : (newsStatus === 'empty' ? '새 소식 없음' : '불러오는 중')),
       newsMoreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1);cursor:' + (newsItem || newsStatus === 'error' ? 'pointer' : 'default') + ';opacity:' + (newsItem || newsStatus === 'error' ? '1' : '0.58'),
       ctaStyle: locked ? CTA_OFF : CTA_ON,
-      openChart: () => { this.bumpTabCount(); this.logEvent('chart_detail_opened', 'chart'); },
+      openChart: () => { this.logEvent('chart_detail_opened', 'chart'); },
       openNews: () => { if (newsItem) this.openNewsItem(newsItem); else if (st && newsStatus === 'error') this.loadNews(st.code); },
       closeSub: () => this.closeSub(),
       chartLine: () => this.setChartType('line'), chartCandle: () => this.setChartType('candlestick'),

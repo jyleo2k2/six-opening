@@ -3364,6 +3364,140 @@ function serviceHowToReply(
   });
 }
 
+function isNavigationQuestion(message: string) {
+  return includesAny(message, [
+    "어디",
+    "어디서",
+    "어떤버튼",
+    "버튼",
+    "어떻게가",
+    "어떻게써",
+    "어떻게사용",
+    "찾아",
+    "보여",
+    "이동",
+    "시작",
+  ]);
+}
+
+/**
+ * 화면 위치를 묻는 말은 용어 설명보다 먼저 처리한다. 화면 상태는 정적 계약으로만
+ * 만들고, 사용자가 버튼을 눌러야 iframe 안의 실제 화면으로 이동한다.
+ */
+function getScreenNavigationReply(message: string): ChatReply | null {
+  if (!isNavigationQuestion(message)) return null;
+
+  if (includesAny(message, ["주차카드", "주간카드", "카드모아보기", "카드모으기"])) {
+    return serviceHowToReply(
+      "주차 카드는 아카이브 성향 탭의 ‘카드 모아보기’에서 볼 수 있어요.",
+      "카드 모아보기 열기",
+      "archive",
+      { archiveTab: "report", archiveOverlay: "cards" },
+    );
+  }
+
+  if (message.includes("오늘많이오른순")) {
+    return serviceHowToReply(
+      "‘오늘 많이 오른 순’은 모의투자 화면의 맨 앞 필터예요.",
+      "오늘 많이 오른 순 보기",
+      "stock",
+      { stockView: "explore", sectorId: "rank" },
+    );
+  }
+
+  if (includesAny(message, ["관심기업", "관심종목"])) {
+    return serviceHowToReply(
+      "관심 기업은 모의투자 화면에서 하트로 담아 둔 회사를 모아 보는 필터예요.",
+      "관심 기업 보기",
+      "stock",
+      { stockView: "explore", sectorId: "watch" },
+    );
+  }
+
+  const matchedSector = SECTORS.find((sector) =>
+    message.includes(sector.label.replaceAll("·", "")),
+  );
+  if (matchedSector && includesAny(message, ["업종", "섹터", "칩"])) {
+    return serviceHowToReply(
+      `${matchedSector.label} 업종 칩은 모의투자 화면에서 누를 수 있어요.`,
+      `${matchedSector.label} 업종 보기`,
+      "stock",
+      { stockView: "explore", sectorId: matchedSector.key },
+    );
+  }
+
+  if (includesAny(message, ["업종칩", "섹터칩"])) {
+    return serviceHowToReply(
+      "업종 칩은 모의투자 화면에서 회사를 하는 일이 비슷한 분야별로 모아 보는 버튼이에요.",
+      "업종 칩 보러 가기",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  if (includesAny(message, ["종목카드", "회사카드"]) ||
+    (message.includes("종목") && includesAny(message, ["찾아", "어디"])) ) {
+    return serviceHowToReply(
+      "종목 카드는 모의투자 화면에서 회사 이름과 업종을 보고 고르는 카드예요.",
+      "종목 카드 보러 가기",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  if (includesAny(message, ["내계좌", "내계정", "포트폴리오"])) {
+    return serviceHowToReply(
+      "내 계좌 보기는 가진 회사, 쓸 수 있는 가상 돈, 기다리는 주문을 확인하는 화면이에요.",
+      "내 계좌 보기",
+      "portfolio",
+    );
+  }
+
+  if (message.includes("랭킹")) {
+    return serviceHowToReply(
+      "랭킹은 가족의 이번 주 또는 시즌 전체 수익률 순서를 보는 화면이에요.",
+      "랭킹 보기",
+      "ranking",
+    );
+  }
+
+  if (message.includes("아카이브")) {
+    return serviceHowToReply(
+      "아카이브에서는 내 성향과 수익률, 지난 기록을 다시 볼 수 있어요.",
+      "아카이브에서 보기",
+      "archive",
+      { archiveTab: "report" },
+    );
+  }
+
+  if (includesAny(message, ["학교시간엔매매쉬기", "주문잠금", "매매쉬기"])) {
+    return serviceHowToReply(
+      "학교 시간엔 매매 쉬기 토글은 홈에서 자녀 계정의 주문만 잠시 막는 보호자 기능이에요.",
+      "홈에서 주문 잠금 보기",
+      "home",
+    );
+  }
+
+  if (message.includes("홈")) {
+    return serviceHowToReply(
+      "홈에서는 내 지갑 전체와 시즌 진행, 모의투자 시작 버튼을 볼 수 있어요.",
+      "홈으로 가기",
+      "home",
+    );
+  }
+
+  if (message.includes("모의투자")) {
+    return serviceHowToReply(
+      "모의투자는 모의투자 화면에서 회사를 찾아 가상 돈으로 주문을 연습하며 시작해요.",
+      "모의투자 하러 가기",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  return null;
+}
+
 function getCuratedServiceHowToReply(message: string, context: ChatContext): ChatReply | null {
   const stockDetails = context.stockId ? { stockId: context.stockId } : {};
 
@@ -3712,6 +3846,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // 서비스 낱말이 섞였을 때 큐레이트 FAQ 가 먼저 잡아 보호 응답이 사라진다.
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);
+
+  const navigationReply = getScreenNavigationReply(message);
+  if (navigationReply) return navigationReply;
 
   const curatedServiceHowToReply = getCuratedServiceHowToReply(message, context);
   if (curatedServiceHowToReply) return curatedServiceHowToReply;

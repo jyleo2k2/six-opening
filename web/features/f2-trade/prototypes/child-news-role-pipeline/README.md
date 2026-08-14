@@ -44,7 +44,7 @@
 - `collect-universe-news.ts`: 종목마다 체크포인트를 남기고 `--resume`할 수 있는 51종목 수집 CLI
 - `universe-news-evaluation.ts`: 51종목 결과 계약, 대상 종목 주인공 게이트, 현재 목업 대 실제 결과 비교 HTML
 - `run-universe-evaluation.ts`: 51종목을 Luna 역할 파이프라인으로 판정하고 종목마다 JSON·HTML을 갱신하는 CLI
-- `universe-news-storage.ts`: 완전한 51종목 보고서를 검사하되, 승인된 v2 필드를 담을 DB 계약이 생기기 전에는 적재 SQL을 차단하는 가드
+- `universe-news-storage.ts`: 완전한 51종목 보고서만 승인된 v2 DB 계약으로 적재하는 SQL 생성기
 
 ## 실행
 
@@ -83,7 +83,9 @@ node features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs
 
 ## 51종목 수집·파이프라인·목업 비교
 
-51종목 각각에 대해 최신순 검색 후보를 최대 3페이지에서 찾고 표준 기사 페이지를 다시 읽는다. 검색 결과의 짧은 설명은 근거로 사용하지 않는다. 종목명이 제목 또는 실제 본문에 없는 후보는 수집 단계에서 제외하고, 실적·계약·생산 같은 직접 사건을 우선하되 적절한 후보가 없으면 일상·홍보·주인공 불일치 후보를 억지로 통과시키지 않는다.
+51종목 각각에 대해 최신순 검색 후보를 최대 3페이지에서 찾고 표준 기사 페이지를 다시 읽는다. 검색 결과의 짧은 설명은 근거로 사용하지 않는다. 종목명이 제목 또는 실제 본문에 없는 후보는 수집 단계에서 제외하고, 최신 날짜부터 과거 날짜 순으로 최대 8개를 파이프라인 후보로 보존한다. 같은 날짜에는 점수가 높은 기사 2개까지만 둔다.
+
+첫 기사가 의미상 거부되면 다음 과거 후보를 이어서 검사하고 첫 `ready_for_storage`에서 멈춘다. `ROLE_ERROR`·`PIPELINE_EXECUTION_ERROR` 같은 기술 오류는 오래된 기사로 숨기지 않고 해당 종목의 재시도 대상으로 남긴다. 최대 8개 안에서도 통과 기사가 없으면 서비스 카드를 만들지 않으며 일상·홍보·주인공 불일치 기사로 빈칸을 채우지 않는다.
 
 ```powershell
 cd web
@@ -120,7 +122,7 @@ node features/f2-trade/prototypes/child-news-role-pipeline/run-universe-evaluati
   --retry-technical-errors `
   --role-timeout-ms 600000
 
-# 후속 DB v2 계약 연결 뒤 사용할 적재 명령. 현재는 새 필드 누락을 막기 위해 실패한다.
+# 51종목 완료·기술 오류 0건일 때만 v2 적재 SQL을 만든다.
 node features/f2-trade/prototypes/child-news-role-pipeline/generate-universe-storage.cjs `
   --report features/f2-trade/prototypes/child-news-role-pipeline/reports/selected-company-news-2026-08-13-luna/report.json `
   --overwrite
@@ -130,7 +132,9 @@ node features/f2-trade/prototypes/child-news-role-pipeline/generate-universe-sto
 
 51종목 실행의 제목·본문 선별, 편집, 독립 검수는 모두 `max`를 사용한다. 추론 토큰이 보이는 JSON 출력 전에 한도를 모두 쓰는 문제를 막기 위해 역할별 출력 여유를 32,000~48,000으로 두고 `max_output_tokens` 불완전 응답일 때만 64,000으로 한 번 재시도한다. 역할당 기본 제한은 360초이며 기술 오류 재시도 때는 `--role-timeout-ms`로 최대 900초까지 명시할 수 있다. 최종 보고서에 `ROLE_ERROR`나 `PIPELINE_EXECUTION_ERROR`가 하나라도 있으면 적재 SQL 생성 자체를 막는다.
 
-DB에는 `ready_for_storage` 결과만 넣는 원칙을 유지한다. 현재는 `priceConnection`과 3개 `factKey`를 담을 DB 계약이 없어 통과 기사가 한 건이라도 있으면 적재 SQL 생성을 차단한다. `report.json`은 51건의 통과·거부 감사 기록을 모두 보존하며, 거부 기사를 서비스 카드로 만들지 않는다.
+편집자와 독립 검수자는 선별 문장에 남은 어려운 용어를 모두 처리하고 DB에는 전체 근거를 보존한다. 아이가 보는 서비스 카드와 비교 HTML에는 제목·3줄·주가 연결 문장에 실제로 등장하는 용어만 등장 순서대로 최대 3개 표시한다.
+
+DB에는 `ready_for_storage` 결과만 넣는 원칙을 유지한다. v2 적재 SQL은 `priceConnection`, 3개 `factKey`, 용어별 원문 ID, 새 독립검수 결과를 함께 저장한다. `report.json`은 51건의 통과·거부 감사 기록을 모두 보존하며, 거부 기사를 서비스 카드로 만들지 않는다.
 
 ### 2026-08-13 제목 선별·3줄 요약 추가 후 실측 결과
 
@@ -194,9 +198,9 @@ npx tsx features/f2-trade/prototypes/child-news-role-pipeline/generate-price-lin
 - 모델은 짧은 카드와 상세에 함께 쓰는 `headline` 하나만 생성하며, 파이프라인이 DB 하위 호환 `homeSummary`를 같은 값으로 만든다.
 - 3줄에는 서로 다른 snake_case `factKey`가 필요하다.
 - `priceConnection`은 기사에서 확인된 연결(`article_fact`)과 사건 유형 교육 설명(`event_education`)을 구분한다.
-- 어려운 용어는 원래 이름을 유지하고 별도 풀이·원문 ID를 모두 남긴다.
+- 어려운 용어는 원래 이름을 유지하고 별도 풀이·원문 ID를 모두 남기되, 서비스 노출은 실제 문안 관련 용어 최대 3개로 제한한다.
 - 독립 검수자는 같은 제목, 사실 중복, 주가 연결 근거, 용어 풀이 완전성을 명시적 boolean으로 다시 판정한다.
-- 현재 Supabase 스키마에는 `priceConnection`과 `factKey` 컬럼이 없으므로 통과 기사가 있는 보고서의 적재 SQL 생성은 닫힌 실패한다. 새 DB 계약을 붙이기 전에는 결과 JSON·HTML만 검수한다.
+- Supabase v2 스키마는 `priceConnection`, 3개 `factKey`, 용어별 `sourceIds`와 새 독립검수 boolean을 저장하고 `news_feed_items`에서 함께 조회한다.
 
 ### 승인 형식 연결 후 실제 10건 재검증
 
@@ -214,10 +218,27 @@ cd web
 node features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/latest-economic-news-2026-08-13.json --output features/f2-trade/prototypes/child-news-role-pipeline/reports/latest-economic-news-2026-08-13-price-linked-v2 --overwrite --role-timeout-ms 600000
 ```
 
+### 2026-08-14 선정 51종목 실제 수집·품질 검수
+
+2026-08-14 기준으로 51종목마다 최신 검색 후보와 실제 기사 원문을 수집하고, 네 역할을 모두 `gpt-5.6-luna`의 `max` 추론으로 실행했다. 수집 입력은 `evaluation-fixtures/selected-company-news-2026-08-14-luna.json`, 결과는 `reports/selected-company-news-2026-08-14-luna/`의 JSON과 비교 HTML에 보존한다.
+
+- 완료: **51/51**
+- `ready_for_storage`: **5건** — 엔씨소프트, 더블유게임즈, HMM, 오리온, 코웨이
+- `rejected`: **46건**
+- 기술 오류: **0건**
+- 주인공 불일치 계열 거부가 가장 많았고, 중요성 부족·일상/홍보성·용어 풀이 누락·주가 연결 근거 부족·요약 사실 반복이 뒤를 이었다.
+- 삼성전자-딥엑스, 하이브-컴투스, 한국전력-파주시, 키움증권-이마트처럼 검색어만 걸린 기사는 출고 게이트에서 거부됐다.
+- 한진칼 편집본은 원문에 없는 매각 비율과 빠진 용어 풀이 때문에, 롯데렌탈 편집본은 제목 사건을 3줄에서 반복했기 때문에 거부됐다.
+
+수동 품질 검수에서는 엔씨소프트와 더블유게임즈가 승인 형식에 가장 가까웠다. HMM은 첫 요약이 `13일 영업이익을 공시했어요.`처럼 주어와 새 정보가 약했고, 코웨이는 태국 렌탈 기사에서 미국 매출 두 줄이 중심이 되어 기사 초점이 흐려졌다. 오리온은 제품 판매량을 정확히 설명했지만 실행일보다 나흘 앞선 제품 기사라 최신성·중요성 경계에 있다. 통과 기사 전반의 `왜 주가와 관련 있어?`도 `사업 결과와 연결돼요` 형태가 반복적이다.
+
+따라서 이 실행 결과는 **UI 연결 보류**로 판정했다. DB 적재도 하지 않았다. 이후 요청에 따라 한 후보가 거부되면 과거 기사로 폴백하고, 서비스 용어 노출은 최대 3개로 제한했다. 새 폴백 결과를 다시 검수한 뒤 UI 연결 여부를 결정한다.
+
 ## 운영 연결 전 남은 일
 
-1. 51종목 비교 HTML 사람 검수와 통과·거부 이견 해결
-2. 일일 수집기와 이 프로토타입 입력 계약 연결
-3. 스케줄 재실행·부분 실패·관측 로그 검증
+1. 과거 기사 폴백이 포함된 새 51종목 표본 재검증
+2. 통과 카드의 최대 3개 용어 노출과 기사 최신성 사람 검수
+3. 품질 승인 뒤 일일 수집기·DB·뉴스 UI 순서로 연결
+4. 스케줄 재실행·부분 실패·관측 로그 검증
 
 51종목 수동 실행과 DB 적재는 일일 수집기 연결 승인으로 간주하지 않는다.

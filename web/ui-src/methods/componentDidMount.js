@@ -1,5 +1,7 @@
   componentDidMount(){
     this.loadDbUser();
+    this.loadBehaviorProfile();
+    this.loadSeasonCards();
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
