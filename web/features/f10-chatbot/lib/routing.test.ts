@@ -1755,6 +1755,38 @@ for (const [question, target, action] of navigationQuestions) {
   }
 }
 
+const navigationAliasQuestions = [
+  ["홈화면 어디노", "home", { label: "홈으로 가기" }],
+  ["모투 어디서하노", "stock", { stockView: "explore" }],
+  ["랭킹 어딨노", "ranking", {}],
+  ["매매제한 해제 어떻게하노", "home", {}],
+  ["학교시간에 매매제한 해제 어떻게하노", "home", {}],
+  ["오늘 뭐가 많이오름", "stock", { stockView: "explore", sectorId: "rank" }],
+  ["관심종목 어디서", "stock", { stockView: "explore", sectorId: "watch" }],
+  ["종목카드 어딨음", "stock", { stockView: "explore" }],
+  ["회사카드 어딨음", "stock", { stockView: "explore" }],
+  ["주차카드 어딨음", "archive", { archiveTab: "report", archiveOverlay: "cards" }],
+  ["주간카드 어딨음", "archive", { archiveTab: "report", archiveOverlay: "cards" }],
+  ["메인화면 어떻게 가?", "home", {}],
+  ["가상투자 시작하는 법 알려줘", "stock", { stockView: "explore" }],
+  ["찜한 종목 어디서 봐?", "stock", { stockView: "explore", sectorId: "watch" }],
+] as const;
+
+for (const [question, target, action] of navigationAliasQuestions) {
+  const routed = routeMessage(question, howtoContexts.order);
+  assert.equal(routed.route, "faq", `별칭 화면 찾기 질문이 FAQ가 아니야: ${question}`);
+  assert.equal(routed.intent, "service_help", `별칭 화면 찾기 목적이 달라: ${question}`);
+  assert.equal(routed.uiAction?.target, target, `별칭 화면 이동 대상이 달라: ${question}`);
+  assert.equal(Boolean(routed.uiAction?.label), true, `별칭 화면 이동 버튼 라벨이 없어: ${question}`);
+  for (const [key, value] of Object.entries(action)) {
+    assert.equal(
+      routed.uiAction?.[key as keyof NonNullable<typeof routed.uiAction>],
+      value,
+      `별칭 화면 이동 세부 상태가 달라: ${question} / ${key}`,
+    );
+  }
+}
+
 // 보호 신호에 서비스 낱말이 섞인 입력. 큐레이트 사용법 FAQ 가 보호 판정보다
 // 앞에 있으면 여기서 route 가 faq 로 떨어진다 (SPEC §6.1.2 입력 안전 우선순위).
 const protectionBeatsHowto = [

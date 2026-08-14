@@ -3368,11 +3368,17 @@ function isNavigationQuestion(message: string) {
   return includesAny(message, [
     "어디",
     "어디서",
+    "어딨",
+    "어딧",
+    "어디노",
     "어떤버튼",
     "버튼",
+    "어떻게",
     "어떻게가",
     "어떻게써",
     "어떻게사용",
+    "하는법",
+    "사용법",
     "찾아",
     "보여",
     "이동",
@@ -3380,14 +3386,39 @@ function isNavigationQuestion(message: string) {
   ]);
 }
 
+const SCREEN_NAME_ALIASES = {
+  weeklyCards: ["주차카드", "주간카드", "이번주카드", "성장카드", "카드모아보기", "카드모으기"],
+  topMovers: ["오늘많이오른순", "오늘뭐가많이오름", "오늘많이오름", "많이오른종목", "상승종목"],
+  watchlist: ["관심기업", "관심종목", "찜한종목", "하트누른회사"],
+  stockCards: ["종목카드", "회사카드", "회사고르는카드", "주식카드"],
+  portfolio: ["내계좌", "내계정", "포트폴리오", "계좌화면", "내자산현황"],
+  ranking: ["랭킹", "순위표", "랭킹표"],
+  archive: ["아카이브", "성장기록", "기록보관함"],
+  tradingLock: [
+    "학교시간엔매매쉬기",
+    "학교시간매매제한",
+    "매매제한",
+    "매매잠금",
+    "주문잠금",
+    "매매쉬기",
+  ],
+  home: ["홈", "홈화면", "메인화면", "첫화면"],
+  mockInvesting: ["모의투자", "모투", "가상투자", "주식연습"],
+} as const;
+
+function mentionsScreenName(message: string, name: keyof typeof SCREEN_NAME_ALIASES) {
+  return includesAny(message, SCREEN_NAME_ALIASES[name]);
+}
+
 /**
  * 화면 위치를 묻는 말은 용어 설명보다 먼저 처리한다. 화면 상태는 정적 계약으로만
  * 만들고, 사용자가 버튼을 눌러야 iframe 안의 실제 화면으로 이동한다.
  */
 function getScreenNavigationReply(message: string): ChatReply | null {
-  if (!isNavigationQuestion(message)) return null;
+  const isTopMoversQuestion = mentionsScreenName(message, "topMovers");
+  if (!isNavigationQuestion(message) && !isTopMoversQuestion) return null;
 
-  if (includesAny(message, ["주차카드", "주간카드", "카드모아보기", "카드모으기"])) {
+  if (mentionsScreenName(message, "weeklyCards")) {
     return serviceHowToReply(
       "주차 카드는 아카이브 성향 탭의 ‘카드 모아보기’에서 볼 수 있어요.",
       "카드 모아보기 열기",
@@ -3396,7 +3427,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (message.includes("오늘많이오른순")) {
+  if (isTopMoversQuestion) {
     return serviceHowToReply(
       "‘오늘 많이 오른 순’은 모의투자 화면의 맨 앞 필터예요.",
       "오늘 많이 오른 순 보기",
@@ -3405,7 +3436,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (includesAny(message, ["관심기업", "관심종목"])) {
+  if (mentionsScreenName(message, "watchlist")) {
     return serviceHowToReply(
       "관심 기업은 모의투자 화면에서 하트로 담아 둔 회사를 모아 보는 필터예요.",
       "관심 기업 보기",
@@ -3435,7 +3466,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (includesAny(message, ["종목카드", "회사카드"]) ||
+  if (mentionsScreenName(message, "stockCards") ||
     (message.includes("종목") && includesAny(message, ["찾아", "어디"])) ) {
     return serviceHowToReply(
       "종목 카드는 모의투자 화면에서 회사 이름과 업종을 보고 고르는 카드예요.",
@@ -3445,7 +3476,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (includesAny(message, ["내계좌", "내계정", "포트폴리오"])) {
+  if (mentionsScreenName(message, "portfolio")) {
     return serviceHowToReply(
       "내 계좌 보기는 가진 회사, 쓸 수 있는 가상 돈, 기다리는 주문을 확인하는 화면이에요.",
       "내 계좌 보기",
@@ -3453,7 +3484,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (message.includes("랭킹")) {
+  if (mentionsScreenName(message, "ranking")) {
     return serviceHowToReply(
       "랭킹은 가족의 이번 주 또는 시즌 전체 수익률 순서를 보는 화면이에요.",
       "랭킹 보기",
@@ -3461,7 +3492,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (message.includes("아카이브")) {
+  if (mentionsScreenName(message, "archive")) {
     return serviceHowToReply(
       "아카이브에서는 내 성향과 수익률, 지난 기록을 다시 볼 수 있어요.",
       "아카이브에서 보기",
@@ -3470,7 +3501,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (includesAny(message, ["학교시간엔매매쉬기", "주문잠금", "매매쉬기"])) {
+  if (mentionsScreenName(message, "tradingLock")) {
     return serviceHowToReply(
       "학교 시간엔 매매 쉬기 토글은 홈에서 자녀 계정의 주문만 잠시 막는 보호자 기능이에요.",
       "홈에서 주문 잠금 보기",
@@ -3478,7 +3509,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (message.includes("홈")) {
+  if (mentionsScreenName(message, "home")) {
     return serviceHowToReply(
       "홈에서는 내 지갑 전체와 시즌 진행, 모의투자 시작 버튼을 볼 수 있어요.",
       "홈으로 가기",
@@ -3486,7 +3517,7 @@ function getScreenNavigationReply(message: string): ChatReply | null {
     );
   }
 
-  if (message.includes("모의투자")) {
+  if (mentionsScreenName(message, "mockInvesting")) {
     return serviceHowToReply(
       "모의투자는 모의투자 화면에서 회사를 찾아 가상 돈으로 주문을 연습하며 시작해요.",
       "모의투자 하러 가기",
