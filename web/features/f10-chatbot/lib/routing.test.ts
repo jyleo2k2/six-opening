@@ -125,6 +125,18 @@ for (const question of [
   assert.equal(routed.uiAction?.target, "archive", `성향 화면 이동 대상이 달라: ${question}`);
   assert.equal(Boolean(routed.uiAction?.label), true, `성향 화면 버튼이 없어: ${question}`);
 }
+for (const question of [
+  "근거는 뭔소리야",
+  "직관이 뭔소리야",
+  "집중은 뭔 말이야",
+  "분산은 무슨 소리야",
+  "정확력은 뭐임",
+  "근거력은 뭔데",
+] as const) {
+  const routed = routeMessage(question, { screen: "archive" });
+  assert.equal(routed.route, "faq", `아카이브 구어체 뜻 질문을 이해하지 못했어: ${question}`);
+  assert.equal(routed.uiAction?.target, "archive", `구어체 질문의 이동 대상이 달라: ${question}`);
+}
 assert.equal(
   routeMessage("확신이 뭐야", { screen: "archive" }).text.includes("집중"),
   true,
