@@ -18,6 +18,7 @@ const APP_HTML = join(webRoot, "public", "ui", "app.html");
 const UI_ROOT = join(webRoot, "public", "ui");
 const UI_SRC = join(webRoot, "ui-src");
 const ENGINE_SOURCE = join(webRoot, "shared", "engine", "archive-profile.js");
+const SCHEDULED_ORDER_SOURCE = join(webRoot, "features", "f2-trade", "lib", "scheduled-orders.js");
 const UI_DIST = join(webRoot, "ui-dist");
 const MANIFEST = join(UI_SRC, "manifest.json");
 
@@ -58,6 +59,7 @@ const METHOD = /^ {2}([A-Za-z_$][\w$]*)\s*\(/;
 const ENGINE_BEGIN = /^\/\/ >>> archive-engine/;
 const ENGINE_END = /^\/\/ <<< archive-engine/;
 const ENGINE_CHUNK = "logic/archive-engine.js";
+const SCHEDULED_ORDER_CHUNK = "logic/scheduled-orders.js";
 
 // isHome -> home, isBuy2 -> buy2
 function screenName(flag) {
@@ -228,11 +230,27 @@ function engineChunkText() {
   return body.replace(/\r?\n/g, "\r\n");
 }
 
+function scheduledOrderChunkText() {
+  const source = readFileSync(SCHEDULED_ORDER_SOURCE, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
+  const body = [
+    "// >>> scheduled-order-engine — GENERATED from features/f2-trade/lib/scheduled-orders.js",
+    "// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.",
+    source.replace(/\n+$/, ""),
+    "// <<< scheduled-order-engine",
+    "",
+  ].join("\n");
+  return body.replace(/\r?\n/g, "\r\n");
+}
+
 function assemble(keep = () => true) {
   const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
   return manifest.files
     .filter(keep)
-    .map((file) => (file === ENGINE_CHUNK ? engineChunkText() : readFileSync(join(UI_SRC, file), "utf8")))
+    .map((file) => file === ENGINE_CHUNK
+      ? engineChunkText()
+      : file === SCHEDULED_ORDER_CHUNK
+        ? scheduledOrderChunkText()
+        : readFileSync(join(UI_SRC, file), "utf8"))
     .join("");
 }
 
