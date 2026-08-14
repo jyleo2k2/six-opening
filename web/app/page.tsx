@@ -7,7 +7,7 @@ import { LoginGate } from "./LoginGate";
 async function currentProfile() {
   loadDevelopmentEnvironment();
   const store = await cookies();
-  const raw = store.get(SESSION_COOKIE)?.value ?? process.env.DEMO_USER_ID;
+  const raw = store.get(SESSION_COOKIE)?.value;
   const id = raw ? Number(raw) : NaN;
   if (!Number.isInteger(id) || id <= 0) return null;
   try {
