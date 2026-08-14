@@ -55,7 +55,11 @@ import {
 } from "./lib/response-preparation";
 import {
   FLOATING_AVATAR_IDLE_ROTATION_MS,
+  DISMISS_TARGET_ARMED_DIAMETER_PX,
+  DISMISS_TARGET_DIAMETER_PX,
+  dismissTargetPosition,
   hasFloatingAvatarDragStarted,
+  isOverDismissTarget,
   pickNextAvatarIndex,
 } from "./lib/floating-avatar";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
@@ -137,6 +141,8 @@ type FloatingChatDragState = {
   startY: number;
   origin: FloatingChatPosition;
   moved: boolean;
+  // 놓는 순간 판정에 쓴다. state 로만 두면 pointerup 이 한 프레임 뒤진 값을 볼 수 있다.
+  overDismiss: boolean;
 };
 
 const COPY = {
@@ -156,6 +162,8 @@ const COPY = {
   askDirectly: "\uc9c1\uc811 \uc9c8\ubb38",
   dismiss: "\uad1c\ucc2e\uc544",
   openChat: "\ud0a4\uc6c5\uc774 \ucc57\ubd07 \uc5f4\uae30",
+  dismissHint: "\uc5ec\uae30\uc5d0 \ub193\uc73c\uba74 \uc0ac\ub77c\uc838\uc694",
+  dismissDrop: "\ub193\uc73c\uba74 \uc0ac\ub77c\uc838\uc694",
   close: "\ub2eb\uae30",
   greeting:
     "\uc548\ub155, \ub098\ub294 \ud0a4\uc6c5\uc774\uc57c. \ud22c\uc790 \uae30\ucd08\uc640 \ud654\uba74 \uc0ac\uc6a9\ubc95\uc744 \ud568\uaed8 \ubcfc \uc218 \uc788\uc5b4.",
@@ -422,6 +430,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const [idleAvatarIndex, setIdleAvatarIndex] = useState<number | null>(null);
   const [dragAvatarIndex, setDragAvatarIndex] = useState<number | null>(null);
   const [isFloatingChatDragging, setIsFloatingChatDragging] = useState(false);
+  // 삭제 타깃에 놓아 숨긴 상태. 되살리기는 홈 화면 버튼이 맡는다 (F10 SPEC §6.1).
+  const [isChatDismissed, setIsChatDismissed] = useState(false);
+  const [isOverDismissTargetNow, setIsOverDismissTargetNow] = useState(false);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
@@ -445,6 +456,8 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     floatingChatPosition ?? defaultFloatingChatPosition(prototypeScreen),
     prototypeScreen,
   );
+  const dismissTarget = dismissTargetPosition(prototypeScreen);
+  const dismissTargetScale = prototypeScreen?.scale ?? 1;
   const bubbleOpensLeft = resolvedFloatingChatPosition.x >=
     (prototypeScreen ? prototypeScreen.left + prototypeScreen.width / 2 : 195);
   const floatingAvatar = isFloatingChatDragging
@@ -570,6 +583,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     if (element) element.scrollTop = element.scrollHeight;
   }, [isOpen, messages]);
 
+  // 선제 도움 말풍선은 플로팅 버튼의 같은 중심 좌표를 앵커로 쓴다 (F10 SPEC §7).
+  // 숨겨진 상태에서 신호가 오면 붙일 곳이 없으므로 버튼을 기본 자리로 되살린다.
+  useEffect(() => {
+    if (!signal) return;
+    setIsChatDismissed(false);
+    setFloatingChatPosition(null);
+  }, [signal, signalVersion]);
+
   useEffect(() => {
     if (signal !== "buyHesitation") {
       setIsBuyHesitationBubbleVisible(false);
@@ -623,6 +644,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       startY: event.clientY,
       origin,
       moved: false,
+      overDismiss: false,
     };
   }
 
@@ -648,6 +670,10 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       );
       setIsFloatingChatDragging(true);
     }
+    const overDismiss =
+      drag.moved && isOverDismissTarget(next, dismissTarget, dismissTargetScale);
+    drag.overDismiss = overDismiss;
+    setIsOverDismissTargetNow(overDismiss);
     setFloatingChatPosition(next);
   }
 
@@ -659,11 +685,18 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     }
     suppressFloatingChatClickRef.current = drag.moved;
     floatingChatDragRef.current = null;
+    setIsOverDismissTargetNow(false);
     if (drag.moved) {
       setIdleAvatarIndex((currentIndex) =>
         pickNextAvatarIndex(HERO_AVATARS.length, currentIndex),
       );
       setIsFloatingChatDragging(false);
+    }
+    if (drag.overDismiss) {
+      // 되살리기는 홈 화면 버튼이 맡는다 (F10 SPEC §6.1). 여기서는 숨기기만 한다.
+      setIsChatDismissed(true);
+      setFloatingChatPosition(null);
+      setIsOpen(false);
     }
   }
 
@@ -1084,7 +1117,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         </section>
       </div>
 
-      {signal && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
+      {signal && !isChatDismissed && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
         <aside
           aria-live="polite"
           className="fixed z-20"
@@ -1125,9 +1158,67 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         </aside>
       )}
 
+      {isFloatingChatDragging && !isChatDismissed && (
+        <div
+          aria-hidden="true"
+          // 버튼(z-10)보다 위에 그려 X 가 가려지지 않게 한다 — 버튼이 빨려 들어가 보인다.
+          className="pointer-events-none fixed z-20 grid place-items-center rounded-full border-[1.5px] text-white transition-all duration-150"
+          style={{
+            left: dismissTarget.x,
+            top: dismissTarget.y,
+            transform: "translate(-50%, -50%)",
+            width:
+              (isOverDismissTargetNow
+                ? DISMISS_TARGET_ARMED_DIAMETER_PX
+                : DISMISS_TARGET_DIAMETER_PX) * dismissTargetScale,
+            height:
+              (isOverDismissTargetNow
+                ? DISMISS_TARGET_ARMED_DIAMETER_PX
+                : DISMISS_TARGET_DIAMETER_PX) * dismissTargetScale,
+            background: isOverDismissTargetNow
+              ? "var(--color-magenta)"
+              : "rgb(26 34 51 / 0.55)",
+            borderColor: isOverDismissTargetNow ? "#fff" : "rgb(255 255 255 / 0.55)",
+            boxShadow: isOverDismissTargetNow
+              ? "0 0 0 8px rgb(215 0 130 / 0.18), 0 12px 26px -6px rgb(215 0 130 / 0.55)"
+              : "none",
+            backdropFilter: "blur(6px)",
+          }}
+        >
+          <svg
+            fill="none"
+            height={26 * dismissTargetScale}
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth={2.6}
+            viewBox="0 0 24 24"
+            width={26 * dismissTargetScale}
+          >
+            <path d="M7 7l10 10M17 7L7 17" />
+          </svg>
+        </div>
+      )}
+
+      {isFloatingChatDragging && !isChatDismissed && (
+        <p
+          aria-hidden="true"
+          className="pointer-events-none fixed z-20 whitespace-nowrap text-[11px] font-bold transition-colors"
+          style={{
+            // 타깃 아래는 하단 탭바라 문구를 위쪽에 둔다.
+            left: dismissTarget.x,
+            top: dismissTarget.y - 56 * dismissTargetScale,
+            transform: "translate(-50%, -50%)",
+            color: isOverDismissTargetNow ? "var(--color-magenta)" : "#6B7185",
+          }}
+        >
+          {isOverDismissTargetNow ? COPY.dismissDrop : COPY.dismissHint}
+        </p>
+      )}
+
       <button
         aria-label={COPY.openChat}
-        className="fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg cursor-grab active:cursor-grabbing"
+        className="fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg cursor-grab active:cursor-grabbing transition-[transform,opacity] duration-150"
+        hidden={isChatDismissed}
         onClick={handleFloatingChatClick}
         onPointerCancel={finishFloatingChatDrag}
         onPointerDown={handleFloatingChatPointerDown}
@@ -1137,7 +1228,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
           bottom: "auto",
           left: resolvedFloatingChatPosition.x,
           top: resolvedFloatingChatPosition.y,
-          transform: "translate(-50%, -50%)",
+          // 타깃 위에서는 작아지고 흐려져 "놓으면 사라진다"를 미리 보여준다.
+          transform: `translate(-50%, -50%) scale(${isOverDismissTargetNow ? 0.72 : 1})`,
+          opacity: isOverDismissTargetNow ? 0.55 : 1,
         }}
         type="button"
       >
