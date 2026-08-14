@@ -162,8 +162,6 @@ const COPY = {
   askDirectly: "\uc9c1\uc811 \uc9c8\ubb38",
   dismiss: "\uad1c\ucc2e\uc544",
   openChat: "\ud0a4\uc6c5\uc774 \ucc57\ubd07 \uc5f4\uae30",
-  dismissHint: "\uc5ec\uae30\uc5d0 \ub193\uc73c\uba74 \uc0ac\ub77c\uc838\uc694",
-  dismissDrop: "\ub193\uc73c\uba74 \uc0ac\ub77c\uc838\uc694",
   close: "\ub2eb\uae30",
   greeting:
     "\uc548\ub155, \ub098\ub294 \ud0a4\uc6c5\uc774\uc57c. \ud22c\uc790 \uae30\ucd08\uc640 \ud654\uba74 \uc0ac\uc6a9\ubc95\uc744 \ud568\uaed8 \ubcfc \uc218 \uc788\uc5b4.",
@@ -1161,8 +1159,8 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       {isFloatingChatDragging && !isChatDismissed && (
         <div
           aria-hidden="true"
-          // 버튼(z-10)보다 위에 그려 X 가 가려지지 않게 한다 — 버튼이 빨려 들어가 보인다.
-          className="pointer-events-none fixed z-20 grid place-items-center rounded-full border-[1.5px] text-white transition-all duration-150"
+          // 버튼과 같은 z-index 이고 DOM 에서 먼저 그려진다 — 끌고 있는 버튼이 항상 위에 온다.
+          className="pointer-events-none fixed z-10 grid place-items-center rounded-full border-[1.5px] text-white transition-all duration-150"
           style={{
             left: dismissTarget.x,
             top: dismissTarget.y,
@@ -1175,12 +1173,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               (isOverDismissTargetNow
                 ? DISMISS_TARGET_ARMED_DIAMETER_PX
                 : DISMISS_TARGET_DIAMETER_PX) * dismissTargetScale,
+            // 버튼이 마젠타라 활성색까지 마젠타면 겹쳤을 때 한 덩어리로 보인다.
+            // 진한 회색(ink)으로 채워 위에 올라온 버튼과 대비를 준다.
             background: isOverDismissTargetNow
-              ? "var(--color-magenta)"
+              ? "var(--color-ink)"
               : "rgb(26 34 51 / 0.55)",
             borderColor: isOverDismissTargetNow ? "#fff" : "rgb(255 255 255 / 0.55)",
             boxShadow: isOverDismissTargetNow
-              ? "0 0 0 8px rgb(215 0 130 / 0.18), 0 12px 26px -6px rgb(215 0 130 / 0.55)"
+              ? "0 0 0 8px rgb(26 34 51 / 0.16), 0 12px 26px -6px rgb(26 34 51 / 0.5)"
               : "none",
             backdropFilter: "blur(6px)",
           }}
@@ -1197,22 +1197,6 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
             <path d="M7 7l10 10M17 7L7 17" />
           </svg>
         </div>
-      )}
-
-      {isFloatingChatDragging && !isChatDismissed && (
-        <p
-          aria-hidden="true"
-          className="pointer-events-none fixed z-20 whitespace-nowrap text-[11px] font-bold transition-colors"
-          style={{
-            // 타깃 아래는 하단 탭바라 문구를 위쪽에 둔다.
-            left: dismissTarget.x,
-            top: dismissTarget.y - 56 * dismissTargetScale,
-            transform: "translate(-50%, -50%)",
-            color: isOverDismissTargetNow ? "var(--color-magenta)" : "#6B7185",
-          }}
-        >
-          {isOverDismissTargetNow ? COPY.dismissDrop : COPY.dismissHint}
-        </p>
       )}
 
       <button
