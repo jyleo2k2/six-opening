@@ -513,11 +513,7 @@ export function TradingViewChart({ symbol, period, chartType }: {
           width={pane.width}
           height={pane.height}
         >
-          {placed.map((marker) => {
-            const fill =
-              marker.member === "child"
-                ? "var(--color-trade-child)"
-                : "var(--color-trade-parent)";
+          {(() => {
             // 말풍선 꼬리처럼 뱃지 변에 붙는다. 밑변은 뱃지 모서리와 정확히 맞닿아
             // 같은 fill 이라 이음매가 안 보이고, 꼭짓점은 체결가 쪽을 가리킨다.
             // 밑변 너비(10)가 rx=6 으로 둥글린 모서리 사이 평평한 구간 안에 들어간다.
@@ -528,41 +524,60 @@ export function TradingViewChart({ symbol, period, chartType }: {
             //
             // 밑변·꼭짓점 모두 **잘린 뒤의 뱃지 위치**에서 딴다. 그래야 천장·바닥에 붙어
             // 간격이 줄어든 마커도 꼬리가 뱃지에 붙은 채 같은 길이로 나온다.
-            const badgeY = clampBadgeTop(
-              marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP,
-              pane.height,
-            );
-            const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
-            const tip = marker.side === "buy" ? base + TAIL : base - TAIL;
+            const laid = placed.map((marker) => {
+              const fill =
+                marker.member === "child"
+                  ? "var(--color-trade-child)"
+                  : "var(--color-trade-parent)";
+              const badgeY = clampBadgeTop(
+                marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP,
+                pane.height,
+              );
+              const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
+              const tip = marker.side === "buy" ? base + TAIL : base - TAIL;
+              return { marker, fill, badgeY, base, tip };
+            });
+            // 뱃지를 전부 먼저 그리고 꼬리는 따로 마지막에 그린다. 연속된 봉마다 체결이
+            // 있으면 뱃지 폭(22px)이 봉 간격보다 넓어 옆 마커의 뱃지가 겹친다. 마커 하나의
+            // <g> 안에서 꼬리→뱃지 순으로 그리면, 옆 마커(뒤에 그려짐)의 뱃지가 이 마커의
+            // 꼬리를 통째로 덮어 뾰족한 부분이 사라진다. 꼬리를 모든 뱃지 위에 올리면
+            // 뱃지끼리는 여전히 겹치더라도 꼬리는 항상 보인다.
             return (
-              <g key={marker.id}>
-                <title>{marker.label}</title>
-                <polygon
-                  points={`${marker.x - 5},${base} ${marker.x + 5},${base} ${marker.x},${tip}`}
-                  fill={fill}
-                />
-                <rect
-                  x={marker.x - BADGE / 2}
-                  y={badgeY}
-                  width={BADGE}
-                  height={BADGE}
-                  rx={6}
-                  fill={fill}
-                />
-                <text
-                  x={marker.x}
-                  y={badgeY + BADGE / 2}
-                  fontSize={12}
-                  fontWeight={700}
-                  fill="#fff"
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                >
-                  {marker.side === "buy" ? "B" : "S"}
-                </text>
-              </g>
+              <>
+                {laid.map(({ marker, fill, badgeY }) => (
+                  <g key={marker.id}>
+                    <title>{marker.label}</title>
+                    <rect
+                      x={marker.x - BADGE / 2}
+                      y={badgeY}
+                      width={BADGE}
+                      height={BADGE}
+                      rx={6}
+                      fill={fill}
+                    />
+                    <text
+                      x={marker.x}
+                      y={badgeY + BADGE / 2}
+                      fontSize={12}
+                      fontWeight={700}
+                      fill="#fff"
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                    >
+                      {marker.side === "buy" ? "B" : "S"}
+                    </text>
+                  </g>
+                ))}
+                {laid.map(({ marker, fill, base, tip }) => (
+                  <polygon
+                    key={`${marker.id}-tail`}
+                    points={`${marker.x - 5},${base} ${marker.x + 5},${base} ${marker.x},${tip}`}
+                    fill={fill}
+                  />
+                ))}
+              </>
             );
-          })}
+          })()}
         </svg>
       )}
       {state !== "ready" && (
