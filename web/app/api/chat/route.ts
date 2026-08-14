@@ -8,6 +8,8 @@ import {
   createChatOutcome,
 } from "../../../features/f10-chatbot/lib/orchestrator";
 import { resolveChatSession } from "../../../features/f10-chatbot/lib/session";
+import { createReadOnlyToolRunner } from "../../../features/f10-chatbot/lib/tools";
+import { createSupabasePersonalData } from "./personal-data";
 
 export const runtime = "nodejs";
 
@@ -40,6 +42,8 @@ export async function POST(request: NextRequest) {
   }
 
   const session = resolveChatSession();
+  // 조회 대상 사용자는 요청 쿠키가 정한다. 본문 식별자는 parseChatRequest 가 이미 거부했다.
+  const runTool = createReadOnlyToolRunner(createSupabasePersonalData(request));
   const stream = new ReadableStream({
     async start(controller) {
       const send = (type: ChatEvent, value: string | ChatActionPayload) => {
@@ -50,6 +54,7 @@ export async function POST(request: NextRequest) {
         const outcome = await createChatOutcome(chatRequest, session, {
           requestSignal: request.signal,
           onStatus: (status) => send("status", status),
+          runTool,
         });
 
         send("text", outcome.response.text);

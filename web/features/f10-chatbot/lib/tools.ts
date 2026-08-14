@@ -24,8 +24,21 @@ export type ArchiveSummary = {
   latestSeasonLabel: string | null;
 };
 
+/**
+ * 세션 사용자 본인의 보유 현황. `current`는 지금 보고 있는 종목의 보유이며,
+ * 화면 종목이 없거나 그 종목을 갖고 있지 않으면 `null`이다.
+ */
+export type HoldingSummary = {
+  current: { stockName: string; quantity: number; averagePrice: number } | null;
+  holdingCount: number;
+};
+
 export type PersonalChatDataSource = {
   getTradeRecordSummary: (userId: string) => Promise<TradeRecordSummary | null>;
+  getHoldingSummary: (
+    userId: string,
+    stockId: string | undefined,
+  ) => Promise<HoldingSummary | null>;
   getBehaviorProfileSummary: (
     userId: string,
   ) => Promise<BehaviorProfileSummary | null>;
@@ -41,14 +54,20 @@ export type ToolExecution = {
 
 const EMPTY_PERSONAL_DATA: PersonalChatDataSource = {
   getTradeRecordSummary: async () => null,
+  getHoldingSummary: async () => null,
   getBehaviorProfileSummary: async () => null,
   getArchiveSummary: async () => null,
 };
 
+/** 화면에 쓰는 천 단위 구분. 값은 서버 조회 결과이며 모델이 만들지 않는다. */
+function formatWon(value: number) {
+  return `${Math.round(value).toLocaleString("ko-KR")}원`;
+}
+
 function unavailable(
   tool: ReadOnlyChatToolName,
   text: string,
-  target: "stock" | "archive",
+  target: "stock" | "archive" | "portfolio",
 ): ToolExecution {
   return {
     tool,
@@ -133,6 +152,43 @@ export function createReadOnlyToolRunner(
           uiAction: { type: "open_screen", target: "archive" },
         },
         evidence: [`trade-record-count:${summary.recordCount}`],
+      };
+    }
+
+    if (tool === "own_holdings") {
+      const holdings = await dataSource.getHoldingSummary(
+        session.userId,
+        context.stockId,
+      );
+      if (!holdings || holdings.holdingCount === 0) {
+        return unavailable(
+          tool,
+          "아직 갖고 있는 주식이 없어요. 주식을 사면 여기에서 수량과 평균 매수가를 알려 줄게요.",
+          "portfolio",
+        );
+      }
+
+      if (holdings.current) {
+        const { stockName, quantity, averagePrice } = holdings.current;
+        return {
+          tool,
+          status: "ok",
+          response: {
+            text: `${stockName}는 ${quantity}주 갖고 있고, 평균 매수가는 ${formatWon(averagePrice)}이에요. 지금 값어치는 포트폴리오에서 볼 수 있어요.`,
+            uiAction: { type: "open_screen", target: "portfolio" },
+          },
+          evidence: [`holding:${context.stockId}:${quantity}`],
+        };
+      }
+
+      return {
+        tool,
+        status: "ok",
+        response: {
+          text: `지금 보고 있는 회사는 아직 갖고 있지 않고, 다른 회사 ${holdings.holdingCount}곳을 갖고 있어요. 포트폴리오에서 전부 볼 수 있어요.`,
+          uiAction: { type: "open_screen", target: "portfolio" },
+        },
+        evidence: [`holding-count:${holdings.holdingCount}`],
       };
     }
 

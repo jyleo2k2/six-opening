@@ -133,6 +133,7 @@ export type ChatResponse = {
 export const READ_ONLY_CHAT_TOOLS = [
   "approved_stock_facts",
   "own_trade_records",
+  "own_holdings",
   "own_behavior_profile",
   "own_archive",
 ] as const;

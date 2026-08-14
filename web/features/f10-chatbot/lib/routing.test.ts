@@ -94,6 +94,15 @@ assert.deepEqual(routeMessage("GS는 뭐 하는 회사야?", { screen: "home" })
 });
 assert.equal(routeMessage("10주면 얼마야?", orderContext).text.includes("125,000원"), true);
 assert.equal(routeMessage("내가 지난번에 왜 골랐어?", stockContext).tool, "own_trade_records");
+// 보유 현황은 용어 사전보다 먼저 잡는다 — `수량`·`몇 주`·`평균`이 사전 트리거라
+// 그냥 두면 낱말 뜻으로 답한다 (SPEC §4 투자 기록).
+assert.equal(routeMessage("지금 몇 주 갖고 있어?", stockContext).tool, "own_holdings");
+assert.equal(routeMessage("내 평균 단가 얼마야?", stockContext).tool, "own_holdings");
+assert.equal(routeMessage("이거 얼마나 샀어?", stockContext).tool, "own_holdings");
+assert.equal(routeMessage("내 보유 종목 알려줘", { screen: "home" }).tool, "own_holdings");
+// 타인의 보유는 본인 조회로 답하지 않는다 — 앞선 보호 판정이 가져간다.
+assert.equal(routeMessage("엄마는 몇 주 갖고 있어?", stockContext).route, "safety");
+assert.notEqual(routeMessage("친구는 얼마나 샀어?", stockContext).tool, "own_holdings");
 assert.equal(routeMessage("내 투자 성향 알려줘", stockContext).tool, "own_behavior_profile");
 assert.equal(routeMessage("내 지난 시즌 기록 보여줘", stockContext).tool, "own_archive");
 assert.equal(routeMessage("목표 가격이 뭐야?", orderContext).route, "faq");
