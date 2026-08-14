@@ -27,7 +27,8 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 |---|---|---|
 | 아카이브 화면 | `web/ui-src/screens/archive.html` | 마크업. `app.html` 은 여기서 조립된다 |
 | 화면 조립 | `web/ui-src/methods/buildArchive.js` | 색·좌표·문구 등 표시값 생성 |
-| **계산** | `web/shared/engine/archive-profile.js` | **능력치 다섯 축, 캐릭터·레벨, 정확 채점** |
+| **계산(비로그인 폴백)** | `web/shared/engine/archive-profile.js` | **능력치 다섯 축, 캐릭터·레벨, 정확 채점** (0~100, §3) |
+| **계산(로그인, 정본)** | `web/shared/engine/behavior-profile.ts` | 위와 같은 다섯 값을 0~10 로 계산 (§6). `buildArchive()` 연결은 §6.11 |
 | 레일 드래그 | `web/ui-src/methods/bindCardRail.js` | 카드 가로 스크롤 |
 | 종가 조회 | `web/ui-src/methods/loadDailyCloses.js` | 사고판 종목 일봉을 한 번에 받아 온다 |
 | 종가 API | `web/app/api/quote/daily-closes/route.ts` | 보관 일봉에서 `{종목: [{date, close}]}` |
@@ -35,7 +36,7 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 원본 데이터 | `localStorage["kw_proto_v1"]` | `acc`·`records`·`sellRecords`·`events` |
 | 행동 데이터 판정 API | `web/app/api/profile/behavior/route.ts` | 로그인 세션의 `stock_tab_views`·`transactions` 집계 → 캐릭터 키 |
 | 행동 데이터 조회 | `web/ui-src/methods/loadBehaviorProfile.js` | 진입 시 위 API를 불러 `this.dbBehavior`에 저장 |
-| 지난 주차 카드 API | `web/app/api/profile/season-cards/route.ts` | 로그인 세션의 `transactions`(매수만)를 KST 주 단위로 묶어 주차별 다섯 축 점수 반환. 이번 주는 제외 |
+| 지난 주차 카드 API | `web/app/api/profile/season-cards/route.ts` | 로그인 세션의 `transactions`·`stock_tab_views`·`holdings`를 §6 신버전 엔진에 넣어 이번 주를 포함한 주차별 `AbilityCard`(0~10)와 누적 `cumulative` 반환 |
 | 지난 주차 카드 조회 | `web/ui-src/methods/loadSeasonCards.js` | 진입 시 위 API를 불러 `this.dbSeasonCards`에 저장 |
 | 가족 성향 조회 | `web/ui-src/methods/loadFamilyProfiles.js` | `/api/family`의 실제 가족 구성원과 누적 성향을 `this.dbFamily`에 저장 |
 | 가족 피드 반응 조회 | `web/ui-src/methods/loadArchiveFeedReactions.js` | 실제 가족 거래 ID별 댓글·좋아요를 일괄 조회 |
@@ -43,11 +44,14 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
-## 3. 계산(구버전, 화면 현행) — `shared/engine/archive-profile.js`
+## 3. 계산(구버전, 비로그인 폴백) — `shared/engine/archive-profile.js`
 
 `web/AGENTS.md`는 수치·스코어링 계산을 `shared/engine`에서만 하도록 정한다. 화면은 결과를 표시만 한다.
 
-> **§3~§5 는 화면이 지금 쓰는 구버전이다.** 앞으로 갈 정본은 §6 신버전(`behavior-profile.ts`)이며, 화면 이관이 끝나면 이 절과 `archive-profile.js` 를 지운다.
+> **§3~§5 는 비로그인(또는 서버 응답 전) 화면이 여전히 쓰는 구버전이다.** 로그인 상태의 정본은
+> §6 신버전(`behavior-profile.ts`)이며, `buildArchive()` 연결은 §6.11 이 완료됐다. `archive-profile.js`
+> 는 이 로컬 폴백과 §3.2 행동 신호 캐릭터 판정(`resolveCharacterFromBehaviorSignals`)에 계속
+> 쓰이므로 아직 지우지 않는다.
 
 ### 3.1 능력치 다섯 축
 
@@ -118,28 +122,28 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 - 요청이 실패하면 `closes` 가 비어 전부 `pending` 이 되고, 화면은 기본값으로 그대로 뜬다.
 - 종가 적재는 장마감 배치와 `web/scripts/seed-candles.ts` 가 담당한다. 배치가 밀리면 최근 거래가 오래 `pending` 에 남는다.
 
-### 3.5 지난 주차 카드의 Supabase 대체 입력
+### 3.5 지난 주차 카드의 Supabase 대체 입력 [대체됨 — §6.8·§6.11 이 현재 동작이다]
+
+> `web/app/api/profile/season-cards/route.ts`는 이미 §6 신버전 엔진(`computeBehaviorProfile`)으로
+> 옮겨갔다. 아래 문단은 그 이전(구버전 `computeAbilityScores` 직접 호출) 동작을 적은 기록이며
+> 지금 코드와 다르다 — 실제 계산·채점·화면 연결은 §6.6·§6.8·§6.11을 본다. 이 절은 "로컬에 없는
+> 지난 주를 Supabase로 채운다"는 목적만 여전히 유효해 남겨 둔다.
 
 로컬스토리지가 초기화되면 지난 주 기록도 함께 사라진다. 카드 모아보기가 로그인 기간 동안의
 지난 주를 계속 보여 줄 수 있도록, 로컬에 없는 지난 주는 Supabase `transactions` 로 다시 낸다.
 
-- 조회·계산: `web/app/api/profile/season-cards/route.ts` (GET, 로그인 세션 필요). 그 사용자의
-  `transactions`에서 `side = 'buy'` 행만 모아 `weekStartKstOf`(KST 월요일 날짜)로 주 단위로
-  묶고, 주마다 `computeAbilityScores`(§3.1과 같은 함수)로 다섯 축을 낸다. **이번 주는 이 API가
-  다루지 않는다** — 화면은 이번 주에 항상 로컬 계산 + §3.2 행동 데이터 오버라이드를 쓴다.
-- 섹터는 `stocks.category`를 그대로 쓴다. 정확은 과거 주차 공통 관례(§3.3 서두, §7)대로 채점하지
-  않고 `ACCURACY_PLACEHOLDER`(50) 그대로 둔다 — 로컬 지난 주 카드와 동일하다.
-- 주 경계 함수: `web/shared/engine/archive-profile.js`의 `weekStartKstOf(iso)`. 화면의 로컬 주
+- 조회·계산: `web/app/api/profile/season-cards/route.ts` (GET, 로그인 세션 필요). §6.8 표대로
+  그 사용자의 Supabase 기록을 신버전 엔진에 넣어 주마다(이번 주 포함) `AbilityCard`를 낸다.
+- 주 경계 함수: `web/shared/engine/behavior-profile.ts`의 `mondayOf`/`weekBucketsKST`. 화면의 로컬 주
   경계(`monday()`, 브라우저 로컬 시간)와 다른 함수지만 KST 단일 시장을 가정해 같은 월요일로
   맞아떨어진다.
 - 화면 연결: `componentDidMount`가 진입 시 `loadSeasonCards()`로 이 API를 한 번 불러
-  `this.dbSeasonCards`에 저장한다. `buildArchive()`는 로컬 주 그룹(`weeks`)에 없는 지난 주만
-  이 응답으로 채우고, 이번 주와 로컬에 이미 기록이 있는 주는 그대로 로컬 계산을 쓴다.
-- **`stock_tab_views`는 이 계산에 들어가지 않는다.** 지난 주차 카드는 로컬 지난 주 카드와 같은
-  산식(매수 이유 비율·섹터 수)만 쓴다. 다만 `stock_tab_views`·`transactions`에 지난 주 더미
-  행을 넣으면 §3.2의 "로그인 사용자 행동 데이터" 오버라이드는 **기간 제한 없이 전체 누적**이라
-  이번 주 카드의 캐릭터 표시에도 함께 영향을 줄 수 있다 — 별개 경로이지만 같은 원본 테이블을
-  공유하기 때문이다.
+  `this.dbSeasonCards`에 저장한다. §6.11 대로 `buildArchive()`는 이 응답이 있으면 같은 주 로컬
+  계산보다 우선해 쓴다.
+- **`stock_tab_views`도 이 계산에 들어간다** — §6.9 `synthesizeTabViews`가 근거력 입력으로 복원한다.
+  `stock_tab_views`·`transactions`에 지난 주 더미 행을 넣으면 §3.2의 "로그인 사용자 행동 데이터"
+  오버라이드(**기간 제한 없이 전체 누적**)에도 함께 영향을 줄 수 있다는 점은 그대로다 — 별개
+  경로이지만 같은 원본 테이블을 공유하기 때문이다.
 
 ## 4. 엔진 복사본과 드리프트 검출
 
@@ -174,7 +178,7 @@ app.html 안 `// >>> archive-engine` ~ `// <<< archive-engine`
 }
 ```
 
-가족 비교는 로그인 사용자의 `family_tag`에 속한 모든 `profiles`를 표시한다. 각 구성원의 오각형은 `/api/family`가 신버전 행동 엔진으로 계산한 누적 성향을 0~100 화면 값으로 변환해 그리며, 거래가 없는 구성원도 이름과 빈 상태 카드는 표시한다. API를 사용할 수 없을 때만 기존 로컬 데모 계산으로 폴백한다.
+가족 비교는 로그인 사용자의 `family_tag`에 속한 모든 `profiles`를 표시한다. 각 구성원의 오각형은 `/api/family`가 신버전 행동 엔진(§6, 0~10)으로 계산한 누적 성향을 **그 스케일 그대로** 그리며, 거래가 없는 구성원도 이름과 빈 상태 카드는 표시한다. API를 사용할 수 없을 때만 기존 로컬 데모 계산(0~100)으로 폴백한다. `buildArchive()`는 카드마다 `scaleMax`(10 또는 100)를 함께 들고 다녀 오각형 좌표·막대 폭을 `score / scaleMax` 비율로 낸다 — §6.11.
 
 `renderVals()` 는 `const arc = this.buildArchive()` 로 받아 화면 키에 펼친다.
 
@@ -309,7 +313,7 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 | 계획 일치 | `sellRecords.plan_match` | DB 에 없어 `actionAlignment` 는 항상 0 |
 | 현재가 | 유니버스 시세 | 보관 종가의 마지막 값 |
 
-`season-cards` 응답의 `weeks[]` 는 화면이 아직 읽는 `weekStart`·`count`·`scores`(**0~100**, 집중·분산·정확·직관·근거 순)를 유지하고, 신버전 값 전체를 `card` 에 함께 넣는다. 화면 이관이 끝나면 호환 필드를 지운다.
+`season-cards` 응답의 `weeks[]` 는 `weekStart`·`weekEnd`·`label`·`status`·`count`와 신버전 카드 전체(`card: AbilityCard`, **0~10**)만 담는다. 0~100 호환 배열(`scores`)은 화면 이관이 끝나 없앴다 — §6.11.
 
 ### 6.9 `stock_tab_views` → 근거력 복원 [가정]
 
@@ -323,14 +327,29 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 
 ### 6.10 아직 연결 안 된 것
 
-- **화면이 신버전 계약을 직접 읽지 않는다.** `app.html` 은 여전히 §3 구버전으로 이번 주를 계산하고, 지난 주만 `season-cards` 의 0~100 호환 배열을 쓴다.
 - **`info_detail_opened` 가 화면에서 한 번도 안 찍힌다.** `logEvent` 호출부는 `news_detail_opened`·`chart_detail_opened` 둘뿐이라 로컬 경로의 "3탭 중 2탭" 규칙이 실질 "2탭 중 2탭"이다.
 - `archive-profile.js` 의 `weekStartKstOf` 는 `season-cards` 가 신버전으로 옮겨가며 쓰이지 않게 됐다. 구버전을 지울 때 함께 정리한다.
 - `shared/store/family-trade-seed.ts` 주석이 아직 "5거래일" 기준으로 적혀 있다 (다른 세션 소유 경로).
+- `POST /api/profile`(로그인 불필요, 로컬 `kw_proto_v1` 로 신버전을 계산)은 아직 화면이 부르지 않는다. 로그인 전 화면은 §3 구버전 로컬 계산으로 남는다 — §6.11.
+
+### 6.11 화면 연결 (2026-08-14, `buildArchive()`)
+
+성향 탭·카드 모아보기는 이제 **로그인 상태면 신버전(0~10) 값을 그 스케일 그대로** 그린다. 로그인 전이거나 응답이 아직 없으면(§6.10) §3 구버전(0~100)으로 폴백한다. 한 카드 안에서 두 스케일을 섞지 않도록 `buildArchive()`가 만드는 모든 성향 카드(`traits`·`weekCards`·`cardSheet`·`famPolys`)는 `scaleMax`(10 또는 100)를 값과 함께 들고 다니며, 오각형 좌표와 막대 폭은 항상 `score / scaleMax` 비율로 낸다. 화면에 찍는 숫자도 `scaleMax`를 따른다 — 10점 만점은 소수 한 자리(`7.2`), 100점 만점은 정수(`72`)다.
+
+| 카드 | 값 원본(로그인) | 값 원본(비로그인·응답 전) |
+|---|---|---|
+| 성향 탭(오각형·유형) | `GET /api/profile/season-cards` 의 `cumulative` | 로컬 `records` + 구버전 `computeAbilityScores`/`gradeAccuracy` |
+| 카드 모아보기 — 이번 주 | 위와 같은 `cumulative` (성향 탭과 항상 같은 카드) | 위와 같은 로컬 계산 |
+| 카드 모아보기 — 지난 주 | `season-cards` 의 `weeks[]`를 주 시작일로 매칭 — 로컬에 같은 주 기록이 있어도 이 값이 우선한다(실제 채점을 담고 있어서다) | 로컬 `records`를 그 주만 모아 구버전으로 재계산(정확은 §7대로 기본값) |
+| 가족 비교 | `GET /api/family`의 `members[].behavior`(신버전 누적 카드) | 로컬 `records`를 계정별로 구버전 재계산 |
+
+캐릭터는 신버전 `character`(`challenger`는 화면 키 `fighter`로 맞춘다, §6.5)를 우선 쓰고, `null`이면(표본 부족·동점대) 구버전 `resolveCharacter()`의 상대 비교로 대신 정한다 — 비교 연산이라 스케일에 무관하게 동작한다. 레벨이 `null`이면(§6.4 표본 부족) 화면은 2로 둔다.
+
+`resolveCharacterFromBehaviorSignals`(§3.2, `GET /api/profile/behavior`)는 신버전 `character`가 있으면 밀려나는 보조 신호로 남는다 — 신버전이 더 정확한 입력(실제 근거·집중 산식)을 쓰기 때문이다. 이 API·화면 연결을 없애는 판단은 이 작업의 범위 밖이다.
 
 ## 7. 현재 알려진 불일치·미완료
 
-- **지난 주 카드의 정확은 로컬 기록만 있을 때 여전히 기본값이다.** `season-cards`(Supabase 경로)는 §6 신버전으로 실제 채점하지만, 화면이 로컬 `records` 만으로 그리는 주는 구버전 `computeAbilityScores` 를 채점 없이 부른다. 화면 이관 때 함께 없어진다.
+- **지난 주 카드의 정확은 비로그인(로컬 기록만 있을 때)이면 여전히 기본값이다.** 로그인 상태는 §6.11 대로 `season-cards`(Supabase 경로, §6 신버전 실제 채점)를 그대로 쓴다. 로그인 세션이 없어 로컬 `records` 만으로 그리는 주는 구버전 `computeAbilityScores` 를 채점 없이 부른다 — `archive-profile.js`가 남아있는 동안은 이 폴백도 함께 남는다.
 - 종가 배치가 밀리면 최근 거래가 오래 `pending` 에 남아 정확이 기본값 50에 머문다.
 - 수익률 탭에서 `보유 종목 · 섹터별` 레일을 뺐다. 그 레일에서만 열리던 **섹터 상세 모달(`secModal*`)과 `retSectors` 계산이 화면에서 도달 불가**로 남아 있다. 되살리거나 지우는 판단이 필요하다.
 - 가족 비교의 아빠(`dad`)는 앱 계정이 없어 값이 비어 있다.

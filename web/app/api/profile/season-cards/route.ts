@@ -5,7 +5,6 @@ import {
   VALID_DWELL_MS,
 } from "../../../../shared/engine/behavior-profile";
 import type {
-  AbilityCard,
   DailyClose,
   EvidenceTab,
   ProfileBuy,
@@ -79,17 +78,6 @@ export function synthesizeTabViews(
     }
   }
   return views;
-}
-
-/**
- * 화면(`buildArchive`)이 아직 읽는 0~100 정수 배열.
- * 순서는 오각형과 같다: 집중 · 분산 · 정확 · 직관 · 근거.
- */
-export function legacyScores(card: AbilityCard): number[] {
-  const { focus, diversification, accuracy, intuition, evidence } = card.scores;
-  return [focus, diversification, accuracy, intuition, evidence].map((value) =>
-    Math.round(value * 10),
-  );
 }
 
 export type SeasonCardsDeps = {
@@ -213,14 +201,13 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
   });
 
   return {
-    // 화면이 아직 읽는 모양 — `scores` 는 0~100 이다. 신버전 값은 `card` 에 있다.
+    // 화면은 `card`(0~10, 신버전 그대로)를 읽는다. 호환용 0~100 배열은 없앴다.
     weeks: snapshot.weeks.map((week) => ({
       weekStart: week.weekStart,
       weekEnd: week.weekEnd,
       label: week.label,
       status: week.status,
       count: week.samples.buys,
-      scores: legacyScores(week),
       card: week,
     })),
     cumulative: snapshot.cumulative,
