@@ -1,6 +1,12 @@
   bindCardRail(el){
     if (!el || el === this.railEl) return;
     this.railEl = el;
+    // 카드 모아보기를 여는 순간 이 콜백이 레일 DOM 과 함께 바로 실행된다. openCards()
+    // 의 jumpCard() 호출은 이 레일이 아직 없을 때 일어날 수 있어 여기서도 한 번 더
+    // 현재 카드로 맞춘다. 다시 열 때(레일이 새로 생길 때)도 이 분기를 함께 탄다.
+    if (this.state.cardActive !== undefined && this.state.cardActive !== null) {
+      this.jumpCard(this.state.cardActive);
+    }
     el.addEventListener('scroll', () => {
       const mid = el.scrollLeft + el.clientWidth / 2;
       let best = 0, bd = 1e9;
@@ -11,10 +17,3 @@
       if (best !== this.state.cardActive) this.setState({ cardActive: best });
     }, { passive: true });
   }
-
-  /**
-   * 성장 아카이브 화면에 필요한 값을 한 번에 만든다.
-   *
-   * 가족은 기획안대로 아빠·엄마·찬영 셋이다. 지금 앱에는 자녀(찬영)와 부모(엄마)
-   * 계정만 있어서 아빠 칸은 비어 있다. 계정이 생기면 ACC 에 한 줄 추가하면 된다.
-   */
