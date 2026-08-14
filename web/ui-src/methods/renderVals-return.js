@@ -709,7 +709,7 @@
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
-      goArchive: () => { this.set({ screen:'archive' }); },
+      goArchive: () => { this.set({ screen:'archive' }); this.loadDailyCloses(); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();

@@ -11,20 +11,27 @@ import type {
   ProfileTabView,
 } from "../types/behavior-profile";
 import type { Trade } from "../types/trade";
+// 정확 채점은 화면(app.html)도 같은 것을 써야 해서 순수 JS 쪽에 두고 여기서 가져온다.
+// 두 벌로 갈리면 서버와 화면의 레벨이 어긋난다.
+import { accuracyLevelOf, gradeAccuracy, kstDateOf } from "./archive-profile.js";
+
+export {
+  ACCURACY_DEFAULT_RATIO,
+  ACCURACY_LEVEL_2_RATIO,
+  ACCURACY_LEVEL_3_RATIO,
+  ACCURACY_WAIT_TRADING_DAYS,
+  accuracyLevelOf,
+  gradeAccuracy,
+  kstDateOf,
+} from "./archive-profile.js";
 
 // 임계값은 2026-08-13 개요 확정값이다 (f9-archive/SPEC.md §4.1). 임의로 바꾸지 않는다.
 export const VALID_DWELL_MS = 10_000;
 export const EVIDENCE_TAB_MIN = 2;
 export const FOCUS_SECTOR_HIGH_MAX = 3;
 export const CASH_HEAVY_RATIO = 0.5;
-export const ACCURACY_WAIT_TRADING_DAYS = 5;
 // [가정] 표본 임계 — 제품 확정 시 상수만 바꾼다 (SPEC §4.2·§4.3).
 export const MIN_BUYS_FOR_PROFILE = 3;
-// [가정] 채점된 거래가 없을 때의 기본 적중 비율 — 레벨 2 구간의 중앙에서 시작한다.
-export const ACCURACY_DEFAULT_RATIO = 0.5;
-// 레벨 분기 — 적중 비율 2/3 이상 레벨 3, 1/3 이상 레벨 2 (2026-08-13 유저 확정, 경계 포함은 [가정]).
-export const ACCURACY_LEVEL_3_RATIO = 2 / 3;
-export const ACCURACY_LEVEL_2_RATIO = 1 / 3;
 
 /** app.html 이벤트명 → 3탭. 기업정보 탭(info_detail_opened)은 화면 출시 전에 미리 등록해 둔다. */
 export const TAB_BY_EVENT: Record<string, EvidenceTab> = {
@@ -36,11 +43,6 @@ export const TAB_BY_EVENT: Record<string, EvidenceTab> = {
 const clampScore = (value: number) => Math.max(0, Math.min(10, Math.round(value)));
 
 const timeOf = (iso: string) => new Date(iso).getTime();
-
-/** ISO 시각 → KST 날짜(YYYY-MM-DD). 캔들 `DailyClose.date` 와 같은 축이다. */
-export function kstDateOf(iso: string): string {
-  return new Date(timeOf(iso) + 9 * 3_600_000).toISOString().slice(0, 10);
-}
 
 /** 매수 이전에 같은 종목을 10초 이상 본 탭 종류 수 */
 export function viewedTabCount(buy: ProfileBuy, tabViews: ProfileTabView[]): number {
@@ -86,23 +88,7 @@ export function computeFocus(
   return clampScore(score);
 }
 
-function closeAfterTradingDays(closes: DailyClose[], date: string, days: number): number | null {
-  let seen = 0;
-  for (const candle of closes) {
-    if (candle.date > date && ++seen === days) return candle.close;
-  }
-  return null;
-}
-
-function closeOnOrBefore(closes: DailyClose[], date: string): number | null {
-  let last: number | null = null;
-  for (const candle of closes) {
-    if (candle.date > date) break;
-    last = candle.close;
-  }
-  return last;
-}
-
+// 정확 채점 본체는 archive-profile.js 에 있다. 서버 쪽 타입만 여기서 붙인다.
 export type AccuracyResult = {
   /** 적중률 퍼센트 0~100, 소수점 반올림 */
   accuracy: number;
@@ -111,53 +97,6 @@ export type AccuracyResult = {
   pending: number;
   hits: number;
 };
-
-/**
- * 정확력 = 채점된 거래의 적중률 퍼센트(0~100, 소수점 반올림). 예: 5건 중 4건 적중 = 80%.
- * 레벨은 적중 비율 1/3·2/3 을 분기로 1·2·3 이며, 채점은 체결 후 5거래일 종가 기준이다.
- * 미경과·종가 없는 거래는 채점 전이라 반영하지 않고, 채점이 하나도 없으면 기본 비율 50%로 시작한다.
- */
-export function gradeAccuracy(
-  buys: ProfileBuy[],
-  sells: ProfileSell[],
-  dailyClosesBySymbol: Record<string, DailyClose[]>,
-): AccuracyResult {
-  let graded = 0;
-  let hits = 0;
-  let pending = 0;
-  for (const buy of buys) {
-    const closes = dailyClosesBySymbol[buy.symbol] ?? [];
-    const settle = closeAfterTradingDays(closes, kstDateOf(buy.tradedAt), ACCURACY_WAIT_TRADING_DAYS);
-    if (settle === null) {
-      pending += 1;
-      continue;
-    }
-    graded += 1;
-    if (settle > buy.price) hits += 1;
-  }
-  for (const sell of sells) {
-    const closes = dailyClosesBySymbol[sell.symbol] ?? [];
-    const soldDate = kstDateOf(sell.tradedAt);
-    // 매도 체결가는 매도 당일(없으면 직전 거래일) 종가로 근사한다 [가정]
-    const sellPrice = closeOnOrBefore(closes, soldDate);
-    const settle = closeAfterTradingDays(closes, soldDate, ACCURACY_WAIT_TRADING_DAYS);
-    if (sellPrice === null || settle === null) {
-      pending += 1;
-      continue;
-    }
-    graded += 1;
-    if (settle < sellPrice) hits += 1;
-  }
-  const ratio = graded > 0 ? hits / graded : ACCURACY_DEFAULT_RATIO;
-  return { accuracy: Math.round(ratio * 100), level: accuracyLevelOf(ratio), graded, pending, hits };
-}
-
-/** 적중 비율 → 레벨. 반올림 전 비율로 판정해 66.7% 경계가 흔들리지 않게 한다 */
-export function accuracyLevelOf(ratio: number): 1 | 2 | 3 {
-  if (ratio >= ACCURACY_LEVEL_3_RATIO) return 3;
-  if (ratio >= ACCURACY_LEVEL_2_RATIO) return 2;
-  return 1;
-}
 
 /** 두 쌍의 우세로 캐릭터 결정. 5:5 동점은 근거·집중 쪽으로 귀속한다 */
 export function judgeCharacter(

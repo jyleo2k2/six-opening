@@ -1558,9 +1558,18 @@ const EVIDENCE_REASON_CODES = ["buy_news", "buy_chart", "buy_familiar"];
 // 오각형 축 순서. 화면 라벨(집중·분산·정확·직관·근거)과 같은 순서다.
 const ABILITY_ORDER = ["focus", "diversification", "accuracy", "intuition", "evidence"];
 
-// 정확은 사고판 시점이 맞았는지라 5거래일 종가가 있어야 채점된다.
-// 아직 채점 경로가 화면에 없어 중간값으로 둔다. [가정]
-const ACCURACY_PLACEHOLDER = 50;
+// 정확은 체결 후 이만큼 거래일이 지난 종가로 채점한다.
+const ACCURACY_WAIT_TRADING_DAYS = 5;
+
+// 채점된 거래가 하나도 없으면 이 비율에서 시작한다. [가정]
+const ACCURACY_DEFAULT_RATIO = 0.5;
+
+// 레벨 경계. 반올림 전 비율로 판정해 66.7% 경계가 흔들리지 않게 한다.
+const ACCURACY_LEVEL_3_RATIO = 2 / 3;
+const ACCURACY_LEVEL_2_RATIO = 1 / 3;
+
+// 채점 전 화면에 쓰는 기본 정확 점수.
+const ACCURACY_PLACEHOLDER = Math.round(ACCURACY_DEFAULT_RATIO * 100);
 
 // 섹터가 하나 늘 때마다 집중이 이만큼 내려간다. [가정]
 const FOCUS_STEP_PER_SECTOR = 22;
@@ -1572,9 +1581,10 @@ const clamp100 = (n) => Math.max(0, Math.min(100, n));
  *
  * @param {Array<{symbol: string, reason_code: string}>} records 한 사람의 매수 기록
  * @param {(symbol: string) => (string|null|undefined)} sectorOf 종목 코드 -> 섹터
+ * @param {number} [accuracy] 채점된 정확 점수 0~100. 없으면 채점 전 기본값
  * @returns {{count: number, evidencePct: number, focus: number, scores: number[]}}
  */
-function computeAbilityScores(records, sectorOf) {
+function computeAbilityScores(records, sectorOf, accuracy = ACCURACY_PLACEHOLDER) {
   const list = Array.isArray(records) ? records : [];
   const sectors = {};
   list.forEach((r) => {
@@ -1593,7 +1603,7 @@ function computeAbilityScores(records, sectorOf) {
     evidencePct,
     focus,
     // 집중·분산과 근거·직관은 서로 보완쌍이라 합이 100 이다.
-    scores: [focus, 100 - focus, ACCURACY_PLACEHOLDER, 100 - evidencePct, evidencePct],
+    scores: [focus, 100 - focus, clamp100(Math.round(accuracy)), 100 - evidencePct, evidencePct],
   };
 }
 
@@ -1602,9 +1612,10 @@ function computeAbilityScores(records, sectorOf) {
  * 5:5 동점은 근거·집중 쪽으로 귀속한다.
  *
  * @param {number[]} scores computeAbilityScores 의 scores
+ * @param {1|2|3} [level] gradeAccuracy 가 낸 레벨. 없으면 정확 점수로 되짚는다
  * @returns {{key: "sniper"|"strategist"|"fighter"|"explorer", level: 1|2|3}}
  */
-function resolveCharacter(scores) {
+function resolveCharacter(scores, level) {
   const focus = scores[0];
   const diversification = scores[1];
   const accuracy = scores[2];
@@ -1620,8 +1631,84 @@ function resolveCharacter(scores) {
         ? "fighter"
         : "explorer";
 
-  const level = accuracy >= 70 ? 3 : accuracy >= 40 ? 2 : 1;
-  return { key, level };
+  return { key, level: level || accuracyLevelOf(accuracy / 100) };
+}
+
+// ── 정확 채점 ──────────────────────────────────────────────────────────
+// 체결 5거래일 뒤 종가로 맞았는지 본다. 매수는 오르면, 매도는 내리면 적중이다.
+
+/** ISO 시각 → KST 날짜(YYYY-MM-DD). 일봉 `date` 와 같은 축이다. */
+function kstDateOf(iso) {
+  return new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
+}
+
+/** `date` 다음 거래일부터 세어 `days` 번째 종가. 아직 안 지났으면 null */
+function closeAfterTradingDays(closes, date, days) {
+  let seen = 0;
+  for (const candle of closes) {
+    if (candle.date > date && (seen += 1) === days) return candle.close;
+  }
+  return null;
+}
+
+/** `date` 당일 종가, 없으면 직전 거래일 종가 */
+function closeOnOrBefore(closes, date) {
+  let last = null;
+  for (const candle of closes) {
+    if (candle.date > date) break;
+    last = candle.close;
+  }
+  return last;
+}
+
+/** 적중 비율 → 레벨. 반올림 전 비율로 판정한다 */
+function accuracyLevelOf(ratio) {
+  if (ratio >= ACCURACY_LEVEL_3_RATIO) return 3;
+  if (ratio >= ACCURACY_LEVEL_2_RATIO) return 2;
+  return 1;
+}
+
+/**
+ * 정확 = 채점된 거래의 적중률 퍼센트(0~100, 반올림).
+ * 종가가 모자란 거래는 `pending` 으로 빼고 적중률에서 제외한다.
+ *
+ * @param {Array<{symbol: string, price: number, tradedAt: string}>} buys
+ * @param {Array<{symbol: string, tradedAt: string}>} sells
+ * @param {Record<string, Array<{date: string, close: number}>>} dailyClosesBySymbol
+ * @returns {{accuracy: number, level: 1|2|3, graded: number, pending: number, hits: number}}
+ */
+function gradeAccuracy(buys, sells, dailyClosesBySymbol) {
+  let graded = 0;
+  let hits = 0;
+  let pending = 0;
+
+  for (const buy of buys || []) {
+    const closes = dailyClosesBySymbol[buy.symbol] || [];
+    const settle = closeAfterTradingDays(closes, kstDateOf(buy.tradedAt), ACCURACY_WAIT_TRADING_DAYS);
+    if (settle === null) {
+      pending += 1;
+      continue;
+    }
+    graded += 1;
+    if (settle > buy.price) hits += 1;
+  }
+
+  for (const sell of sells || []) {
+    const closes = dailyClosesBySymbol[sell.symbol] || [];
+    const soldDate = kstDateOf(sell.tradedAt);
+    // 매도 체결가는 매도 당일(없으면 직전 거래일) 종가로 근사한다 [가정]
+    const sellPrice = closeOnOrBefore(closes, soldDate);
+    const settle = closeAfterTradingDays(closes, soldDate, ACCURACY_WAIT_TRADING_DAYS);
+    if (sellPrice === null || settle === null) {
+      pending += 1;
+      continue;
+    }
+    graded += 1;
+    if (settle < sellPrice) hits += 1;
+  }
+
+  const ratio = graded > 0 ? hits / graded : ACCURACY_DEFAULT_RATIO;
+  return { accuracy: Math.round(ratio * 100), level: accuracyLevelOf(ratio), graded, pending, hits };
 }
 // <<< archive-engine
 class Component extends DCLogic {
@@ -1632,6 +1719,7 @@ class Component extends DCLogic {
     orderDone: null, sellDone: null, watchlist: [], stockQuery: '',
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
+    closes: {},
     sellStep: 1, arcTab: 'report', sellPick: 'all',
     sellDraft: { sellBy:'qty', qty:0, amountInput:0, orderType:'market', limitPct:0, reason:null, change:null, memo:'', memoSaved:false },
     schoolLock: true, forceSchool: 'auto', rankTab: 'week',
@@ -1680,6 +1768,7 @@ class Component extends DCLogic {
     } else if (action.target === 'archive') {
       const archiveTabs = ['report', 'return'];
       this.set({ screen:'archive', arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report' });
+      this.loadDailyCloses();
     } else if (action.target === 'stock') {
       const sector = (this.uni().sectors || []).filter(x => x.id === action.sectorId)[0];
       if (sector) this.set({ screen:'explore', sectorId:sector.id, cardIndex:0 });
@@ -1828,6 +1917,28 @@ class Component extends DCLogic {
     }
   }
 
+  // 정확 채점에 쓸 일봉 종가를 가져온다. 사고판 종목이 바뀔 때만 다시 부른다.
+  loadDailyCloses(){
+    if (this.closesBusy) return;
+    const s = this.state;
+    const codes = {};
+    (s.records || []).forEach(r => { if (r.order_status === 'filled' && r.symbol) codes[r.symbol] = 1; });
+    (s.sellRecords || []).forEach(r => { if (r.order_status === 'filled' && r.symbol) codes[r.symbol] = 1; });
+    const symbols = Object.keys(codes).sort();
+    if (!symbols.length) return;
+    const key = symbols.join(',');
+    if (this.closesKey === key) return;
+    this.closesBusy = true;
+    fetch('/api/quote/daily-closes?symbols=' + encodeURIComponent(key))
+      .then(res => res.ok ? res.json() : Promise.reject(new Error('closes')))
+      .then(data => {
+        this.closesKey = key;
+        this.setState(x => Object.assign({}, x, { closes: data.closes || {} }));
+      })
+      // 종가를 못 받으면 엔진이 전부 채점 보류로 처리한다. 화면은 그대로 뜬다.
+      .catch(() => {})
+      .finally(() => { this.closesBusy = false; });
+  }
   loadNews(code){
     if (!/^\d{6}$/.test(code || '')) return;
     const status = this.state.newsStatusByStock[code];
@@ -2079,10 +2190,18 @@ class Component extends DCLogic {
     // ── 성향 다섯 축 ──────────────────────────────────────────────
     // 산출식은 shared/engine/archive-profile.js 가 갖고 있다. 여기서는 부르기만 한다.
     const sectorOfCode = code => { const st = u.stocks.filter(v => v.code === code)[0]; return st ? st.sector : null; };
+    // 정확 채점 입력. 대기 주문은 체결이 아니라 빼고, 매수가는 주문금액 ÷ 주 수로 낸다.
+    const buysOf = userId => (s.records || [])
+      .filter(r => r.user_id === userId && r.order_status === 'filled' && r.qty > 0 && r.amount_krw > 0)
+      .map(r => ({ symbol: r.symbol, price: r.amount_krw / r.qty, tradedAt: r.ts }));
+    const sellsOf = userId => (s.sellRecords || [])
+      .filter(r => r.user_id === userId && r.order_status === 'filled')
+      .map(r => ({ symbol: r.symbol, tradedAt: r.ts }));
     const scoresOf = userId => {
       const recs = (s.records || []).filter(r => r.user_id === userId);
-      const out = computeAbilityScores(recs, sectorOfCode);
-      return { n: out.count, gr: out.evidencePct, list: out.scores };
+      const grade = gradeAccuracy(buysOf(userId), sellsOf(userId), s.closes || {});
+      const out = computeAbilityScores(recs, sectorOfCode, grade.accuracy);
+      return { n: out.count, gr: out.evidencePct, list: out.scores, grade: grade };
     };
 
     // ── 투자 유형 네 가지 ─────────────────────────────────────────
@@ -2097,8 +2216,8 @@ class Component extends DCLogic {
       explorer:   { name:'탐험가', img:'explorer',   pal:['#B2D2C7','#87B6A7','#619484','#1B3F35'],
         desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
     };
-    const typeOf = sc => {
-      const decided = resolveCharacter(sc);
+    const typeOf = (sc, level) => {
+      const decided = resolveCharacter(sc, level);
       const t = TYPES[decided.key], lv = decided.level;
       return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
     };
@@ -2114,7 +2233,7 @@ class Component extends DCLogic {
     ];
 
     const mine = scoresOf('child_minji');
-    const myType = typeOf(mine.list);
+    const myType = typeOf(mine.list, mine.grade.level);
     const MPL = myType.pal, mInk = MPL[3];
 
     const R = 48, CX = 80, CY = 80;
@@ -2159,14 +2278,9 @@ class Component extends DCLogic {
     const WEEKS = weekKeys.map(k => {
       const recs = weeks[k], isNow = k === thisMon;
       let list;
+      // 지난 주 카드는 그 주 기록만으로 다시 낸다. 정확은 그 시점 채점이 없어 기본값이다.
       if (isNow) list = mine.list;
-      else {
-        const nSec = {};
-        recs.forEach(r => { const st = u.stocks.filter(v => v.code === r.symbol)[0]; if (st) nSec[st.sector] = 1; });
-        const g = recs.length ? Math.round(recs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / recs.length * 100) : 0;
-        const f = Math.max(0, Math.min(100, 100 - (Math.max(1, Object.keys(nSec).length) - 1) * 22));
-        list = [f, 100 - f, 50, 100 - g, g];
-      }
+      else list = computeAbilityScores(recs, sectorOfCode).scores;
       const t = typeOf(list);
       const mon = new Date(k), sun = new Date(k + 6 * 86400000);
       return {
@@ -2242,7 +2356,7 @@ class Component extends DCLogic {
     // 아빠는 아직 앱 계정이 없어 점수가 비어 있다.
     const FAM = MEMBERS.map(f => {
       const sc = f.acc ? scoresOf(f.user) : null;
-      const t = sc && sc.n ? typeOf(sc.list) : null;
+      const t = sc && sc.n ? typeOf(sc.list, sc.grade.level) : null;
       return {
         key: f.key, name: f.name, face: f.face, col: f.col, fill: f.fill,
         has: !!(sc && sc.n), scores: sc ? sc.list : [0, 0, 0, 0, 0],
@@ -3480,7 +3594,7 @@ class Component extends DCLogic {
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
-      goArchive: () => { this.set({ screen:'archive' }); },
+      goArchive: () => { this.set({ screen:'archive' }); this.loadDailyCloses(); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();

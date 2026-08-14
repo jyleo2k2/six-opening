@@ -4,6 +4,8 @@ import {
   ABILITY_ORDER,
   ACCURACY_PLACEHOLDER,
   computeAbilityScores,
+  gradeAccuracy,
+  kstDateOf,
   resolveCharacter,
 } from "./archive-profile.js";
 
@@ -77,14 +79,98 @@ test("캐릭터는 두 보완쌍의 우세로 정하고 동점은 근거·집중
   assert.equal(resolveCharacter(at(50, 50)).key, "sniper");
 });
 
-test("레벨은 정확 40·70 을 경계로 나뉜다", () => {
+test("레벨은 적중 비율 1/3·2/3 을 경계로 나뉜다", () => {
   const withAccuracy = (accuracy: number) => [100, 0, accuracy, 0, 100];
-  assert.equal(resolveCharacter(withAccuracy(39)).level, 1);
-  assert.equal(resolveCharacter(withAccuracy(40)).level, 2);
-  assert.equal(resolveCharacter(withAccuracy(69)).level, 2);
-  assert.equal(resolveCharacter(withAccuracy(70)).level, 3);
+  assert.equal(resolveCharacter(withAccuracy(33)).level, 1);
+  assert.equal(resolveCharacter(withAccuracy(34)).level, 2);
+  assert.equal(resolveCharacter(withAccuracy(66)).level, 2);
+  assert.equal(resolveCharacter(withAccuracy(67)).level, 3);
+});
+
+test("채점 결과가 있으면 그 레벨을 그대로 쓴다", () => {
+  const scores = [100, 0, 80, 0, 100];
+  assert.equal(resolveCharacter(scores, 1).level, 1);
+  assert.equal(resolveCharacter(scores).level, 3);
 });
 
 test("정확 기본값은 레벨 2 다", () => {
   assert.equal(resolveCharacter(computeAbilityScores([], sectorOf).scores).level, 2);
+});
+
+// ── 정확 채점 ────────────────────────────────────────────────────────
+const closes = (...pairs: [string, number][]) => pairs.map(([date, close]) => ({ date, close }));
+// 8/3 에 사면 다음 거래일부터 다섯 번째인 8/10 종가로 채점한다.
+const WEEK = closes(
+  ["2026-08-03", 100],
+  ["2026-08-04", 101],
+  ["2026-08-05", 102],
+  ["2026-08-06", 103],
+  ["2026-08-07", 104],
+  ["2026-08-10", 120],
+  ["2026-08-11", 121],
+);
+const buyAt = (date: string, price: number) => ({ symbol: "A", price, tradedAt: `${date}T01:00:00.000Z` });
+const sellAt = (date: string) => ({ symbol: "A", tradedAt: `${date}T01:00:00.000Z` });
+
+test("매수는 5거래일 뒤 종가가 체결가보다 높으면 적중", () => {
+  const hit = gradeAccuracy([buyAt("2026-08-03", 100)], [], { A: WEEK });
+  assert.deepEqual([hit.graded, hit.hits, hit.pending], [1, 1, 0]);
+  assert.equal(hit.accuracy, 100);
+  assert.equal(hit.level, 3);
+
+  const miss = gradeAccuracy([buyAt("2026-08-03", 130)], [], { A: WEEK });
+  assert.deepEqual([miss.graded, miss.hits], [1, 0]);
+  assert.equal(miss.accuracy, 0);
+  assert.equal(miss.level, 1);
+});
+
+test("매도는 5거래일 뒤 종가가 매도일 종가보다 낮으면 적중", () => {
+  const falling = closes(
+    ["2026-08-03", 100],
+    ["2026-08-04", 99],
+    ["2026-08-05", 98],
+    ["2026-08-06", 97],
+    ["2026-08-07", 96],
+    ["2026-08-10", 80],
+  );
+  const hit = gradeAccuracy([], [sellAt("2026-08-03")], { A: falling });
+  assert.deepEqual([hit.graded, hit.hits], [1, 1]);
+
+  const miss = gradeAccuracy([], [sellAt("2026-08-03")], { A: WEEK });
+  assert.deepEqual([miss.graded, miss.hits], [1, 0]);
+});
+
+test("5거래일이 안 지났으면 채점하지 않고 보류한다", () => {
+  const short = closes(["2026-08-03", 100], ["2026-08-04", 101]);
+  const out = gradeAccuracy([buyAt("2026-08-03", 100)], [], { A: short });
+  assert.deepEqual([out.graded, out.pending], [0, 1]);
+  assert.equal(out.accuracy, 50);
+  assert.equal(out.level, 2);
+});
+
+test("종가가 없는 종목은 보류로 빠진다", () => {
+  const out = gradeAccuracy([{ symbol: "없음", price: 100, tradedAt: "2026-08-03T01:00:00.000Z" }], [], {});
+  assert.deepEqual([out.graded, out.pending], [0, 1]);
+});
+
+test("적중률은 채점된 거래만으로 낸다", () => {
+  const short = closes(["2026-08-03", 100]);
+  const out = gradeAccuracy(
+    [buyAt("2026-08-03", 100), { symbol: "B", price: 100, tradedAt: "2026-08-03T01:00:00.000Z" }],
+    [],
+    { A: WEEK, B: short },
+  );
+  assert.deepEqual([out.graded, out.hits, out.pending], [1, 1, 1]);
+  assert.equal(out.accuracy, 100);
+});
+
+test("채점 결과가 다섯 축의 정확 자리에 들어간다", () => {
+  const grade = gradeAccuracy([buyAt("2026-08-03", 100)], [], { A: WEEK });
+  const out = computeAbilityScores([buy("259960", "buy_news")], sectorOf, grade.accuracy);
+  assert.equal(out.scores[2], 100);
+});
+
+test("kstDateOf 는 UTC 시각을 KST 날짜로 옮긴다", () => {
+  assert.equal(kstDateOf("2026-08-03T16:00:00.000Z"), "2026-08-04");
+  assert.equal(kstDateOf("2026-08-03T14:59:00.000Z"), "2026-08-03");
 });
