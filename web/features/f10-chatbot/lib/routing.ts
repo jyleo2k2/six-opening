@@ -3364,6 +3364,44 @@ function serviceHowToReply(
   });
 }
 
+const ARCHIVE_ABILITY_DEFINITIONS = [
+  {
+    aliases: ["집중", "집중력", "확신", "몰아담기"],
+    text: "집중은 가진 회사를 적은 업종에 모아 담고 현금을 적게 둘수록 높게 나타날 수 있는 축이에요. 아카이브에서는 이를 ‘확신한 곳에 몰아 담는 정도’라고도 쉽게 말해요. 높고 낮음이 좋고 나쁨을 가르는 점수는 아니에요.",
+  },
+  {
+    aliases: ["분산", "분산력", "나눠담기"],
+    text: "분산은 가진 회사를 여러 업종에 나누어 담는 쪽을 보여주는 축이에요. 집중과 한 쌍이라 어느 한쪽이 더 좋다는 뜻은 아니에요.",
+  },
+  {
+    aliases: ["정확", "정확력", "맞힌정도"],
+    text: "정확은 거래 뒤 가격 방향을 확인해 보는 축이에요. 한 번의 결과로 실력을 판단하지 않고, 기록이 쌓이며 함께 살펴봐요.",
+  },
+  {
+    aliases: ["직관", "직관력", "빠른결정"],
+    text: "직관은 자료를 오래 살피기보다 빠르게 결정한 기록을 보여주는 축이에요. 근거와 한 쌍이며 어느 쪽이 더 좋다는 뜻은 아니에요.",
+  },
+  {
+    aliases: ["근거", "근거력", "자료확인"],
+    text: "근거는 매수 전에 뉴스·기업 정보·차트 같은 자료를 확인한 기록을 보여주는 축이에요. 점수로 너를 평가하는 기능은 아니에요.",
+  },
+] as const;
+
+function getArchiveAbilityReply(message: string, context: ChatContext): ChatReply | null {
+  if (
+    context.screen !== "archive" ||
+    message.includes("확신도") ||
+    !includesAny(message, ["뭐야", "무슨뜻", "뜻", "의미", "설명", "알려줘"])
+  ) {
+    return null;
+  }
+
+  const ability = ARCHIVE_ABILITY_DEFINITIONS.find(({ aliases }) => includesAny(message, aliases));
+  if (!ability) return null;
+
+  return serviceHowToReply(ability.text, "성향 화면 보기", "archive", { archiveTab: "report" });
+}
+
 function isNavigationQuestion(message: string) {
   return includesAny(message, [
     "어디",
@@ -3898,6 +3936,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
 
   const archiveManagementReply = getArchiveManagementReply(message);
   if (archiveManagementReply) return archiveManagementReply;
+
+  const archiveAbilityReply = getArchiveAbilityReply(message, context);
+  if (archiveAbilityReply) return archiveAbilityReply;
 
   // 안전·개인정보·규칙 안내 뒤에는 승인된 화면 용어를 먼저 설명한다.
   // "목표 가격"처럼 매매 요청과 같은 단어를 쓰더라도, 단순 용어 질문은

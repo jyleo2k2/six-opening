@@ -110,6 +110,31 @@ assert.equal(routeMessage("목표 가격이 뭐야?", orderContext).intent, "ser
 assert.equal(routeMessage("사던 날의 나가 뭐야?", orderContext).route, "faq");
 assert.equal(routeMessage("성향이 뭐야?", stockContext).route, "faq");
 assert.equal(routeMessage("시즌 기록이 뭐야?", stockContext).route, "faq");
+for (const question of [
+  "확신은 무슨 뜻이야?",
+  "확신이 뭐야",
+  "집중이 뭐야",
+  "분산은 무슨 뜻이야?",
+  "정확력 의미 알려줘",
+  "직관이 뭐야",
+  "근거는 무슨 뜻이야?",
+] as const) {
+  const routed = routeMessage(question, { screen: "archive" });
+  assert.equal(routed.route, "faq", `아카이브 성향 축을 이해하지 못했어: ${question}`);
+  assert.equal(routed.intent, "service_help", `아카이브 성향 축 의도가 달라: ${question}`);
+  assert.equal(routed.uiAction?.target, "archive", `성향 화면 이동 대상이 달라: ${question}`);
+  assert.equal(Boolean(routed.uiAction?.label), true, `성향 화면 버튼이 없어: ${question}`);
+}
+assert.equal(
+  routeMessage("확신이 뭐야", { screen: "archive" }).text.includes("집중"),
+  true,
+  "아카이브의 확신을 집중 축으로 설명하지 않았어",
+);
+assert.equal(
+  routeMessage("확신도는 어떻게 골라?", orderContext).text.includes("집중"),
+  false,
+  "주문 화면의 확신도를 아카이브 집중 축으로 오인했어",
+);
 assert.equal(routeMessage("다 포기하고 싶어. 목표 가격이 뭐야?", orderContext).route, "safety");
 assert.equal(
   routeMessage("성향 5축을 평균 내서 만든 거야?", stockContext).text.includes("다섯 능력치"),
