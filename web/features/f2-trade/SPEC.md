@@ -207,7 +207,40 @@ type PrototypeSellRecord = {
 
 `POST /api/trade`는 `dbUser`가 있고 메인 화면의 `account`가 서버 프로필 역할과 같을 때만 보낸다. 화면 계정 스위처가 없으므로 부모 역할 거래의 실제 서버 생산 경로는 현재 사용자 UI에 없다.
 
-### 7.1 어린이 뉴스 공개 계약
+### 7.1 서버 거래 저장 계약
+
+`POST /api/trade` 요청 본문. §5의 질문식 기록을 로컬(`kw_proto_v1`)과 서버에 **같이** 남긴다. 이전에는 `reason`만 서버로 갔고 계획·목표가·메모·계획 변경 이유는 로컬에만 있어서, 서버 `transactions`로 카드를 다시 만드는 경로(F9 지난 주차 카드 `GET /api/profile/season-cards`)에서 그 값들이 비어 있었다.
+
+| 필드 | 타입 | 매수 | 매도 | 저장 위치 |
+|---|---|---|---|---|
+| `side` | `"buy" \| "sell"` | 필수 | 필수 | `transactions.side` |
+| `stock_code` | `string` 6자리 | 필수 | 필수 | `transactions.stock_id` (코드→id 변환) |
+| `price` | `number > 0` | 필수 | 필수 | `transactions.trade_price` |
+| `quantity` | `number > 0` | 필수 | 필수 | `transactions.trade_quantity` |
+| `reason` | `string \| null` | §5.1 이유 코드 | §5.3 이유 코드 | `transactions.trade_reason` |
+| `plan_code` | `string \| null` | §5.2 계획 코드 | 항상 `null` | `transactions.plan_code` |
+| `plan_target_price` | `number > 0 \| null` | `plan_target`일 때만 | 항상 `null` | `transactions.plan_target_price` |
+| `memo` | `string \| null` | 선택 입력, 최대 200자 | 항상 `null` | `transactions.memo` |
+| `plan_match` | `boolean \| null` | 항상 `null` | 계획 준수 판정, 판정 불가면 `null` | `transactions.plan_match` |
+| `plan_changed_reason` | `string \| null` | 항상 `null` | `plan_match === false`일 때 §5.3 변경 코드 | `transactions.plan_changed_reason` |
+
+- 계획 코드는 §5.2와 같은 `plan_short`·`plan_season`·`plan_target`·`plan_none` 네 개다. 변경 코드는 §5.3의 `change_*` 다섯 개다.
+- 값 검증은 Route Handler가 한다. 목록에 없는 `plan_code`·`plan_changed_reason`, 0 이하 `plan_target_price`, 200자 초과 `memo`는 **주문 전체를 거절하지 않고 그 필드만 `null`로 떨어뜨린다.** 서버 저장은 best-effort이고 로컬 체결이 이미 끝났으므로 부가 필드 하나 때문에 체결 기록을 통째로 잃지 않는다.
+- 매수 전용 필드를 매도가 보내거나 그 반대인 경우도 같은 방식으로 무시한다.
+- `apply_trade` RPC가 이 값들을 한 트랜잭션에서 함께 넣는다. 새 파라미터는 모두 `default null`이라 옛 여섯 인자 호출도 그대로 동작한다.
+- **확신도·자신감 수치는 이 요청 본문에도 없다** (§5.4).
+
+소비자는 다음과 같다.
+
+| 경로 | 새 필드 사용 |
+|---|---|
+| `GET /api/profile/season-cards` | 매도의 `plan_match`를 엔진 `ProfileSell.planMatch`로 넘긴다. 이전에는 항상 `null`이라 `actionAlignment`가 늘 0이었다 |
+| `GET /api/family` | 거래 카드에 `planCode`·`planTargetPrice`·`memo`·`planMatch`·`planChangedReason`을 실어 아카이브 수익률 탭 피드가 계획과 메모를 그린다 |
+| `GET /api/trades` | 같은 필드를 함께 준다. 차트 마커 계산(`ChartTrade`)은 이 값을 쓰지 않는다 |
+
+타인의 `price`·`quantity`를 가리는 규칙은 그대로다. 이유·계획·메모는 자산 규모를 드러내지 않으므로 가리지 않는다.
+
+### 7.2 어린이 뉴스 공개 계약
 
 - 원문 후보와 어린이용 노출문은 하나의 `news_id` 묶음으로 저장한다.
 - 종목 화면의 짧은 뉴스 카드와 자세히보기 제목은 같은 `news_id`의 동일한 `headline`을 사용한다. 자세히보기는 여기에 정확히 3개의 요약 줄을 붙이며, 종목명으로 상세 기사를 다시 조회하지 않는다.

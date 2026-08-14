@@ -175,7 +175,16 @@ export function settleScheduledOrder({ account, records, sellRecords, order, can
       account: next,
       records,
       sellRecords: replaceRecord(sellRecords, order.id, patch),
-      effect: { type: "filled", side: "sell", orderId: order.id, code: order.code, price, qty, reason: record.sell_reason_code },
+      // plan 은 서버 저장 계약(F2 SPEC §7.1)이 요구하는 부가 필드다. 주문 접수 때 고른 값을
+      // 그대로 옮긴다 — 예약 체결은 사용자가 다시 답하지 않으므로 새로 판정하지 않는다.
+      effect: {
+        type: "filled", side: "sell", orderId: order.id, code: order.code, price, qty,
+        reason: record.sell_reason_code,
+        plan: {
+          plan_match: typeof record.plan_match === "boolean" ? record.plan_match : null,
+          plan_changed_reason: record.change_reason_code ?? null,
+        },
+      },
     };
   }
 
@@ -196,6 +205,14 @@ export function settleScheduledOrder({ account, records, sellRecords, order, can
     account: next,
     records: replaceRecord(records, order.id, patch),
     sellRecords,
-    effect: { type: "filled", side: "buy", orderId: order.id, code: order.code, price, qty, reason: record.reason_code },
+    effect: {
+      type: "filled", side: "buy", orderId: order.id, code: order.code, price, qty,
+      reason: record.reason_code,
+      plan: {
+        plan_code: record.plan_code ?? null,
+        plan_target_price: record.plan_target_price ?? null,
+        memo: record.memo ?? null,
+      },
+    },
   };
 }

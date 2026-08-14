@@ -11,6 +11,51 @@ const isSide = (value: unknown): value is "buy" | "sell" => value === "buy" || v
 const positiveNumber = (value: unknown) =>
   typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
 
+/** F2 SPEC §5.2 보유 계획. 화면 상수(`ui-src/logic/constants.js`)의 `PLANS` 와 같은 목록이다. */
+const PLAN_CODES = ["plan_short", "plan_season", "plan_target", "plan_none"];
+/** F2 SPEC §5.3 계획 변경 이유. 같은 파일의 `CHANGES` 와 같은 목록이다. */
+const PLAN_CHANGED_REASONS = [
+  "change_new_info",
+  "change_view_shift",
+  "change_price_emotion",
+  "change_alternative",
+  "change_plan_revision",
+];
+const MEMO_MAX_LENGTH = 200;
+
+const codeIn = (allowed: readonly string[], value: unknown) =>
+  typeof value === "string" && allowed.includes(value) ? value : null;
+
+/**
+ * 질문식 기록의 부가 필드를 RPC 인자로 옮긴다 (F2 SPEC §7.1).
+ *
+ * 하나가 틀려도 주문을 거절하지 않고 그 필드만 버린다. 서버 저장은 best-effort 이고
+ * 로컬 체결은 이미 끝났으므로, 메모 한 줄 때문에 체결 기록 전체를 잃는 쪽이 더 나쁘다.
+ * 매수 전용·매도 전용 필드는 반대쪽에서 오면 여기서 지운다. DB 함수도 같은 판단을 한 번 더 한다.
+ */
+export function planFields(side: "buy" | "sell", payload: Record<string, unknown>) {
+  if (side === "buy") {
+    const memo = typeof payload.memo === "string" ? payload.memo.trim() : "";
+    return {
+      p_plan_code: codeIn(PLAN_CODES, payload.plan_code),
+      p_plan_target_price: positiveNumber(payload.plan_target_price),
+      p_memo: memo && memo.length <= MEMO_MAX_LENGTH ? memo : null,
+      p_plan_match: null,
+      p_plan_changed_reason: null,
+    };
+  }
+  const planMatch = typeof payload.plan_match === "boolean" ? payload.plan_match : null;
+  return {
+    p_plan_code: null,
+    p_plan_target_price: null,
+    p_memo: null,
+    p_plan_match: planMatch,
+    // 계획을 지켰거나 판정 자체가 없으면 변경 이유는 남기지 않는다.
+    p_plan_changed_reason:
+      planMatch === false ? codeIn(PLAN_CHANGED_REASONS, payload.plan_changed_reason) : null,
+  };
+}
+
 /**
  * 체결된 주문 하나를 저장한다.
  * 잔액 차감·보유수량 갱신·transactions 기록은 apply_trade 함수 한 트랜잭션에서 처리하므로
@@ -45,6 +90,7 @@ export async function POST(request: NextRequest) {
       p_price: price,
       p_quantity: quantity,
       p_reason: reason,
+      ...planFields(side, payload),
     });
     console.info(
       JSON.stringify({ event: "trade_saved", userId, stockCode, side, transactionId: result.transaction_id }),

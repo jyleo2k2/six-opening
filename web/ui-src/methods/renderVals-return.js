@@ -312,7 +312,9 @@
           orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null, requestMode:byQty ? 'qty' : 'amount' }
         });
         if (!isLimit && !isScheduled) {
-          this.saveTrade('buy', st.code, price, qty, s.draft.reason);
+          this.saveTrade('buy', st.code, price, qty, s.draft.reason, {
+            plan_code: rec.plan_code, plan_target_price: rec.plan_target_price, memo: rec.memo
+          });
           this.flushTabViews(st.code);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
         }
@@ -655,7 +657,9 @@
           sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null }
         });
         if (isLimit || isScheduled) return;
-        this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, null);
+        this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, {
+          plan_match: rec.plan_match, plan_changed_reason: rec.change_reason_code
+        });
         const behaviorEvent = { kind:'trade_filled', stockId:'KRX:' + st.code, side:'sell' };
         if (heldRow && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
           behaviorEvent.realizedPnlPct = (price - heldAvg) / heldAvg * 100;

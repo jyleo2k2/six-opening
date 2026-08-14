@@ -27,6 +27,7 @@ type TransactionRow = {
   trade_price: number | string;
   trade_quantity: number | string;
   trade_reason: string | null;
+  plan_match: boolean | null;
   created_at: string;
 };
 type StockRow = { stock_id: number; stock_code: string; category: string | null };
@@ -104,7 +105,7 @@ const defaultDeps: SeasonCardsDeps = {
 export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = defaultDeps) {
   const [transactions, stocks, holdingRows, accounts, tabViewRows] = await Promise.all([
     selectRows<TransactionRow>("transactions", {
-      select: "id,stock_id,side,trade_price,trade_quantity,trade_reason,created_at",
+      select: "id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_match,created_at",
       user_id: `eq.${userId}`,
       order: "created_at.asc",
     }),
@@ -145,8 +146,16 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
         tradedAt: row.created_at,
       });
     } else {
-      // 계획 일치 여부는 DB 에 없다 — 이 경로의 actionAlignment 는 항상 0 이다.
-      sells.push({ id: row.id, symbol, quantity, price, tradedAt: row.created_at, planMatch: null });
+      // 계획 준수 여부는 F2 SPEC §7.1 이후 `transactions.plan_match` 에 있다.
+      // 그 전에 저장된 매도는 여전히 null 이고, 엔진은 null 을 판정 대상에서 뺀다.
+      sells.push({
+        id: row.id,
+        symbol,
+        quantity,
+        price,
+        tradedAt: row.created_at,
+        planMatch: typeof row.plan_match === "boolean" ? row.plan_match : null,
+      });
     }
   }
 

@@ -40,7 +40,7 @@
         this.persist(Object.assign({}, state, patch));
         this.setState(patch, () => {
           effects.filter(effect => effect.type === 'filled').forEach(effect => {
-            this.saveTrade(effect.side, effect.code, effect.price, effect.qty, effect.reason);
+            this.saveTrade(effect.side, effect.code, effect.price, effect.qty, effect.reason, effect.plan);
             if (effect.side === 'buy') this.flushTabViews(effect.code);
             this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + effect.code, side:effect.side });
           });

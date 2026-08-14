@@ -95,6 +95,46 @@ test("매도 예약은 시가에 한 번 체결해 보유 수량과 현금을 �
   assert.equal(second.effect, null);
 });
 
+// 예약 체결은 사용자가 이유·계획을 다시 답하지 않는다. 주문 접수 때 고른 값을 그대로
+// 서버로 실어야 아카이브 카드가 비지 않는다 (F2 SPEC §7.1).
+test("예약 체결 effect 는 접수 때 고른 계획·메모를 그대로 싣는다", () => {
+  const buyOrder = { id: "ord_plan", kind: "next_open", side: "buy", code: "005930", requestMode: "amount", reservedAmount: 1000 };
+  const buy = settleScheduledOrder({
+    account: { name: "아이", cash: 9000, holdings: [], pending: [buyOrder] },
+    records: [{
+      order_id: "ord_plan", order_status: "scheduled", reason_code: "buy_news",
+      plan_code: "plan_target", plan_target_price: 1200, memo: "목표 오면 팔기",
+    }],
+    sellRecords: [], order: buyOrder, candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
+  });
+  assert.deepEqual(buy.effect?.plan, {
+    plan_code: "plan_target", plan_target_price: 1200, memo: "목표 오면 팔기",
+  });
+
+  const sellOrder = { id: "ord_plan_sell", kind: "next_open", side: "sell", code: "005930", reservedQty: 1, reservationMode: "held" };
+  const sell = settleScheduledOrder({
+    account: { name: "아이", cash: 0, holdings: [{ code: "005930", qty: 2, avg: 80 }], pending: [sellOrder] },
+    records: [],
+    sellRecords: [{
+      order_id: "ord_plan_sell", order_status: "scheduled", sell_reason_code: "sell_fear_drop",
+      plan_match: false, change_reason_code: "change_price_emotion",
+    }],
+    order: sellOrder, candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
+  });
+  assert.deepEqual(sell.effect?.plan, {
+    plan_match: false, plan_changed_reason: "change_price_emotion",
+  });
+
+  // 계획을 안 고른 옛 기록은 null 로 내려간다 — 서버가 그대로 비운다
+  const bare = settleScheduledOrder({
+    account: { name: "아이", cash: 9000, holdings: [], pending: [{ ...buyOrder, id: "ord_bare" }] },
+    records: [{ order_id: "ord_bare", order_status: "scheduled", reason_code: "buy_news" }],
+    sellRecords: [], order: { ...buyOrder, id: "ord_bare" },
+    candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
+  });
+  assert.deepEqual(bare.effect?.plan, { plan_code: null, plan_target_price: null, memo: null });
+});
+
 test("구버전 지정가 매도는 한 번만 보유 수량으로 복구해 자산 증발을 막는다", () => {
   const legacy = { name: "아이", cash: 0, holdings: [], pending: [{ id: "ord_4", side: "sell", code: "005930", qty: 2, price: 100 }] };
   const migrated = migrateLegacyAccount(legacy, [{ order_id: "ord_4", avg: 80 }]);

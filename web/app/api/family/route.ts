@@ -12,6 +12,11 @@ type TransactionRow = {
   trade_price: number | string;
   trade_quantity: number | string;
   trade_reason: string | null;
+  plan_code: string | null;
+  plan_target_price: number | string | null;
+  memo: string | null;
+  plan_match: boolean | null;
+  plan_changed_reason: string | null;
   created_at: string;
   stocks: { stock_code: string; stock_name: string } | null;
 };
@@ -47,7 +52,9 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
 
   const [transactions, behaviorProfiles] = await Promise.all([
     deps.selectTransactions({
-      select: "id,user_id,side,trade_price,trade_quantity,trade_reason,created_at,stocks(stock_code,stock_name)",
+      select:
+        "id,user_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
+        "memo,plan_match,plan_changed_reason,created_at,stocks(stock_code,stock_name)",
       user_id: `in.(${memberIds.join(",")})`,
       order: "created_at.desc",
     }),
@@ -87,6 +94,14 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
         price: own ? Number(row.trade_price) : null,
         quantity: own ? Number(row.trade_quantity) : null,
         reason: row.trade_reason?.trim() || "이유를 남기지 않았어요.",
+        // 이유 코드 원본. 화면이 코드를 문구로 바꾼다 — `reason` 은 코드가 없을 때의 대체 문구다.
+        reasonCode: row.trade_reason?.trim() || null,
+        // 계획·메모는 자산 규모가 아니라 가리지 않는다 (F2 SPEC §7.1).
+        planCode: row.plan_code,
+        planTargetPrice: row.plan_target_price === null ? null : Number(row.plan_target_price),
+        memo: row.memo?.trim() || null,
+        planMatch: row.plan_match,
+        planChangedReason: row.plan_changed_reason,
         tradedAt: row.created_at,
       }];
     }),
