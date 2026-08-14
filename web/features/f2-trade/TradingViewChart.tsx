@@ -172,6 +172,13 @@ export function TradingViewChart({ symbol, period, chartType }: {
   chartType: PrototypeChartType;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  /** 차트·시리즈 인스턴스. 1초 재조회로 `points` 가 바뀔 때마다 다시 만들지 않고 데이터만 갈아끼운다. */
+  const chartRef = useRef<IChartApi | null>(null);
+  const seriesRef = useRef<ISeriesApi<SeriesType, Time> | null>(null);
+  /** 마커 좌표를 매 프레임 다시 잡는 루프(아래)가 읽는다. 데이터가 갱신될 때만 바뀐다. */
+  const markersRef = useRef<readonly TradeMarker[]>([]);
+  /** 이 차트 인스턴스에서 초기 가시 구간을 이미 잡았는지. 1초 재조회마다 다시 잡으면 스크롤·확대가 튄다. */
+  const hasFitRef = useRef(false);
   const [shown, setShown] = useState({ period, chartType });
   const [points, setPoints] = useState<ChartPoint[] | null>(null);
   const [state, setState] = useState<LoadState>("loading");
@@ -244,7 +251,13 @@ export function TradingViewChart({ symbol, period, chartType }: {
     };
   }, []);
 
-  // 데이터는 종목·기간에만 달려 있다. 선↔캔들 전환은 여기를 다시 타지 않는다.
+  /**
+   * 데이터는 종목·기간에만 달려 있다. 선↔캔들 전환은 여기를 다시 타지 않는다.
+   *
+   * 실시간처럼 보이게 1초마다 전체를 다시 받는다. 토스 초당 15건 한도 안에서 종목 하나당
+   * 초당 1건이면 여유가 크다 — 마지막 봉만 병합하는 대신 그냥 전체를 다시 그린다.
+   * 겹치는 요청은 만들지 않는다: 이전 틱이 아직 안 끝났으면 다음 setInterval 호출을 건너뛴다.
+   */
   useEffect(() => {
     const controller = new AbortController();
     setPoints(null);
@@ -253,20 +266,39 @@ export function TradingViewChart({ symbol, period, chartType }: {
     setPlaced([]);
     setFound(0);
 
-    fetch(`/api/quote/${encodeURIComponent(symbol)}/chart?period=${shownPeriod}`, {
-      signal: controller.signal,
-    })
-      .then((response) => response.ok ? response.json() : Promise.reject(new Error("chart request failed")))
-      .then((payload: unknown) => {
-        const received = parseChartPoints(payload);
-        if (!received.length) throw new Error("empty chart");
-        setPoints(received);
+    let fetching = false;
+    const load = () => {
+      if (fetching) return;
+      fetching = true;
+      fetch(`/api/quote/${encodeURIComponent(symbol)}/chart?period=${shownPeriod}`, {
+        signal: controller.signal,
+        cache: "no-store",
       })
-      .catch(() => {
-        if (!controller.signal.aborted) setState("error");
-      });
+        .then((response) => response.ok ? response.json() : Promise.reject(new Error("chart request failed")))
+        .then((payload: unknown) => {
+          const received = parseChartPoints(payload);
+          if (!received.length) throw new Error("empty chart");
+          setPoints(received);
+        })
+        .catch(() => {
+          // 최초 로드 실패만 화면을 에러로 바꾼다. 이미 보여주고 있는 값이 있으면
+          // 그 틱의 실패는 무시하고 다음 1초 뒤에 다시 시도한다.
+          if (!controller.signal.aborted) {
+            setState((current) => (current === "loading" ? "error" : current));
+          }
+        })
+        .finally(() => {
+          fetching = false;
+        });
+    };
 
-    return () => controller.abort();
+    load();
+    const timer = window.setInterval(load, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+      controller.abort();
+    };
   }, [shownPeriod, symbol]);
 
   /**
@@ -287,9 +319,16 @@ export function TradingViewChart({ symbol, period, chartType }: {
     return () => controller.abort();
   }, [symbol]);
 
+  /**
+   * 차트·시리즈 생명주기. 종목·기간·차트종류가 바뀔 때만 다시 만든다.
+   *
+   * `points` 는 여기 의존성에 없다 — 1초마다 갱신되는 값을 여기 넣으면 매초 차트를
+   * 통째로 새로 만들어 스크롤·확대가 초기화되고 깜빡인다. 데이터 반영은 아래
+   * 데이터 갱신 effect 가 기존 시리즈에 `setData` 로만 반영한다.
+   */
   useEffect(() => {
     const container = containerRef.current;
-    if (!points || !container) return;
+    if (!container) return;
 
     const up = token("--color-up", "#E8322E");
     const down = token("--color-down", "#1668DC");
@@ -317,47 +356,28 @@ export function TradingViewChart({ symbol, period, chartType }: {
       },
       crosshair: { vertLine: { color: gray }, horzLine: { color: gray } },
     });
-    let series: ISeriesApi<SeriesType, Time>;
-    if (shownChartType === "line") {
-      const line = chart.addSeries(LineSeries, {
-        color: up,
-        lineWidth: 3,
-        priceLineVisible: true,
-        lastValueVisible: true,
-      });
-      line.setData(points.map((point) => ({
-        time: point.time as UTCTimestamp,
-        value: point.close,
-      })));
-      series = line;
-    } else {
-      const candles = chart.addSeries(CandlestickSeries, {
-        upColor: up,
-        downColor: down,
-        borderUpColor: up,
-        borderDownColor: down,
-        wickUpColor: up,
-        wickDownColor: down,
-        priceLineVisible: true,
-        lastValueVisible: true,
-      });
-      candles.setData(points.map((point) => ({
-        time: point.time as UTCTimestamp,
-        open: point.open,
-        high: point.high,
-        low: point.low,
-        close: point.close,
-      })));
-      series = candles;
-    }
+    const series: ISeriesApi<SeriesType, Time> =
+      shownChartType === "line"
+        ? chart.addSeries(LineSeries, {
+            color: up,
+            lineWidth: 3,
+            priceLineVisible: true,
+            lastValueVisible: true,
+          })
+        : chart.addSeries(CandlestickSeries, {
+            upColor: up,
+            downColor: down,
+            borderUpColor: up,
+            borderDownColor: down,
+            wickUpColor: up,
+            wickDownColor: down,
+            priceLineVisible: true,
+            lastValueVisible: true,
+          });
 
-    // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
-    const markers = MARKER_PERIODS.includes(shownPeriod)
-      ? buildTradeMarkers({ trades, candleTimes: points.map((point) => point.time) })
-      : [];
-    setFound(markers.length);
-
-    showRecentBars(chart, points.length, shownPeriod);
+    chartRef.current = chart;
+    seriesRef.current = series;
+    hasFitRef.current = false;
 
     /**
      * 좌표를 매 프레임 다시 읽는다.
@@ -368,11 +388,12 @@ export function TradingViewChart({ symbol, period, chartType }: {
      * 마찬가지여서, 축이 아직 폭을 못 잡은 사이에 읽으면 `timeToCoordinate` 가 `null`
      * 을 주고 마커가 통째로 사라진다.
      *
-     * 좌표가 그대로면 상태를 갱신하지 않으므로 다시 그리지 않는다.
+     * 좌표가 그대로면 상태를 갱신하지 않으므로 다시 그리지 않는다. 마커 목록 자체는
+     * `markersRef` 로 받는다 — 데이터 갱신 effect 가 갈아끼우는 값을 매 프레임 최신으로 읽는다.
      */
     let frame = 0;
     const follow = () => {
-      const next = placeMarkers(markers, chart, series);
+      const next = placeMarkers(markersRef.current, chart, series);
       setPlaced((current) => (samePlacement(current, next) ? current : next));
       setPane((current) => {
         const { width, height } = chart.paneSize();
@@ -388,14 +409,57 @@ export function TradingViewChart({ symbol, period, chartType }: {
       chart.applyOptions({ width: Math.max(1, Math.floor(entry.contentRect.width)) });
     });
     observer.observe(container);
-    setState("ready");
 
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
       chart.remove();
+      chartRef.current = null;
+      seriesRef.current = null;
     };
-  }, [points, shownChartType, shownPeriod, symbol, trades]);
+  }, [shownChartType, shownPeriod, symbol]);
+
+  /**
+   * 데이터 갱신. `points`(1초마다 새로 받음)가 바뀔 때마다 기존 시리즈에 값만 갈아끼운다.
+   *
+   * 차트를 다시 만들지 않으므로 사용자가 스크롤·확대해 둔 위치가 그대로 유지된다.
+   * 최초 데이터가 들어왔을 때만 `showRecentBars` 로 보여줄 구간을 잡고, 그 뒤 틱은
+   * 사용자가 보고 있는 구간을 건드리지 않는다.
+   */
+  useEffect(() => {
+    const chart = chartRef.current;
+    const series = seriesRef.current;
+    if (!points || !chart || !series) return;
+
+    if (shownChartType === "line") {
+      series.setData(points.map((point) => ({
+        time: point.time as UTCTimestamp,
+        value: point.close,
+      })));
+    } else {
+      series.setData(points.map((point) => ({
+        time: point.time as UTCTimestamp,
+        open: point.open,
+        high: point.high,
+        low: point.low,
+        close: point.close,
+      })));
+    }
+
+    // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
+    const markers = MARKER_PERIODS.includes(shownPeriod)
+      ? buildTradeMarkers({ trades, candleTimes: points.map((point) => point.time) })
+      : [];
+    markersRef.current = markers;
+    setFound(markers.length);
+
+    if (!hasFitRef.current) {
+      showRecentBars(chart, points.length, shownPeriod);
+      hasFitRef.current = true;
+    }
+
+    setState("ready");
+  }, [points, shownChartType, shownPeriod, trades]);
 
   return (
     <main className="relative h-[264px] w-full overflow-hidden bg-white">

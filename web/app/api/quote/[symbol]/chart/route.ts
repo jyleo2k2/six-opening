@@ -1,5 +1,5 @@
 import { after, NextResponse } from "next/server";
-import { getChart, refreshStoredChart, type ChartPeriod } from "../../kiwoom";
+import { getChart, refreshStoredChart, type ChartPeriod } from "../../quotes";
 
 export const dynamic = "force-dynamic";
 
