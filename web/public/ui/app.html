@@ -1634,6 +1634,22 @@ function resolveCharacter(scores, level) {
   return { key, level: level || accuracyLevelOf(accuracy / 100) };
 }
 
+/**
+ * 로그인 사용자 행동 데이터(F9-archive SPEC §3.2 대체 입력)로 캐릭터를 정한다.
+ * tab_count 합계가 근거·직관, 거래 종목 수가 집중·분산을 정하고 두 우세의
+ * 조합으로 캐릭터가 나온다. 정확·레벨은 이 함수의 범위 밖이다.
+ *
+ * @param {number} tabCountTotal `stock_tab_views.tab_count` 합계. 0~1 → 직관 우세, 2 이상 → 근거 우세
+ * @param {number} distinctSymbolCount 거래한 종목 수. 2 이하 → 집중 우세, 3 이상 → 분산 우세
+ * @returns {"sniper"|"strategist"|"fighter"|"explorer"}
+ */
+function resolveCharacterFromBehaviorSignals(tabCountTotal, distinctSymbolCount) {
+  const evidenceLeads = tabCountTotal >= 2;
+  const focusLeads = distinctSymbolCount <= 2;
+  if (evidenceLeads) return focusLeads ? "sniper" : "strategist";
+  return focusLeads ? "fighter" : "explorer";
+}
+
 // ── 정확 채점 ──────────────────────────────────────────────────────────
 // 체결 5거래일 뒤 종가로 맞았는지 본다. 매수는 오르면, 매도는 내리면 적중이다.
 
@@ -1797,6 +1813,7 @@ class Component extends DCLogic {
 
   componentDidMount(){
     this.loadDbUser();
+    this.loadBehaviorProfile();
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
@@ -1900,6 +1917,16 @@ class Component extends DCLogic {
     fetch('/api/account', { cache:'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d && d.user_id) this.dbUser = d; })
+      .catch(() => {});
+  }
+
+  // F9-archive SPEC §3.2 대체 입력 — 로그인 사용자의 Supabase 행동 데이터로 낸 캐릭터.
+  // 표본이 없거나 비로그인이면 null 로 남고, buildArchive() 가 기존 로컬 계산으로 폴백한다.
+  loadBehaviorProfile(){
+    this.dbBehavior = null;
+    fetch('/api/profile/behavior', { cache:'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && d.character) { this.dbBehavior = d; this.forceUpdate(); } })
       .catch(() => {});
   }
 
@@ -2221,8 +2248,10 @@ class Component extends DCLogic {
       explorer:   { name:'탐험가', img:'explorer',   pal:['#B2D2C7','#87B6A7','#619484','#1B3F35'],
         desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
     };
-    const typeOf = (sc, level) => {
-      const decided = resolveCharacter(sc, level);
+    // overrideKey 가 있으면 로그인 사용자의 실제 Supabase 행동 데이터(F9-archive SPEC §3.2 대체
+    // 입력)로 정한 캐릭터를 그대로 쓴다. 다섯 축 막대·레벨 산식은 바뀌지 않는다.
+    const typeOf = (sc, level, overrideKey) => {
+      const decided = overrideKey ? { key: overrideKey, level: level } : resolveCharacter(sc, level);
       const t = TYPES[decided.key], lv = decided.level;
       return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
     };
@@ -2238,7 +2267,8 @@ class Component extends DCLogic {
     ];
 
     const mine = scoresOf('child_minji');
-    const myType = typeOf(mine.list, mine.grade.level);
+    const behaviorCharacter = this.dbBehavior && this.dbBehavior.character;
+    const myType = typeOf(mine.list, mine.grade.level, behaviorCharacter);
     const MPL = myType.pal, mInk = MPL[3];
 
     const R = 48, CX = 80, CY = 80;
@@ -2286,7 +2316,8 @@ class Component extends DCLogic {
       // 지난 주 카드는 그 주 기록만으로 다시 낸다. 정확은 그 시점 채점이 없어 기본값이다.
       if (isNow) list = mine.list;
       else list = computeAbilityScores(recs, sectorOfCode).scores;
-      const t = typeOf(list);
+      // 이번 주 카드는 위에서 낸 myType(행동 데이터 오버라이드 포함)과 같은 캐릭터를 써야 한다.
+      const t = isNow ? myType : typeOf(list);
       const mon = new Date(k), sun = new Date(k + 6 * 86400000);
       return {
         week: isNow ? '이번 주' : (mon.getMonth() + 1) + '월 ' + Math.ceil((mon.getDate() + 6) / 7) + '주차',
