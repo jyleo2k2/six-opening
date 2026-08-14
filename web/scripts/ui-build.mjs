@@ -17,6 +17,7 @@ const webRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const APP_HTML = join(webRoot, "public", "ui", "app.html");
 const UI_ROOT = join(webRoot, "public", "ui");
 const UI_SRC = join(webRoot, "ui-src");
+const ENGINE_SOURCE = join(webRoot, "shared", "engine", "archive-profile.js");
 const UI_DIST = join(webRoot, "ui-dist");
 const MANIFEST = join(UI_SRC, "manifest.json");
 
@@ -50,6 +51,13 @@ const SCRIPT_CLOSE = /^<\/script>\s*$/;
 const SC_IF_SCREEN = /^<sc-if value="\{\{ (is\w+) \}\}"/;
 const CLASS_OPEN = /^class Component extends DCLogic \{/;
 const METHOD = /^ {2}([A-Za-z_$][\w$]*)\s*\(/;
+
+// 성향 계산은 `shared/engine/archive-profile.js` 가 원본이고, 화면에는 그 복사본이 들어간다.
+// 아래 두 표식 사이가 복사 구간이다. 조립할 때마다 원본에서 다시 만들어 넣으므로,
+// 원본만 고치고 build 를 안 돌리면 verify 가 어긋난 것을 잡아낸다.
+const ENGINE_BEGIN = /^\/\/ >>> archive-engine/;
+const ENGINE_END = /^\/\/ <<< archive-engine/;
+const ENGINE_CHUNK = "logic/archive-engine.js";
 
 // isHome -> home, isBuy2 -> buy2
 function screenName(flag) {
@@ -159,7 +167,16 @@ function plan(text) {
   }
   if (classOpenLine === -1) throw new Error("class Component 선언을 찾지 못했다");
 
-  push(uniqueName(used, "constants"), "logic", scriptOpenLine + 1, classOpenLine);
+  // 상수 구간 안에 성향 엔진 복사본이 있다. 사이를 잘라 따로 조각으로 뽑는다.
+  const engineFrom = findLine(text, starts, scriptOpenLine + 1, classOpenLine, ENGINE_BEGIN);
+  const engineTo = engineFrom === -1 ? -1 : findLine(text, starts, engineFrom, classOpenLine, ENGINE_END);
+  if (engineFrom !== -1 && engineTo !== -1) {
+    push(uniqueName(used, "constants"), "logic", scriptOpenLine + 1, engineFrom);
+    push(uniqueName(used, "archive-engine"), "logic", engineFrom, engineTo + 1);
+    push(uniqueName(used, "constants-tail"), "logic", engineTo + 1, classOpenLine);
+  } else {
+    push(uniqueName(used, "constants"), "logic", scriptOpenLine + 1, classOpenLine);
+  }
   push(uniqueName(used, "class-open"), "logic", classOpenLine, classOpenLine + 1);
 
   const methods = findMethods(text, starts, classOpenLine + 1, scriptCloseLine);
@@ -196,11 +213,26 @@ function readApp() {
   return readFileSync(APP_HTML, "utf8");
 }
 
+// 엔진 원본을 화면에 넣을 형태로 바꾼다. 모듈이 아닌 <script> 안이라 export 를 떼고,
+// app.html 이 CRLF 라 줄바꿈도 맞춘다.
+function engineChunkText() {
+  // BOM 이 붙은 채로 스크립트 한가운데 들어가면 문법이 깨진다. 편집기가 붙여도 여기서 뗀다.
+  const source = readFileSync(ENGINE_SOURCE, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
+  const body = [
+    "// >>> archive-engine — GENERATED from shared/engine/archive-profile.js",
+    "// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.",
+    source.replace(/\n+$/, ""),
+    "// <<< archive-engine",
+    "",
+  ].join("\n");
+  return body.replace(/\r?\n/g, "\r\n");
+}
+
 function assemble(keep = () => true) {
   const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
   return manifest.files
     .filter(keep)
-    .map((file) => readFileSync(join(UI_SRC, file), "utf8"))
+    .map((file) => (file === ENGINE_CHUNK ? engineChunkText() : readFileSync(join(UI_SRC, file), "utf8")))
     .join("");
 }
 

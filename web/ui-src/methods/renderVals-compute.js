@@ -197,34 +197,6 @@
     const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s;' + (on
       ? 'color:#fff;background:#001E5A'
       : 'color:#7C819A;background:#EAEBF3');
-    const myRecs = s.records.filter(r => r.user_id === (s.account === 'child' ? 'child_minji' : 'parent_mom'));
-    const cnt = {};
-    myRecs.forEach(r => { cnt[r.reason_code] = (cnt[r.reason_code] || 0) + 1; });
-    const reasonStats = REASONS.filter(r => cnt[r.code]).map(r => ({
-      emoji: r.emoji, label: r.label, n: cnt[r.code],
-      pct: Math.round(cnt[r.code] / myRecs.length * 100) + '%',
-      barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:#F5327F'
-    })).sort((a, b) => b.n - a.n);
-    const infoShare = myRecs.length ? myRecs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / myRecs.length : 0;
-    const seasonShare = myRecs.length ? myRecs.filter(r => r.plan_code === 'plan_season').length / myRecs.length : 0;
-    const AXES = [
-      { axis:'집중–분산', left:'한우물형', right:'골고루형', child: Math.min(95, 30 + (m.holdings.length * 18)), parent: 41 },
-      { axis:'속도',      left:'진득이형', right:'재빨리형', child: Math.round(30 + (1 - seasonShare) * 55), parent: 22 },
-      { axis:'신중함',    left:'직진형',   right:'돌다리형', child: Math.round(20 + infoShare * 60), parent: 79 },
-      { axis:'손실 대응', left:'버티기형', right:'갈아타기형', child: Math.round(30 + ((s.sellRecords || []).filter(r => r.sell_reason_code === 'sell_fear_drop' || r.sell_reason_code === 'sell_anxiety').length ? 45 : 15)), parent: 35 },
-      { axis:'탐험심',    left:'익숙함형', right:'개척자형', child: Math.min(95, 35 + myRecs.length * 12), parent: 30 }
-    ];
-    const axes = AXES.map(a => ({
-      axis: a.axis, left: a.left, right: a.right,
-      leftStyle: 'font-size:12.5px;font-weight:' + (a.child < 50 ? '600' : '500') + ';color:' + (a.child < 50 ? '#01185A' : '#B6BACB'),
-      rightStyle: 'font-size:12.5px;font-weight:' + (a.child >= 50 ? '600' : '500') + ';color:' + (a.child >= 50 ? '#01185A' : '#B6BACB'),
-      barStyle: 'width:' + a.child + '%;height:100%;border-radius:999px;background:#01185A'
-    }));
-    const styleName = myRecs.length === 0 ? '아직 기록 전이야'
-      : (AXES[4].child >= 60 ? '재빨리 개척자형!' : infoShare >= 0.6 ? '차근차근 탐험가형!' : '마음따라 모험가형!');
-    const coachText = myRecs.length === 0
-      ? '아직 산 게 없어. 한 번 사고 나면 이번 주 어떤 스타일이었는지 알려줄게.'
-      : (m.name + '는 이번 주에 ' + myRecs.length + '번 샀어. ' + (infoShare >= 0.5 ? '뉴스나 그래프처럼 근거를 보고 고르는 편이었어.' : '마음이 끌리는 쪽으로 고르는 편이었어.'));
     const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8' };
     const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:#F4F4FA,0 0 0 1.5px ' + sec.accent + '33';
 

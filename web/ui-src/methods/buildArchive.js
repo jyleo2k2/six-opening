@@ -20,21 +20,16 @@
     const shown = MEMBERS.filter(x => who === 'all' || x.key === who);
 
     // ── 성향 다섯 축 ──────────────────────────────────────────────
-    // 팀원이 산출식을 주면 아래 score 다섯 개만 갈아끼우면 된다. '정확'은 아직 50 고정.
+    // 산출식은 shared/engine/archive-profile.js 가 갖고 있다. 여기서는 부르기만 한다.
+    const sectorOfCode = code => { const st = u.stocks.filter(v => v.code === code)[0]; return st ? st.sector : null; };
     const scoresOf = userId => {
       const recs = (s.records || []).filter(r => r.user_id === userId);
-      const codes = {}; recs.forEach(r => { codes[r.symbol] = 1; });
-      const nSec = {};
-      recs.forEach(r => { const st = u.stocks.filter(v => v.code === r.symbol)[0]; if (st) nSec[st.sector] = 1; });
-      const gr = recs.length
-        ? Math.round(recs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / recs.length * 100)
-        : 0;
-      const focus = Math.max(0, Math.min(100, 100 - (Math.max(1, Object.keys(nSec).length) - 1) * 22));
-      return { n: recs.length, gr: gr, list: [focus, 100 - focus, 50, 100 - gr, gr] };
+      const out = computeAbilityScores(recs, sectorOfCode);
+      return { n: out.count, gr: out.evidencePct, list: out.scores };
     };
 
     // ── 투자 유형 네 가지 ─────────────────────────────────────────
-    // 근거/직관, 집중/분산 두 쌍의 우세로 정한다 (5:5 는 근거·집중 쪽).
+    // 어느 유형인지와 레벨은 엔진이 정한다. 여기 있는 건 이름·색·설명뿐이다.
     const TYPES = {
       sniper:     { name:'저격수', img:'sniper',     pal:['#FCE3B4','#F7D08A','#E3AF57','#63430A'],
         desc:'찾아볼 건 다 찾아보고, 확신이 선 소수 섹터에 몰아 담았어요.\n근거는 촘촘하지만 한쪽으로 쏠려 있어요.' },
@@ -46,10 +41,9 @@
         desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
     };
     const typeOf = sc => {
-      const focus = sc[0], spread = sc[1], acc = sc[2], intu = sc[3], reason = sc[4];
-      const k = reason >= intu ? (focus >= spread ? 'sniper' : 'strategist') : (focus >= spread ? 'fighter' : 'explorer');
-      const t = TYPES[k], lv = acc >= 70 ? 3 : (acc >= 40 ? 2 : 1);
-      return { key:k, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
+      const decided = resolveCharacter(sc);
+      const t = TYPES[decided.key], lv = decided.level;
+      return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
     };
     const typeImg = k => A + 'type-' + k + '.png';
 

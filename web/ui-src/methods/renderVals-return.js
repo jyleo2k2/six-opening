@@ -392,18 +392,8 @@
       secModalName: arc.secModalName, secModalCount: arc.secModalCount,
       secModalValue: arc.secModalValue, secModalPctText: arc.secModalPctText,
       secModalPctStyle: arc.secModalPctStyle, secModalRows: arc.secModalRows,
-      styleName: styleName,
-      axes: axes,
-      hasReasons: reasonStats.length > 0, noReasons: reasonStats.length === 0,
-      reasonStats: reasonStats,
-      coachText: coachText,
       pnlPctText: (pnl >= 0 ? '+' : '') + (pnl / SEED * 100).toFixed(2) + '%',
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      compareAxes: AXES.map((a, i) => ({
-        axis: a.axis, range: a.left + ' ↔ ' + a.right,
-        childBar: 'width:' + a.child + '%;height:100%;border-radius:999px;background:#F5327F',
-        parentBar: 'width:' + a.parent + '%;height:100%;border-radius:999px;background:#01185A'
-      })),
       badgeCount: s.badges || 0,
       sellCount: (s.sellRecords || []).length,
       memoRecordCount: s.records.filter(r => r.memo).length + (s.sellRecords || []).filter(r => r.memo).length,

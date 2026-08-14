@@ -1543,6 +1543,87 @@ const seedAccounts = () => ({
   parent: { name:'엄마', cash: SEED - 459750, holdings: [ { code:'005930', qty:1, avg:240000 }, { code:'011200', qty:10, avg:21075 } ], pending:[] }
 });
 
+// >>> archive-engine — GENERATED from shared/engine/archive-profile.js
+// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.
+// F9 아카이브 성향 계산. 화면은 이 결과를 표시만 한다.
+//
+// 이 파일은 브라우저(`public/ui/app.html`)와 서버·테스트가 함께 쓴다.
+// `scripts/ui-build.mjs` 가 `export` 를 떼고 app.html 안으로 복사하므로
+// TypeScript 문법과 import 를 쓰지 않는다. 계산이 바뀌면 이 파일만 고치고
+// `node scripts/ui-build.mjs build` 로 화면을 다시 만든다.
+
+// 살 때 뉴스·그래프·아는 회사를 근거로 골랐다고 본다.
+const EVIDENCE_REASON_CODES = ["buy_news", "buy_chart", "buy_familiar"];
+
+// 오각형 축 순서. 화면 라벨(집중·분산·정확·직관·근거)과 같은 순서다.
+const ABILITY_ORDER = ["focus", "diversification", "accuracy", "intuition", "evidence"];
+
+// 정확은 사고판 시점이 맞았는지라 5거래일 종가가 있어야 채점된다.
+// 아직 채점 경로가 화면에 없어 중간값으로 둔다. [가정]
+const ACCURACY_PLACEHOLDER = 50;
+
+// 섹터가 하나 늘 때마다 집중이 이만큼 내려간다. [가정]
+const FOCUS_STEP_PER_SECTOR = 22;
+
+const clamp100 = (n) => Math.max(0, Math.min(100, n));
+
+/**
+ * 체결 매수 기록에서 능력치 다섯 축을 낸다.
+ *
+ * @param {Array<{symbol: string, reason_code: string}>} records 한 사람의 매수 기록
+ * @param {(symbol: string) => (string|null|undefined)} sectorOf 종목 코드 -> 섹터
+ * @returns {{count: number, evidencePct: number, focus: number, scores: number[]}}
+ */
+function computeAbilityScores(records, sectorOf) {
+  const list = Array.isArray(records) ? records : [];
+  const sectors = {};
+  list.forEach((r) => {
+    const sector = sectorOf ? sectorOf(r.symbol) : null;
+    if (sector) sectors[sector] = 1;
+  });
+
+  const evidenceCount = list.filter((r) => EVIDENCE_REASON_CODES.indexOf(r.reason_code) >= 0).length;
+  const evidencePct = list.length ? Math.round((evidenceCount / list.length) * 100) : 0;
+
+  const sectorCount = Math.max(1, Object.keys(sectors).length);
+  const focus = clamp100(100 - (sectorCount - 1) * FOCUS_STEP_PER_SECTOR);
+
+  return {
+    count: list.length,
+    evidencePct,
+    focus,
+    // 집중·분산과 근거·직관은 서로 보완쌍이라 합이 100 이다.
+    scores: [focus, 100 - focus, ACCURACY_PLACEHOLDER, 100 - evidencePct, evidencePct],
+  };
+}
+
+/**
+ * 두 보완쌍의 우세로 캐릭터를, 정확으로 레벨을 정한다.
+ * 5:5 동점은 근거·집중 쪽으로 귀속한다.
+ *
+ * @param {number[]} scores computeAbilityScores 의 scores
+ * @returns {{key: "sniper"|"strategist"|"fighter"|"explorer", level: 1|2|3}}
+ */
+function resolveCharacter(scores) {
+  const focus = scores[0];
+  const diversification = scores[1];
+  const accuracy = scores[2];
+  const intuition = scores[3];
+  const evidence = scores[4];
+
+  const key =
+    evidence >= intuition
+      ? focus >= diversification
+        ? "sniper"
+        : "strategist"
+      : focus >= diversification
+        ? "fighter"
+        : "explorer";
+
+  const level = accuracy >= 70 ? 3 : accuracy >= 40 ? 2 : 1;
+  return { key, level };
+}
+// <<< archive-engine
 class Component extends DCLogic {
   state = {
     screen: 'home', account: 'child',
@@ -2026,21 +2107,16 @@ class Component extends DCLogic {
     const shown = MEMBERS.filter(x => who === 'all' || x.key === who);
 
     // ── 성향 다섯 축 ──────────────────────────────────────────────
-    // 팀원이 산출식을 주면 아래 score 다섯 개만 갈아끼우면 된다. '정확'은 아직 50 고정.
+    // 산출식은 shared/engine/archive-profile.js 가 갖고 있다. 여기서는 부르기만 한다.
+    const sectorOfCode = code => { const st = u.stocks.filter(v => v.code === code)[0]; return st ? st.sector : null; };
     const scoresOf = userId => {
       const recs = (s.records || []).filter(r => r.user_id === userId);
-      const codes = {}; recs.forEach(r => { codes[r.symbol] = 1; });
-      const nSec = {};
-      recs.forEach(r => { const st = u.stocks.filter(v => v.code === r.symbol)[0]; if (st) nSec[st.sector] = 1; });
-      const gr = recs.length
-        ? Math.round(recs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / recs.length * 100)
-        : 0;
-      const focus = Math.max(0, Math.min(100, 100 - (Math.max(1, Object.keys(nSec).length) - 1) * 22));
-      return { n: recs.length, gr: gr, list: [focus, 100 - focus, 50, 100 - gr, gr] };
+      const out = computeAbilityScores(recs, sectorOfCode);
+      return { n: out.count, gr: out.evidencePct, list: out.scores };
     };
 
     // ── 투자 유형 네 가지 ─────────────────────────────────────────
-    // 근거/직관, 집중/분산 두 쌍의 우세로 정한다 (5:5 는 근거·집중 쪽).
+    // 어느 유형인지와 레벨은 엔진이 정한다. 여기 있는 건 이름·색·설명뿐이다.
     const TYPES = {
       sniper:     { name:'저격수', img:'sniper',     pal:['#FCE3B4','#F7D08A','#E3AF57','#63430A'],
         desc:'찾아볼 건 다 찾아보고, 확신이 선 소수 섹터에 몰아 담았어요.\n근거는 촘촘하지만 한쪽으로 쏠려 있어요.' },
@@ -2052,10 +2128,9 @@ class Component extends DCLogic {
         desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
     };
     const typeOf = sc => {
-      const focus = sc[0], spread = sc[1], acc = sc[2], intu = sc[3], reason = sc[4];
-      const k = reason >= intu ? (focus >= spread ? 'sniper' : 'strategist') : (focus >= spread ? 'fighter' : 'explorer');
-      const t = TYPES[k], lv = acc >= 70 ? 3 : (acc >= 40 ? 2 : 1);
-      return { key:k, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
+      const decided = resolveCharacter(sc);
+      const t = TYPES[decided.key], lv = decided.level;
+      return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
     };
     const typeImg = k => A + 'type-' + k + '.png';
 
@@ -2697,34 +2772,6 @@ class Component extends DCLogic {
     const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s;' + (on
       ? 'color:#fff;background:#001E5A'
       : 'color:#7C819A;background:#EAEBF3');
-    const myRecs = s.records.filter(r => r.user_id === (s.account === 'child' ? 'child_minji' : 'parent_mom'));
-    const cnt = {};
-    myRecs.forEach(r => { cnt[r.reason_code] = (cnt[r.reason_code] || 0) + 1; });
-    const reasonStats = REASONS.filter(r => cnt[r.code]).map(r => ({
-      emoji: r.emoji, label: r.label, n: cnt[r.code],
-      pct: Math.round(cnt[r.code] / myRecs.length * 100) + '%',
-      barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:#F5327F'
-    })).sort((a, b) => b.n - a.n);
-    const infoShare = myRecs.length ? myRecs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / myRecs.length : 0;
-    const seasonShare = myRecs.length ? myRecs.filter(r => r.plan_code === 'plan_season').length / myRecs.length : 0;
-    const AXES = [
-      { axis:'집중–분산', left:'한우물형', right:'골고루형', child: Math.min(95, 30 + (m.holdings.length * 18)), parent: 41 },
-      { axis:'속도',      left:'진득이형', right:'재빨리형', child: Math.round(30 + (1 - seasonShare) * 55), parent: 22 },
-      { axis:'신중함',    left:'직진형',   right:'돌다리형', child: Math.round(20 + infoShare * 60), parent: 79 },
-      { axis:'손실 대응', left:'버티기형', right:'갈아타기형', child: Math.round(30 + ((s.sellRecords || []).filter(r => r.sell_reason_code === 'sell_fear_drop' || r.sell_reason_code === 'sell_anxiety').length ? 45 : 15)), parent: 35 },
-      { axis:'탐험심',    left:'익숙함형', right:'개척자형', child: Math.min(95, 35 + myRecs.length * 12), parent: 30 }
-    ];
-    const axes = AXES.map(a => ({
-      axis: a.axis, left: a.left, right: a.right,
-      leftStyle: 'font-size:12.5px;font-weight:' + (a.child < 50 ? '600' : '500') + ';color:' + (a.child < 50 ? '#01185A' : '#B6BACB'),
-      rightStyle: 'font-size:12.5px;font-weight:' + (a.child >= 50 ? '600' : '500') + ';color:' + (a.child >= 50 ? '#01185A' : '#B6BACB'),
-      barStyle: 'width:' + a.child + '%;height:100%;border-radius:999px;background:#01185A'
-    }));
-    const styleName = myRecs.length === 0 ? '아직 기록 전이야'
-      : (AXES[4].child >= 60 ? '재빨리 개척자형!' : infoShare >= 0.6 ? '차근차근 탐험가형!' : '마음따라 모험가형!');
-    const coachText = myRecs.length === 0
-      ? '아직 산 게 없어. 한 번 사고 나면 이번 주 어떤 스타일이었는지 알려줄게.'
-      : (m.name + '는 이번 주에 ' + myRecs.length + '번 샀어. ' + (infoShare >= 0.5 ? '뉴스나 그래프처럼 근거를 보고 고르는 편이었어.' : '마음이 끌리는 쪽으로 고르는 편이었어.'));
     const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8' };
     const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:#F4F4FA,0 0 0 1.5px ' + sec.accent + '33';
 
@@ -3146,18 +3193,8 @@ class Component extends DCLogic {
       secModalName: arc.secModalName, secModalCount: arc.secModalCount,
       secModalValue: arc.secModalValue, secModalPctText: arc.secModalPctText,
       secModalPctStyle: arc.secModalPctStyle, secModalRows: arc.secModalRows,
-      styleName: styleName,
-      axes: axes,
-      hasReasons: reasonStats.length > 0, noReasons: reasonStats.length === 0,
-      reasonStats: reasonStats,
-      coachText: coachText,
       pnlPctText: (pnl >= 0 ? '+' : '') + (pnl / SEED * 100).toFixed(2) + '%',
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      compareAxes: AXES.map((a, i) => ({
-        axis: a.axis, range: a.left + ' ↔ ' + a.right,
-        childBar: 'width:' + a.child + '%;height:100%;border-radius:999px;background:#F5327F',
-        parentBar: 'width:' + a.parent + '%;height:100%;border-radius:999px;background:#01185A'
-      })),
       badgeCount: s.badges || 0,
       sellCount: (s.sellRecords || []).length,
       memoRecordCount: s.records.filter(r => r.memo).length + (s.sellRecords || []).filter(r => r.memo).length,
