@@ -20,6 +20,7 @@ import {
 import { generateChatAnswer } from "./openai";
 import { judgeChatOutput } from "./output-judge";
 import { looksLikeNewQuestion } from "./colloquial";
+import { isHaeyoKorean, toPoliteKorean } from "./polite";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
 import type { ChatSession } from "./session";
 import {
@@ -47,7 +48,8 @@ export type ChatOutcome = {
   gateReason?:
     | Exclude<ReturnType<typeof gateChatOutput>, { ok: true }>["reason"]
     | "judge_violation"
-    | "judge_unavailable";
+    | "judge_unavailable"
+    | "tone_violation";
   failure?: "timeout" | "model_error" | "tool_error";
 };
 
@@ -210,6 +212,46 @@ function dapieFeedback(
   if (intent === "service_help") return "어디서 확인할지 잘 물어봤어요";
   if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어요";
   return "궁금한 지점을 잘 짚었어요";
+}
+
+function toPoliteAction(
+  action: ChatActionPayload | undefined,
+): ChatActionPayload | undefined {
+  if (!action) return undefined;
+  const suggestedQuestions = action.suggestedQuestions?.map(toPoliteKorean);
+  if (!("kind" in action)) return { ...action, suggestedQuestions };
+
+  if (action.kind === "explain") {
+    return {
+      ...action,
+      suggestedQuestions,
+      turn: {
+        ...action.turn,
+        prompt: toPoliteKorean(action.turn.prompt),
+        choices: action.turn.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+      },
+    };
+  }
+  if (action.kind === "stock-explore") {
+    return {
+      ...action,
+      suggestedQuestions,
+      turn: {
+        ...action.turn,
+        prompt: toPoliteKorean(action.turn.prompt),
+        choices: action.turn.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+      },
+    };
+  }
+  return {
+    ...action,
+    suggestedQuestions,
+    turn: {
+      ...action.turn,
+      prompt: toPoliteKorean(action.turn.prompt),
+      choices: action.turn.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+    },
+  };
 }
 
 export async function createChatOutcome(
@@ -405,12 +447,25 @@ export async function createChatOutcome(
     }
   }
 
+  response = {
+    ...response,
+    text: toPoliteKorean(response.text),
+    ...(response.suggestedQuestions
+      ? { suggestedQuestions: response.suggestedQuestions.map(toPoliteKorean) }
+      : {}),
+  };
+
   onStatus("답변을 안전하게 점검하는 중");
-  const gate = gateChatOutput({
-    text: response.text,
-    source,
-    allowedNumbers: allowedContextNumbers(request),
-  });
+  const politeOutput =
+    isHaeyoKorean(response.text) &&
+    (response.suggestedQuestions?.every(isHaeyoKorean) ?? true);
+  const gate = politeOutput
+    ? gateChatOutput({
+        text: response.text,
+        source,
+        allowedNumbers: allowedContextNumbers(request),
+      })
+    : { ok: false as const, reason: "tone_violation" as const };
 
   // T5b (SPEC §6.0.2) — 룰을 통과한 모델 생성 답변만 다시 판정한다. 고정 응답·
   // 사전·FAQ·Tool 응답은 승인된 정적 텍스트라 호출하지 않는다.
@@ -447,7 +502,7 @@ export async function createChatOutcome(
   const standardAction = safeOutput
     ? sanitizeActionPayload(response)
     : undefined;
-  const outputAction = safeOutput
+  const outputAction = toPoliteAction(safeOutput
     ? sectorExploreAction
       ? { ...standardAction, ...sectorExploreAction }
       : stockExploreAction
@@ -455,7 +510,7 @@ export async function createChatOutcome(
       : explainAction
         ? { ...standardAction, ...explainAction }
         : standardAction
-    : undefined;
+    : undefined);
   const gatedResponse: ChatResponse = {
     text: useSimplerFallback
       ? useSimplerFallback
