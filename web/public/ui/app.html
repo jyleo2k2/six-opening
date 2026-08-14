@@ -2711,8 +2711,23 @@ class Component extends DCLogic {
       { c:'#9B8CFF', desc:'사기 전에 뉴스·기업정보·차트를 확인하고 결정한 비율이에요.' }
     ];
 
-    const mine = scoresOf('child_minji');
-    const behaviorCharacter = this.dbBehavior && this.dbBehavior.character;
+    // 신버전 엔진(behavior-profile.ts, 0~10, F9-archive SPEC §6)이 낸 season-cards
+    // 누적 카드가 있으면(로그인) 그 값을 그대로 쓴다. 없으면(비로그인·응답 전) 구버전
+    // (0~100, archive-profile.js)이 로컬 records로 낸 값으로 폴백한다. 두 스케일을
+    // 섞어 쓰지 않도록 scaleMax 를 항상 함께 들고 다닌다.
+    const CHAR_ALIAS = { challenger: 'fighter' };
+    const typeKeyOf = character => character ? (CHAR_ALIAS[character] || character) : null;
+    const axesFromCard = card => [card.scores.focus, card.scores.diversification, card.scores.accuracy, card.scores.intuition, card.scores.evidence];
+    const fmtScore = (v, scaleMax) => scaleMax === 10 ? (Math.round(v * 10) / 10).toFixed(1) : String(Math.round(v));
+
+    const season = this.dbSeasonCards;
+    const cumCard = season && season.cumulative;
+    const localMine = scoresOf('child_minji');
+    const mine = cumCard
+      ? { n: cumCard.samples.buys + cumCard.samples.sells, list: axesFromCard(cumCard), scaleMax: 10,
+          grade: { level: cumCard.level || 2 }, characterKey: typeKeyOf(cumCard.character) }
+      : { n: localMine.n, list: localMine.list, scaleMax: 100, grade: localMine.grade, characterKey: null };
+    const behaviorCharacter = mine.characterKey || (this.dbBehavior && this.dbBehavior.character);
     const myType = typeOf(mine.list, mine.grade.level, behaviorCharacter);
     const MPL = myType.pal, mInk = MPL[3];
 
@@ -2723,11 +2738,12 @@ class Component extends DCLogic {
     };
     const traits = mine.list.map((score, i) => {
       const m = TMETA[i], sel = s.traitPick === i;
-      const outer = ptAt(i, 1, R, CX, CY), dot = ptAt(i, score / 100, R, CX, CY);
+      const ratio = score / mine.scaleMax;
+      const outer = ptAt(i, 1, R, CX, CY), dot = ptAt(i, ratio, R, CX, CY);
       const a = (-90 + i * 72) * Math.PI / 180;
       const lx = (CX + R * 1.32 * Math.cos(a)) / 160 * 100, ly = (CY + R * 1.32 * Math.sin(a)) / 160 * 100;
       return {
-        label: TLBL[i], score: score, desc: m.desc,
+        label: TLBL[i], score: fmtScore(score, mine.scaleMax), desc: m.desc,
         ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
         dotR: sel ? 4.2 : 2.6, dotFill: sel ? '#FFFFFF' : mInk,
         select: e => { if (e && e.stopPropagation) e.stopPropagation(); this.set({ traitPick: sel ? null : i }); },
@@ -2735,7 +2751,7 @@ class Component extends DCLogic {
         labelStyle: 'position:absolute;left:' + lx.toFixed(1) + '%;top:' + ly.toFixed(1) + '%;transform:translate(-50%,-50%);white-space:nowrap;cursor:pointer;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;' + (sel
           ? 'color:#fff;background:' + mInk + ';box-shadow:0 3px 8px ' + rgba(mInk, 0.35)
           : 'color:' + mInk + ';background:rgba(255,255,255,0.85);box-shadow:0 1px 3px ' + rgba(mInk, 0.18)),
-        barStyle: 'width:' + score + '%;height:100%;border-radius:999px;background:' + m.c + ''
+        barStyle: 'width:' + (ratio * 100) + '%;height:100%;border-radius:999px;background:' + m.c + ''
       };
     });
     const radarGrid = [0.25, 0.5, 0.75, 1].map(k => ({
@@ -2750,34 +2766,46 @@ class Component extends DCLogic {
     };
     const md = d => (d.getMonth() + 1) + '/' + d.getDate();
     const myRecs = (s.records || []).filter(r => r.user_id === 'child_minji');
-    const weeks = {};
-    myRecs.forEach(r => { const k = monday(r.ts).getTime(); (weeks[k] || (weeks[k] = [])).push(r); });
+    const localWeeks = {};
+    myRecs.forEach(r => { const k = monday(r.ts).getTime(); (localWeeks[k] || (localWeeks[k] = [])).push(r); });
     const thisMon = monday(Date.now()).getTime();
-    if (!weeks[thisMon]) weeks[thisMon] = [];
-    // Supabase 지난 주차 카드(loadSeasonCards, F9-archive SPEC §3.1 재사용) — 로컬에
-    // 기록이 없는 지난 주만 채운다. 이번 주는 항상 로컬 계산을 쓴다.
-    const dbWeeks = (this.dbSeasonCards && this.dbSeasonCards.weeks) || [];
-    dbWeeks.forEach(w => {
-      const k = new Date(w.weekStart + 'T00:00:00').getTime();
-      if (k !== thisMon && !weeks[k]) weeks[k] = { fromDb: true, count: w.count, scores: w.scores };
-    });
-    const weekKeys = Object.keys(weeks).map(Number).sort((a, b) => a - b);
+
+    // 신버전 주간 카드(season-cards, F9-archive SPEC §6.6) — 로그인 상태면 실제 채점된
+    // 값이라 로컬 재계산보다 우선한다. 이번 주 카드만은 성향 탭과 같은 값(mine)을 쓴다.
+    const seasonWeeks = (season && season.weeks) || [];
+    const seasonByKey = {};
+    seasonWeeks.forEach(w => { seasonByKey[new Date(w.weekStart + 'T00:00:00').getTime()] = w; });
+
+    const weekKeys = Array.from(new Set([
+      ...Object.keys(localWeeks).map(Number),
+      ...Object.keys(seasonByKey).map(Number),
+      thisMon,
+    ])).sort((a, b) => a - b);
+
     const WEEKS = weekKeys.map(k => {
-      const raw = weeks[k], isNow = k === thisMon, fromDb = !Array.isArray(raw);
-      const count = fromDb ? raw.count : raw.length;
-      let list;
-      // 지난 주 카드는 그 주 기록만으로 다시 낸다. 정확은 그 시점 채점이 없어 기본값이다.
-      if (isNow) list = mine.list;
-      else if (fromDb) list = raw.scores;
-      else list = computeAbilityScores(raw, sectorOfCode).scores;
+      const isNow = k === thisMon;
+      const seasonWeek = seasonByKey[k];
+      let list, scaleMax, level, count, characterKey;
+      if (isNow) {
+        list = mine.list; scaleMax = mine.scaleMax; level = mine.grade.level;
+        count = (localWeeks[thisMon] || []).length; characterKey = mine.characterKey;
+      } else if (seasonWeek) {
+        list = axesFromCard(seasonWeek.card); scaleMax = 10; level = seasonWeek.card.level || 2;
+        count = seasonWeek.count; characterKey = typeKeyOf(seasonWeek.card.character);
+      } else {
+        const raw = localWeeks[k] || [];
+        list = computeAbilityScores(raw, sectorOfCode).scores; scaleMax = 100; level = null;
+        count = raw.length; characterKey = null;
+      }
       // 이번 주 카드는 위에서 낸 myType(행동 데이터 오버라이드 포함)과 같은 캐릭터를 써야 한다.
-      const t = isNow ? myType : typeOf(list);
+      const t = isNow ? myType : typeOf(list, level, characterKey);
       const mon = new Date(k), sun = new Date(k + 6 * 86400000);
       return {
         week: isNow ? '이번 주' : (mon.getMonth() + 1) + '월 ' + Math.ceil((mon.getDate() + 6) / 7) + '주차',
         date: md(mon) + ' – ' + md(sun),
-        title: t.title, img: t.img, desc: count === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
-        scores: list
+        title: t.title, img: t.img,
+        desc: count > 0 ? t.desc : (isNow ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : '이 주는 산 게 없었어요.'),
+        scores: list, scaleMax: scaleMax
       };
     });
     const cardActive = Math.max(0, Math.min(
@@ -2788,10 +2816,11 @@ class Component extends DCLogic {
       const ink = PL[3];
       const axes = c.scores.map((sc, i) => {
         const a = (-90 + i * 72) * Math.PI / 180;
-        const outer = ptAt(i, 1, R, CX, CY), dot = ptAt(i, sc / 100, R, CX, CY);
+        const ratio = sc / c.scaleMax;
+        const outer = ptAt(i, 1, R, CX, CY), dot = ptAt(i, ratio, R, CX, CY);
         const lx = (CX + R * 1.32 * Math.cos(a)) / 160 * 100, ly = (CY + R * 1.32 * Math.sin(a)) / 160 * 100;
         return {
-          label: TLBL[i], score: sc, ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
+          label: TLBL[i], score: fmtScore(sc, c.scaleMax), ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
           labelStyle: 'position:absolute;left:' + lx.toFixed(1) + '%;top:' + ly.toFixed(1) + '%;transform:translate(-50%,-50%);white-space:nowrap;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:999px;color:' + ink + ';background:rgba(255,255,255,0.8);box-shadow:0 1px 2px ' + rgba(ink, 0.14)
         };
       });
@@ -2824,7 +2853,7 @@ class Component extends DCLogic {
 
     // 카드 한 장을 눌렀을 때 올라오는 상세 시트
     const sheetIdx = (s.cardSheet === null || s.cardSheet === undefined) ? cardActive : s.cardSheet;
-    const sw = WEEKS[sheetIdx] || WEEKS[WEEKS.length - 1] || { week:'', date:'', title:'', desc:'', img:'sniper', scores:[0,0,0,0,0] };
+    const sw = WEEKS[sheetIdx] || WEEKS[WEEKS.length - 1] || { week:'', date:'', title:'', desc:'', img:'sniper', scores:[0,0,0,0,0], scaleMax:10 };
     const SPL = (TYPES[sw.img] && TYPES[sw.img].pal) || TYPES.sniper.pal, sInk = SPL[3];
     const cardSheet = {
       week: sw.week, date: sw.date, title: sw.title, desc: sw.desc,
@@ -2833,12 +2862,12 @@ class Component extends DCLogic {
       titleStyle: 'font-size:24px;font-weight:900;color:' + sInk + ';letter-spacing:-0.01em;line-height:1.1;text-shadow:0 1px 0 rgba(255,255,255,0.5)',
       closeStyle: 'flex:none;white-space:nowrap;font-size:14px;font-weight:700;color:' + rgba(sInk, 0.6) + ';cursor:pointer;padding:6px 4px',
       rows: sw.scores.map((sc, k) => ({
-        label: TLBL[k], score: sc, note: TMETA[k].desc,
+        label: TLBL[k], score: fmtScore(sc, sw.scaleMax), note: TMETA[k].desc,
         labelStyle: 'flex:1;min-width:0;font-size:16px;font-weight:800;color:' + sInk,
         scoreStyle: 'font-size:18px;font-weight:900;color:' + sInk + ';font-variant-numeric:tabular-nums',
         trackStyle: 'height:9px;border-radius:999px;background:' + rgba(sInk, 0.1) + ';box-shadow:inset 0 1px 2px ' + rgba(sInk, 0.2) + ';overflow:hidden;margin-top:8px',
         noteStyle: 'font-size:13px;font-weight:500;color:' + rgba(sInk, 0.82) + ';line-height:1.6;margin-top:7px;text-wrap:pretty;white-space:pre-line',
-        barStyle: 'width:' + sc + '%;height:100%;border-radius:999px;background:' + TMETA[k].c + ''
+        barStyle: 'width:' + (sc / sw.scaleMax * 100) + '%;height:100%;border-radius:999px;background:' + TMETA[k].c + ''
       }))
     };
 
@@ -2854,11 +2883,11 @@ class Component extends DCLogic {
     const FAM = dbFamilyMembers.length ? dbFamilyMembers.map((member, index) => {
       const behavior = member.behavior || {};
       const scores = behavior.scores || {};
-      const list = [scores.focus, scores.diversification, scores.accuracy, scores.intuition, scores.evidence]
-        .map(value => Math.round((Number.isFinite(Number(value)) ? Number(value) : 5) * 10));
+      const list = ['focus', 'diversification', 'accuracy', 'intuition', 'evidence']
+        .map(key => Number.isFinite(Number(scores[key])) ? Number(scores[key]) : 5);
       const samples = behavior.samples || {};
       const has = Number(samples.buys || 0) + Number(samples.sells || 0) > 0;
-      const typeKey = behavior.character === 'challenger' ? 'fighter' : behavior.character;
+      const typeKey = typeKeyOf(behavior.character);
       const meta = typeKey && TYPES[typeKey] ? TYPES[typeKey] : null;
       const color = familyColors[index % familyColors.length];
       const isDad = /아빠|부/.test(member.name || '');
@@ -2866,7 +2895,7 @@ class Component extends DCLogic {
         : isDad ? A + 'face-dad.jpg' : A + 'face-mom.jpg';
       return {
         key:'db_' + member.id, name:member.name, face:face, col:color.col, fill:color.fill,
-        has:has, scores:list,
+        has:has, scores:list, scaleMax:10,
         title:meta ? meta.name + (behavior.level ? ' LV' + behavior.level : '') : (has ? '관찰 중' : ''),
         desc:has ? (meta ? meta.desc : '거래 기록이 더 쌓이면 투자 유형도 함께 보여요.')
           : '아직 체결된 거래가 없어요.\n한 번 사고 나면 성향이 만들어져요.'
@@ -2876,7 +2905,7 @@ class Component extends DCLogic {
       const t = sc && sc.n ? typeOf(sc.list, sc.grade.level) : null;
       return {
         key:f.key, name:f.name, face:f.face, col:f.col, fill:f.fill,
-        has:!!(sc && sc.n), scores:sc ? sc.list : [0, 0, 0, 0, 0],
+        has:!!(sc && sc.n), scores:sc ? sc.list : [0, 0, 0, 0, 0], scaleMax:100,
         title:t ? t.title : '',
         desc:(sc && sc.n) ? t.desc : '아직 산 게 없어요.\n한 번 사고 나면 성향이 만들어져요.'
       };
@@ -2887,10 +2916,10 @@ class Component extends DCLogic {
     const famShown = FAM.filter(f => f.has && (famPick === 'all' || f.key === famPick));
     const RR = 92, RCX = 118, RCY = 118;
     const famPolys = famShown.map(f => ({
-      poly: f.scores.map((sc, i) => ptAt(i, sc / 100, RR, RCX, RCY).join(',')).join(' '),
+      poly: f.scores.map((sc, i) => ptAt(i, sc / f.scaleMax, RR, RCX, RCY).join(',')).join(' '),
       stroke: f.col, fill: f.fill,
       dots: f.scores.map((sc, i) => {
-        const d = ptAt(i, sc / 100, RR, RCX, RCY);
+        const d = ptAt(i, sc / f.scaleMax, RR, RCX, RCY);
         return { dx: d[0], dy: d[1], col: f.col };
       })
     }));

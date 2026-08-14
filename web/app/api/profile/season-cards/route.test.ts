@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { legacyScores, synthesizeTabViews, TAB_FLUSH_TOLERANCE_MS } from "./route";
+import { synthesizeTabViews, TAB_FLUSH_TOLERANCE_MS } from "./route";
 import { computeEvidence, VALID_DWELL_MS } from "../../../../shared/engine/behavior-profile";
-import type { AbilityCard, ProfileBuy } from "../../../../shared/types/behavior-profile";
+import type { ProfileBuy } from "../../../../shared/types/behavior-profile";
 
 const buy = (over: Partial<ProfileBuy>): ProfileBuy => ({
   id: "b1",
@@ -52,15 +52,5 @@ assert.equal(paired.filter((view) => Date.parse(view.viewedAt) > boughtAt).lengt
 assert.equal(computeEvidence([buy({})], synthesizeTabViews([buy({})], rows([boughtAt, 2]))), 6);
 // 1탭뿐이면 근거 미인정 → shrink(0,1) = 4
 assert.equal(computeEvidence([buy({})], synthesizeTabViews([buy({})], rows([boughtAt, 1]))), 4);
-
-// 화면 호환 배열 — 0~10 을 0~100 으로, 순서는 집중·분산·정확·직관·근거
-const card: AbilityCard = {
-  scores: { evidence: 7.1, intuition: 2.9, focus: 6.5, diversification: 3.5, accuracy: 5.7 },
-  character: "sniper",
-  level: 2,
-  samples: { buys: 3, sells: 0, graded: 3, pending: 0, hits: 2 },
-  observation: "ready",
-};
-assert.deepEqual(legacyScores(card), [65, 35, 57, 29, 71]);
 
 console.log("season cards route tests passed");
