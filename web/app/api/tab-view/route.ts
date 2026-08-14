@@ -1,13 +1,14 @@
 import type { NextRequest } from "next/server";
-import { insertRow, sessionUserId } from "../supabase";
+import { insertRow, selectRows, sessionUserId } from "../supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** 종목 카드 목록 진입부터 매수 화면 도달까지 이 시간을 넘겨야 저장한다. */
+/** 기업정보·차트·뉴스 한 번의 방문이 유효하려면 이 시간 이상 머물러야 한다. */
 export const MIN_DURATION_MS = 10_000;
 
-type TabViewRow = { id: string; duration_seconds: number | string | null };
+type StockRow = { stock_id: number };
+type TabViewRow = { id: string; tab_count: number };
 
 const parseTime = (value: unknown) => {
   if (typeof value !== "string") return null;
@@ -15,10 +16,18 @@ const parseTime = (value: unknown) => {
   return Number.isFinite(ms) ? ms : null;
 };
 
+const isQualifyingView = (value: unknown) => {
+  if (!value || typeof value !== "object") return false;
+  const view = value as Record<string, unknown>;
+  const openedAt = parseTime(view.opened_at);
+  const closedAt = parseTime(view.closed_at);
+  return openedAt !== null && closedAt !== null && closedAt - openedAt >= MIN_DURATION_MS;
+};
+
 /**
- * 저장 대상은 매수 화면까지 도달한 관찰 구간뿐이다.
- * 10초 판정은 화면에서도 하지만 서버에서 다시 확인한다.
- * duration_seconds 는 generated 컬럼이라 보내지 않는다.
+ * 프론트는 기업정보·차트·뉴스 중 10초 이상 머문 방문 구간만 골라 보내지만,
+ * 서버가 각 구간을 다시 계산해 진짜 10초 이상인 것만 센다.
+ * 몇 초 머물렀는지는 저장하지 않고 최종 개수(tab_count)만 종목별로 저장한다.
  */
 export async function POST(request: NextRequest) {
   const userId = sessionUserId(request);
@@ -31,31 +40,37 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
   const payload = (body ?? {}) as Record<string, unknown>;
-  const openedAt = parseTime(payload.opened_at);
-  const closedAt = parseTime(payload.closed_at);
-  const tabCount = payload.tab_count;
+  const stockCode = payload.stock_code;
+  const views = payload.views;
 
-  if (openedAt === null || closedAt === null) {
-    return Response.json({ error: "시각 값이 올바르지 않습니다." }, { status: 400 });
+  if (typeof stockCode !== "string" || !/^\d{6}$/.test(stockCode)) {
+    return Response.json({ error: "종목 코드가 올바르지 않습니다." }, { status: 400 });
   }
-  if (!Number.isInteger(tabCount) || (tabCount as number) < 0) {
-    return Response.json({ error: "탭 횟수가 올바르지 않습니다." }, { status: 400 });
+  if (!Array.isArray(views)) {
+    return Response.json({ error: "체류 기록이 올바르지 않습니다." }, { status: 400 });
   }
-  if (closedAt - openedAt < MIN_DURATION_MS) {
-    return Response.json({ skipped: "too_short" });
-  }
+
+  const tabCount = views.filter(isQualifyingView).length;
+  if (tabCount === 0) return Response.json({ skipped: "no_qualifying_view" });
 
   try {
+    const stocks = await selectRows<StockRow>("stocks", {
+      stock_code: `eq.${stockCode}`,
+      select: "stock_id",
+      limit: "1",
+    });
+    const stockId = stocks[0]?.stock_id;
+    if (!stockId) return Response.json({ error: "등록되지 않은 종목입니다." }, { status: 400 });
+
     const row = await insertRow<TabViewRow>("stock_tab_views", {
       user_id: userId,
-      opened_at: new Date(openedAt).toISOString(),
-      closed_at: new Date(closedAt).toISOString(),
+      stock_id: stockId,
       tab_count: tabCount,
     });
     console.info(
-      JSON.stringify({ event: "tab_view_saved", userId, id: row.id, seconds: row.duration_seconds }),
+      JSON.stringify({ event: "tab_view_saved", userId, stockCode, id: row.id, tabCount: row.tab_count }),
     );
-    return Response.json({ id: row.id, duration_seconds: row.duration_seconds });
+    return Response.json({ id: row.id, tab_count: row.tab_count });
   } catch (error) {
     console.error(JSON.stringify({ event: "tab_view_saved", result: "error", message: String(error) }));
     return Response.json({ error: "행동 기록을 저장하지 못했습니다." }, { status: 502 });

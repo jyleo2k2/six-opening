@@ -16,7 +16,9 @@
     if (this.state.screen === 'detail' && this.state.code && (!prevState || prevState.screen !== 'detail' || prevState.code !== this.state.code)) {
       this.loadNews(this.state.code);
     }
-    if (prevState && prevState.screen !== this.state.screen) this.trackTabWindow(prevState.screen, this.state.screen);
+    if (prevState && (prevState.screen !== this.state.screen || prevState.code !== this.state.code)) {
+      this.trackTabView(prevState.screen, prevState.code, this.state.screen, this.state.code);
+    }
   }
 
   // --- Supabase 연동 -------------------------------------------------

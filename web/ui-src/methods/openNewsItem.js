@@ -1,7 +1,6 @@
   openNewsItem(item){
     const code = this.state.code;
     if (!code || !this.validNewsItem(item, code)) return;
-    this.bumpTabCount();
     this.setState(s => Object.assign({}, s, { activeNewsId:item.newsId, activeNews:item }));
     this.logEvent('news_detail_opened', 'news');
     fetch('/api/news/' + encodeURIComponent(String(item.newsId)), { cache:'no-store' })

@@ -296,6 +296,7 @@
         });
         if (!isLimit) {
           this.saveTrade('buy', st.code, price, qty, s.draft.reason);
+          this.flushTabViews(st.code);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
         }
       },
@@ -686,7 +687,7 @@
       newsMoreLabel: newsItem ? '뉴스 자세히 보기' : (newsStatus === 'error' ? '다시 불러오기' : (newsStatus === 'empty' ? '새 소식 없음' : '불러오는 중')),
       newsMoreBtnStyle: 'font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;white-space:nowrap;background:radial-gradient(ellipse 64% 56% at 50% -6%,rgba(255,255,255,1) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 7px 12px -5px rgba(35,25,80,0.2),inset 0 -8px 13px -7px rgba(255,255,255,0.9),inset 0 1.5px 2px rgba(255,255,255,1);cursor:' + (newsItem || newsStatus === 'error' ? 'pointer' : 'default') + ';opacity:' + (newsItem || newsStatus === 'error' ? '1' : '0.58'),
       ctaStyle: locked ? CTA_OFF : CTA_ON,
-      openChart: () => { this.bumpTabCount(); this.logEvent('chart_detail_opened', 'chart'); },
+      openChart: () => { this.logEvent('chart_detail_opened', 'chart'); },
       openNews: () => { if (newsItem) this.openNewsItem(newsItem); else if (st && newsStatus === 'error') this.loadNews(st.code); },
       closeSub: () => this.closeSub(),
       chartLine: () => this.setChartType('line'), chartCandle: () => this.setChartType('candlestick'),
