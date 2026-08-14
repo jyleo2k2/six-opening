@@ -39,8 +39,13 @@ type PlacedMarker = TradeMarker & { x: number; y: number };
 /** 뱃지 한 변. 원본 시안(서비스 개요 HTML)의 22×22 rx=6 을 따른다. */
 const BADGE = 22;
 
-/** 체결가를 가리키는 꼬리 높이. 뱃지 변에 맞닿는다. */
-const TAIL = 7;
+/**
+ * 체결가와 뱃지 사이 간격. 꼬리 높이이기도 하다 — 꼭짓점은 체결가에, 밑변은 뱃지 변에 닿는다.
+ *
+ * 7px 일 때는 뱃지가 봉에 거의 붙어 캔들 몸통·꼬리를 덮었다. 체결가는 꼬리 끝이
+ * 가리키므로 뱃지 자체는 봉에서 떨어져 있어도 되고, 떨어져야 봉이 안 가려진다.
+ */
+const TAIL = 18;
 
 /**
  * 처음 보여줄 봉 개수.
@@ -386,9 +391,13 @@ export function TradingViewChart({ symbol, period, chartType }: {
             // 말풍선 꼬리처럼 뱃지 변에 붙는다. 꼭짓점이 체결가를 가리키고
             // 밑변은 뱃지 모서리와 정확히 맞닿는다 — 같은 fill 이라 이음매가 안 보인다.
             // 밑변 너비(10)가 rx=6 으로 둥글린 모서리 사이 평평한 구간 안에 들어간다.
+            //
+            // 매수는 봉 위, 매도는 봉 아래로 나눈다. 방향만 봐도 산 자리와 판 자리가
+            // 구분되고, 같은 봉에서 매수·매도가 겹쳐도 뱃지가 서로 포개지지 않는다.
+            // SVG 는 y 가 아래로 자라므로 "위"가 뺄셈이다.
             const badgeY =
-              marker.side === "buy" ? marker.y + TAIL : marker.y - TAIL - BADGE;
-            const base = marker.side === "buy" ? marker.y + TAIL : marker.y - TAIL;
+              marker.side === "buy" ? marker.y - TAIL - BADGE : marker.y + TAIL;
+            const base = marker.side === "buy" ? marker.y - TAIL : marker.y + TAIL;
             return (
               <g key={marker.id}>
                 <title>{marker.label}</title>
