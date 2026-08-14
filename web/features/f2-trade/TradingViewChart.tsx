@@ -40,16 +40,26 @@ type PlacedMarker = TradeMarker & { x: number; y: number };
 const BADGE = 22;
 
 /**
- * 체결가와 뱃지 사이 간격. 꼬리 높이이기도 하다 — 꼭짓점은 체결가에, 밑변은 뱃지 변에 닿는다.
+ * 체결가와 뱃지 사이 간격.
  *
- * 7px 일 때는 뱃지가 봉에 거의 붙어 캔들 몸통·꼬리를 덮었다. 체결가는 꼬리 끝이
- * 가리키므로 뱃지 자체는 봉에서 떨어져 있어도 되고, 떨어져야 봉이 안 가려진다.
- *
- * 100px 은 페인 높이(238)의 절반에 가까워 대부분의 마커가 `clampBadgeTop` 에 걸려
- * 천장·바닥에 눌러앉았다 — 간격이 아니라 화면 끝이 위치를 정하는 꼴이었다. 50px 은
- * 뱃지까지 72px 이라 웬만한 체결이 잘리지 않고 이 간격을 그대로 받는다.
+ * 7px 일 때는 뱃지가 봉에 거의 붙어 캔들 몸통·꼬리를 덮었다. 100px 은 페인 높이(238)의
+ * 절반에 가까워 대부분의 마커가 `clampBadgeTop` 에 걸려 천장·바닥에 눌러앉았다 —
+ * 간격이 아니라 화면 끝이 위치를 정하는 꼴이었다. 50px 은 뱃지까지 72px 이라 웬만한
+ * 체결이 잘리지 않고 이 간격을 그대로 받는다.
  */
-const TAIL = 50;
+const GAP = 50;
+
+/**
+ * 꼬리 높이. 뱃지 변에서 체결가 쪽으로 뻗는다.
+ *
+ * `GAP` 과 갈라져 있다. 예전에는 하나였고 꼬리가 뱃지에서 체결가까지 전 구간을 이었는데,
+ * 간격을 50px 로 벌리자 꼬리가 그만큼 길어져 화면을 갈랐다. 꼬리를 짧게 끊으면 어느 봉의
+ * 체결인지는 **뱃지의 x** 가 그대로 답하므로 읽는 데 지장이 없다.
+ *
+ * 대신 꼭짓점이 체결가에 정확히 닿지는 않는다. 꼬리는 이제 정확한 y 를 짚는 바늘이 아니라
+ * 어느 쪽 봉을 가리키는지만 알려주는 방향 표시다.
+ */
+const TAIL = 10;
 
 /**
  * 차트 페인 높이. 아래 `h-[238px]` 두 곳과 같은 값이어야 한다.
@@ -62,9 +72,9 @@ const PANE_HEIGHT = 238;
 /**
  * 뱃지를 페인 안에 가둔다.
  *
- * 페인 끝에 가까운 체결은 `TAIL` 만큼 벌리면 뱃지가 위아래로 잘려 나간다. SVG 는 제
+ * 페인 끝에 가까운 체결은 `GAP` 만큼 벌리면 뱃지가 위아래로 잘려 나간다. SVG 는 제
  * 뷰포트 밖을 안 그리므로 잘리면 통째로 사라진다 — 마커가 없는 것과 구분이 안 된다.
- * 뱃지만 끝에 붙여 세우고 꼬리를 그만큼 줄여 체결가를 계속 가리키게 한다.
+ * 뱃지를 끝에 붙여 세우고, 꼬리는 뱃지 변에서 따므로 같이 따라간다.
  */
 function clampBadgeTop(top: number) {
   return Math.min(Math.max(top, 0), PANE_HEIGHT - BADGE);
@@ -411,25 +421,26 @@ export function TradingViewChart({ symbol, period, chartType }: {
               marker.member === "child"
                 ? "var(--color-trade-child)"
                 : "var(--color-trade-parent)";
-            // 말풍선 꼬리처럼 뱃지 변에 붙는다. 꼭짓점이 체결가를 가리키고
-            // 밑변은 뱃지 모서리와 정확히 맞닿는다 — 같은 fill 이라 이음매가 안 보인다.
+            // 말풍선 꼬리처럼 뱃지 변에 붙는다. 밑변은 뱃지 모서리와 정확히 맞닿아
+            // 같은 fill 이라 이음매가 안 보이고, 꼭짓점은 체결가 쪽을 가리킨다.
             // 밑변 너비(10)가 rx=6 으로 둥글린 모서리 사이 평평한 구간 안에 들어간다.
             //
             // 매수는 봉 위, 매도는 봉 아래로 나눈다. 방향만 봐도 산 자리와 판 자리가
             // 구분되고, 같은 봉에서 매수·매도가 겹쳐도 뱃지가 서로 포개지지 않는다.
             // SVG 는 y 가 아래로 자라므로 "위"가 뺄셈이다.
             //
-            // 밑변은 `TAIL` 이 아니라 **잘린 뒤의 뱃지 위치**에서 딴다. 그래야 천장·바닥에
-            // 붙어 간격이 줄어든 마커도 꼬리가 뱃지에 붙은 채 체결가까지 닿는다.
+            // 밑변·꼭짓점 모두 **잘린 뒤의 뱃지 위치**에서 딴다. 그래야 천장·바닥에 붙어
+            // 간격이 줄어든 마커도 꼬리가 뱃지에 붙은 채 같은 길이로 나온다.
             const badgeY = clampBadgeTop(
-              marker.side === "buy" ? marker.y - TAIL - BADGE : marker.y + TAIL,
+              marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP,
             );
             const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
+            const tip = marker.side === "buy" ? base + TAIL : base - TAIL;
             return (
               <g key={marker.id}>
                 <title>{marker.label}</title>
                 <polygon
-                  points={`${marker.x - 5},${base} ${marker.x + 5},${base} ${marker.x},${marker.y}`}
+                  points={`${marker.x - 5},${base} ${marker.x + 5},${base} ${marker.x},${tip}`}
                   fill={fill}
                 />
                 <rect
