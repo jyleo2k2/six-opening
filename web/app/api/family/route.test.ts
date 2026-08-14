@@ -11,9 +11,9 @@ const neutral: AbilityCard = {
   observation: "none",
 };
 const profiles: Profile[] = [
-  { id: 1, name: "찬영", login_id: "child", parent_child: "child", family_tag: "찬영가족" },
-  { id: 2, name: "찬영엄마", login_id: "mom", parent_child: "parent", family_tag: "찬영가족" },
-  { id: 3, name: "찬영아빠", login_id: "dad", parent_child: "parent", family_tag: "찬영가족" },
+  { id: 1, name: "찬영", login_id: "child", parent_child: "child", family_tag: "찬영가족", guardian_role: null },
+  { id: 2, name: "찬영엄마", login_id: "mom", parent_child: "parent", family_tag: "찬영가족", guardian_role: "mom" },
+  { id: 3, name: "찬영아빠", login_id: "dad", parent_child: "parent", family_tag: "찬영가족", guardian_role: "dad" },
 ];
 
 let profileFilter = "";
