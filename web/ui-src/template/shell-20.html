@@ -1,0 +1,44 @@
+
+<img src="assets/statusbar.svg" width="402" height="59" alt="" style="{{ statusDark }}">
+<img src="assets/statusbar-w.svg" width="402" height="59" alt="" style="{{ statusLight }}">
+<div style="position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;z-index:3;pointer-events:none"><div style="width:140px;height:5px;border-radius:999px;background:#1A2233;opacity:0.85"></div></div>
+</div>
+<div style="position:absolute;left:24px;top:23px;width:402px;height:874px;border-radius:40px;pointer-events:none;z-index:4;opacity:0.18;mix-blend-mode:overlay;background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNjAnIGhlaWdodD0nMTYwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzE2MCcgaGVpZ2h0PScxNjAnIGZpbHRlcj0ndXJsKCNuKScvPjwvc3ZnPg==)"></div>
+<img src="assets/iphone-frame.png" width="450" height="920" alt="" style="position:absolute;left:0;top:0;display:block;z-index:5;pointer-events:none">
+</div>
+
+<div style="width:330px;display:flex;flex-direction:column;gap:14px">
+<div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
+<div style="font-size:17px;font-weight:800;color:#01185A">연결된 프로토타입 · 1차</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.7;margin-top:9px;text-wrap:pretty">홈 · 종목 탐색 · 종목 상세 · 차트/뉴스 상세 · 매수 3단계 · 매도 3단계 · 계좌 · 아카이브 4탭 · 랭킹이 전부 눌러서 진행됩니다. 사고팔면 지갑과 보유 종목이 실제로 바뀌고, 아카이브 수치도 그 기록에서 계산됩니다. 상태는 브라우저에 저장돼 새로고침해도 남습니다.</div>
+<div style="margin-top:16px;padding-top:15px;border-top:1px solid #EFEFF5">
+<div style="font-size:13px;font-weight:700;color:#01185A">시연용 · 학교 시간 강제</div>
+<div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.6;margin-top:6px">실제 시각과 무관하게 잠금 상태를 보여줍니다. 자녀 계정에서만 효과가 있습니다.</div>
+<div style="display:flex;gap:7px;margin-top:11px">
+<div onClick="{{ forceAuto }}" style="{{ forceAutoStyle }}">자동</div>
+<div onClick="{{ forceOn }}" style="{{ forceOnStyle }}">학교 시간</div>
+<div onClick="{{ forceOff }}" style="{{ forceOffStyle }}">하교 후</div>
+</div>
+</div>
+<div onClick="{{ resetAll }}" style="margin-top:14px;text-align:center;border-radius:12px;padding:11px;font-size:14px;font-weight:600;color:#01185A;cursor:pointer;background:#F1F2F8;box-shadow:inset 0 0 0 1px #E2E4EF">시드머니 1,000만원으로 초기화</div>
+</div>
+
+<div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">스펙대로 지킨 것</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.75;margin-top:10px">· 매수 이유 6개 2열×3행, 전부 같은 색·크기<br>· 버튼 순서는 세션마다 셔플됩니다<br>· 어떤 답을 골라도 주문은 그대로 진행됩니다<br>· 완료 화면에 한 줄 메모(50자) + 저장<br>· 지정가는 <b style="color:#01185A">기다리는 주문</b>으로 잡히고 그동안 금액이 예약됩니다<br>· 매도는 <b style="color:#01185A">사던 날의 나</b>를 반드시 거치고, 수익률은 중립색으로 표시합니다<br>· 계획과 다르게 팔 때만 조건부 질문이 뜹니다 (일치하면 배지)<br>· 차트·뉴스 상세 진입과 <b style="color:#01185A">머문 시간</b>을 이벤트로 남깁니다<br>· <code style="font-size:11px;background:#F1F2F8;padding:1px 5px;border-radius:4px">buy_record</code> 스키마 그대로 저장</div>
+</div>
+
+<div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07);border-left:4px solid #F5327F">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">확인이 필요한 것</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.75;margin-top:10px;text-wrap:pretty">스펙 BUY-1의 예시가 <b style="color:#01185A">30,000원 → 2주</b>인데, 삼성전자 72,400원 기준으로는 0.41주입니다. 1만원 칩을 쓰려면 소수점 매매가 필수라 <b style="color:#01185A">소수점 둘째 자리</b>로 구현했습니다. 정수 주식만 허용할지 알려주세요.</div>
+</div>
+
+<div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">아직 안 된 것</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.75;margin-top:10px">· 지정가 <b style="color:#01185A">자동 체결</b> — 목표가에 닿아도 아직 안 사집니다 (시세 연동 시 처리)<br>· 회사 로고 — <code style="font-size:11px;background:#F1F2F8;padding:1px 5px;border-radius:4px">universe.js</code>의 <code style="font-size:11px;background:#F1F2F8;padding:1px 5px;border-radius:4px">logos</code>에 등록하면 카드에 뜹니다<br>· 종목은 화이트리스트 51종 · 가격은 키움 실시간 — <code style="font-size:11px;background:#F1F2F8;padding:1px 5px;border-radius:4px">/api/universe</code> 하나만 교체하면 됩니다</div>
+</div>
+</div>
+
+</div>
+
+</x-dc>

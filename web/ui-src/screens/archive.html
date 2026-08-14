@@ -1,0 +1,177 @@
+<sc-if value="{{ isArchive }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ goHome }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">성장 아카이브</div>
+<div style="width:38px"></div>
+</div>
+<div style="flex:none;display:flex;padding:0 12px 12px">
+<div onClick="{{ tabReport }}" style="{{ tabReportStyle }}">성향</div>
+<div onClick="{{ tabReturn }}" style="{{ tabReturnStyle }}">수익률</div>
+<div onClick="{{ tabCompare }}" style="{{ tabCompareStyle }}">가족 비교</div>
+<div onClick="{{ tabSeason }}" style="{{ tabSeasonStyle }}">시즌 기록</div>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 0;display:flex;flex-direction:column;gap:11px">
+
+<sc-if value="{{ atReport }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:28px;padding:19px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.65)">이번 시즌</span>
+<span style="font-size:12.5px;font-weight:700;color:#fff;background:#F5327F;border-radius:999px;padding:6px 12px;white-space:nowrap">정답은 없어!</span>
+</div>
+<div style="display:flex;align-items:center;gap:13px;margin-top:13px">
+<span style="font-size:44px;line-height:1;flex:none">{{ charEmoji }}</span>
+<div style="min-width:0">
+<div style="font-size:21px;font-weight:800;letter-spacing:-0.01em;line-height:1.35">{{ meName }}는 <span style="color:#FF8AD0">{{ styleName }}</span></div>
+<div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.6">{{ judgeLine }}</div>
+</div>
+</div>
+<sc-if value="{{ hasStarBadge }}" hint-placeholder-val="{{ false }}">
+<div style="display:inline-block;font-size:12px;font-weight:600;background:rgba(255,255,255,0.14);border-radius:999px;padding:6px 12px;margin-top:11px">⏳ {{ starBadge }}</div>
+</sc-if>
+<div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:9px;line-height:1.6">캐릭터는 시즌마다 새로 뽑아 — 계속 바뀌어도 괜찮아</div>
+</div>
+
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:16px;font-weight:800;color:#01185A">내 능력치 오각형</span><span style="font-size:12.5px;font-weight:500;color:#A9AEC4">10점 만점</span></div>
+<svg width="270" height="230" viewBox="0 0 270 230" style="display:block;margin:8px auto 0">
+<polygon points="{{ radarRingInner }}" fill="none" stroke="#F0F1F7" stroke-width="1"></polygon>
+<polygon points="{{ radarRingMid }}" fill="none" stroke="#EAEBF4" stroke-width="1"></polygon>
+<polygon points="{{ radarOutline }}" fill="none" stroke="#DDDFEC" stroke-width="1.5"></polygon>
+<polygon points="{{ radarData }}" fill="rgba(246,99,161,0.22)" stroke="#F5327F" stroke-width="2.5" stroke-linejoin="round"></polygon>
+<text x="135" y="16" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText0 }}</text>
+<text x="232" y="90" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText1 }}</text>
+<text x="197" y="218" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText2 }}</text>
+<text x="73" y="218" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText3 }}</text>
+<text x="38" y="90" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText4 }}</text>
+</svg>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;text-align:center;margin-top:4px">근거+직관 = 10 · 집중+분산 = 10 — 오른쪽으로 기울면 근거·집중</div>
+</div>
+
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:16px;font-weight:800;color:#01185A">왜 샀는지 모아봤어</span><span style="font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">매수 {{ recordCount }}번</span></div>
+<sc-if value="{{ hasReasons }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+<sc-for list="{{ reasonStats }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font-size:16px;flex:none">{{ r.emoji }}</span>
+<span style="font-size:13.5px;font-weight:600;color:#5C6280;width:96px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</span>
+<div style="flex:1;height:9px;border-radius:999px;background:#EAEBF4;overflow:hidden"><div style="{{ r.barStyle }}"></div></div>
+<span style="font-size:13px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;width:34px;text-align:right;flex:none">{{ r.pct }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ noReasons }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:14px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:11px">아직 산 게 없어. 한 번 사고 나면 여기에 모아줄게.</div>
+</sc-if>
+</div>
+
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:18px">🐻</span><span style="font-size:16px;font-weight:800;color:#01185A">키웅이가 본 이번 시즌</span></div>
+<div style="font-size:15px;font-weight:500;color:#5C6280;line-height:1.8;margin-top:10px;text-wrap:pretty">{{ coachText }}</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ atReturn }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="background:#FFFFFF;border-radius:28px;padding:19px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="font-size:13.5px;font-weight:500;color:#8E93A8">지금 내 돈 전부</div>
+<div style="font-size:31px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:7px;line-height:1.15;white-space:nowrap">{{ totalAssetText }}</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin-top:9px">
+<span style="{{ pnlStyle }}">{{ pnlText }}</span><span style="{{ pnlPctStyle }}">{{ pnlPctText }}</span>
+</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:8px">시작할 때 10,000,000원</div>
+</div>
+
+<sc-if value="{{ hasHoldings }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:26px;padding:6px 19px 10px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<sc-for list="{{ holdingCards }}" as="h" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:11px;padding:13px 0;border-bottom:1px solid #F0F1F7">
+<span style="font-size:19px;flex:none">{{ h.emoji }}</span>
+<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800;color:#01185A">{{ h.name }}</div><div style="font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.qtyText }}</div></div>
+<div style="text-align:right"><div style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.valueText }}</div><div style="{{ h.pnlStyle }}">{{ h.pnlText }}</div></div>
+</div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:13px 0"><span style="font-size:15.5px;font-weight:800;color:#01185A">현금</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ noHoldings }}" hint-placeholder-val="{{ true }}">
+<div style="background:#FFFFFF;border-radius:26px;padding:30px 20px;text-align:center;box-shadow:0 12px 26px rgba(35,25,80,0.09)">
+<div style="font-size:36px">🪺</div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:11px">아직 가진 회사가 없어</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ atCompare }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="display:flex;align-items:center;gap:9px;background:#FFFFFF;border-radius:20px;padding:12px 15px;box-shadow:0 10px 22px rgba(35,25,80,0.09)">
+<span style="font-size:15px">🔒</span><span style="font-size:13.5px;font-weight:600;color:#5C6280">양쪽이 공개에 동의했어요</span>
+</div>
+<div style="background:#FFFFFF;border-radius:26px;padding:18px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;gap:10px">
+<div style="flex:1;text-align:center;background:#FDF2F7;border-radius:18px;padding:14px 8px">
+<div style="font-size:13px;font-weight:700;color:#F5327F">{{ childName }}</div>
+<div style="font-size:34px;margin-top:7px;line-height:1">{{ compareChildEmoji }}</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:7px">{{ compareChildName }}</div>
+<div style="font-size:12.5px;font-weight:600;color:#8E93A8;margin-top:3px">{{ compareChildStar }}</div>
+</div>
+<div style="flex:1;text-align:center;background:#F1F3FA;border-radius:18px;padding:14px 8px">
+<div style="font-size:13px;font-weight:700;color:#01185A">{{ parentName }}</div>
+<div style="font-size:34px;margin-top:7px;line-height:1">{{ compareParentEmoji }}</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:7px">{{ compareParentName }}</div>
+<div style="font-size:12.5px;font-weight:600;color:#8E93A8;margin-top:3px">{{ compareParentStar }}</div>
+</div>
+</div>
+<div style="display:flex;align-items:baseline;gap:8px;margin-top:15px;padding-bottom:7px;border-bottom:1px solid #F0F1F7">
+<span style="flex:1;font-size:12px;font-weight:600;color:#A9AEC4">능력치</span>
+<span style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#F5327F">{{ childName }}</span>
+<span style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#01185A">{{ parentName }}</span>
+</div>
+<sc-for list="{{ compareRows }}" as="a" hint-placeholder-count="5">
+<div style="display:flex;align-items:baseline;gap:8px;margin-top:11px">
+<span style="flex:1;font-size:13.5px;font-weight:600;color:#5C6280">{{ a.label }}</span>
+<span style="width:64px;text-align:right;font-size:13.5px;font-weight:700;color:#F5327F;font-variant-numeric:tabular-nums">{{ a.childText }}</span>
+<span style="width:64px;text-align:right;font-size:13.5px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums">{{ a.parentText }}</span>
+</div>
+</sc-for>
+</div>
+<div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:26px;padding:18px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
+<div style="font-size:17px;font-weight:800;line-height:1.55;text-wrap:pretty">{{ compareHeadline }}</div>
+<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);margin-top:10px;line-height:1.65;text-wrap:pretty">어느 쪽이 더 좋다는 뜻은 아니에요. 오늘 저녁에 서로 왜 그렇게 했는지 물어보세요.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ atSeason }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:11px">
+<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="font-size:16px;font-weight:800;color:#01185A">시즌 3 기록</div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">산 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ recordCount }}번</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">판 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ sellCount }}번</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">한 줄 메모</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ memoRecordCount }}개</span></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0"><span style="font-size:14px;font-weight:500;color:#8E93A8">자세히 본 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ detailViewCount }}번</span></div>
+</div>
+
+<div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:26px;padding:19px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
+<div style="font-size:12.5px;font-weight:700;color:#FF8AD0">시즌이 끝나면</div>
+<div style="font-size:18px;font-weight:800;margin-top:9px;line-height:1.5">{{ meName }}의 시즌 3 기록 카드를<br>받게 될 거야</div>
+<div style="display:inline-block;font-size:13px;font-weight:600;background:rgba(255,255,255,0.16);border-radius:999px;padding:8px 14px;margin-top:13px">🔒 4주차에 열려</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+<div style="{{ navStyle }}">
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
+</div>
+</div>
+</sc-if>

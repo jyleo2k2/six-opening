@@ -1,0 +1,53 @@
+<sc-if value="{{ isRanking }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column">
+
+<div style="{{ rkHeadStyle }}">
+<div onClick="{{ goHome }}" style="{{ rkBackStyle }}">‹</div>
+<div style="{{ rkTitleStyle }}"><span>랭킹</span></div>
+<div style="{{ rkSegWrap }}">
+<div onClick="{{ pickWeek }}" style="{{ rkSegWeek }}">이번 주</div>
+<div onClick="{{ pickSeason }}" style="{{ rkSegSeason }}">시즌 전체</div>
+</div>
+<div style="{{ rkConeStyle }}"></div>
+<div style="{{ rkGroundStyle }}"></div>
+<sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+<div style="{{ p.pedStyle }}">
+<div style="{{ p.pedTopStyle }}"></div>
+<div style="{{ p.ribLStyle }}"></div>
+<div style="{{ p.ribRStyle }}"></div>
+<div style="{{ p.medStyle }}">{{ p.rank }}</div>
+</div>
+</sc-for>
+<sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+<div style="{{ p.slotStyle }}">
+<div style="{{ p.crownStyle }}">{{ p.crown }}</div>
+<div style="{{ p.nameStyle }}">{{ p.name }}</div>
+<div style="{{ p.pillStyle }}">
+<div style="{{ p.pctStyle }}">{{ p.pct }}</div>
+<div style="{{ p.stepStyle }}">{{ p.step }}</div>
+</div>
+<div style="{{ p.avStyle }}">{{ p.emoji }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 16px 4px;display:flex;flex-direction:column;gap:13px">
+<sc-for list="{{ rankRows }}" as="r" hint-placeholder-count="13">
+<div style="{{ r.rowStyle }}">
+<div style="{{ r.rankStyle }}">{{ r.rank }}</div>
+<div style="{{ r.plateStyle }}">{{ r.emoji }}</div>
+<div style="{{ r.nameStyle }}">{{ r.name }}</div>
+<div style="{{ r.badgeStyle }}">{{ r.step }}</div>
+<div style="{{ r.pctStyle }}">{{ r.pct }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="{{ navStyle }}">
+<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
+<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
+<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
+</div>
+</div>
+</sc-if>
