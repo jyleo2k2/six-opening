@@ -97,12 +97,12 @@ const COPY = {
   greeting:
     "\uc548\ub155, \ub098\ub294 \ud0a4\uc6c5\uc774\uc57c. \ud22c\uc790 \uae30\ucd08\uc640 \ud654\uba74 \uc0ac\uc6a9\ubc95\uc744 \ud568\uaed8 \ubcfc \uc218 \uc788\uc5b4.",
   recommended: "\ucd94\ucc9c \uc9c8\ubb38",
-  aiNotice: "\ud0a4\uc6c5\uc774\ub294 AI \ub3c4\uc6b0\ubbf8\uc57c",
   status: "\ucc98\ub9ac \uc0c1\ud0dc",
   input: "\uad81\uae08\ud55c \uac83\uc744 \uc785\ub825\ud574 \uc918",
   send: "\ubcf4\ub0b4\uae30",
   relatedScreen: "관련 화면 보기",
   openArchive: "아카이브에서 보기",
+  reset: "초기화",
   avatar: "\uacf0",
 } as const;
 
@@ -350,6 +350,8 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const [sectorExploreAction, setSectorExploreAction] =
     useState<SectorExploreActionPayload | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const requestAbortRef = useRef<AbortController | null>(null);
+  const chatSessionVersionRef = useRef(0);
   const sheetDragRef = useRef<SheetDragState | null>(null);
   const floatingChatDragRef = useRef<FloatingChatDragState | null>(null);
   const suppressFloatingChatClickRef = useRef(false);
@@ -557,10 +559,29 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     sheetDragRef.current = null;
   }
 
+  function resetChat() {
+    chatSessionVersionRef.current += 1;
+    requestAbortRef.current?.abort();
+    requestAbortRef.current = null;
+    setMessages([]);
+    setInput("");
+    setStatus("질문을 기다리고 있어");
+    setExplainAction(null);
+    setStockExploreAction(null);
+    setSectorExploreAction(null);
+    setIsLoading(false);
+  }
+
   function handleSheetPointerDown(
-    event: ReactPointerEvent<HTMLDivElement>,
+    event: ReactPointerEvent<HTMLElement>,
   ) {
     if (!event.isPrimary || event.button !== 0) return;
+    if (
+      event.target instanceof HTMLElement &&
+      event.target.closest("button, input, textarea")
+    ) {
+      return;
+    }
 
     event.currentTarget.setPointerCapture(event.pointerId);
     sheetDragRef.current = {
@@ -575,7 +596,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   }
 
   function handleSheetPointerMove(
-    event: ReactPointerEvent<HTMLDivElement>,
+    event: ReactPointerEvent<HTMLElement>,
   ) {
     const drag = sheetDragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
@@ -599,7 +620,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   }
 
   function finishSheetDrag(
-    event: ReactPointerEvent<HTMLDivElement>,
+    event: ReactPointerEvent<HTMLElement>,
     cancelled = false,
   ) {
     const drag = sheetDragRef.current;
@@ -643,6 +664,10 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     stockExploreChoiceId?: StockExploreChoiceId,
     sectorExploreChoiceId?: SectorExploreChoiceId,
   ) {
+    const chatSessionVersion = chatSessionVersionRef.current;
+    const abortController = new AbortController();
+    requestAbortRef.current?.abort();
+    requestAbortRef.current = abortController;
     const explainTurn = explainAction?.turn;
     const stockExploreTurn = stockExploreAction?.turn;
     const sectorExploreTurn = sectorExploreAction?.turn;
@@ -676,6 +701,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: abortController.signal,
         body: JSON.stringify({
           message: question,
           context: chatContext,
@@ -761,6 +787,8 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         setTimeout(resolve, remainingPreparationMs(startedAt, Date.now()));
       });
 
+      if (chatSessionVersion !== chatSessionVersionRef.current) return;
+
       setExplainAction(pendingExplainAction);
       setStockExploreAction(pendingStockExploreAction);
       setSectorExploreAction(pendingSectorExploreAction);
@@ -808,6 +836,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       ]);
       setStatus("답변을 준비했어요");
     } catch {
+      if (abortController.signal.aborted || chatSessionVersion !== chatSessionVersionRef.current) {
+        return;
+      }
       setStatus("연결을 다시 확인해 주세요");
       await new Promise<void>((resolve) => {
         setTimeout(resolve, remainingPreparationMs(startedAt, Date.now()));
@@ -819,7 +850,12 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         ];
       });
     } finally {
-      setIsLoading(false);
+      if (requestAbortRef.current === abortController) {
+        requestAbortRef.current = null;
+      }
+      if (chatSessionVersion === chatSessionVersionRef.current) {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -985,15 +1021,10 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
             borderRadius: 40 * prototypeScreen.scale,
           }}
         >
-          <button
-            aria-label={COPY.close}
-            className="absolute inset-0 z-0 cursor-default bg-navy/20 backdrop-blur-[1px]"
-            onClick={closeChat}
-            type="button"
-          />
+          <div aria-hidden="true" className="absolute inset-0 z-0 bg-navy/20 backdrop-blur-[1px]" />
 
           <section
-            aria-labelledby="kiwoong-chat-title"
+            aria-label="키웅이 챗봇"
             aria-modal="true"
             className={`absolute bottom-0 left-0 z-10 flex flex-col overflow-hidden rounded-t-[28px] bg-white shadow-card ${
               isSheetDragging
@@ -1001,6 +1032,10 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                 : "transition-transform duration-200 ease-out motion-reduce:transition-none"
             }`}
             role="dialog"
+            onPointerCancel={(event) => finishSheetDrag(event, true)}
+            onPointerDown={handleSheetPointerDown}
+            onPointerMove={handleSheetPointerMove}
+            onPointerUp={finishSheetDrag}
             style={{
               width: PROTOTYPE_PHONE.screenWidth,
               height: PROTOTYPE_SHEET_HEIGHT,
@@ -1010,11 +1045,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
             }}
           >
             <div
-              className="flex h-7 shrink-0 touch-none cursor-grab items-center justify-center active:cursor-grabbing"
-              onPointerCancel={(event) => finishSheetDrag(event, true)}
-              onPointerDown={handleSheetPointerDown}
-              onPointerMove={handleSheetPointerMove}
-              onPointerUp={finishSheetDrag}
+              className="flex h-7 shrink-0 touch-none items-center justify-center"
             >
               <span
                 aria-hidden="true"
@@ -1022,23 +1053,13 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               />
             </div>
 
-            <div className="flex shrink-0 items-center justify-between border-b border-gray/40 px-5 pb-4">
-              <div>
-                <p
-                  className="text-base font-bold text-navy"
-                  id="kiwoong-chat-title"
-                >
-                  {COPY.title}
-                </p>
-                <p className="mt-0.5 text-xs text-ink/60">{COPY.subtitle}</p>
-                <p className="mt-1 text-xs text-ink/60">{COPY.aiNotice}</p>
-              </div>
+            <div className="flex shrink-0 justify-end border-b border-gray/40 px-5 pb-3">
               <button
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-ink"
-                onClick={closeChat}
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
+                onClick={resetChat}
                 type="button"
               >
-                {COPY.close}
+                {COPY.reset}
               </button>
             </div>
 
