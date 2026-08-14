@@ -251,6 +251,7 @@
     '105560': 'assets/logos/105560.png',
     '122870': 'assets/logos/122870.png',
     '180640': 'assets/logos/180640.png',
+    '192080': 'assets/logos/192080.png',
     '251270': 'assets/logos/251270.png',
     '259960': 'assets/logos/259960.png',
     '271560': 'assets/logos/271560.png',
