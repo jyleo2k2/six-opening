@@ -44,7 +44,7 @@
 - `collect-universe-news.ts`: 종목마다 체크포인트를 남기고 `--resume`할 수 있는 51종목 수집 CLI
 - `universe-news-evaluation.ts`: 51종목 결과 계약, 대상 종목 주인공 게이트, 현재 목업 대 실제 결과 비교 HTML
 - `run-universe-evaluation.ts`: 51종목을 Luna 역할 파이프라인으로 판정하고 종목마다 JSON·HTML을 갱신하는 CLI
-- `universe-news-storage.ts`: 완전한 51종목 보고서를 검사하되, 승인된 v2 필드를 담을 DB 계약이 생기기 전에는 적재 SQL을 차단하는 가드
+- `universe-news-storage.ts`: 완전한 51종목 보고서만 승인된 v2 DB 계약으로 적재하는 SQL 생성기
 
 ## 실행
 
@@ -120,7 +120,7 @@ node features/f2-trade/prototypes/child-news-role-pipeline/run-universe-evaluati
   --retry-technical-errors `
   --role-timeout-ms 600000
 
-# 후속 DB v2 계약 연결 뒤 사용할 적재 명령. 현재는 새 필드 누락을 막기 위해 실패한다.
+# 51종목 완료·기술 오류 0건일 때만 v2 적재 SQL을 만든다.
 node features/f2-trade/prototypes/child-news-role-pipeline/generate-universe-storage.cjs `
   --report features/f2-trade/prototypes/child-news-role-pipeline/reports/selected-company-news-2026-08-13-luna/report.json `
   --overwrite
@@ -130,7 +130,7 @@ node features/f2-trade/prototypes/child-news-role-pipeline/generate-universe-sto
 
 51종목 실행의 제목·본문 선별, 편집, 독립 검수는 모두 `max`를 사용한다. 추론 토큰이 보이는 JSON 출력 전에 한도를 모두 쓰는 문제를 막기 위해 역할별 출력 여유를 32,000~48,000으로 두고 `max_output_tokens` 불완전 응답일 때만 64,000으로 한 번 재시도한다. 역할당 기본 제한은 360초이며 기술 오류 재시도 때는 `--role-timeout-ms`로 최대 900초까지 명시할 수 있다. 최종 보고서에 `ROLE_ERROR`나 `PIPELINE_EXECUTION_ERROR`가 하나라도 있으면 적재 SQL 생성 자체를 막는다.
 
-DB에는 `ready_for_storage` 결과만 넣는 원칙을 유지한다. 현재는 `priceConnection`과 3개 `factKey`를 담을 DB 계약이 없어 통과 기사가 한 건이라도 있으면 적재 SQL 생성을 차단한다. `report.json`은 51건의 통과·거부 감사 기록을 모두 보존하며, 거부 기사를 서비스 카드로 만들지 않는다.
+DB에는 `ready_for_storage` 결과만 넣는 원칙을 유지한다. v2 적재 SQL은 `priceConnection`, 3개 `factKey`, 용어별 원문 ID, 새 독립검수 결과를 함께 저장한다. `report.json`은 51건의 통과·거부 감사 기록을 모두 보존하며, 거부 기사를 서비스 카드로 만들지 않는다.
 
 ### 2026-08-13 제목 선별·3줄 요약 추가 후 실측 결과
 
@@ -196,7 +196,7 @@ npx tsx features/f2-trade/prototypes/child-news-role-pipeline/generate-price-lin
 - `priceConnection`은 기사에서 확인된 연결(`article_fact`)과 사건 유형 교육 설명(`event_education`)을 구분한다.
 - 어려운 용어는 원래 이름을 유지하고 별도 풀이·원문 ID를 모두 남긴다.
 - 독립 검수자는 같은 제목, 사실 중복, 주가 연결 근거, 용어 풀이 완전성을 명시적 boolean으로 다시 판정한다.
-- 현재 Supabase 스키마에는 `priceConnection`과 `factKey` 컬럼이 없으므로 통과 기사가 있는 보고서의 적재 SQL 생성은 닫힌 실패한다. 새 DB 계약을 붙이기 전에는 결과 JSON·HTML만 검수한다.
+- Supabase v2 스키마는 `priceConnection`, 3개 `factKey`, 용어별 `sourceIds`와 새 독립검수 boolean을 저장하고 `news_feed_items`에서 함께 조회한다.
 
 ### 승인 형식 연결 후 실제 10건 재검증
 

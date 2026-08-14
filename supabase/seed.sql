@@ -16,14 +16,14 @@ insert into public.news_pipeline_runs (
   'latest-economic-news-2026-08-13-luna',
   '2026-08-13',
   'gpt-5.6-luna',
-  'child-news-role-pipeline-v1',
-  'headline-examples-and-three-line-summary-v1',
+  'child-news-role-pipeline-v2',
+  'approved-price-linked-max-v2',
   10,
   3,
   7,
-  false,
+  true,
   '2026-08-13T07:30:00.000Z',
-  '2026-08-13T08:07:29.882Z'
+  '2026-08-14T03:47:14.710Z'
 )
 on conflict (run_key) do nothing;
 
@@ -129,7 +129,7 @@ join (
       'S3', 3::smallint,
       '서울 외환시장에서 원·달러 환율은 7.7원 내린 1416.1원에 마감했다.',
       'da54efe990b418152e78f8495f65130ffbce86b6e3a5e68f79262baa51053b6b',
-      false, false
+      true, false
     ),
     (
       '8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82',
@@ -181,8 +181,14 @@ insert into public.news_publications (
   headline,
   home_summary,
   summary_line_1,
+  summary_line_1_fact_key,
   summary_line_2,
+  summary_line_2_fact_key,
   summary_line_3,
+  summary_line_3_fact_key,
+  price_connection_kind,
+  price_connection_basis,
+  price_connection_text,
   term_treatments,
   deterministic_facts_pass,
   review_allowed_scope,
@@ -194,6 +200,10 @@ insert into public.news_publications (
   review_no_irrelevant_detail,
   review_attribution_and_timing,
   review_all_terms_easy,
+  review_same_headline_across_surfaces,
+  review_distinct_summary_facts,
+  review_price_connection_grounded,
+  review_term_explanation_coverage,
   review_investment_safety,
   review_no_sentiment_label,
   editor_attempts,
@@ -210,10 +220,17 @@ select
   publication.headline,
   publication.home_summary,
   publication.summary_line_1,
+  publication.summary_line_1_fact_key,
   publication.summary_line_2,
+  publication.summary_line_2_fact_key,
   publication.summary_line_3,
+  publication.summary_line_3_fact_key,
+  publication.price_connection_kind,
+  publication.price_connection_basis,
+  publication.price_connection_text,
   publication.term_treatments::jsonb,
-  true, true, true, true, true, true, true, true, true, true, true, true,
+  true, true, true, true, true, true, true, true, true, true,
+  true, true, true, true, true, true,
   publication.editor_attempts,
   '2026-08-13T08:07:29.882Z'::timestamptz
 from public.news_articles as article
@@ -224,12 +241,18 @@ join (
       'observed_market_move',
       '{}'::text[],
       '13일 국내 증시에서 코스피와 코스닥이 상승 마감했다.',
-      '13일 코스피가 3.56% 올라 마감',
-      '13일 코스피와 다른 주식시장 숫자가 올랐다.',
-      '13일 코스피가 올라 마감했다.',
-      '다른 국내 주식시장 숫자도 0.29% 올랐다.',
-      '코스피는 국내 주식시장 대표 숫자야.',
-      '[{"term":"코스피","easyText":"코스피는 국내 주식시장 대표 숫자야.","treatment":"explained"},{"term":"코스닥","easyText":"다른 국내 주식시장 숫자","treatment":"replaced"}]',
+      '코스피, 3.56% 올라 6813.34로 마감',
+      '코스피, 3.56% 올라 6813.34로 마감',
+      '전날보다 234.30포인트 올랐어요.',
+      'kospi_points',
+      '코스닥도 0.29% 오른 1419.4였어요.',
+      'kosdaq_close',
+      '원·달러 환율은 7.7원 내렸어요.',
+      'exchange_rate',
+      'market_index',
+      'event_education',
+      '코스피와 코스닥은 국내 주식시장 흐름을 보여주는 숫자예요.',
+      '[{"term":"코스피","easyText":"국내 주식시장을 대표하는 숫자","treatment":"explained","sourceIds":["S1"]},{"term":"포인트","easyText":"주식시장 숫자가 얼마나 움직였는지 나타내는 단위","treatment":"explained","sourceIds":["S1","S2"]},{"term":"코스닥","easyText":"성장 기업이 많이 모인 국내 주식시장의 숫자","treatment":"explained","sourceIds":["S2"]},{"term":"서울 외환시장","easyText":"서울에서 나라 돈을 바꾸는 시장","treatment":"explained","sourceIds":["S3"]},{"term":"원·달러 환율","easyText":"한국 돈과 미국 달러를 바꾸는 비율","treatment":"explained","sourceIds":["S3"]}]',
       1::smallint
     ),
     (
@@ -237,12 +260,18 @@ join (
       'earnings',
       array['015760']::text[],
       '한국전력의 2026년 2분기 영업이익이 전년 동기보다 47.2% 감소했다.',
-      '한국전력 2026년 2분기 본업에서 번 돈 47.2% 줄어',
-      '한국전력의 2026년 2분기 본업에서 번 돈은 1조1286억원으로 지난해 같은 기간보다 47.2% 줄었다.',
-      '한국전력의 2026년 2분기 본업에서 번 돈이 줄었다.',
-      '판매액은 21조9189억원, 남은 돈은 2775억원이다.',
-      '한국전력은 전기 판매량 감소와 연료비 증가를 원인으로 들었다.',
-      '[{"term":"영업이익","easyText":"본업에서 번 돈","treatment":"replaced"},{"term":"매출","easyText":"판매액","treatment":"replaced"},{"term":"순이익","easyText":"남은 돈","treatment":"replaced"}]',
+      '한국전력, 2026년 2분기 영업이익 지난해 같은 기간보다 47.2% 줄어',
+      '한국전력, 2026년 2분기 영업이익 지난해 같은 기간보다 47.2% 줄어',
+      '영업이익은 1조1286억원이에요.',
+      'operating_profit_amount',
+      '매출은 21조9189억원이고 순이익은 2775억원이에요.',
+      'revenue_net_income_amounts',
+      '한국전력은 전기 판매량 감소와 연료비 증가를 원인으로 들었어요.',
+      'cited_profit_reasons',
+      'business_performance',
+      'event_education',
+      '영업이익과 매출의 변화는 회사의 사업 흐름과 연결돼요.',
+      '[{"term":"영업이익","easyText":"회사가 본업으로 벌어 비용을 빼고 남긴 돈","treatment":"explained","sourceIds":["S1","S3"]},{"term":"매출","easyText":"제품이나 서비스를 팔아 받은 전체 금액","treatment":"explained","sourceIds":["S2"]},{"term":"순이익","easyText":"모든 비용을 빼고 마지막에 남은 돈","treatment":"explained","sourceIds":["S2"]},{"term":"전기 판매량","easyText":"팔린 전기의 양","treatment":"explained","sourceIds":["S3"]},{"term":"연료비","easyText":"전기를 만들 때 쓰는 연료에 드는 돈","treatment":"explained","sourceIds":["S3"]}]',
       2::smallint
     )
 ) as publication(
@@ -253,8 +282,14 @@ join (
   headline,
   home_summary,
   summary_line_1,
+  summary_line_1_fact_key,
   summary_line_2,
+  summary_line_2_fact_key,
   summary_line_3,
+  summary_line_3_fact_key,
+  price_connection_kind,
+  price_connection_basis,
+  price_connection_text,
   term_treatments,
   editor_attempts
 ) on publication.source_key = article.source_key
@@ -273,15 +308,18 @@ join (
   values
     ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'headline', 'S1'),
     ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'home_summary', 'S1'),
-    ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'home_summary', 'S2'),
     ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'summary_line_1', 'S1'),
     ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'summary_line_2', 'S2'),
-    ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'summary_line_3', 'S1'),
+    ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'summary_line_3', 'S3'),
+    ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'price_connection', 'S1'),
+    ('f21b4df0d67eb94caa6e9db042d77ec6026354ae8cbf35cdebf2db08572efd35', 'price_connection', 'S2'),
     ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'headline', 'S1'),
     ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'home_summary', 'S1'),
     ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'summary_line_1', 'S1'),
     ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'summary_line_2', 'S2'),
-    ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'summary_line_3', 'S3')
+    ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'summary_line_3', 'S3'),
+    ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'price_connection', 'S1'),
+    ('8bf4861b341e7b0b893452d1840f695147dbe8db098f3eb70c838c68f26e2a82', 'price_connection', 'S2')
 ) as citation(source_key, output_field, source_unit_id)
   on citation.source_key = article.source_key
 on conflict (publication_id, output_field, source_unit_id) do nothing;

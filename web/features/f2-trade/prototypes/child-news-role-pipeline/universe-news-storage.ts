@@ -38,9 +38,17 @@ function storageSourceId(value: string) {
   return normalized;
 }
 
+function storageTermTreatments(ready: ReadyNews) {
+  return ready.draft.termTreatments.map((treatment) => ({
+    ...treatment,
+    sourceIds: treatment.sourceIds.map(storageSourceId),
+  }));
+}
+
 function sourceIdsForField(ready: ReadyNews, outputField: string) {
   if (outputField === "headline") return ready.draft.headline.sourceIds;
   if (outputField === "home_summary") return ready.draft.homeSummary.sourceIds;
+  if (outputField === "price_connection") return ready.draft.priceConnection.sourceIds;
   const match = outputField.match(/^summary_line_(\d)$/u);
   const index = match ? Number(match[1]) - 1 : -1;
   if (index < 0 || index >= ready.draft.body.length) {
@@ -98,8 +106,8 @@ function renderRunInsert(report: UniverseNewsReport, criteriaPassed: boolean) {
   started_at, completed_at
 ) values (
   ${sqlText(report.runId)}, ${sqlText(report.runDateKst)}::date,
-  'gpt-5.6-luna', 'child-news-role-pipeline-v1',
-  'selected-company-max-reasoning-and-three-line-summary-v1',
+  'gpt-5.6-luna', 'child-news-role-pipeline-v2',
+  'approved-price-linked-max-v2',
   51, ${report.readyForStorageCount}, ${report.rejectedCount}, ${criteriaPassed},
   ${sqlText(report.sourceRetrievedAt)}::timestamptz,
   ${sqlText(report.generatedAt)}::timestamptz
@@ -224,8 +232,13 @@ function renderExistingPublicationGuard(items: readonly ReadyStorageItem[]) {
       ${sqlText(sourceKey)}, ${sqlText(ready.selection.eventType)},
       ${sqlTextArray(codes)}, ${sqlText(ready.selection.focusStatement)},
       ${sqlText(ready.draft.headline.text)}, ${sqlText(ready.draft.homeSummary.text)},
-      ${sqlText(ready.draft.body[0].text)}, ${sqlText(ready.draft.body[1].text)},
-      ${sqlText(ready.draft.body[2].text)}, ${sqlJson(ready.draft.termTreatments)}
+      ${sqlText(ready.draft.body[0].text)}, ${sqlText(ready.draft.body[0].factKey)},
+      ${sqlText(ready.draft.body[1].text)}, ${sqlText(ready.draft.body[1].factKey)},
+      ${sqlText(ready.draft.body[2].text)}, ${sqlText(ready.draft.body[2].factKey)},
+      ${sqlText(ready.draft.priceConnection.kind)},
+      ${sqlText(ready.draft.priceConnection.basis)},
+      ${sqlText(ready.draft.priceConnection.text)},
+      ${sqlJson(storageTermTreatments(ready))}
     )`;
   }).join(",\n      ");
   return `do $$
@@ -240,8 +253,12 @@ begin
       ${values}
     ) as expected(
       source_key, event_type, stock_codes, focus_statement,
-      headline, home_summary, summary_line_1, summary_line_2,
-      summary_line_3, term_treatments
+      headline, home_summary,
+      summary_line_1, summary_line_1_fact_key,
+      summary_line_2, summary_line_2_fact_key,
+      summary_line_3, summary_line_3_fact_key,
+      price_connection_kind, price_connection_basis,
+      price_connection_text, term_treatments
     ) on expected.source_key = article.source_key
     where publication.selector_event_type <> expected.event_type
       or publication.reviewer_event_type <> expected.event_type
@@ -251,8 +268,14 @@ begin
       or publication.headline <> expected.headline
       or publication.home_summary <> expected.home_summary
       or publication.summary_line_1 <> expected.summary_line_1
+      or publication.summary_line_1_fact_key <> expected.summary_line_1_fact_key
       or publication.summary_line_2 <> expected.summary_line_2
+      or publication.summary_line_2_fact_key <> expected.summary_line_2_fact_key
       or publication.summary_line_3 <> expected.summary_line_3
+      or publication.summary_line_3_fact_key <> expected.summary_line_3_fact_key
+      or publication.price_connection_kind <> expected.price_connection_kind
+      or publication.price_connection_basis <> expected.price_connection_basis
+      or publication.price_connection_text <> expected.price_connection_text
       or publication.term_treatments <> expected.term_treatments
   ) then
     raise exception 'NEWS_SOURCE_PUBLICATION_OUTPUT_MISMATCH';
@@ -272,12 +295,19 @@ function renderPublicationInsert(items: readonly ReadyStorageItem[]) {
       ${sqlText(sourceKey)}, ${sqlText(ready.selection.eventType)},
       ${sqlTextArray(codes)}, ${sqlText(ready.selection.focusStatement)},
       ${sqlText(ready.draft.headline.text)}, ${sqlText(ready.draft.homeSummary.text)},
-      ${sqlText(ready.draft.body[0].text)}, ${sqlText(ready.draft.body[1].text)},
-      ${sqlText(ready.draft.body[2].text)}, ${sqlJson(ready.draft.termTreatments)},
+      ${sqlText(ready.draft.body[0].text)}, ${sqlText(ready.draft.body[0].factKey)},
+      ${sqlText(ready.draft.body[1].text)}, ${sqlText(ready.draft.body[1].factKey)},
+      ${sqlText(ready.draft.body[2].text)}, ${sqlText(ready.draft.body[2].factKey)},
+      ${sqlText(ready.draft.priceConnection.kind)},
+      ${sqlText(ready.draft.priceConnection.basis)},
+      ${sqlText(ready.draft.priceConnection.text)},
+      ${sqlJson(storageTermTreatments(ready))},
       ${checks.allowedScope}, ${checks.primarySubject}, ${checks.directMateriality},
       ${checks.sourceFidelity}, ${checks.focusAlignment},
       ${checks.conciseThreeLineSummary}, ${checks.noIrrelevantDetail},
       ${checks.attributionAndTiming}, ${checks.allTermsEasy},
+      ${checks.sameHeadlineAcrossSurfaces}, ${checks.distinctSummaryFacts},
+      ${checks.priceConnectionGrounded}, ${checks.termExplanationCoverage},
       ${checks.investmentSafety}, ${checks.noSentimentLabel},
       ${ready.editorAttempts}::smallint
     )`;
@@ -285,12 +315,18 @@ function renderPublicationInsert(items: readonly ReadyStorageItem[]) {
   return `insert into public.news_publications (
   article_id, status, selector_event_type, reviewer_event_type,
   selector_stock_codes, reviewer_stock_codes, focus_statement,
-  headline, home_summary, summary_line_1, summary_line_2, summary_line_3,
+  headline, home_summary,
+  summary_line_1, summary_line_1_fact_key,
+  summary_line_2, summary_line_2_fact_key,
+  summary_line_3, summary_line_3_fact_key,
+  price_connection_kind, price_connection_basis, price_connection_text,
   term_treatments, deterministic_facts_pass,
   review_allowed_scope, review_primary_subject, review_direct_materiality,
   review_source_fidelity, review_focus_alignment,
   review_concise_three_line_summary, review_no_irrelevant_detail,
   review_attribution_and_timing, review_all_terms_easy,
+  review_same_headline_across_surfaces, review_distinct_summary_facts,
+  review_price_connection_grounded, review_term_explanation_coverage,
   review_investment_safety, review_no_sentiment_label,
   editor_attempts, ready_at
 )
@@ -298,13 +334,18 @@ select
   article.id, 'draft', publication.event_type, publication.event_type,
   publication.stock_codes, publication.stock_codes,
   publication.focus_statement, publication.headline, publication.home_summary,
-  publication.summary_line_1, publication.summary_line_2,
-  publication.summary_line_3, publication.term_treatments,
+  publication.summary_line_1, publication.summary_line_1_fact_key,
+  publication.summary_line_2, publication.summary_line_2_fact_key,
+  publication.summary_line_3, publication.summary_line_3_fact_key,
+  publication.price_connection_kind, publication.price_connection_basis,
+  publication.price_connection_text, publication.term_treatments,
   true, publication.allowed_scope, publication.primary_subject,
   publication.direct_materiality, publication.source_fidelity,
   publication.focus_alignment, publication.concise_three_line_summary,
   publication.no_irrelevant_detail, publication.attribution_and_timing,
-  publication.all_terms_easy, publication.investment_safety,
+  publication.all_terms_easy, publication.same_headline_across_surfaces,
+  publication.distinct_summary_facts, publication.price_connection_grounded,
+  publication.term_explanation_coverage, publication.investment_safety,
   publication.no_sentiment_label, publication.editor_attempts, now()
 from public.news_articles as article
 join (
@@ -312,10 +353,16 @@ join (
     ${values.join(",\n    ")}
 ) as publication(
   source_key, event_type, stock_codes, focus_statement, headline, home_summary,
-  summary_line_1, summary_line_2, summary_line_3, term_treatments,
+  summary_line_1, summary_line_1_fact_key,
+  summary_line_2, summary_line_2_fact_key,
+  summary_line_3, summary_line_3_fact_key,
+  price_connection_kind, price_connection_basis,
+  price_connection_text, term_treatments,
   allowed_scope, primary_subject, direct_materiality, source_fidelity,
   focus_alignment, concise_three_line_summary, no_irrelevant_detail,
-  attribution_and_timing, all_terms_easy, investment_safety,
+  attribution_and_timing, all_terms_easy, same_headline_across_surfaces,
+  distinct_summary_facts, price_connection_grounded,
+  term_explanation_coverage, investment_safety,
   no_sentiment_label, editor_attempts
 ) on publication.source_key = article.source_key
 on conflict (article_id) do nothing;`;
@@ -329,6 +376,7 @@ function renderCitationInsert(items: readonly ReadyStorageItem[]) {
     "summary_line_1",
     "summary_line_2",
     "summary_line_3",
+    "price_connection",
   ] as const;
   const rows = items.flatMap(({ ready, sourceKey }) =>
     outputFields.flatMap((outputField) =>
@@ -401,11 +449,6 @@ export function renderUniverseNewsStorageSql(report: UniverseNewsReport) {
   );
   if (!criteriaPassed) {
     throw new Error("모델 또는 파이프라인 실행 오류가 남아 있어 DB 적재 SQL을 만들지 않습니다.");
-  }
-  if (report.readyForStorageCount > 0) {
-    throw new Error(
-      "주가 연결 설명과 factKey를 저장할 DB 계약이 아직 없어 적재 SQL을 만들지 않습니다.",
-    );
   }
   const items = readyStorageItems(report);
   return `-- ${report.runId}
