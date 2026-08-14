@@ -55,9 +55,6 @@
       exploreBgStyle: 'position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(circle at 18% 7%,rgba(225,219,255,0.34) 0%,rgba(225,219,255,0) 32%),radial-gradient(circle at 88% 92%,rgba(255,226,239,0.25) 0%,rgba(255,226,239,0) 30%),linear-gradient(180deg,#FAF9FD 0%,#F5F3FB 52%,#FAF8FC 100%)',
       // 캐러셀 영역은 투명 — 별도 배경을 두지 않는다
       stageStyle: 'position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:transparent',
-      // 하단 내비 — 밝은 배경에 이어지는 반투명 글래스
-      navStyleX: 'flex:none;display:flex;padding-bottom:14px;background:linear-gradient(180deg,rgba(250,248,252,0) 0%,rgba(252,251,254,0.86) 34%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.9)',
-      navHomeX: this.navItemX(false), navTradeX: this.navItemX(true), navArchiveX: this.navItemX(false), navRankingX: this.navItemX(false),
       cardsRef: (el) => { this.cardsEl = el; },
       cardsScroll: (e) => {
         const el = e.currentTarget;
@@ -422,7 +419,6 @@
       statusDark: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:' + (s.screen === 'ranking' ? 'none' : 'block'),
       statusLight: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:' + (s.screen === 'ranking' ? 'block' : 'none'),
       goRanking: () => this.set({ screen:'ranking' }),
-      navRanking: this.navItem(s.screen === 'ranking'),
       rkHeadStyle: 'flex:none;position:relative;height:416px;border-radius:0 0 48px 48px;overflow:hidden;'
         + 'background:radial-gradient(125% 100% at 50% 8%,#2A5FC4 0%,#123B8E 38%,#0B2A6B 68%,#01185A 100%)',
       rkBackStyle: 'position:absolute;left:18px;top:65px;width:38px;height:38px;border-radius:999px;background:rgba(255,255,255,0.14);'
@@ -702,10 +698,12 @@
       backBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
       stepPillStyle: 'min-width:58px;text-align:center;border-radius:999px;padding:8px 12px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#A9AEC4;background:#F1F2F8',
 
-      navStyle: 'flex:none;display:flex;padding-bottom:14px;background:linear-gradient(180deg,rgba(245,242,248,0) 0%,#F5F2F8 34%);box-shadow:0 -1px 0 rgba(1,24,90,0.06)',
-      navHome: this.navItem(s.screen === 'home'),
-      navTrade: this.navItem(s.screen === 'explore' || s.screen === 'detail' || s.screen === 'buy'),
-      navArchive: this.navItem(s.screen === 'archive'),
+      navBarStyle: 'flex:none;display:flex;align-items:center;gap:8px;padding:10px 14px 20px',
+      navPillStyle: 'flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:rgba(255,255,255,0.6);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(255,255,255,0.5)',
+      navHomeIcon: this.navIcon(s.screen === 'home'), navHomeLabel: this.navLabel(s.screen === 'home'),
+      navTradeIcon: this.navIcon(s.screen === 'explore' || s.screen === 'detail' || s.screen === 'buy'), navTradeLabel: this.navLabel(s.screen === 'explore' || s.screen === 'detail' || s.screen === 'buy'),
+      navArchiveIcon: this.navIcon(s.screen === 'archive'), navArchiveLabel: this.navLabel(s.screen === 'archive'),
+      navRankingIcon: this.navIcon(s.screen === 'ranking'), navRankingLabel: this.navLabel(s.screen === 'ranking'),
       navAccount: this.navItem(s.screen === 'portfolio'),
 
       tradeLocked: locked, tradeOpen: !locked,
