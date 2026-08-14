@@ -40,9 +40,11 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
-## 3. 계산 — `shared/engine/archive-profile.js`
+## 3. 계산(구버전, 화면 현행) — `shared/engine/archive-profile.js`
 
 `web/AGENTS.md`는 수치·스코어링 계산을 `shared/engine`에서만 하도록 정한다. 화면은 결과를 표시만 한다.
+
+> **§3~§5 는 화면이 지금 쓰는 구버전이다.** 앞으로 갈 정본은 §6 신버전(`behavior-profile.ts`)이며, 화면 이관이 끝나면 이 절과 `archive-profile.js` 를 지운다.
 
 ### 3.1 능력치 다섯 축
 
@@ -171,18 +173,128 @@ app.html 안 `// >>> archive-engine` ~ `// <<< archive-engine`
 
 `renderVals()` 는 `const arc = this.buildArchive()` 로 받아 화면 키에 펼친다.
 
-## 6. 서버 F9 — 남아 있으나 화면과 끊겼다
+## 6. 신버전 엔진 — `shared/engine/behavior-profile.ts` (화면 이관 전)
 
-`web/app/api/profile/behavior/route.ts`(§3.2 대체 입력)는 화면과 연결돼 있다. 아래 넷은 여전히 **그대로 있지만 화면이 부르지 않는다**:
+위 §3~§5 는 **화면이 지금 쓰는 구버전**(`archive-profile.js`)이다. 이 절은 **화면이 앞으로 쓸 신버전**이다. 두 벌이 동시에 존재하는 건 이관 중이기 때문이며, 화면 이관이 끝나면 `archive-profile.js` 를 지운다.
 
-`web/app/api/profile/route.ts`, `web/shared/engine/behavior-profile.ts`, `web/shared/types/behavior-profile.ts`, `web/features/f9-archive/lib/narration.ts`.
+### 6.1 설계 원칙 — 5가 중립
 
-- 능력치를 0~10 으로 내는 계약(`BehaviorProfileSnapshot`)과 근거·집중 산식은 현재 화면과 무관하다.
-- 캐릭터 코드도 다르다. 서버는 승부사를 `challenger`, 화면 엔진은 `fighter` 로 쓴다.
-- Luna 서술(`narration.ts`)도 화면에 나오지 않는다. F9 는 현재 **LLM 을 쓰지 않는다.**
-- 되살릴 때는 두 계산 중 어느 쪽을 정본으로 삼을지부터 정한다. 두 벌을 동시에 유지하지 않는다.
+모든 축이 **0~10 이고 5가 중립**이다. 표본이 없으면 5에서 시작해 기록이 쌓일수록 5에서 멀어진다. 극단값은 증거가 있을 때만 나온다.
 
-**단, 정확 채점만은 한 벌이다.** `gradeAccuracy`·`accuracyLevelOf`·`kstDateOf` 와 관련 상수는 `archive-profile.js` 가 갖고 `behavior-profile.ts` 가 가져다 다시 내보낸다. 서버와 화면의 레벨이 갈리지 않게 하기 위해서다. 채점 규칙을 바꾸면 양쪽이 함께 바뀐다.
+구버전에서 이 원칙이 깨져 있던 곳:
+
+| 구버전 | 신버전 |
+|---|---|
+| 매수 0건 → 근거 0(직관 100) | 매수 0건 → 근거 5 |
+| 전량 매도 → 집중 1 | 전량 매도 → 집중 5 |
+| 채점 1건 적중 → 정확 100 | 채점 1건 적중 → 정확 6 |
+| 5:5 동점 → 저격수로 강제 귀속 | 동점대(차이 < 1) → `character: null` |
+
+### 6.2 다섯 축
+
+| 축 | 산식 |
+|---|---|
+| 근거력 `evidence` | 3탭 중 **2개 이상을 매수 직전 10초 넘게 본** 매수의 비율에 표본 축소 적용 |
+| 직관력 `intuition` | `10 − 근거력` |
+| 집중력 `focus` | 아래 §6.3 |
+| 분산력 `diversification` | `10 − 집중력` |
+| 정확력 `accuracy` | 채점된 거래의 적중 비율에 표본 축소 적용 — 아래 §6.4 |
+
+**표본 축소(shrinkage)** — `shrink(적중, 전체) = 10 × (적중 + k/2) / (전체 + k)`, `k = SHRINKAGE_K = 4`.
+표본 0건이면 정확히 5, 1건 성공이면 6, 1건 실패면 4다. 한두 건으로 극단이 나오지 않는다.
+
+점수는 **소수점 한 자리**로 반올림한다. 화면 표시는 정수로 더 줄여도 된다.
+
+### 6.3 집중력 — 유효 섹터수 + 현금 감쇠
+
+가짓수가 아니라 **비중까지 반영한 실질 분산 정도**를 본다.
+
+```
+wᵢ  = 섹터 i 평가액 ÷ 전체 주식 평가액
+ES  = 1 / Σwᵢ²                                  (유효 섹터수)
+raw = clamp(10 − FOCUS_SPAN × log_FOCUS_ANCHOR_ES(ES), 0, 10)
+invested = 주식 평가액 ÷ (현금 + 주식 평가액)
+집중력   = 5 + (raw − 5) × invested
+```
+
+`FOCUS_ANCHOR_ES = 3`, `FOCUS_SPAN = 5` **[가정]**.
+
+| ES | 1 | 1.5 | 2 | 3 | 4 | 6 | 9+ |
+|---|---|---|---|---|---|---|---|
+| raw | 10 | 8.2 | 6.8 | **5** | 3.7 | 1.8 | 0 |
+
+- 반도체 900만 + 게임 1만은 섹터가 둘이어도 ES ≈ 1.0 이라 집중이다.
+- 계단이 없다. 종목 한 주만 사도 점수가 연속으로 움직인다.
+- 현금이 많을수록 중립으로 끌려온다. **전량 현금이면 정확히 5**다 — 판단할 근거가 없다는 뜻이다.
+- 섹터를 모르는 종목은 ES 에서 빼되 `invested` 에는 넣는다. 투자한 돈은 투자한 돈이다.
+
+### 6.4 정확력 — 체결 **2거래일** 뒤 종가
+
+2026-08-14 유저 확정. 월요일에 사면 수요일 종가로 판정한다 (`ACCURACY_WAIT_TRADING_DAYS = 2`).
+
+| 거래 | 적중 조건 |
+|---|---|
+| 매수 | 2거래일 뒤 종가 > 체결가 |
+| 매도 | 2거래일 뒤 종가 < 매도 체결가 |
+
+- 매도 체결가는 `sell.price` → 매도일 종가(없으면 직전 거래일) 순으로 잡는다 **[가정]**.
+- 2거래일이 안 지났거나 종가가 없으면 보류하고 적중률에서 뺀다.
+- 레벨 경계는 기존 비율 1/3·2/3 을 0~10 으로 옮긴 값이다: `LV3 ≥ 20/3`, `LV2 ≥ 10/3`, 나머지 LV1.
+- 채점 함수는 `settledOn`(채점이 끝난 KST 날짜)을 함께 낸다. §6.6 주간 귀속이 이 값을 쓴다.
+
+### 6.5 캐릭터
+
+| 캐릭터 | 코드 | 판정 |
+|---|---|---|
+| 저격수 | `sniper` | 근거 > 직관, 집중 > 분산 |
+| 전략가 | `strategist` | 근거 > 직관, 집중 < 분산 |
+| 승부사 | `challenger` | 근거 < 직관, 집중 > 분산 |
+| 탐험가 | `explorer` | 근거 < 직관, 집중 < 분산 |
+
+- **어느 한 쌍이라도 차이가 `TIE_BAND = 1` 미만이면 `null`** 이다. 우세를 꾸며내지 않는다.
+- 체결 매수가 `MIN_BUYS_FOR_PROFILE = 3` 건 미만이면 캐릭터·레벨을 주지 않는다 (`observation: "none" | "low"`).
+- 화면 엔진의 `fighter` 와 코드가 다르다 — 이관할 때 `challenger` 로 맞춘다.
+
+### 6.6 주간 결산 카드 + 누적 현재 카드
+
+**축마다 시간 성격이 달라 귀속 규칙을 따로 둔다.**
+
+| 축 | 성격 | 주간 카드 | 누적 카드 |
+|---|---|---|---|
+| 근거력 | 유량 | 그 주에 체결된 매수만 | 전체 매수 |
+| 정확력 | 유량 + 2거래일 지연 | **그 주에 채점이 끝난 거래**(`settledOn` 기준) | 전체 채점 |
+| 집중력 | 저량 | **그 주 마지막 날 보유 스냅샷** | 오늘 보유 |
+
+정확력을 체결 주가 아니라 **채점 주**에 귀속하는 게 핵심이다. 그래야 끝난 주 카드가 나중에 바뀌지 않는다 — 결산의 조건이다.
+
+- 주 경계는 **월요일 00:00 ~ 일요일 24:00 KST** (`weekBucketsKST`). 라벨은 `8/10 – 8/16`.
+- 첫 거래가 있는 주부터 오늘이 속한 주까지 만든다. 거래가 하나도 없어도 이번 주 한 장은 나온다.
+- 과거 보유는 `replayPortfolio` 가 **현재 보유·현금에서 그 이후 거래를 최신순으로 되돌려** 복원한다.
+- 주간 `pending` 은 반대로 **그 주에 한 거래 중 아직 판정 안 난 것**을 센다.
+- 계산 함수(`computeAbilities`)는 기간을 모른다. 기간 자르기는 바깥에서 표본을 잘라 넘기므로 주간·누적이 같은 함수를 쓴다.
+
+### 6.7 출력 계약
+
+```ts
+BehaviorProfileSnapshot = {
+  userId; periodStart; periodEnd;
+  cumulative: AbilityCard;      // 현재 카드 = 전체 누적
+  weeks: WeekCard[];            // 주간 결산, 오래된 주 → 이번 주
+  reasonDistribution; actionAlignment;
+}
+AbilityCard = { scores; character; level; samples; observation }
+WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "current" }
+```
+
+`POST /api/profile` 이 이 스냅샷과 Luna 서술을 함께 낸다. 오늘 날짜는 `deps.now()` 로 주입받는다 — 주간 카드가 오늘에 매달리므로 테스트가 고정할 수 있어야 한다.
+
+### 6.8 아직 연결 안 된 것
+
+- **화면이 신버전을 부르지 않는다.** `app.html` 은 여전히 §3 구버전을 쓴다.
+- **`stock_tab_views` 로는 신버전 근거력을 못 낸다.** 컬럼이 `(user_id, stock_id, tab_count, created_at)` 뿐이라 어느 탭인지·몇 초 봤는지·매수 전인지가 없다. localStorage `events` 경유로 갈지 스키마를 넓힐지 결정이 필요하다.
+- **`info_detail_opened` 가 화면에서 한 번도 안 찍힌다.** `logEvent` 호출부는 `news_detail_opened`·`chart_detail_opened` 둘뿐이라 "3탭 중 2탭" 규칙이 실질 "2탭 중 2탭"이다.
+- **주차 카드 산출이 둘이다.** PR #150 이 `GET /api/profile/season-cards` 를 먼저 붙였다 — 구버전 산식으로 Supabase `transactions` 를 주 단위로 묶되 **과거 주 정확은 채점하지 않고 기본값**이고 이번 주는 다루지 않는다. 신버전 `weeks[]` 는 정확을 채점 주에 귀속하고 이번 주도 포함한다. 화면을 붙이기 전에 어느 쪽을 남길지 정해야 한다.
+- `shared/store/family-trade-seed.ts` 주석이 아직 "5거래일" 기준으로 적혀 있다 (다른 세션 소유 경로).
 
 ## 7. 현재 알려진 불일치·미완료
 
