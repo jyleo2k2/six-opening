@@ -87,6 +87,22 @@ export function resolveCharacter(scores, level) {
   return { key, level: level || accuracyLevelOf(accuracy / 100) };
 }
 
+/**
+ * 로그인 사용자 행동 데이터(F9-archive SPEC §3.2 대체 입력)로 캐릭터를 정한다.
+ * tab_count 합계가 근거·직관, 거래 종목 수가 집중·분산을 정하고 두 우세의
+ * 조합으로 캐릭터가 나온다. 정확·레벨은 이 함수의 범위 밖이다.
+ *
+ * @param {number} tabCountTotal `stock_tab_views.tab_count` 합계. 0~1 → 직관 우세, 2 이상 → 근거 우세
+ * @param {number} distinctSymbolCount 거래한 종목 수. 2 이하 → 집중 우세, 3 이상 → 분산 우세
+ * @returns {"sniper"|"strategist"|"fighter"|"explorer"}
+ */
+export function resolveCharacterFromBehaviorSignals(tabCountTotal, distinctSymbolCount) {
+  const evidenceLeads = tabCountTotal >= 2;
+  const focusLeads = distinctSymbolCount <= 2;
+  if (evidenceLeads) return focusLeads ? "sniper" : "strategist";
+  return focusLeads ? "fighter" : "explorer";
+}
+
 // ── 정확 채점 ──────────────────────────────────────────────────────────
 // 체결 5거래일 뒤 종가로 맞았는지 본다. 매수는 오르면, 매도는 내리면 적중이다.
 

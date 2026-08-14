@@ -7,6 +7,7 @@ import {
   gradeAccuracy,
   kstDateOf,
   resolveCharacter,
+  resolveCharacterFromBehaviorSignals,
 } from "./archive-profile.js";
 
 const SECTORS: Record<string, string> = {
@@ -95,6 +96,19 @@ test("채점 결과가 있으면 그 레벨을 그대로 쓴다", () => {
 
 test("정확 기본값은 레벨 2 다", () => {
   assert.equal(resolveCharacter(computeAbilityScores([], sectorOf).scores).level, 2);
+});
+
+test("행동 신호 캐릭터 — tab_count 2 미만은 직관, 거래 종목 2 이하는 집중", () => {
+  assert.equal(resolveCharacterFromBehaviorSignals(2, 2), "sniper");
+  assert.equal(resolveCharacterFromBehaviorSignals(2, 3), "strategist");
+  assert.equal(resolveCharacterFromBehaviorSignals(1, 2), "fighter");
+  assert.equal(resolveCharacterFromBehaviorSignals(1, 3), "explorer");
+});
+
+test("행동 신호 캐릭터 — 경계값", () => {
+  assert.equal(resolveCharacterFromBehaviorSignals(0, 1), "fighter");
+  assert.equal(resolveCharacterFromBehaviorSignals(1, 1), "fighter");
+  assert.equal(resolveCharacterFromBehaviorSignals(2, 0), "sniper");
 });
 
 // ── 정확 채점 ────────────────────────────────────────────────────────
