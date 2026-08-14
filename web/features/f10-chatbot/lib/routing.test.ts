@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { toPoliteKorean } from "./polite";
 import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput } from "../../../shared/llm/filter";
 import { normalizeChatInput, PROACTIVE_SCRIPTS, routeMessage } from "./routing";
@@ -1141,7 +1142,10 @@ const recommendationAlternativesByIntent = [
 for (const example of recommendationAlternativesByIntent) {
   const routed = routeMessage(example.question, stockContext);
   assert.equal(routed.steps[0], example.firstStep, `하위 의도 분류가 달라: ${example.question}`);
-  assert.deepEqual(routed.suggestedQuestions, example.alternatives);
+  assert.deepEqual(
+    routed.suggestedQuestions,
+    example.alternatives.map(toPoliteKorean),
+  );
 }
 
 const allowedLookalikes = [
