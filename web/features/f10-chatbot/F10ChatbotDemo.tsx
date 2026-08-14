@@ -8,6 +8,16 @@ import {
   useRef,
   useState,
 } from "react";
+import hero01 from "./assets/floating/hero-01.png";
+import hero02 from "./assets/floating/hero-02.png";
+import hero03 from "./assets/floating/hero-03.png";
+import hero04 from "./assets/floating/hero-04.png";
+import hero05 from "./assets/floating/hero-05.png";
+import villain01 from "./assets/floating/villain-01.png";
+import villain02 from "./assets/floating/villain-02.png";
+import villain03 from "./assets/floating/villain-03.png";
+import villain04 from "./assets/floating/villain-04.png";
+import villain05 from "./assets/floating/villain-05.png";
 import { PROACTIVE_LIMITS } from "../../shared/engine/proactive-help";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
 import type {
@@ -43,6 +53,11 @@ import {
   getPreparationStepIndex,
   remainingPreparationMs,
 } from "./lib/response-preparation";
+import {
+  FLOATING_AVATAR_IDLE_ROTATION_MS,
+  hasFloatingAvatarDragStarted,
+  pickNextAvatarIndex,
+} from "./lib/floating-avatar";
 import { PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
@@ -103,11 +118,18 @@ const COPY = {
   relatedScreen: "관련 화면 보기",
   openArchive: "아카이브에서 보기",
   reset: "초기화",
-  avatar: "\uacf0",
 } as const;
 
 const PROACTIVE_BUBBLE_VISIBLE_MS = 8_000;
 const FLOATING_CHAT_RADIUS = 28;
+const HERO_AVATARS = [hero01, hero02, hero03, hero04, hero05] as const;
+const VILLAIN_AVATARS = [
+  villain01,
+  villain02,
+  villain03,
+  villain04,
+  villain05,
+] as const;
 const PROACTIVE_BUBBLE_TOGGLE_COPY: Record<
   ProactiveSignal,
   { accept: string; decline: string }
@@ -343,6 +365,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     useState(false);
   const [floatingChatPosition, setFloatingChatPosition] =
     useState<FloatingChatPosition | null>(null);
+  const [idleAvatarIndex, setIdleAvatarIndex] = useState<number | null>(null);
+  const [dragAvatarIndex, setDragAvatarIndex] = useState<number | null>(null);
+  const [isFloatingChatDragging, setIsFloatingChatDragging] = useState(false);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
@@ -372,6 +397,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       : typeof window === "undefined"
         ? 195
         : window.innerWidth / 2);
+  const floatingAvatar = isFloatingChatDragging
+    ? VILLAIN_AVATARS[dragAvatarIndex ?? 0]
+    : HERO_AVATARS[idleAvatarIndex ?? 0];
   const chatContext = useMemo(
     () =>
       context ?? {
@@ -403,6 +431,34 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     window.addEventListener("resize", syncPrototypeScreen);
     return () => window.removeEventListener("resize", syncPrototypeScreen);
   }, []);
+
+  useEffect(() => {
+    setIdleAvatarIndex(
+      pickNextAvatarIndex(HERO_AVATARS.length, null),
+    );
+
+    const preloaders = [...HERO_AVATARS, ...VILLAIN_AVATARS].map((avatar) => {
+      const image = new window.Image();
+      image.src = avatar.src;
+      return image;
+    });
+
+    return () => {
+      for (const image of preloaders) image.src = "";
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isFloatingChatDragging) return;
+
+    const timer = window.setInterval(() => {
+      setIdleAvatarIndex((currentIndex) =>
+        pickNextAvatarIndex(HERO_AVATARS.length, currentIndex),
+      );
+    }, FLOATING_AVATAR_IDLE_ROTATION_MS);
+
+    return () => window.clearInterval(timer);
+  }, [isFloatingChatDragging]);
 
   useEffect(() => {
     const enteredAt = Date.now();
@@ -527,8 +583,20 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
       { x: drag.origin.x + event.clientX - drag.startX, y: drag.origin.y + event.clientY - drag.startY },
       prototypeScreen,
     );
-    if (Math.abs(event.clientX - drag.startX) + Math.abs(event.clientY - drag.startY) > 4) {
+    if (
+      !drag.moved &&
+      hasFloatingAvatarDragStarted(
+        drag.startX,
+        drag.startY,
+        event.clientX,
+        event.clientY,
+      )
+    ) {
       drag.moved = true;
+      setDragAvatarIndex((currentIndex) =>
+        pickNextAvatarIndex(VILLAIN_AVATARS.length, currentIndex),
+      );
+      setIsFloatingChatDragging(true);
     }
     setFloatingChatPosition(next);
   }
@@ -541,6 +609,12 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     }
     suppressFloatingChatClickRef.current = drag.moved;
     floatingChatDragRef.current = null;
+    if (drag.moved) {
+      setIdleAvatarIndex((currentIndex) =>
+        pickNextAvatarIndex(HERO_AVATARS.length, currentIndex),
+      );
+      setIsFloatingChatDragging(false);
+    }
   }
 
   function handleFloatingChatClick() {
@@ -993,7 +1067,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
 
       <button
         aria-label={COPY.openChat}
-        className="fixed z-10 grid size-14 touch-none place-items-center rounded-full bg-magenta text-lg font-bold text-white shadow-lg cursor-grab active:cursor-grabbing"
+        className="fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg cursor-grab active:cursor-grabbing"
         onClick={handleFloatingChatClick}
         onPointerCancel={finishFloatingChatDrag}
         onPointerDown={handleFloatingChatPointerDown}
@@ -1007,7 +1081,15 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         }}
         type="button"
       >
-        {COPY.avatar}
+        <img
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none size-full select-none object-cover"
+          draggable={false}
+          height={56}
+          src={floatingAvatar.src}
+          width={56}
+        />
       </button>
 
       {isOpen && prototypeScreen && (
