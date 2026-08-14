@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
           toolStatus: outcome.toolStatus ?? null,
           gate: outcome.gate,
           gateReason: outcome.gateReason ?? null,
+          rewritten: outcome.rewritten ?? false,
           failure: outcome.failure ?? null,
           result: "completed",
         });
