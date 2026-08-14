@@ -1,17 +1,24 @@
 import assert from "node:assert/strict";
 import {
+  accuracyLevelOf,
+  buildCard,
   computeBehaviorProfile,
   computeEvidence,
   computeFocus,
-  gradeAccuracy,
+  effectiveSectorCount,
+  gradeTrades,
   judgeCharacter,
   kstDateOf,
+  mondayOf,
   parsePrototypeProfileInput,
   profileEntriesFromTrades,
-  accuracyLevelOf,
+  replayPortfolio,
+  scoreAccuracy,
+  shrink,
   viewedTabCount,
+  weekBucketsKST,
 } from "./behavior-profile";
-import type { DailyClose, ProfileBuy, ProfileTabView } from "../types/behavior-profile";
+import type { DailyClose, ProfileBuy, ProfileSell, ProfileTabView } from "../types/behavior-profile";
 import type { Trade } from "../types/trade";
 
 const buy = (over: Partial<ProfileBuy>): ProfileBuy => ({
@@ -24,6 +31,16 @@ const buy = (over: Partial<ProfileBuy>): ProfileBuy => ({
   ...over,
 });
 
+const sell = (over: Partial<ProfileSell>): ProfileSell => ({
+  id: "s1",
+  symbol: "005930",
+  quantity: 1,
+  price: null,
+  tradedAt: "2026-08-04T05:00:00.000Z",
+  planMatch: true,
+  ...over,
+});
+
 const view = (over: Partial<ProfileTabView>): ProfileTabView => ({
   tab: "news",
   symbol: "005930",
@@ -32,12 +49,37 @@ const view = (over: Partial<ProfileTabView>): ProfileTabView => ({
   ...over,
 });
 
+// ── 스케일: 표본이 없으면 중립 5, 표본이 쌓여야 극단으로 간다 ────────────────
+assert.equal(shrink(0, 0), 5);
+assert.equal(shrink(1, 1), 6);
+assert.equal(shrink(0, 1), 4);
+assert.equal(shrink(2, 2), 6.7);
+assert.equal(shrink(10, 10), 8.6);
+assert.equal(shrink(0, 10), 1.4);
+// 한두 건으로는 극단이 나오지 않고, 표본이 충분히 쌓이면 그때 극단에 닿는다
+assert.ok(shrink(1, 1) < 10 && shrink(0, 1) > 0);
+assert.equal(shrink(1000, 1000), 10);
+assert.equal(shrink(0, 1000), 0);
+
+// ── 날짜 ───────────────────────────────────────────────────────────────────
 // KST 변환 — 16시 UTC 는 KST 다음날이다
 assert.equal(kstDateOf("2026-08-04T16:00:00.000Z"), "2026-08-05");
 assert.equal(kstDateOf("2026-08-04T02:00:00.000Z"), "2026-08-04");
+// 2026-08-10 은 월요일이다
+assert.equal(mondayOf("2026-08-10"), "2026-08-10");
+assert.equal(mondayOf("2026-08-14"), "2026-08-10");
+assert.equal(mondayOf("2026-08-09"), "2026-08-03");
+assert.deepEqual(weekBucketsKST("2026-08-03", "2026-08-14"), [
+  { start: "2026-08-03", end: "2026-08-09" },
+  { start: "2026-08-10", end: "2026-08-16" },
+]);
+// 거래가 없어도 이번 주 한 장은 나온다
+assert.equal(weekBucketsKST("2026-08-14", "2026-08-14").length, 1);
+assert.deepEqual(weekBucketsKST("2026-08-15", "2026-08-14"), []);
 
-// 유효 열람 — 10초 미만·다른 종목·매수 이후 열람은 세지 않는다
+// ── 근거력 ─────────────────────────────────────────────────────────────────
 const b1 = buy({});
+// 유효 열람 — 10초 미만·다른 종목·매수 이후 열람은 세지 않는다
 assert.equal(viewedTabCount(b1, [view({}), view({ tab: "chart" })]), 2);
 assert.equal(viewedTabCount(b1, [view({ dwellMs: 9_999 })]), 0);
 assert.equal(viewedTabCount(b1, [view({ symbol: "000660" })]), 0);
@@ -47,26 +89,52 @@ assert.equal(viewedTabCount(b1, [view({ tab: "info" }), view({ tab: "chart" })])
 // 같은 탭을 여러 번 봐도 종류는 1개다
 assert.equal(viewedTabCount(b1, [view({}), view({ viewedAt: "2026-08-05T00:30:00.000Z" })]), 1);
 
-// 근거력 — 2탭+ 매수 1건 / 전체 2건 = 5점
-const b2 = buy({ id: "b2", symbol: "000660", tradedAt: "2026-08-06T02:00:00.000Z" });
-assert.equal(computeEvidence([b1, b2], [view({}), view({ tab: "chart" })]), 5);
-assert.equal(computeEvidence([], []), 0);
+// 매수가 없으면 중립, 1건 근거면 6, 1건 무근거면 4
+assert.equal(computeEvidence([], []), 5);
+assert.equal(computeEvidence([b1], [view({}), view({ tab: "chart" })]), 6);
+assert.equal(computeEvidence([b1], [view({})]), 4);
 
-// 집중력 — 섹터 경계 3↔4, 현금 50% 패널티, 전량 현금
+// ── 집중력 ─────────────────────────────────────────────────────────────────
 const sectorBySymbol = { A: "game", B: "ent", C: "food", D: "bank", E: "auto" };
-const holding = (symbol: string) => ({ symbol, quantity: 1, averagePrice: 100 });
+const holding = (symbol: string, quantity = 1) => ({ symbol, quantity, averagePrice: 100 });
 const prices = { A: 100, B: 100, C: 100, D: 100, E: 100 };
-assert.equal(computeFocus([holding("A"), holding("B"), holding("C")], 0, prices, sectorBySymbol), 7);
-assert.equal(computeFocus([holding("A"), holding("B"), holding("C"), holding("D")], 0, prices, sectorBySymbol), 4);
-// 현금비중 50% 이상이면 −2 (보유 300 = 현금 300)
-assert.equal(computeFocus([holding("A"), holding("B"), holding("C")], 300, prices, sectorBySymbol), 5);
-assert.equal(computeFocus([], 1_000_000, prices, sectorBySymbol), 1);
-// 현재가가 없으면 averagePrice 로 평가한다 — 값 200이면 현금 100은 33%라 패널티 없음
-assert.equal(computeFocus([{ symbol: "A", quantity: 2, averagePrice: 100 }], 100, {}, sectorBySymbol), 9);
 
-// 정확력 — 5거래일 종가 판정과 표본 보류
-const closes = (symbol: string, dates: [string, number][]): Record<string, DailyClose[]> => ({
-  [symbol]: dates.map(([date, close]) => ({ date, close })),
+// 유효 섹터수는 가짓수가 아니라 비중을 본다 — 900:100 은 섹터가 둘이어도 1.2 다
+assert.equal(effectiveSectorCount([holding("A")], prices, sectorBySymbol), 1);
+assert.equal(effectiveSectorCount([holding("A"), holding("B")], prices, sectorBySymbol), 2);
+assert.ok(
+  Math.abs(effectiveSectorCount([holding("A", 9), holding("B")], prices, sectorBySymbol) - 1.2195) <
+    0.001,
+);
+// 섹터를 모르는 종목은 제외한다
+assert.equal(effectiveSectorCount([holding("Z")], prices, sectorBySymbol), 0);
+
+// 1섹터 몰빵 = 10, 앵커인 3섹터 균등 = 중립 5, 2섹터 균등은 그 사이
+assert.equal(computeFocus([holding("A")], 0, prices, sectorBySymbol), 10);
+assert.equal(computeFocus([holding("A"), holding("B"), holding("C")], 0, prices, sectorBySymbol), 5);
+assert.equal(computeFocus([holding("A"), holding("B")], 0, prices, sectorBySymbol), 6.8);
+// 계단이 없다 — 3섹터에서 4섹터로 넘어가도 완만하게 내려간다
+const three = computeFocus([holding("A"), holding("B"), holding("C")], 0, prices, sectorBySymbol);
+const four = computeFocus(
+  [holding("A"), holding("B"), holding("C"), holding("D")],
+  0,
+  prices,
+  sectorBySymbol,
+);
+assert.ok(three - four > 0 && three - four < 2);
+// 비중이 쏠려 있으면 섹터가 둘이어도 집중이다
+assert.equal(computeFocus([holding("A", 9), holding("B")], 0, prices, sectorBySymbol), 9.1);
+// 현금은 절벽 없이 중립으로 끌어당긴다 — 50% 현금이면 10점이 7.5로 내려온다
+assert.equal(computeFocus([holding("A")], 100, prices, sectorBySymbol), 7.5);
+// 전량 현금·판정할 보유 없음은 정확히 중립이다 (구버전은 1점으로 떨어졌다)
+assert.equal(computeFocus([], 1_000_000, prices, sectorBySymbol), 5);
+assert.equal(computeFocus([holding("Z")], 0, prices, sectorBySymbol), 5);
+// 현재가가 없으면 averagePrice 로 평가한다 — 보유 200 / 현금 100 → invested 2/3
+assert.equal(computeFocus([holding("A", 2)], 100, {}, sectorBySymbol), 8.3);
+
+// ── 정확력: 체결 2거래일 뒤 종가 ────────────────────────────────────────────
+const closes = (symbol: string, rows: [string, number][]): Record<string, DailyClose[]> => ({
+  [symbol]: rows.map(([date, close]) => ({ date, close })),
 });
 const series = closes("005930", [
   ["2026-08-03", 100],
@@ -78,77 +146,206 @@ const series = closes("005930", [
   ["2026-08-11", 90],
   ["2026-08-12", 91],
 ]);
-// 08-03 매수 100원 → 5거래일 뒤(08-10) 110원 = 적중, 1건 중 1건 = 100%
-const early = buy({ tradedAt: "2026-08-03T02:00:00.000Z" });
-assert.deepEqual(gradeAccuracy([early], [], series), { accuracy: 100, level: 3, graded: 1, pending: 0, hits: 1 });
-// 08-10 매수 → 남은 봉 2개뿐이라 채점 보류, 채점 0건이면 기본 50% 레벨 2
-const late = buy({ id: "b9", tradedAt: "2026-08-10T02:00:00.000Z" });
-assert.deepEqual(gradeAccuracy([late], [], series), { accuracy: 50, level: 2, graded: 0, pending: 1, hits: 0 });
-// 캔들이 아예 없는 종목도 보류
-assert.equal(gradeAccuracy([buy({ symbol: "999999" })], [], series).pending, 1);
-// 매도 — 08-04 매도(종가 101 근사) → 5거래일 뒤(08-11) 90 = 하락 적중
-const sell = { id: "s1", symbol: "005930", tradedAt: "2026-08-04T05:00:00.000Z", planMatch: true };
-assert.equal(gradeAccuracy([], [sell], series).hits, 1);
-// 적중률 반올림 — 3건 중 2적중 = 66.67% → 67%, 레벨은 반올림 전 비율(2/3 경계 포함)로 3
-const miss = buy({ id: "b3", price: 200, tradedAt: "2026-08-03T02:00:00.000Z" });
-const graded3 = gradeAccuracy([early, miss], [sell], series);
-assert.equal(graded3.graded, 3);
-assert.equal(graded3.accuracy, 67);
-assert.equal(graded3.level, 3);
-// 전부 적중 = 100%, 전부 빗나감 = 0%
-const manyHits = Array.from({ length: 7 }, (unused, i) => buy({ id: `h${i}`, tradedAt: "2026-08-03T02:00:00.000Z" }));
-assert.deepEqual([gradeAccuracy(manyHits, [], series).accuracy, gradeAccuracy(manyHits, [], series).level], [100, 3]);
-const manyMisses = Array.from({ length: 7 }, (unused, i) => buy({ id: `m${i}`, price: 200, tradedAt: "2026-08-03T02:00:00.000Z" }));
-assert.deepEqual([gradeAccuracy(manyMisses, [], series).accuracy, gradeAccuracy(manyMisses, [], series).level], [0, 1]);
 
-// 캐릭터 — 동점 5:5 는 근거·집중 귀속
-assert.equal(judgeCharacter({ evidence: 5, intuition: 5, focus: 5, diversification: 5 }), "sniper");
+// 08-03 매수 100원 → 2거래일 뒤는 08-05(102). 오르면 적중이고 채점일은 08-05 다
+const early = buy({ tradedAt: "2026-08-03T02:00:00.000Z" });
+const earlyGrade = gradeTrades([early], [], series);
+assert.equal(earlyGrade.graded.length, 1);
+assert.equal(earlyGrade.graded[0].settledOn, "2026-08-05");
+assert.equal(earlyGrade.graded[0].hit, true);
+// 같은 매수를 비싸게 샀으면 빗나감
+assert.equal(gradeTrades([buy({ price: 200, tradedAt: "2026-08-03T02:00:00.000Z" })], [], series).graded[0].hit, false);
+// 2거래일이 안 지났으면 보류 — 08-12 매수는 뒤에 봉이 없다
+assert.ok(gradeTrades([buy({ id: "b9", tradedAt: "2026-08-12T02:00:00.000Z" })], [], series).pendingIds.has("b9"));
+// 08-11 매수는 08-12 하나뿐이라 아직 보류다
+assert.ok(gradeTrades([buy({ id: "b8", tradedAt: "2026-08-11T02:00:00.000Z" })], [], series).pendingIds.has("b8"));
+// 캔들이 아예 없는 종목도 보류
+assert.ok(gradeTrades([buy({ id: "b7", symbol: "999999" })], [], series).pendingIds.has("b7"));
+// 매도는 내리면 적중 — 08-10 매도(종가 110 근사) → 2거래일 뒤 08-12(91)
+assert.equal(gradeTrades([], [sell({ tradedAt: "2026-08-10T05:00:00.000Z" })], series).graded[0].hit, true);
+// 매도 체결가가 있으면 종가 근사 대신 그 값을 쓴다 — 80원에 팔았으면 91은 상승이라 빗나감
+assert.equal(
+  gradeTrades([], [sell({ tradedAt: "2026-08-10T05:00:00.000Z", price: 80 })], series).graded[0].hit,
+  false,
+);
+
+// 채점 0건은 중립, 표본이 쌓여야 극단으로 간다
+assert.equal(scoreAccuracy([]), 5);
+assert.equal(scoreAccuracy(earlyGrade.graded), 6);
+
+// 레벨 경계 — 기존 적중 비율 1/3·2/3 을 0~10 으로 옮긴 값
+assert.equal(accuracyLevelOf(10), 3);
+assert.equal(accuracyLevelOf(20 / 3), 3);
+assert.equal(accuracyLevelOf(6.6), 2);
+assert.equal(accuracyLevelOf(5), 2);
+assert.equal(accuracyLevelOf(10 / 3), 2);
+assert.equal(accuracyLevelOf(3.3), 1);
+assert.equal(accuracyLevelOf(0), 1);
+
+// ── 캐릭터: 동점대는 확정하지 않는다 ────────────────────────────────────────
+assert.equal(judgeCharacter({ evidence: 5, intuition: 5, focus: 5, diversification: 5 }), null);
+assert.equal(judgeCharacter({ evidence: 8, intuition: 2, focus: 5.4, diversification: 4.6 }), null);
+assert.equal(judgeCharacter({ evidence: 5.5, intuition: 4.5, focus: 8, diversification: 2 }), "sniper");
 assert.equal(judgeCharacter({ evidence: 7, intuition: 3, focus: 4, diversification: 6 }), "strategist");
 assert.equal(judgeCharacter({ evidence: 3, intuition: 7, focus: 6, diversification: 4 }), "challenger");
 assert.equal(judgeCharacter({ evidence: 3, intuition: 7, focus: 4, diversification: 6 }), "explorer");
 
-// 레벨 경계 — 적중 비율 2/3 이상 레벨 3, 1/3 이상 레벨 2 (경계 포함). 유저 예시: 5건 중 4적중 = 80% → 레벨 3
-assert.equal(accuracyLevelOf(4 / 5), 3);
-assert.equal(accuracyLevelOf(2 / 3), 3);
-assert.equal(accuracyLevelOf(0.66), 2);
-assert.equal(accuracyLevelOf(1 / 3), 2);
-assert.equal(accuracyLevelOf(0.32), 1);
-assert.equal(accuracyLevelOf(0), 1);
-
-// 통합 — 매수 2건은 관찰 초기, 3건부터 캐릭터가 나온다
-const baseInput = {
-  userId: "child_minji",
-  periodStart: "2026-08-01",
-  periodEnd: "2026-08-14",
+// ── 과거 시점 포트폴리오 복원 ───────────────────────────────────────────────
+const emptySample = {
   sells: [],
-  tabViews: [view({}), view({ tab: "chart" })],
-  holdings: [holding("A")],
-  cash: 0,
+  tabViews: [],
+  graded: [],
+  pending: 0,
   priceBySymbol: prices,
   sectorBySymbol,
-  dailyClosesBySymbol: series,
 };
-const initial = computeBehaviorProfile({ ...baseInput, buys: [b1, b2] });
-assert.equal(initial.observationState, "initial");
-assert.equal(initial.character, null);
-assert.equal(initial.level, null);
+// asOf 이후 매수·매도를 최신순으로 되돌린다
+assert.deepEqual(
+  replayPortfolio(
+    { holdings: [holding("A", 2)], cash: 500 },
+    [buy({ id: "x1", symbol: "A", price: 120, tradedAt: "2026-08-12T02:00:00.000Z" })],
+    [sell({ id: "x2", symbol: "A", price: 130, tradedAt: "2026-08-13T02:00:00.000Z" })],
+    "2026-08-10",
+  ),
+  { holdings: [holding("A", 2)], cash: 490 },
+);
+// asOf 이전 거래는 건드리지 않는다
+assert.deepEqual(
+  replayPortfolio(
+    { holdings: [holding("A", 2)], cash: 500 },
+    [buy({ id: "x3", symbol: "A", price: 120, tradedAt: "2026-08-05T02:00:00.000Z" })],
+    [],
+    "2026-08-10",
+  ),
+  { holdings: [holding("A", 2)], cash: 500 },
+);
+// asOf 이후 샀다가 전부 판 종목은 유령 보유로 남지 않는다
+assert.deepEqual(
+  replayPortfolio(
+    { holdings: [], cash: 1000 },
+    [buy({ id: "x4", symbol: "B", price: 100, tradedAt: "2026-08-12T02:00:00.000Z" })],
+    [sell({ id: "x5", symbol: "B", price: 150, tradedAt: "2026-08-13T02:00:00.000Z" })],
+    "2026-08-10",
+  ),
+  { holdings: [], cash: 950 },
+);
 
-const ready = computeBehaviorProfile({ ...baseInput, buys: [b1, b2, buy({ id: "b4", symbol: "035420" })] });
-assert.equal(ready.observationState, "ready");
-assert.equal(ready.sampleSize, 3);
-// 근거력 = 2탭 매수 1/3 → 3점, 직관력 7점, 보유 1섹터 → 집중 9점 → 승부사
-assert.equal(ready.abilities.evidence, 3);
-assert.equal(ready.abilities.intuition, 7);
-assert.equal(ready.abilities.focus, 9);
-assert.equal(ready.character, "challenger");
-// 채점된 매수 1건이 빗나가 적중률 0% 레벨 1, 나머지 보류 거래는 반영되지 않는다
-assert.equal(ready.abilities.accuracy, 0);
-assert.equal(ready.gradedTradeCount, 1);
-assert.equal(ready.pendingTradeCount, 2);
-assert.equal(ready.level, 1);
-assert.equal(ready.reasonDistribution.buy_news, 3);
+// ── 카드 한 장: 표본이 모자라면 캐릭터를 주지 않는다 ────────────────────────
+const lowCard = buildCard({ ...emptySample, buys: [b1], holdings: [holding("A")], cash: 0 });
+assert.equal(lowCard.observation, "low");
+assert.equal(lowCard.character, null);
+assert.equal(lowCard.level, null);
+const noneCard = buildCard({ ...emptySample, buys: [], holdings: [], cash: 1000 });
+assert.equal(noneCard.observation, "none");
+assert.deepEqual(noneCard.scores, {
+  evidence: 5,
+  intuition: 5,
+  focus: 5,
+  diversification: 5,
+  accuracy: 5,
+});
 
-// kw_proto_v1 원본 매핑 — 체결만, 단가 도출, 계정 분리, 이벤트 매핑
+// ── 통합: 주간 결산 카드 + 누적 현재 카드 ───────────────────────────────────
+const aCloses = closes("A", [
+  ["2026-08-03", 100],
+  ["2026-08-04", 101],
+  ["2026-08-05", 102],
+  ["2026-08-06", 103],
+  ["2026-08-07", 104],
+  ["2026-08-10", 110],
+  ["2026-08-11", 90],
+  ["2026-08-12", 91],
+  ["2026-08-13", 95],
+  ["2026-08-14", 99],
+]);
+const researchViews = [
+  view({ symbol: "A", viewedAt: "2026-08-04T01:00:00.000Z" }),
+  view({ symbol: "A", tab: "chart", viewedAt: "2026-08-04T01:10:00.000Z" }),
+];
+const weekly = computeBehaviorProfile({
+  userId: "child_minji",
+  periodEnd: "2026-08-14",
+  buys: [
+    buy({ id: "ba1", symbol: "A", tradedAt: "2026-08-04T02:00:00.000Z" }),
+    buy({ id: "ba2", symbol: "A", tradedAt: "2026-08-05T02:00:00.000Z" }),
+    buy({ id: "ba3", symbol: "A", tradedAt: "2026-08-11T02:00:00.000Z" }),
+  ],
+  sells: [],
+  tabViews: researchViews,
+  holdings: [holding("A", 3)],
+  cash: 700,
+  priceBySymbol: prices,
+  sectorBySymbol,
+  dailyClosesBySymbol: aCloses,
+});
+
+// 첫 거래(08-04)가 속한 주부터 이번 주까지
+assert.equal(weekly.periodStart, "2026-08-04");
+assert.equal(weekly.weeks.length, 2);
+assert.deepEqual(
+  weekly.weeks.map((week) => [week.label, week.status]),
+  [
+    ["8/3 – 8/9", "closed"],
+    ["8/10 – 8/16", "current"],
+  ],
+);
+
+// 누적 = 전체. 매수 3건이라 캐릭터가 나온다
+assert.equal(weekly.cumulative.observation, "ready");
+assert.deepEqual(weekly.cumulative.samples, { buys: 3, sells: 0, graded: 3, pending: 0, hits: 2 });
+assert.deepEqual(weekly.cumulative.scores, {
+  evidence: 7.1,
+  intuition: 2.9,
+  focus: 6.5,
+  diversification: 3.5,
+  accuracy: 5.7,
+});
+assert.equal(weekly.cumulative.character, "sniper");
+assert.equal(weekly.cumulative.level, 2);
+
+// 지난 주 카드 — 그 주 매수 2건, 그 주에 채점이 끝난 거래 2건 모두 적중
+const [lastWeek, thisWeek] = weekly.weeks;
+assert.deepEqual(lastWeek.samples, { buys: 2, sells: 0, graded: 2, pending: 0, hits: 2 });
+assert.equal(lastWeek.scores.accuracy, 6.7);
+assert.equal(lastWeek.scores.evidence, 6.7);
+// 집중력은 그 주 마지막 날 보유로 낸다 — 08-11 매수를 되돌려 2주 보유·현금 800
+assert.equal(lastWeek.scores.focus, 6);
+// 매수 2건은 아직 표본 부족이라 캐릭터를 주지 않는다
+assert.equal(lastWeek.observation, "low");
+assert.equal(lastWeek.character, null);
+
+// 이번 주 카드 — 08-11 매수는 08-13 에 채점이 끝나 이번 주에 귀속된다
+assert.deepEqual(thisWeek.samples, { buys: 1, sells: 0, graded: 1, pending: 0, hits: 0 });
+assert.equal(thisWeek.scores.accuracy, 4);
+assert.equal(thisWeek.scores.evidence, 6);
+// 이번 주 집중력은 오늘 보유 기준이라 누적과 같다
+assert.equal(thisWeek.scores.focus, weekly.cumulative.scores.focus);
+
+// 기록이 하나도 없어도 이번 주 카드 한 장은 나오고 전 축이 중립이다
+const blank = computeBehaviorProfile({
+  userId: "child_minji",
+  periodEnd: "2026-08-14",
+  buys: [],
+  sells: [],
+  tabViews: [],
+  holdings: [],
+  cash: 1_000_000,
+  priceBySymbol: prices,
+  sectorBySymbol,
+  dailyClosesBySymbol: {},
+});
+assert.equal(blank.weeks.length, 1);
+assert.equal(blank.weeks[0].status, "current");
+assert.equal(blank.cumulative.observation, "none");
+assert.deepEqual(blank.cumulative.scores, {
+  evidence: 5,
+  intuition: 5,
+  focus: 5,
+  diversification: 5,
+  accuracy: 5,
+});
+
+// ── kw_proto_v1 원본 매핑 ───────────────────────────────────────────────────
 const rawState = {
   acc: {
     child: { name: "민지", cash: 500_000, holdings: [{ code: "005930", qty: 2, avg: 100_000 }] },
@@ -169,7 +366,8 @@ const rawState = {
     { order_id: "ord_0003", user_id: "parent_mom", symbol: "011200", amount_krw: 21_400, qty: 1, order_status: "filled", ts: "2026-08-06T04:00:00.000Z" },
   ],
   sellRecords: [
-    { order_id: "ord_0004", user_id: "child_minji", symbol: "005930", qty: 1, plan_match: false, ts: "2026-08-07T02:00:00.000Z" },
+    { order_id: "ord_0004", user_id: "child_minji", symbol: "005930", qty: 1, avg: 100_000, pnl_pct_at_sell: 10, order_status: "filled", plan_match: false, ts: "2026-08-07T02:00:00.000Z" },
+    { order_id: "ord_0005", user_id: "child_minji", symbol: "005930", qty: 1, order_status: "pending", ts: "2026-08-07T03:00:00.000Z" },
   ],
   events: [
     { event: "news_detail_opened", symbol: "005930", user_id: "child_minji", ts: "2026-08-05T01:00:00.000Z", dwell_ms: 15_000 },
@@ -181,7 +379,11 @@ const rawState = {
 const childInput = parsePrototypeProfileInput(rawState, "child");
 assert.equal(childInput.buys.length, 1);
 assert.equal(childInput.buys[0].price, 100_000);
+// 지정가 대기 매도는 체결이 아니라 표본에서 빠진다
 assert.equal(childInput.sells.length, 1);
+assert.equal(childInput.sells[0].quantity, 1);
+// 매도 체결가는 평균단가와 매도 시점 손익률로 되짚는다
+assert.equal(childInput.sells[0].price, 110_000);
 assert.equal(childInput.sells[0].planMatch, false);
 assert.deepEqual(childInput.tabViews.map((item) => item.tab), ["news", "info"]);
 assert.equal(childInput.cash, 500_000);
@@ -190,8 +392,16 @@ const parentInput = parsePrototypeProfileInput(rawState, "parent");
 assert.equal(parentInput.buys.length, 1);
 assert.deepEqual(parentInput.tabViews.map((item) => item.tab), ["chart"]);
 assert.equal(parsePrototypeProfileInput(null, "child").buys.length, 0);
+// 손익률이 없으면 null 로 두어 매도일 종가 근사에 맡긴다
+assert.equal(
+  parsePrototypeProfileInput(
+    { sellRecords: [{ order_id: "s", user_id: "child_minji", symbol: "005930", qty: 1, order_status: "filled", ts: "2026-08-07T02:00:00.000Z" }] },
+    "child",
+  ).sells[0].price,
+  null,
+);
 
-// F11 시드(Trade) → 엔진 표본
+// ── F11 시드(Trade) → 엔진 표본 ─────────────────────────────────────────────
 const seed: Trade[] = [
   { id: "seed-1", member: "parent", symbol: "005930", side: "buy", quantity: 2, price: 240_000, reason: "이 회사(제품)를 잘 알아", memo: "", tradedAt: "2026-08-04T01:12:00.000Z" },
   { id: "seed-2", member: "parent", symbol: "011200", side: "sell", quantity: 5, price: 21_400, reason: "목표한 만큼 와서", memo: "", tradedAt: "2026-08-06T04:35:00.000Z" },
@@ -200,6 +410,9 @@ const seed: Trade[] = [
 const parentEntries = profileEntriesFromTrades(seed, "parent");
 assert.equal(parentEntries.buys.length, 1);
 assert.equal(parentEntries.sells.length, 1);
+// 시드 매도도 수량·체결가를 그대로 넘긴다 — 포트폴리오 복원이 이 값을 쓴다
+assert.equal(parentEntries.sells[0].quantity, 5);
+assert.equal(parentEntries.sells[0].price, 21_400);
 assert.equal(profileEntriesFromTrades(seed, "child").buys.length, 1);
 
 console.log("behavior profile engine tests passed");
