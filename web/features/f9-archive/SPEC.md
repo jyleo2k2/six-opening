@@ -33,6 +33,8 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 종가 API | `web/app/api/quote/daily-closes/route.ts` | 보관 일봉에서 `{종목: [{date, close}]}` |
 | 빌드 | `web/scripts/ui-build.mjs` | `ui-src` ↔ `app.html` 왕복과 엔진 복사 |
 | 원본 데이터 | `localStorage["kw_proto_v1"]` | `acc`·`records`·`sellRecords`·`events` |
+| 행동 데이터 판정 API | `web/app/api/profile/behavior/route.ts` | 로그인 세션의 `stock_tab_views`·`transactions` 집계 → 캐릭터 키 |
+| 행동 데이터 조회 | `web/ui-src/methods/loadBehaviorProfile.js` | 진입 시 위 API를 불러 `this.dbBehavior`에 저장 |
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
@@ -66,6 +68,17 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 5:5 동점은 근거·집중 쪽으로 귀속한다. 레벨은 **적중 비율**로 정한다: **3 = 2/3 이상, 2 = 1/3 이상, 1 = 1/3 미만** (2026-08-13 유저 확정, 경계 포함은 [가정]). 화면에는 `저격수 LV2` 처럼 붙여 쓴다.
 
 반올림한 퍼센트가 아니라 **반올림 전 비율**로 판정한다. 3건 중 2건(66.67%)이 반올림 때문에 레벨 2로 떨어지지 않게 하기 위해서다.
+
+**근거·집중의 대체 입력 — 로그인 사용자 행동 데이터.** 로컬스토리지 계산과 별개로, 실제 로그인 세션(Supabase)의 다음 두 신호가 있으면 그 값으로 근거·집중 우세만 다시 정하고 위 표에 그대로 대입한다. 정확·레벨과 다섯 축 막대 수치는 이 경로의 영향을 받지 않는다 — **캐릭터 카드(이름·이미지·설명)만 바뀐다.**
+
+| 축 | 산식 | 데이터 |
+|---|---|---|
+| 근거/직관 우세 | `stock_tab_views.tab_count` 합계 — 0~1 → 직관 우세, 2 이상 → 근거 우세 | 로그인 사용자의 `stock_tab_views` 전 행 |
+| 집중/분산 우세 | 거래한 종목 수(매수·매도 통틀어 distinct `stock_id`) — 2개 이하 → 집중 우세, 3개 이상 → 분산 우세 | 로그인 사용자의 `transactions` 전 행 |
+
+- 판정 함수: `web/shared/engine/archive-profile.js`의 `resolveCharacterFromBehaviorSignals(tabCountTotal, distinctSymbolCount)`.
+- 조회·집계: `web/app/api/profile/behavior/route.ts` (GET, 로그인 세션 필요, 기간 제한 없이 전체 누적 집계). **주 단위 등 데이터 리셋은 운영이 `stock_tab_views`·`transactions` 원본을 직접 관리하는 별도 절차이며 이 API·엔진은 리셋을 수행하지 않는다.**
+- 화면 연결: `componentDidMount`가 진입 시 이 API를 한 번 불러 `this.dbBehavior`에 저장한다. `buildArchive()`는 `dbBehavior.character`가 있으면 그 캐릭터로 표시하고, 없으면(비로그인·표본 없음 등) 기존 로컬스토리지 계산으로 폴백한다.
 
 ### 3.3 정확 채점
 
@@ -135,7 +148,9 @@ app.html 안 `// >>> archive-engine` ~ `// <<< archive-engine`
 
 ## 6. 서버 F9 — 남아 있으나 화면과 끊겼다
 
-`web/app/api/profile/route.ts`, `web/shared/engine/behavior-profile.ts`, `web/shared/types/behavior-profile.ts`, `web/features/f9-archive/lib/narration.ts` 는 **그대로 있지만 화면이 부르지 않는다.**
+`web/app/api/profile/behavior/route.ts`(§3.2 대체 입력)는 화면과 연결돼 있다. 아래 넷은 여전히 **그대로 있지만 화면이 부르지 않는다**:
+
+`web/app/api/profile/route.ts`, `web/shared/engine/behavior-profile.ts`, `web/shared/types/behavior-profile.ts`, `web/features/f9-archive/lib/narration.ts`.
 
 - 능력치를 0~10 으로 내는 계약(`BehaviorProfileSnapshot`)과 근거·집중 산식은 현재 화면과 무관하다.
 - 캐릭터 코드도 다르다. 서버는 승부사를 `challenger`, 화면 엔진은 `fighter` 로 쓴다.
