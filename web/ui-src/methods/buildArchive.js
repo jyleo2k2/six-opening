@@ -198,19 +198,47 @@
     };
 
     // ── 가족 투자 성향 비교 ───────────────────────────────────────
-    // 아빠는 아직 앱 계정이 없어 점수가 비어 있다.
-    const FAM = MEMBERS.map(f => {
+    // DB 응답이 있으면 실제 family_tag 구성원을 쓴다. 타인 성향도 같은 서버 엔진이 계산한다.
+    const dbFamilyMembers = (this.dbFamily && Array.isArray(this.dbFamily.members))
+      ? this.dbFamily.members : [];
+    const familyColors = [
+      { col:'#7FD2FF', fill:'rgba(96,190,255,0.3)' },
+      { col:'#FF8AD0', fill:'rgba(245,50,127,0.26)' },
+      { col:'#FFD84D', fill:'rgba(255,197,61,0.24)' }
+    ];
+    const FAM = dbFamilyMembers.length ? dbFamilyMembers.map((member, index) => {
+      const behavior = member.behavior || {};
+      const scores = behavior.scores || {};
+      const list = [scores.focus, scores.diversification, scores.accuracy, scores.intuition, scores.evidence]
+        .map(value => Math.round((Number.isFinite(Number(value)) ? Number(value) : 5) * 10));
+      const samples = behavior.samples || {};
+      const has = Number(samples.buys || 0) + Number(samples.sells || 0) > 0;
+      const typeKey = behavior.character === 'challenger' ? 'fighter' : behavior.character;
+      const meta = typeKey && TYPES[typeKey] ? TYPES[typeKey] : null;
+      const color = familyColors[index % familyColors.length];
+      const isDad = /아빠|부/.test(member.name || '');
+      const face = member.role === 'child' ? A + 'face-me.jpg'
+        : isDad ? A + 'face-dad.jpg' : A + 'face-mom.jpg';
+      return {
+        key:'db_' + member.id, name:member.name, face:face, col:color.col, fill:color.fill,
+        has:has, scores:list,
+        title:meta ? meta.name + (behavior.level ? ' LV' + behavior.level : '') : (has ? '관찰 중' : ''),
+        desc:has ? (meta ? meta.desc : '거래 기록이 더 쌓이면 투자 유형도 함께 보여요.')
+          : '아직 체결된 거래가 없어요.\n한 번 사고 나면 성향이 만들어져요.'
+      };
+    }) : MEMBERS.map(f => {
       const sc = f.acc ? scoresOf(f.user) : null;
       const t = sc && sc.n ? typeOf(sc.list, sc.grade.level) : null;
       return {
-        key: f.key, name: f.name, face: f.face, col: f.col, fill: f.fill,
-        has: !!(sc && sc.n), scores: sc ? sc.list : [0, 0, 0, 0, 0],
-        title: t ? t.title : '',
-        desc: !f.acc ? '아직 앱 계정이 없어요.\n계정이 생기면 여기에 성향이 쌓여요.'
-          : (sc && sc.n) ? t.desc : '아직 산 게 없어요.\n한 번 사고 나면 성향이 만들어져요.'
+        key:f.key, name:f.name, face:f.face, col:f.col, fill:f.fill,
+        has:!!(sc && sc.n), scores:sc ? sc.list : [0, 0, 0, 0, 0],
+        title:t ? t.title : '',
+        desc:(sc && sc.n) ? t.desc : '아직 산 게 없어요.\n한 번 사고 나면 성향이 만들어져요.'
       };
     });
-    const famPick = s.famPick || 'all';
+    const requestedFamPick = s.famPick || 'all';
+    const famPick = requestedFamPick === 'all' || FAM.some(f => f.key === requestedFamPick)
+      ? requestedFamPick : 'all';
     const famShown = FAM.filter(f => f.has && (famPick === 'all' || f.key === famPick));
     const RR = 92, RCX = 118, RCY = 118;
     const famPolys = famShown.map(f => ({

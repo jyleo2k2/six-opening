@@ -37,6 +37,7 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 행동 데이터 조회 | `web/ui-src/methods/loadBehaviorProfile.js` | 진입 시 위 API를 불러 `this.dbBehavior`에 저장 |
 | 지난 주차 카드 API | `web/app/api/profile/season-cards/route.ts` | 로그인 세션의 `transactions`(매수만)를 KST 주 단위로 묶어 주차별 다섯 축 점수 반환. 이번 주는 제외 |
 | 지난 주차 카드 조회 | `web/ui-src/methods/loadSeasonCards.js` | 진입 시 위 API를 불러 `this.dbSeasonCards`에 저장 |
+| 가족 성향 조회 | `web/ui-src/methods/loadFamilyProfiles.js` | `/api/family`의 실제 가족 구성원과 누적 성향을 `this.dbFamily`에 저장 |
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
@@ -170,6 +171,8 @@ app.html 안 `// >>> archive-engine` ~ `// <<< archive-engine`
     · secModalCount · secModalValue · secModalPctText · secModalPctStyle · secModalRows;
 }
 ```
+
+가족 비교는 로그인 사용자의 `family_tag`에 속한 모든 `profiles`를 표시한다. 각 구성원의 오각형은 `/api/family`가 신버전 행동 엔진으로 계산한 누적 성향을 0~100 화면 값으로 변환해 그리며, 거래가 없는 구성원도 이름과 빈 상태 카드는 표시한다. API를 사용할 수 없을 때만 기존 로컬 데모 계산으로 폴백한다.
 
 `renderVals()` 는 `const arc = this.buildArchive()` 로 받아 화면 키에 펼친다.
 
