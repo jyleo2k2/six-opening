@@ -47,9 +47,7 @@ const SCRIPT_OPEN = /^<script type="text\/x-dc"/;
 const SCRIPT_CLOSE = /^<\/script>\s*$/;
 // 깊이는 모든 sc-if 를 센다. 화면 이름은 `{{ isHome }}` 꼴일 때만 뽑는다.
 // (`{{ c.noLogo }}` 처럼 점이 들어간 조건도 있어서 이름 규칙으로 깊이를 세면 안 된다.)
-const SC_IF_ANY = /^<sc-if\b/;
 const SC_IF_SCREEN = /^<sc-if value="\{\{ (is\w+) \}\}"/;
-const SC_IF_CLOSE = /^<\/sc-if>\s*$/;
 const CLASS_OPEN = /^class Component extends DCLogic \{/;
 const METHOD = /^ {2}([A-Za-z_$][\w$]*)\s*\(/;
 
@@ -59,26 +57,27 @@ function screenName(flag) {
 }
 
 // 템플릿 영역에서 깊이 0 인 sc-if 블록만 화면으로 본다. 중첩된 sc-if 는 부모 안에 남는다.
+// 한 줄에서 열고 닫는 sc-if 가 있으므로(예: `<sc-if ...><span .../></sc-if>`) 줄마다
+// 여는 개수와 닫는 개수를 함께 세야 한다. 여는 줄에서 곧장 다음 줄로 넘어가면 그 줄의
+// 닫기를 놓쳐 깊이가 영영 0 으로 돌아오지 않는다.
 function findScreens(text, starts, fromLine, toLine) {
   const screens = [];
   let depth = 0;
   let open = null;
   for (let i = fromLine; i < toLine; i += 1) {
     const line = lineAt(text, starts, i);
-    if (SC_IF_ANY.test(line)) {
-      if (depth === 0) {
-        const named = SC_IF_SCREEN.exec(line);
-        open = { name: named ? screenName(named[1]) : "block", fromLine: i };
-      }
-      depth += 1;
-      continue;
+    const opens = (line.match(/<sc-if\b/g) || []).length;
+    const closes = (line.match(/<\/sc-if>/g) || []).length;
+    if (!opens && !closes) continue;
+    if (depth === 0 && opens > 0) {
+      const named = SC_IF_SCREEN.exec(line);
+      open = { name: named ? screenName(named[1]) : "block", fromLine: i };
     }
-    if (SC_IF_CLOSE.test(line)) {
-      depth -= 1;
-      if (depth === 0 && open) {
-        screens.push({ ...open, toLine: i + 1 });
-        open = null;
-      }
+    depth += opens - closes;
+    if (depth < 0) throw new Error(`sc-if 닫기가 더 많다 (${i + 1}번째 줄)`);
+    if (depth === 0 && open) {
+      screens.push({ ...open, toLine: i + 1 });
+      open = null;
     }
   }
   if (depth !== 0) throw new Error(`sc-if 짝이 맞지 않는다 (depth=${depth})`);

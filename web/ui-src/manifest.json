@@ -62,6 +62,8 @@
     "methods/notifyChatContext.js",
     "methods/notifyChatBehavior.js",
     "methods/sectorOf.js",
+    "methods/bindCardRail.js",
+    "methods/buildArchive.js",
     "methods/totalAsset.js",
     "methods/polyline.js",
     "methods/chip.js",

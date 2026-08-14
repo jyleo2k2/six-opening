@@ -187,9 +187,16 @@
       : true;
     const prog2 = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.sellStep ? '#F5327F' : '#DDDFEC');
     const devChip = on => 'flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:12.5px;font-weight:' + (on ? '800' : '600') + ';cursor:pointer;' + (on ? 'color:#fff;background:#01185A' : 'color:#6E7488;background:#F1F2F8');
-    const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:999px;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap;' + (on
-      ? 'color:#fff;background:#01185A;box-shadow:0 6px 12px -4px rgba(1,24,90,0.4)'
-      : 'color:#8E93A8');
+    const arc = this.buildArchive();
+    // 아카이브 성향 카드는 유형별 팔레트를 쓴다. arcInk 는 그 팔레트의 가장 진한 색.
+    const arcPal = arc.pal, arcInk = arc.ink;
+    const arcRgba = a => { const n = parseInt(arcInk.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    const arcHasPick = typeof s.traitPick === 'number';
+    const arcPicked = arcHasPick ? arc.traits[Math.min(s.traitPick, arc.traits.length - 1)] : arc.traits[0];
+    const arcWrap = t => (t || '').replace(/\s*\n\s*/g, ' ').replace(/(다|어|야|요)\.\s+/g, '$1.\n');
+    const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s;' + (on
+      ? 'color:#fff;background:#001E5A'
+      : 'color:#7C819A;background:#EAEBF3');
     const myRecs = s.records.filter(r => r.user_id === (s.account === 'child' ? 'child_minji' : 'parent_mom'));
     const cnt = {};
     myRecs.forEach(r => { cnt[r.reason_code] = (cnt[r.reason_code] || 0) + 1; });
@@ -198,82 +205,26 @@
       pct: Math.round(cnt[r.code] / myRecs.length * 100) + '%',
       barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:#F5327F'
     })).sort((a, b) => b.n - a.n);
-    // 성향은 서버 엔진(BehaviorProfileSnapshot)이 계산한다. 여기서는 표시만 한다.
-    const CHARACTER_CARD = {
-      sniper: { name:'저격수' }, strategist: { name:'전략가' },
-      challenger: { name:'승부사' }, explorer: { name:'탐험가' }
-    };
-    const ABILITY_ROWS = [
-      { key:'accuracy', label:'정확력' }, { key:'evidence', label:'근거력' }, { key:'focus', label:'집중력' },
-      { key:'diversification', label:'분산력' }, { key:'intuition', label:'직관력' }
+    const infoShare = myRecs.length ? myRecs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / myRecs.length : 0;
+    const seasonShare = myRecs.length ? myRecs.filter(r => r.plan_code === 'plan_season').length / myRecs.length : 0;
+    const AXES = [
+      { axis:'집중–분산', left:'한우물형', right:'골고루형', child: Math.min(95, 30 + (m.holdings.length * 18)), parent: 41 },
+      { axis:'속도',      left:'진득이형', right:'재빨리형', child: Math.round(30 + (1 - seasonShare) * 55), parent: 22 },
+      { axis:'신중함',    left:'직진형',   right:'돌다리형', child: Math.round(20 + infoShare * 60), parent: 79 },
+      { axis:'손실 대응', left:'버티기형', right:'갈아타기형', child: Math.round(30 + ((s.sellRecords || []).filter(r => r.sell_reason_code === 'sell_fear_drop' || r.sell_reason_code === 'sell_anxiety').length ? 45 : 15)), parent: 35 },
+      { axis:'탐험심',    left:'익숙함형', right:'개척자형', child: Math.min(95, 35 + myRecs.length * 12), parent: 30 }
     ];
-    const profs = s.profiles || {};
-    const myProf = profs[s.account] || null;
-    const mySnap = myProf ? myProf.snapshot : null;
-    const profLoading = s.profileStatus === 'loading' || s.profileStatus === 'idle';
-    const profError = s.profileStatus === 'error';
-    const isInitial = !!mySnap && mySnap.observationState === 'initial';
-    const character = mySnap && !isInitial && mySnap.character ? CHARACTER_CARD[mySnap.character] : null;
-    const starTextOf = grade => grade === 3 ? '★★★' : grade === 2 ? '★★☆' : grade === 1 ? '★☆☆' : '';
-    // 오각형 레이더 — 위 꼭짓점부터 시계방향으로 정확력·근거력·집중력·분산력·직관력 (오른쪽 기울면 근거·집중).
-    const radarPoint = (i, ratio) => {
-      const angle = (-90 + i * 72) * Math.PI / 180;
-      const r = 86 * Math.max(0, Math.min(1, ratio));
-      return (135 + r * Math.cos(angle)).toFixed(1) + ',' + (118 + r * Math.sin(angle)).toFixed(1);
-    };
-    const radarRing = ratio => ABILITY_ROWS.map((row, i) => radarPoint(i, ratio)).join(' ');
-    const abilityValue = key => {
-      const v = mySnap ? mySnap.abilities[key] : 0;
-      return typeof v === 'number' ? v : 0;
-    };
-    const radarData = ABILITY_ROWS.map((row, i) => radarPoint(i, abilityValue(row.key) / 10)).join(' ');
-    const abilityText = row => {
-      if (!mySnap) return row.label;
-      if (row.key === 'accuracy' && mySnap.abilities.accuracy === null) return row.label + ' 판정 중';
-      return row.label + ' ' + abilityValue(row.key);
-    };
-    const cmp = (a, b) => a > b ? ' > ' : a < b ? ' < ' : ' = ';
-    const judgeLine = character
-      ? '근거 ' + mySnap.abilities.evidence + cmp(mySnap.abilities.evidence, mySnap.abilities.intuition) + '직관 ' + mySnap.abilities.intuition
-        + ' → ' + (mySnap.abilities.evidence >= mySnap.abilities.intuition ? '근거형' : '직관형')
-        + ' · 집중 ' + mySnap.abilities.focus + cmp(mySnap.abilities.focus, mySnap.abilities.diversification) + '분산 ' + mySnap.abilities.diversification
-        + ' → ' + (mySnap.abilities.focus >= mySnap.abilities.diversification ? '집중형' : '분산형')
-      : isInitial ? '매수 기록이 3건 모이면 캐릭터가 정해져'
-      : profError ? '아카이브를 나갔다 다시 들어와 봐'
-      : '기록을 불러오는 중이야';
-    const styleName = profLoading ? '기록 살펴보는 중…'
-      : profError ? '지금은 못 불러왔어'
-      : character ? (character.name + (mySnap.starGrade ? ' ' + starTextOf(mySnap.starGrade) : '')) : '아직 관찰 초기야';
-    const charEmoji = character ? character.emoji : (profLoading ? '⏳' : '🌱');
-    const starBadge = character && mySnap.starGrade === null ? '별 판정 중 — 사고판 지 5거래일이 지나면 채점돼' : '';
-    const coachText = profLoading ? '키웅이가 기록을 살펴보고 있어…'
-      : (myProf && myProf.narration && myProf.narration.text) ? myProf.narration.text
-      : '기록이 모이면 이번 시즌 이야기를 들려줄게.';
-    const childSnap = profs.child ? profs.child.snapshot : null;
-    const parentSnap = profs.parent ? profs.parent.snapshot : null;
-    const compareSide = snapX => {
-      if (!snapX) return { name:'불러오는 중', star:'' };
-      if (snapX.observationState === 'initial' || !snapX.character) return { name:'관찰 초기', star:'' };
-      const card = CHARACTER_CARD[snapX.character];
-      return { emoji: card.emoji, name: card.name, star: snapX.starGrade ? starTextOf(snapX.starGrade) : '별 판정 중' };
-    };
-    const compareChild = compareSide(childSnap);
-    const compareParent = compareSide(parentSnap);
-    const compareCell = (snapX, row) => {
-      if (!snapX) return '—';
-      if (row.key === 'accuracy' && snapX.abilities.accuracy === null) return '판정 중';
-      const v = snapX.abilities[row.key];
-      return typeof v === 'number' ? v + '점' : '—';
-    };
-    const compareRows = ABILITY_ROWS.map(row => ({
-      label: row.label,
-      childText: compareCell(childSnap, row),
-      parentText: compareCell(parentSnap, row)
+    const axes = AXES.map(a => ({
+      axis: a.axis, left: a.left, right: a.right,
+      leftStyle: 'font-size:12.5px;font-weight:' + (a.child < 50 ? '600' : '500') + ';color:' + (a.child < 50 ? '#01185A' : '#B6BACB'),
+      rightStyle: 'font-size:12.5px;font-weight:' + (a.child >= 50 ? '600' : '500') + ';color:' + (a.child >= 50 ? '#01185A' : '#B6BACB'),
+      barStyle: 'width:' + a.child + '%;height:100%;border-radius:999px;background:#01185A'
     }));
-    const compareHeadline = childSnap && parentSnap && childSnap.character && parentSnap.character
-      ? s.acc.child.name + '는 ' + CHARACTER_CARD[childSnap.character].name + ', ' + s.acc.parent.name + '는 ' + CHARACTER_CARD[parentSnap.character].name + '. '
-        + (childSnap.character === parentSnap.character ? '같은 캐릭터여도 오각형 모양이 달라요.' : '스타일이 달라요.')
-      : '두 사람의 기록이 모이는 중이에요.';
+    const styleName = myRecs.length === 0 ? '아직 기록 전이야'
+      : (AXES[4].child >= 60 ? '재빨리 개척자형!' : infoShare >= 0.6 ? '차근차근 탐험가형!' : '마음따라 모험가형!');
+    const coachText = myRecs.length === 0
+      ? '아직 산 게 없어. 한 번 사고 나면 이번 주 어떤 스타일이었는지 알려줄게.'
+      : (m.name + '는 이번 주에 ' + myRecs.length + '번 샀어. ' + (infoShare >= 0.5 ? '뉴스나 그래프처럼 근거를 보고 고르는 편이었어.' : '마음이 끌리는 쪽으로 고르는 편이었어.'));
     const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8' };
     const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:#F4F4FA,0 0 0 1.5px ' + sec.accent + '33';
 
