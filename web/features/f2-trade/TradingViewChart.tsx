@@ -165,6 +165,17 @@ function formatTime(time: Time, period: PrototypeChartPeriod) {
   }).format(new Date(time * 1000));
 }
 
+/** 크로스헤어 시간바는 눈금과 달리 분봉에서도 월.일을 같이 보여준다. */
+function formatCrosshairTime(time: Time, period: PrototypeChartPeriod) {
+  if (typeof time !== "number") return String(time);
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric",
+    day: "numeric",
+    ...(period === "minute" ? { hour: "2-digit", minute: "2-digit" } : {}),
+  }).format(new Date(time * 1000));
+}
+
 export function TradingViewChart({ symbol, period, chartType }: {
   symbol: string;
   /** 첫 렌더용 기본값. 이후 값은 app.html 이 메시지로 바꾼다. */
@@ -359,7 +370,7 @@ export function TradingViewChart({ symbol, period, chartType }: {
       localization: {
         locale: "ko-KR",
         priceFormatter: (price: number) => `${Math.round(price).toLocaleString("ko-KR")}원`,
-        timeFormatter: (time: Time) => formatTime(time, shownPeriod),
+        timeFormatter: (time: Time) => formatCrosshairTime(time, shownPeriod),
       },
       crosshair: { vertLine: { color: gray }, horzLine: { color: gray } },
     });
