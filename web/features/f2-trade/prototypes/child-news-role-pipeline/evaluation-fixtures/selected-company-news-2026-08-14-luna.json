@@ -1,0 +1,4130 @@
+{
+  "schemaVersion": 1,
+  "runId": "selected-company-news-2026-08-14-luna",
+  "runDateKst": "2026-08-14",
+  "retrievedAt": "2026-08-14T05:04:19.185Z",
+  "sourceBasis": "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인함",
+  "candidates": [
+    {
+      "stock": {
+        "stockId": "KRX:259960",
+        "symbol": "259960",
+        "name": "크래프톤",
+        "aliases": [
+          "KRAFTON"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%81%AC%EB%9E%98%ED%94%84%ED%86%A4+%EA%B2%8C%EC%9E%84",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/138/0002237827",
+        "https://n.news.naver.com/mnews/article/016/0002684028",
+        "https://n.news.naver.com/mnews/article/003/0014127639",
+        "https://n.news.naver.com/mnews/article/138/0002237814",
+        "https://n.news.naver.com/mnews/article/030/0003457460"
+      ],
+      "candidateCount": 5,
+      "selectionScore": 184,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 매출, 영업이익, 판매"
+      ],
+      "article": {
+        "articleId": "NAVER-003-0014127639",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "'배그'로 1조원 격차 뒤집은 크래프톤…넥슨 아성 흔들",
+        "publisher": "뉴시스",
+        "publishedAt": "2026-08-14T01:53:39.000Z",
+        "sourceUrl": "https://www.newsis.com/view/NISX20260814_0003749075",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "상반기 매출·영업익 모두 크래프톤 우위"
+          },
+          {
+            "id": "S2",
+            "text": "넥슨도 역대 최대 매출 올렸지만 크래프톤이 더 빨라"
+          },
+          {
+            "id": "S3",
+            "text": "14일 게임업계에 따르면 크래프톤은 올해 2분기 매출 1조2902억원, 영업이익 4109억원을 기록했다."
+          },
+          {
+            "id": "S4",
+            "text": "이에 따라 크래프톤은 2분기 매출에서 넥슨을 1512억원, 영업이익에서는 1166억원 앞섰다."
+          },
+          {
+            "id": "S5",
+            "text": "크래프톤이 분기 영업이익에서 넥슨을 넘어선 적은 있었지만 매출과 영업이익을 동시에 앞선 것은 이번이 처음이다."
+          },
+          {
+            "id": "S6",
+            "text": "하지만 크래프톤이 올해 상반기 매출과 영업이익에서 모두 넥슨을 넘어선 만큼 하반기 실적에 따라 장기간 이어진 국내 게임업계 실적 구도가 바뀔 가능성이 제기된다."
+          },
+          {
+            "id": "S7",
+            "text": "크래프톤의 상반기 매출은 2조6616억원, 영업이익은 9725억원으로 전년 동기 대비 각각 73.3%, 38.3% 증가했다."
+          },
+          {
+            "id": "S8",
+            "text": "크래프톤이 매출에서 1013억원, 영업이익에서 1346억원 앞선 셈이다."
+          },
+          {
+            "id": "S9",
+            "text": "지난해 연간 매출은 넥슨이 4조5072억원, 크래프톤이 3조3266억원으로 1조원 이상 차이가 났다."
+          },
+          {
+            "id": "S10",
+            "text": "2분기 넥슨의 매출이 전년 동기 대비 2% 늘어나는 동안 크래프톤은 94.9% 증가하며 몸집을 빠르게 불렸다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:036570",
+        "symbol": "036570",
+        "name": "엔씨소프트",
+        "aliases": [
+          "NC",
+          "NCSoft",
+          "엔씨"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%97%94%EC%94%A8%EC%86%8C%ED%94%84%ED%8A%B8+%EA%B2%8C%EC%9E%84",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002684028",
+        "https://n.news.naver.com/mnews/article/081/0003670368",
+        "https://n.news.naver.com/mnews/article/023/0003992903",
+        "https://n.news.naver.com/mnews/article/028/0002818445",
+        "https://n.news.naver.com/mnews/article/011/0004651512",
+        "https://n.news.naver.com/mnews/article/109/0005587838",
+        "https://n.news.naver.com/mnews/article/023/0003992837",
+        "https://n.news.naver.com/mnews/article/421/0009112766"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 165,
+      "selectionSignals": [
+        "종목 별칭이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익, 순이익"
+      ],
+      "article": {
+        "articleId": "NAVER-109-0005587838",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "‘리니지 클래식 호조’ 엔씨, 2분기 매출 7705억 원…해외 매출 비중 52% 달성",
+        "publisher": "OSEN",
+        "publishedAt": "2026-08-13T07:43:11.000Z",
+        "sourceUrl": "http://www.osen.co.kr/article/G1112856478",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "[OSEN=고용준 기자] 해외 매출 뿐만 아니라 &lsquo;리니지 클래식&rsquo;의 실적이 반영되면서 영업이익에서는 전년 대비 1053% 상승이 이뤄졌다."
+          },
+          {
+            "id": "S2",
+            "text": "엔씨가 2분기 연속 역대 최고 PC 매출 경신한 2026년 2분기 실적을 발표했다."
+          },
+          {
+            "id": "S3",
+            "text": "엔씨소프트는 지난 11일 2026년 2분기 실적 결산(연결기준) 결과 매출 7705억 원, 영업이익 1739억 원, 당기순이익 1312억 원을 기록했다고 밝혔다."
+          },
+          {
+            "id": "S4",
+            "text": "매출과 영업이익은 전분기 대비 각각 38%, 53% 증가했으며, 전년 동기 대비로는 각각 101%, 1,053% 상승했다."
+          },
+          {
+            "id": "S5",
+            "text": "이번 분기 영업이익률은 23%로 집계됐다."
+          },
+          {
+            "id": "S6",
+            "text": "지역별 매출 비중은 한국 48%, 아시아 25%, 북미&middot;유럽 등 27% 순이다."
+          },
+          {
+            "id": "S7",
+            "text": "엔씨소프트에 따르면 해외 매출 비중은 4분기 연속 증가세를 기록하고 있다."
+          },
+          {
+            "id": "S8",
+            "text": "이는 글로벌 모바일 게임 플랫폼 '저스트플레이(JustPlay)'의 최초 연결 편입에 따른 결과로, 모바일 캐주얼 사업은 엔씨소프트 전체 분기 매출의 22%를 차지하게 됐다."
+          },
+          {
+            "id": "S9",
+            "text": "한편 엔씨소프트는 오는 8월 26일 독일 쾰른에서 개막하는 게임쇼 &lsquo;게임스컴 2026&rsquo;에 참가할 예정이다."
+          },
+          {
+            "id": "S10",
+            "text": "엔씨소프트는 해당 행사에서 아이온2, 신더시티, 프로젝트 본파이어 등 개발 중인 글로벌 신작 라인업을 공개할 계획이다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:251270",
+        "symbol": "251270",
+        "name": "넷마블",
+        "aliases": [
+          "Netmarble"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EB%84%B7%EB%A7%88%EB%B8%94+%EA%B2%8C%EC%9E%84",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002684028",
+        "https://n.news.naver.com/mnews/article/001/0016251605",
+        "https://n.news.naver.com/mnews/article/138/0002237814"
+      ],
+      "candidateCount": 3,
+      "selectionScore": 54,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 실적, 매출, 영업이익"
+      ],
+      "article": {
+        "articleId": "NAVER-138-0002237814",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "'역대 최대' 속출한 K-게임 2분기…흥행작 따라 희비 갈렸다",
+        "publisher": "디지털데일리",
+        "publishedAt": "2026-08-14T01:48:08.000Z",
+        "sourceUrl": "https://www.ddaily.co.kr/page/view/2026081410180855243",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "크래프톤, 매출·영업이익 모두 넥슨 처음으로 앞서"
+          },
+          {
+            "id": "S2",
+            "text": "2026년 2분기 국내 주요 게임사 매출 그래프."
+          },
+          {
+            "id": "S3",
+            "text": "지난해 같은 기간보다 각각 17%, 13% 늘어난 수치로 매출과 영업이익, 순이익 모두 반기 기준 최대 기록을 새로 썼다."
+          },
+          {
+            "id": "S4",
+            "text": "펄어비스는 '붉은사막' 정산대상 금액의 20%를 환불 보증 목적으로 이연하면서 가이던스를 하회하는 매출을 기록했지만, 판매 호조에 힘입어 영업이익과 순이익이 큰 폭으로 개선됐다."
+          },
+          {
+            "id": "S5",
+            "text": "영업이익은 1739억원으로 1053% 늘었고 순이익은 1312억원으로 흑자 전환했다."
+          },
+          {
+            "id": "S6",
+            "text": "인수한 리워드 게임 플랫폼 저스트플레이가 이번 분기부터 온전히 연결 실적에 포함되면서 모바일 캐주얼 매출은 1697억원으로 전체 매출의 약 22%를 차지했다."
+          },
+          {
+            "id": "S7",
+            "text": "넷마블은 신작 효과로 매출을 키웠지만 비용 증가로 영업이익이 줄었고, 시프트업과 네오위즈는 지난해 흥행작에 따른 기저효과를 피하지 못했다."
+          },
+          {
+            "id": "S8",
+            "text": "넷마블의 2분기 매출은 7492억원으로 전년 동기보다 4.4% 증가한 반면 영업이익은 801억원으로 20.8% 감소했다."
+          },
+          {
+            "id": "S9",
+            "text": "전분기와 비교하면 '미르의 전설2' IP 로열티 분쟁 종결에 따른 일회성 라이선스 매출이 빠지면서 매출이 29% 감소하고 영업이익은 적자로 돌아섰다."
+          },
+          {
+            "id": "S10",
+            "text": "매출은 전년 동기보다 42.7% 감소했고 영업이익은 적자 전환했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:192080",
+        "symbol": "192080",
+        "name": "더블유게임즈",
+        "aliases": [
+          "DoubleGame",
+          "더블유게임"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EB%8D%94%EB%B8%94%EC%9C%A0%EA%B2%8C%EC%9E%84%EC%A6%88+%EA%B2%8C%EC%9E%84",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/003/0014123167",
+        "https://n.news.naver.com/mnews/article/092/0002433730",
+        "https://n.news.naver.com/mnews/article/366/0001185724",
+        "https://n.news.naver.com/mnews/article/011/0004650917"
+      ],
+      "candidateCount": 4,
+      "selectionScore": 180,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익"
+      ],
+      "article": {
+        "articleId": "NAVER-003-0014123167",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "더블유게임즈, 2분기 매출 2106억·영업익 701억…또 사상 최대",
+        "publisher": "뉴시스",
+        "publishedAt": "2026-08-12T05:26:31.000Z",
+        "sourceUrl": "https://www.newsis.com/view/NISX20260812_0003746230",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "전년 대비 매출 22.5%·영업이익 29% 증가…영업이익률 33.3%"
+          },
+          {
+            "id": "S2",
+            "text": "팍시게임즈 매출 126% 급증…AI 기반 신작 비중 81%"
+          },
+          {
+            "id": "S3",
+            "text": "[서울=뉴시스]오동현 기자 = 더블유게임즈가 소셜카지노의 안정적인 성장과 캐주얼게임 사업 확대에 힘입어 2개 분기 연속 사상 최대 실적을 경신했다."
+          },
+          {
+            "id": "S4",
+            "text": "더블유게임즈는 올해 2분기 연결 기준 매출 2106억원, 영업이익 701억원을 기록했다고 12일 공시했다."
+          },
+          {
+            "id": "S5",
+            "text": "전년 동기 대비 매출은 22.5%, 영업이익은 29% 증가했다."
+          },
+          {
+            "id": "S6",
+            "text": "매출은 7개 분기 연속 성장했다."
+          },
+          {
+            "id": "S7",
+            "text": "자체 결제 시스템을 이용하는 직접판매(DTC) 매출 비중이 47.5%까지 확대되면서 플랫폼 수수료 부담을 줄인 것이 수익성 개선으로 이어졌다."
+          },
+          {
+            "id": "S8",
+            "text": "상반기 누적 매출은 전년 동기 대비 24.5% 증가한 4156억원, 영업이익은 27% 늘어난 1385억원으로 집계됐다."
+          },
+          {
+            "id": "S9",
+            "text": "더블유카지노와 더블다운카지노 등 기존 게임의 안정적인 운영에 지난해 7월 인수한 와우게임즈의 실적이 더해졌다."
+          },
+          {
+            "id": "S10",
+            "text": "더블유게임즈 관계자는 \"소셜카지노의 안정적인 수익 기반 위에서 캐주얼게임과 아이게이밍 사업의 성장이 본격화하고 있다\"며 \"하반기에도 신규 성장동력의 성과를 확대해 실적 성장세를 이어갈 것\"이라고 말했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:000120",
+        "symbol": "000120",
+        "name": "CJ대한통운",
+        "aliases": [
+          "CJ 대한통운",
+          "씨제이대한통운"
+        ],
+        "sector": "logistics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=CJ%EB%8C%80%ED%95%9C%ED%86%B5%EC%9A%B4+%EB%AC%BC%EB%A5%98",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/662/0000101922",
+        "https://n.news.naver.com/mnews/article/422/0000895760",
+        "https://n.news.naver.com/mnews/article/586/0000135974",
+        "https://n.news.naver.com/mnews/article/081/0003670506",
+        "https://n.news.naver.com/mnews/article/018/0006351774",
+        "https://n.news.naver.com/mnews/article/018/0006351770",
+        "https://n.news.naver.com/mnews/article/082/0001393910",
+        "https://n.news.naver.com/mnews/article/119/0003121830"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 48,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 중단"
+      ],
+      "article": {
+        "articleId": "NAVER-586-0000135974",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "\"기다리지 마세요\"…광복절 연휴 '택배 쉬는 날'",
+        "publisher": "시사저널",
+        "publishedAt": "2026-08-14T03:47:10.000Z",
+        "sourceUrl": "https://www.sisajournal.com/news/articleView.html?idxno=383647",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "14~15일 택배 쉬는 날…쿠팡·컬리는 정상 배송"
+          },
+          {
+            "id": "S2",
+            "text": "CJ대한통운 배송 차량 ⓒ연합뉴스"
+          },
+          {
+            "id": "S3",
+            "text": "광복절 연휴 '택배 쉬는 날'이 시작됐다."
+          },
+          {
+            "id": "S4",
+            "text": "이 기간 쿠팡·컬리 등 새벽 배송 서비스를 제외한 일반 배송 업무는 일시 중단된다."
+          },
+          {
+            "id": "S5",
+            "text": "14일 업계에 따르면 CJ대한통운과 한진, 롯데글로벌로지스 등 주요 택배사들은 이날 '택배 쉬는 날'을 맞아 배송 업무를 중단했다."
+          },
+          {
+            "id": "S6",
+            "text": "택배 쉬는 날은 휴가 사용이 쉽지 않은 택배기사들의 휴식권을 보장하기 위해 도입된 날로, 2020년 고용노동부와 택배업계의 사회적 합의에 따라 매년 8월14일이 휴무일로 지정됐다."
+          },
+          {
+            "id": "S7",
+            "text": "특히 올해는 택배 쉬는 날에 이어 15일 광복절, 16일 일요일, 17일 대체공휴일까지 나흘간 연휴가 이어진다."
+          },
+          {
+            "id": "S8",
+            "text": "CJ대한통운은 14~15일 이틀간 배송을 멈추고 16일부터 정상 배송을 재개한다."
+          },
+          {
+            "id": "S9",
+            "text": "한진과 롯데글로벌로지스도 15일까지 배송을 하지 않으며, 이후 16~17일에는 별도 계약을 맺은 휴일 배송 물량만 처리한다."
+          },
+          {
+            "id": "S10",
+            "text": "다만 자체 배송망이 닿지 않는 지역이나 일부 판매자 배송 상품은 외부 택배사를 이용하는 만큼 배송 일정이 달라질 수 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:011200",
+        "symbol": "011200",
+        "name": "HMM",
+        "aliases": [
+          "에이치엠엠"
+        ],
+        "sector": "logistics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=HMM+%EB%AC%BC%EB%A5%98",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/021/0002811281",
+        "https://n.news.naver.com/mnews/article/008/0005399753",
+        "https://n.news.naver.com/mnews/article/262/0000019611",
+        "https://n.news.naver.com/mnews/article/082/0001393676",
+        "https://n.news.naver.com/mnews/article/138/0002237609",
+        "https://n.news.naver.com/mnews/article/029/0003042060",
+        "https://n.news.naver.com/mnews/article/658/0000152074"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 182,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익"
+      ],
+      "article": {
+        "articleId": "NAVER-021-0002811281",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "HMM, 올 2분기 영업이익 3541억 원…전년比 52↑",
+        "publisher": "문화일보",
+        "publishedAt": "2026-08-13T07:05:13.000Z",
+        "sourceUrl": "https://www.munhwa.com/article/11609398?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "국내 최대 컨테이너선사인 HMM의 2만4000TEU급 친환경 컨테이너선 ‘HMM상트페테르부르크’호."
+          },
+          {
+            "id": "S2",
+            "text": "HMM의 올해 영업이익이 3541억 원으로 1년 새 50% 넘게 증가한 것으로 나타났다."
+          },
+          {
+            "id": "S3",
+            "text": "중동발 정세 변화에 따른 해운·물류 시장 불안에도 견조한 실적을 냈다는 평가가 나온다."
+          },
+          {
+            "id": "S4",
+            "text": "HMM은 연결 기준 올해 2분기 영업이익 3541억 원을 기록했다고 13일 공시했다."
+          },
+          {
+            "id": "S5",
+            "text": "매출액은 이번 2분기 3조4020억 원으로 지난해 같은 기간(2조6227억 원)보다 30% 늘었다."
+          },
+          {
+            "id": "S6",
+            "text": "HMM의 올해 상반기 누적 매출은 6조1207억 원으로 작년 상반기( 5조4774억 원) 대비 12% 증가했다."
+          },
+          {
+            "id": "S7",
+            "text": "HMM 관계자는 “지난 3월부터 중동전쟁 여파로 매출 손실과 연료비 상승 영향이 있었지만 5월 말부터 성수기가 조기에 시작되면서 운임이 반등했다”고 설명했다."
+          },
+          {
+            "id": "S8",
+            "text": "HMM은 고유가에 대응한 연료비 최적화와 ‘허브 앤 스포크’ 전략을 통한 선대 운영 효율화, 동남아시아 등 신규 수요 확보에도 나섰다."
+          },
+          {
+            "id": "S9",
+            "text": "올해 3분기에는 미국 관세와 파나마 운하 및 주요 항만 적체, 중동전쟁 등의 영향으로 공급망 불확실성이 이어질 것으로 HMM은 전망했다."
+          },
+          {
+            "id": "S10",
+            "text": "HMM은 지난해 2분기부터 올해 상반기까지 15개월 간 약 10조 원을 투자했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:086280",
+        "symbol": "086280",
+        "name": "현대글로비스",
+        "aliases": [
+          "Hyundai Glovis"
+        ],
+        "sector": "logistics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%98%84%EB%8C%80%EA%B8%80%EB%A1%9C%EB%B9%84%EC%8A%A4+%EB%AC%BC%EB%A5%98",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/008/0005399777",
+        "https://n.news.naver.com/mnews/article/021/0002811285",
+        "https://n.news.naver.com/mnews/article/001/0016249751",
+        "https://n.news.naver.com/mnews/article/138/0002237674",
+        "https://n.news.naver.com/mnews/article/029/0003042210",
+        "https://n.news.naver.com/mnews/article/011/0004651332",
+        "https://n.news.naver.com/mnews/article/629/0000524142",
+        "https://n.news.naver.com/mnews/article/119/0003121323"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 146,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 사고"
+      ],
+      "article": {
+        "articleId": "NAVER-021-0002811285",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "현대글로비스, 한국도로공사와 화물차 안전사고 예방 협력…“안전용품 지원”",
+        "publisher": "문화일보",
+        "publishedAt": "2026-08-13T07:06:15.000Z",
+        "sourceUrl": "https://www.munhwa.com/article/11609402?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "오는 11월까지 전국 고속도로 화물차 거점서 혹서·혹한 용품 배포"
+          },
+          {
+            "id": "S2",
+            "text": "11일 경기 안성시에 위치한 고삼호수휴게소에서 현대글로비스 관계자가 화물차 운전자에게 안전용품을 전달하고 있다."
+          },
+          {
+            "id": "S3",
+            "text": "현대글로비스가 한국도로공사와 손잡고 화물차 안전사고 예방을 위해 안전용품 지원에 나섰다."
+          },
+          {
+            "id": "S4",
+            "text": "현대글로비스는 화물차 운전자의 안전운전 문화 정착을 지원하고 안전용품을 전달하는 ‘화물차 기사님 안전을 드림’ 캠페인을 오는 11월까지 진행한다고 13일 밝혔다."
+          },
+          {
+            "id": "S5",
+            "text": "현대글로비스는 지난 11일 경기 안성시 고삼호수휴게소에서 화물차 기사를 대상으로 앞좌석 햇빛 가리개, 발포비타민, 화물차 반사띠, 사이드 미러 발수 필름 등 여름철 사고예방을 위한 안전용품을 배포했다."
+          },
+          {
+            "id": "S6",
+            "text": "앞서 지난 6월 현대글로비스는 한국도로공사 서울경기·대전충남·부산경남지역본부 및 한국생활안전연합과 업무협약(MOU)을 맺고 물류 현장 의견을 반영한 맞춤형 프로그램을 운영하기로 했다."
+          },
+          {
+            "id": "S7",
+            "text": "현대글로비스는 물류 현장의 안전사고 예방을 위한 다양한 활동을 펼치고 있다."
+          },
+          {
+            "id": "S8",
+            "text": "현대글로비스는 지난 2월에는 산업현장 안전예방에 기여한 공로를 인정받아 고용노동부 장관상을 수상하기도 했다."
+          },
+          {
+            "id": "S9",
+            "text": "올해 1월에는 ‘2025년 대·중소 안전보건 상생협력 유공’ 부문에서 김일환 현대글로비스 안전환경센터장이 고용노동부 장관 표창을 받았다."
+          },
+          {
+            "id": "S10",
+            "text": "현대글로비스 관계자는 “안전이 최우선이라는 생각으로 작은 것 하나부터 세심하게 신경쓰고 있다”라며 “지난 10년 간 진행하고 있는 사회공헌 프로그램을 더욱 발전시켜 안전하고 건강한 물류 현장을 만들 수 있도록 노력하겠다”고 말했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:005930",
+        "symbol": "005930",
+        "name": "삼성전자",
+        "aliases": [
+          "삼성 전자",
+          "Samsung Electronics"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%82%BC%EC%84%B1%EC%A0%84%EC%9E%90+%EC%A0%84%EC%9E%90+%EB%B0%98%EB%8F%84%EC%B2%B4",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/374/0000527552",
+        "https://n.news.naver.com/mnews/article/138/0002237838",
+        "https://n.news.naver.com/mnews/article/079/0004178847",
+        "https://n.news.naver.com/mnews/article/417/0001155386",
+        "https://n.news.naver.com/mnews/article/001/0016251850",
+        "https://n.news.naver.com/mnews/article/011/0004651812",
+        "https://n.news.naver.com/mnews/article/030/0003457517",
+        "https://n.news.naver.com/mnews/article/243/0000101661"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 54,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 실적, 매출, 수주"
+      ],
+      "article": {
+        "articleId": "NAVER-138-0002237838",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "딥엑스, 'DX-M1' 양산 1년 만에 1300만달러 수주… 온디바이스 AI 수출 본격화",
+        "publisher": "디지털데일리",
+        "publishedAt": "2026-08-14T04:49:12.000Z",
+        "sourceUrl": "https://www.ddaily.co.kr/page/view/2026081411380945555",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "[반도체레이다] 10여개 국가서 77건 구매주문 확보…최근 넉 달간 전체 수주 62% 집중"
+          },
+          {
+            "id": "S2",
+            "text": "딥엑스의 온디바이스 AI 반도체 'DX-M1' 계열 제품."
+          },
+          {
+            "id": "S3",
+            "text": "[디지털데일리 배태용기자] 초저전력 AI 반도체 기업 딥엑스가 첫 양산 제품인 온디바이스 AI NPU 'DX-M1'을 앞세워 글로벌 시장 수주를 크게 늘리고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "딥엑스는 한국을 비롯해 미국, 중국, 유럽, 대만, 홍콩, 일본, 싱가포르, 인도 등 주요 시장에서 수주 실적을 거뒀다."
+          },
+          {
+            "id": "S5",
+            "text": "올해 7월 말 누적 매출 기준 전체 매출의 절반 이상이 해외에서 발생하며 글로벌 수출 전환에 속도가 붙는 모습이다."
+          },
+          {
+            "id": "S6",
+            "text": "공급 제품은 DX-M1, DX-M1 M.2, DX-M1M, DX-M1M M.2 등 DX-M1 계열과 일부 DX-H1 제품으로, 고객 요구에 따라 칩과 모듈 형태로 공급된다."
+          },
+          {
+            "id": "S7",
+            "text": "DX-M1은 클라우드 연결 없이 디바이스 자체에서 AI 연산을 수행하도록 삼성전자 5나노 공정을 통해 양산 중이다."
+          },
+          {
+            "id": "S8",
+            "text": "딥엑스는 500건 이상의 특허 보유와 양산 수율 90% 수준을 달성하며 원가 경쟁력과 공급 안정성을 확보했다."
+          },
+          {
+            "id": "S9",
+            "text": "중국에서는 바이두 관련 문서 인식(OCR) 및 머신비전 프로젝트, 레노버 관련 AI 엣지서버 프로젝트가 진행 중이며, 대만 산업용 컴퓨팅 기업 AAEON 등 현지 파트너와 공급망을 확장하고 있다."
+          },
+          {
+            "id": "S10",
+            "text": "삼성전자 2나노 공정을 기반으로 제작되며 2027년 3월 시제품 웨이퍼 확보 후 브링업을 거쳐 6월 초기 고객 제공을 목표로 한다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:000660",
+        "symbol": "000660",
+        "name": "SK하이닉스",
+        "aliases": [
+          "SK 하이닉스",
+          "SK hynix",
+          "에스케이하이닉스"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=SK%ED%95%98%EC%9D%B4%EB%8B%89%EC%8A%A4+%EC%A0%84%EC%9E%90+%EB%B0%98%EB%8F%84%EC%B2%B4",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/374/0000527552",
+        "https://n.news.naver.com/mnews/article/417/0001155386",
+        "https://n.news.naver.com/mnews/article/001/0016251850",
+        "https://n.news.naver.com/mnews/article/011/0004651812",
+        "https://n.news.naver.com/mnews/article/243/0000101661",
+        "https://n.news.naver.com/mnews/article/081/0003670507",
+        "https://n.news.naver.com/mnews/article/422/0000895744",
+        "https://n.news.naver.com/mnews/article/003/0014127884"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 130,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호 없음"
+      ],
+      "article": {
+        "articleId": "NAVER-243-0000101661",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "[오늘의 삼전닉스] SK하이닉스가 미국에 메모리 전공정 공장도 지을까요",
+        "publisher": "이코노미스트",
+        "publishedAt": "2026-08-14T04:00:09.000Z",
+        "sourceUrl": "https://economist.co.kr/article/view/ecn202608140029",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "오는 27일 미국 인디애나주 후공정 반도체 팹 착공식"
+          },
+          {
+            "id": "S2",
+            "text": "향후 미국 내 설비 투자 청사진에 대한 관심"
+          },
+          {
+            "id": "S3",
+            "text": "[이코노미스트 김두용 기자] SK하이닉스가 미국 인디애나주 후공정 반도체 공장(팹) 착공식을 오는 27일(현지시간)에 개최한다."
+          },
+          {
+            "id": "S4",
+            "text": "이에 SK하이닉스가 미국에 메모리 전공정 팹을 과연 지을 것인지에 대한 관심도 올라가고 있다."
+          },
+          {
+            "id": "S5",
+            "text": "곽노정 SK하이닉스 대표이사의 참석은 확정적이다."
+          },
+          {
+            "id": "S6",
+            "text": "여기에 젠슨 황 엔비디아 최고경영자(CEO)의 참석 여부도 거론되는 등 SK하이닉스 입장에서는 큰 행사를 앞두고 있다."
+          },
+          {
+            "id": "S7",
+            "text": "SK하이닉스는 지난 2024년 4월 웨스트라피엣에 후공정 팹 건설을 공식적으로 발표한 바 있다."
+          },
+          {
+            "id": "S8",
+            "text": "최근 하워드 러트닉 상무장관이 SK하이닉스와 삼성전자를 향해 미국 내 메모리 생산 확대를 공개적으로 촉구하는 등 한국 반도체 기업에 대한 투자 요구의 목소리를 높이고 있다."
+          },
+          {
+            "id": "S9",
+            "text": "미국도 이번 SK하이닉스의 인디애나주 공장 건설과 관련해 반도체법(Chips Act)에 따라 최대 4억5000만 달러(약 6400억원) 규모의 직접 보조금과 5억 달러(약 7100억원)의 대출을 지원해준다."
+          },
+          {
+            "id": "S10",
+            "text": "조현동 주미대사가 지난 2024년 미국 인디애나주 웨스트 라파예트에 위치한 퍼듀 대학에서 개최된 SK하이닉스 투자 발표 행사에 참석해 축사하고 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:066570",
+        "symbol": "066570",
+        "name": "LG전자",
+        "aliases": [
+          "LG 전자",
+          "LG Electronics",
+          "엘지전자"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=LG%EC%A0%84%EC%9E%90+%EC%A0%84%EC%9E%90+%EB%B0%98%EB%8F%84%EC%B2%B4",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/001/0016251850",
+        "https://n.news.naver.com/mnews/article/374/0000527517",
+        "https://n.news.naver.com/mnews/article/052/0002393217",
+        "https://n.news.naver.com/mnews/article/037/0000038673",
+        "https://n.news.naver.com/mnews/article/009/0005720967",
+        "https://n.news.naver.com/mnews/article/015/0005320806",
+        "https://n.news.naver.com/mnews/article/366/0001186190",
+        "https://n.news.naver.com/mnews/article/366/0001186175"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 108,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호 없음",
+        "홍보·일상 감점: 출시"
+      ],
+      "article": {
+        "articleId": "NAVER-001-0016251850",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "네이버·LG전자에 최대 20배 베팅…바이낸스 선물 출시",
+        "publisher": "연합뉴스",
+        "publishedAt": "2026-08-14T04:33:58.000Z",
+        "sourceUrl": "https://www.yna.co.kr/view/AKR20260814084400002?input=1195m",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "삼성전기·한미반도체·KODEX 200 ETF 등도"
+          },
+          {
+            "id": "S2",
+            "text": "삼성전자·SK하이닉스·현대차 등엔 50배 투자 가능"
+          },
+          {
+            "id": "S3",
+            "text": "(서울=연합뉴스) 박수현 기자 = 해외 가상자산 거래소 바이낸스가 네이버, LG전자 등에 최대 20배 레버리지로 투자할 수 있는 무기한 선물 상품을 출시했다."
+          },
+          {
+            "id": "S4",
+            "text": "14일 가상자산업계에 따르면 바이낸스는 이날부터 국내 상장 주식인 네이버, LG전자, 삼성전기, 한미반도체, KODEX 200 상장지수펀드(ETF) 등을 추종하는 무기한 선물 상품을 거래지원(상장)하기 시작했다."
+          },
+          {
+            "id": "S5",
+            "text": "이들 상품은 최대 20배까지 레버리지를 걸 수 있으며, 가상자산처럼 휴일 없이 24시간 거래할 수 있다."
+          },
+          {
+            "id": "S6",
+            "text": "해외 가상자산 거래소이자 미신고 거래소인 MEXC와 XT닷컴도 네이버와 LG전자 등에 최대 20배 레버리지를 걸 수 있는 무기한 선물 상품을 상장한 상태다."
+          },
+          {
+            "id": "S7",
+            "text": "바이낸스는 수개월 전부터 국내 주식을 기초자산으로 하는 무기한 선물 상품을 잇따라 내놓고 있다."
+          },
+          {
+            "id": "S8",
+            "text": "지난 6월 2일에는 삼성전자, SK하이닉스, 현대차에 각 20배 레버리지 투자를 할 수 있는 선물 상품을 출시했다."
+          },
+          {
+            "id": "S9",
+            "text": "같은 달 22일에는 미국 뉴욕 증시에 상장된 코스피 3배 레버리지 ETF 'KORU'를 추종하는 선물 상품을 상장했다."
+          },
+          {
+            "id": "S10",
+            "text": "지난 6월 출시된 상품들은 현재 최대 50배까지 레버리지를 걸 수 있는 상태다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:064350",
+        "symbol": "064350",
+        "name": "현대로템",
+        "aliases": [
+          "Hyundai Rotem"
+        ],
+        "sector": "defense",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%98%84%EB%8C%80%EB%A1%9C%ED%85%9C+%EB%B0%A9%EC%82%B0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/002/0002452147",
+        "https://n.news.naver.com/mnews/article/011/0004651686",
+        "https://n.news.naver.com/mnews/article/011/0004651674",
+        "https://n.news.naver.com/mnews/article/081/0003670287",
+        "https://n.news.naver.com/mnews/article/469/0000947936",
+        "https://n.news.naver.com/mnews/article/009/0005720809",
+        "https://n.news.naver.com/mnews/article/011/0004651523",
+        "https://n.news.naver.com/mnews/article/417/0001155322"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 110,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 인수, 지분",
+        "다른 선정 기업도 제목에 있음: 한국항공우주"
+      ],
+      "article": {
+        "articleId": "NAVER-469-0000947936",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "현대로템, KAI와 장거리 공대공 미사일 개발 협력… 'KAI 인수전' 한화 독주 견제",
+        "publisher": "한국일보",
+        "publishedAt": "2026-08-13T09:13:08.000Z",
+        "sourceUrl": "https://www.hankookilbo.com/news/article/A2026081315410003149?did=NA",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "한화의 KAI 지분 15% 확보 공시 이틀 뒤"
+          },
+          {
+            "id": "S2",
+            "text": "양사 기술·사업 아우르는 협력 관계 맺어"
+          },
+          {
+            "id": "S3",
+            "text": "5월엔 현대차그룹이 한화 발표 직후 MOU"
+          },
+          {
+            "id": "S4",
+            "text": "조형준(왼쪽) 현대로템 AD&RH사업본부장과 김용민 KAI 사업부문장이 12일 경남 사천시 KAI 본사에서 '항공무장 사업협력 업무협약(MOU)'을 체결하고 있다."
+          },
+          {
+            "id": "S5",
+            "text": "현대로템이 한국항공우주산업(KAI)과 KF-21에 탑재될 장거리 공대공 미사일 등 항공무장 기술 개발 협력에 나서자 방산업계에서 KAI 민영화와 연계한 해석이 나온다."
+          },
+          {
+            "id": "S6",
+            "text": "한화가 KAI 지분을 15% 이상 확보하며 미래 인수전의 우위를 다지고 있는 상황에 현대자동차그룹도 뒷짐만 지지 않겠다는 의지를 드러냈다는 것이다."
+          },
+          {
+            "id": "S7",
+            "text": "자금력이 충분한 현대차그룹은 10년 전 KAI 지분 10%를 보유한 2대 주주였고, KAI 인수전 후보로도 꾸준히 거론되고 있다."
+          },
+          {
+            "id": "S8",
+            "text": "현대로템은 전날 경남 사천시 KAI 본사에서 '항공무장 사업협력 업무협약(MOU)'을 체결했다고 13일 밝혔다."
+          },
+          {
+            "id": "S9",
+            "text": "그로부터 이틀 뒤 현대차그룹의 핵심 방산 계열사 현대로템이 KAI와 기술·사업을 포괄하는 협력관계를 맺었다."
+          },
+          {
+            "id": "S10",
+            "text": "현대로템이 배포한 보도자료의 행간도 의미심장하다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:012450",
+        "symbol": "012450",
+        "name": "한화에어로스페이스",
+        "aliases": [
+          "한화 에어로",
+          "Hanwha Aerospace"
+        ],
+        "sector": "defense",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%95%9C%ED%99%94%EC%97%90%EC%96%B4%EB%A1%9C%EC%8A%A4%ED%8E%98%EC%9D%B4%EC%8A%A4+%EB%B0%A9%EC%82%B0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/001/0016251902",
+        "https://n.news.naver.com/mnews/article/421/0009114368",
+        "https://n.news.naver.com/mnews/article/008/0005400244",
+        "https://n.news.naver.com/mnews/article/277/0005803244",
+        "https://n.news.naver.com/mnews/article/215/0001262390",
+        "https://n.news.naver.com/mnews/article/417/0001155382",
+        "https://n.news.naver.com/mnews/article/009/0005721072",
+        "https://n.news.naver.com/mnews/article/001/0016251597"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 130,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호 없음"
+      ],
+      "article": {
+        "articleId": "NAVER-009-0005721072",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "서울대·한화에어로스페이스, ‘국방AI 통합 플랫폼’ 구축…AI 프런티어관 세운다",
+        "publisher": "매일경제",
+        "publishedAt": "2026-08-14T02:29:08.000Z",
+        "sourceUrl": "https://www.mk.co.kr/article/12127810",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "유홍림 서울대 총장(왼쪽)과 김동관 한화그룹 수석부회장(오른쪽)이 8월 12일 협약식 기념 촬영을 하고 있다."
+          },
+          {
+            "id": "S2",
+            "text": "[서울대 제공] 서울대학교와 한화에어로스페이스가 국방 인공지능(AI) 분야의 연구와 인재 양성을 위해 손을 잡았다."
+          },
+          {
+            "id": "S3",
+            "text": "한화에어로스페이스는 서울대에 국방AI 연구 거점이 될 ‘한화 AI 프런티어관’을 건립해 관련 교육·연구 지원에 나설 계획이다."
+          },
+          {
+            "id": "S4",
+            "text": "서울대와 한화에어로스페이스는 지난 12일 서울대 관악캠퍼스 행정관에서 국가 방위산업 경쟁력 강화와 국방AI 등 첨단기술 분야의 교육·연구 역량 증진을 위한 협약을 체결했다고 14일 밝혔다."
+          },
+          {
+            "id": "S5",
+            "text": "협약식에는 김동관 한화그룹 수석부회장과 유홍림 서울대 총장, 김승모 한화에어로스페이스 이사회 의장, 이부환 대표이사, 양기원 한화시스템 대표 등이 참석했다."
+          },
+          {
+            "id": "S6",
+            "text": "이번 협약의 핵심은 국방AI 연구와 인재 양성을 위한 종합 인프라 구축이다."
+          },
+          {
+            "id": "S7",
+            "text": "한화가 건립할 AI 프런티어관을 거점으로 서울대의 AI·공학 분야 연구 역량과 한화의 우주·항공·방산 분야 기술을 연계해 관련 교육과 공동 연구를 확대할 계획이다."
+          },
+          {
+            "id": "S8",
+            "text": "국방AI 분야의 전문인력을 양성하고 대학과 기업 간 산학 연구도 활성화한다는 구상이다."
+          },
+          {
+            "id": "S9",
+            "text": "김동관 수석부회장은 “국방AI 기술은 미래 사회와 산업 발전, 국가 경쟁력 제고에 중요한 분야”라며 “학생과 연구자들이 새로운 가능성에 도전하고 세계적 수준의 연구 성과를 창출하는 계기가 되길 바란다”고 말했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:079550",
+        "symbol": "079550",
+        "name": "LIG넥스원",
+        "aliases": [
+          "LIG 넥스원",
+          "LIG Nex1",
+          "엘아이지넥스원"
+        ],
+        "sector": "defense",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=LIG%EB%84%A5%EC%8A%A4%EC%9B%90+%EB%B0%A9%EC%82%B0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/009/0005720911",
+        "https://n.news.naver.com/mnews/article/009/0005720818",
+        "https://n.news.naver.com/mnews/article/417/0001155322",
+        "https://n.news.naver.com/mnews/article/031/0001048850"
+      ],
+      "candidateCount": 4,
+      "selectionScore": 28,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 계약, 공급, 지분",
+        "다른 선정 기업도 제목에 있음: 한국항공우주"
+      ],
+      "article": {
+        "articleId": "NAVER-417-0001155322",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "한화 지분확대에 반발하는 KAI 노조 '공급망 장악' 주장 따져보니",
+        "publisher": "동행미디어 시대",
+        "publishedAt": "2026-08-13T08:25:43.000Z",
+        "sourceUrl": "https://www.sidae.com/article/2026081313191048957",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "한화, KAI 공급업체이지만 엔진은 방사청과 직접 계약, 방산 원가도 정부 관리"
+          },
+          {
+            "id": "S2",
+            "text": "한화오션 시정조치 3년 연장에도 위반 사실 없어…시장집중도에 따른 사후관리"
+          },
+          {
+            "id": "S3",
+            "text": "전문가들 \"국내 방산 대형으로 통합해 글로벌 경쟁력 키워야\""
+          },
+          {
+            "id": "S4",
+            "text": "/자료=업계 종합 한국항공우주산업(KAI) 노동조합이 한화그룹의 지분 확대에 반발하며 공정거래위원회에 기업결합 불허를 촉구해 주목된다."
+          },
+          {
+            "id": "S5",
+            "text": "한화가 KAI의 공급업체이자 우주사업 경쟁업체인 만큼 경영에 참여하면 이해상충과 정보유출 우려가 있다는 주장이다."
+          },
+          {
+            "id": "S6",
+            "text": "방산은 일반 제조업과 달리 정부가 조달과 원가를 관리하기 때문에 한화가 KAI의 공급망을 임의로 좌우하기 어려운 구조라는 지적이 나온다."
+          },
+          {
+            "id": "S7",
+            "text": "지난 10일 기준 지분 15.89%를 확보했다고 공시했다."
+          },
+          {
+            "id": "S8",
+            "text": "KF-21 최초 양산분 엔진 공급계약 규모는 약 1조1794억원이다."
+          },
+          {
+            "id": "S9",
+            "text": "지상무기는 현대로템, 유도무기는 LIG넥스원, 함정은 HD현대중공업 등 각 분야에 주요 사업자가 따로 있다."
+          },
+          {
+            "id": "S10",
+            "text": "전문가들은 이번 지분 인수가 국내 방산기업 체급을 키우는 계기가 될 수 있다고 본다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:047810",
+        "symbol": "047810",
+        "name": "한국항공우주",
+        "aliases": [
+          "KAI",
+          "한국 항공 우주",
+          "카이"
+        ],
+        "sector": "defense",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%95%9C%EA%B5%AD%ED%95%AD%EA%B3%B5%EC%9A%B0%EC%A3%BC+%EB%B0%A9%EC%82%B0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/215/0001262390",
+        "https://n.news.naver.com/mnews/article/417/0001155382",
+        "https://n.news.naver.com/mnews/article/001/0016251597",
+        "https://n.news.naver.com/mnews/article/366/0001186269",
+        "https://n.news.naver.com/mnews/article/011/0004651686",
+        "https://n.news.naver.com/mnews/article/138/0002237768",
+        "https://n.news.naver.com/mnews/article/020/0003740786"
+      ],
+      "candidateCount": 5,
+      "selectionScore": 149,
+      "selectionSignals": [
+        "종목 별칭이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 적자"
+      ],
+      "article": {
+        "articleId": "NAVER-417-0001155382",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "제노코, 3년째 적자… KAI 편입에도 실적 개선은 아직",
+        "publisher": "동행미디어 시대",
+        "publishedAt": "2026-08-14T02:32:30.000Z",
+        "sourceUrl": "https://www.sidae.com/article/2026081317101595701",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "95%이상 매출원가율 지속, 하반기 KF-21·위성 양산 전환이 분수령"
+          },
+          {
+            "id": "S2",
+            "text": "KAI 품에 안긴 제노코는 KF-21 완제기 양산과 함께 실적 턴어라운드를 기대한다."
+          },
+          {
+            "id": "S3",
+            "text": "/사진=뉴스1 제노코가 3년째 영업적자와 높은 매출원가율로 실적 부진을 겪고 있어 주목된다."
+          },
+          {
+            "id": "S4",
+            "text": "한국항공우주산업(KAI) 자회사 편입으로 실적 개선 기대가 컸지만 실적 개선은 아직이다."
+          },
+          {
+            "id": "S5",
+            "text": "제노코 관계자는 \"미래가치를 위한 사업을 수주하는 과정에서 기존 예산 대비 원가율이 상승한 개발 프로젝트들이 있어 적자가 발생했다\"며 \"3분기부터 KF-21이나 위성 사업 등에 대한 수주 개발이 완료되고 제작으로 전환되는 시점인 만큼 분기별 실적은 계속 개선될 것으로 전망한다\"고 말했다."
+          },
+          {
+            "id": "S6",
+            "text": "최근 한화그룹이 KAI 지분을 15.89%까지 늘리며 2대 주주로 올라선 점은 변수로 꼽힌다."
+          },
+          {
+            "id": "S7",
+            "text": "투자업계 관계자는 \"한화가 KAI 지분을 확대하는 건 제노코 입장에서 양날의 검이 될 수 있다\"며 \"당장은 안정적인 매출처가 될 수 있지만 장기적으론 계열사 간 중복 기술 부문 등은 매각 등 재편 가능성도 있다\"고 전망했다."
+          },
+          {
+            "id": "S8",
+            "text": "제노코 관계자는 \"한화시스템이나 한화에어로스페이스는 저희 고객사이고 이미 수주해서 양산하고 다음 차수 양산까지 진행한 프로젝트가 있다\"며 \"KAI와 한화의 지분관계 등과 관계 없이 기존 공급망 체계가 훼손되는 일은 없을 것\"이라고 했다."
+          },
+          {
+            "id": "S9",
+            "text": "KAI와 제노코는 2024년 11월7일 경영권 매각 계약을 체결했다."
+          },
+          {
+            "id": "S10",
+            "text": "이후 KAI는 2025년 7월 인수 자금 납입을 마치며 제노코 주식 37.95%를 확보, 최대주주에 올랐다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:003230",
+        "symbol": "003230",
+        "name": "삼양식품",
+        "aliases": [
+          "삼양 식품"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%82%BC%EC%96%91%EC%8B%9D%ED%92%88+%EC%8B%9D%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/015/0005320933",
+        "https://n.news.naver.com/mnews/article/011/0004651813",
+        "https://n.news.naver.com/mnews/article/011/0004651794",
+        "https://n.news.naver.com/mnews/article/421/0009113993",
+        "https://n.news.naver.com/mnews/article/015/0005320580",
+        "https://n.news.naver.com/mnews/article/031/0001049499",
+        "https://n.news.naver.com/mnews/article/005/0001866586",
+        "https://n.news.naver.com/mnews/article/005/0001866497"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 184,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 배당"
+      ],
+      "article": {
+        "articleId": "NAVER-421-0009113993",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "\"불닭으로 벌어 주주에게\"…삼양식품, '3조 클럽' 앞두고 배당 확대",
+        "publisher": "뉴스1",
+        "publishedAt": "2026-08-14T01:51:10.000Z",
+        "sourceUrl": "https://www.news1.kr/industry/distribution/6258402",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "중간배당 1년 만에 2200원→3200원 상향…최근 4년 간 5배 증가"
+          },
+          {
+            "id": "S2",
+            "text": "연매출 3조원 가능성…14일 발표 2분기 매출·이익 역대 최대 전망"
+          },
+          {
+            "id": "S3",
+            "text": "서울 시내 한 대형마트에 삼양식품의 라면 제품이 진열된 모습."
+          },
+          {
+            "id": "S4",
+            "text": "(서울=뉴스1) 황두현 기자 = 연 매출 3조 원 달성 가능성이 점쳐지는 삼양식품(003230)이 불닭볶음면의 인기에 힘입어 배당 규모를 다시 한번 확대했다."
+          },
+          {
+            "id": "S5",
+            "text": "14일 업계에 따르면 삼양식품은 12일 보통주 1주당 3200원의 중간배당을 결정했다고 밝혔다."
+          },
+          {
+            "id": "S6",
+            "text": "삼양식품은 지난해 중간배당 2200원, 결산배당 2600원을 더해 연간 4800원을 지급했는데 올해는 이미 중간배당금이 1000원 늘었다."
+          },
+          {
+            "id": "S7",
+            "text": "삼양식품 관계자는 \"지속적인 성장에 따라 순이익을 실질적 투자에 집행하며 미래 가치 증대를 이루는 구조\"라며 \"이익 증가세가 더딘 기업이 배당금 총액을 고정해 배당 성향이 자연스럽게 오르는 것과는 다른 접근\"이라고 설명했다."
+          },
+          {
+            "id": "S8",
+            "text": "삼양식품 본사 전경.(삼양식품 제공) 올해 연 매출 3조 달성 전망…\"이익 투자로 미래 가치 증대\""
+          },
+          {
+            "id": "S9",
+            "text": "삼양식품의 연결 매출은 2022년 9090억 원에서 지난해 2조3518억 원으로 급증했다."
+          },
+          {
+            "id": "S10",
+            "text": "증권가에서는 삼양식품이 올해 사상 처음으로 매출 3조 원을 돌파할 것으로 보고 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:271560",
+        "symbol": "271560",
+        "name": "오리온",
+        "aliases": [
+          "ORION"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%98%A4%EB%A6%AC%EC%98%A8+%EC%8B%9D%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/087/0001211443",
+        "https://n.news.naver.com/mnews/article/005/0001866586",
+        "https://n.news.naver.com/mnews/article/005/0001866497",
+        "https://n.news.naver.com/mnews/article/009/0005720112",
+        "https://n.news.naver.com/mnews/article/003/0014122115",
+        "https://n.news.naver.com/mnews/article/008/0005398679",
+        "https://n.news.naver.com/mnews/article/008/0005398411",
+        "https://n.news.naver.com/mnews/article/031/0001048575"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 158,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 생산, 판매"
+      ],
+      "article": {
+        "articleId": "NAVER-031-0001048575",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "오리온이 쏘아올린 '황치즈'…디저트 판 흔든다",
+        "publisher": "아이뉴스24",
+        "publishedAt": "2026-08-10T09:01:06.000Z",
+        "sourceUrl": "http://www.inews24.com/view/1993402",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "한정판이 품절 대란으로…58만 박스 팔린 '황치즈칩'"
+          },
+          {
+            "id": "S2",
+            "text": "과자 넘어 빵·외식 메뉴까지…식품업계 황치즈 러시"
+          },
+          {
+            "id": "S3",
+            "text": "우베 다음은 황치즈?…'맛·색감' 뚜렷한 디저트 뜬다 오리온이 불붙인 '황치즈' 열풍이 과자에서 베이커리와 외식 메뉴까지 번지고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "10일 식품업계에 따르면 오리온은 지난 2월 봄 한정판으로 '촉촉한 초코칩'의 황치즈 버전인 '촉촉한 황치즈칩'을 출시했다."
+          },
+          {
+            "id": "S5",
+            "text": "당초 한정판으로 기획돼 3월 판매가 종료되자 일부 온라인 판매처와 중고거래 시장에서는 웃돈이 붙기도 했다."
+          },
+          {
+            "id": "S6",
+            "text": "이후 소비자와 유통채널의 추가 생산 요청이 이어지면서 오리온은 4월 추가 생산에 나섰다."
+          },
+          {
+            "id": "S7",
+            "text": "초도 물량 약 38만 박스와 2차 물량 약 20만 박스 등 총 58만 박스가 판매됐으며, 6월에는 3차 생산까지 진행했다."
+          },
+          {
+            "id": "S8",
+            "text": "이 같은 흥행을 확인한 오리온은 황치즈를 다른 제품으로도 확장하고 있다."
+          },
+          {
+            "id": "S9",
+            "text": "이 제품 역시 현재 오리온 공식몰에서 품절되는 등 인기를 이어가고 있다."
+          },
+          {
+            "id": "S10",
+            "text": "오리온 관계자는 \"이색적인 한정판으로 선보인 만큼 출시 초기부터 색다른 맛에 대한 소비자들의 긍정적인 반응이 이어지며 온라인상에서 화제를 모았다\"며 \"최근 젊은층 사이에서 열풍이 일고 있는 황치즈를 활용해 스테디셀러 제품을 새롭게 변신시킨 점이 소비자들의 관심을 끌면서 꾸준한 인기를 이어가고 있다\"고 말했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:097950",
+        "symbol": "097950",
+        "name": "CJ제일제당",
+        "aliases": [
+          "CJ 제일제당",
+          "씨제이제일제당"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=CJ%EC%A0%9C%EC%9D%BC%EC%A0%9C%EB%8B%B9+%EC%8B%9D%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/469/0000948037",
+        "https://n.news.naver.com/mnews/article/028/0002818543",
+        "https://n.news.naver.com/mnews/article/030/0003457439",
+        "https://n.news.naver.com/mnews/article/020/0003740877",
+        "https://n.news.naver.com/mnews/article/011/0004651730",
+        "https://n.news.naver.com/mnews/article/277/0005803060",
+        "https://n.news.naver.com/mnews/article/015/0005320836"
+      ],
+      "candidateCount": 6,
+      "selectionScore": 18,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 판매"
+      ],
+      "article": {
+        "articleId": "NAVER-277-0005803060",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "\"빵값 줄줄이 오른다\"…파리바게뜨도 가격 인상 단행",
+        "publisher": "아시아경제",
+        "publishedAt": "2026-08-14T00:11:23.000Z",
+        "sourceUrl": "https://view.asiae.co.kr/article/2026081409112372369",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "빵류 86종 등 평균 5.0% 인상 파리바게뜨가 원가 부담 등을 이유로 빵 등 제품 가격 인상을 단행한다."
+          },
+          {
+            "id": "S2",
+            "text": "파리바게뜨가 빵류 86종, 케이크와 디저트 41종 등 제품 가격을 인상한다고 14일 밝혔다."
+          },
+          {
+            "id": "S3",
+            "text": "이번 가격 인상은 지난해 2월 이후 1년 6개월 만이다."
+          },
+          {
+            "id": "S4",
+            "text": "이로 인해 대표 제품인 '상미종 생식빵'의 권장소비자가격이 3900원에서 4100원으로, '카스테라'가 2400원에서 2500원으로, '마이 넘버원 케이크'가 3만5000원에서 3만6000원 등으로 오른다."
+          },
+          {
+            "id": "S5",
+            "text": "앞서 삼립은 다음 달 1일부터 빵 제품 50여종의 가격을 평균 9%대로 인상한다고 밝혔다."
+          },
+          {
+            "id": "S6",
+            "text": "편의점 판매가 기준으로 '정통보름달'은 1천800원에서 2천원으로 11.1% 인상된다."
+          },
+          {
+            "id": "S7",
+            "text": "'허쉬초코샌드'는 2200원에서 2400원으로, '치즈후레쉬팡'은 2500원에서 2600원으로 오른다."
+          },
+          {
+            "id": "S8",
+            "text": "CJ푸드빌이 운영하는 뚜레쥬르도 지난달 빵과 케이크 등 76종의 가격을 평균 8.2% 인상했다."
+          },
+          {
+            "id": "S9",
+            "text": "가격 조정 대상은 빵과 케이크 등 총 76종이며 전체 가격 인상률은 평균 8.2%였다."
+          },
+          {
+            "id": "S10",
+            "text": "CJ제일제당도 지난달 햇반과 만두, 생선구이 등 8개 카테고리 27개 품목의 가격을 평균 8% 인상했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:004370",
+        "symbol": "004370",
+        "name": "농심",
+        "aliases": [
+          "Nongshim"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EB%86%8D%EC%8B%AC+%EB%9D%BC%EB%A9%B4",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/422/0000895776",
+        "https://n.news.naver.com/mnews/article/015/0005320933",
+        "https://n.news.naver.com/mnews/article/469/0000948037",
+        "https://n.news.naver.com/mnews/article/028/0002818543",
+        "https://n.news.naver.com/mnews/article/421/0009113975",
+        "https://n.news.naver.com/mnews/article/008/0005400151",
+        "https://n.news.naver.com/mnews/article/018/0006351688"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 202,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익, 순이익"
+      ],
+      "article": {
+        "articleId": "NAVER-422-0000895776",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "농심, 상반기 영업이익 31.7% 늘어…\"해외사업 실적 견인\"",
+        "publisher": "연합뉴스TV",
+        "publishedAt": "2026-08-14T04:41:10.000Z",
+        "sourceUrl": "http://www.yonhapnewstv.co.kr/news/AKR202608141340580dp",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "농심 신라면 40주년 기자간담회 [연합뉴스 자료사진]"
+          },
+          {
+            "id": "S2",
+            "text": "농심은 올해 상반기 연결 기준 영업이익이 1,267억 원으로, 지난해 같은 기간보다 31.7% 늘었다고 오늘(14일) 공시했습니다."
+          },
+          {
+            "id": "S3",
+            "text": "매출액은 1조 8,901억 원으로 같은 기간 7.3% 증가했고, 당기순이익은 1,153억 원으로 30.2% 늘었습니다."
+          },
+          {
+            "id": "S4",
+            "text": "농심의 2분기 연결 기준 매출액은 9,561억 원으로 지난해 같은 기간보다 10.2% 늘었고, 영업이익은 593억 원으로 47.6% 증가했습니다."
+          },
+          {
+            "id": "S5",
+            "text": "당기순이익은 547억 원으로 작년보다 50.1% 성장했습니다."
+          },
+          {
+            "id": "S6",
+            "text": "다만, 해외 법인 실적을 제외한 국내 중심 2분기 별도 기준 영업이익은 321억 원으로, 올해 1분기보다 32.0% 감소했습니다."
+          },
+          {
+            "id": "S7",
+            "text": "고환율과 고유가 여파로 인한 포장재 가격 상승 등의 영향으로 원가 부담이 커진 데 따른 결과라고 농심 측은 설명했습니다."
+          },
+          {
+            "id": "S8",
+            "text": "같은 기간 매출액은 7,384억 원으로, 올해 1분기 대비 3.3% 오르는 데 그쳤습니다."
+          },
+          {
+            "id": "S9",
+            "text": "농심 관계자는 \"소비 둔화와 경쟁 심화 등 어려운 국내 시장 여건에도 불구하고 해외 사업 매출 성장과 수익성 개선이 전체 실적 상승을 견인했다\"고 설명했습니다."
+          },
+          {
+            "id": "S10",
+            "text": "연합뉴스TV 기사문의 및 제보 : 카톡/라인 jebo23"
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:015760",
+        "symbol": "015760",
+        "name": "한국전력",
+        "aliases": [
+          "한전",
+          "KEPCO"
+        ],
+        "sector": "energy",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%95%9C%EA%B5%AD%EC%A0%84%EB%A0%A5+%EC%97%90%EB%84%88%EC%A7%80",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/215/0001262399",
+        "https://n.news.naver.com/mnews/article/586/0000135932",
+        "https://n.news.naver.com/mnews/article/011/0004651658",
+        "https://n.news.naver.com/mnews/article/629/0000524446",
+        "https://n.news.naver.com/mnews/article/023/0003992936",
+        "https://n.news.naver.com/mnews/article/031/0001049660"
+      ],
+      "candidateCount": 5,
+      "selectionScore": 70,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 계약, 공급, 생산, 판매"
+      ],
+      "article": {
+        "articleId": "NAVER-031-0001049660",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "파주시, 공공부지 태양광 전력 지역기업에 직접 공급…지방정부형 ‘에너지 직거래’ 첫발",
+        "publisher": "아이뉴스24",
+        "publishedAt": "2026-08-13T11:13:08.000Z",
+        "sourceUrl": "http://www.inews24.com/view/1994882",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "문산정수장에 1.148MW 규모 공공 재생에너지 1호 발전소 준공…지역 중소기업 7곳과 직접 PPA"
+          },
+          {
+            "id": "S2",
+            "text": "30년간 kWh당 130원 고정가격 공급…RE100 대응·수출기업 에너지 경쟁력 강화 기대 경기도 파주시가 지방정부 소유 공공부지에서 생산한 재생에너지를 지역 중소기업에 직접 공급하는 새로운 공공에너지 사업에 착수했다."
+          },
+          {
+            "id": "S3",
+            "text": "공공시설의 유휴공간을 발전 자원으로 활용하고 생산된 전력을 지역기업이 장기간 안정적인 가격으로 사용할 수 있도록 연결하면서 기존 ‘전력 판매형’ 공공 태양광 사업에서 한 단계 나아간 지역 에너지 순환모델을 구축했다는 평가다."
+          },
+          {
+            "id": "S4",
+            "text": "지난 12일 문산정수장에서 ‘파주 공공 재생에너지 1호 발전소’ 준공식을 열고 본격적인 전력 생산·공급 체계 가동에 들어갔다고 밝혔다."
+          },
+          {
+            "id": "S5",
+            "text": "이번 사업의 핵심은 지방정부가 확보한 공공부지를 활용해 재생에너지를 생산하고 이를 지역 내 기업과 직접 전력구매계약(PPA·Power Purchase Agreement) 방식으로 연결하는 데 있다."
+          },
+          {
+            "id": "S6",
+            "text": "이곳에서 생산되는 전력은 한국전력에 단순 판매하는 기존 공공 태양광 사업 방식과 달리 직접 PPA를 통해 파주시 소재 중소기업에 공급된다."
+          },
+          {
+            "id": "S7",
+            "text": "전력 공급계약을 장기간 고정가격으로 설계한 것도 특징이다."
+          },
+          {
+            "id": "S8",
+            "text": "기업이 직접 발전시설을 구축하지 않더라도 지역에서 생산된 재생에너지를 장기간 공급받을 수 있도록 공공이 플랫폼 역할을 담당하는 셈이다."
+          },
+          {
+            "id": "S9",
+            "text": "기존 지방정부와 공공기관의 태양광 사업이 공공청사나 유휴부지 등에 발전시설을 설치한 뒤 생산된 전력을 한국전력 등에 판매해 수익을 확보하는 방식에 집중됐다면 파주 모델은 생산된 전력을 지역기업의 실제 재생에너지 사용으로 연결한다는 점에서 차이가 있다."
+          },
+          {
+            "id": "S10",
+            "text": "재생에너지 생산에서 그치지 않고 ‘공공부지 확보→발전시설 조성→지역 내 전력 생산→지역기업 공급→기업 RE100 이행 지원’으로 이어지는 지역 단위 에너지 순환구조를 구축한 것이다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:010950",
+        "symbol": "010950",
+        "name": "S-OIL",
+        "aliases": [
+          "에쓰오일",
+          "에스오일",
+          "S Oil"
+        ],
+        "sector": "energy",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=S-OIL+%EC%A0%95%EC%9C%A0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/648/0000049774",
+        "https://n.news.naver.com/mnews/article/018/0006350039",
+        "https://n.news.naver.com/mnews/article/028/0002818066",
+        "https://n.news.naver.com/mnews/article/088/0001023048"
+      ],
+      "candidateCount": 4,
+      "selectionScore": 126,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호 없음"
+      ],
+      "article": {
+        "articleId": "NAVER-018-0006350039",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "S-Oil·GS, 국제유가 급등에 강세…나란히 급등세[특징주]",
+        "publisher": "이데일리",
+        "publishedAt": "2026-08-12T00:34:10.000Z",
+        "sourceUrl": "https://www.edaily.co.kr/news/newspath.asp?newsid=03762166645546664",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "[이데일리 김경은 기자] 12일 코스피 시장에서 장 초반 정유주가 일제히 강세를 보이고 있다."
+          },
+          {
+            "id": "S2",
+            "text": "국제유가 급등에 따른 정제마진 개선 기대감이 주가를 끌어올리는 모습이다."
+          },
+          {
+            "id": "S3",
+            "text": "엠피닥터에 따르면 이날 오전 9시27분 기준 S-Oil(010950)은 전일 대비 6600원(4.66%) 오른 14만8200원에 거래되고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "같은 시각 GS(078930)도 전일 대비 5900원(6.05%) 상승한 10만3400원에 거래되며 강세다."
+          },
+          {
+            "id": "S5",
+            "text": "이러한 상승세는 전날 국제유가가 5% 이상 폭등해 배럴당 80달러를 돌파한 뒤, 이날도 오름세를 이어간 영향으로 풀이된다."
+          },
+          {
+            "id": "S6",
+            "text": "사진=연합 11일(현지시간) ICE선물거래소에서 10월 인도분 브렌트유 선물 종가는 전 거래일보다 1.4% 오른 배럴당 88.91달러에 마감했다."
+          },
+          {
+            "id": "S7",
+            "text": "뉴욕상업거래소에서 9월 인도분 미국 서부텍사스산원유(WTI) 선물 종가 역시 전장 대비 1.3% 상승한 배럴당 83.20달러를 기록했다."
+          },
+          {
+            "id": "S8",
+            "text": "당초 미국과 이란은 호르무즈 해협 개방과 대이란 해상봉쇄 해제에 합의하고 60일간 이란의 비핵화 등을 의제로 후속 협상을 진행할 예정이었다."
+          },
+          {
+            "id": "S9",
+            "text": "하지만 양측의 무력 공방 속에 협상이 난항을 겪으면서 오는 8월 16일로 예정된 합의 기한을 앞두고 불확실성이 극에 달한 상황이다."
+          },
+          {
+            "id": "S10",
+            "text": "특히 전날(현지시간) 이란 강경파 고위 인사의 발언이 시장의 중동발 공급 불안 심리를 자극했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:078930",
+        "symbol": "078930",
+        "name": "GS",
+        "aliases": [
+          "지에스"
+        ],
+        "sector": "energy",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=GS+%EC%A7%80%EC%A3%BC",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/003/0014127521",
+        "https://n.news.naver.com/mnews/article/018/0006351673",
+        "https://n.news.naver.com/mnews/article/008/0005400134",
+        "https://n.news.naver.com/mnews/article/024/0000107527",
+        "https://n.news.naver.com/mnews/article/215/0001262182",
+        "https://n.news.naver.com/mnews/article/015/0005320198"
+      ],
+      "candidateCount": 5,
+      "selectionScore": 51,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호 없음",
+        "투자 콘텐츠 감점: 저평가"
+      ],
+      "article": {
+        "articleId": "NAVER-015-0005320198",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "AI 날개 단 GS…\"만년 저평가 해소 기대\"",
+        "publisher": "한국경제",
+        "publishedAt": "2026-08-12T08:59:12.000Z",
+        "sourceUrl": "https://www.hankyung.com/article/2026081275771",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "PER 6.48배로 지주사 최저 수준"
+          },
+          {
+            "id": "S2",
+            "text": "증권사 목표가 줄줄이 상향 한국경제신문의 투자 전문 유료 플랫폼 '한경 프리미엄9' (www.hankyung.com/premium9)에 실린 기사입니다."
+          },
+          {
+            "id": "S3",
+            "text": "GS와 두산의 12개월 선행 주가수익비율(PER) 차이다."
+          },
+          {
+            "id": "S4",
+            "text": "12일 유가증권시장에서 GS는 전일 대비 3.59% 오른 10만1000원에 장을 마감했다."
+          },
+          {
+            "id": "S5",
+            "text": "올해 들어 GS 주가는 79.40% 급등하며 같은 기간 코스피지수 상승률(56.12%)을 뛰어넘었다."
+          },
+          {
+            "id": "S6",
+            "text": "GS의 올해 2분기 연결 기준 매출은 7조4131억원, 영업이익은 1조7174억원이다."
+          },
+          {
+            "id": "S7",
+            "text": "에픽AI에 따르면 GS의 2분기 영업이익 시장 추정치는 1조1203억원이었다."
+          },
+          {
+            "id": "S8",
+            "text": "발전소를 운영하는 GS EPS와 GS E&R 등 일부 계열사 실적이 다소 부진했지만, 정유 기업인 GS칼텍스와 유통업체인 GS리테일 등 주력 자회사의 수익성이 개선되면서 지분법상 이익이 상승했다."
+          },
+          {
+            "id": "S9",
+            "text": "에픽AI에 따르면 GS의 올해 영업이익 전망치는 약 4조2974억원으로 전년 대비 46.3%가량 증가할 것으로 예상된다."
+          },
+          {
+            "id": "S10",
+            "text": "황성현 유진투자증권 연구원은 “계약 구조에 따라 다소 차이는 있겠지만 2.4GW 규모 데이터센터 구축이 완료되면 GS의 지배주주 순이익은 최소 20% 이상 증가할 수 있다”고 말했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:096770",
+        "symbol": "096770",
+        "name": "SK이노베이션",
+        "aliases": [
+          "SK 이노베이션",
+          "SK Innovation",
+          "에스케이이노베이션"
+        ],
+        "sector": "energy",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=SK%EC%9D%B4%EB%85%B8%EB%B2%A0%EC%9D%B4%EC%85%98+%EC%97%90%EB%84%88%EC%A7%80",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/117/0004094816",
+        "https://n.news.naver.com/mnews/article/018/0006351658",
+        "https://n.news.naver.com/mnews/article/008/0005399977",
+        "https://n.news.naver.com/mnews/article/421/0009113322",
+        "https://n.news.naver.com/mnews/article/015/0005320753",
+        "https://n.news.naver.com/mnews/article/008/0005399825",
+        "https://n.news.naver.com/mnews/article/366/0001186114"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 36,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 계약, 공급"
+      ],
+      "article": {
+        "articleId": "NAVER-117-0004094816",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "최태원, 빌 게이츠와 다시 마주 앉는다…‘AI 전력’ 동맹 결실 맺나",
+        "publisher": "마이데일리",
+        "publishedAt": "2026-08-14T02:18:08.000Z",
+        "sourceUrl": "https://www.mydaily.co.kr/page/view/2026081410273311079",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "테라파워 투자 4년 만에 美 차세대 원전 착공…메타와 최대 8기 공급계약"
+          },
+          {
+            "id": "S2",
+            "text": "SK 15GW AI 데이터센터 구상과 맞물려…13년 이어온 백신 협력도 확장 가능성"
+          },
+          {
+            "id": "S3",
+            "text": "지난 2022년 최태원 SK그룹 회장과 빌 게이츠 빌&멜린다 게이츠 재단 공동이사장이 서울 여의도에서 만나 글로벌 공중 보건 증진 등을 위한 협력 방안을 논의했다."
+          },
+          {
+            "id": "S4",
+            "text": "SK㈜와 SK이노베이션은 2022년 게이츠가 설립한 미국 차세대 원전 기업 테라파워에 공동으로 2억5000만달러를 투자해 주요 주주가 됐다."
+          },
+          {
+            "id": "S5",
+            "text": "당시 최 회장과 게이츠 이사장은 테라파워의 4세대 원자로 ‘나트륨(Natrium)’ 개발과 상용화 방안을 논의했는데, 이 자리에는 테라파워 최고경영자와 SK이노베이션 에너지사업 책임자뿐 아니라 SK바이오사이언스와 SK바이오팜 경영진도 참석했다."
+          },
+          {
+            "id": "S6",
+            "text": "테라파워는 올해 1월 메타와 미국에 최대 8기의 나트륨 발전소를 구축하는 계약을 체결했다."
+          },
+          {
+            "id": "S7",
+            "text": "총 2.8GW의 기저전력을 공급하고 내장된 에너지저장 시스템을 활용하면 최대 4GW까지 출력을 높일 수 있는 규모다."
+          },
+          {
+            "id": "S8",
+            "text": "초기 발전소는 이르면 2032년부터 공급할 계획이다."
+          },
+          {
+            "id": "S9",
+            "text": "한국수력원자력은 올해 테라파워 투자자에 합류했고 SK이노베이션·한수원·테라파워는 차세대 원전의 글로벌 사업화를 함께 추진하고 있다."
+          },
+          {
+            "id": "S10",
+            "text": "SK바이오사이언스는 게이츠재단의 지원을 받아 저소득 국가에 공급하기 위한 장티푸스 백신을 비롯해 코로나19 백신 등 감염병 대응 제품의 개발·생산을 추진해 왔다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:047050",
+        "symbol": "047050",
+        "name": "포스코인터내셔널",
+        "aliases": [
+          "POSCO인터내셔널",
+          "POSCO International",
+          "포스코"
+        ],
+        "sector": "logistics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%8F%AC%EC%8A%A4%EC%BD%94%EC%9D%B8%ED%84%B0%EB%82%B4%EC%85%94%EB%84%90+%EB%AC%BC%EB%A5%98",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/082/0001392173",
+        "https://n.news.naver.com/mnews/article/119/0003117192",
+        "https://n.news.naver.com/mnews/article/138/0002236085",
+        "https://n.news.naver.com/mnews/article/028/0002816502",
+        "https://n.news.naver.com/mnews/article/009/0005714590",
+        "https://n.news.naver.com/mnews/article/092/0002432581",
+        "https://n.news.naver.com/mnews/article/277/0005795885",
+        "https://n.news.naver.com/mnews/article/119/0003114240"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 107,
+      "selectionSignals": [
+        "종목 별칭이 제목에 있음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 실적, 매출, 영업이익, 흑자, 적자"
+      ],
+      "article": {
+        "articleId": "NAVER-009-0005714590",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "비주력사업이 효자…SK이노·포스코 호실적",
+        "publisher": "매일경제",
+        "publishedAt": "2026-07-30T08:49:10.000Z",
+        "sourceUrl": "https://www.mk.co.kr/article/12112180",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "SK이노베이션과 포스코홀딩스가 올해 2분기 호실적을 냈다."
+          },
+          {
+            "id": "S2",
+            "text": "각각 주력 산업인 정유, 철강 부문이 부진했지만, 배터리·리튬 등 비주력·신사업이 실적을 견인한 덕분이다."
+          },
+          {
+            "id": "S3",
+            "text": "SK이노베이션은 올해 2분기 매출 29조1572억원, 영업이익 3조4873억원을 달성했다고 30일 밝혔다."
+          },
+          {
+            "id": "S4",
+            "text": "지난해 같은 기간 약 4000억원 적자에서 흑자 전환에 성공했다."
+          },
+          {
+            "id": "S5",
+            "text": "포스코그룹 지주사 포스코홀딩스는 올해 2분기 매출 19조2590억원, 영업이익 8190억원을 기록했다고 이날 공시했다."
+          },
+          {
+            "id": "S6",
+            "text": "지난해 같은 기간과 비교해 매출은 9.7%, 영업이익은 34.9% 증가한 수치다."
+          },
+          {
+            "id": "S7",
+            "text": "실적 상승을 이끈 일등 공신은 인프라 분야(포스코인터내셔널·포스코이앤씨)다."
+          },
+          {
+            "id": "S8",
+            "text": "포스코인터내셔널이 미얀마와 호주 가스전, 인도네시아 팜유 사업 등에서 선전하며 분기 기준 역대 최대 영업이익을 달성한 덕분이다."
+          },
+          {
+            "id": "S9",
+            "text": "삼성SDS는 클라우드와 물류 사업 성장에 힘입어 2분기 연결 기준 매출 3조7178억원, 영업이익 2318억원을 기록했다고 밝혔다."
+          },
+          {
+            "id": "S10",
+            "text": "AI 서버와 네트워크 등 데이터센터용·전장용 적층세라믹커패시터(MLCC) 매출 확대와 글로벌 빅테크 고객사 대상 고부가가치 반도체 기판 공급 증가가 실적 상승을 견인했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:352820",
+        "symbol": "352820",
+        "name": "하이브",
+        "aliases": [
+          "HYBE"
+        ],
+        "sector": "entertainment",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%95%98%EC%9D%B4%EB%B8%8C+%EC%8B%A4%EC%A0%81",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/015/0005320927",
+        "https://n.news.naver.com/mnews/article/088/0001023597",
+        "https://n.news.naver.com/mnews/article/024/0000107524",
+        "https://n.news.naver.com/mnews/article/011/0004651237",
+        "https://n.news.naver.com/mnews/article/293/0000088983"
+      ],
+      "candidateCount": 5,
+      "selectionScore": 70,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 실적, 매출, 영업이익, 적자"
+      ],
+      "article": {
+        "articleId": "NAVER-011-0004651237",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "컴투스, 매출 15% 줄었지만…경영 효율화로 영업이익은 420% ↑",
+        "publisher": "서울경제",
+        "publishedAt": "2026-08-12T22:01:18.000Z",
+        "sourceUrl": "https://www.sedaily.com/article/20078687?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "매출 1570억 원, 영업이익 72억 원 기록"
+          },
+          {
+            "id": "S2",
+            "text": "마케팅비·지급수수료 절감으로 수익성 개선"
+          },
+          {
+            "id": "S3",
+            "text": "사진 제공=컴투스 컴투스(078340) 가 게임·콘텐츠 부진으로 2분기 매출이 두 자릿수 감소했다."
+          },
+          {
+            "id": "S4",
+            "text": "13일 게임 업계에 따르면 컴투스는 전날 2분기 실적을 공시하고 연결 기준 매출 1570억 원, 영업이익 72억 원을 기록했다고 밝혔다."
+          },
+          {
+            "id": "S5",
+            "text": "매출은 지난해 같은 기간보다 15% 줄었고, 영업이익은 420.7% 늘었다."
+          },
+          {
+            "id": "S6",
+            "text": "순손실은 35억원으로 적자로 돌아섰다."
+          },
+          {
+            "id": "S7",
+            "text": "별도 기준으로는 2분기 매출 1340억 원, 영업이익 123억 원을 달성했다."
+          },
+          {
+            "id": "S8",
+            "text": "컴투스의 매출 감소는 경영 효율화, 선별적 제작 기조 영향으로 자회사 매출이 49.1% 급감한 여파다."
+          },
+          {
+            "id": "S9",
+            "text": "자회사 컴투스플랫폼은 게임 백엔드 서비스 ‘하이브’와 클라우드 사업을 확대할 방침이다."
+          },
+          {
+            "id": "S10",
+            "text": "3분기에는 인공지능(AI) 에이전트에 최적화한 ‘하이브 액실’을 출시할 예정이다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:041510",
+        "symbol": "041510",
+        "name": "에스엠",
+        "aliases": [
+          "SM",
+          "SM엔터"
+        ],
+        "sector": "entertainment",
+        "market": "KOSDAQ"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%97%90%EC%8A%A4%EC%97%A0+%EC%97%94%ED%84%B0%ED%85%8C%EC%9D%B8%EB%A8%BC%ED%8A%B8",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/008/0005399650",
+        "https://n.news.naver.com/mnews/article/008/0005397777"
+      ],
+      "candidateCount": 1,
+      "selectionScore": -2,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호 없음"
+      ],
+      "article": {
+        "articleId": "NAVER-008-0005399650",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "NCT 127, 美 '아메리카 갓 탤런트' 스페셜 게스트 등단… 19일 생방송 무대",
+        "publisher": "머니투데이",
+        "publishedAt": "2026-08-13T05:09:43.000Z",
+        "sourceUrl": "https://www.mt.co.kr/stock/2026/08/13/2026081314054144031",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "에스엠엔터테인먼트의 보이그룹 NCT 127(엔시티 127)가 미국 대표 오디션 프로그램 '아메리카 갓 탤런트(America's Got Talent)'에 출연한다."
+          },
+          {
+            "id": "S2",
+            "text": "13일( 현지시간) 미국 NBC의 대표 예능 프로그램 '아메리카 갓 탤런트'는 SNS(소셜미디어)를 통해 \"K팝 슈퍼스타 NCT 127이 오는 8월 19일 스페셜 게스트로 출연해 무대를 빛낸다\"고 공식 발표했다."
+          },
+          {
+            "id": "S3",
+            "text": "NCT 127은 오는 19일 미국 캘리포니아 패서디나 시빅 오디토리움에서 진행되는 '아메리카 갓 탤런트' 생방송에 참석해 특유의 완성도 높은 퍼포먼스를 선보일 예정이다."
+          },
+          {
+            "id": "S4",
+            "text": "올해로 21번째 시즌을 맞이한 '아메리카 갓 탤런트'는 가창, 댄스, 코미디, 곡예, 마술 등 다양한 분야의 재능 있는 인물을 발굴하는 미국 NBC의 간판 프로그램이다."
+          },
+          {
+            "id": "S5",
+            "text": "NCT 127은 오는 8월 24일 정규 7집 '블링이(BLINGY)' 발매를 앞두고 글로벌 북미 프로모션에 박차를 가하고 있다."
+          },
+          {
+            "id": "S6",
+            "text": "앞서 지난 7월 뉴욕과 로스앤젤레스(LA) 일대를 수놓은 대형 옥외 광고 프로모션으로 미국 X(구 트위터) 실시간 트렌드를 장악한 데 이어, 이번 '아메리카 갓 탤런트'와 '케이콘(KCON LA)' 무대에 연달아 올라 현지 컴백 열기를 최고조로 끌어올릴 전망이다."
+          },
+          {
+            "id": "S7",
+            "text": "한편, NCT 127의 정규 7집 '블링이'는 오는 24일 오후 6시 각종 음악 사이트에서 전곡 음원이 공개된다."
+          },
+          {
+            "id": "S8",
+            "text": "동명의 타이틀곡 '블링이'를 포함해 NCT 127만의 음악적 정체성을 담은 총 9곡이 수록됐다."
+          },
+          {
+            "id": "S9",
+            "text": "에스엠은 음원·음반 중심의 기존 엔터테인먼트 사업에서 탈피해, 'SM 3.0' 체제 아래 멀티 레이블 및 글로벌 현지 IP 프로듀싱 시스템을 본격 가동하며 글로벌 엔터 플랫폼으로 도약을 추진 중이다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:035900",
+        "symbol": "035900",
+        "name": "JYP Ent.",
+        "aliases": [
+          "JYP",
+          "JYP엔터",
+          "JYP Ent",
+          "제이와이피",
+          "제이와이피엔터",
+          "제이와이피엔터테인먼트"
+        ],
+        "sector": "entertainment",
+        "market": "KOSDAQ"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=JYP+Ent.+%EC%97%94%ED%84%B0%ED%85%8C%EC%9D%B8%EB%A8%BC%ED%8A%B8",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/088/0001023597",
+        "https://n.news.naver.com/mnews/article/014/0005561523",
+        "https://n.news.naver.com/mnews/article/081/0003670196",
+        "https://n.news.naver.com/mnews/article/001/0016250291",
+        "https://n.news.naver.com/mnews/article/001/0016248576",
+        "https://n.news.naver.com/mnews/article/001/0016248358",
+        "https://n.news.naver.com/mnews/article/008/0005397773",
+        "https://n.news.naver.com/mnews/article/008/0005396415"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 143,
+      "selectionSignals": [
+        "종목 별칭이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익, 계약",
+        "홍보·일상 감점: 기부"
+      ],
+      "article": {
+        "articleId": "NAVER-001-0016250291",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "[특징주] JYP엔터, 2분기 부진·트와이스 재계약 불확실성에 급락(종합)",
+        "publisher": "연합뉴스",
+        "publishedAt": "2026-08-13T06:47:47.000Z",
+        "sourceUrl": "https://www.yna.co.kr/view/AKR20260813044351008?input=1195m",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "(서울=연합뉴스) 임은진 기자 = JYP엔터테인먼트(JYP Ent.)가 13일 부진한 2분기 실적과 트와이스 재계약 불확실성 등의 영향에 11% 넘게 하락했다."
+          },
+          {
+            "id": "S2",
+            "text": "한국거래소에 따르면 이날 JYP Ent.는 전 거래일 대비 11.20% 내린 4만850원에 거래를 마쳤다."
+          },
+          {
+            "id": "S3",
+            "text": "앞서 JYP Ent.는 2분기 연결 기준 영업이익이 310억원으로, 지난해 동기보다 41.4% 감소한 것으로 잠정 집계됐다고 전날 공시했다."
+          },
+          {
+            "id": "S4",
+            "text": "이는 연합인포맥스가 집계한 시장 전망치 378억원을 18% 하회한 수준이다."
+          },
+          {
+            "id": "S5",
+            "text": "이 영향에 이날 증권가는 잇달아 목표주가를 내렸다."
+          },
+          {
+            "id": "S6",
+            "text": "메리츠증권은 7만9천원에서 6만5천원으로, SK증권은 7만5천원에서 6만6천원으로, NH투자증권은 8만3천원에서 6만9천원으로, 삼성증권은 7만7천원에서 6만2천원으로, 하나증권은 7만9천원에서 5만8천원으로 각각 하향 조정했다."
+          },
+          {
+            "id": "S7",
+            "text": "박준형 SK증권 연구원은 JYP Ent."
+          },
+          {
+            "id": "S8",
+            "text": "2분기 실적에 대해 \"앨범 매출은 주요 아티스트들의 신보 발매로 증가했지만, 작년 동기 스트레이키즈 공연에 따른 높은 기저 효과로 공연과 MD(굿즈 상품) 매출이 감소한 영향\"이라고 짚었다."
+          },
+          {
+            "id": "S9",
+            "text": "이어 그는 \"스트레이키즈의 군 입대와 트와이스 재계약 불확실성은 중장기 실적에 부담 요인\"이라며 \"특히 트와이스의 향후 재계약 여부뿐만 아니라 활동 및 컴백 주기의 가시성이 낮아 향후 실적 추정에 보수적인 접근이 필요하다\"고 말했다."
+          },
+          {
+            "id": "S10",
+            "text": "이화정 NH투자증권 연구원은 \"트와이스의 완전체 활동 재개 시점에 대한 가시성이 다소 낮아졌다\"면서 이에 따라 목표 주가수익비율(PER)을 기존 23배에서 21배로 낮췄다고 전했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:122870",
+        "symbol": "122870",
+        "name": "와이지엔터테인먼트",
+        "aliases": [
+          "YG",
+          "YG엔터",
+          "와이지",
+          "와이지엔터"
+        ],
+        "sector": "entertainment",
+        "market": "KOSDAQ"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%99%80%EC%9D%B4%EC%A7%80%EC%97%94%ED%84%B0%ED%85%8C%EC%9D%B8%EB%A8%BC%ED%8A%B8+%EC%97%94%ED%84%B0%ED%85%8C%EC%9D%B8%EB%A8%BC%ED%8A%B8",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/088/0001023597",
+        "https://n.news.naver.com/mnews/article/008/0005400120",
+        "https://n.news.naver.com/mnews/article/028/0002818342",
+        "https://n.news.naver.com/mnews/article/009/0005719653",
+        "https://n.news.naver.com/mnews/article/024/0000107453",
+        "https://n.news.naver.com/mnews/article/028/0002817811",
+        "https://n.news.naver.com/mnews/article/366/0001185175",
+        "https://n.news.naver.com/mnews/article/001/0016241568"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 159,
+      "selectionSignals": [
+        "종목 별칭이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익, 계약"
+      ],
+      "article": {
+        "articleId": "NAVER-024-0000107453",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "YG엔터 지금 팔까요?...하나證 “당분간 주가 조정” [오늘, 이 종목]",
+        "publisher": "매경이코노미",
+        "publishedAt": "2026-08-10T06:52:12.000Z",
+        "sourceUrl": "https://www.mk.co.kr/article/12122917",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "(연합뉴스) 아티스트 라인업 부족으로 와이지엔터테인먼트(YG엔터) 주가가 당분간 조정받을 수 있다는 전망이 나왔다."
+          },
+          {
+            "id": "S2",
+            "text": "이기훈 하나증권 애널리스트는 10일 YG엔터 목표주가 6만3000원과 투자의견 ‘매수’를 유지했다."
+          },
+          {
+            "id": "S3",
+            "text": "한국거래소에 따르면 이날 오후 3시 7분 기준 YG엔터는 전 거래일보다 6.61% 오른 4만4300원에 거래 중이다."
+          },
+          {
+            "id": "S4",
+            "text": "이 애널리스트는 YG엔터 주가가 단기 조정을 받을 수 있다고 예상했다."
+          },
+          {
+            "id": "S5",
+            "text": "그는 “2027년이 되면 사실상 트레저·베이비몬스터 활동이 대부분일 정도로 아티스트 라인업이 부족하다”고 설명했다."
+          },
+          {
+            "id": "S6",
+            "text": "“빅뱅 이후 위너·아이콘·트레저가 데뷔했지만 아이콘은 계약이 만료됐다”며 “위너의 상황까지 고려하면 성장 모멘텀이 부재하다”고 덧붙였다."
+          },
+          {
+            "id": "S7",
+            "text": "다만 하반기 실적은 긍정적으로 전망했다."
+          },
+          {
+            "id": "S8",
+            "text": "이 애널리스트는 “빅뱅 20주년 월드투어·베이비몬스터 컴백·MD 매출 고성장으로 하반기에만 약 500억원 영업이익을 전망한다”며 “투어 수요가 많아 공연이 추가될 가능성도 충분하다”고 말했다."
+          },
+          {
+            "id": "S9",
+            "text": "다만 경쟁 그룹 코르티스가 앨범을 300만장 넘게 판매한 점, SM에서 신인 남성 그룹을 준비 중인 점을 언급하며 신인 남성 그룹 간 경쟁이 치열하다고도 말했다."
+          },
+          {
+            "id": "S10",
+            "text": "이 애널리스트는 “2027년에는 데뷔가 계획된 신인 걸그룹이 흥행하면 베이비몬스터와 함께 저연차 아티스트의 매출 비중이 상당히 높아진다“며 ”실적과 기업가치가 동반 상승할 수 있다”고 언급했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:021240",
+        "symbol": "021240",
+        "name": "코웨이",
+        "aliases": [
+          "Coway"
+        ],
+        "sector": "retail",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%BD%94%EC%9B%A8%EC%9D%B4+%EC%A0%95%EC%88%98%EA%B8%B0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/018/0006350558",
+        "https://n.news.naver.com/mnews/article/029/0003042066",
+        "https://n.news.naver.com/mnews/article/366/0001185692",
+        "https://n.news.naver.com/mnews/article/030/0003456388"
+      ],
+      "candidateCount": 4,
+      "selectionScore": 196,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익, 판매"
+      ],
+      "article": {
+        "articleId": "NAVER-030-0003456388",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "코웨이, 태국 렌탈 계정 50만개 돌파 임박…“제2의 말레이시아로 키운다”",
+        "publisher": "전자신문",
+        "publishedAt": "2026-08-11T07:01:33.000Z",
+        "sourceUrl": "https://www.etnews.com/20260811000228",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "코웨이가 태국 시장에서 판매 중인 정수기 '네오 플러스'"
+          },
+          {
+            "id": "S2",
+            "text": "코웨이가 태국에서 고성장을 이어가고 있다."
+          },
+          {
+            "id": "S3",
+            "text": "정수기 판매 호조와 브랜드 인지도 상승을 기반으로 태국 법인을 말레이시아에 이어 '제2의 성장 동력'으로 육성한다는 계획이다."
+          },
+          {
+            "id": "S4",
+            "text": "코웨이 태국 법인은 렌탈 계정 50만대 돌파를 앞두고 있다."
+          },
+          {
+            "id": "S5",
+            "text": "코웨이 해외 사업 2위인 미국 법인(669억원)과 매출 격차를 9억원으로 좁혔다."
+          },
+          {
+            "id": "S6",
+            "text": "서장원 코웨이 대표는 2분기 실적 설명회에서 “판매 인력 세일즈 노하우와 제품 혁신성, 프로모션 효과 등이 어우러져 예상보다 정수기가 굉장히 많이 팔렸다”고 소개했다."
+          },
+          {
+            "id": "S7",
+            "text": "코웨이는 태국을 해외 최대 매출처인 말레이시아에 이은 핵심 거점으로 키운다는 방침이다."
+          },
+          {
+            "id": "S8",
+            "text": "코웨이는 중장기 성장 기반을 마련하기 위해 마케팅·영업·조직 투자 등에 비용을 선제 집행한 만큼 하반기 영업이익률을 끌어올릴 수 있을 것으로 관측했다."
+          },
+          {
+            "id": "S9",
+            "text": "김순태 코웨이 최고재무책임자(CFO)는 “선제 투자를 바탕으로 견조한 판매 성장과 렌탈 계정 확대를 이어가 하반기에는 태국 법인 수익성도 개선될 것으로 기대하고 있다”고 말했다."
+          },
+          {
+            "id": "S10",
+            "text": "코웨이 태국 법인 2분기 실적 추이 - 단위: 원."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:004170",
+        "symbol": "004170",
+        "name": "신세계",
+        "aliases": [
+          "Shinsegae"
+        ],
+        "sector": "retail",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%8B%A0%EC%84%B8%EA%B3%84+%EB%B0%B1%ED%99%94%EC%A0%90",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/052/0002393202",
+        "https://n.news.naver.com/mnews/article/277/0005803122",
+        "https://n.news.naver.com/mnews/article/022/0004150922",
+        "https://n.news.naver.com/mnews/article/243/0000101640",
+        "https://n.news.naver.com/mnews/article/081/0003670430",
+        "https://n.news.naver.com/mnews/article/020/0003740875",
+        "https://n.news.naver.com/mnews/article/366/0001186224",
+        "https://n.news.naver.com/mnews/article/032/0003464225"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 78,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호 없음",
+        "홍보·일상 감점: 팝업"
+      ],
+      "article": {
+        "articleId": "NAVER-366-0001186224",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "LV BnF, 신세계 강남서 뷰티·웰니스 팝업… 17일까지 운영",
+        "publisher": "조선비즈",
+        "publishedAt": "2026-08-14T00:31:10.000Z",
+        "sourceUrl": "https://biz.chosun.com/industry/business_info/2026/08/14/5VU5VMYQRVEBZAOUO4WDVV3IIE/?utm_source=naver&utm_medium=original&utm_campaign=biz",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "디에이이펙트·썬슈룹·파이벌 참여… 피부 측정·선케어·멀티파이버 체험"
+          },
+          {
+            "id": "S2",
+            "text": "신세계백화점 강남점 지하 1층 스위트 파크에 마련된 LV BnF 팝업 스토어 내 파이벌 공간 / 로지스밸리비앤에프 제공"
+          },
+          {
+            "id": "S3",
+            "text": "로지스밸리비앤에프(LV BnF)가 신세계백화점 강남점 지하 1층 스위트 파크에서 뷰티·웰니스 브랜드 팝업 스토어를 운영한다."
+          },
+          {
+            "id": "S4",
+            "text": "팝업은 지난 10일 시작해 오는 17일까지 진행된다."
+          },
+          {
+            "id": "S5",
+            "text": "팝업에는 더마 브랜드 ‘디에이이펙트(DA EFFECT)’, 선케어 브랜드 ‘썬슈룹(sun.shurupp)’, 웰니스 브랜드 ‘파이벌(FIBERRR)’이 참여한다."
+          },
+          {
+            "id": "S6",
+            "text": "현장에는 피부 상태 측정과 브랜드별 제품 체험, 멀티파이버 시음 등 다채로운 참여형 프로그램이 마련됐다."
+          },
+          {
+            "id": "S7",
+            "text": "세 브랜드는 앞서 지난 7월 24일부터 8월 6일까지 신세계 센텀시티몰 지하 1층에서 팝업 스토어를 운영한 바 있다."
+          },
+          {
+            "id": "S8",
+            "text": "이번 강남 팝업에서는 브랜드별 체험 프로그램과 굿즈 제공, 팝업 전용 구성 등 다양한 프로모션도 함께 운영된다."
+          },
+          {
+            "id": "S9",
+            "text": "방문객은 피부 상태를 확인한 뒤 1대1 퍼스널 케어 안내를 받을 수 있다."
+          },
+          {
+            "id": "S10",
+            "text": "파이벌은 서로 다른 특성의 식이섬유 5종을 한 포에 담은 ‘멀티파이버’를 소개한다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:282330",
+        "symbol": "282330",
+        "name": "BGF리테일",
+        "aliases": [
+          "BGF 리테일",
+          "비지에프리테일"
+        ],
+        "sector": "retail",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=BGF%EB%A6%AC%ED%85%8C%EC%9D%BC+%EC%9C%A0%ED%86%B5",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/277/0005803122",
+        "https://n.news.naver.com/mnews/article/015/0005320836",
+        "https://n.news.naver.com/mnews/article/138/0002237767",
+        "https://n.news.naver.com/mnews/article/023/0003992910",
+        "https://n.news.naver.com/mnews/article/023/0003992759",
+        "https://n.news.naver.com/mnews/article/025/0003543903",
+        "https://n.news.naver.com/mnews/article/003/0014122963",
+        "https://n.news.naver.com/mnews/article/421/0009109562"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 72,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 실적, 매출, 영업이익, 판매"
+      ],
+      "article": {
+        "articleId": "NAVER-277-0005803122",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "백화점서 '플렉스', 편의점서 한끼…유통가 상반기 훈풍, 달라진 소비 풍경",
+        "publisher": "아시아경제",
+        "publishedAt": "2026-08-14T01:00:00.000Z",
+        "sourceUrl": "https://view.asiae.co.kr/article/2026081315553880088",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "백화점과 편의점을 중심으로 매출과 영업이익이 지난해보다 개선되며 소비 회복세가 실적에 반영된 것이다."
+          },
+          {
+            "id": "S2",
+            "text": "14일 유통업계에 따르면 백화점 3사(롯데·신세계·현대)는 올해 상반기 외국인 관광객 증가와 명품·패션 등 판매 호조에 힘입어 매출과 영업이익 모두 전년 상반기 대비 신장하며 최대 실적을 기록했다."
+          },
+          {
+            "id": "S3",
+            "text": "롯데백화점은 상반기 매출 1조7635억원, 영업이익 3109억원으로 각각 전년 동기 대비 8.7%와 59.4% 증가했다."
+          },
+          {
+            "id": "S4",
+            "text": "신세계백화점은 매출 1조4794억원, 영업이익 2499억원으로 각각 14.9%와 39.7% 늘었다."
+          },
+          {
+            "id": "S5",
+            "text": "현대백화점도 매출 1조2764억원, 영업이익 2460억원으로 각각 8.3%와 47.7% 증가했다."
+          },
+          {
+            "id": "S6",
+            "text": "매출은 10% 안팎 신장했으나 영업이익은 최대 80% 증가하면서 수익성 개선 폭이 훨씬 컸다."
+          },
+          {
+            "id": "S7",
+            "text": "BGF리테일이 운영하는 편의점 CU의 상반기 매출은 4조5472억원, 영업이익은 1230억원으로 전년 동기 대비 각각 5.6%와 33.7% 증가했다."
+          },
+          {
+            "id": "S8",
+            "text": "GS리테일이 운영하는 GS25는 상반기 매출 4조4707억원, 영업이익 927억원을 기록하며 각각 5.5%와 21.7% 늘었다."
+          },
+          {
+            "id": "S9",
+            "text": "이마트는 상반기 매출 9조1581억원, 영업이익 1719억원을 기록했다."
+          },
+          {
+            "id": "S10",
+            "text": "반면 대표적인 e커머스 기업인 컬리는 상반기 매출액 1조5000억원, 영업이익은 516억원으로 역대 최대 실적을 기록했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:105560",
+        "symbol": "105560",
+        "name": "KB금융",
+        "aliases": [
+          "KB 금융",
+          "케이비금융"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=KB%EA%B8%88%EC%9C%B5+%EA%B8%88%EC%9C%B5%EC%A7%80%EC%A3%BC",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/055/0001380636",
+        "https://n.news.naver.com/mnews/article/011/0004651761",
+        "https://n.news.naver.com/mnews/article/003/0014127397",
+        "https://n.news.naver.com/mnews/article/003/0014127337",
+        "https://n.news.naver.com/mnews/article/011/0004651704",
+        "https://n.news.naver.com/mnews/article/022/0004150895",
+        "https://n.news.naver.com/mnews/article/015/0005320754",
+        "https://n.news.naver.com/mnews/article/658/0000152295"
+      ],
+      "candidateCount": 3,
+      "selectionScore": 18,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 사고"
+      ],
+      "article": {
+        "articleId": "NAVER-011-0004651704",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "‘할 말 하는’ 사외이사들…금융지주 내부통제 강화",
+        "publisher": "서울경제",
+        "publishedAt": "2026-08-13T23:10:11.000Z",
+        "sourceUrl": "https://www.sedaily.com/article/20079319?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "금융지주들이 소위원회를 중심으로 내부통제 역할을 키우고 있다."
+          },
+          {
+            "id": "S2",
+            "text": "윤인섭 우리금융지주 사외이사는 지난해 회의에서 “상사에게 잘못된 부분을 지적할 수 있는 문화가 정착돼야 한다”고 목소리를 냈다."
+          },
+          {
+            "id": "S3",
+            "text": "사외이사들이 경영 전반의 내부통제 취약점을 직접 지적하고 개선 방안을 제시하는 형태로 발전하고 있다는 평가다."
+          },
+          {
+            "id": "S4",
+            "text": "13일 금융계에 따르면 지난해 4대 금융지주의 내부통제위원회 개최 횟수는 신한금융이 7회로 가장 많았다."
+          },
+          {
+            "id": "S5",
+            "text": "KB금융은 4회, 하나금융은 2회 개최했다."
+          },
+          {
+            "id": "S6",
+            "text": "신한은 총 13건의 안건을 다루면서 윤리준법경영 체계와 주요 금융사고, 대표이사·임원의 관리의무 등을 점검했다."
+          },
+          {
+            "id": "S7",
+            "text": "우리금융은 11개의 안건을 논의했다."
+          },
+          {
+            "id": "S8",
+            "text": "KB는 책무구조도 운영 실태와 준법감시 등 15건의 안건을 처리했다."
+          },
+          {
+            "id": "S9",
+            "text": "하나금융은 내부통제 기본 방침과 준법을 중시하는 조직 문화 정착 방안 등 2건을 다뤘다."
+          },
+          {
+            "id": "S10",
+            "text": "우리금융은 4대 금융지주 중 유일하게 사외이사별 ‘주요 발언 및 토의 내용’을 ‘지배구조 및 보상 체계 연차보고서’에 별도로 공시한다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:039490",
+        "symbol": "039490",
+        "name": "키움증권",
+        "aliases": [
+          "Kiwoom",
+          "키움",
+          "키움 증권",
+          "영웅문",
+          "Kiwoom Securities"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%82%A4%EC%9B%80%EC%A6%9D%EA%B6%8C+%EC%A6%9D%EA%B6%8C%EC%82%AC",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/014/0005561659",
+        "https://n.news.naver.com/mnews/article/016/0002683999",
+        "https://n.news.naver.com/mnews/article/374/0000527497",
+        "https://n.news.naver.com/mnews/article/088/0001023600",
+        "https://n.news.naver.com/mnews/article/003/0014127397",
+        "https://n.news.naver.com/mnews/article/001/0016251249",
+        "https://n.news.naver.com/mnews/article/015/0005320805",
+        "https://n.news.naver.com/mnews/article/119/0003121694"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 104,
+      "selectionSignals": [
+        "종목 별칭이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 영업이익, 순이익",
+        "투자 콘텐츠 감점: 목표가"
+      ],
+      "article": {
+        "articleId": "NAVER-015-0005320805",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "\"이마트, 자회사 실적 부담 지속…목표가↓\"-키움",
+        "publisher": "한국경제",
+        "publishedAt": "2026-08-13T22:39:12.000Z",
+        "sourceUrl": "https://www.hankyung.com/article/2026081405996",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "키움증권은 14일 이마트에 대해 \"올해 3분기 이후에도 자회사의 실적 전망 가시성이 낮다\"며 목표주가를 기존 12만원에서 10만3000원으로 낮췄다."
+          },
+          {
+            "id": "S2",
+            "text": "박상준 키움증권 연구원은 \"이마트의 3분기 연결기준 영업이익과 지배주주순이익 전망치를 각각 2064억원과 675억원으로 기존보다 하향 조정한다\"며 \"SCK컴퍼니와 신세계건설의 실적 가시성이 여전히 낮다\"고 봤다."
+          },
+          {
+            "id": "S3",
+            "text": "이어 \"특히 신세계건설은 미분양 관련 손실과 금융비용 증가 부담에 지속적으로 변수가 발생해 이익 변동성을 예측하기 어려운 상황\"이라고 짚었다."
+          },
+          {
+            "id": "S4",
+            "text": "이마트의 지난 2분기 실적도 자회사가 발목을 잡았다."
+          },
+          {
+            "id": "S5",
+            "text": "이마트의 2분기 연결기준 영업손실과 지배주주순손실은 각각 430억원과 1563억원으로 집계됐다."
+          },
+          {
+            "id": "S6",
+            "text": "영업이익의 경우 시장 컨센서스(증권사 평균 추정치)를 89% 밑돌았다."
+          },
+          {
+            "id": "S7",
+            "text": "SCK컴퍼니, 신세계건설, 쓱닷컴 등 자회사 실적이 크게 악화하면서다."
+          },
+          {
+            "id": "S8",
+            "text": "다만 할인점의 경우 3분기 기존점 성장률(8.5% 전망)이 상반기보다 크게 개선되면서 별도법인의 실적 개선을 이끌 것으로 박 연구원은 전망했다."
+          },
+          {
+            "id": "S9",
+            "text": "홈플러스 점포 구조조정에 따른 반사수혜, 전년 동기 소비쿠폰 사용처 제외에 따른 기저효과, 추석 시점 차이에 따른 긍정적 영향 등을 감안하면서다."
+          },
+          {
+            "id": "S10",
+            "text": "박 연구원은 \"할인점은 홈플러스 점포 구조조정에 따른 반사수혜가 확대될 가능성이 높다\"며 \"SCK컴퍼니의 매출 역성장 폭도 6월을 저점으로 완화되고 있다\"고 설명했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:055550",
+        "symbol": "055550",
+        "name": "신한지주",
+        "aliases": [
+          "신한 지주"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%8B%A0%ED%95%9C%EC%A7%80%EC%A3%BC+%EA%B8%88%EC%9C%B5",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002684011",
+        "https://n.news.naver.com/mnews/article/003/0014127397",
+        "https://n.news.naver.com/mnews/article/011/0004651704",
+        "https://n.news.naver.com/mnews/article/009/0005720907",
+        "https://n.news.naver.com/mnews/article/031/0001049570",
+        "https://n.news.naver.com/mnews/article/277/0005802844",
+        "https://n.news.naver.com/mnews/article/029/0003042295"
+      ],
+      "candidateCount": 2,
+      "selectionScore": 16,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 사고"
+      ],
+      "article": {
+        "articleId": "NAVER-031-0001049570",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "코스피 단숨에 6800선…외국인 2조 사고 개미 2.7조 팔았다",
+        "publisher": "아이뉴스24",
+        "publishedAt": "2026-08-13T07:08:11.000Z",
+        "sourceUrl": "http://www.inews24.com/view/1994803",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "삼성전자 4%·SK하이닉스 5%·삼성전기 12%↑"
+          },
+          {
+            "id": "S2",
+            "text": "코스닥 4거래일 연속 상승세 보이며 861.37 마감 코스피가 외국인의 2조원대 순매수와 인공지능(AI) 관련주 강세에 6800선을 회복했다."
+          },
+          {
+            "id": "S3",
+            "text": "코스닥은 나흘간 연속 상승하며 860선에서 장을 마쳤다."
+          },
+          {
+            "id": "S4",
+            "text": "한국거래소에 따르면 13일 코스피는 전 거래일 대비 234.30포인트(3.56%) 오른 6813.34에 장을 마감했다."
+          },
+          {
+            "id": "S5",
+            "text": "지수는 194.88포인트(2.96%) 상승한 6773.92에 출발한 뒤 상승폭을 확대했다."
+          },
+          {
+            "id": "S6",
+            "text": "13일 하나은행 딜링룸 [사진=연합뉴스]"
+          },
+          {
+            "id": "S7",
+            "text": "이날 외국인은 2조951억원, 기관은 6798억원을 사들였다."
+          },
+          {
+            "id": "S8",
+            "text": "반면 개인은 2조7228억원을 팔았다."
+          },
+          {
+            "id": "S9",
+            "text": "삼성전자는 4.88% 오른 26만8000원, SK하이닉스는 5.92% 오른 159만3000원에 거래를 마쳤다."
+          },
+          {
+            "id": "S10",
+            "text": "현대차(2.20%), LG에너지솔루션(1.95%), 한화에어로스페이스(2.50%), 삼성물산(2.10%), 신한지주(2.70%), SK(1.47%), 현대모비스(2.50%), 하나금융지주(2.42%), LS ELECTRIC(.64%) 등도 약 2%대 상승했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:086790",
+        "symbol": "086790",
+        "name": "하나금융지주",
+        "aliases": [
+          "하나 금융",
+          "하나금융"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%95%98%EB%82%98%EA%B8%88%EC%9C%B5%EC%A7%80%EC%A3%BC+%EA%B8%88%EC%9C%B5",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/243/0000101639",
+        "https://n.news.naver.com/mnews/article/029/0003042392",
+        "https://n.news.naver.com/mnews/article/022/0004150895",
+        "https://n.news.naver.com/mnews/article/022/0004150886",
+        "https://n.news.naver.com/mnews/article/008/0005399992",
+        "https://n.news.naver.com/mnews/article/020/0003740789",
+        "https://n.news.naver.com/mnews/article/005/0001866807",
+        "https://n.news.naver.com/mnews/article/014/0005561460"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 34,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 계약, 인수"
+      ],
+      "article": {
+        "articleId": "NAVER-014-0005561460",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "'6전7기' KDB생명, 한투금융이 품는다",
+        "publisher": "파이낸셜뉴스",
+        "publishedAt": "2026-08-13T12:18:16.000Z",
+        "sourceUrl": "http://www.fnnews.com/news/202608132117300383",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "증권 의존도 높은 수익구조 탈피 한국투자금융지주가 12년을 끌어온 KDB생명의 새 주인이 될 전망이다."
+          },
+          {
+            "id": "S2",
+            "text": "일곱번째 도전에서 한국투자금융지주가 우선협상대상자로 선정됐기 때문이다."
+          },
+          {
+            "id": "S3",
+            "text": "산업은행에는 장기 구조조정 매물의 엑시트, 한투금융에는 증권 중심 사업구조에 보험이라는 마지막 퍼즐을 채우는 거래라는 평가가 나온다."
+          },
+          {
+            "id": "S4",
+            "text": "13일 투자은행(IB)업계에 따르면 산업은행은 이날 오후 KDB생명 매각 우선협상대상자로 한투금융지주를 선정했다."
+          },
+          {
+            "id": "S5",
+            "text": "이번 본입찰에는 한투금융과 한화생명, 흥국생명이 참여해 3파전을 벌였다."
+          },
+          {
+            "id": "S6",
+            "text": "산은은 금호그룹 구조조정 과정에서 2010년 금호생명을 인수한 뒤 2014년부터 매각을 추진했지만 번번이 좌초했다."
+          },
+          {
+            "id": "S7",
+            "text": "2020년 JC파트너스와 주식매매계약(SPA)까지 체결했지만 대주주 적격성 문제로 무산됐고, 2023년에는 하나금융지주가 우협에 선정된 뒤 실사 끝에 인수를 포기했다."
+          },
+          {
+            "id": "S8",
+            "text": "IB업계에서는 한투금융이 인수 이후 KDB생명의 재무건전성을 끌어올리기 위해 최대 1조원 안팎의 증자를 단행할 가능성도 거론된다."
+          },
+          {
+            "id": "S9",
+            "text": "실제 규모와 시기는 향후 실사 및 인수 구조에 따라 달라질 수 있지만, 인수가격뿐 아니라 인수 이후 투입해야 할 자본까지 감안하면 이번 거래의 실질적인 베팅 규모는 작지 않을 전망이다."
+          },
+          {
+            "id": "S10",
+            "text": "향후 실사에서 확인되는 자본확충 필요 규모와 이를 반영한 인수가격 조정 여부가 산은과 한투금융 간 최종 협상의 핵심이 될 전망이다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:316140",
+        "symbol": "316140",
+        "name": "우리금융지주",
+        "aliases": [
+          "우리 금융",
+          "우리금융",
+          "우리은행"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%9A%B0%EB%A6%AC%EA%B8%88%EC%9C%B5%EC%A7%80%EC%A3%BC+%EA%B8%88%EC%9C%B5",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/011/0004651704",
+        "https://n.news.naver.com/mnews/article/011/0004651588",
+        "https://n.news.naver.com/mnews/article/030/0003456908"
+      ],
+      "candidateCount": 3,
+      "selectionScore": 48,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 사고"
+      ],
+      "article": {
+        "articleId": "NAVER-011-0004651704",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "‘할 말 하는’ 사외이사들…금융지주 내부통제 강화",
+        "publisher": "서울경제",
+        "publishedAt": "2026-08-13T23:10:11.000Z",
+        "sourceUrl": "https://www.sedaily.com/article/20079319?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "금융지주들이 소위원회를 중심으로 내부통제 역할을 키우고 있다."
+          },
+          {
+            "id": "S2",
+            "text": "윤인섭 우리금융지주 사외이사는 지난해 회의에서 “상사에게 잘못된 부분을 지적할 수 있는 문화가 정착돼야 한다”고 목소리를 냈다."
+          },
+          {
+            "id": "S3",
+            "text": "사외이사들이 경영 전반의 내부통제 취약점을 직접 지적하고 개선 방안을 제시하는 형태로 발전하고 있다는 평가다."
+          },
+          {
+            "id": "S4",
+            "text": "신한은 총 13건의 안건을 다루면서 윤리준법경영 체계와 주요 금융사고, 대표이사·임원의 관리의무 등을 점검했다."
+          },
+          {
+            "id": "S5",
+            "text": "우리금융은 11개의 안건을 논의했다."
+          },
+          {
+            "id": "S6",
+            "text": "우리금융 특히 내부통제위원회를 내실 있게 운영 중이다."
+          },
+          {
+            "id": "S7",
+            "text": "우리금융의 윤리·내부통제위원회는 윤리경영실을 보조 기구로 둔다."
+          },
+          {
+            "id": "S8",
+            "text": "우리금융은 4대 금융지주 중 유일하게 사외이사별 ‘주요 발언 및 토의 내용’을 ‘지배구조 및 보상 체계 연차보고서’에 별도로 공시한다."
+          },
+          {
+            "id": "S9",
+            "text": "김춘수 우리금융지주 사외이사는 “준법제보가 활성화되는 것이 조직 전체 내부통제를 제고하는 데 기여한다”며 제도의 지속적인 운영을 주문했다."
+          },
+          {
+            "id": "S10",
+            "text": "우리금융은 이 같은 의견을 반영해 정기적으로 기업문화 진단도 실시하고 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:402340",
+        "symbol": "402340",
+        "name": "SK스퀘어",
+        "aliases": [
+          "SK 스퀘어",
+          "SK Square",
+          "에스케이스퀘어"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=SK%EC%8A%A4%ED%80%98%EC%96%B4+%EC%A7%80%EC%A3%BC",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/024/0000107541",
+        "https://n.news.naver.com/mnews/article/009/0005720941",
+        "https://n.news.naver.com/mnews/article/009/0005720911",
+        "https://n.news.naver.com/mnews/article/009/0005720818",
+        "https://n.news.naver.com/mnews/article/031/0001049570",
+        "https://n.news.naver.com/mnews/article/277/0005802844"
+      ],
+      "candidateCount": 6,
+      "selectionScore": 18,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 인수"
+      ],
+      "article": {
+        "articleId": "NAVER-024-0000107541",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "솔리다임 美 상장 추진…하이닉스에 호재냐 악재냐",
+        "publisher": "매경이코노미",
+        "publishedAt": "2026-08-14T04:57:11.000Z",
+        "sourceUrl": "https://www.mk.co.kr/article/12127906",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "미래에셋證 “후속 투자재원 확충 차원”"
+          },
+          {
+            "id": "S2",
+            "text": "거버넌스포럼 “코리아 디스카운트 수출 행위”"
+          },
+          {
+            "id": "S3",
+            "text": "(연합뉴스) SK하이닉스 미국 자회사 솔리다임이 나스닥 상장을 추진하고 있는 것으로 알려지면서 시장의 시선이 엇갈리고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "14일 업계에 따르면 미래에셋증권은 최근 보고서에서 솔리다임의 미국 시장 상장 가능성에 대해 “일각에선 자회사 중복상장 케이스로 인식하기도 하지만 이번 이슈는 M&A 투자금 회수 및 후속 투자재원 확충의 성격으로 접근하는 것이 타당하다”고 했다."
+          },
+          {
+            "id": "S5",
+            "text": "솔리다임은 SK하이닉스가 미국 인텔의 낸드·SSD 사업을 인수하면서 설립한 미국 자회사다."
+          },
+          {
+            "id": "S6",
+            "text": "SK하이닉스는 지난 1월 28일 솔리다임의 모회사이자 SK하이닉스의 자회사인 SK하이닉스 낸드 프로덕트 솔루션에 최대 100억달러 출자를 약정했다."
+          },
+          {
+            "id": "S7",
+            "text": "미래에셋증권은 “솔리다임 지분을 매각해 투자금을 모집할 경우 약 150억달러 규모의 미국 내 투자 여력이 확보되는 것”이라고 설명했다."
+          },
+          {
+            "id": "S8",
+            "text": "솔리다임 지분 일부를 철회하더라도 SK하이닉스 기업가치에 미치는 영향은 제한적일 것으로 내다봤다."
+          },
+          {
+            "id": "S9",
+            "text": "포럼 측은 “솔리다임 상장은 최태원 회장부터 SK㈜, SK스퀘어, SK하이닉스, 현지 법인을 거쳐 내려가는 전 세계적으로도 유례가 없는 ‘5단 중복상장’”이라며 “코리아 디스카운트를 해외로 수출하는 행위”라고 지적했다."
+          },
+          {
+            "id": "S10",
+            "text": "이어 “지금은 해외 법인을 통한 피라미드 확장보다 SK㈜-SK스퀘어-SK하이닉스로 이어지는 기존 국내 3단 중복상장 해소를 먼저 고민할 때”라고 했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:000270",
+        "symbol": "000270",
+        "name": "기아",
+        "aliases": [
+          "KIA"
+        ],
+        "sector": "automotive",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EA%B8%B0%EC%95%84+%EC%9E%90%EB%8F%99%EC%B0%A8",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/277/0005803034",
+        "https://n.news.naver.com/mnews/article/011/0004651674",
+        "https://n.news.naver.com/mnews/article/015/0005320396",
+        "https://n.news.naver.com/mnews/article/047/0002525403",
+        "https://n.news.naver.com/mnews/article/660/0000115057",
+        "https://n.news.naver.com/mnews/article/020/0003740125",
+        "https://n.news.naver.com/mnews/article/449/0000356062"
+      ],
+      "candidateCount": 4,
+      "selectionScore": 136,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 사고"
+      ],
+      "article": {
+        "articleId": "NAVER-449-0000356062",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "‘굿 윌 헌팅’ 미니 드라이버 “기아가 내 목숨 구했다”",
+        "publisher": "채널A",
+        "publishedAt": "2026-08-08T04:49:02.000Z",
+        "sourceUrl": "https://www.ichannela.com/news/main/news_detailPage.do?publishId=000000544083",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "영화배우 미니 드라이버(출처: 인스타그램)"
+          },
+          {
+            "id": "S2",
+            "text": "영국 영화배우 미니 드라이버가 최근 프랑스에서 교통사고를 당했는데 기아 자동차 덕분에 목숨을 구했다고 밝혔습니다."
+          },
+          {
+            "id": "S3",
+            "text": "미니 드라이버는 자신의 SNS에 목 보호대를 착용한 채 침대에 누워있는 영상을 공개하고 사고 당시 상황을 직접 설명했습니다."
+          },
+          {
+            "id": "S4",
+            "text": "그는 “친구와 함께 차로 프랑스 시골길을 달리고 있었는데 다른 차량이 멈추지 않은 채 빠른 속도로 돌진해 들이받았다”고 밝혔습니다."
+          },
+          {
+            "id": "S5",
+            "text": "또 “차에서 걸어 나올 수 없었고 기어서 빠져나왔다”며 “정말 끔찍한 사고였지만 살아남았다는 사실만으로 감사하다”고 말했습니다."
+          },
+          {
+            "id": "S6",
+            "text": "이어 사고에서 살아남을 수 있었던 데는 차량의 안전 설계가 큰 역할을 했다고 했습니다."
+          },
+          {
+            "id": "S7",
+            "text": "사고 당시 타고 있던 기아 EV2의 안전성을 언급하며 “차량 내부의 360도 에어백과 견고한 차체 구조가 우리 두 사람의 생명을 구한 핵심 이유”라고 강조했습니다."
+          },
+          {
+            "id": "S8",
+            "text": "그러면서 “절대 상업적 광고가 아니고 생명을 지켜준 차량의 완성도에 깊이 감사할 뿐”이라고 덧붙였습니다."
+          },
+          {
+            "id": "S9",
+            "text": "영상에는 전면부가 파손된 사고 차량 사진과 병원 치료 후 퇴원하는 모습도 담겼습니다."
+          },
+          {
+            "id": "S10",
+            "text": "미니 드라이버는 1997년 영화 ‘굿 윌 헌팅’의 스카일러 역으로 아카데미 여우조연상 후보에 오른 바 있습니다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:005380",
+        "symbol": "005380",
+        "name": "현대차",
+        "aliases": [
+          "현대 자동차",
+          "현대차",
+          "Hyundai Motor"
+        ],
+        "sector": "automotive",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%98%84%EB%8C%80%EC%B0%A8+%EC%9E%90%EB%8F%99%EC%B0%A8",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/011/0004651817",
+        "https://n.news.naver.com/mnews/article/421/0009114332",
+        "https://n.news.naver.com/mnews/article/029/0003042411",
+        "https://n.news.naver.com/mnews/article/016/0002683946",
+        "https://n.news.naver.com/mnews/article/003/0014127601",
+        "https://n.news.naver.com/mnews/article/421/0009113874",
+        "https://n.news.naver.com/mnews/article/003/0014127501"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 166,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 생산, 파업"
+      ],
+      "article": {
+        "articleId": "NAVER-029-0003042411",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "2시간→4시간→6시간…현대차 노조 파업 갈수록 세진다",
+        "publisher": "디지털타임스",
+        "publishedAt": "2026-08-14T02:41:56.000Z",
+        "sourceUrl": "https://www.dt.co.kr/article/12078291?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "12~13일 조별 4시간 이어 14일 6시간으로 확대"
+          },
+          {
+            "id": "S2",
+            "text": "반복되는 부분파업에 생산 차질 누적 우려"
+          },
+          {
+            "id": "S3",
+            "text": "12일 울산 북구 현대차 울산공장 명촌정문에서 오전조 근무자들이 4시간 부분파업으로 일찍 퇴근하고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "현대자동차 노동조합이 광복절 연휴를 하루 앞둔 14일 파업 수위를 높인다."
+          },
+          {
+            "id": "S5",
+            "text": "이에 따라 이날 현대차 생산라인은 최대 12시간 가동을 멈추게 된다."
+          },
+          {
+            "id": "S6",
+            "text": "현대차 노조의 올해 파업은 이번이 처음이 아니다."
+          },
+          {
+            "id": "S7",
+            "text": "노조는 지난달 13~15일 근무조별 2시간씩 부분파업을 시작으로 20~22일과 29~31일에는 근무조별 4시간씩 생산라인을 멈췄다."
+          },
+          {
+            "id": "S8",
+            "text": "특히 현대차는 지난달 판매 감소 원인 가운데 하나로 노조 파업에 따른 생산 차질을 직접 언급하기도 했다."
+          },
+          {
+            "id": "S9",
+            "text": "현대차의 7월 글로벌 판매량은 31만8454대로 지난해 같은 기간보다 5.1% 감소했다."
+          },
+          {
+            "id": "S10",
+            "text": "현대차 노사의 임금협상이 장기화하는 가운데 파업 시간이 2시간에서 4시간, 다시 6시간으로 확대되면서 노사 모두 부담도 커지고 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:089860",
+        "symbol": "089860",
+        "name": "롯데렌탈",
+        "aliases": [
+          "Lotte Rental"
+        ],
+        "sector": "retail",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EB%A1%AF%EB%8D%B0%EB%A0%8C%ED%83%88+%EB%A0%8C%ED%84%B0%EC%B9%B4",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/008/0005399809",
+        "https://n.news.naver.com/mnews/article/029/0003042092",
+        "https://n.news.naver.com/mnews/article/586/0000135785",
+        "https://n.news.naver.com/mnews/article/001/0016247793",
+        "https://n.news.naver.com/mnews/article/293/0000088967",
+        "https://n.news.naver.com/mnews/article/366/0001185825"
+      ],
+      "candidateCount": 6,
+      "selectionScore": 162,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 인수, 배당"
+      ],
+      "article": {
+        "articleId": "NAVER-001-0016247793",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "TPG 품에 안긴 롯데렌탈…\"매각대금에도 롯데그룹 신용도 영향 제한적\"",
+        "publisher": "연합뉴스",
+        "publishedAt": "2026-08-12T07:05:28.000Z",
+        "sourceUrl": "https://www.yna.co.kr/view/AKR20260812124200008?input=1195m",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "롯데렌탈에 대해서도 \"최대주주 변경, 신용도 영향 제한적\""
+          },
+          {
+            "id": "S2",
+            "text": "'경영권 변경' 공모채 9천600억원 중도상환 특약…\"유동성 여력은 충분\""
+          },
+          {
+            "id": "S3",
+            "text": "(서울=연합뉴스) 정회인 기자 = 글로벌 사모펀드(PEF) 운용사 텍사스퍼시픽그룹(TPG)이 롯데렌탈의 새 주인으로 낙점된 가운데 신용평가사들은 최대주주 변경이 롯데렌탈의 신용도에 미치는 직접적인 영향은 제한적이라고 평가했다."
+          },
+          {
+            "id": "S4",
+            "text": "12일 신용평가업계에 따르면 나이스신용평가와 한국신용평가는 이날 보고서를 내고 \"롯데렌탈의 최대주주가 호텔롯데·부산롯데호텔에서 TPG로 변경되더라도 현재 신용등급에 미치는 영향은 제한적\"이라고 밝혔다."
+          },
+          {
+            "id": "S5",
+            "text": "현재 롯데렌탈의 잔존 공·사모 회사채는 2029년까지 12개 종목으로, 발행액 기준 총 9천910억원 규모로 집계된다."
+          },
+          {
+            "id": "S6",
+            "text": "나신평에 따르면 롯데렌탈의 공모채에는 지배구조 변경 제한 조항에 따른 중도상환 특약이 설정돼 있으며 해당 채권은 지난 3월 말 기준 9천610억원에 달한다."
+          },
+          {
+            "id": "S7",
+            "text": "호텔롯데와 부산롯데호텔은 전날 TPG가 설립한 특수목적회사(SPC) 렉시콘코리아홀드코에 롯데렌탈 지분 61.17%를 1조3천105억원에 매각하는 주식매매계약(SPA)을 체결했다."
+          },
+          {
+            "id": "S8",
+            "text": "앞서 1월 SK렌터카를 인수한 홍콩계 PEF 운용사 어피니티에쿼티파트너스가 롯데렌탈을 인수하기로 했지만, 공정거래위원회로부터 기업결합승인을 얻지 못하면서 매각 추진이 한 차례 무산된 바 있다."
+          },
+          {
+            "id": "S9",
+            "text": "업계에서는 TPG의 자금력과 거래 종결(클로징) 능력뿐 아니라, 롯데렌탈을 기존 시장과는 다른 관점에서 평가한 점이 최종 인수자로 선정되는 데 영향을 미친 것으로 보고 있다."
+          },
+          {
+            "id": "S10",
+            "text": "TPG는 현재 카카오모빌리티 지분 약 14%를 보유한 2대주주라는 점에서, 향후 롯데렌탈과 카카오모빌리티 간 모빌리티 사업의 시너지 가능성도 기업가치 제고 요소 가운데 하나로 보고 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:012330",
+        "symbol": "012330",
+        "name": "현대모비스",
+        "aliases": [
+          "Hyundai Mobis"
+        ],
+        "sector": "automotive",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%98%84%EB%8C%80%EB%AA%A8%EB%B9%84%EC%8A%A4+%EC%9E%90%EB%8F%99%EC%B0%A8",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002683946",
+        "https://n.news.naver.com/mnews/article/421/0009113874",
+        "https://n.news.naver.com/mnews/article/014/0005561590",
+        "https://n.news.naver.com/mnews/article/016/0002683857",
+        "https://n.news.naver.com/mnews/article/015/0005320867",
+        "https://n.news.naver.com/mnews/article/374/0000527464",
+        "https://n.news.naver.com/mnews/article/092/0002433941",
+        "https://n.news.naver.com/mnews/article/421/0009113002"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 70,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 공급, 생산, 판매, 인수"
+      ],
+      "article": {
+        "articleId": "NAVER-092-0002433941",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "흔들리는 유럽 車 공급망 파고든 중국…수출 막히자 공장·부품사로",
+        "publisher": "지디넷코리아",
+        "publishedAt": "2026-08-13T08:23:10.000Z",
+        "sourceUrl": "https://zdnet.co.kr/view/?no=20260813172239",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "中 7월 내수 21%↓·수출 88%↑…車부품사 130곳 투자·인수 유럽연합(EU)이 중국산 전기차에 관세 장벽을 세우자 중국 자동차 업체들이 현지 생산과 합작, 부품사 인수로 유럽 공략 방식을 바꾸고 있다."
+          },
+          {
+            "id": "S2",
+            "text": "13일 외신과 업계에 따르면 중국 자동차 시장 내수 부진이 장기화하면서 중국 업체들의 해외시장 공략 압력은 한층 커지고 있다."
+          },
+          {
+            "id": "S3",
+            "text": "중국승용차협회(CPCA)에 따르면 지난 7월 중국 승용차 내수 판매량은 147만대로 전년 동월 대비 21.1% 감소했다."
+          },
+          {
+            "id": "S4",
+            "text": "지리와 포드가 각각 지분을 보유하는 합작사를 통해 2028년부터 지리 EX5 등을 생산하고 유럽 시장을 겨냥한 신규 모델도 공동 개발할 계획이다."
+          },
+          {
+            "id": "S5",
+            "text": "스텔란티스와 중국 립모터의 협력 범위도 판매에서 생산으로 넓어지고 있다."
+          },
+          {
+            "id": "S6",
+            "text": "스텔란티스는 2023년 립모터 지분 21%를 인수한 데 이어 양사가 설립한 합작사 립모터인터내셔널을 통해 중국 외 지역에서 판매와 생산을 확대하고 있다."
+          },
+          {
+            "id": "S7",
+            "text": "중국 업체들은 새 공장을 처음부터 건설하지 않고도 유럽 생산거점을 확보할 수 있고, 유럽 업체들은 판매 부진으로 남아도는 생산능력을 중국 브랜드 물량으로 채울 수 있어서다."
+          },
+          {
+            "id": "S8",
+            "text": "중국 업체들의 영향력은 완성차 생산에 그치지 않고 부품 공급망으로도 확대되고 있다."
+          },
+          {
+            "id": "S9",
+            "text": "중국 자동차 산업의 유럽 진출 전선이 완성차 판매에서 현지 생산으로, 다시 부품 공급망으로 넓어지면서 EU가 중국 업체들의 현지화를 어디까지 수용하고 어떤 기준으로 관리할지가 향후 유럽 자동차 산업 경쟁력의 주요 변수로 떠오를 전망이다."
+          },
+          {
+            "id": "S10",
+            "text": "특히 경쟁 범위가 완성차 판매를 넘어 배터리와 전장, 섀시 등 부품 공급망으로 확대될 경우 현대모비스와 국내 배터리·자동차 부품업체들도 영향을 받을 수 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:329180",
+        "symbol": "329180",
+        "name": "HD현대중공업",
+        "aliases": [
+          "HD 현대중공업",
+          "에이치디현대중공업",
+          "현대중공업"
+        ],
+        "sector": "shipbuilding",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=HD%ED%98%84%EB%8C%80%EC%A4%91%EA%B3%B5%EC%97%85+%EC%A1%B0%EC%84%A0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/003/0014128105",
+        "https://n.news.naver.com/mnews/article/119/0003121854",
+        "https://n.news.naver.com/mnews/article/031/0001049790",
+        "https://n.news.naver.com/mnews/article/021/0002811526",
+        "https://n.news.naver.com/mnews/article/021/0002811516",
+        "https://n.news.naver.com/mnews/article/001/0016251649",
+        "https://n.news.naver.com/mnews/article/417/0001155381",
+        "https://n.news.naver.com/mnews/article/123/0002388417"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 101,
+      "selectionSignals": [
+        "종목 별칭이 제목에 있음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 판매, 사고"
+      ],
+      "article": {
+        "articleId": "NAVER-003-0014128105",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "노동자 끼임사망사고…현대중공업 군산조선소 압수수색",
+        "publisher": "뉴시스",
+        "publishedAt": "2026-08-14T04:46:50.000Z",
+        "sourceUrl": "https://www.newsis.com/view/NISX20260814_0003749515",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "경찰, 협력업체 사무실 등 압수수색 실시"
+          },
+          {
+            "id": "S2",
+            "text": "[군산=뉴시스] 24일 오후 4시44분께 전북 군산시 비응도동의 조선소에서 장비를 운행하던 30대 근로자가 머리가 끼어 숨졌다."
+          },
+          {
+            "id": "S3",
+            "text": "근로자가 끼임사고를 당한 장비 모습."
+          },
+          {
+            "id": "S4",
+            "text": "(사진=전북도소방본부 제공) 2026.07.24."
+          },
+          {
+            "id": "S5",
+            "text": "photo@newsis.com *재판매 및 DB 금지 [전주=뉴시스]강경호 기자 = HD현대중공업 군산조선소에서 발생한 근로자의 끼임 사고와 관련해 경찰이 조선소 등에 대한 압수수색에 나섰다."
+          },
+          {
+            "id": "S6",
+            "text": "전북경찰청 광역범죄수사대는 업무상 과실치사 혐의로 현대중공업 군산조선소와 사고로 숨진 노동자가 소속된 협력업체 사무실 등을 압수수색 중이라고 14일 밝혔다."
+          },
+          {
+            "id": "S7",
+            "text": "지난달 24일 오후 4시44분께 전북 군산시 비응도동에 위치한 현대중공업 군산조선소에서 구조물 조립·운반용 장비인 러그 취부기를 운행하던 근로자 A(30대)씨가 구조물과 취부기 사이에 머리가 끼었다."
+          },
+          {
+            "id": "S8",
+            "text": "이 사고로 A씨는 머리에 큰 부상을 입어 심정지 상태로 군산의료원으로 이송돼 치료를 받던 중 같은 날 숨졌다."
+          },
+          {
+            "id": "S9",
+            "text": "A씨는 천장이 뚫려있는 구조의 러그 취부기를 후진하던 중 사고를 당한 것으로 파악됐다."
+          },
+          {
+            "id": "S10",
+            "text": "경찰은 압수수색을 통해 자료를 확보한 뒤 안전관리 책임자들의 안전조치 이행 여부와 적절성을 검토할 계획이다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:009540",
+        "symbol": "009540",
+        "name": "HD한국조선해양",
+        "aliases": [
+          "HD 한국조선해양",
+          "에이치디한국조선해양",
+          "한국조선해양"
+        ],
+        "sector": "shipbuilding",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=HD%ED%95%9C%EA%B5%AD%EC%A1%B0%EC%84%A0%ED%95%B4%EC%96%91+%EC%A1%B0%EC%84%A0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/119/0003121854",
+        "https://n.news.naver.com/mnews/article/081/0003670526",
+        "https://n.news.naver.com/mnews/article/021/0002811526",
+        "https://n.news.naver.com/mnews/article/277/0005803228",
+        "https://n.news.naver.com/mnews/article/417/0001155381",
+        "https://n.news.naver.com/mnews/article/123/0002388417",
+        "https://n.news.naver.com/mnews/article/277/0005803186",
+        "https://n.news.naver.com/mnews/article/629/0000524501"
+      ],
+      "candidateCount": 5,
+      "selectionScore": 54,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호: 생산, 인수, 지분"
+      ],
+      "article": {
+        "articleId": "NAVER-081-0003670526",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "‘美 조선소 투자’ 한화, 국내서 美 군함 건조 길 열리나",
+        "publisher": "서울신문",
+        "publishedAt": "2026-08-14T04:27:11.000Z",
+        "sourceUrl": "https://www.seoul.co.kr/news/economy/industry/2026/08/14/20260814500126?wlog_tag3=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "필리조선소 인수로 트럼프 조건 충족"
+          },
+          {
+            "id": "S2",
+            "text": "“추가 대미 투자 사례 늘어날 전망”"
+          },
+          {
+            "id": "S3",
+            "text": "지난해 미국 필라델피아의 한화 필리조선소 크레인 옆으로 명명식을 하는 ‘스테이트 오브 메인’호가 떠 있다."
+          },
+          {
+            "id": "S4",
+            "text": "도널드 트럼프 미국 대통령이 미국 조선소에 투자하는 해외 기업에 한해 본국 선박 건조를 허용키로 하면서, 미국 현지 생산 거점을 확보한 한화가 직접적인 수혜를 받을 것으로 전망된다."
+          },
+          {
+            "id": "S5",
+            "text": "이날 서명한 각서에 따르면, 미국에 새 조선소를 동시에 건설하거나 미국 내 기존 조선소의 소유권 또는 과반 지분을 확보한 외국 조선업체가 대상이 된다."
+          },
+          {
+            "id": "S6",
+            "text": "앞서 한화오션과 한화시스템은 2024년 6월 총 1억달러(약 1380억원)을 투자해 미국 펜실베이니아주의 필리조선소 지분 100%를 공동 인수했다."
+          },
+          {
+            "id": "S7",
+            "text": "지난해에는 50억달러 추가 투자로 생산능력을 연간 10~20척으로 확대 중이다."
+          },
+          {
+            "id": "S8",
+            "text": "한화의 미국 계열사인 한화디펜스USA는 미국 사업부 오스탈USA 사업 및 운영 조직 인수도 진행 중이다."
+          },
+          {
+            "id": "S9",
+            "text": "한화가 오스탈USA를 인수하면 미국 동부의 필리조선소에 이어 남부 앨라배마주 조선소까지 확보하게 된다."
+          },
+          {
+            "id": "S10",
+            "text": "강경태 한국투자증권 연구원은 “한국 조선사들의 미국 시장 신규 및 추가 투자 사례는 더 많아질 것”이라며 “필리조선소 추가 투자를 비롯해 HD한국조선해양의 신규 투자 결정으로 인한 밸류에이션 확장을 기대한다”고 분석했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:042660",
+        "symbol": "042660",
+        "name": "한화오션",
+        "aliases": [
+          "Hanwha Ocean"
+        ],
+        "sector": "shipbuilding",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%95%9C%ED%99%94%EC%98%A4%EC%85%98+%EC%A1%B0%EC%84%A0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/417/0001155384",
+        "https://n.news.naver.com/mnews/article/081/0003670526",
+        "https://n.news.naver.com/mnews/article/031/0001049790",
+        "https://n.news.naver.com/mnews/article/021/0002811516",
+        "https://n.news.naver.com/mnews/article/003/0014127859",
+        "https://n.news.naver.com/mnews/article/374/0000527517",
+        "https://n.news.naver.com/mnews/article/001/0016251649",
+        "https://n.news.naver.com/mnews/article/421/0009114059"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 148,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 지분"
+      ],
+      "article": {
+        "articleId": "NAVER-417-0001155384",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "한화오션, 미 군함 거제 건조 길 열렸다…트럼프, 해외건조 문턱 낮춰",
+        "publisher": "동행미디어 시대",
+        "publishedAt": "2026-08-14T04:33:12.000Z",
+        "sourceUrl": "https://www.sidae.com/article/2026081413030168324",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "필리조선소 보유해 해외건조 조건 충족"
+          },
+          {
+            "id": "S2",
+            "text": "수상전투함까지 허용, 美함정시장 진출 기대"
+          },
+          {
+            "id": "S3",
+            "text": "/사진=한화오션 한화오션이 미국 정부의 미 해군 선박 해외 건조 허용 조치에 따라 거제사업장에서 미 해군 함정을 건조할 수 있는 기회를 확보할 전망이다."
+          },
+          {
+            "id": "S4",
+            "text": "가장 직접적인 수혜 후보로는 한화오션이 꼽힌다."
+          },
+          {
+            "id": "S5",
+            "text": "세부 조달 방안이 마련되면 한화오션이 국내에서 미 해군 선박을 건조할 수 있는 제도적 기반이 마련되는 셈이다."
+          },
+          {
+            "id": "S6",
+            "text": "최초 2척 이후에는 미국에서 건조해야 하는 만큼 필리조선소의 생산능력 확대가 향후 미 해군 사업 수주의 관건이 될 전망이다."
+          },
+          {
+            "id": "S7",
+            "text": "한화오션은 2024년 9월 거제사업장에서 국내 최초로 미 해군 함정 유지·보수·정비(MRO)를 수행했다."
+          },
+          {
+            "id": "S8",
+            "text": "최근에는 미 국방부·해군이 한화오션을 포함한 국내 조선사들에 보낸 전투함·급유함 건조역량 정보요청(RFI)에도 대응하며 함정 사업 확대를 추진하고 있다."
+          },
+          {
+            "id": "S9",
+            "text": "한화는 필리조선소에 이어 호주 오스탈의 미국 사업부인 '오스탈USA' 인수도 추진하며 미국 내 두 번째 생산거점 확보에 나서는 등 현지 투자를 확대하고 있다."
+          },
+          {
+            "id": "S10",
+            "text": "이번 조치가 한화오션에 특정 함정 건조 물량을 배정한 것은 아니며 개별 사업별 미국 정부 승인과 의회 통보 등을 거쳐야 한다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:010140",
+        "symbol": "010140",
+        "name": "삼성중공업",
+        "aliases": [
+          "삼성 중공업"
+        ],
+        "sector": "shipbuilding",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%82%BC%EC%84%B1%EC%A4%91%EA%B3%B5%EC%97%85+%EC%A1%B0%EC%84%A0",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/119/0003121854",
+        "https://n.news.naver.com/mnews/article/031/0001049790",
+        "https://n.news.naver.com/mnews/article/001/0016251649",
+        "https://n.news.naver.com/mnews/article/277/0005803228",
+        "https://n.news.naver.com/mnews/article/629/0000524501",
+        "https://n.news.naver.com/mnews/article/008/0005400141",
+        "https://n.news.naver.com/mnews/article/018/0006351650",
+        "https://n.news.naver.com/mnews/article/005/0001866830"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 84,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 공급, 생산, 지분"
+      ],
+      "article": {
+        "articleId": "NAVER-031-0001049790",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "“韓서 먼저 만들어도 된다”…트럼프가 K조선에 연 美 함정시장",
+        "publisher": "아이뉴스24",
+        "publishedAt": "2026-08-14T03:39:06.000Z",
+        "sourceUrl": "http://www.inews24.com/view/1995075",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "美 투자 외국 조선사, 본국서 미국 선박 최대 2척 건조 허용"
+          },
+          {
+            "id": "S2",
+            "text": "초기 물량 한국서 만들고 후속은 현지 생산 가능"
+          },
+          {
+            "id": "S3",
+            "text": "필리조선소 확보한 한화 최대 수혜…HD현대·삼성중공업도 탄력 미국 함정시장의 문이 K조선에 한층 더 넓게 열렸다."
+          },
+          {
+            "id": "S4",
+            "text": "미국 현지 생산 기반이 자리 잡기 전까지 한국에서 초기 물량을 만들어 공급할 수 있게 된 것으로, 필리조선소를 확보한 한화를 비롯해 HD현대중공업과 삼성중공업의 미국 함정시장 진출에도 속도가 붙을 전망이다."
+          },
+          {
+            "id": "S5",
+            "text": "한국 조선사 입장에서는 미국 현지 생산을 준비하면서 동시에 국내의 높은 건조 경쟁력을 활용해 미국 선박을 공급할 수 있는 길이 열린 셈이다."
+          },
+          {
+            "id": "S6",
+            "text": "한화오션은 지난해 미국 필라델피아의 필리조선소를 인수하며 이미 미국 현지 생산거점을 확보했다."
+          },
+          {
+            "id": "S7",
+            "text": "인수가 성사될 경우 한화는 필리조선소에 이어 미국 내 함정 생산 기반을 추가로 확보하게 된다."
+          },
+          {
+            "id": "S8",
+            "text": "삼성중공업 역시 미국 조선업체들과 무인수상정과 선박 유지·보수·정비(MRO) 분야 협력을 확대하며 미국 시장 진출을 준비하고 있다."
+          },
+          {
+            "id": "S9",
+            "text": "초기 2척 이후에는 미국 현지에서 생산해야 하는 만큼 현지 조선소의 생산능력 확대와 인력 확보, 공급망 구축이 핵심 과제로 남는다."
+          },
+          {
+            "id": "S10",
+            "text": "또 다른 업계 관계자는 “미국 현지 투자와 현지 생산을 전제로 한다는 점에서 단순히 국내에서 함정을 건조할 수 있게 됐다는 의미로만 봐서는 안 된다”며 “향후 미국 내 조선소의 생산능력 확대와 인력 확보, 현지 공급망 구축까지 병행해야 실질적인 수주 경쟁력으로 이어질 것”이라고 말했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:003490",
+        "symbol": "003490",
+        "name": "대한항공",
+        "aliases": [
+          "Korean Air"
+        ],
+        "sector": "airline",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EB%8C%80%ED%95%9C%ED%95%AD%EA%B3%B5+%ED%95%AD%EA%B3%B5",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/138/0002237837",
+        "https://n.news.naver.com/mnews/article/243/0000101663",
+        "https://n.news.naver.com/mnews/article/366/0001186296",
+        "https://n.news.naver.com/mnews/article/021/0002811510",
+        "https://n.news.naver.com/mnews/article/016/0002684011"
+      ],
+      "candidateCount": 5,
+      "selectionScore": 148,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 지분"
+      ],
+      "article": {
+        "articleId": "NAVER-138-0002237837",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "대한항공, 생성형 AI로 항공기 정비결함 찾는다",
+        "publisher": "디지털데일리",
+        "publishedAt": "2026-08-14T04:49:09.000Z",
+        "sourceUrl": "https://www.ddaily.co.kr/page/view/2026081409583215171",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "반복 결함·발생 패턴 분석해 현장 정비사 판단 지원"
+          },
+          {
+            "id": "S2",
+            "text": "대한항공 부산 테크센터에서 정비를 받고 있는 보잉 747-8i 항공기의 모습.[사진=대한항공]"
+          },
+          {
+            "id": "S3",
+            "text": "[디지털데일리 윤서연기자] 대한항공이 생성형 인공지능(AI)을 항공기 정비 현장에 도입한다."
+          },
+          {
+            "id": "S4",
+            "text": "수백만 건에 달하는 정비 데이터를 한곳에 모으고 AI가 과거 결함 사례와 발생 패턴까지 분석해 정비사의 판단을 돕는다."
+          },
+          {
+            "id": "S5",
+            "text": "14일 대한항공은 생성형 AI와 클라우드 기술을 활용한 정비결함 분석 시스템을 최근 구축했다고 밝혔다."
+          },
+          {
+            "id": "S6",
+            "text": "정비 현장의 의사결정을 지원하고 항공 정비 업무의 디지털 전환에 속도를 내기 위해서다."
+          },
+          {
+            "id": "S7",
+            "text": "시스템은 LG CNS와 AWS가 약 6개월간 공동 개발했다."
+          },
+          {
+            "id": "S8",
+            "text": "생성형 AI를 활용해 정비사가 방대한 정비 데이터를 직접 찾아다니지 않고 자연어로 필요한 정보를 검색·분석할 수 있도록 한 것이 특징이다."
+          },
+          {
+            "id": "S9",
+            "text": "대한항공은 그동안 분산돼 있던 90여개 데이터베이스 테이블과 수백만 건의 정비 데이터도 하나로 통합했다."
+          },
+          {
+            "id": "S10",
+            "text": "대한항공은 시스템 도입으로 기술 정보 분석과 의사결정에 걸리는 시간을 줄일 것으로 기대하고 있다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:020560",
+        "symbol": "020560",
+        "name": "아시아나항공",
+        "aliases": [
+          "아시아나 항공"
+        ],
+        "sector": "airline",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%95%84%EC%8B%9C%EC%95%84%EB%82%98%ED%95%AD%EA%B3%B5+%ED%95%AD%EA%B3%B5",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002684011",
+        "https://n.news.naver.com/mnews/article/421/0009113790",
+        "https://n.news.naver.com/mnews/article/016/0002683854",
+        "https://n.news.naver.com/mnews/article/138/0002237791",
+        "https://n.news.naver.com/mnews/article/003/0014127266",
+        "https://n.news.naver.com/mnews/article/001/0016251176",
+        "https://n.news.naver.com/mnews/article/119/0003121733",
+        "https://n.news.naver.com/mnews/article/421/0009113684"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 106,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호 없음",
+        "다른 선정 기업도 제목에 있음: 대한항공"
+      ],
+      "article": {
+        "articleId": "NAVER-016-0002683854",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "아시아나항공, ‘통합 대한항공’ 자녀 대상 승무원 진로교육 진행",
+        "publisher": "헤럴드경제",
+        "publishedAt": "2026-08-14T00:48:10.000Z",
+        "sourceUrl": "https://biz.heraldcorp.com/article/10841153?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "초등학생 자녀 객실ㆍ운항 승무원 직업 체험"
+          },
+          {
+            "id": "S2",
+            "text": "올해 두 번째 양사 임직원 가족 교류 프로그램"
+          },
+          {
+            "id": "S3",
+            "text": "13일 서울 강서구 오쇠동 아시아나항공 객실훈련원에서 아시아나항공 직원이 어린이들에게 승무원 유니폼 입는 방법을 알려주고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "[헤럴드경제=권제인 기자] 아시아나항공은 13일과 14일 양일간 서울 오쇠동 본사에서 아시아나항공과 대한항공 양사 임직원 초등학생 자녀들을 초청해 견학 및 승무원 진로 교육을 실시했다고 밝혔다."
+          },
+          {
+            "id": "S5",
+            "text": "이번 행사는 ‘오늘은 내가 승무원’을 주제로 임직원 가족 간 정서적 유대감을 높이고, 양사 임직원 간 화합을 도모하기 위해 진행됐다."
+          },
+          {
+            "id": "S6",
+            "text": "양사 임직원 가족 교류 프로그램은 지난 1월 항공사 정비 업무를 소개한 ‘Why?"
+          },
+          {
+            "id": "S7",
+            "text": "항공과학 탐험교실’에 이어 이번이 두 번째다."
+          },
+          {
+            "id": "S8",
+            "text": "진로 교육에 참가한 양사 직원과 자녀들은 평소 일반인 출입이 제한되는 객실훈련원에서 승무원의 역할을 직접 경험하는 ‘신나는 3가지 특별 미션’을 수행했다."
+          },
+          {
+            "id": "S9",
+            "text": "주요 프로그램은 ▷기내 서비스 실습, 이미지 메이킹, 기내 방송 실습, 승무원 워킹 등 ‘객실 승무원 체험’ ▷기내 화재 진압, 비상탈출 슬라이드 등 ‘안전 훈련 체험’ ▷ 운항승무원 ‘직업특강’ 등으로 구성됐다."
+          },
+          {
+            "id": "S10",
+            "text": "아시아나항공 관계자는 “이번 행사가 자녀들에게 부모 직업에 대한 자부심을 심어주는 계기가 되길 바란다”며 “앞으로도 일과 가정이 양립할 수 있는 가족친화적 기업문화를 조성하고, 통합을 앞두고 양사 구성원과 가족들이 서로 소통할 수 있는 교류 프로그램을 확대해 성공적인 통합 기틀을 마련하겠다”고 말했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:180640",
+        "symbol": "180640",
+        "name": "한진칼",
+        "aliases": [
+          "한진 칼",
+          "Hanjin KAL"
+        ],
+        "sector": "airline",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%ED%95%9C%EC%A7%84%EC%B9%BC+%ED%95%AD%EA%B3%B5+%EC%A7%80%EC%A3%BC",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002684011",
+        "https://n.news.naver.com/mnews/article/648/0000049750",
+        "https://n.news.naver.com/mnews/article/421/0009091536"
+      ],
+      "candidateCount": 3,
+      "selectionScore": 162,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 지분, 사고"
+      ],
+      "article": {
+        "articleId": "NAVER-648-0000049750",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "한진칼, 공익법인 지원에도 지분 '찔끔' 오른 이유",
+        "publisher": "비즈워치",
+        "publishedAt": "2026-08-12T01:39:12.000Z",
+        "sourceUrl": "https://news.bizwatch.co.kr/article/industry/2026/08/12/0006",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "한진칼, 특수관계자 지분 0.01%p 확대"
+          },
+          {
+            "id": "S2",
+            "text": "공익법인은 주식 사고 이명희 고문은 팔고"
+          },
+          {
+            "id": "S3",
+            "text": "이명희, 지분 1.83%...5년간 1088억 매각 한진그룹 공익법인이 예고한 대로 지주사 한진칼 지분을 사들였다."
+          },
+          {
+            "id": "S4",
+            "text": "조원태 한진칼 회장(사진)의 모친 이명희 정석기업 고문이 일부 지분을 매각하면서다."
+          },
+          {
+            "id": "S5",
+            "text": "호반그룹이 한진칼 지분을 사들이며 한진칼 경영진을 압박하는 가운데 한진칼의 소규모 지분변동도 민감해지는 분위기다."
+          },
+          {
+            "id": "S6",
+            "text": "한진칼은 지난 11일 조 회장 등 특수관계자 지분이 기존 31.15%(2079만6274주)로 기존보다 6280주(0.01%) 늘었다고 공시했다."
+          },
+          {
+            "id": "S7",
+            "text": "이 공익법인은 지난 6~7월 '올 연말까지 한진칼 지분을 취득하겠다'고 공시했고, 이번에 예고대로 한진칼 지분 매입에 나선 것이다."
+          },
+          {
+            "id": "S8",
+            "text": "1023억원 규모 한진칼 지분을 취득하겠다고 밝힌 정석물류학술재단은 연말까지 추가로 930억원 규모 지분 매입에 나설 것으로 보인다."
+          },
+          {
+            "id": "S9",
+            "text": "지난달 기준 호반그룹은 한진칼 지분 20.15%를 보유하고 있다."
+          },
+          {
+            "id": "S10",
+            "text": "한진칼 지분 보유 현황을 보면 △호반건설 11.5% △호반호텔앤리조트 8.34% △호반산업 0.17% △호반 0.15% 등으로 2022년부터 한진칼 주식 매입에 총 8782억원을 투입했다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:278470",
+        "symbol": "278470",
+        "name": "에이피알",
+        "aliases": [
+          "APR"
+        ],
+        "sector": "cosmetics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%97%90%EC%9D%B4%ED%94%BC%EC%95%8C+%ED%99%94%EC%9E%A5%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002684000",
+        "https://n.news.naver.com/mnews/article/020/0003740783",
+        "https://n.news.naver.com/mnews/article/020/0003740716",
+        "https://n.news.naver.com/mnews/article/009/0005720655",
+        "https://n.news.naver.com/mnews/article/001/0016250250",
+        "https://n.news.naver.com/mnews/article/001/0016248568",
+        "https://n.news.naver.com/mnews/article/003/0014124321",
+        "https://n.news.naver.com/mnews/article/023/0003992683"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 102,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익, 생산, 판매"
+      ],
+      "article": {
+        "articleId": "NAVER-020-0003740783",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "‘K뷰티 인기’ 날개 달고… 제조-브랜드-유통 나란히 고공행진",
+        "publisher": "동아일보",
+        "publishedAt": "2026-08-13T15:31:27.000Z",
+        "sourceUrl": "https://www.donga.com/news/Economy/article/all/20260813/134475254/2",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "한국콜마-코스맥스 실적 역대 최대"
+          },
+          {
+            "id": "S2",
+            "text": "달바-에이피알도 2분기 최고 실적"
+          },
+          {
+            "id": "S3",
+            "text": "유통업체 실리콘투, 두자릿수 성장"
+          },
+          {
+            "id": "S4",
+            "text": "K뷰티의 글로벌 인기가 이어지면서 국내 화장품 기업들이 2분기(4∼6월) 줄줄이 역대 최대 실적을 내고 있다."
+          },
+          {
+            "id": "S5",
+            "text": "국내 양대 화장품 제조자개발생산(ODM) 기업인 한국콜마와 코스맥스가 나란히 사상 최대 매출과 영업이익을 거둔 데 이어 뷰티 기업인 에이피알과 달바글로벌도 해외 판매에 힘입어 분기 최대 실적을 기록했다."
+          },
+          {
+            "id": "S6",
+            "text": "13일 화장품 업계에 따르면 한국콜마는 올해 2분기 연결 기준 매출 8613억 원, 영업이익 1103억 원을 냈다."
+          },
+          {
+            "id": "S7",
+            "text": "코스맥스도 2분기 연결 기준 매출 7949억 원, 영업이익 737억 원으로 각각 27.5%, 21.3% 증가하며 분기 기준 사상 최대 실적을 거뒀다."
+          },
+          {
+            "id": "S8",
+            "text": "영업이익은 472억 원으로 62% 늘어 매출과 영업이익 모두 분기 기준 사상 최대치였다."
+          },
+          {
+            "id": "S9",
+            "text": "앞서 에이피알은 2분기 매출이 7675억 원, 영업이익 1906억 원으로 지난해 같은 기간보다 각각 134.2%, 134.5%씩 급증했다."
+          },
+          {
+            "id": "S10",
+            "text": "양 사 모두 북미와 유럽 등 해외 시장에서 판매가 가파르게 늘어난 것이 실적 성장을 이끌었다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:090430",
+        "symbol": "090430",
+        "name": "아모레퍼시픽",
+        "aliases": [
+          "아모레 퍼시픽",
+          "Amorepacific"
+        ],
+        "sector": "cosmetics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EC%95%84%EB%AA%A8%EB%A0%88%ED%8D%BC%EC%8B%9C%ED%94%BD+%ED%99%94%EC%9E%A5%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/648/0000049837",
+        "https://n.news.naver.com/mnews/article/018/0006351653",
+        "https://n.news.naver.com/mnews/article/243/0000101625",
+        "https://n.news.naver.com/mnews/article/009/0005720870",
+        "https://n.news.naver.com/mnews/article/018/0006351289",
+        "https://n.news.naver.com/mnews/article/009/0005720655",
+        "https://n.news.naver.com/mnews/article/029/0003042292"
+      ],
+      "candidateCount": 7,
+      "selectionScore": 82,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 매출, 인수, 지분"
+      ],
+      "article": {
+        "articleId": "NAVER-009-0005720870",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "아모레등 1세대 뷰티업체 … 신사업·해외공략에 잰걸음",
+        "publisher": "매일경제",
+        "publishedAt": "2026-08-13T08:57:24.000Z",
+        "sourceUrl": "https://www.mk.co.kr/article/12126894",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "애경산업이 지난달 미국 라스베이거스에서 열린 뷰티 전시회 '코스모프로프'에 마련한 부스에 관람객이 몰렸다."
+          },
+          {
+            "id": "S2",
+            "text": "아모레퍼시픽, LG생활건강 등 2010년대 중반까지 중국을 중심으로 선전했던 1세대 뷰티 기업들이 'K뷰티 열풍'을 효과적으로 활용하기 위해 사업 다각화에 나서고 있다."
+          },
+          {
+            "id": "S3",
+            "text": "신사업과 유망 브랜드 인수를 추진하는가 하면 비핵심 자산을 매각해 자금을 마련하고 해외 공략도 강화하고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "13일 화장품 업계에 따르면 최근 아모레퍼시픽은 주름 개선에 도움을 주는 약물용 의료기기 개발 기업 하이어코퍼레이션에 지분을 투자하고 의료용 미용시장 공략에 나섰다."
+          },
+          {
+            "id": "S5",
+            "text": "양사는 피부과 시술 전용 화장품과 원료 등을 공동 개발할 계획이다."
+          },
+          {
+            "id": "S6",
+            "text": "계열사인 코스알엑스와 주력 브랜드 '라네즈' '에스트라' '헤라'를 중심으로 해외 공략도 강화하고 있다."
+          },
+          {
+            "id": "S7",
+            "text": "코스알엑스는 미국, 영국, 프랑스, 러시아 등에 제품을 수출해 지난해 매출(4562억원)의 96%를 해외에서 창출했다."
+          },
+          {
+            "id": "S8",
+            "text": "더페이스샵은 최근 미국 대형 오프라인 마트 월마트에 제품 공급을 시작했으며, 호주와 뉴질랜드에 수출을 타진 중이다."
+          },
+          {
+            "id": "S9",
+            "text": "애경산업도 올해 초 태광그룹에 인수된 후 재정비에 나섰다."
+          },
+          {
+            "id": "S10",
+            "text": "루나는 오는 11월 일본에서 팝업스토어도 열 계획이다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:483650",
+        "symbol": "483650",
+        "name": "달바글로벌",
+        "aliases": [
+          "달바 글로벌",
+          "d'Alba Global",
+          "달바"
+        ],
+        "sector": "cosmetics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=%EB%8B%AC%EB%B0%94%EA%B8%80%EB%A1%9C%EB%B2%8C+%ED%99%94%EC%9E%A5%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/016/0002684000",
+        "https://n.news.naver.com/mnews/article/018/0006351515",
+        "https://n.news.naver.com/mnews/article/020/0003740783",
+        "https://n.news.naver.com/mnews/article/020/0003740716",
+        "https://n.news.naver.com/mnews/article/374/0000527360",
+        "https://n.news.naver.com/mnews/article/009/0005720655",
+        "https://n.news.naver.com/mnews/article/001/0016250250",
+        "https://n.news.naver.com/mnews/article/029/0003042292"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 184,
+      "selectionSignals": [
+        "공식 종목명이 제목에 있음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 실적, 매출, 영업이익"
+      ],
+      "article": {
+        "articleId": "NAVER-018-0006351515",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "달바글로벌, 하반기 수익성 개선세 두드러질 것-하나",
+        "publisher": "이데일리",
+        "publishedAt": "2026-08-13T22:46:09.000Z",
+        "sourceUrl": "https://www.edaily.co.kr/news/newspath.asp?newsid=03089766645547320",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "[이데일리 권오석 기자] 하나증권이 달바글로벌(483650)에 대해 하반기 수익성 개선세가 더욱 두드러질 전망이라고 14일 밝혔다."
+          },
+          {
+            "id": "S2",
+            "text": "다만 투자의견과 목표주가는 제시하지 않았다."
+          },
+          {
+            "id": "S3",
+            "text": "(사진=하나증권) 박종대 하나증권 연구원은 “2분기 연결 매출과 영업이익은 각각 전년 대비 46%, 62% 성장한 1869억원과 472억원으로 시장 기대치(영업이익 413억원)를 넘어서는 양호한 실적을 기록했다”며 “한국과 러시아 부진(용기 부족)이 아쉽지만, 일본을 비롯해 북미와 유럽에서의 성장세가 두드러졌다”고 분석했다."
+          },
+          {
+            "id": "S4",
+            "text": "해외 오프라인 매장수가 약 9607개(전년 대비 +3539개)로 크게 늘었고, 유럽과 아세안에서는 틱톱샵 매출이 큰 폭으로 증가했다”며 “영업이익률은 마케팅비 효율화와 영업레버리지 효과로 25.3%(+2.5%포인트)까지 상승했다."
+          },
+          {
+            "id": "S5",
+            "text": "관세환급 20억원은 물류비로 차감했고, 해외 B2B매출 비중은 39%로 상승했다”고 설명했다."
+          },
+          {
+            "id": "S6",
+            "text": "하반기의 경우 전년 대비 영업이익률이 2~3%포인트 상승하면서 영업이익 증가폭이 전년 대비 75% 상승할 것으로 추정했다."
+          },
+          {
+            "id": "S7",
+            "text": "박 연구원은 “국내외 러시아가 정상화되고 마케팅비 효율화가 이뤄지고 있으며 B2B(기업간거래) 매출 비중이 상승하고 있기 때문”이라며 “무엇보다 지역별 수익성 관리를 엄격히 하고 있다”고 말했다."
+          },
+          {
+            "id": "S8",
+            "text": "그는 “향수 브랜드 쿠오카 투자는 최근 향수 수출 확대와 맞물려 브랜드·카테고리 확장 측면에서 중국 법인 설립은 신규 지역 확대 측면에서 긍정적”이라며 “달바글로벌은 화장품 멀티 브랜드 대기업을 향해 발걸음을 떼고 있다."
+          },
+          {
+            "id": "S9",
+            "text": "그러면서 “회사 측은 2026년 연간 매출 가이던스를 7250억원(기존 대비 +250억원), 영업이익률 21%로 올렸고 3분기 매출 1700억원 영업이익률 17%를 제시했다."
+          },
+          {
+            "id": "S10",
+            "text": "보수적인 수치”라며 “현재 주가는 경쟁 업체와 밸류에이션 갭을 유지하면서 주가 상승세를 이어갈 것으로 예상한다”고 덧붙였다."
+          }
+        ]
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:051900",
+        "symbol": "051900",
+        "name": "LG생활건강",
+        "aliases": [
+          "LG 생활건강",
+          "엘지생활건강"
+        ],
+        "sector": "cosmetics",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=LG%EC%83%9D%ED%99%9C%EA%B1%B4%EA%B0%95+%ED%99%94%EC%9E%A5%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/654/0000195212",
+        "https://n.news.naver.com/mnews/article/009/0005720870",
+        "https://n.news.naver.com/mnews/article/018/0006351289",
+        "https://n.news.naver.com/mnews/article/009/0005720655",
+        "https://n.news.naver.com/mnews/article/001/0016250250",
+        "https://n.news.naver.com/mnews/article/029/0003042292",
+        "https://n.news.naver.com/mnews/article/001/0016248568",
+        "https://n.news.naver.com/mnews/article/016/0002683164"
+      ],
+      "candidateCount": 8,
+      "selectionScore": 82,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 확인됨",
+        "직접 사건 신호: 매출, 인수, 지분"
+      ],
+      "article": {
+        "articleId": "NAVER-009-0005720870",
+        "runDateKst": "2026-08-14",
+        "scope": "company",
+        "title": "아모레등 1세대 뷰티업체 … 신사업·해외공략에 잰걸음",
+        "publisher": "매일경제",
+        "publishedAt": "2026-08-13T08:57:24.000Z",
+        "sourceUrl": "https://www.mk.co.kr/article/12126894",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "애경산업이 지난달 미국 라스베이거스에서 열린 뷰티 전시회 '코스모프로프'에 마련한 부스에 관람객이 몰렸다."
+          },
+          {
+            "id": "S2",
+            "text": "아모레퍼시픽, LG생활건강 등 2010년대 중반까지 중국을 중심으로 선전했던 1세대 뷰티 기업들이 'K뷰티 열풍'을 효과적으로 활용하기 위해 사업 다각화에 나서고 있다."
+          },
+          {
+            "id": "S3",
+            "text": "신사업과 유망 브랜드 인수를 추진하는가 하면 비핵심 자산을 매각해 자금을 마련하고 해외 공략도 강화하고 있다."
+          },
+          {
+            "id": "S4",
+            "text": "13일 화장품 업계에 따르면 최근 아모레퍼시픽은 주름 개선에 도움을 주는 약물용 의료기기 개발 기업 하이어코퍼레이션에 지분을 투자하고 의료용 미용시장 공략에 나섰다."
+          },
+          {
+            "id": "S5",
+            "text": "양사는 피부과 시술 전용 화장품과 원료 등을 공동 개발할 계획이다."
+          },
+          {
+            "id": "S6",
+            "text": "코스알엑스는 미국, 영국, 프랑스, 러시아 등에 제품을 수출해 지난해 매출(4562억원)의 96%를 해외에서 창출했다."
+          },
+          {
+            "id": "S7",
+            "text": "LG생활건강은 모발 브랜드 '닥터그루트', 구강용품 브랜드 '유시몰'을 중심으로 해외 공략에 속도를 내고 있다."
+          },
+          {
+            "id": "S8",
+            "text": "더페이스샵은 최근 미국 대형 오프라인 마트 월마트에 제품 공급을 시작했으며, 호주와 뉴질랜드에 수출을 타진 중이다."
+          },
+          {
+            "id": "S9",
+            "text": "애경산업도 올해 초 태광그룹에 인수된 후 재정비에 나섰다."
+          },
+          {
+            "id": "S10",
+            "text": "루나는 오는 11월 일본에서 팝업스토어도 열 계획이다."
+          }
+        ]
+      }
+    }
+  ]
+}

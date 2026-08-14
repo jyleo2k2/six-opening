@@ -14,6 +14,7 @@ import {
   processNewsCandidate,
   type NewsPipelineDependencies,
 } from "./pipeline";
+import { selectVisibleTermTreatments } from "./visible-term-treatments";
 
 const ROUTINE_REASON_CODES = new Set(["ROUTINE_OR_PROMOTIONAL"]);
 const SUBJECT_REASON_CODES = new Set([
@@ -356,8 +357,9 @@ function renderServiceNewsCard(
         `<li><span>${lineIndex + 1}</span><p>${escapeHtml(line.text)}</p></li>`,
     )
     .join("");
-  const terms = draft.termTreatments.length > 0
-    ? `<div class="term-panel"><strong>기사 속 말 배우기</strong>${draft.termTreatments.map((term) => `<p><b>${escapeHtml(term.term)}</b>${escapeHtml(term.easyText)}</p>`).join("")}</div>`
+  const visibleTerms = selectVisibleTermTreatments(draft);
+  const terms = visibleTerms.length > 0
+    ? `<div class="term-panel"><strong>기사 속 말 배우기 · 최대 3개</strong>${visibleTerms.map((term) => `<p><b>${escapeHtml(term.term)}</b>${escapeHtml(term.easyText)}</p>`).join("")}</div>`
     : "";
 
   return `<article class="service-news-card" data-case-id="${escapeHtml(item.caseId)}">

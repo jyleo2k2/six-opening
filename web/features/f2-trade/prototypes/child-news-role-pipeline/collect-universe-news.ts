@@ -47,7 +47,7 @@ async function main() {
     throw new Error("재개할 수집 결과의 runId 또는 날짜가 현재 명령과 다릅니다.");
   }
   const retrievedAt = existing?.retrievedAt ?? new Date().toISOString();
-  const sourceBasis = "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인함";
+  const sourceBasis = "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함";
   async function writeCheckpoint(candidates: readonly UniverseNewsCollection["candidates"][number][]) {
     await mkdir(dirname(outputPath), { recursive: true });
     await writeFile(
@@ -71,7 +71,7 @@ async function main() {
     async onProgress(completed, total, candidate, candidates) {
       await writeCheckpoint(candidates);
       console.log(
-        `[${completed}/${total}] ${candidate.stock.name}: ${candidate.article.title} (점수 ${candidate.selectionScore})`,
+        `[${completed}/${total}] ${candidate.stock.name}: ${candidate.article.title} (점수 ${candidate.selectionScore}, 폴백 ${candidate.fallbackCandidates?.length ?? 0}건)`,
       );
     },
   });

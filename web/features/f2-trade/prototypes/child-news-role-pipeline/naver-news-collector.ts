@@ -3,7 +3,9 @@ import type { NewsSourceArticle, NewsSourceUnit } from "./contracts";
 
 const NAVER_SEARCH_ENDPOINT = "https://search.naver.com/search.naver";
 const SEARCH_STARTS = [1, 11, 21] as const;
-const MAX_ARTICLE_CANDIDATES = 8;
+const MAX_ARTICLE_CANDIDATES = 24;
+const MAX_PIPELINE_CANDIDATES = 8;
+const MAX_PIPELINE_CANDIDATES_PER_DAY = 2;
 const MAX_SOURCE_UNITS = 10;
 const REQUEST_TIMEOUT_MS = 20_000;
 
@@ -90,6 +92,13 @@ export type CollectedStockNewsCandidate = {
   searchUrl: string;
   inspectedArticleUrls: string[];
   candidateCount: number;
+  selectionScore: number;
+  selectionSignals: string[];
+  article: NewsSourceArticle;
+  fallbackCandidates?: CollectedArticleCandidate[];
+};
+
+export type CollectedArticleCandidate = {
   selectionScore: number;
   selectionSignals: string[];
   article: NewsSourceArticle;
@@ -309,6 +318,44 @@ export function scoreArticleForStock(
   return { score, signals };
 }
 
+function publishedDayKst(value: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(value));
+}
+
+export function selectPipelineArticleCandidates(
+  articles: readonly ParsedNaverArticle[],
+  stock: Pick<StockEducation, "name" | "searchAliases">,
+  universe: readonly Pick<StockEducation, "name" | "searchAliases">[],
+  runDateKst: string,
+) {
+  const ranked = articles
+    .map((article) => ({
+      article,
+      publishedDayKst: publishedDayKst(article.publishedAt),
+      ...scoreArticleForStock(article, stock, universe, runDateKst),
+    }))
+    .sort((left, right) =>
+      right.publishedDayKst.localeCompare(left.publishedDayKst) ||
+      right.score - left.score ||
+      new Date(right.article.publishedAt).getTime() - new Date(left.article.publishedAt).getTime(),
+    );
+  const countByDay = new Map<string, number>();
+  const selected: typeof ranked = [];
+  for (const candidate of ranked) {
+    const dayCount = countByDay.get(candidate.publishedDayKst) ?? 0;
+    if (dayCount >= MAX_PIPELINE_CANDIDATES_PER_DAY) continue;
+    selected.push(candidate);
+    countByDay.set(candidate.publishedDayKst, dayCount + 1);
+    if (selected.length >= MAX_PIPELINE_CANDIDATES) break;
+  }
+  return selected;
+}
+
 function sourceUnitScore(segment: string, index: number, stock: Pick<StockEducation, "name" | "searchAliases">) {
   const hasCompany = textMentionsStock(segment, stock);
   const materialCount = signalMatches(segment, MATERIAL_SIGNALS).length;
@@ -437,16 +484,18 @@ async function collectForStock(
     const errors = settled.flatMap((result) => result.status === "rejected" ? [String(result.reason)] : []);
     throw new Error(`${stock.name}: 기사 본문을 읽지 못했습니다. ${errors.join(" | ")}`);
   }
-  const ranked = parsed
-    .map((article) => ({
-      article,
-      ...scoreArticleForStock(article, stock, universe, runDateKst),
-    }))
-    .sort((left, right) =>
-      right.score - left.score ||
-      new Date(right.article.publishedAt).getTime() - new Date(left.article.publishedAt).getTime(),
-    );
+  const ranked = selectPipelineArticleCandidates(parsed, stock, universe, runDateKst);
   const selected = ranked[0];
+  const toArticle = (candidate: typeof selected): NewsSourceArticle => ({
+    articleId: candidate.article.articleId,
+    runDateKst,
+    scope: "company",
+    title: candidate.article.title,
+    publisher: candidate.article.publisher,
+    publishedAt: candidate.article.publishedAt,
+    sourceUrl: candidate.article.sourceUrl,
+    sourceUnits: selectSourceUnits(candidate.article, stock),
+  });
   return {
     stock: {
       stockId: stock.id,
@@ -461,16 +510,12 @@ async function collectForStock(
     candidateCount: parsed.length,
     selectionScore: selected.score,
     selectionSignals: selected.signals,
-    article: {
-      articleId: selected.article.articleId,
-      runDateKst,
-      scope: "company",
-      title: selected.article.title,
-      publisher: selected.article.publisher,
-      publishedAt: selected.article.publishedAt,
-      sourceUrl: selected.article.sourceUrl,
-      sourceUnits: selectSourceUnits(selected.article, stock),
-    },
+    article: toArticle(selected),
+    fallbackCandidates: ranked.slice(1).map((candidate) => ({
+      selectionScore: candidate.score,
+      selectionSignals: candidate.signals,
+      article: toArticle(candidate),
+    })),
   };
 }
 
@@ -516,7 +561,7 @@ export async function collectLatestUniverseNews(
     runId: options.runId,
     runDateKst: options.runDateKst,
     retrievedAt: new Date().toISOString(),
-    sourceBasis: "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인함",
+    sourceBasis: "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함",
     candidates,
   };
 }
