@@ -169,6 +169,26 @@ node features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs --
 
 이 10건 역사적 실행에서는 실제 서비스 저장 연결을 하지 않았다. 이후 51종목 실행은 51건 완료·기술 오류 0건을 별도 조건으로 두고, 그 실행에서 통과한 기사만 수동 적재한다.
 
+## 주가와 연결해 쉽게 읽는 골든 뉴스 10건
+
+기존 목업과 자유 요약 결과를 바로 운영 계약으로 쓰지 않고, 먼저 사람이 문안 방향을 검수할 수 있는 골든 10건을 만든다. 실적 외에도 생산설비, 합병, 부분파업, 배당, 해외 렌탈 성장, 최대주주 변경, 실제 주가 움직임과 시장 시황을 포함한다.
+
+```powershell
+cd web
+npx tsx features/f2-trade/prototypes/child-news-role-pipeline/price-linked-news.test.ts
+npx tsx features/f2-trade/prototypes/child-news-role-pipeline/generate-price-linked-review.ts
+```
+
+출력은 `reports/price-linked-news-golden-2026-08-13/`에 JSON과 HTML로 생성된다.
+
+- 종목 화면과 상세 화면은 같은 `headline`을 사용한다.
+- 상세의 세 줄은 서로 다른 `factKey`와 원문 근거 ID를 가져야 하며 제목 문장을 그대로 반복하지 않는다.
+- `%`, `억 원`, `조 원`은 그대로 두고 금융용어는 없애지 않은 채 별도 설명한다.
+- `왜 주가와 관련 있어?`는 기사에서 확인된 연결과 사건 유형에 따른 교육 설명을 구분한다.
+- 코스피 시장 뉴스는 개별 종목의 빈자리를 채우는 폴백으로 쓰지 않는다.
+- 입찰 참여처럼 계약이 확정되지 않은 사건은 중요해 보여도 서비스 카드를 만들지 않는다.
+- 이 골든 문안이 사람 검수를 통과하기 전에는 기존 AI 프롬프트·DB 적재 계약에 연결하지 않는다.
+
 ## 운영 연결 전 남은 일
 
 1. 51종목 비교 HTML 사람 검수와 통과·거부 이견 해결

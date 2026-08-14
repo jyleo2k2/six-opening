@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": 1,
+  "title": "주가와 연결해 쉽게 읽는 어린이 뉴스 · 골든 10건",
+  "generatedAt": "2026-08-14T01:56:05.412Z",
+  "caseCount": 10,
+  "readyCount": 9,
+  "rejectedCount": 1,
+  "cases": [
+    {
+      "caseId": "market-kospi-close",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "daily-2026-08-13",
+        "caseId": "01-market-close-kospi-definition"
+      },
+      "scope": "market",
+      "stockIds": [],
+      "companyNames": [],
+      "eventType": "observed_market_move",
+      "headline": {
+        "text": "코스피, 3.56% 올라 6813.34로 마감",
+        "sourceIds": [
+          "S1"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "kospi_points",
+          "text": "전날보다 234.30포인트 올랐어요.",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "factKey": "kosdaq_close",
+          "text": "코스닥도 0.29% 오른 1419.4였어요.",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "factKey": "exchange_rate",
+          "text": "원·달러 환율은 7.7원 내렸어요.",
+          "sourceIds": [
+            "S3"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "market_index",
+        "basis": "event_education",
+        "text": "코스피는 국내 대표 기업들의 주가 흐름을 모아 보여주는 숫자예요.",
+        "sourceIds": [
+          "S1"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "코스피",
+          "text": "국내 대표 기업들의 주가 흐름을 모은 숫자",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "term": "코스닥",
+          "text": "성장 기업이 많이 모인 국내 주식시장의 숫자",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "term": "환율",
+          "text": "서로 다른 나라 돈을 바꾸는 비율",
+          "sourceIds": [
+            "S3"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "N1001",
+        "runDateKst": "2026-08-13",
+        "scope": "market",
+        "title": "상승 마감한 코스피·코스닥",
+        "publisher": "뉴스핌",
+        "publishedAt": "2026-08-13T06:49:00.000Z",
+        "sourceUrl": "https://www.newspim.com/news/view/20260813001115",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "13일 코스피는 전날보다 234.30포인트(3.56%) 오른 6813.34에 마감했다."
+          },
+          {
+            "id": "S2",
+            "text": "같은 날 코스닥은 2.46포인트(0.29%) 오른 1419.4에 마감했다."
+          },
+          {
+            "id": "S3",
+            "text": "서울 외환시장에서 원·달러 환율은 7.7원 내린 1416.1원에 마감했다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "samsung-pune-production",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "daily-2026-08-13",
+        "caseId": "02-samsung-pune-production-line"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:005930"
+      ],
+      "companyNames": [
+        "삼성전자"
+      ],
+      "eventType": "sales_or_production",
+      "headline": {
+        "text": "삼성전자, 인도에 AI 냉방 설비 생산라인 완공",
+        "sourceIds": [
+          "S1"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "facility_area",
+          "text": "생산시설 면적은 1만3826제곱미터예요.",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "factKey": "annual_capacity",
+          "text": "한 해 최대 6500대를 생산할 수 있어요.",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "factKey": "construction_period",
+          "text": "설비 구축을 시작한 지 약 6개월 만이에요.",
+          "sourceIds": [
+            "S3"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "production_capacity",
+        "basis": "event_education",
+        "text": "생산할 수 있는 제품 수가 늘면 앞으로의 판매 규모와 연결될 수 있어요.",
+        "sourceIds": [
+          "S1",
+          "S2"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "데이터센터",
+          "text": "많은 컴퓨터가 데이터를 저장하고 처리하는 시설",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "term": "생산라인",
+          "text": "제품을 순서대로 만드는 설비와 작업 공간",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "term": "제곱미터",
+          "text": "가로 1미터와 세로 1미터로 만든 넓이의 단위",
+          "sourceIds": [
+            "S2"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "N1002",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "삼성 印 푸네에 ‘AI 냉각기지’…연 6500대 쏟아낸다",
+        "publisher": "에너지경제신문",
+        "publishedAt": "2026-08-13T00:51:00.000Z",
+        "sourceUrl": "https://www.ekn.kr/web/view.php?key=20260813025512326",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "삼성전자는 인도 푸네에 데이터센터용 냉방·공기관리 설비 생산라인을 완공했다."
+          },
+          {
+            "id": "S2",
+            "text": "생산시설 면적은 1만3826제곱미터이고, 냉방 설비를 연간 최대 6500대 생산할 수 있다."
+          },
+          {
+            "id": "S3",
+            "text": "삼성전자는 올해 초 설비 구축을 시작해 약 6개월 만에 양산 체계를 갖췄다고 밝혔다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "korean-air-asiana-merger",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "daily-2026-08-12",
+        "caseId": "02-airline-merger"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:003490",
+        "KRX:020560"
+      ],
+      "companyNames": [
+        "대한항공",
+        "아시아나항공"
+      ],
+      "eventType": "merger_or_ownership",
+      "headline": {
+        "text": "대한항공·아시아나항공, 12월 합병 예정",
+        "sourceIds": [
+          "S1",
+          "S3"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "shareholder_vote",
+          "text": "아시아나 주주총회에서 합병안이 통과됐어요.",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "factKey": "approval_rate",
+          "text": "참석 주주의 99.3%가 찬성했어요.",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "factKey": "launch_date",
+          "text": "통합 대한항공은 12월 17일 출범할 예정이에요.",
+          "sourceIds": [
+            "S3"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "business_combination",
+        "basis": "event_education",
+        "text": "합병은 회사의 크기와 운영 방식을 크게 바꾸는 일이어서 주가와 연결돼요.",
+        "sourceIds": [
+          "S1",
+          "S3"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "합병",
+          "text": "둘 이상의 회사가 하나의 회사로 합쳐지는 일",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "term": "주주총회",
+          "text": "주식을 가진 사람들이 회사의 중요한 일을 결정하는 회의",
+          "sourceIds": [
+            "S1"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "N0085",
+        "runDateKst": "2026-08-12",
+        "scope": "company",
+        "title": "대한-아시아나, 진짜 한 항공사로…12월 '통합 대한항공' 출범",
+        "publisher": "MBN",
+        "publishedAt": "2026-08-12T01:31:00.000Z",
+        "sourceUrl": "http://mbn.mk.co.kr/pages/news/newsView.php?category=mbn00009&news_seq_no=5211913",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "아시아나항공은 12일 임시 주주총회에서 대한항공과의 합병안을 가결했다고 밝혔다."
+          },
+          {
+            "id": "S2",
+            "text": "아시아나항공이 공개한 주주총회 참석률은 81.9%, 합병안 찬성률은 99.3%였다."
+          },
+          {
+            "id": "S3",
+            "text": "두 회사는 12월 17일 통합 대한항공을 출범할 예정이라고 밝혔다."
+          },
+          {
+            "id": "S4",
+            "text": "대한항공은 2020년 11월 아시아나항공 인수를 공식화한 뒤 국내외 경쟁 당국의 기업결합 심사를 거쳤다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "hyundai-partial-strike",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "daily-2026-08-12",
+        "caseId": "06-automaker-strike"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:005380"
+      ],
+      "companyNames": [
+        "현대차"
+      ],
+      "eventType": "material_operational_risk",
+      "headline": {
+        "text": "현대차 노조, 네 번째 부분파업 시작",
+        "sourceIds": [
+          "S1"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "strike_start",
+          "text": "노조가 12일부터 네 번째 부분파업에 들어갔어요.",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "factKey": "production_risk",
+          "text": "파업은 자동차 생산 일정에 영향을 줄 수 있어요.",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "factKey": "outcome_unknown",
+          "text": "하반기 판매 결과는 아직 확인되지 않았어요.",
+          "sourceIds": [
+            "S3"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "operational_continuity",
+        "basis": "event_education",
+        "text": "생산이 멈추거나 늦어지면 판매할 차량 수와 비용에 영향을 줄 수 있어요.",
+        "sourceIds": [
+          "S1",
+          "S2"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "노동조합",
+          "text": "일하는 사람들이 근무 조건을 함께 논의하려 만든 모임",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "term": "부분파업",
+          "text": "일부 시간이나 업무만 멈추는 파업",
+          "sourceIds": [
+            "S1"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "N0263",
+        "runDateKst": "2026-08-12",
+        "scope": "company",
+        "title": "현대차 노조, 오늘부터 4차 부분파업 돌입",
+        "publisher": "뉴데일리경제",
+        "publishedAt": "2026-08-12T01:26:00.000Z",
+        "sourceUrl": "https://biz.newdaily.co.kr/site/data/html/2026/08/12/2026081200084.html",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "현대자동차 노동조합은 12일부터 네 번째 부분파업에 들어갔다."
+          },
+          {
+            "id": "S2",
+            "text": "이번 파업은 현대자동차의 차량 생산 일정에 직접 영향을 줄 수 있는 운영 위험이다."
+          },
+          {
+            "id": "S3",
+            "text": "기사에는 하반기 신차 판매와 실적에 대한 전망도 포함됐지만 아직 관측된 결과는 아니다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "samyang-interim-dividend",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "universe-2026-08-13",
+        "stockName": "삼양식품"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:003230"
+      ],
+      "companyNames": [
+        "삼양식품"
+      ],
+      "eventType": "capital_or_dividend",
+      "headline": {
+        "text": "삼양식품, 올해 중간배당 결정",
+        "sourceIds": [
+          "S1"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "dividend_per_share",
+          "text": "보통주 1주마다 현금 3200원을 지급해요.",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "factKey": "dividend_yield",
+          "text": "주가와 비교한 배당 비율은 0.3%예요.",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "factKey": "total_dividend",
+          "text": "전체 배당금은 약 241억 원이에요.",
+          "sourceIds": [
+            "S2"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "shareholder_return",
+        "basis": "event_education",
+        "text": "배당은 회사가 가진 돈을 주주에게 나누는 결정이라 주가와 연결돼요.",
+        "sourceIds": [
+          "S1",
+          "S2"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "중간배당",
+          "text": "한 해가 끝나기 전에 주주에게 먼저 주는 배당",
+          "sourceIds": [
+            "S1"
+          ]
+        },
+        {
+          "term": "보통주",
+          "text": "회사의 주인이 될 권리를 나타내는 일반적인 주식",
+          "sourceIds": [
+            "S1"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "NAVER-016-0002683039",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "삼양식품, 주당 3200원 현금배당 결정",
+        "publisher": "헤럴드경제",
+        "publishedAt": "2026-08-12T07:12:13.000Z",
+        "sourceUrl": "https://biz.heraldcorp.com/article/10839141?ref=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "[헤럴드경제=증권부] 삼양식품은 보통주 1주당 3200원의 현금 중간배당을 결정했다고 12일 공시했다."
+          },
+          {
+            "id": "S2",
+            "text": "시가배당율은 0.3%이며 배당금총액은 241억564만원이다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "jyp-price-reaction",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "universe-2026-08-13",
+        "stockName": "JYP Ent."
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:035900"
+      ],
+      "companyNames": [
+        "JYP Ent."
+      ],
+      "eventType": "observed_market_move",
+      "headline": {
+        "text": "JYP Ent., 실적 발표 뒤 주가 11.20% 하락",
+        "sourceIds": [
+          "S1",
+          "S2"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "closing_price",
+          "text": "13일 주가는 4만850원에 마감했어요.",
+          "sourceIds": [
+            "S2"
+          ]
+        },
+        {
+          "factKey": "operating_profit",
+          "text": "2분기 영업이익은 310억 원이었어요.",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        {
+          "factKey": "profit_change",
+          "text": "지난해 같은 기간보다 41.4% 줄었어요.",
+          "sourceIds": [
+            "S3"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "observed_price_move",
+        "basis": "article_fact",
+        "text": "기사에서는 실적 부진과 재계약 불확실성을 하락 배경으로 전했어요.",
+        "sourceIds": [
+          "S1"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "영업이익",
+          "text": "회사가 본업으로 벌어 사업 비용을 빼고 남긴 금액",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        {
+          "term": "재계약",
+          "text": "끝나가는 계약을 다시 이어서 맺는 일",
+          "sourceIds": [
+            "S1"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "NAVER-001-0016250291",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "[특징주] JYP엔터, 2분기 부진·트와이스 재계약 불확실성에 급락(종합)",
+        "publisher": "연합뉴스",
+        "publishedAt": "2026-08-13T06:47:47.000Z",
+        "sourceUrl": "https://www.yna.co.kr/view/AKR20260813044351008?input=1195m",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "(서울=연합뉴스) 임은진 기자 = JYP엔터테인먼트(JYP Ent.)가 13일 부진한 2분기 실적과 트와이스 재계약 불확실성 등의 영향에 11% 넘게 하락했다."
+          },
+          {
+            "id": "S2",
+            "text": "한국거래소에 따르면 이날 JYP Ent.는 전 거래일 대비 11.20% 내린 4만850원에 거래를 마쳤다."
+          },
+          {
+            "id": "S3",
+            "text": "앞서 JYP Ent.는 2분기 연결 기준 영업이익이 310억원으로, 지난해 동기보다 41.4% 감소한 것으로 잠정 집계됐다고 전날 공시했다."
+          },
+          {
+            "id": "S4",
+            "text": "이는 연합인포맥스가 집계한 시장 전망치 378억원을 18% 하회한 수준이다."
+          },
+          {
+            "id": "S5",
+            "text": "이 영향에 이날 증권가는 잇달아 목표주가를 내렸다."
+          },
+          {
+            "id": "S6",
+            "text": "메리츠증권은 7만9천원에서 6만5천원으로, SK증권은 7만5천원에서 6만6천원으로, NH투자증권은 8만3천원에서 6만9천원으로, 삼성증권은 7만7천원에서 6만2천원으로, 하나증권은 7만9천원에서 5만8천원으로 각각 하향 조정했다."
+          },
+          {
+            "id": "S7",
+            "text": "박준형 SK증권 연구원은 JYP Ent."
+          },
+          {
+            "id": "S8",
+            "text": "2분기 실적에 대해 \"앨범 매출은 주요 아티스트들의 신보 발매로 증가했지만, 작년 동기 스트레이키즈 공연에 따른 높은 기저 효과로 공연과 MD(굿즈 상품) 매출이 감소한 영향\"이라고 짚었다."
+          },
+          {
+            "id": "S9",
+            "text": "이어 그는 \"스트레이키즈의 군 입대와 트와이스 재계약 불확실성은 중장기 실적에 부담 요인\"이라며 \"특히 트와이스의 향후 재계약 여부뿐만 아니라 활동 및 컴백 주기의 가시성이 낮아 향후 실적 추정에 보수적인 접근이 필요하다\"고 말했다."
+          },
+          {
+            "id": "S10",
+            "text": "이화정 NH투자증권 연구원은 \"트와이스의 완전체 활동 재개 시점에 대한 가시성이 다소 낮아졌다\"면서 이에 따라 목표 주가수익비율(PER)을 기존 23배에서 21배로 낮췄다고 전했다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "coway-thailand-rental",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "universe-2026-08-13",
+        "stockName": "코웨이"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:021240"
+      ],
+      "companyNames": [
+        "코웨이"
+      ],
+      "eventType": "sales_or_production",
+      "headline": {
+        "text": "코웨이, 태국 렌탈 제품 50만 대 눈앞",
+        "sourceIds": [
+          "S4"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "sales_background",
+          "text": "정수기 판매와 브랜드 인지도가 함께 늘었어요.",
+          "sourceIds": [
+            "S3"
+          ]
+        },
+        {
+          "factKey": "us_revenue_gap",
+          "text": "미국 법인과 매출 차이는 9억 원까지 줄었어요.",
+          "sourceIds": [
+            "S5"
+          ]
+        },
+        {
+          "factKey": "growth_hub",
+          "text": "회사는 태국을 두 번째 해외 성장 거점으로 키울 계획이에요.",
+          "sourceIds": [
+            "S7"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "recurring_sales",
+        "basis": "event_education",
+        "text": "렌탈 계약 수는 매달 반복해서 들어오는 매출 규모와 연결돼요.",
+        "sourceIds": [
+          "S4",
+          "S5"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "렌탈 계정",
+          "text": "고객이 제품을 빌려 쓰기로 맺은 계약 수",
+          "sourceIds": [
+            "S4"
+          ]
+        },
+        {
+          "term": "법인",
+          "text": "회사가 다른 나라에서 사업하려고 세운 별도 회사",
+          "sourceIds": [
+            "S5"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "NAVER-030-0003456388",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "코웨이, 태국 렌탈 계정 50만개 돌파 임박…“제2의 말레이시아로 키운다”",
+        "publisher": "전자신문",
+        "publishedAt": "2026-08-11T07:01:33.000Z",
+        "sourceUrl": "https://www.etnews.com/20260811000228",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "코웨이가 태국 시장에서 판매 중인 정수기 '네오 플러스'"
+          },
+          {
+            "id": "S2",
+            "text": "코웨이가 태국에서 고성장을 이어가고 있다."
+          },
+          {
+            "id": "S3",
+            "text": "정수기 판매 호조와 브랜드 인지도 상승을 기반으로 태국 법인을 말레이시아에 이어 '제2의 성장 동력'으로 육성한다는 계획이다."
+          },
+          {
+            "id": "S4",
+            "text": "코웨이 태국 법인은 렌탈 계정 50만대 돌파를 앞두고 있다."
+          },
+          {
+            "id": "S5",
+            "text": "코웨이 해외 사업 2위인 미국 법인(669억원)과 매출 격차를 9억원으로 좁혔다."
+          },
+          {
+            "id": "S6",
+            "text": "서장원 코웨이 대표는 2분기 실적 설명회에서 “판매 인력 세일즈 노하우와 제품 혁신성, 프로모션 효과 등이 어우러져 예상보다 정수기가 굉장히 많이 팔렸다”고 소개했다."
+          },
+          {
+            "id": "S7",
+            "text": "코웨이는 태국을 해외 최대 매출처인 말레이시아에 이은 핵심 거점으로 키운다는 방침이다."
+          },
+          {
+            "id": "S8",
+            "text": "코웨이는 중장기 성장 기반을 마련하기 위해 마케팅·영업·조직 투자 등에 비용을 선제 집행한 만큼 하반기 영업이익률을 끌어올릴 수 있을 것으로 관측했다."
+          },
+          {
+            "id": "S9",
+            "text": "김순태 코웨이 최고재무책임자(CFO)는 “선제 투자를 바탕으로 견조한 판매 성장과 렌탈 계정 확대를 이어가 하반기에는 태국 법인 수익성도 개선될 것으로 기대하고 있다”고 말했다."
+          },
+          {
+            "id": "S10",
+            "text": "코웨이 태국 법인 2분기 실적 추이 - 단위: 원."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "lotte-rental-owner-change",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "universe-2026-08-13",
+        "stockName": "롯데렌탈"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:089860"
+      ],
+      "companyNames": [
+        "롯데렌탈"
+      ],
+      "eventType": "merger_or_ownership",
+      "headline": {
+        "text": "롯데렌탈 최대주주, TPG로 바뀔 예정",
+        "sourceIds": [
+          "S3",
+          "S4"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "stake_sale",
+          "text": "호텔롯데 등은 지분 61.17%를 팔기로 계약했어요.",
+          "sourceIds": [
+            "S7"
+          ]
+        },
+        {
+          "factKey": "deal_value",
+          "text": "계약 금액은 1조3105억 원이에요.",
+          "sourceIds": [
+            "S7"
+          ]
+        },
+        {
+          "factKey": "credit_view",
+          "text": "신용평가사는 등급 영향이 제한적이라고 봤어요.",
+          "sourceIds": [
+            "S4"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "ownership_and_credit",
+        "basis": "event_education",
+        "text": "최대주주 변경은 회사의 중요한 결정 방식과 자금 조달에 연결될 수 있어요.",
+        "sourceIds": [
+          "S3",
+          "S4",
+          "S7"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "최대주주",
+          "text": "회사 주식을 가장 많이 가진 주주",
+          "sourceIds": [
+            "S3",
+            "S4"
+          ]
+        },
+        {
+          "term": "지분",
+          "text": "회사 전체 주식 가운데 누가 가진 몫",
+          "sourceIds": [
+            "S7"
+          ]
+        },
+        {
+          "term": "신용등급",
+          "text": "회사가 빌린 돈을 갚을 힘을 나타낸 등급",
+          "sourceIds": [
+            "S4"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "NAVER-001-0016247793",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "TPG 품에 안긴 롯데렌탈…\"매각대금에도 롯데그룹 신용도 영향 제한적\"",
+        "publisher": "연합뉴스",
+        "publishedAt": "2026-08-12T07:05:28.000Z",
+        "sourceUrl": "https://www.yna.co.kr/view/AKR20260812124200008?input=1195m",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "롯데렌탈에 대해서도 \"최대주주 변경, 신용도 영향 제한적\""
+          },
+          {
+            "id": "S2",
+            "text": "'경영권 변경' 공모채 9천600억원 중도상환 특약…\"유동성 여력은 충분\""
+          },
+          {
+            "id": "S3",
+            "text": "(서울=연합뉴스) 정회인 기자 = 글로벌 사모펀드(PEF) 운용사 텍사스퍼시픽그룹(TPG)이 롯데렌탈의 새 주인으로 낙점된 가운데 신용평가사들은 최대주주 변경이 롯데렌탈의 신용도에 미치는 직접적인 영향은 제한적이라고 평가했다."
+          },
+          {
+            "id": "S4",
+            "text": "12일 신용평가업계에 따르면 나이스신용평가와 한국신용평가는 이날 보고서를 내고 \"롯데렌탈의 최대주주가 호텔롯데·부산롯데호텔에서 TPG로 변경되더라도 현재 신용등급에 미치는 영향은 제한적\"이라고 밝혔다."
+          },
+          {
+            "id": "S5",
+            "text": "현재 롯데렌탈의 잔존 공·사모 회사채는 2029년까지 12개 종목으로, 발행액 기준 총 9천910억원 규모로 집계된다."
+          },
+          {
+            "id": "S6",
+            "text": "나신평에 따르면 롯데렌탈의 공모채에는 지배구조 변경 제한 조항에 따른 중도상환 특약이 설정돼 있으며 해당 채권은 지난 3월 말 기준 9천610억원에 달한다."
+          },
+          {
+            "id": "S7",
+            "text": "호텔롯데와 부산롯데호텔은 전날 TPG가 설립한 특수목적회사(SPC) 렉시콘코리아홀드코에 롯데렌탈 지분 61.17%를 1조3천105억원에 매각하는 주식매매계약(SPA)을 체결했다."
+          },
+          {
+            "id": "S8",
+            "text": "앞서 1월 SK렌터카를 인수한 홍콩계 PEF 운용사 어피니티에쿼티파트너스가 롯데렌탈을 인수하기로 했지만, 공정거래위원회로부터 기업결합승인을 얻지 못하면서 매각 추진이 한 차례 무산된 바 있다."
+          },
+          {
+            "id": "S9",
+            "text": "업계에서는 TPG의 자금력과 거래 종결(클로징) 능력뿐 아니라, 롯데렌탈을 기존 시장과는 다른 관점에서 평가한 점이 최종 인수자로 선정되는 데 영향을 미친 것으로 보고 있다."
+          },
+          {
+            "id": "S10",
+            "text": "TPG는 현재 카카오모빌리티 지분 약 14%를 보유한 2대주주라는 점에서, 향후 롯데렌탈과 카카오모빌리티 간 모빌리티 사업의 시너지 가능성도 기업가치 제고 요소 가운데 하나로 보고 있다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "dalba-quarterly-growth",
+      "status": "ready_for_human_review",
+      "articleRef": {
+        "fixture": "universe-2026-08-13",
+        "stockName": "달바글로벌"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:483650"
+      ],
+      "companyNames": [
+        "달바글로벌"
+      ],
+      "eventType": "earnings",
+      "headline": {
+        "text": "달바글로벌, 2분기 영업이익 61.6% 증가",
+        "sourceIds": [
+          "S4"
+        ]
+      },
+      "summaryLines": [
+        {
+          "factKey": "operating_profit",
+          "text": "영업이익은 472억4100만 원이었어요.",
+          "sourceIds": [
+            "S4"
+          ]
+        },
+        {
+          "factKey": "revenue",
+          "text": "매출은 1868억6100만 원으로 45.6% 늘었어요.",
+          "sourceIds": [
+            "S5"
+          ]
+        },
+        {
+          "factKey": "overseas_revenue",
+          "text": "해외 매출은 1415억 원으로 74% 늘었어요.",
+          "sourceIds": [
+            "S9"
+          ]
+        }
+      ],
+      "priceConnection": {
+        "kind": "business_performance",
+        "basis": "event_education",
+        "text": "판매와 영업이익이 함께 늘었는지는 회사의 사업 흐름과 연결돼요.",
+        "sourceIds": [
+          "S4",
+          "S5",
+          "S9"
+        ]
+      },
+      "termExplanations": [
+        {
+          "term": "매출",
+          "text": "제품이나 서비스를 팔아 받은 전체 금액",
+          "sourceIds": [
+            "S5"
+          ]
+        },
+        {
+          "term": "영업이익",
+          "text": "회사가 본업으로 벌어 사업 비용을 빼고 남긴 금액",
+          "sourceIds": [
+            "S4"
+          ]
+        },
+        {
+          "term": "연결 기준",
+          "text": "본사와 자회사의 실적을 합쳐 계산한 기준",
+          "sourceIds": [
+            "S4"
+          ]
+        }
+      ],
+      "article": {
+        "articleId": "NAVER-421-0009112352",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "달바글로벌, 2분기 영업익 472억 '역대 최대'…해외 매출 76%",
+        "publisher": "뉴스1",
+        "publishedAt": "2026-08-13T04:49:37.000Z",
+        "sourceUrl": "https://www.news1.kr/industry/general-industry/6257951",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "매출도 1869억으로 최대…북미·유럽 판매 확대"
+          },
+          {
+            "id": "S2",
+            "text": "달바글로벌 제품 (달바글로벌 제공)"
+          },
+          {
+            "id": "S3",
+            "text": "(서울=뉴스1) 정윤영 기자 = 달바글로벌이 해외 화장품 판매 확대에 힘입어 올해 2분기 역대 최대 분기 매출과 영업이익을 기록했다."
+          },
+          {
+            "id": "S4",
+            "text": "13일 달바글로벌은 금융감독원 전자공시시스템(DART)을 통해 올해 2분기 연결 기준 영업이익이 472억 4100만원으로 전년 동기 대비 61.6% 증가했다고 공시했다."
+          },
+          {
+            "id": "S5",
+            "text": "같은 기간 매출은 1868억 6100만 원으로 45.6% 늘었으며 당기순이익은 380억 6000만 원으로 92.2% 증가했다."
+          },
+          {
+            "id": "S6",
+            "text": "직전 분기와 비교하면 매출은 9.1%, 영업이익은 4.8%, 당기순이익은 4.7% 각각 늘었다."
+          },
+          {
+            "id": "S7",
+            "text": "2분기 영업이익률은 25.3%로 전년 동기보다 2.5%포인트(p) 상승했다."
+          },
+          {
+            "id": "S8",
+            "text": "영업이익은 923억 3100만 원으로 55.8%, 당기순이익은 743억 9700만 원으로 67.0% 각각 늘었다."
+          },
+          {
+            "id": "S9",
+            "text": "달바글로벌이 이날 공개한 실적 자료에 따르면 2분기 해외 매출은 1415억 원으로 전년 동기보다 74% 증가했다."
+          },
+          {
+            "id": "S10",
+            "text": "달바글로벌은 화이트 트러플을 핵심 원료로 사용하는 프리미엄 비건 스킨케어 브랜드 '달바'를 운영하는 화장품 기업이다."
+          }
+        ]
+      }
+    },
+    {
+      "caseId": "hanwha-ocean-tender-not-awarded",
+      "status": "rejected",
+      "articleRef": {
+        "fixture": "universe-2026-08-13",
+        "stockName": "한화오션"
+      },
+      "scope": "company",
+      "stockIds": [
+        "KRX:042660"
+      ],
+      "companyNames": [
+        "한화오션"
+      ],
+      "eventType": "binding_contract",
+      "reasonCodes": [
+        "CONTRACT_NOT_AWARDED",
+        "MULTI_COMPANY_TENDER"
+      ],
+      "reasons": [
+        "한화오션이 입찰에 참여했지만 수주가 확정되지 않았습니다.",
+        "여섯 회사가 경쟁하는 기사라 한화오션의 계약 성과로 바꾸면 안 됩니다."
+      ],
+      "reasonSourceIds": [
+        "S3",
+        "S4",
+        "S10"
+      ],
+      "article": {
+        "articleId": "NAVER-081-0003670234",
+        "runDateKst": "2026-08-13",
+        "scope": "company",
+        "title": "한화오션만 살아남았나…태국 호위함 수주전, 해군까지 해명 [밀리터리+]",
+        "publisher": "서울신문",
+        "publishedAt": "2026-08-13T08:01:16.000Z",
+        "sourceUrl": "https://nownews.seoul.co.kr/news/newsView.php?id=20260813601024&wlog_tag3=naver",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "한화오션만 자격·기술평가 통과 주장 제기"
+          },
+          {
+            "id": "S2",
+            "text": "태국 해군의 차기 호위함 사업에서 한화오션이 자격·기술평가를 통과한 유일한 업체라는 현지 보도가 나오면서 수주전이 새로운 국면을 맞았다."
+          },
+          {
+            "id": "S3",
+            "text": "한화오션이 수주를 확정했다고 단정하기에는 이른 단계다."
+          },
+          {
+            "id": "S4",
+            "text": "실제 입찰에는 한국의 한화오션과 HD현대중공업을 비롯해 싱가포르 ST엔지니어링, 스페인 나반티아, 튀르키예 ASFAT·TAIS 등 6개 업체가 참여한 것으로 알려졌다."
+          },
+          {
+            "id": "S5",
+            "text": "6개 업체 경쟁했는데…“한화오션만 평가 통과” 주장"
+          },
+          {
+            "id": "S6",
+            "text": "한화오션이 태국 해군에 인도한 3700t급 호위함 ‘푸미폰 아둔야뎃함’이 항해하고 있다."
+          },
+          {
+            "id": "S7",
+            "text": "한화오션은 이 함정 건조 실적을 바탕으로 태국 차기 호위함 사업 수주전에 참여하고 있다."
+          },
+          {
+            "id": "S8",
+            "text": "한화오션은 태국 시장에서 이미 실적을 갖고 있다."
+          },
+          {
+            "id": "S9",
+            "text": "이번 논란으로 한화오션의 수주 가능성은 다시 주목받게 됐다."
+          },
+          {
+            "id": "S10",
+            "text": "결국 이번 해군의 해명은 한화오션의 수주 확정을 뜻하지 않는다."
+          }
+        ]
+      }
+    }
+  ]
+}
