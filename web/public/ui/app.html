@@ -899,7 +899,7 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 
 <div style="{{ navStyle }}">
 <div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
 <div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
 <div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
@@ -907,177 +907,384 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 </sc-if>
 
 <sc-if value="{{ isArchive }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
-<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:#F7F6FB">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 20px 0">
 <div onClick="{{ goHome }}" style="{{ backBtnStyle }}">‹</div>
-<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">성장 아카이브</div>
-<div style="width:38px"></div>
+<div style="flex:1"></div>
 </div>
-<div style="flex:none;display:flex;padding:0 12px 12px">
+<div style="flex:none;padding:10px 20px 0">
+<div style="font-size:14px;font-weight:600;color:#9095AA">{{ arcWeekLabel }}</div>
+<div style="font-size:27px;font-weight:800;color:#001E5A;letter-spacing:-0.025em;margin-top:2px">성장 아카이브</div>
+</div>
+<div style="flex:none;display:flex;gap:8px;padding:16px 20px 12px">
 <div onClick="{{ tabReport }}" style="{{ tabReportStyle }}">성향</div>
 <div onClick="{{ tabReturn }}" style="{{ tabReturnStyle }}">수익률</div>
-<div onClick="{{ tabCompare }}" style="{{ tabCompareStyle }}">가족 비교</div>
-<div onClick="{{ tabSeason }}" style="{{ tabSeasonStyle }}">시즌 기록</div>
 </div>
 
-<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 0;display:flex;flex-direction:column;gap:11px">
+<sc-if value="{{ famOpen }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 16px;display:flex;flex-direction:column;gap:12px">
 
-<sc-if value="{{ atReport }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;flex-direction:column;gap:11px">
-<div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:28px;padding:19px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
-<div style="display:flex;align-items:center;justify-content:space-between">
-<span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.65)">이번 시즌</span>
-<span style="font-size:12.5px;font-weight:700;color:#fff;background:#F5327F;border-radius:999px;padding:6px 12px;white-space:nowrap">정답은 없어!</span>
-</div>
-<div style="display:flex;align-items:center;gap:13px;margin-top:13px">
-<span style="font-size:44px;line-height:1;flex:none">{{ charEmoji }}</span>
-<div style="min-width:0">
-<div style="font-size:21px;font-weight:800;letter-spacing:-0.01em;line-height:1.35">{{ meName }}는 <span style="color:#FF8AD0">{{ styleName }}</span></div>
-<div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.6">{{ judgeLine }}</div>
-</div>
-</div>
-<sc-if value="{{ hasStarBadge }}" hint-placeholder-val="{{ false }}">
-<div style="display:inline-block;font-size:12px;font-weight:600;background:rgba(255,255,255,0.14);border-radius:999px;padding:6px 12px;margin-top:11px">⏳ {{ starBadge }}</div>
-</sc-if>
-<div style="font-size:12.5px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:9px;line-height:1.6">캐릭터는 시즌마다 새로 뽑아 — 계속 바뀌어도 괜찮아</div>
+<div style="flex:none;display:flex;gap:7px;flex-wrap:wrap">
+<sc-for list="{{ famChips }}" as="f" hint-placeholder-count="4">
+<div onClick="{{ f.pick }}" style="{{ f.style }}"><span>{{ f.name }}</span></div>
+</sc-for>
 </div>
 
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:16px;font-weight:800;color:#01185A">내 능력치 오각형</span><span style="font-size:12.5px;font-weight:500;color:#A9AEC4">10점 만점</span></div>
-<svg width="270" height="230" viewBox="0 0 270 230" style="display:block;margin:8px auto 0">
-<polygon points="{{ radarRingInner }}" fill="none" stroke="#F0F1F7" stroke-width="1"></polygon>
-<polygon points="{{ radarRingMid }}" fill="none" stroke="#EAEBF4" stroke-width="1"></polygon>
-<polygon points="{{ radarOutline }}" fill="none" stroke="#DDDFEC" stroke-width="1.5"></polygon>
-<polygon points="{{ radarData }}" fill="rgba(246,99,161,0.22)" stroke="#F5327F" stroke-width="2.5" stroke-linejoin="round"></polygon>
-<text x="135" y="16" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText0 }}</text>
-<text x="232" y="90" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText1 }}</text>
-<text x="197" y="218" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText2 }}</text>
-<text x="73" y="218" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText3 }}</text>
-<text x="38" y="90" text-anchor="middle" style="font-size:12px;font-weight:700;fill:#01185A">{{ abilityText4 }}</text>
+<div style="flex:none;display:flex;justify-content:center;background:#FFFFFF;border-radius:26px;padding:10px 12px 14px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="position:relative;width:100%;max-width:300px;aspect-ratio:1/1">
+<svg viewBox="0 0 236 236" style="position:absolute;left:0;top:0;width:100%;height:100%;display:block;overflow:visible">
+<sc-for list="{{ famGrid }}" as="g" hint-placeholder-count="4">
+<polygon points="{{ g.pts }}" fill="none" stroke="#E4E6F1" stroke-width="1.2"></polygon>
+</sc-for>
+<sc-for list="{{ famAxes }}" as="a" hint-placeholder-count="5">
+<line x1="118" y1="118" x2="{{ a.ax }}" y2="{{ a.ay }}" stroke="#EAEBF4" stroke-width="1.2"></line>
+</sc-for>
+<sc-for list="{{ famPolys }}" as="p" hint-placeholder-count="3">
+<polygon points="{{ p.poly }}" fill="{{ p.fill }}" stroke="{{ p.stroke }}" stroke-width="2.6" stroke-linejoin="round"></polygon>
+</sc-for>
+<sc-for list="{{ famPolys }}" as="p" hint-placeholder-count="3">
+<sc-for list="{{ p.dots }}" as="d" hint-placeholder-count="5">
+<circle cx="{{ d.dx }}" cy="{{ d.dy }}" r="3.4" fill="{{ d.col }}" stroke="#FFFFFF" stroke-width="1.4"></circle>
+</sc-for>
+</sc-for>
 </svg>
-<div style="font-size:12px;font-weight:500;color:#A9AEC4;text-align:center;margin-top:4px">근거+직관 = 10 · 집중+분산 = 10 — 오른쪽으로 기울면 근거·집중</div>
+<sc-for list="{{ famAxes }}" as="a" hint-placeholder-count="5">
+<div style="{{ a.labelStyle }}">{{ a.label }}</div>
+</sc-for>
+</div>
 </div>
 
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:16px;font-weight:800;color:#01185A">왜 샀는지 모아봤어</span><span style="font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">매수 {{ recordCount }}번</span></div>
-<sc-if value="{{ hasReasons }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
-<sc-for list="{{ reasonStats }}" as="r" hint-placeholder-count="3">
-<div style="display:flex;align-items:center;gap:10px">
-<span style="font-size:16px;flex:none">{{ r.emoji }}</span>
-<span style="font-size:13.5px;font-weight:600;color:#5C6280;width:96px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</span>
-<div style="flex:1;height:9px;border-radius:999px;background:#EAEBF4;overflow:hidden"><div style="{{ r.barStyle }}"></div></div>
-<span style="font-size:13px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;width:34px;text-align:right;flex:none">{{ r.pct }}</span>
+<sc-for list="{{ famCards }}" as="f" hint-placeholder-count="3">
+<div onClick="{{ f.pick }}" style="{{ f.rowStyle }}">
+<div style="{{ f.iconStyle }}"></div>
+<div style="flex:1;min-width:0">
+<div style="display:flex;align-items:center;gap:7px">
+<div style="{{ f.dotStyle }}"></div>
+<span style="font-size:15px;font-weight:800;color:#001E5A">{{ f.name }}</span>
+<span style="font-size:12.5px;font-weight:700;color:#D70082">{{ f.title }}</span>
+</div>
+<div style="white-space:pre-line;font-size:12.5px;font-weight:500;color:#7E849B;line-height:1.65;margin-top:5px;text-wrap:pretty">{{ f.desc }}</div>
+</div>
+</div>
+</sc-for>
+
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;line-height:1.65;text-align:center;padding:2px 6px 4px;text-wrap:pretty">누가 더 좋다는 뜻은 아니에요. 서로 왜 그렇게 했는지 이야기해 보세요.</div>
+</div>
+<div style="flex:none;display:flex;justify-content:center;padding:6px 16px 18px">
+<div onClick="{{ closeFam }}" style="width:230px;text-align:center;font-size:14px;font-weight:800;color:#fff;border-radius:18px;padding:13px 0;cursor:pointer;background:#D70082">성향 화면으로 돌아가기</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ cardsOpen }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center">
+<div class="kwcardrail" ref="{{ cardRailRef }}" style="flex:none;display:flex;align-items:center;gap:4px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:14px 36px;scrollbar-width:none">
+<sc-for list="{{ weekCards }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.open }}" style="{{ c.cardStyle }}">
+<div style="{{ c.innerStyle }}">
+<div style="{{ c.blob1 }}"></div>
+<div style="{{ c.blob2 }}"></div>
+<div style="position:absolute;left:-30%;top:-60%;width:64%;height:200%;transform:rotate(22deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.28) 50%,rgba(255,255,255,0) 100%);pointer-events:none"></div>
+
+<div style="position:relative;display:flex;align-items:center;justify-content:center;gap:6px">
+<span style="{{ c.weekStyle }}">{{ c.week }}</span>
+<span style="{{ c.dateStyle }}">{{ c.date }}</span>
+</div>
+<div style="{{ c.titleStyle }}">{{ c.title }}</div>
+
+<div style="position:relative;display:flex;align-items:center;gap:2px;margin-top:6px">
+<div style="flex:none;width:124px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+<div style="{{ c.imgStyle }}"></div>
+<div style="{{ c.shadowStyle }}"></div>
+</div>
+<div style="flex:1;min-width:0;position:relative;aspect-ratio:1/1">
+<svg viewBox="0 0 160 160" style="position:absolute;left:0;top:0;width:100%;height:100%;display:block;overflow:visible">
+<sc-for list="{{ c.grid }}" as="g" hint-placeholder-count="4">
+<polygon points="{{ g.pts }}" fill="none" stroke="{{ c.gridStroke }}" stroke-width="0.8"></polygon>
+</sc-for>
+<sc-for list="{{ c.axes }}" as="t" hint-placeholder-count="5">
+<line x1="80" y1="80" x2="{{ t.ax }}" y2="{{ t.ay }}" stroke="{{ c.axisStroke }}" stroke-width="0.8"></line>
+</sc-for>
+<polygon points="{{ c.poly }}" fill="{{ c.polyFill }}" stroke="{{ c.polyStroke }}" stroke-width="2" stroke-linejoin="round"></polygon>
+<sc-for list="{{ c.axes }}" as="t" hint-placeholder-count="5">
+<circle cx="{{ t.dx }}" cy="{{ t.dy }}" r="2.4" fill="{{ c.dotFill }}" stroke="{{ c.dotStroke }}" stroke-width="1"></circle>
+</sc-for>
+</svg>
+<sc-for list="{{ c.axes }}" as="t" hint-placeholder-count="5">
+<div style="{{ t.labelStyle }}">{{ t.label }} <span style="font-weight:900;font-variant-numeric:tabular-nums">{{ t.score }}</span></div>
+</sc-for>
+</div>
+</div>
+
+<div style="{{ c.descBoxStyle }}">
+<div style="{{ c.descTextStyle }}">{{ c.desc }}</div>
+</div>
+</div>
 </div>
 </sc-for>
 </div>
+<div style="flex:none;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 0 0">
+<sc-for list="{{ arcCardDots }}" as="d" hint-placeholder-count="4">
+<div style="{{ d.style }}"></div>
+</sc-for>
+</div>
+<div style="flex:none;text-align:center;padding:14px 26px 0">
+<div style="font-size:13px;font-weight:600;color:#8E93A8;line-height:1.6;text-wrap:pretty">한 주에 한 장씩 쌓여요. 옆으로 넘겨서 지난 주의 나를 볼 수 있어요.</div>
+</div>
+</div>
+<div style="flex:none;display:flex;justify-content:center;padding:0 16px 18px">
+<div onClick="{{ closeCards }}" style="width:230px;text-align:center;font-size:14px;font-weight:800;color:#fff;border-radius:18px;padding:13px 0;cursor:pointer;background:#D70082">성향 화면으로 돌아가기</div>
+</div>
 </sc-if>
-<sc-if value="{{ noReasons }}" hint-placeholder-val="{{ true }}">
-<div style="font-size:14px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:11px">아직 산 게 없어. 한 번 사고 나면 여기에 모아줄게.</div>
-</sc-if>
+
+<sc-if value="{{ notCards }}" hint-placeholder-val="{{ true }}">
+<div style="{{ arcBodyStyle }}">
+
+<sc-if value="{{ atReport }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:11px;padding-bottom:6px">
+<div onClick="{{ openTrait }}" style="{{ styleCardStyle }}">
+<div style="{{ styleInnerStyle }}">
+<div style="{{ styleBlob1 }}"></div>
+<div style="{{ styleBlob2 }}"></div>
+<div style="position:absolute;left:-30%;top:-60%;width:64%;height:200%;transform:rotate(22deg);background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0.28) 50%,rgba(255,255,255,0) 100%);pointer-events:none"></div>
+
+<div style="position:relative;display:flex;align-items:center;justify-content:center;gap:5px"><span style="{{ styleKickerStyle }}">나의 투자 성향</span><span style="{{ styleChevStyle }}">›</span></div>
+<div style="{{ styleTitleStyle }}">{{ styleTitle }}</div>
+
+<div style="position:relative;display:flex;align-items:center;gap:6px;margin-top:8px">
+
+<div style="flex:none;width:142px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end">
+<div style="{{ styleImgStyle }}"></div>
+<div style="{{ styleShadowStyle }}"></div>
 </div>
 
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:9px"><span style="font-size:18px">🐻</span><span style="font-size:16px;font-weight:800;color:#01185A">키웅이가 본 이번 시즌</span></div>
-<div style="font-size:15px;font-weight:500;color:#5C6280;line-height:1.8;margin-top:10px;text-wrap:pretty">{{ coachText }}</div>
+<div style="flex:1;min-width:0;position:relative;aspect-ratio:1/1">
+<svg viewBox="0 0 160 160" style="position:absolute;left:0;top:0;width:100%;height:100%;display:block;overflow:visible">
+<sc-for list="{{ radarGrid }}" as="g" hint-placeholder-count="4">
+<polygon points="{{ g.pts }}" fill="none" stroke="{{ styleGridStroke }}" stroke-width="0.8"></polygon>
+</sc-for>
+<sc-for list="{{ traits }}" as="t" hint-placeholder-count="5">
+<line x1="80" y1="80" x2="{{ t.ax }}" y2="{{ t.ay }}" stroke="{{ styleAxisStroke }}" stroke-width="0.8"></line>
+</sc-for>
+<polygon points="{{ radarPoly }}" fill="{{ stylePolyFill }}" stroke="{{ stylePolyStroke }}" stroke-width="2" stroke-linejoin="round"></polygon>
+<sc-for list="{{ traits }}" as="t" hint-placeholder-count="5">
+<circle cx="{{ t.dx }}" cy="{{ t.dy }}" r="{{ t.dotR }}" fill="{{ t.dotFill }}" stroke="#FFFFFF" stroke-width="1"></circle>
+</sc-for>
+</svg>
+<sc-for list="{{ traits }}" as="t" hint-placeholder-count="5">
+<div onClick="{{ t.select }}" style="{{ t.labelStyle }}">{{ t.label }} <span style="{{ t.labelNumStyle }}">{{ t.score }}</span></div>
+</sc-for>
+</div>
+</div>
+
+<div style="{{ pickedStyle }}">
+<sc-if value="{{ pickedShowLead }}" hint-placeholder-val="{{ true }}">
+</sc-if>
+<div style="{{ pickedHeadStyle }}">
+<sc-if value="{{ hasPick }}" hint-placeholder-val="{{ false }}"><span style="{{ pickedLabelStyle }}">{{ picked.label }}</span></sc-if>
+<sc-if value="{{ hasPick }}" hint-placeholder-val="{{ false }}"><span style="{{ pickedScoreStyle }}">{{ picked.score }}</span></sc-if>
+</div>
+<div style="{{ pickedTextStyle }}">{{ pickedText }}</div>
+</div>
+
+</div>
+</div>
+
+<div style="display:flex;gap:10px;padding-bottom:2px;margin-top:14px">
+<div style="flex:1;text-align:center;font-size:14.5px;font-weight:700;color:#fff;border-radius:16px;padding:14px 0;cursor:pointer;background:#D70082" onClick="{{ openCards }}">카드 모아보기</div>
+<div style="flex:1;text-align:center;font-size:14.5px;font-weight:700;color:#001E5A;border-radius:16px;padding:14px 0;cursor:pointer;background:#fff;box-shadow:0 2px 10px rgba(30,25,60,0.06)" onClick="{{ openFam }}">가족 투자 성향 비교</div>
 </div>
 </div>
 </sc-if>
 
 <sc-if value="{{ atReturn }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:11px">
-<div style="background:#FFFFFF;border-radius:28px;padding:19px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="font-size:13.5px;font-weight:500;color:#8E93A8">지금 내 돈 전부</div>
-<div style="font-size:31px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:7px;line-height:1.15;white-space:nowrap">{{ totalAssetText }}</div>
-<div style="display:flex;align-items:baseline;gap:10px;margin-top:9px">
-<span style="{{ pnlStyle }}">{{ pnlText }}</span><span style="{{ pnlPctStyle }}">{{ pnlPctText }}</span>
-</div>
-<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:8px">시작할 때 10,000,000원</div>
-</div>
+<div style="display:flex;flex-direction:column;gap:13px;padding-bottom:10px">
 
-<sc-if value="{{ hasHoldings }}" hint-placeholder-val="{{ false }}">
-<div style="background:#FFFFFF;border-radius:26px;padding:6px 19px 10px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 0 0 1px rgba(255,255,255,0.7)">
-<sc-for list="{{ holdingCards }}" as="h" hint-placeholder-count="2">
-<div style="display:flex;align-items:center;gap:11px;padding:13px 0;border-bottom:1px solid #F0F1F7">
-<span style="font-size:19px;flex:none">{{ h.emoji }}</span>
-<div style="flex:1;min-width:0"><div style="font-size:15.5px;font-weight:800;color:#01185A">{{ h.name }}</div><div style="font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.qtyText }}</div></div>
-<div style="text-align:right"><div style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.valueText }}</div><div style="{{ h.pnlStyle }}">{{ h.pnlText }}</div></div>
+<div style="background:#FFFFFF;border-radius:22px;padding:16px 16px 14px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">가족 수익률 달리기</div>
+<div style="font-size:11.5px;font-weight:500;color:#A9AEC4;white-space:nowrap">START 왼쪽은 마이너스</div>
 </div>
-</sc-for>
-<div style="display:flex;justify-content:space-between;align-items:baseline;padding:13px 0"><span style="font-size:15.5px;font-weight:800;color:#01185A">현금</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
+<div style="position:relative;margin-top:12px;border-radius:16px;overflow:hidden;background:#F4F5FB;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="{{ runStartLabelStyle }}">START</div>
+<div style="{{ runStartLineStyle }}"></div>
+<sc-for list="{{ runners }}" as="r" hint-placeholder-count="3">
+<div style="{{ r.laneStyle }}">
+<div style="{{ r.nameStyle }}">{{ r.name }}</div>
+<div style="{{ r.runnerStyle }}">
+<div style="{{ r.dashStyle }}"></div>
+<div style="{{ r.faceStyle }}"></div>
+<div style="{{ r.pctStyle }}">{{ r.pctText }}</div>
 </div>
-</sc-if>
-<sc-if value="{{ noHoldings }}" hint-placeholder-val="{{ true }}">
-<div style="background:#FFFFFF;border-radius:26px;padding:30px 20px;text-align:center;box-shadow:0 12px 26px rgba(35,25,80,0.09)">
-<div style="font-size:36px">🪺</div>
-<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:11px">아직 가진 회사가 없어</div>
-</div>
-</sc-if>
-</div>
-</sc-if>
-
-<sc-if value="{{ atCompare }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:11px">
-<div style="display:flex;align-items:center;gap:9px;background:#FFFFFF;border-radius:20px;padding:12px 15px;box-shadow:0 10px 22px rgba(35,25,80,0.09)">
-<span style="font-size:15px">🔒</span><span style="font-size:13.5px;font-weight:600;color:#5C6280">양쪽이 공개에 동의했어요</span>
-</div>
-<div style="background:#FFFFFF;border-radius:26px;padding:18px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;gap:10px">
-<div style="flex:1;text-align:center;background:#FDF2F7;border-radius:18px;padding:14px 8px">
-<div style="font-size:13px;font-weight:700;color:#F5327F">{{ childName }}</div>
-<div style="font-size:34px;margin-top:7px;line-height:1">{{ compareChildEmoji }}</div>
-<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:7px">{{ compareChildName }}</div>
-<div style="font-size:12.5px;font-weight:600;color:#8E93A8;margin-top:3px">{{ compareChildStar }}</div>
-</div>
-<div style="flex:1;text-align:center;background:#F1F3FA;border-radius:18px;padding:14px 8px">
-<div style="font-size:13px;font-weight:700;color:#01185A">{{ parentName }}</div>
-<div style="font-size:34px;margin-top:7px;line-height:1">{{ compareParentEmoji }}</div>
-<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:7px">{{ compareParentName }}</div>
-<div style="font-size:12.5px;font-weight:600;color:#8E93A8;margin-top:3px">{{ compareParentStar }}</div>
-</div>
-</div>
-<div style="display:flex;align-items:baseline;gap:8px;margin-top:15px;padding-bottom:7px;border-bottom:1px solid #F0F1F7">
-<span style="flex:1;font-size:12px;font-weight:600;color:#A9AEC4">능력치</span>
-<span style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#F5327F">{{ childName }}</span>
-<span style="width:64px;text-align:right;font-size:12px;font-weight:700;color:#01185A">{{ parentName }}</span>
-</div>
-<sc-for list="{{ compareRows }}" as="a" hint-placeholder-count="5">
-<div style="display:flex;align-items:baseline;gap:8px;margin-top:11px">
-<span style="flex:1;font-size:13.5px;font-weight:600;color:#5C6280">{{ a.label }}</span>
-<span style="width:64px;text-align:right;font-size:13.5px;font-weight:700;color:#F5327F;font-variant-numeric:tabular-nums">{{ a.childText }}</span>
-<span style="width:64px;text-align:right;font-size:13.5px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums">{{ a.parentText }}</span>
 </div>
 </sc-for>
 </div>
-<div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:26px;padding:18px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
-<div style="font-size:17px;font-weight:800;line-height:1.55;text-wrap:pretty">{{ compareHeadline }}</div>
-<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);margin-top:10px;line-height:1.65;text-wrap:pretty">어느 쪽이 더 좋다는 뜻은 아니에요. 오늘 저녁에 서로 왜 그렇게 했는지 물어보세요.</div>
+</div>
+
+<div style="position:relative;overflow:hidden;background:#001E5A;border-radius:26px;padding:20px 22px 21px">
+<div style="font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.6)">{{ retHeroLabel }}</div>
+<div style="display:flex;align-items:flex-end;gap:10px;margin-top:5px">
+<div style="{{ retHeroPctStyle }}">{{ retHeroPctText }}</div>
+</div>
+<div style="display:flex;align-items:flex-end;gap:14px;margin-top:15px;padding-top:13px;border-top:1px solid rgba(255,255,255,0.13)">
+<div style="flex:1;min-width:0">
+<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.52);white-space:nowrap">지금 총 금액</div>
+<div style="font-size:21px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;margin-top:3px;white-space:nowrap">{{ retHeroTotalText }}</div>
+</div>
+<div style="flex:none;text-align:right">
+<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.52);white-space:nowrap">{{ retCashLabel }}</div>
+<div style="font-size:15.5px;font-weight:800;color:rgba(255,255,255,0.82);font-variant-numeric:tabular-nums;margin-top:3px;white-space:nowrap">{{ retCashText }}</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="font-size:16px;font-weight:700;color:#001E5A;letter-spacing:-0.01em;padding:6px 0 0">{{ retFeedLabel }}</div>
+<sc-for list="{{ retFeed }}" as="p" hint-placeholder-count="3">
+<div style="background:#fff;border-radius:22px;padding:16px 17px 14px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="display:flex;align-items:center;gap:11px">
+<div style="{{ p.avatarStyle }}"></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15.5px;font-weight:800;color:#001E5A;white-space:nowrap">{{ p.name }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#B8BDD0;margin-top:3px;white-space:nowrap">{{ p.time }}</div>
+</div>
+</div>
+
+<div style="display:flex;border-radius:16px;overflow:hidden;margin-top:13px;min-height:112px">
+<div style="{{ p.blockStyle }}">
+<div>
+<div style="font-size:10.5px;font-weight:700;color:rgba(255,255,255,0.75);white-space:nowrap">{{ p.dateLabel }}</div>
+<div style="font-size:12px;font-weight:800;color:#fff;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.stockName }}</div>
+<div style="font-size:25px;font-weight:800;color:#fff;margin-top:5px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;white-space:nowrap">{{ p.bigPctText }}</div>
+</div>
+<div style="{{ p.blockEmojiStyle }}"></div>
+</div>
+<div style="flex:1;min-width:0;background:#F5F6FB;padding:14px 15px;display:flex;flex-direction:column;justify-content:center">
+<div style="font-size:13px;font-weight:600;color:#A9AEC4">평단가</div>
+<div style="{{ p.avgPctStyle }}">{{ p.avgPctText }}</div>
+<div style="font-size:14px;font-weight:700;color:#3D4460;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.oneLiner }}</div>
+</div>
+</div>
+
+<div style="font-size:14.5px;font-weight:500;color:#3D4460;line-height:1.72;margin-top:13px;white-space:pre-line;text-wrap:pretty">{{ p.text }}</div>
+<div style="display:flex;align-items:center;justify-content:flex-end;gap:20px;margin-top:13px">
+<div onClick="{{ p.toggleCmt }}" style="{{ p.cmtBtnStyle }}"><span>댓글</span><span>{{ p.cmtCount }}</span></div>
+<div onClick="{{ p.like }}" style="{{ p.likeStyle }}"><span style="font-size:19px">{{ p.likeIcon }}</span><span>{{ p.likeCount }}</span></div>
+</div>
+<sc-if value="{{ p.cmtOpen }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:11px;margin-top:13px;padding-top:12px;border-top:1px solid #F0F1F7">
+<sc-for list="{{ p.comments }}" as="c" hint-placeholder-count="2">
+<div style="display:flex;align-items:flex-start;gap:8px">
+<div style="{{ c.avatarStyle }}"></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:12.5px;font-weight:800;color:#001E5A">{{ c.name }}</div>
+<sc-if value="{{ c.notEditing }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:13px;font-weight:500;color:#5C6280;line-height:1.6;margin-top:2px;text-wrap:pretty">{{ c.text }}</div>
+</sc-if>
+<sc-if value="{{ c.editing }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+<input value="{{ c.editDraft }}" onChange="{{ c.onEditDraft }}" style="flex:1;min-width:0;border:none;outline:none;background:#F2F3FA;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:600;color:#001E5A;font-family:inherit">
+<div onClick="{{ c.saveEdit }}" style="flex:none;font-size:11.5px;font-weight:800;color:#fff;padding:6px 11px;border-radius:999px;background:#001E5A;cursor:pointer;white-space:nowrap">저장</div>
+<div onClick="{{ c.cancelEdit }}" style="flex:none;font-size:11.5px;font-weight:700;color:#A9AEC4;padding:6px 9px;border-radius:999px;background:#F2F3FA;cursor:pointer;white-space:nowrap">취소</div>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ c.canEdit }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;display:flex;gap:6px;padding-top:1px">
+<div onClick="{{ c.startEdit }}" style="{{ c.actStyle }}">수정</div>
+<div onClick="{{ c.del }}" style="{{ c.actStyle }}">삭제</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="{{ p.meAvatarStyle }}"></div>
+<input value="{{ p.draft }}" onChange="{{ p.onDraft }}" placeholder="댓글 남기기" style="flex:1;min-width:0;border:none;outline:none;background:#F2F3FA;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:600;color:#001E5A;font-family:inherit">
+<div onClick="{{ p.send }}" style="{{ p.sendStyle }}">올리기</div>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+</div>
+</sc-if>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ secModalOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSecModal }}" style="position:absolute;left:0;top:0;right:0;bottom:0;z-index:9;background:rgba(20,19,48,0.5);display:flex;align-items:center;justify-content:center;padding:26px">
+<div onClick="{{ stopTap }}" style="width:100%;max-width:292px">
+<div style="position:relative;display:flex;flex-direction:column;max-height:78vh;border-radius:26px;padding:16px 20px 20px;background:#fff;box-shadow:0 24px 50px rgba(20,18,40,0.32)">
+<div style="display:flex;align-items:flex-start">
+<div style="flex:1;display:flex;justify-content:center;padding-top:2px"><div style="width:38px;height:5px;border-radius:999px;background:#E7E9F3"></div></div>
+<div onClick="{{ closeSecModal }}" style="position:absolute;right:18px;top:16px;width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#8E93A8;cursor:pointer;background:#fff;box-shadow:0 3px 8px rgba(35,25,80,0.10),inset 0 0 0 1px #EDEEF5">✕</div>
+</div>
+<div style="display:flex;align-items:center;gap:14px;margin-top:20px">
+<div style="{{ secModalIconStyle }}">{{ secModalEmoji }}</div>
+<div style="min-width:0">
+<div style="font-size:23px;font-weight:800;color:#001E5A;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ secModalName }}</div>
+<div style="font-size:13px;font-weight:600;color:#A9AEC4;margin-top:3px">{{ secModalCount }}</div>
+</div>
+</div>
+<div style="height:1px;background:#EFF0F7;margin:16px 0 14px"></div>
+<div style="display:flex;align-items:center;gap:10px">
+<div style="flex:1;min-width:0;border-radius:16px;padding:12px 13px;background:#F5F6FB">
+<div style="font-size:11.5px;font-weight:500;color:#9095AA;white-space:nowrap">섹터 수익률</div>
+<div style="{{ secModalPctStyle }}">{{ secModalPctText }}</div>
+</div>
+<div style="flex:1;min-width:0;border-radius:16px;padding:12px 13px;background:#F5F6FB">
+<div style="font-size:11.5px;font-weight:600;color:#A9AEC4;white-space:nowrap">평가 금액</div>
+<div style="font-size:16px;font-weight:800;color:#001E5A;margin-top:4px;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ secModalValue }}</div>
+</div>
+</div>
+<div style="font-size:12px;font-weight:700;color:#A9AEC4;margin:18px 0 12px">보유 내역</div>
+<div style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:15px">
+<sc-for list="{{ secModalRows }}" as="h" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:11px">
+<div style="{{ h.avatarStyle }}"></div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:800;color:#001E5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.stockName }}</div>
+<div style="font-size:12.5px;font-weight:600;color:#8E93A8;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.qtyText }} · {{ h.valueText }}</div>
+</div>
+<div style="{{ h.pctStyle }}">{{ h.pctText }}</div>
+</div>
+</sc-for>
+</div>
+</div>
 </div>
 </div>
 </sc-if>
 
-<sc-if value="{{ atSeason }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;flex-direction:column;gap:11px">
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="font-size:16px;font-weight:800;color:#01185A">시즌 3 기록</div>
-<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">산 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ recordCount }}번</span></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">판 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ sellCount }}번</span></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid #F0F1F7"><span style="font-size:14px;font-weight:500;color:#8E93A8">한 줄 메모</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ memoRecordCount }}개</span></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline;padding:11px 0"><span style="font-size:14px;font-weight:500;color:#8E93A8">자세히 본 횟수</span><span style="font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ detailViewCount }}번</span></div>
+<sc-if value="{{ cardSheetOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeCardSheet }}" style="position:absolute;left:0;top:0;right:0;bottom:0;z-index:6;background:rgba(20,15,40,0.4)"></div>
+<div style="{{ cardSheet.sheetStyle }}">
+<div style="{{ cardSheet.grabStyle }}"></div>
+<div style="display:flex;align-items:center;gap:12px">
+<div style="flex:1;min-width:0">
+<div style="{{ cardSheet.titleStyle }}">{{ cardSheet.title }}</div>
 </div>
-
-<div style="background:linear-gradient(157deg,#0B2A6B 0%,#01185A 100%);border-radius:26px;padding:19px 20px;color:#fff;box-shadow:0 14px 30px rgba(1,24,90,0.28)">
-<div style="font-size:12.5px;font-weight:700;color:#FF8AD0">시즌이 끝나면</div>
-<div style="font-size:18px;font-weight:800;margin-top:9px;line-height:1.5">{{ meName }}의 시즌 3 기록 카드를<br>받게 될 거야</div>
-<div style="display:inline-block;font-size:13px;font-weight:600;background:rgba(255,255,255,0.16);border-radius:999px;padding:8px 14px;margin-top:13px">🔒 4주차에 열려</div>
+<div onClick="{{ closeCardSheet }}" style="{{ cardSheet.closeStyle }}">닫기</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:20px">
+<sc-for list="{{ cardSheet.rows }}" as="r" hint-placeholder-count="5">
+<div>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="{{ r.labelStyle }}">{{ r.label }}</div>
+<div style="{{ r.scoreStyle }}">{{ r.score }}</div>
+</div>
+<div style="{{ r.trackStyle }}"><div style="{{ r.barStyle }}"></div></div>
+<div style="{{ r.noteStyle }}">{{ r.note }}</div>
+</div>
+</sc-for>
 </div>
 </div>
 </sc-if>
 
-</div>
 <div style="{{ navStyle }}">
 <div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
-<div onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
 <div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
 <div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
 </div>
@@ -1336,6 +1543,87 @@ const seedAccounts = () => ({
   parent: { name:'엄마', cash: SEED - 459750, holdings: [ { code:'005930', qty:1, avg:240000 }, { code:'011200', qty:10, avg:21075 } ], pending:[] }
 });
 
+// >>> archive-engine — GENERATED from shared/engine/archive-profile.js
+// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.
+// F9 아카이브 성향 계산. 화면은 이 결과를 표시만 한다.
+//
+// 이 파일은 브라우저(`public/ui/app.html`)와 서버·테스트가 함께 쓴다.
+// `scripts/ui-build.mjs` 가 `export` 를 떼고 app.html 안으로 복사하므로
+// TypeScript 문법과 import 를 쓰지 않는다. 계산이 바뀌면 이 파일만 고치고
+// `node scripts/ui-build.mjs build` 로 화면을 다시 만든다.
+
+// 살 때 뉴스·그래프·아는 회사를 근거로 골랐다고 본다.
+const EVIDENCE_REASON_CODES = ["buy_news", "buy_chart", "buy_familiar"];
+
+// 오각형 축 순서. 화면 라벨(집중·분산·정확·직관·근거)과 같은 순서다.
+const ABILITY_ORDER = ["focus", "diversification", "accuracy", "intuition", "evidence"];
+
+// 정확은 사고판 시점이 맞았는지라 5거래일 종가가 있어야 채점된다.
+// 아직 채점 경로가 화면에 없어 중간값으로 둔다. [가정]
+const ACCURACY_PLACEHOLDER = 50;
+
+// 섹터가 하나 늘 때마다 집중이 이만큼 내려간다. [가정]
+const FOCUS_STEP_PER_SECTOR = 22;
+
+const clamp100 = (n) => Math.max(0, Math.min(100, n));
+
+/**
+ * 체결 매수 기록에서 능력치 다섯 축을 낸다.
+ *
+ * @param {Array<{symbol: string, reason_code: string}>} records 한 사람의 매수 기록
+ * @param {(symbol: string) => (string|null|undefined)} sectorOf 종목 코드 -> 섹터
+ * @returns {{count: number, evidencePct: number, focus: number, scores: number[]}}
+ */
+function computeAbilityScores(records, sectorOf) {
+  const list = Array.isArray(records) ? records : [];
+  const sectors = {};
+  list.forEach((r) => {
+    const sector = sectorOf ? sectorOf(r.symbol) : null;
+    if (sector) sectors[sector] = 1;
+  });
+
+  const evidenceCount = list.filter((r) => EVIDENCE_REASON_CODES.indexOf(r.reason_code) >= 0).length;
+  const evidencePct = list.length ? Math.round((evidenceCount / list.length) * 100) : 0;
+
+  const sectorCount = Math.max(1, Object.keys(sectors).length);
+  const focus = clamp100(100 - (sectorCount - 1) * FOCUS_STEP_PER_SECTOR);
+
+  return {
+    count: list.length,
+    evidencePct,
+    focus,
+    // 집중·분산과 근거·직관은 서로 보완쌍이라 합이 100 이다.
+    scores: [focus, 100 - focus, ACCURACY_PLACEHOLDER, 100 - evidencePct, evidencePct],
+  };
+}
+
+/**
+ * 두 보완쌍의 우세로 캐릭터를, 정확으로 레벨을 정한다.
+ * 5:5 동점은 근거·집중 쪽으로 귀속한다.
+ *
+ * @param {number[]} scores computeAbilityScores 의 scores
+ * @returns {{key: "sniper"|"strategist"|"fighter"|"explorer", level: 1|2|3}}
+ */
+function resolveCharacter(scores) {
+  const focus = scores[0];
+  const diversification = scores[1];
+  const accuracy = scores[2];
+  const intuition = scores[3];
+  const evidence = scores[4];
+
+  const key =
+    evidence >= intuition
+      ? focus >= diversification
+        ? "sniper"
+        : "strategist"
+      : focus >= diversification
+        ? "fighter"
+        : "explorer";
+
+  const level = accuracy >= 70 ? 3 : accuracy >= 40 ? 2 : 1;
+  return { key, level };
+}
+// <<< archive-engine
 class Component extends DCLogic {
   state = {
     screen: 'home', account: 'child',
@@ -1344,7 +1632,6 @@ class Component extends DCLogic {
     orderDone: null, sellDone: null, watchlist: [], stockQuery: '',
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
-    profiles: null, profileStatus: 'idle',
     sellStep: 1, arcTab: 'report', sellPick: 'all',
     sellDraft: { sellBy:'qty', qty:0, amountInput:0, orderType:'market', limitPct:0, reason:null, change:null, memo:'', memoSaved:false },
     schoolLock: true, forceSchool: 'auto', rankTab: 'week',
@@ -1374,34 +1661,6 @@ class Component extends DCLogic {
 
   // 성향 스냅샷(F9)은 서버 엔진이 계산한다. 두 계정을 한 번에 받아 두면 계정 전환·가족 비교에 재요청이 없다.
   // 체결이 새로 나면 profiles 를 비워 다음 아카이브 진입에서 다시 계산한다.
-  loadProfiles(){
-    if (this.profileBusy || this.state.profileStatus === 'loading' || this.state.profileStatus === 'ready') return;
-    this.profileBusy = true;
-    this.setState(s => Object.assign({}, s, { profileStatus: 'loading' }));
-    const snap = this.state;
-    const ask = (account, narrate) => fetch('/api/profile', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ account: account, narrate: narrate, state: { acc: snap.acc, records: snap.records, sellRecords: snap.sellRecords || [], events: snap.events || [] } })
-    }).then(r => r.ok ? r.json() : null);
-    // 1차는 서술 없이 즉시 받아 화면을 채우고(룰 기반 폴백 서술 포함), Luna 서술은 도착하는 대로 바꿔 끼운다.
-    Promise.all([ask('child', false), ask('parent', false)])
-      .then(pair => {
-        if (!pair[0] || !pair[1]) throw new Error('profile unavailable');
-        this.setState(s => Object.assign({}, s, { profiles: { child: pair[0], parent: pair[1] }, profileStatus: 'ready' }));
-        return Promise.all([ask('child', true), ask('parent', true)]);
-      })
-      .then(pair => {
-        if (!pair || !pair[0] || !pair[1]) return;
-        this.setState(s => s.profileStatus === 'ready'
-          ? Object.assign({}, s, { profiles: { child: pair[0], parent: pair[1] } })
-          : s);
-      })
-      .catch(() => {
-        this.setState(s => s.profileStatus === 'ready' ? s : Object.assign({}, s, { profileStatus: 'error' }));
-      })
-      .finally(() => { this.profileBusy = false; });
-  }
-
   openRequestedScreen(data){
     if (!data) return;
     if (data.type === 'kiwoom:open-stock' && /^\d{6}$/.test(String(data.symbol))) {
@@ -1419,9 +1678,8 @@ class Component extends DCLogic {
     } else if (action.target === 'portfolio') {
       this.set({ screen:'portfolio' });
     } else if (action.target === 'archive') {
-      const archiveTabs = ['report', 'return', 'compare', 'season'];
+      const archiveTabs = ['report', 'return'];
       this.set({ screen:'archive', arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report' });
-      this.loadProfiles();
     } else if (action.target === 'stock') {
       const sector = (this.uni().sectors || []).filter(x => x.id === action.sectorId)[0];
       if (sector) this.set({ screen:'explore', sectorId:sector.id, cardIndex:0 });
@@ -1777,6 +2035,482 @@ class Component extends DCLogic {
     window.parent.postMessage({ type:'kiwoom:chat-behavior', event:event }, window.location.origin);
   }
   sectorOf(id){ return this.uni().sectors.filter(s => s.id === id)[0] || { accent:'#8E93A8', name:'' }; }
+  bindCardRail(el){
+    if (!el || el === this.railEl) return;
+    this.railEl = el;
+    el.addEventListener('scroll', () => {
+      const mid = el.scrollLeft + el.clientWidth / 2;
+      let best = 0, bd = 1e9;
+      for (let i = 0; i < el.children.length; i++) {
+        const k = el.children[i], d = Math.abs(k.offsetLeft + k.offsetWidth/2 - mid);
+        if (d < bd) { bd = d; best = i; }
+      }
+      if (best !== this.state.cardActive) this.setState({ cardActive: best });
+    }, { passive: true });
+  }
+
+  /**
+   * 성장 아카이브 화면에 필요한 값을 한 번에 만든다.
+   *
+   * 가족은 기획안대로 아빠·엄마·찬영 셋이다. 지금 앱에는 자녀(찬영)와 부모(엄마)
+   * 계정만 있어서 아빠 칸은 비어 있다. 계정이 생기면 ACC 에 한 줄 추가하면 된다.
+   */
+  buildArchive(){
+    const s = this.state, u = this.uni();
+    const up = '#E8322E', down = '#1668DC', accent = '#D70082';
+    const A = 'assets/archive/';
+    const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
+    const pctTxt = v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1) + '%';
+    const price = code => { const x = u.stocks.filter(v => v.code === code)[0]; return x ? x.price : 0; };
+    const nameOf = code => { const x = u.stocks.filter(v => v.code === code)[0]; return x ? x.name : code; };
+    const rgba = (h, a) => { const n = parseInt(h.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+
+    // 가족 구성원 ↔ 앱 계정. dad 는 아직 계정이 없어 값이 비어 있다.
+    const MEMBERS = [
+      { key:'dad', name:'찬영 아빠', short:'아빠', acc:null,     face:A + 'face-dad.jpg', user:'parent_dad',  col:'#FFD84D', fill:'rgba(255,197,61,0.24)', pose:A + 'pose-yw-cheer.png' },
+      { key:'mom', name:'찬영 엄마', short:'엄마', acc:'parent', face:A + 'face-mom.jpg', user:'parent_mom',  col:'#FF8AD0', fill:'rgba(245,50,127,0.26)', pose:A + 'pose-yw-magnify.png' },
+      { key:'me',  name:'찬영',      short:'나',   acc:'child',  face:A + 'face-me.jpg',  user:'child_minji', col:'#7FD2FF', fill:'rgba(96,190,255,0.3)',  pose:A + 'pose-ki-calm.png' }
+    ];
+    const byKey = {}, byUser = {};
+    MEMBERS.forEach(x => { byKey[x.key] = x; byUser[x.user] = x; });
+    const who = s.retWho || 'all';
+    const shown = MEMBERS.filter(x => who === 'all' || x.key === who);
+
+    // ── 성향 다섯 축 ──────────────────────────────────────────────
+    // 산출식은 shared/engine/archive-profile.js 가 갖고 있다. 여기서는 부르기만 한다.
+    const sectorOfCode = code => { const st = u.stocks.filter(v => v.code === code)[0]; return st ? st.sector : null; };
+    const scoresOf = userId => {
+      const recs = (s.records || []).filter(r => r.user_id === userId);
+      const out = computeAbilityScores(recs, sectorOfCode);
+      return { n: out.count, gr: out.evidencePct, list: out.scores };
+    };
+
+    // ── 투자 유형 네 가지 ─────────────────────────────────────────
+    // 어느 유형인지와 레벨은 엔진이 정한다. 여기 있는 건 이름·색·설명뿐이다.
+    const TYPES = {
+      sniper:     { name:'저격수', img:'sniper',     pal:['#FCE3B4','#F7D08A','#E3AF57','#63430A'],
+        desc:'찾아볼 건 다 찾아보고, 확신이 선 소수 섹터에 몰아 담았어요.\n근거는 촘촘하지만 한쪽으로 쏠려 있어요.' },
+      strategist: { name:'전략가', img:'strategist', pal:['#F0F8CC','#E3F09B','#C6DA66','#404F16'],
+        desc:'알아본 뒤 여러 섹터에 나눠 담았어요.\n근거와 분산을 모두 챙긴 한 주였어요.' },
+      fighter:    { name:'승부사', img:'fighter',    pal:['#FCC7AB','#F79F79','#DE7B50','#5E2410'],
+        desc:'마음에 들면 바로 한 곳에 걸었어요.\n결정은 빠르지만 남긴 기록은 얇아요.' },
+      explorer:   { name:'탐험가', img:'explorer',   pal:['#B2D2C7','#87B6A7','#619484','#1B3F35'],
+        desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
+    };
+    const typeOf = sc => {
+      const decided = resolveCharacter(sc);
+      const t = TYPES[decided.key], lv = decided.level;
+      return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
+    };
+    const typeImg = k => A + 'type-' + k + '.png';
+
+    const TLBL = ['집중', '분산', '정확', '직관', '근거'];
+    const TMETA = [
+      { c:'#FFC53D', desc:'확신한 곳에 몰아 담은 정도예요. 담은 섹터가 적고 현금이 적을수록 높아요.' },
+      { c:'#4FC3F7', desc:'여러 곳에 나눠 담은 정도예요. 집중의 반대쪽 축이에요.' },
+      { c:'#7BE3A0', desc:'사고판 시점이 맞았는지예요. 산 뒤 오르거나 판 뒤 내리면 올라가요.' },
+      { c:'#FF8AD0', desc:'느낌으로 빠르게 결정한 비율이에요. 근거의 반대쪽 축이에요.' },
+      { c:'#9B8CFF', desc:'사기 전에 뉴스·기업정보·차트를 확인하고 결정한 비율이에요.' }
+    ];
+
+    const mine = scoresOf('child_minji');
+    const myType = typeOf(mine.list);
+    const MPL = myType.pal, mInk = MPL[3];
+
+    const R = 48, CX = 80, CY = 80;
+    const ptAt = (i, ratio, r0, cx, cy) => {
+      const a = (-90 + i * 72) * Math.PI / 180, rr = r0 * Math.max(0.1, Math.min(1, ratio));
+      return [(cx + rr * Math.cos(a)).toFixed(1), (cy + rr * Math.sin(a)).toFixed(1)];
+    };
+    const traits = mine.list.map((score, i) => {
+      const m = TMETA[i], sel = s.traitPick === i;
+      const outer = ptAt(i, 1, R, CX, CY), dot = ptAt(i, score / 100, R, CX, CY);
+      const a = (-90 + i * 72) * Math.PI / 180;
+      const lx = (CX + R * 1.32 * Math.cos(a)) / 160 * 100, ly = (CY + R * 1.32 * Math.sin(a)) / 160 * 100;
+      return {
+        label: TLBL[i], score: score, desc: m.desc,
+        ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
+        dotR: sel ? 4.2 : 2.6, dotFill: sel ? '#FFFFFF' : mInk,
+        select: e => { if (e && e.stopPropagation) e.stopPropagation(); this.set({ traitPick: sel ? null : i }); },
+        labelNumStyle: 'font-weight:900;font-variant-numeric:tabular-nums;color:' + (sel ? '#FFFFFF' : mInk),
+        labelStyle: 'position:absolute;left:' + lx.toFixed(1) + '%;top:' + ly.toFixed(1) + '%;transform:translate(-50%,-50%);white-space:nowrap;cursor:pointer;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;' + (sel
+          ? 'color:#fff;background:' + mInk + ';box-shadow:0 3px 8px ' + rgba(mInk, 0.35)
+          : 'color:' + mInk + ';background:rgba(255,255,255,0.85);box-shadow:0 1px 3px ' + rgba(mInk, 0.18)),
+        barStyle: 'width:' + score + '%;height:100%;border-radius:999px;background:' + m.c + ''
+      };
+    });
+    const radarGrid = [0.25, 0.5, 0.75, 1].map(k => ({
+      pts: TLBL.map((_, i) => ptAt(i, k, R, CX, CY).join(',')).join(' ')
+    }));
+
+    // ── 카드 모아보기 — 한 주에 한 장. 기록이 있는 주 + 이번 주 ────
+    const monday = ts => {
+      const d = new Date(ts); d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      return d;
+    };
+    const md = d => (d.getMonth() + 1) + '/' + d.getDate();
+    const myRecs = (s.records || []).filter(r => r.user_id === 'child_minji');
+    const weeks = {};
+    myRecs.forEach(r => { const k = monday(r.ts).getTime(); (weeks[k] || (weeks[k] = [])).push(r); });
+    const thisMon = monday(Date.now()).getTime();
+    if (!weeks[thisMon]) weeks[thisMon] = [];
+    const weekKeys = Object.keys(weeks).map(Number).sort((a, b) => a - b);
+    const WEEKS = weekKeys.map(k => {
+      const recs = weeks[k], isNow = k === thisMon;
+      let list;
+      if (isNow) list = mine.list;
+      else {
+        const nSec = {};
+        recs.forEach(r => { const st = u.stocks.filter(v => v.code === r.symbol)[0]; if (st) nSec[st.sector] = 1; });
+        const g = recs.length ? Math.round(recs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / recs.length * 100) : 0;
+        const f = Math.max(0, Math.min(100, 100 - (Math.max(1, Object.keys(nSec).length) - 1) * 22));
+        list = [f, 100 - f, 50, 100 - g, g];
+      }
+      const t = typeOf(list);
+      const mon = new Date(k), sun = new Date(k + 6 * 86400000);
+      return {
+        week: isNow ? '이번 주' : (mon.getMonth() + 1) + '월 ' + Math.ceil((mon.getDate() + 6) / 7) + '주차',
+        date: md(mon) + ' – ' + md(sun),
+        title: t.title, img: t.img, desc: recs.length === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
+        scores: list
+      };
+    });
+    const cardActive = Math.max(0, Math.min(
+      (s.cardActive === undefined || s.cardActive === null) ? WEEKS.length - 1 : s.cardActive, WEEKS.length - 1));
+    const weekCards = WEEKS.map((c, ci) => {
+      const on = ci === cardActive;
+      const PL = (TYPES[c.img] && TYPES[c.img].pal) || TYPES.sniper.pal;
+      const ink = PL[3];
+      const axes = c.scores.map((sc, i) => {
+        const a = (-90 + i * 72) * Math.PI / 180;
+        const outer = ptAt(i, 1, R, CX, CY), dot = ptAt(i, sc / 100, R, CX, CY);
+        const lx = (CX + R * 1.32 * Math.cos(a)) / 160 * 100, ly = (CY + R * 1.32 * Math.sin(a)) / 160 * 100;
+        return {
+          label: TLBL[i], score: sc, ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
+          labelStyle: 'position:absolute;left:' + lx.toFixed(1) + '%;top:' + ly.toFixed(1) + '%;transform:translate(-50%,-50%);white-space:nowrap;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:999px;color:' + ink + ';background:rgba(255,255,255,0.8);box-shadow:0 1px 2px ' + rgba(ink, 0.14)
+        };
+      });
+      return {
+        week: c.week, date: c.date, title: c.title, desc: c.desc, axes: axes,
+        open: () => { if (ci !== cardActive) { this.snapCard(ci); this.set({ cardActive: ci }); } else this.set({ cardSheet: ci }); },
+        poly: axes.map(a => a.dx + ',' + a.dy).join(' '),
+        grid: [0.25, 0.5, 0.75, 1].map(k => ({ pts: TLBL.map((_, i) => ptAt(i, k, R, CX, CY).join(',')).join(' ') })),
+        imgStyle: 'width:158px;height:196px;margin:0 -16px -4px -14px;background:url(' + typeImg(c.img) + ') center bottom/contain no-repeat;filter:drop-shadow(0 12px 14px ' + rgba(ink, 0.38) + ')',
+        cardStyle: 'flex:none;scroll-snap-align:center;width:296px;margin:0 9px;border-radius:28px;padding:8px;cursor:pointer;transition:transform 0.28s ease;transform-origin:center;background:linear-gradient(160deg,' + PL[0] + ' 0%,' + PL[1] + ' 46%,' + PL[2] + ' 100%);' + (on
+          ? 'transform:scale(1.05);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 0 0 1.5px ' + rgba(ink, 0.3) + ',0 2px 3px ' + rgba(ink, 0.2) + ',0 14px 18px -8px ' + rgba(ink, 0.35)
+          : 'transform:scale(0.9);box-shadow:inset 0 1px 0 rgba(255,255,255,0.5),0 1px 2px ' + rgba(ink, 0.14) + ',0 7px 10px -7px ' + rgba(ink, 0.22)),
+        innerStyle: 'position:relative;border-radius:21px;padding:15px 14px 13px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),inset 0 0 0 1px rgba(255,255,255,0.36),inset 0 -20px 40px ' + rgba(ink, 0.1) + ';background:linear-gradient(158deg,rgba(255,255,255,0.42) 0%,rgba(255,255,255,0.14) 34%,rgba(255,255,255,0.06) 62%,rgba(255,255,255,0.2) 100%)',
+        blob1: 'position:absolute;left:-40px;top:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.6) 0%,rgba(255,255,255,0) 68%);filter:blur(18px);pointer-events:none',
+        blob2: 'position:absolute;right:-50px;bottom:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,' + rgba(ink, 0.16) + ' 0%,' + rgba(ink, 0) + ' 68%);filter:blur(22px);pointer-events:none',
+        weekStyle: 'font-size:10.5px;font-weight:800;color:' + rgba(ink, 0.9) + ';letter-spacing:0.12em;white-space:nowrap',
+        dateStyle: 'font-size:10px;font-weight:700;color:' + rgba(ink, 0.75) + ';white-space:nowrap',
+        titleStyle: 'position:relative;text-align:center;font-size:21px;font-weight:900;color:' + ink + ';margin-top:5px;letter-spacing:-0.01em;text-shadow:0 1px 0 rgba(255,255,255,0.6)',
+        shadowStyle: 'width:82px;height:18px;margin-top:-8px;border-radius:50%;background:radial-gradient(ellipse at center,' + rgba(ink, 0.22) + ' 0%,' + rgba(ink, 0.06) + ' 46%,rgba(0,0,0,0) 72%)',
+        gridStroke: rgba(ink, 0.18), axisStroke: rgba(ink, 0.16),
+        polyFill: rgba(ink, 0.24), polyStroke: ink, dotFill: ink, dotStroke: '#FFFFFF',
+        descBoxStyle: 'position:relative;display:flex;align-items:flex-start;gap:9px;margin-top:8px;border-radius:14px;padding:10px 11px;background:rgba(255,255,255,0.5);box-shadow:inset 0 1px 0 rgba(255,255,255,0.75),inset 0 0 0 1px rgba(255,255,255,0.45)',
+        descIconStyle: 'width:26px;height:26px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;background:rgba(255,255,255,0.8);box-shadow:0 1px 3px ' + rgba(ink, 0.2),
+        descTextStyle: 'flex:1;min-width:0;font-size:11.5px;font-weight:600;color:' + rgba(ink, 0.9) + ';line-height:1.6;text-wrap:pretty'
+      };
+    });
+    const cardDots = WEEKS.map((w, i) => ({
+      style: 'width:' + (i === cardActive ? 20 : 7) + 'px;height:7px;border-radius:999px;transition:width 0.25s ease,background 0.25s ease;background:' + (i === cardActive ? accent : '#D5D8E6')
+    }));
+
+    // 카드 한 장을 눌렀을 때 올라오는 상세 시트
+    const sheetIdx = (s.cardSheet === null || s.cardSheet === undefined) ? cardActive : s.cardSheet;
+    const sw = WEEKS[sheetIdx] || WEEKS[WEEKS.length - 1] || { week:'', date:'', title:'', desc:'', img:'sniper', scores:[0,0,0,0,0] };
+    const SPL = (TYPES[sw.img] && TYPES[sw.img].pal) || TYPES.sniper.pal, sInk = SPL[3];
+    const cardSheet = {
+      week: sw.week, date: sw.date, title: sw.title, desc: sw.desc,
+      sheetStyle: 'position:absolute;left:0;right:0;bottom:0;z-index:7;max-height:82%;overflow-y:auto;border-radius:30px 30px 0 0;padding:14px 20px 26px;background:linear-gradient(168deg,rgba(255,255,255,0.82) 0%,rgba(255,255,255,0.74) 100%),linear-gradient(168deg,' + SPL[0] + ' 0%,' + SPL[1] + ' 52%,' + SPL[2] + ' 100%);box-shadow:0 -18px 40px ' + rgba(sInk, 0.3),
+      grabStyle: 'width:44px;height:5px;border-radius:999px;background:' + rgba(sInk, 0.25) + ';margin:0 auto 14px',
+      titleStyle: 'font-size:24px;font-weight:900;color:' + sInk + ';letter-spacing:-0.01em;line-height:1.1;text-shadow:0 1px 0 rgba(255,255,255,0.5)',
+      closeStyle: 'flex:none;white-space:nowrap;font-size:14px;font-weight:700;color:' + rgba(sInk, 0.6) + ';cursor:pointer;padding:6px 4px',
+      rows: sw.scores.map((sc, k) => ({
+        label: TLBL[k], score: sc, note: TMETA[k].desc,
+        labelStyle: 'flex:1;min-width:0;font-size:16px;font-weight:800;color:' + sInk,
+        scoreStyle: 'font-size:18px;font-weight:900;color:' + sInk + ';font-variant-numeric:tabular-nums',
+        trackStyle: 'height:9px;border-radius:999px;background:' + rgba(sInk, 0.1) + ';box-shadow:inset 0 1px 2px ' + rgba(sInk, 0.2) + ';overflow:hidden;margin-top:8px',
+        noteStyle: 'font-size:13px;font-weight:500;color:' + rgba(sInk, 0.82) + ';line-height:1.6;margin-top:7px;text-wrap:pretty;white-space:pre-line',
+        barStyle: 'width:' + sc + '%;height:100%;border-radius:999px;background:' + TMETA[k].c + ''
+      }))
+    };
+
+    // ── 가족 투자 성향 비교 ───────────────────────────────────────
+    // 아빠는 아직 앱 계정이 없어 점수가 비어 있다.
+    const FAM = MEMBERS.map(f => {
+      const sc = f.acc ? scoresOf(f.user) : null;
+      const t = sc && sc.n ? typeOf(sc.list) : null;
+      return {
+        key: f.key, name: f.name, face: f.face, col: f.col, fill: f.fill,
+        has: !!(sc && sc.n), scores: sc ? sc.list : [0, 0, 0, 0, 0],
+        title: t ? t.title : '',
+        desc: !f.acc ? '아직 앱 계정이 없어요.\n계정이 생기면 여기에 성향이 쌓여요.'
+          : (sc && sc.n) ? t.desc : '아직 산 게 없어요.\n한 번 사고 나면 성향이 만들어져요.'
+      };
+    });
+    const famPick = s.famPick || 'all';
+    const famShown = FAM.filter(f => f.has && (famPick === 'all' || f.key === famPick));
+    const RR = 92, RCX = 118, RCY = 118;
+    const famPolys = famShown.map(f => ({
+      poly: f.scores.map((sc, i) => ptAt(i, sc / 100, RR, RCX, RCY).join(',')).join(' '),
+      stroke: f.col, fill: f.fill,
+      dots: f.scores.map((sc, i) => {
+        const d = ptAt(i, sc / 100, RR, RCX, RCY);
+        return { dx: d[0], dy: d[1], col: f.col };
+      })
+    }));
+    const famGrid = [0.25, 0.5, 0.75, 1].map(k => ({
+      pts: TLBL.map((_, i) => ptAt(i, k, RR, RCX, RCY).join(',')).join(' ')
+    }));
+    const famAxes = TLBL.map((lb, i) => {
+      const a = (-90 + i * 72) * Math.PI / 180;
+      const outer = ptAt(i, 1, RR, RCX, RCY);
+      const lx = (RCX + RR * 1.24 * Math.cos(a)) / 236 * 100, ly = (RCY + RR * 1.24 * Math.sin(a)) / 236 * 100;
+      return {
+        label: lb, ax: outer[0], ay: outer[1],
+        labelStyle: 'position:absolute;left:' + lx.toFixed(1) + '%;top:' + ly.toFixed(1) + '%;transform:translate(-50%,-50%);white-space:nowrap;font-size:11.5px;font-weight:800;color:#5C6280'
+      };
+    });
+    const famChips = [{ key:'all', name:'전체' }].concat(FAM).map(f => ({
+      name: f.name,
+      pick: () => this.set({ famPick: f.key }),
+      style: 'display:flex;align-items:center;gap:5px;padding:9px 16px;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700;white-space:nowrap;transition:all 0.18s;' + (famPick === f.key
+        ? 'color:#fff;background:' + accent
+        : 'color:#6B6F85;background:#fff;box-shadow:0 1px 5px rgba(30,25,60,0.05)')
+    }));
+    const famCards = FAM.map(f => ({
+      name: f.name, title: f.title, desc: f.desc,
+      pick: () => this.set({ famPick: famPick === f.key ? 'all' : f.key }),
+      iconStyle: 'width:42px;height:42px;flex:none;border-radius:999px;background:url(' + f.face + ') center/cover no-repeat,' + f.col + '2E;box-shadow:inset 0 0 0 2px ' + f.col + '99',
+      dotStyle: 'width:9px;height:9px;border-radius:999px;flex:none;background:' + f.col,
+      rowStyle: 'display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-radius:22px;cursor:pointer;transition:box-shadow 0.18s ease;background:#FFFFFF;' + (famPick === f.key
+        ? 'box-shadow:inset 0 0 0 2px ' + f.col + ',0 2px 10px rgba(30,25,60,0.05)'
+        : 'box-shadow:0 2px 10px rgba(30,25,60,0.05)')
+    }));
+
+    // ── 수익률 탭 ────────────────────────────────────────────────
+    let cash = 0, stockValue = 0, cost = 0;
+    shown.forEach(x => {
+      if (!x.acc) return;
+      const a = s.acc[x.acc];
+      cash += a.cash;
+      a.holdings.forEach(h => { stockValue += h.qty * price(h.code); cost += h.qty * h.avg; });
+    });
+    const pnl = stockValue - cost;
+    const pnlPct = cost > 0 ? pnl / cost * 100 : 0, heroPos = pnl >= 0;
+
+    const avat = (m, size) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:999px;background:url(' + m.face + ') center/cover no-repeat,#FFFFFF;box-shadow:0 4px 9px -3px rgba(35,25,80,0.22),0 0 0 2px ' + m.col + '66';
+    const pctPill = v => 'flex:none;font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;padding:4px 9px;border-radius:999px;color:' + (v >= 0 ? up : down) + ';background:' + (v >= 0 ? 'rgba(232,50,46,0.09)' : 'rgba(22,104,220,0.09)');
+
+    const SECIMG = { auto:'auto', semi:'semi', food:'food', game:'game', enter:'enter', energy:'energy' };
+    const secImg = id => SECIMG[id] ? A + 'sector-' + SECIMG[id] + '.png' : null;
+    const secGroups = [];
+    shown.forEach(x => {
+      if (!x.acc) return;
+      s.acc[x.acc].holdings.forEach(h => {
+        const st = u.stocks.filter(v => v.code === h.code)[0];
+        if (!st) return;
+        const sec = this.sectorOf(st.sector);
+        let g = secGroups.filter(y => y.id === st.sector)[0];
+        if (!g) { g = { id:st.sector, key:sec.name || '기타', emoji:sec.emoji, rows:[], value:0, cost:0 }; secGroups.push(g); }
+        const val = h.qty * st.price;
+        const pc = h.avg > 0 ? (st.price - h.avg) / h.avg * 100 : 0;
+        g.rows.push({
+          stockName: st.name, avatarStyle: avat(x, 38),
+          qtyText: (h.qty >= 1 ? (Math.round(h.qty * 100) / 100) : h.qty.toFixed(2)) + '주',
+          valueText: won(val), pctText: pctTxt(pc), pctStyle: pctPill(pc)
+        });
+        g.value += val; g.cost += h.qty * h.avg;
+      });
+    });
+    secGroups.sort((a, b) => b.value - a.value);
+    const secKeys = secGroups.map(g => g.id);
+    const secPick = secKeys.indexOf(s.retSecPick) >= 0 ? s.retSecPick : (secKeys[0] || null);
+    const retSectors = secGroups.map(g => {
+      const gp = g.cost > 0 ? (g.value - g.cost) / g.cost * 100 : 0;
+      const on = g.id === secPick, img = secImg(g.id);
+      return {
+        name: g.key, emoji: img ? '' : g.key.charAt(0),
+        countText: g.rows.length + '개 종목',
+        pctText: pctTxt(gp),
+        pctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:8px;color:' + (gp >= 0 ? up : down),
+        cardStyle: 'flex:none;width:108px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;text-align:center;border-radius:20px;padding:16px 10px 17px;cursor:pointer;transition:box-shadow 0.18s;background:#fff;box-shadow:' + (on ? '0 0 0 2px ' + accent + ',0 4px 14px rgba(30,25,60,0.09)' : '0 2px 10px rgba(30,25,60,0.05)'),
+        iconStyle: 'width:50px;height:50px;flex:none;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:25px;background:' + (img ? 'url(' + img + ') center/74% no-repeat,' : '') + '#F5F6FB',
+        pick: () => this.set({ retSecPick: g.id, retSecModal: g.id })
+      };
+    });
+    const secModal = secGroups.filter(g => g.id === s.retSecModal)[0] || null;
+    const secModalPct = secModal && secModal.cost > 0 ? (secModal.value - secModal.cost) / secModal.cost * 100 : 0;
+    const secModalImg = secModal ? secImg(secModal.id) : null;
+
+    // 피드 — 매수·매도 기록을 최신순으로. 댓글은 계정 있는 사람만 남길 수 있다.
+    const ago = ts => {
+      const min = Math.max(1, Math.round((Date.now() - new Date(ts).getTime()) / 60000));
+      if (min < 60) return min + '분 전';
+      if (min < 1440) return Math.round(min / 60) + '시간 전';
+      return Math.round(min / 1440) + '일 전';
+    };
+    const meMember = byUser[s.account === 'child' ? 'child_minji' : 'parent_mom'];
+    const cmts = s.arcCmts || {}, cmtOpen = s.arcCmtOpen || {}, cmtD = s.arcCmtDraft || {};
+    const edit = s.arcCmtEdit || null;
+    const events = []
+      .concat((s.records || []).map(r => ({ r: r, sell: false })))
+      .concat((s.sellRecords || []).map(r => ({ r: r, sell: true })))
+      .filter(e => { const m = byUser[e.r.user_id]; return m && (who === 'all' || m.key === who); })
+      .sort((a, b) => String(b.r.ts).localeCompare(String(a.r.ts)))
+      .slice(0, 12);
+    const retFeed = events.map(e => {
+      const r = e.r, m = byUser[r.user_id], id = r.order_id;
+      const now = price(r.symbol), avg = e.sell ? (r.avg || now) : (r.amount_krw / (r.qty || 1));
+      const pc = avg ? (now - avg) / avg * 100 : 0, pos = pc >= 0;
+      const liked = (s.arcLikes || {})[id];
+      const d = new Date(r.ts);
+      const reason = (e.sell ? SELL_REASONS : REASONS).filter(x => x.code === (r.sell_reason_code || r.reason_code))[0];
+      const list = cmts[id] || [];
+      return {
+        name: m.name, time: ago(r.ts), avatarStyle: avat(m, 44),
+        dateLabel: (d.getMonth() + 1) + '월 ' + d.getDate() + '일 수익률',
+        stockName: nameOf(r.symbol),
+        bigPctText: (pos ? '+' : '−') + Math.abs(pc).toFixed(2) + '%',
+        blockStyle: 'flex:none;width:39%;position:relative;overflow:hidden;padding:13px 14px 14px;display:flex;flex-direction:column;justify-content:space-between;background:' + (pos ? accent : '#001E5A'),
+        blockEmojiStyle: 'position:absolute;right:-2px;bottom:-2px;width:56px;height:60px;background:url(' + m.pose + ') right bottom/contain no-repeat;filter:drop-shadow(0 4px 7px rgba(0,0,0,0.3))',
+        avgPctText: won(avg),
+        avgPctStyle: 'font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-top:4px;white-space:nowrap;color:' + (pos ? up : down),
+        oneLiner: reason ? reason.short : (e.sell ? '팔았어' : '담았어'),
+        text: (e.sell ? '팔았어. ' : '담았어. ') + (r.memo || (reason ? reason.short + ' 결정했어.' : '')),
+        cmtCount: list.length,
+        cmtOpen: !!cmtOpen[id],
+        toggleCmt: () => this.set({ arcCmtOpen: Object.assign({}, cmtOpen, { [id]: !cmtOpen[id] }) }),
+        cmtBtnStyle: 'display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;color:' + (cmtOpen[id] ? '#0A3272' : '#A9AEC4'),
+        likeCount: liked ? 1 : 0,
+        likeIcon: '좋아요',
+        likeStyle: 'display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;color:' + (liked ? accent : '#A9AEC4'),
+        like: () => this.set({ arcLikes: Object.assign({}, s.arcLikes || {}, { [id]: !liked }) }),
+        comments: list.map((c, i) => {
+          const q = byKey[c.who] || meMember;
+          const isEd = !!(edit && edit.id === id && edit.i === i);
+          return {
+            name: q.name, text: c.text, avatarStyle: avat(q, 26),
+            canEdit: c.who === meMember.key && !isEd, editing: isEd, notEditing: !isEd,
+            editDraft: isEd ? (s.arcCmtEditDraft || '') : '',
+            actStyle: 'font-size:11.5px;font-weight:700;color:#A9AEC4;padding:4px 8px;border-radius:999px;background:#F2F3FA;cursor:pointer;white-space:nowrap',
+            onEditDraft: ev => this.setState({ arcCmtEditDraft: ev.target.value }),
+            startEdit: () => this.setState({ arcCmtEdit: { id: id, i: i }, arcCmtEditDraft: c.text }),
+            saveEdit: () => {
+              const v = (this.state.arcCmtEditDraft || '').trim(); if (!v) return;
+              const arr = (cmts[id] || []).slice(); arr[i] = { who: c.who, text: v };
+              this.set({ arcCmts: Object.assign({}, cmts, { [id]: arr }), arcCmtEdit: null, arcCmtEditDraft: '' });
+            },
+            cancelEdit: () => this.setState({ arcCmtEdit: null, arcCmtEditDraft: '' }),
+            del: () => {
+              const arr = (cmts[id] || []).slice(); arr.splice(i, 1);
+              this.set({ arcCmts: Object.assign({}, cmts, { [id]: arr }), arcCmtEdit: null, arcCmtEditDraft: '' });
+            }
+          };
+        }),
+        meAvatarStyle: avat(meMember, 30),
+        draft: cmtD[id] || '',
+        onDraft: ev => { const v = ev.target.value; this.setState(st => ({ arcCmtDraft: Object.assign({}, st.arcCmtDraft || {}, { [id]: v }) })); },
+        sendStyle: 'flex:none;font-size:12.5px;font-weight:800;padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;' + ((cmtD[id] || '').trim()
+          ? 'color:#fff;background:#001E5A'
+          : 'color:#B8BDD0;background:#F0F1F7'),
+        send: () => {
+          const v = (cmtD[id] || '').trim(); if (!v) return;
+          this.set({
+            arcCmts: Object.assign({}, cmts, { [id]: (cmts[id] || []).concat([{ who: meMember.key, text: v }]) }),
+            arcCmtDraft: Object.assign({}, cmtD, { [id]: '' })
+          });
+        }
+      };
+    });
+
+    // ── 가족 수익률 달리기 ──────────────────────────────────────────
+    // 트랙 왼쪽 2/5 지점이 START. 플러스면 오른쪽으로 웃으며 달리고,
+    // 마이너스면 START 왼쪽에서 왼쪽을 보고 땀을 흘린다.
+    const RUN_START = 40;
+    const LANE_H = 74;
+    const runRaw = ['me', 'mom', 'dad'].map(k => {
+      const x = byKey[k];
+      if (!x.acc) return { m:x, has:false, pct:0 };
+      const a = s.acc[x.acc];
+      let val = 0, cst = 0;
+      a.holdings.forEach(h => { val += h.qty * price(h.code); cst += h.qty * h.avg; });
+      return { m:x, has: cst > 0, pct: cst > 0 ? (val - cst) / cst * 100 : 0 };
+    });
+    // 가장 많이 간 사람이 트랙 끝에 닿도록 잡되, 다들 0 에 가까우면 5% 를 기준으로 둔다
+    const runMax = Math.max(5, ...runRaw.map(r => Math.abs(r.pct)));
+    const runners = runRaw.map(r => {
+      const minus = r.has && r.pct < 0;
+      const raw = r.pct >= 0
+        ? RUN_START + (r.pct / runMax) * 55
+        : RUN_START + (r.pct / runMax) * 35;
+      const at = r.has ? Math.max(13, Math.min(87, raw)) : RUN_START;
+      const ring = r.m.col;
+      return {
+        name: r.m.name,
+        // 방향은 얼굴 반전과 뒤로 흐르는 모션선으로만 알린다
+        pctText: r.has ? ((r.pct >= 0 ? '+' : '−') + Math.abs(r.pct).toFixed(1) + '%') : '아직',
+        laneStyle: 'position:relative;height:' + LANE_H + 'px;box-shadow:inset 0 -1px 0 #E4E6F1',
+        nameStyle: 'position:absolute;left:8px;top:6px;z-index:3;font-size:11px;font-weight:700;color:#8E93A8;white-space:nowrap;'
+          + 'background:rgba(244,245,251,0.9);border-radius:999px;padding:1px 6px',
+        // 주자 묶음 — 마이너스면 통째로 좌우 반전해 왼쪽을 보게 한다
+        runnerStyle: 'position:absolute;left:' + at.toFixed(1) + '%;top:50%;transform:translate(-50%,-50%)'
+          + (minus ? ' scaleX(-1)' : '') + ';display:flex;align-items:center;gap:4px;transition:left 0.4s ease',
+        dashStyle: (r.has && Math.abs(r.pct) > 0.05)
+          ? 'width:14px;height:12px;flex:none;border-radius:2px;opacity:0.45;background:repeating-linear-gradient(to bottom,' + ring + ' 0 2px,transparent 2px 5px)'
+          : 'display:none',
+        faceStyle: 'width:34px;height:34px;flex:none;border-radius:999px;background:url(' + r.m.face + ') center/cover no-repeat,#EDEFF6;'
+          + 'box-shadow:0 0 0 2.5px ' + ring + (r.has ? '' : '55') + ',0 2px 6px rgba(30,25,60,0.18)'
+          + (r.has ? '' : ';filter:grayscale(0.6);opacity:0.6'),
+        pctStyle: 'position:absolute;left:50%;top:34px;transform:translateX(-50%)' + (minus ? ' scaleX(-1)' : '')
+          + ';font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:'
+          + (!r.has ? '#B8BDD0' : (r.pct >= 0 ? up : down))
+      };
+    });
+    const runStartLabelStyle = 'position:absolute;left:' + RUN_START + '%;top:4px;transform:translateX(-50%);z-index:3;'
+      + 'font-size:9.5px;font-weight:800;letter-spacing:0.1em;color:#8E93A8;background:#F4F5FB;padding:0 5px;white-space:nowrap';
+    const runStartLineStyle = 'position:absolute;left:' + RUN_START + '%;top:0;bottom:0;width:0;'
+      + 'border-left:2px dashed #C6CBDD;transform:translateX(-1px);pointer-events:none';
+
+    const d0 = new Date();
+    return {
+      weekLabel: (d0.getMonth() + 1) + '월 ' + Math.ceil(d0.getDate() / 7) + '주차',
+
+      // 성향
+      traits: traits, radarGrid: radarGrid,
+      radarPoly: traits.map(t => t.dx + ',' + t.dy).join(' '),
+      type: myType, pal: MPL, ink: mInk, typeImgUrl: typeImg(myType.img),
+
+      // 카드 모아보기
+      weekCards: weekCards, cardDots: cardDots, cardSheet: cardSheet, cardCount: WEEKS.length,
+
+      // 가족 비교
+      famPolys: famPolys, famGrid: famGrid, famAxes: famAxes, famChips: famChips, famCards: famCards,
+
+      // 수익률
+      runners: runners, runStartLabelStyle: runStartLabelStyle, runStartLineStyle: runStartLineStyle,
+      retHeroLabel: who === 'all' ? '우리 가족 수익률' : byKey[who].short + ' 수익률',
+      retHeroPctText: (heroPos ? '+' : '−') + Math.abs(pnlPct).toFixed(2) + '%',
+      retHeroPctStyle: 'font-size:40px;font-weight:800;line-height:1;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (heroPos ? '#FF8574' : '#8AB6FF'),
+      retHeroTotalText: won(cash + stockValue),
+      retCashText: won(cash),
+      retSectors: retSectors, retNoHoldings: secGroups.length === 0,
+      retFeed: retFeed,
+      retFeedLabel: who === 'all' ? '가족 피드' : byKey[who].name + '의 피드',
+      secModal: secModal,
+      secModalEmoji: secModal ? (secModalImg ? '' : secModal.key.charAt(0)) : '',
+      secModalIconStyle: 'width:56px;height:56px;flex:none;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;background:' + (secModalImg ? 'url(' + secModalImg + ') center/74% no-repeat,' : '') + '#F5F6FB',
+      secModalName: secModal ? secModal.key : '',
+      secModalCount: secModal ? secModal.rows.length + '개 종목' : '',
+      secModalValue: secModal ? won(secModal.value) : '',
+      secModalPctText: pctTxt(secModalPct),
+      secModalPctStyle: 'font-size:18px;font-weight:800;line-height:1;letter-spacing:-0.01em;font-variant-numeric:tabular-nums;margin-top:5px;white-space:nowrap;color:' + (secModalPct >= 0 ? up : down),
+      secModalRows: secModal ? secModal.rows : []
+    };
+  }
   totalAsset(){
     const m = this.me();
     const held = m.holdings.reduce((a,h) => {
@@ -1998,93 +2732,16 @@ class Component extends DCLogic {
       : true;
     const prog2 = i => 'flex:1;height:4px;border-radius:999px;background:' + (i <= s.sellStep ? '#F5327F' : '#DDDFEC');
     const devChip = on => 'flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:12.5px;font-weight:' + (on ? '800' : '600') + ';cursor:pointer;' + (on ? 'color:#fff;background:#01185A' : 'color:#6E7488;background:#F1F2F8');
-    const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:999px;font-size:13.5px;font-weight:' + (on ? '700' : '500') + ';cursor:pointer;white-space:nowrap;' + (on
-      ? 'color:#fff;background:#01185A;box-shadow:0 6px 12px -4px rgba(1,24,90,0.4)'
-      : 'color:#8E93A8');
-    const myRecs = s.records.filter(r => r.user_id === (s.account === 'child' ? 'child_minji' : 'parent_mom'));
-    const cnt = {};
-    myRecs.forEach(r => { cnt[r.reason_code] = (cnt[r.reason_code] || 0) + 1; });
-    const reasonStats = REASONS.filter(r => cnt[r.code]).map(r => ({
-      emoji: r.emoji, label: r.label, n: cnt[r.code],
-      pct: Math.round(cnt[r.code] / myRecs.length * 100) + '%',
-      barStyle: 'width:' + Math.round(cnt[r.code] / myRecs.length * 100) + '%;height:100%;border-radius:999px;background:#F5327F'
-    })).sort((a, b) => b.n - a.n);
-    // 성향은 서버 엔진(BehaviorProfileSnapshot)이 계산한다. 여기서는 표시만 한다.
-    const CHARACTER_CARD = {
-      sniper: { name:'저격수' }, strategist: { name:'전략가' },
-      challenger: { name:'승부사' }, explorer: { name:'탐험가' }
-    };
-    const ABILITY_ROWS = [
-      { key:'accuracy', label:'정확력' }, { key:'evidence', label:'근거력' }, { key:'focus', label:'집중력' },
-      { key:'diversification', label:'분산력' }, { key:'intuition', label:'직관력' }
-    ];
-    const profs = s.profiles || {};
-    const myProf = profs[s.account] || null;
-    const mySnap = myProf ? myProf.snapshot : null;
-    const profLoading = s.profileStatus === 'loading' || s.profileStatus === 'idle';
-    const profError = s.profileStatus === 'error';
-    const isInitial = !!mySnap && mySnap.observationState === 'initial';
-    const character = mySnap && !isInitial && mySnap.character ? CHARACTER_CARD[mySnap.character] : null;
-    const starTextOf = grade => grade === 3 ? '★★★' : grade === 2 ? '★★☆' : grade === 1 ? '★☆☆' : '';
-    // 오각형 레이더 — 위 꼭짓점부터 시계방향으로 정확력·근거력·집중력·분산력·직관력 (오른쪽 기울면 근거·집중).
-    const radarPoint = (i, ratio) => {
-      const angle = (-90 + i * 72) * Math.PI / 180;
-      const r = 86 * Math.max(0, Math.min(1, ratio));
-      return (135 + r * Math.cos(angle)).toFixed(1) + ',' + (118 + r * Math.sin(angle)).toFixed(1);
-    };
-    const radarRing = ratio => ABILITY_ROWS.map((row, i) => radarPoint(i, ratio)).join(' ');
-    const abilityValue = key => {
-      const v = mySnap ? mySnap.abilities[key] : 0;
-      return typeof v === 'number' ? v : 0;
-    };
-    const radarData = ABILITY_ROWS.map((row, i) => radarPoint(i, abilityValue(row.key) / 10)).join(' ');
-    const abilityText = row => {
-      if (!mySnap) return row.label;
-      if (row.key === 'accuracy' && mySnap.abilities.accuracy === null) return row.label + ' 판정 중';
-      return row.label + ' ' + abilityValue(row.key);
-    };
-    const cmp = (a, b) => a > b ? ' > ' : a < b ? ' < ' : ' = ';
-    const judgeLine = character
-      ? '근거 ' + mySnap.abilities.evidence + cmp(mySnap.abilities.evidence, mySnap.abilities.intuition) + '직관 ' + mySnap.abilities.intuition
-        + ' → ' + (mySnap.abilities.evidence >= mySnap.abilities.intuition ? '근거형' : '직관형')
-        + ' · 집중 ' + mySnap.abilities.focus + cmp(mySnap.abilities.focus, mySnap.abilities.diversification) + '분산 ' + mySnap.abilities.diversification
-        + ' → ' + (mySnap.abilities.focus >= mySnap.abilities.diversification ? '집중형' : '분산형')
-      : isInitial ? '매수 기록이 3건 모이면 캐릭터가 정해져'
-      : profError ? '아카이브를 나갔다 다시 들어와 봐'
-      : '기록을 불러오는 중이야';
-    const styleName = profLoading ? '기록 살펴보는 중…'
-      : profError ? '지금은 못 불러왔어'
-      : character ? (character.name + (mySnap.starGrade ? ' ' + starTextOf(mySnap.starGrade) : '')) : '아직 관찰 초기야';
-    const charEmoji = character ? character.emoji : (profLoading ? '⏳' : '🌱');
-    const starBadge = character && mySnap.starGrade === null ? '별 판정 중 — 사고판 지 5거래일이 지나면 채점돼' : '';
-    const coachText = profLoading ? '키웅이가 기록을 살펴보고 있어…'
-      : (myProf && myProf.narration && myProf.narration.text) ? myProf.narration.text
-      : '기록이 모이면 이번 시즌 이야기를 들려줄게.';
-    const childSnap = profs.child ? profs.child.snapshot : null;
-    const parentSnap = profs.parent ? profs.parent.snapshot : null;
-    const compareSide = snapX => {
-      if (!snapX) return { name:'불러오는 중', star:'' };
-      if (snapX.observationState === 'initial' || !snapX.character) return { name:'관찰 초기', star:'' };
-      const card = CHARACTER_CARD[snapX.character];
-      return { emoji: card.emoji, name: card.name, star: snapX.starGrade ? starTextOf(snapX.starGrade) : '별 판정 중' };
-    };
-    const compareChild = compareSide(childSnap);
-    const compareParent = compareSide(parentSnap);
-    const compareCell = (snapX, row) => {
-      if (!snapX) return '—';
-      if (row.key === 'accuracy' && snapX.abilities.accuracy === null) return '판정 중';
-      const v = snapX.abilities[row.key];
-      return typeof v === 'number' ? v + '점' : '—';
-    };
-    const compareRows = ABILITY_ROWS.map(row => ({
-      label: row.label,
-      childText: compareCell(childSnap, row),
-      parentText: compareCell(parentSnap, row)
-    }));
-    const compareHeadline = childSnap && parentSnap && childSnap.character && parentSnap.character
-      ? s.acc.child.name + '는 ' + CHARACTER_CARD[childSnap.character].name + ', ' + s.acc.parent.name + '는 ' + CHARACTER_CARD[parentSnap.character].name + '. '
-        + (childSnap.character === parentSnap.character ? '같은 캐릭터여도 오각형 모양이 달라요.' : '스타일이 달라요.')
-      : '두 사람의 기록이 모이는 중이에요.';
+    const arc = this.buildArchive();
+    // 아카이브 성향 카드는 유형별 팔레트를 쓴다. arcInk 는 그 팔레트의 가장 진한 색.
+    const arcPal = arc.pal, arcInk = arc.ink;
+    const arcRgba = a => { const n = parseInt(arcInk.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
+    const arcHasPick = typeof s.traitPick === 'number';
+    const arcPicked = arcHasPick ? arc.traits[Math.min(s.traitPick, arc.traits.length - 1)] : arc.traits[0];
+    const arcWrap = t => (t || '').replace(/\s*\n\s*/g, ' ').replace(/(다|어|야|요)\.\s+/g, '$1.\n');
+    const arcTab = on => 'flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.18s;' + (on
+      ? 'color:#fff;background:#001E5A'
+      : 'color:#7C819A;background:#EAEBF3');
     const sec = st ? this.sectorOf(st.sector) : { accent:'#8E93A8' };
     const bigBadge = (size, r, f) => 'width:' + size + 'px;height:' + size + 'px;flex:none;border-radius:' + r + 'px;display:flex;align-items:center;justify-content:center;font-size:' + f + 'px;background:#F4F4FA,0 0 0 1.5px ' + sec.accent + '33';
 
@@ -2406,7 +3063,6 @@ class Component extends DCLogic {
         // 체결이 났으니 성향 스냅샷을 비워 다음 아카이브 진입에서 다시 계산하게 둔다
         this.set({
           acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3,
-          profiles: null, profileStatus: 'idle',
           orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null }
         });
         if (!isLimit) {
@@ -2421,35 +3077,97 @@ class Component extends DCLogic {
       },
 
 
+      // ── 성장 아카이브 ────────────────────────────────────────────────────
+      arcWeekLabel: arc.weekLabel,
       atReport: s.arcTab === 'report' || !s.arcTab, atReturn: s.arcTab === 'return',
-      atCompare: s.arcTab === 'compare', atSeason: s.arcTab === 'season',
-      tabReport: () => this.set({ arcTab:'report' }), tabReturn: () => this.set({ arcTab:'return' }),
-      tabCompare: () => this.set({ arcTab:'compare' }), tabSeason: () => this.set({ arcTab:'season' }),
+      tabReport: () => this.set({ arcTab:'report', cardsOpen:false, cardSheet:null, famOpen:false }),
+      tabReturn: () => this.set({ arcTab:'return', cardsOpen:false, cardSheet:null, famOpen:false }),
       tabReportStyle: arcTab(!s.arcTab || s.arcTab === 'report'), tabReturnStyle: arcTab(s.arcTab === 'return'),
-      tabCompareStyle: arcTab(s.arcTab === 'compare'), tabSeasonStyle: arcTab(s.arcTab === 'season'),
-      styleName: styleName,
-      charEmoji: charEmoji,
-      judgeLine: judgeLine,
-      hasStarBadge: !!starBadge, starBadge: starBadge,
-      radarRingInner: radarRing(1 / 3), radarRingMid: radarRing(2 / 3),
-      radarOutline: radarRing(1), radarData: radarData,
-      abilityText0: abilityText(ABILITY_ROWS[0]), abilityText1: abilityText(ABILITY_ROWS[1]),
-      abilityText2: abilityText(ABILITY_ROWS[2]), abilityText3: abilityText(ABILITY_ROWS[3]),
-      abilityText4: abilityText(ABILITY_ROWS[4]),
-      hasReasons: reasonStats.length > 0, noReasons: reasonStats.length === 0,
-      reasonStats: reasonStats,
-      coachText: coachText,
+      arcBodyStyle: 'flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 8px;display:flex;flex-direction:column;gap:14px'
+        + ((!s.arcTab || s.arcTab === 'report') ? ';justify-content:center' : ''),
+
+      // 성향 카드
+      styleTitle: arc.type.title,
+      styleCardStyle: 'position:relative;border-radius:28px;padding:8px;cursor:pointer;background:linear-gradient(160deg,' + arcPal[0] + ' 0%,' + arcPal[1] + ' 46%,' + arcPal[2] + ' 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 0 0 1.5px ' + arcRgba(0.3) + ',0 2px 3px ' + arcRgba(0.2) + ',0 16px 22px -10px ' + arcRgba(0.35),
+      styleInnerStyle: 'position:relative;border-radius:21px;padding:16px 15px 14px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),inset 0 0 0 1px rgba(255,255,255,0.36),inset 0 -20px 40px ' + arcRgba(0.1) + ';background:linear-gradient(158deg,rgba(255,255,255,0.42) 0%,rgba(255,255,255,0.14) 34%,rgba(255,255,255,0.06) 62%,rgba(255,255,255,0.2) 100%)',
+      styleBlob1: 'position:absolute;left:-40px;top:-30px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.6) 0%,rgba(255,255,255,0) 68%);filter:blur(18px);pointer-events:none',
+      styleBlob2: 'position:absolute;right:-50px;bottom:-40px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,' + arcRgba(0.16) + ' 0%,' + arcRgba(0) + ' 68%);filter:blur(22px);pointer-events:none',
+      styleKickerStyle: 'font-size:11px;font-weight:800;color:' + arcRgba(0.85) + ';letter-spacing:0.14em;white-space:nowrap',
+      styleChevStyle: 'font-size:11.5px;font-weight:800;color:' + arcRgba(0.6),
+      styleTitleStyle: 'position:relative;text-align:center;font-size:26px;font-weight:900;color:' + arcInk + ';margin-top:5px;letter-spacing:-0.01em;text-shadow:0 1px 0 rgba(255,255,255,0.6)',
+      styleImgStyle: 'width:186px;height:250px;margin:0 -20px -6px -18px;background:url(' + arc.typeImgUrl + ') center bottom/contain no-repeat;filter:drop-shadow(0 14px 16px ' + arcRgba(0.38) + ')',
+      styleShadowStyle: 'width:104px;height:22px;margin-top:-10px;border-radius:50%;background:radial-gradient(ellipse at center,' + arcRgba(0.22) + ' 0%,' + arcRgba(0.06) + ' 46%,rgba(0,0,0,0) 72%)',
+      styleGridStroke: arcRgba(0.18), styleAxisStroke: arcRgba(0.16),
+      stylePolyFill: arcRgba(0.24), stylePolyStroke: arcInk,
+      traits: arc.traits, radarGrid: arc.radarGrid, radarPoly: arc.radarPoly,
+
+      // 축을 누르면 그 축 설명, 안 눌렀으면 유형 설명
+      picked: arcPicked, hasPick: arcHasPick,
+      pickedText: arcHasPick ? arcWrap(arcPicked.desc) : arc.type.desc.replace(/\s*\n\s*/g, ' '),
+      pickedShowLead: !arcHasPick,
+      pickedHeadStyle: arcHasPick ? 'display:flex;align-items:center;justify-content:center;gap:7px' : 'display:none',
+      pickedLabelStyle: 'font-size:13.5px;font-weight:800;color:' + arcInk,
+      pickedScoreStyle: 'font-size:14px;font-weight:900;color:' + arcInk + ';font-variant-numeric:tabular-nums',
+      pickedTextStyle: 'flex:1;min-width:0;white-space:pre-line;text-align:' + (arcHasPick ? 'center' : 'left') + ';font-size:' + (arcHasPick ? '12px' : '12.5px') + ';font-weight:500;color:' + arcRgba(0.8) + ';line-height:1.65;' + (arcHasPick ? 'margin-top:3px;' : '') + 'text-wrap:pretty',
+      pickedStyle: 'position:relative;display:flex;flex-direction:' + (arcHasPick ? 'column' : 'row') + ';align-items:center;gap:' + (arcHasPick ? '6px' : '10px') + ';margin-top:10px;border-radius:16px;padding:11px 14px;background:rgba(255,255,255,0.5);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),inset 0 0 0 1px rgba(255,255,255,0.4)',
+
+      // 성향 상세 시트
+      traitOpen: !!s.traitOpen,
+      openTrait: () => this.set({ traitOpen: true }),
+      closeTrait: () => this.set({ traitOpen: false }),
+      tsPal: {
+        sheet: 'position:absolute;left:0;right:0;bottom:0;z-index:7;max-height:80%;overflow-y:auto;border-radius:30px 30px 0 0;padding:14px 20px 26px;background:linear-gradient(160deg,rgba(255,255,255,0.82) 0%,rgba(255,255,255,0.74) 100%),linear-gradient(160deg,' + arcPal[0] + ' 0%,' + arcPal[1] + ' 46%,' + arcPal[2] + ' 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 -18px 40px ' + arcRgba(0.32),
+        grab: 'width:44px;height:5px;border-radius:999px;background:' + arcRgba(0.3) + ';margin:0 auto 14px',
+        title: 'font-size:20px;font-weight:900;color:' + arcInk + ';letter-spacing:-0.01em',
+        close: 'flex:none;white-space:nowrap;font-size:13.5px;font-weight:700;color:' + arcRgba(0.7) + ';cursor:pointer',
+        lead: 'font-size:13px;font-weight:600;color:' + arcRgba(0.82) + ';line-height:1.7;margin-top:9px;text-wrap:pretty;white-space:pre-line',
+        row: '',
+        label: 'flex:1;min-width:0;font-size:15.5px;font-weight:900;color:' + arcInk,
+        score: 'flex:none;font-size:17px;font-weight:900;color:' + arcInk + ';font-variant-numeric:tabular-nums',
+        track: 'height:10px;border-radius:999px;background:' + arcRgba(0.14) + ';overflow:hidden;margin-top:9px',
+        note: 'font-size:12.5px;font-weight:600;color:' + arcRgba(0.78) + ';line-height:1.65;margin-top:8px;text-wrap:pretty',
+        icon: 'width:30px;height:30px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:15px;background:' + arcRgba(0.12)
+      },
+
+      // 카드 모아보기 · 가족 비교 (아카이브 안에서 열리는 두 화면)
+      cardsOpen: !!s.cardsOpen && !s.famOpen, famOpen: !!s.famOpen,
+      notCards: !s.cardsOpen && !s.famOpen,
+      openCards: () => { const last = arc.cardCount - 1; this.set({ cardsOpen:true, cardActive:last, cardSheet:null }); this.jumpCard(last); },
+      closeCards: () => this.set({ cardsOpen:false, cardSheet:null }),
+      cardRailRef: el => this.bindCardRail(el),
+      weekCards: arc.weekCards, arcCardDots: arc.cardDots,
+      cardSheetOpen: s.cardSheet !== null && s.cardSheet !== undefined,
+      closeCardSheet: () => this.set({ cardSheet: null }),
+      cardSheet: arc.cardSheet,
+      openFam: () => this.set({ famOpen:true, cardsOpen:false, cardSheet:null, famPick:'all' }),
+      closeFam: () => this.set({ famOpen: false }),
+      famPolys: arc.famPolys, famGrid: arc.famGrid, famAxes: arc.famAxes,
+      famChips: arc.famChips, famCards: arc.famCards,
+
+      // 수익률 탭
+      runners: arc.runners,
+      runStartLabelStyle: arc.runStartLabelStyle, runStartLineStyle: arc.runStartLineStyle,
+      retHeroLabel: arc.retHeroLabel, retHeroPctText: arc.retHeroPctText, retHeroPctStyle: arc.retHeroPctStyle,
+      retHeroTotalText: arc.retHeroTotalText,
+      retCashLabel: '남은 현금', retCashText: arc.retCashText,
+      retSectors: arc.retSectors, retNoHoldings: arc.retNoHoldings,
+      retFeed: arc.retFeed, retFeedLabel: arc.retFeedLabel,
+      secRailRef: el => { this.secRail = el; },
+      secPrev: () => { if (this.secRail) this.secRail.scrollBy({ left: -118, behavior: 'smooth' }); },
+      secNext: () => { if (this.secRail) this.secRail.scrollBy({ left: 118, behavior: 'smooth' }); },
+      secModalOpen: !!arc.secModal,
+      closeSecModal: () => this.set({ retSecModal: null }),
+      stopTap: e => e.stopPropagation(),
+      secModalEmoji: arc.secModalEmoji, secModalIconStyle: arc.secModalIconStyle,
+      secModalName: arc.secModalName, secModalCount: arc.secModalCount,
+      secModalValue: arc.secModalValue, secModalPctText: arc.secModalPctText,
+      secModalPctStyle: arc.secModalPctStyle, secModalRows: arc.secModalRows,
       pnlPctText: (pnl >= 0 ? '+' : '') + (pnl / SEED * 100).toFixed(2) + '%',
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      childName: s.acc.child.name, parentName: s.acc.parent.name,
-      compareChildEmoji: compareChild.emoji, compareChildName: compareChild.name, compareChildStar: compareChild.star,
-      compareParentEmoji: compareParent.emoji, compareParentName: compareParent.name, compareParentStar: compareParent.star,
-      compareRows: compareRows,
-      compareHeadline: compareHeadline,
       badgeCount: s.badges || 0,
       sellCount: (s.sellRecords || []).length,
       memoRecordCount: s.records.filter(r => r.memo).length + (s.sellRecords || []).filter(r => r.memo).length,
-      detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened' || e.event === 'info_detail_opened').length,
+      detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened').length,
 
       isRanking: s.screen === 'ranking',
       // 랭킹 화면만 상단이 남색이라 상태바 아이콘을 흰색으로 바꾼다.
@@ -2678,7 +3396,6 @@ class Component extends DCLogic {
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, sellStep: 3,
-          profiles: null, profileStatus: 'idle',
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
           sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, badge: showJudge && planMatch === true }
         });
@@ -2763,7 +3480,7 @@ class Component extends DCLogic {
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
-      goArchive: () => { this.set({ screen:'archive' }); this.loadProfiles(); },
+      goArchive: () => { this.set({ screen:'archive' }); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();

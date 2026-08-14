@@ -292,7 +292,6 @@
         // 체결이 났으니 성향 스냅샷을 비워 다음 아카이브 진입에서 다시 계산하게 둔다
         this.set({
           acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3,
-          profiles: null, profileStatus: 'idle',
           orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null }
         });
         if (!isLimit) {
@@ -307,35 +306,97 @@
       },
 
 
+      // ── 성장 아카이브 ────────────────────────────────────────────────────
+      arcWeekLabel: arc.weekLabel,
       atReport: s.arcTab === 'report' || !s.arcTab, atReturn: s.arcTab === 'return',
-      atCompare: s.arcTab === 'compare', atSeason: s.arcTab === 'season',
-      tabReport: () => this.set({ arcTab:'report' }), tabReturn: () => this.set({ arcTab:'return' }),
-      tabCompare: () => this.set({ arcTab:'compare' }), tabSeason: () => this.set({ arcTab:'season' }),
+      tabReport: () => this.set({ arcTab:'report', cardsOpen:false, cardSheet:null, famOpen:false }),
+      tabReturn: () => this.set({ arcTab:'return', cardsOpen:false, cardSheet:null, famOpen:false }),
       tabReportStyle: arcTab(!s.arcTab || s.arcTab === 'report'), tabReturnStyle: arcTab(s.arcTab === 'return'),
-      tabCompareStyle: arcTab(s.arcTab === 'compare'), tabSeasonStyle: arcTab(s.arcTab === 'season'),
-      styleName: styleName,
-      charEmoji: charEmoji,
-      judgeLine: judgeLine,
-      hasStarBadge: !!starBadge, starBadge: starBadge,
-      radarRingInner: radarRing(1 / 3), radarRingMid: radarRing(2 / 3),
-      radarOutline: radarRing(1), radarData: radarData,
-      abilityText0: abilityText(ABILITY_ROWS[0]), abilityText1: abilityText(ABILITY_ROWS[1]),
-      abilityText2: abilityText(ABILITY_ROWS[2]), abilityText3: abilityText(ABILITY_ROWS[3]),
-      abilityText4: abilityText(ABILITY_ROWS[4]),
-      hasReasons: reasonStats.length > 0, noReasons: reasonStats.length === 0,
-      reasonStats: reasonStats,
-      coachText: coachText,
+      arcBodyStyle: 'flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 8px;display:flex;flex-direction:column;gap:14px'
+        + ((!s.arcTab || s.arcTab === 'report') ? ';justify-content:center' : ''),
+
+      // 성향 카드
+      styleTitle: arc.type.title,
+      styleCardStyle: 'position:relative;border-radius:28px;padding:8px;cursor:pointer;background:linear-gradient(160deg,' + arcPal[0] + ' 0%,' + arcPal[1] + ' 46%,' + arcPal[2] + ' 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),0 0 0 1.5px ' + arcRgba(0.3) + ',0 2px 3px ' + arcRgba(0.2) + ',0 16px 22px -10px ' + arcRgba(0.35),
+      styleInnerStyle: 'position:relative;border-radius:21px;padding:16px 15px 14px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),inset 0 0 0 1px rgba(255,255,255,0.36),inset 0 -20px 40px ' + arcRgba(0.1) + ';background:linear-gradient(158deg,rgba(255,255,255,0.42) 0%,rgba(255,255,255,0.14) 34%,rgba(255,255,255,0.06) 62%,rgba(255,255,255,0.2) 100%)',
+      styleBlob1: 'position:absolute;left:-40px;top:-30px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.6) 0%,rgba(255,255,255,0) 68%);filter:blur(18px);pointer-events:none',
+      styleBlob2: 'position:absolute;right:-50px;bottom:-40px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,' + arcRgba(0.16) + ' 0%,' + arcRgba(0) + ' 68%);filter:blur(22px);pointer-events:none',
+      styleKickerStyle: 'font-size:11px;font-weight:800;color:' + arcRgba(0.85) + ';letter-spacing:0.14em;white-space:nowrap',
+      styleChevStyle: 'font-size:11.5px;font-weight:800;color:' + arcRgba(0.6),
+      styleTitleStyle: 'position:relative;text-align:center;font-size:26px;font-weight:900;color:' + arcInk + ';margin-top:5px;letter-spacing:-0.01em;text-shadow:0 1px 0 rgba(255,255,255,0.6)',
+      styleImgStyle: 'width:186px;height:250px;margin:0 -20px -6px -18px;background:url(' + arc.typeImgUrl + ') center bottom/contain no-repeat;filter:drop-shadow(0 14px 16px ' + arcRgba(0.38) + ')',
+      styleShadowStyle: 'width:104px;height:22px;margin-top:-10px;border-radius:50%;background:radial-gradient(ellipse at center,' + arcRgba(0.22) + ' 0%,' + arcRgba(0.06) + ' 46%,rgba(0,0,0,0) 72%)',
+      styleGridStroke: arcRgba(0.18), styleAxisStroke: arcRgba(0.16),
+      stylePolyFill: arcRgba(0.24), stylePolyStroke: arcInk,
+      traits: arc.traits, radarGrid: arc.radarGrid, radarPoly: arc.radarPoly,
+
+      // 축을 누르면 그 축 설명, 안 눌렀으면 유형 설명
+      picked: arcPicked, hasPick: arcHasPick,
+      pickedText: arcHasPick ? arcWrap(arcPicked.desc) : arc.type.desc.replace(/\s*\n\s*/g, ' '),
+      pickedShowLead: !arcHasPick,
+      pickedHeadStyle: arcHasPick ? 'display:flex;align-items:center;justify-content:center;gap:7px' : 'display:none',
+      pickedLabelStyle: 'font-size:13.5px;font-weight:800;color:' + arcInk,
+      pickedScoreStyle: 'font-size:14px;font-weight:900;color:' + arcInk + ';font-variant-numeric:tabular-nums',
+      pickedTextStyle: 'flex:1;min-width:0;white-space:pre-line;text-align:' + (arcHasPick ? 'center' : 'left') + ';font-size:' + (arcHasPick ? '12px' : '12.5px') + ';font-weight:500;color:' + arcRgba(0.8) + ';line-height:1.65;' + (arcHasPick ? 'margin-top:3px;' : '') + 'text-wrap:pretty',
+      pickedStyle: 'position:relative;display:flex;flex-direction:' + (arcHasPick ? 'column' : 'row') + ';align-items:center;gap:' + (arcHasPick ? '6px' : '10px') + ';margin-top:10px;border-radius:16px;padding:11px 14px;background:rgba(255,255,255,0.5);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),inset 0 0 0 1px rgba(255,255,255,0.4)',
+
+      // 성향 상세 시트
+      traitOpen: !!s.traitOpen,
+      openTrait: () => this.set({ traitOpen: true }),
+      closeTrait: () => this.set({ traitOpen: false }),
+      tsPal: {
+        sheet: 'position:absolute;left:0;right:0;bottom:0;z-index:7;max-height:80%;overflow-y:auto;border-radius:30px 30px 0 0;padding:14px 20px 26px;background:linear-gradient(160deg,rgba(255,255,255,0.82) 0%,rgba(255,255,255,0.74) 100%),linear-gradient(160deg,' + arcPal[0] + ' 0%,' + arcPal[1] + ' 46%,' + arcPal[2] + ' 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 -18px 40px ' + arcRgba(0.32),
+        grab: 'width:44px;height:5px;border-radius:999px;background:' + arcRgba(0.3) + ';margin:0 auto 14px',
+        title: 'font-size:20px;font-weight:900;color:' + arcInk + ';letter-spacing:-0.01em',
+        close: 'flex:none;white-space:nowrap;font-size:13.5px;font-weight:700;color:' + arcRgba(0.7) + ';cursor:pointer',
+        lead: 'font-size:13px;font-weight:600;color:' + arcRgba(0.82) + ';line-height:1.7;margin-top:9px;text-wrap:pretty;white-space:pre-line',
+        row: '',
+        label: 'flex:1;min-width:0;font-size:15.5px;font-weight:900;color:' + arcInk,
+        score: 'flex:none;font-size:17px;font-weight:900;color:' + arcInk + ';font-variant-numeric:tabular-nums',
+        track: 'height:10px;border-radius:999px;background:' + arcRgba(0.14) + ';overflow:hidden;margin-top:9px',
+        note: 'font-size:12.5px;font-weight:600;color:' + arcRgba(0.78) + ';line-height:1.65;margin-top:8px;text-wrap:pretty',
+        icon: 'width:30px;height:30px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:15px;background:' + arcRgba(0.12)
+      },
+
+      // 카드 모아보기 · 가족 비교 (아카이브 안에서 열리는 두 화면)
+      cardsOpen: !!s.cardsOpen && !s.famOpen, famOpen: !!s.famOpen,
+      notCards: !s.cardsOpen && !s.famOpen,
+      openCards: () => { const last = arc.cardCount - 1; this.set({ cardsOpen:true, cardActive:last, cardSheet:null }); this.jumpCard(last); },
+      closeCards: () => this.set({ cardsOpen:false, cardSheet:null }),
+      cardRailRef: el => this.bindCardRail(el),
+      weekCards: arc.weekCards, arcCardDots: arc.cardDots,
+      cardSheetOpen: s.cardSheet !== null && s.cardSheet !== undefined,
+      closeCardSheet: () => this.set({ cardSheet: null }),
+      cardSheet: arc.cardSheet,
+      openFam: () => this.set({ famOpen:true, cardsOpen:false, cardSheet:null, famPick:'all' }),
+      closeFam: () => this.set({ famOpen: false }),
+      famPolys: arc.famPolys, famGrid: arc.famGrid, famAxes: arc.famAxes,
+      famChips: arc.famChips, famCards: arc.famCards,
+
+      // 수익률 탭
+      runners: arc.runners,
+      runStartLabelStyle: arc.runStartLabelStyle, runStartLineStyle: arc.runStartLineStyle,
+      retHeroLabel: arc.retHeroLabel, retHeroPctText: arc.retHeroPctText, retHeroPctStyle: arc.retHeroPctStyle,
+      retHeroTotalText: arc.retHeroTotalText,
+      retCashLabel: '남은 현금', retCashText: arc.retCashText,
+      retSectors: arc.retSectors, retNoHoldings: arc.retNoHoldings,
+      retFeed: arc.retFeed, retFeedLabel: arc.retFeedLabel,
+      secRailRef: el => { this.secRail = el; },
+      secPrev: () => { if (this.secRail) this.secRail.scrollBy({ left: -118, behavior: 'smooth' }); },
+      secNext: () => { if (this.secRail) this.secRail.scrollBy({ left: 118, behavior: 'smooth' }); },
+      secModalOpen: !!arc.secModal,
+      closeSecModal: () => this.set({ retSecModal: null }),
+      stopTap: e => e.stopPropagation(),
+      secModalEmoji: arc.secModalEmoji, secModalIconStyle: arc.secModalIconStyle,
+      secModalName: arc.secModalName, secModalCount: arc.secModalCount,
+      secModalValue: arc.secModalValue, secModalPctText: arc.secModalPctText,
+      secModalPctStyle: arc.secModalPctStyle, secModalRows: arc.secModalRows,
       pnlPctText: (pnl >= 0 ? '+' : '') + (pnl / SEED * 100).toFixed(2) + '%',
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      childName: s.acc.child.name, parentName: s.acc.parent.name,
-      compareChildEmoji: compareChild.emoji, compareChildName: compareChild.name, compareChildStar: compareChild.star,
-      compareParentEmoji: compareParent.emoji, compareParentName: compareParent.name, compareParentStar: compareParent.star,
-      compareRows: compareRows,
-      compareHeadline: compareHeadline,
       badgeCount: s.badges || 0,
       sellCount: (s.sellRecords || []).length,
       memoRecordCount: s.records.filter(r => r.memo).length + (s.sellRecords || []).filter(r => r.memo).length,
-      detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened' || e.event === 'info_detail_opened').length,
+      detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened').length,
 
       isRanking: s.screen === 'ranking',
       // 랭킹 화면만 상단이 남색이라 상태바 아이콘을 흰색으로 바꾼다.
@@ -564,7 +625,6 @@
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, sellStep: 3,
-          profiles: null, profileStatus: 'idle',
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
           sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, badge: showJudge && planMatch === true }
         });
@@ -649,7 +709,7 @@
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
-      goArchive: () => { this.set({ screen:'archive' }); this.loadProfiles(); },
+      goArchive: () => { this.set({ screen:'archive' }); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();
