@@ -346,6 +346,7 @@ async function main() {
         assert.equal(message.includes("주식은 회사의 작은 조각"), true);
         return "주식은 회사를 작게 나눈 조각이에요. 그 조각을 가지면 회사의 일부를 가진 거예요.";
       },
+      judgeOutput: async () => ({ violation: false, rule: 0 }),
     },
   );
   assert.equal(simpler.response.text.includes("회사를 작게 나눈 조각"), true);
@@ -383,6 +384,7 @@ async function main() {
     {
       generateAnswer: async () =>
         "주가는 시장에서 거래된 가격이야. 회사 이익은 회사가 번 돈을 계산한 결과야.",
+      judgeOutput: async () => ({ violation: false, rule: 0 }),
     },
   );
   assert.equal(interruptedByQuestion.source, "model");
@@ -410,7 +412,10 @@ async function main() {
       explain: { scriptId: "flow:guided", stage: "detail", choiceId: "ask" },
     },
     session,
-    { generateAnswer: async () => "물타기는 같은 주식을 더 사서 평균 매수가를 바꾸는 행동이에요." },
+    {
+      generateAnswer: async () => "물타기는 같은 주식을 더 사서 평균 매수가를 바꾸는 행동이에요.",
+      judgeOutput: async () => ({ violation: false, rule: 0 }),
+    },
   );
   assert.equal(askWithQuestion.source, "model");
   assert.equal(askWithQuestion.response.text.includes("평균 매수가"), true);
