@@ -3006,7 +3006,7 @@ class Component extends DCLogic {
         window.addEventListener('pointercancel', up);
       },
 
-      stockName: st ? st.name : '', stockEmoji: (sec.name || '').charAt(0),
+      stockName: st ? st.name : '', stockEmoji: st && !logos[st.code] ? (sec.name || '').charAt(0) : '',
 
       // 관심 종목 — 누르기 전 회색, 담고 나면 분홍
       watchBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
@@ -3026,7 +3026,9 @@ class Component extends DCLogic {
       stockSparkBig: st ? this.polyline(st.spark, 336, 112) : '',
       stockDescLong: st ? (st.name + this.topic(st.name) + ' ' + st.desc + '.') : '',
       stockNews: newsItem ? newsItem.headline : (newsStatus === 'error' ? '뉴스를 불러오지 못했어. 다시 눌러 줘.' : (newsStatus === 'empty' ? '아직 검수를 통과한 새 소식이 없어.' : '검수를 통과한 새 소식을 찾고 있어.')),
-      detailBadgeStyle: bigBadge(52, 18, 25),
+      detailBadgeStyle: bigBadge(52, 18, 25) + (st && logos[st.code]
+        ? ';background-color:#F4F4FA;background-image:url(' + logos[st.code] + ');background-position:center;background-size:contain;background-repeat:no-repeat'
+        : ''),
       miniBadgeStyle: bigBadge(38, 13, 18),
 
       buyStepNo: s.buyStep,
