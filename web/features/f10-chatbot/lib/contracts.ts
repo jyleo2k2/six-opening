@@ -4,6 +4,8 @@ import {
   CHAT_ORDER_SIDES,
   CHAT_ORDER_STEPS,
   CHAT_SCREENS,
+  CHAT_STOCK_VIEWS,
+  CHAT_ARCHIVE_OVERLAYS,
   type ChatContext,
   type ChatResponse,
   type ChatScreen,
@@ -329,7 +331,7 @@ export function isAllowedUiAction(value: unknown): value is ChatUiAction {
     return false;
   }
 
-  const { label, stockId, orderSide, orderStep, sectorId, archiveTab } = value;
+  const { label, stockId, orderSide, orderStep, stockView, sectorId, archiveTab, archiveOverlay } = value;
   return (
     (label === undefined ||
       (typeof label === "string" && label.trim().length > 0 && label.length <= MAX_LABEL_LENGTH)) &&
@@ -339,10 +341,17 @@ export function isAllowedUiAction(value: unknown): value is ChatUiAction {
       CHAT_ORDER_SIDES.includes(String(orderSide) as ChatUiAction["orderSide"] & string)) &&
     (orderStep === undefined ||
       CHAT_ORDER_STEPS.includes(String(orderStep) as ChatUiAction["orderStep"] & string)) &&
+    (stockView === undefined ||
+      CHAT_STOCK_VIEWS.includes(String(stockView) as ChatUiAction["stockView"] & string)) &&
     (sectorId === undefined ||
-      (typeof sectorId === "string" && SECTORS.some((sector) => sector.key === sectorId))) &&
+      (typeof sectorId === "string" &&
+        (SECTORS.some((sector) => sector.key === sectorId) || ["rank", "watch"].includes(sectorId)))) &&
     (archiveTab === undefined ||
-      CHAT_ARCHIVE_TABS.includes(String(archiveTab) as ChatUiAction["archiveTab"] & string))
+      CHAT_ARCHIVE_TABS.includes(String(archiveTab) as ChatUiAction["archiveTab"] & string)) &&
+    (archiveOverlay === undefined ||
+      CHAT_ARCHIVE_OVERLAYS.includes(
+        String(archiveOverlay) as ChatUiAction["archiveOverlay"] & string,
+      ))
   );
 }
 

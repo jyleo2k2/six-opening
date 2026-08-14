@@ -226,6 +226,18 @@ assert.equal(
   true,
 );
 assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "stock", stockView: "explore", sectorId: "rank" }),
+  true,
+);
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "ranking" }),
+  true,
+);
+assert.equal(
+  isAllowedUiAction({ type: "open_screen", target: "archive", archiveOverlay: "cards" }),
+  true,
+);
+assert.equal(
   isAllowedUiAction({ type: "open_screen", target: "stock", sectorId: "unknown" }),
   false,
 );

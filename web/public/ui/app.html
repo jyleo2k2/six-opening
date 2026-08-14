@@ -1792,16 +1792,29 @@ class Component extends DCLogic {
     const stock = stockCode ? (this.uni().stocks || []).filter(x => x.code === stockCode)[0] : this.stock();
     if (action.target === 'home') {
       this.set({ screen:'home' });
+    } else if (action.target === 'ranking') {
+      this.set({ screen:'ranking' });
     } else if (action.target === 'portfolio') {
       this.set({ screen:'portfolio' });
     } else if (action.target === 'archive') {
       const archiveTabs = ['report', 'return'];
-      this.set({ screen:'archive', arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report' });
+      this.set({
+        screen:'archive',
+        arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report',
+        cardsOpen: action.archiveOverlay === 'cards',
+        cardSheet: null,
+        famOpen: false,
+      });
       this.loadDailyCloses();
     } else if (action.target === 'stock') {
-      const sector = (this.uni().sectors || []).filter(x => x.id === action.sectorId)[0];
-      if (sector) this.set({ screen:'explore', sectorId:sector.id, cardIndex:0 });
-      else if (stock) this.set({ code:stock.code, screen:'detail' });
+      const stockFilters = ['rank', 'watch'].concat((this.uni().sectors || []).map(x => x.id));
+      if (action.stockView === 'explore' || stockFilters.indexOf(action.sectorId) >= 0) {
+        this.set({
+          screen:'explore',
+          ...(stockFilters.indexOf(action.sectorId) >= 0 ? { sectorId: action.sectorId } : {}),
+          cardIndex:0,
+        });
+      } else if (stock) this.set({ code:stock.code, screen:'detail' });
       else this.set({ screen:'explore' });
     } else if (action.target === 'order') {
       if (!stock) { this.set({ screen:'explore' }); return; }

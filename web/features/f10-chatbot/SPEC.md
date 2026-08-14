@@ -122,13 +122,15 @@ type ChatResponse = {
   suggestedQuestions?: string[];
   uiAction?: {
     type: "open_screen";
-    target: "home" | "stock" | "order" | "archive" | "portfolio";
+    target: "home" | "stock" | "order" | "archive" | "portfolio" | "ranking";
     label?: string;
     stockId?: `KRX:${string}`;
     orderSide?: "buy" | "sell";
     orderStep?: "quantity" | "reason" | "confirmation" | "memo";
+    stockView?: "explore" | "detail";
     sectorId?: string;
     archiveTab?: "report" | "return" | "compare" | "season";
+    archiveOverlay?: "cards";
   };
 };
 
@@ -154,6 +156,8 @@ type ChatAction =
 - `uiAction`은 서버 허용 목록의 화면만 제안한다.
 - 지원 여부는 현재 화면에서 실제로 실행 가능한 기능만 기준으로 판단한다. 예정 기능은 지원으로 안내하지 않는다.
 - `uiAction`은 필요한 경우 종목·매수/매도·주문 단계·업종·아카이브 탭을 함께 지정하며, 버튼 라벨은 실제로 열리는 기능을 그대로 설명한다.
+- 화면의 버튼 위치·사용법을 묻는 질문은 용어 사전보다 먼저 정적 사용법 경로로 처리한다. 홈·모의투자 탐색·랭킹·내 계좌·아카이브·주문 잠금, 상승순·관심 기업·13개 업종 칩·종목 카드·주차 카드는 실제 도달 가능한 화면 상태와 같은 `uiAction`을 반환한다.
+- `stockView: "explore"`는 현재 종목 상세가 아닌 종목 탐색을 명시하며, `archiveOverlay: "cards"`는 성향 탭의 카드 모아보기를 연다.
 - 특정 51종 회사의 사실을 설명한 응답은 `target: "stock"`과 그 회사의 유니버스 `stockId`를 함께 제공한다. 사용자가 관련 화면 버튼을 누르면 현재 보고 있는 종목과 무관하게 그 회사의 상세 화면을 연다.
 - `stockId`가 있는 화면 액션은 등록된 51종 유니버스에 속할 때만 허용한다. 형식만 맞는 미등록 종목 ID는 액션에서 제거하며 다른 종목으로 대신 이동하지 않는다.
 - 미지원 요청은 그 사실을 먼저 밝힌다. 현재 제공되는 관련 기능이 직접적인 대안일 때만 오해 없는 대안 버튼을 함께 제안한다.

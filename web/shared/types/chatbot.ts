@@ -2,8 +2,14 @@ export const CHAT_SCREENS = ["home", "stock", "order", "archive"] as const;
 
 export type ChatScreen = (typeof CHAT_SCREENS)[number];
 
-export const CHAT_ACTION_TARGETS = [...CHAT_SCREENS, "portfolio"] as const;
+export const CHAT_ACTION_TARGETS = [...CHAT_SCREENS, "portfolio", "ranking"] as const;
 export type ChatActionTarget = (typeof CHAT_ACTION_TARGETS)[number];
+
+export const CHAT_STOCK_VIEWS = ["explore", "detail"] as const;
+export type ChatStockView = (typeof CHAT_STOCK_VIEWS)[number];
+
+export const CHAT_ARCHIVE_OVERLAYS = ["cards"] as const;
+export type ChatArchiveOverlay = (typeof CHAT_ARCHIVE_OVERLAYS)[number];
 
 export const CHAT_ORDER_SIDES = ["buy", "sell"] as const;
 export type ChatOrderSide = (typeof CHAT_ORDER_SIDES)[number];
@@ -34,8 +40,12 @@ export type ChatUiAction = {
   stockId?: `KRX:${string}`;
   orderSide?: ChatOrderSide;
   orderStep?: ChatOrderStep;
+  /** 종목 상세와 종목 탐색을 분명히 구분한다. */
+  stockView?: ChatStockView;
   sectorId?: string;
   archiveTab?: ChatArchiveTab;
+  /** 아카이브 탭 안의 사용자 도달 가능 오버레이. */
+  archiveOverlay?: ChatArchiveOverlay;
 };
 
 export const STOCK_FACT_TOPICS = [
