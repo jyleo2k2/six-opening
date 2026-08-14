@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
       user_id: profile.id,
       name: profile.name,
       parent_child: profile.parent_child,
+      guardian_role: profile.guardian_role,
       balance: accounts[0] ? Number(accounts[0].balance) : SEED_BALANCE,
       holdings: holdings.map((row) => ({
         stock_id: row.stock_id,

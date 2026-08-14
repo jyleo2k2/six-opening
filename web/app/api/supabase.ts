@@ -71,9 +71,11 @@ export type Profile = {
   login_id: string;
   parent_child: "parent" | "child" | null;
   family_tag: string | null;
+  /** 엄마·아빠 구분(홈 화면 개인화 전용). parent_child 는 권한 판단에 쓰이므로 건드리지 않는다. */
+  guardian_role: "mom" | "dad" | null;
 };
 
-const PROFILE_COLUMNS = "id,name,login_id,parent_child,family_tag";
+const PROFILE_COLUMNS = "id,name,login_id,parent_child,family_tag,guardian_role";
 
 export async function findProfileByLogin(loginId: string, password: string) {
   const rows = await selectRows<Profile>("profiles", {
