@@ -169,6 +169,12 @@ const COPY = {
   reset: "초기화",
 } as const;
 
+const GREETING_SUGGESTED_QUESTIONS: string[] = [
+  "매수는 어떻게 하나요?",
+  "수익률이 무엇인가요?",
+  "키웅이는 무엇을 도와주나요?",
+];
+
 const PROACTIVE_BUBBLE_VISIBLE_MS = 8_000;
 const FLOATING_CHAT_RADIUS = 28;
 const HERO_AVATARS = [hero01, hero02, hero03, hero04, hero05] as const;
@@ -1301,7 +1307,11 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
             >
               {messages.length === 0 && (
                 <MessageBubble
-                  message={{ role: "assistant", text: COPY.greeting }}
+                  message={{
+                    role: "assistant",
+                    text: COPY.greeting,
+                    suggestedQuestions: GREETING_SUGGESTED_QUESTIONS,
+                  }}
                   onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
