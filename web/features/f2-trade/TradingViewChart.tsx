@@ -532,18 +532,24 @@ export function TradingViewChart({ symbol, period, chartType }: {
             //
             // 밑변·꼭짓점 모두 **잘린 뒤의 뱃지 위치**에서 딴다. 그래야 천장·바닥에 붙어
             // 간격이 줄어든 마커도 꼬리가 뱃지에 붙은 채 같은 길이로 나온다.
+            //
+            // 다만 클램프가 `clampBadgeTop`의 꼬리 여유 구간까지 뱃지를 밀어낸 경우엔
+            // 방향을 뒤집는다. 그 여유 구간은 SVG 밖으로 잘리지 않으려고 비워둔
+            // 빈 공간이라, 원래 방향 그대로 꼬리를 그리면 차트가 없는 쪽(축 여백)을
+            // 가리킨다 — 체결가가 지금 보이는 봉 범위를 완전히 벗어난 경우다.
+            // 뒤집으면 항상 봉이 실제로 있는 안쪽을 가리킨다.
             const laid = placed.map((marker) => {
               const fill =
                 marker.member === "child"
                   ? "var(--color-trade-child)"
                   : "var(--color-trade-parent)";
-              const badgeY = clampBadgeTop(
-                marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP,
-                pane.height,
-                marker.side,
-              );
-              const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
-              const tip = marker.side === "buy" ? base + TAIL : base - TAIL;
+              const rawTop = marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP;
+              const badgeY = clampBadgeTop(rawTop, pane.height, marker.side);
+              const overflowsTailBuffer =
+                marker.side === "buy" ? rawTop > pane.height - BADGE - TAIL : rawTop < TAIL;
+              const tailPointsDown = marker.side === "buy" ? !overflowsTailBuffer : overflowsTailBuffer;
+              const base = tailPointsDown ? badgeY + BADGE : badgeY;
+              const tip = tailPointsDown ? base + TAIL : base - TAIL;
               return { marker, fill, badgeY, base, tip };
             });
             // 뱃지를 전부 먼저 그리고 꼬리는 따로 마지막에 그린다. 연속된 봉마다 체결이
