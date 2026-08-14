@@ -106,7 +106,7 @@ type OfftopicKind =
   | "career"
   | "coding";
 
-type TermKind =
+export type TermKind =
   | "marketBasics"
   | "profitLoss"
   | "valuation"
@@ -2441,7 +2441,7 @@ function parsePercentageCalculation(message: string) {
   };
 }
 
-function termReply(kind: TermKind, message: string): ChatReply {
+export function termReply(kind: TermKind, message: string): ChatReply {
   let text: string;
   let questions: string[];
   let step: string;
@@ -2506,6 +2506,11 @@ function termReply(kind: TermKind, message: string): ChatReply {
       } else if (includesAny(message, ["적용돼", "적용해", "보면되는", "보면돼"])) {
         text =
           "PER은 방산·식품 같은 업종에도 계산할 수 있지만 이익 구조가 비슷한 회사끼리 비교해야 이해하기 쉬워요. PER 하나만으로 회사가 싸거나 좋다고 정할 수는 없어요.";
+      } else if (
+        includesAny(message, ["오르면", "오른다고", "올라가면", "높아지면", "뛰면", "치솟으면"])
+      ) {
+        text =
+          "PER이 오른다고 무조건 좋은 건 아니에요. 주가가 오르거나 이익이 줄면 PER도 오를 수 있어서, 같은 업종의 PER이나 이익 변화도 함께 봐야 해요.";
       } else {
         text =
           "PER이 낮다는 사실만으로 주식이 싸거나 좋은 선택이라고 정할 수는 없어요. 이익이 일시적으로 달라졌는지와 같은 업종의 다른 정보도 함께 봐야 해요.";

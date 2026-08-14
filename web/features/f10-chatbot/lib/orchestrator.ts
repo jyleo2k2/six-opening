@@ -20,9 +20,16 @@ import {
 import { generateChatAnswer } from "./openai";
 import { judgeChatOutput } from "./output-judge";
 import { rewriteFollowUp } from "./rewrite";
+import { classifyTermKind, type ClassifiedTermKind } from "./term-classify";
 import { looksLikeNewQuestion } from "./colloquial";
 import { isHaeyoKorean, toPoliteKorean } from "./polite";
-import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
+import {
+  normalizeChatInput,
+  routeMessage,
+  termReply,
+  type ChatIntent,
+  type ChatRoute,
+} from "./routing";
 import type { ChatSession } from "./session";
 import {
   advanceStockExplore,
@@ -60,6 +67,14 @@ type ChatOrchestratorDependencies = {
   generateAnswer?: typeof generateChatAnswer;
   judgeOutput?: typeof judgeChatOutput;
   rewriteQuestion?: typeof rewriteFollowUp;
+  /**
+   * 실험 단계 T5c(§6.1.5 term 9종 커버리지 보강). 다른 의존성과 달리 기본값이
+   * 실제 Luna 호출이 아니라 무조건 "none"이다 — 호출부(`app/api/chat/route.ts`
+   * 등)가 명시적으로 `classifyTermKind`를 넘겨야만 켜진다. 이 폴더의 기존
+   * 테스트들이 `fallback` 라우팅 케이스에서 `classifyTerm`을 안 넘기고 있어서
+   * 기본값이 실제 호출이면 네트워크를 타 테스트가 깨진다.
+   */
+  classifyTerm?: (message: string, signal: AbortSignal) => Promise<ClassifiedTermKind>;
   runTool?: typeof runReadOnlyTool;
   timeoutMs?: number;
   judgeTimeoutMs?: number;
@@ -67,6 +82,10 @@ type ChatOrchestratorDependencies = {
   requestSignal?: AbortSignal;
   onStatus?: (status: string) => void;
 };
+
+async function noTermClassification(): Promise<ClassifiedTermKind> {
+  return "none";
+}
 
 function createTimedSignal(parent: AbortSignal | undefined, timeoutMs: number) {
   const controller = new AbortController();
@@ -498,18 +517,32 @@ export async function createChatOutcome(
       dependencies.timeoutMs ?? 8_000,
     );
     try {
-      response = {
-        text: await raceWithAbort(
-          // 지시어가 풀린 단독 질문을 준다. 모델이 "그거"를 추측하지 않는다.
-          (dependencies.generateAnswer ?? generateChatAnswer)(
-            modelMessage,
-            request.context,
+      // 키워드 조합(findTermKind)이 놓친 표현 변형을 보조 분류기로 한 번 더
+      // 확인한다. 분류돼도 화면에 나가는 문장은 여전히 termReply의 승인된
+      // 고정 텍스트다 — 이 분기는 자유 생성을 하지 않는다. 실패하면 "none"으로
+      // 닫힌 실패 처리해 기존 자유 생성 경로를 그대로 쓴다.
+      const classifiedKind = await (dependencies.classifyTerm ?? noTermClassification)(
+        modelMessage,
+        timed.signal,
+      ).catch(() => "none" as const);
+
+      if (classifiedKind !== "none") {
+        response = termReply(classifiedKind, normalizeChatInput(modelMessage));
+        source = "fixed";
+      } else {
+        response = {
+          text: await raceWithAbort(
+            // 지시어가 풀린 단독 질문을 준다. 모델이 "그거"를 추측하지 않는다.
+            (dependencies.generateAnswer ?? generateChatAnswer)(
+              modelMessage,
+              request.context,
+              timed.signal,
+            ),
             timed.signal,
           ),
-          timed.signal,
-        ),
-      };
-      source = "model";
+        };
+        source = "model";
+      }
     } catch (error) {
       const aborted = timed.signal.aborted;
       failure = aborted ? "timeout" : "model_error";

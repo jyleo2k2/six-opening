@@ -57,6 +57,7 @@
 | `web/features/f10-chatbot/lib/routing.ts` | 입력 분류, FAQ·맥락 응답, 고정 거절, 선제 신호 |
 | `web/features/f10-chatbot/lib/openai.ts` | Luna Responses API 호출과 F10 시스템 지시문 |
 | `web/features/f10-chatbot/lib/output-judge.ts` | T5b 출력 판정 지시문과 structured output 호출 |
+| `web/features/f10-chatbot/lib/term-classify.ts` | §6.1.5 term 9종 보조 분류기. `findTermKind` 키워드가 놓친 표현 변형을 enum structured output으로 분류만 하며 답변 문장은 만들지 않는다 |
 | `web/app/api/chat/route.ts` | 요청 검증, 목적 라우팅 연결, 출력 게이트, SSE 전송 |
 | `web/shared/data/` | 용어·FAQ·종목·섹터의 승인된 정적 데이터 |
 | `web/shared/llm/client.ts` | 서버 전용 OpenAI 클라이언트와 모델 상수 |
@@ -310,7 +311,8 @@ type ChatRequest = {
 - 스트림에서 `response.output_text.delta` 이벤트만 읽는다.
 - 한 요청에서 **답변 생성** 모델 호출은 최대 1회다. 모델이 툴을 반복 선택하는 에이전트 루프는 만들지 않는다.
 - §3.6의 재작성은 답변을 만들지 않는 정리 호출이므로 위 1회 제한과 별도다. 1단이 허용 목적을 판정했거나 직전 답변이 없으면 호출하지 않는다. `reasoning.effort`는 `none`, `max_output_tokens`는 200이다.
-- §6.0.2의 T5b 판정은 답변을 만들지 않는 검사 호출이므로 위 1회 제한과 별도다. 생성이 없었던 요청에는 판정도 없으므로 한 요청의 Luna 호출은 최대 2회(생성 1 + 판정 1)다.
+- `routed.route === "fallback"`으로 넘어가기 직전에 §6.1.5 term 9종 보조 분류기(`lib/term-classify.ts`)를 먼저 부른다. 답변을 만들지 않는 분류 호출이라 위 1회 제한과 별도다. 9종 중 하나로 판정되면 `termReply`의 승인된 고정 문장으로 답하고 **생성·T5b를 모두 건너뛴다**. `"none"`이면 기존처럼 생성으로 이어진다. 분류 실패·시간 초과는 닫힌 실패로 `"none"` 처리해 기존 생성 경로를 그대로 쓴다.
+- §6.0.2의 T5b 판정은 답변을 만들지 않는 검사 호출이므로 위 1회 제한과 별도다. 생성이 없었던 요청에는 판정도 없다. 한 요청의 Luna 호출은 최대 3회(재작성 1 + 분류 1 + 생성 1이거나, 분류가 미판정이면 분류 1 + 생성 1 + 판정 1)다.
 
 ## 6. 안전 게이트
 
