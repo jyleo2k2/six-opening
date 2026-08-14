@@ -3387,11 +3387,26 @@ const ARCHIVE_ABILITY_DEFINITIONS = [
   },
 ] as const;
 
+const ARCHIVE_ABILITY_QUESTION_PATTERNS = [
+  "뭐야",
+  "무슨뜻",
+  "뜻",
+  "의미",
+  "설명",
+  "알려줘",
+  "뭔소리",
+  "무슨소리",
+  "뭔말",
+  "무슨말",
+  "뭐임",
+  "뭔데",
+] as const;
+
 function getArchiveAbilityReply(message: string, context: ChatContext): ChatReply | null {
   if (
     context.screen !== "archive" ||
     message.includes("확신도") ||
-    !includesAny(message, ["뭐야", "무슨뜻", "뜻", "의미", "설명", "알려줘"])
+    !includesAny(message, ARCHIVE_ABILITY_QUESTION_PATTERNS)
   ) {
     return null;
   }
