@@ -34,5 +34,9 @@ assert.equal(findChatbotKnowledge("학교 시간엔 매매 쉬기가 뭐야?")?.
 assert.equal(findChatbotKnowledge("근거력이 뭐야?")?.id, "profile-abilities");
 assert.equal(findChatbotKnowledge("관찰 초기면 무슨 뜻이야?")?.id, "profile-status");
 assert.equal(findChatbotKnowledge("전략가는 뭐야?")?.id, "profile-character");
+assert.equal(findChatbotKnowledge("목표 가격이 뭐야?")?.id, "goal-price");
+assert.equal(findChatbotKnowledge("사던 날의 나가 뭐야?")?.id, "buy-day-record");
+assert.equal(findChatbotKnowledge("성향이 뭐야?")?.id, "profile-definition");
+assert.equal(findChatbotKnowledge("시즌 기록이 뭐야?")?.id, "season-record");
 
 console.log("chatbot knowledge tests passed");
