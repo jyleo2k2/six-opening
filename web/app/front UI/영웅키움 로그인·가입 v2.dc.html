@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="18" fill="#01185A"/><rect x="20" y="32" width="26" height="36" rx="8" fill="#F5327F"/><rect x="54" y="32" width="26" height="36" rx="8" fill="#fff" opacity=".9"/></svg>
+</template>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'Pretendard';src:url('assets/fonts/Pretendard-Regular.otf') format('opentype');font-weight:400;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('assets/fonts/Pretendard-Medium.otf') format('opentype');font-weight:500;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('assets/fonts/Pretendard-SemiBold.otf') format('opentype');font-weight:600;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('assets/fonts/Pretendard-Bold.otf') format('opentype');font-weight:700;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('assets/fonts/Pretendard-ExtraBold.otf') format('opentype');font-weight:800;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('assets/fonts/Pretendard-Black.otf') format('opentype');font-weight:900;font-display:swap}
+body{margin:0;background:#E9E9F0;font-family:'Pretendard','Segoe UI','Malgun Gothic',sans-serif;color:#1A2233;-webkit-font-smoothing:antialiased}
+a{color:#F5327F;text-decoration:none}
+a:hover{color:#01185A}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes popItem{0%{opacity:0;transform:translateY(0) scale(0.3)}20%{opacity:1;transform:translateY(-14px) scale(1.05)}80%{opacity:1;transform:translateY(-55px) scale(1)}100%{opacity:0;transform:translateY(-115px) scale(0.85)}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes sheetFade{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+<div style="padding:40px 44px 70px;display:flex;gap:34px;align-items:flex-start;flex-wrap:wrap">
+
+<div style="position:relative;width:450px;height:920px;flex:none">
+<div style="position:absolute;left:24px;top:23px;width:402px;height:874px;border-radius:40px;overflow:hidden;background:#F5F2F8">
+
+<sc-if value="{{ isSplash }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)">
+<div style="flex:none;display:flex;flex-direction:column;align-items:center;padding:20px 4px 0">
+<div style="position:relative;width:100%">
+<svg width="46" height="46" viewBox="0 0 48 48" aria-hidden="true" style="position:absolute;left:6px;top:0;pointer-events:none;transform:rotate(-12deg);filter:drop-shadow(0 5px 7px rgba(180,20,100,0.3))"><defs><radialGradient id="stP" cx="35%" cy="28%" r="72%"><stop offset="0" stop-color="#FF95C4"></stop><stop offset="45%" stop-color="#FA4B92"></stop><stop offset="100%" stop-color="#D20F63"></stop></radialGradient></defs><path d="M24 4.5c1.6 0 2.6 1 3.3 2.4l3.7 7.4 8.2 1.2c1.6.2 2.8.9 3.3 2.4.5 1.5 0 2.8-1.1 3.9l-5.9 5.8 1.4 8.2c.3 1.6-.2 2.9-1.5 3.8-1.3.9-2.6.8-4-.1L24 35.6l-7.4 3.7c-1.4.9-2.7 1-4 .1-1.3-.9-1.8-2.2-1.5-3.8l1.4-8.2-5.9-5.8c-1.1-1.1-1.6-2.4-1.1-3.9.5-1.5 1.7-2.2 3.3-2.4l8.2-1.2 3.7-7.4C21.4 5.5 22.4 4.5 24 4.5z" fill="url(#stP)"></path><ellipse cx="19" cy="15" rx="4.6" ry="3" fill="#fff" opacity=".55" transform="rotate(-28 19 15)"></ellipse></svg>
+<svg width="33" height="33" viewBox="0 0 48 48" aria-hidden="true" style="position:absolute;left:20px;top:52px;pointer-events:none;transform:rotate(10deg);filter:drop-shadow(0 5px 7px rgba(185,130,15,0.32))"><defs><radialGradient id="stY" cx="35%" cy="28%" r="72%"><stop offset="0" stop-color="#FFE39A"></stop><stop offset="45%" stop-color="#FFC22E"></stop><stop offset="100%" stop-color="#E8951B"></stop></radialGradient></defs><path d="M24 4.5c1.6 0 2.6 1 3.3 2.4l3.7 7.4 8.2 1.2c1.6.2 2.8.9 3.3 2.4.5 1.5 0 2.8-1.1 3.9l-5.9 5.8 1.4 8.2c.3 1.6-.2 2.9-1.5 3.8-1.3.9-2.6.8-4-.1L24 35.6l-7.4 3.7c-1.4.9-2.7 1-4 .1-1.3-.9-1.8-2.2-1.5-3.8l1.4-8.2-5.9-5.8c-1.1-1.1-1.6-2.4-1.1-3.9.5-1.5 1.7-2.2 3.3-2.4l8.2-1.2 3.7-7.4C21.4 5.5 22.4 4.5 24 4.5z" fill="url(#stY)"></path><ellipse cx="19" cy="15" rx="4.6" ry="3" fill="#fff" opacity=".6" transform="rotate(-28 19 15)"></ellipse></svg>
+<svg width="30" height="30" viewBox="0 0 48 48" aria-hidden="true" style="position:absolute;right:8px;top:58px;pointer-events:none;transform:rotate(18deg);filter:drop-shadow(0 5px 7px rgba(180,20,100,0.28))"><defs><radialGradient id="stP2" cx="35%" cy="28%" r="72%"><stop offset="0" stop-color="#FF95C4"></stop><stop offset="45%" stop-color="#FA4B92"></stop><stop offset="100%" stop-color="#D20F63"></stop></radialGradient></defs><path d="M24 4.5c1.6 0 2.6 1 3.3 2.4l3.7 7.4 8.2 1.2c1.6.2 2.8.9 3.3 2.4.5 1.5 0 2.8-1.1 3.9l-5.9 5.8 1.4 8.2c.3 1.6-.2 2.9-1.5 3.8-1.3.9-2.6.8-4-.1L24 35.6l-7.4 3.7c-1.4.9-2.7 1-4 .1-1.3-.9-1.8-2.2-1.5-3.8l1.4-8.2-5.9-5.8c-1.1-1.1-1.6-2.4-1.1-3.9.5-1.5 1.7-2.2 3.3-2.4l8.2-1.2 3.7-7.4C21.4 5.5 22.4 4.5 24 4.5z" fill="url(#stP2)"></path><ellipse cx="19" cy="15" rx="4.6" ry="3" fill="#fff" opacity=".55" transform="rotate(-28 19 15)"></ellipse></svg>
+<div style="position:relative;text-align:center;white-space:nowrap;font-family:'Jua',sans-serif;font-size:52px;line-height:1.16;letter-spacing:0.01em">
+<div style="position:absolute;left:0;right:0;top:0;color:#3D1191;text-shadow:0 1px 0 #3D1191,0 2px 0 #3A1089,0 3px 0 #370F82,0 4px 0 #340E7B,0 5px 0 #310D74,0 7px 12px rgba(49,13,116,0.35)">영웅키움<br>가족 모의투자</div>
+<div style="position:relative;background:linear-gradient(180deg,#9A63FF 0%,#7B39F2 45%,#5B23D6 100%);-webkit-background-clip:text;background-clip:text;color:transparent">영웅키움<br>가족 모의투자</div>
+</div>
+</div>
+<div style="font-size:15px;font-weight:500;color:#4A4F6B;margin-top:14px;text-align:center;white-space:nowrap">가족과 함께 배우는 우리 아이 주식 첫걸음</div>
+<img src="assets/splash-hero.png" width="300" alt="영웅이와 키웅이" style="display:block;width:300px;height:auto;margin-top:14px">
+</div>
+<div style="flex:none;padding:22px 20px 18px;display:flex;flex-direction:column;gap:13px">
+<div onClick="{{ startSignin }}" style="display:flex;align-items:center;gap:14px;border-radius:24px;padding:16px;cursor:pointer;background:linear-gradient(160deg,#7B45E8 0%,#5B23D6 100%);box-shadow:0 14px 26px -10px rgba(70,30,190,0.45),inset 0 1.5px 1px rgba(255,255,255,0.25)">
+<svg width="52" height="52" viewBox="0 0 57 57" aria-hidden="true" style="display:block;flex:none"><circle cx="28.5" cy="28.5" r="28.5" fill="rgba(255,255,255,0.18)"></circle><path d="M28.5 14.5c-4.4 0-8 3.6-8 8v3.5h4.4V22.5c0-2 1.6-3.6 3.6-3.6s3.6 1.6 3.6 3.6V26h4.4v-3.5c0-4.4-3.6-8-8-8z" fill="#FFFFFF"></path><rect x="17.6" y="25.6" width="21.8" height="17.6" rx="5.4" fill="#FFFFFF"></rect><circle cx="28.5" cy="32.6" r="2.9" fill="#5B23D6"></circle><rect x="27.1" y="33.4" width="2.8" height="5.4" rx="1.4" fill="#5B23D6"></rect></svg>
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:800;color:#fff">기존 계정으로 로그인</div>
+<div style="font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.8);line-height:1.5;margin-top:4px;text-wrap:pretty">아이디·비밀번호로 내 계정에 들어가요</div>
+</div>
+<span style="flex:none;font-size:19px;font-weight:800;color:#fff">›</span>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;padding:2px 4px">
+<div style="flex:1;height:1px;background:rgba(60,40,130,0.12)"></div>
+<span style="font-size:12px;font-weight:700;color:#A6A9BE;white-space:nowrap">처음이신가요?</span>
+<div style="flex:1;height:1px;background:rgba(60,40,130,0.12)"></div>
+</div>
+
+<div onClick="{{ startParent }}" style="display:flex;align-items:center;gap:14px;border-radius:24px;padding:14px 16px;cursor:pointer;background:#FFFFFF;box-shadow:0 10px 22px -8px rgba(60,40,130,0.16),0 2px 4px rgba(60,40,130,0.06)">
+<img src="assets/icon-parents.png" width="57" height="57" alt="" style="display:block;width:57px;height:57px;flex:none;border-radius:999px;object-fit:cover">
+<div style="flex:1;min-width:0">
+<div style="font-size:16.5px;font-weight:800;color:#2C2F6B">부모(보호자) 계정 만들기</div>
+<div style="font-size:12.5px;font-weight:600;color:#A6A9BE;line-height:1.5;margin-top:4px;text-wrap:pretty">아이를 초대하고 법정대리인 동의를 해요</div>
+</div>
+<span style="flex:none;font-size:19px;font-weight:800;color:#F5327F">›</span>
+</div>
+<div onClick="{{ startChild }}" style="display:flex;align-items:center;gap:14px;border-radius:24px;padding:15px 16px;cursor:pointer;background:#FFFFFF;box-shadow:0 10px 22px -8px rgba(60,40,130,0.16),0 2px 4px rgba(60,40,130,0.06)">
+<img src="assets/icon-child.png" width="57" height="57" alt="" style="display:block;width:57px;height:57px;flex:none;border-radius:999px;object-fit:cover">
+<div style="flex:1;min-width:0">
+<div style="font-size:16.5px;font-weight:800;color:#2C2F6B">아이 계정 만들기</div>
+<div style="font-size:12.5px;font-weight:600;color:#A6A9BE;line-height:1.5;margin-top:4px;text-wrap:pretty">부모님 동의를 받으면 바로 시작해요</div>
+</div>
+<span style="flex:none;font-size:19px;font-weight:800;color:#F5327F">›</span>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ goSplash }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;white-space:nowrap">{{ loginTitle }}</div>
+<sc-if value="{{ isSignup }}" hint-placeholder-val="{{ true }}">
+<div style="{{ stepPillStyle }}">{{ stepText }}</div>
+</sc-if>
+<sc-if value="{{ isSignin }}" hint-placeholder-val="{{ false }}">
+<div style="width:38px;flex:none"></div>
+</sc-if>
+</div>
+<sc-if value="{{ isSignup }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;display:flex;gap:5px;padding:0 20px 14px">
+<sc-for list="{{ progBars }}" as="b" hint-placeholder-count="4">
+<div style="{{ b.style }}"></div>
+</sc-for>
+</div>
+</sc-if>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 16px 0;display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ isSignup }}" hint-placeholder-val="{{ true }}">
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px 20px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:18px;font-weight:800;color:#01185A;line-height:1.5;text-wrap:pretty">{{ loginHeadline }}</div>
+<div style="font-size:14.5px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:9px;text-wrap:pretty">{{ loginBody }}</div>
+</div>
+</sc-if>
+
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<sc-if value="{{ isSignin }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:7px;margin-bottom:15px">
+<div onClick="{{ pickParentRole }}" style="{{ roleParentStyle }}">부모 계정으로 로그인</div>
+<div onClick="{{ pickChildRole }}" style="{{ roleChildStyle }}">아이 계정으로 로그인</div>
+</div>
+</sc-if>
+<div style="font-size:16px;font-weight:800;color:#01185A">{{ credTitle }}</div>
+<sc-if value="{{ showGuardianPick }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4;margin-top:12px">누구 계정인가요?</div>
+<div style="display:flex;gap:8px;margin-top:8px">
+<div onClick="{{ pickMom }}" style="{{ momStyle }}">엄마</div>
+<div onClick="{{ pickDad }}" style="{{ dadStyle }}">아빠</div>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+<div style="background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">아이디</div>
+<div style="font-size:17px;font-weight:700;color:#01185A;margin-top:3px">{{ credId }}</div>
+</div>
+<div style="background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">비밀번호</div>
+<div style="font-size:17px;font-weight:700;color:#01185A;letter-spacing:0.14em;margin-top:3px">••••••••</div>
+</div>
+<sc-if value="{{ isSignup }}" hint-placeholder-val="{{ true }}">
+<div style="background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">비밀번호 확인</div>
+<div style="font-size:17px;font-weight:700;color:#01185A;letter-spacing:0.14em;margin-top:3px">••••••••</div>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ isSignup }}" hint-placeholder-val="{{ true }}">
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.65;margin-top:11px;text-wrap:pretty">아이디는 영문·숫자 4~16자, 비밀번호는 8자 이상으로 만들어요. 다른 서비스 계정과 연결하지 않아요.</div>
+</sc-if>
+<sc-if value="{{ isSignin }}" hint-placeholder-val="{{ false }}">
+<div style="text-align:center;font-size:13.5px;font-weight:700;color:#8E93A8;margin-top:14px;cursor:pointer">아이디 찾기 · 비밀번호 재설정</div>
+</sc-if>
+</div>
+<sc-if value="{{ isSignin }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:flex-start;gap:9px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 100%);border-radius:16px;padding:12px 14px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
+<span style="font-size:15px">👨‍👩‍👧</span>
+<span style="flex:1;font-size:12.5px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty">엄마·아빠·아이가 각각 자기 계정으로 로그인해요. 계정끼리는 가족 코드로 연결하고, 만 14세 미만 아이는 시작 전에 법정대리인 동의를 받아요.</span>
+</div>
+</sc-if>
+
+</div>
+<div style="flex:none;padding:12px 16px 20px">
+<div onClick="{{ loginNext }}" style="{{ onCta }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ loginVerb }}</span></div>
+<div style="text-align:center;padding:12px 0 0"></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isVerify }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ backToLogin }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;white-space:nowrap">보호자 본인 확인</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">2</span> / 4</div>
+</div>
+<div style="flex:none;display:flex;gap:5px;padding:0 20px 14px">
+<sc-for list="{{ progBars }}" as="b" hint-placeholder-count="4">
+<div style="{{ b.style }}"></div>
+</sc-for>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:26px;padding:17px 19px;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(170,80,125,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
+<div style="font-size:13px;font-weight:700;color:#D5327A">왜 확인하나요?</div>
+<div style="font-size:16px;font-weight:700;color:#01185A;line-height:1.6;margin-top:8px;text-wrap:pretty">아이 계정의 법정대리인이 되려면 성인 여부를 확인해야 해요. 이름·생년월일만 대조해요.</div>
+</div>
+
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:16px;font-weight:800;color:#01185A">휴대폰 본인확인</div>
+<div style="display:flex;gap:7px;margin-top:14px">
+<sc-for list="{{ carriers }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.name }}</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+<div style="background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">이름</div>
+<div style="font-size:16px;font-weight:700;color:#01185A;margin-top:3px">{{ guardianName }}</div>
+</div>
+<div style="display:flex;gap:9px">
+<div style="flex:1;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">생년월일</div>
+<div style="font-size:16px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;margin-top:3px">{{ guardianBirth }}</div>
+</div>
+<div style="flex:1;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">휴대폰 번호</div>
+<div style="font-size:16px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;margin-top:3px">010-2•••-••18</div>
+</div>
+</div>
+</div>
+<div onClick="{{ sendCode }}" style="{{ sendCodeStyle }}">{{ sendCodeLabel }}</div>
+<sc-if value="{{ codeSent }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:12px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<span style="font-size:13.5px;font-weight:600;color:#5C6280;white-space:nowrap">인증번호 6자리</span>
+<span style="font-size:13.5px;font-weight:700;color:#F5327F;font-variant-numeric:tabular-nums">02:57</span>
+</div>
+<div style="display:flex;gap:7px;margin-top:10px">
+<sc-for list="{{ codeCells }}" as="d" hint-placeholder-count="6">
+<div style="{{ d.style }}">{{ d.ch }}</div>
+</sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">
+<sc-for list="{{ authPad }}" as="k" hint-placeholder-count="12">
+<div onClick="{{ k.tap }}" style="{{ k.style }}">{{ k.label }}</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+
+</div>
+<div style="flex:none;padding:12px 16px 26px">
+<div onClick="{{ verifyNext }}" style="{{ verifyCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ verifyCtaLabel }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFamily }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ goVerify }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;white-space:nowrap">가족 연결</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">3</span> / 4</div>
+</div>
+<div style="flex:none;display:flex;gap:5px;padding:0 20px 14px">
+<sc-for list="{{ progBars }}" as="b" hint-placeholder-count="4">
+<div style="{{ b.style }}"></div>
+</sc-for>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:9px">
+<div onClick="{{ pickCreate }}" style="{{ createStyle }}">
+<div style="font-size:22px">🏡</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:8px">가족 새로 만들기</div>
+</div>
+<div onClick="{{ pickJoin }}" style="{{ joinStyle }}">
+<div style="font-size:22px">🔗</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:8px">기존 가족에 참여</div>
+</div>
+</div>
+
+<sc-if value="{{ isCreate }}" hint-placeholder-val="{{ true }}">
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:16px;font-weight:800;color:#01185A">가족 이름</div>
+<div style="background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;margin-top:12px;font-size:17px;font-weight:700;color:#01185A;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">우리 가족</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:9px">랭킹에 보이는 이름이에요. 실명은 쓰지 않아요.</div>
+</div>
+
+<div style="background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 46%,#F6D5E3 100%);border-radius:28px;padding:20px;text-align:center;box-shadow:0 16px 34px rgba(90,25,70,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(170,80,125,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
+<div style="font-size:13px;font-weight:700;color:#D5327A">가족 코드</div>
+<div style="font-size:38px;font-weight:800;color:#01185A;letter-spacing:0.1em;font-variant-numeric:tabular-nums;margin-top:8px;white-space:nowrap">{{ familyCode }}</div>
+<div style="font-size:13.5px;font-weight:500;color:#8E93A8;line-height:1.65;margin-top:9px;text-wrap:pretty">아이 기기에서 [아이 계정 만들기]를 누르고<br>이 숫자 6자리를 입력하면 동의 요청이 와요.</div>
+<div onClick="{{ copyCode }}" style="{{ copyBtnStyle }}">{{ copyBtnLabel }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isJoin }}" hint-placeholder-val="{{ false }}">
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:16px;font-weight:800;color:#01185A">가족 코드 입력</div>
+<div style="font-size:13px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:7px">먼저 가입한 보호자에게 코드를 받아요.</div>
+<div onClick="{{ pasteJoin }}" style="{{ pasteBtnStyle }}">{{ pasteBtnLabel }}</div>
+<div style="display:flex;gap:7px;margin-top:12px">
+<sc-for list="{{ joinCells }}" as="d" hint-placeholder-count="6">
+<div style="{{ d.style }}">{{ d.ch }}</div>
+</sc-for>
+</div>
+<sc-if value="{{ joinLookupDone }}" hint-placeholder-val="{{ false }}">
+<div style="{{ joinLookupStyle }}">
+<div style="font-size:12px;font-weight:800;color:{{ joinLookupAccent }}">{{ joinLookupLabel }}</div>
+<div style="display:flex;align-items:center;gap:11px;margin-top:9px">
+<div style="flex:none;width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:21px;background:#fff;box-shadow:0 6px 12px -7px rgba(35,25,80,0.28)">{{ joinFamilyEmoji }}</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:16px;font-weight:800;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ joinFamilyName }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#5C6280;line-height:1.55;margin-top:3px;text-wrap:pretty">{{ joinFamilyMembers }}</div>
+</div>
+</div>
+</div>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">
+<sc-for list="{{ joinPad }}" as="k" hint-placeholder-count="12">
+<div onClick="{{ k.tap }}" style="{{ k.style }}">{{ k.label }}</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+<div style="flex:none;padding:12px 16px 26px">
+<div onClick="{{ familyNext }}" style="{{ familyCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ familyCtaLabel }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isConsent }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ goFamily }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;white-space:nowrap">법정대리인 동의</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">4</span> / 4</div>
+</div>
+<div style="flex:none;display:flex;gap:5px;padding:0 20px 14px">
+<sc-for list="{{ progBars }}" as="b" hint-placeholder-count="4">
+<div style="{{ b.style }}"></div>
+</sc-for>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:13px;font-weight:700;color:#D5327A">동의를 기다리는 요청</div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+<div style="width:52px;height:52px;flex:none;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:25px;background:linear-gradient(180deg,#FFFFFF 0%,#FFE6F1 100%);box-shadow:0 8px 16px -6px rgba(35,25,80,0.22),inset 0 2px 2px rgba(255,255,255,0.9)">🐮</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:17px;font-weight:800;color:#01185A">찬영</div>
+<div style="font-size:13px;font-weight:500;color:#8E93A8;font-variant-numeric:tabular-nums;margin-top:3px;white-space:nowrap">{{ childBirthText }} · 6분 전 요청</div>
+</div>
+</div>
+<div style="{{ ageBadgeStyle }}">{{ ageBadgeText }}</div>
+<div style="font-size:13.5px;font-weight:600;color:#5C6280;line-height:1.65;margin-top:12px;text-wrap:pretty">{{ consentIntro }}</div>
+</div>
+
+<sc-if value="{{ legalAlready }}" hint-placeholder-val="{{ false }}">
+<div style="background:linear-gradient(157deg,#F1FAF6 0%,#E4F4EC 100%);border-radius:26px;padding:17px 19px;box-shadow:inset 0 0 0 1.5px rgba(15,138,104,0.22)">
+<div style="font-size:15.5px;font-weight:800;color:#0F8A68">{{ legalAlreadyTitle }}</div>
+<div style="font-size:13px;font-weight:500;color:#4A7A6C;line-height:1.7;margin-top:8px;text-wrap:pretty">{{ legalAlreadyBody }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ legalPickable }}" hint-placeholder-val="{{ true }}">
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">법정대리인은 누가 하나요?</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:6px;text-wrap:pretty">법정대리인 동의는 보호자 한 명만 하면 돼요. 나머지 보호자는 가족 구성원으로 함께 봐요.</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div onClick="{{ pickLegalMom }}" style="{{ legalMomStyle }}">엄마</div>
+<div onClick="{{ pickLegalDad }}" style="{{ legalDadStyle }}">아빠</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ legalIsOther }}" hint-placeholder-val="{{ false }}">
+<div style="background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 46%,#DFE1F1 100%);border-radius:22px;padding:15px 17px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
+<div style="font-size:15px;font-weight:800;color:#01185A">{{ legalOtherTitle }}</div>
+<div style="font-size:13px;font-weight:500;color:#5C6280;line-height:1.7;margin-top:8px;text-wrap:pretty">{{ legalOtherBody }}</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ legalIsMe }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ toggleAll }}" style="{{ allBoxStyle }}">
+<div style="{{ allMarkStyle }}">✓</div>
+<div style="flex:1;font-size:16.5px;font-weight:800;color:#01185A">전체 동의하기</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ terms }}" as="t" hint-placeholder-count="5">
+<div style="{{ t.rowStyle }}">
+<div onClick="{{ t.tap }}" style="{{ t.markStyle }}">✓</div>
+<div onClick="{{ t.tap }}" style="flex:1;cursor:pointer">
+<div style="{{ t.tagStyle }}">{{ t.tag }}</div>
+<div style="font-size:14.5px;font-weight:600;color:#01185A;line-height:1.5;margin-top:5px;text-wrap:pretty">{{ t.label }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:5px;text-wrap:pretty">{{ t.detail }}</div>
+</div>
+<div style="flex:none;font-size:15px;font-weight:700;color:#A9AEC4;padding:0 2px;cursor:pointer">›</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<div style="background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 46%,#DFE1F1 100%);border-radius:20px;padding:14px 16px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
+<div style="display:flex;align-items:center;gap:9px"><span style="font-size:17px">⚖️</span><span style="font-size:15px;font-weight:800;color:#01185A;white-space:nowrap">개인정보 보호법 제22조의2</span></div>
+<div style="font-size:13px;font-weight:500;color:#5C6280;line-height:1.7;margin-top:8px;text-wrap:pretty">만 14세 미만 아동의 개인정보를 처리할 때는 법정대리인의 동의가 필요해요. 동의 전까지 아이 계정은 시작되지 않아요.</div>
+<div style="display:flex;align-items:flex-start;gap:9px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(120,110,170,0.18)">
+<span style="flex:1;font-size:13px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty">동의는 언제든 [설정 → 아이 계정 관리]에서 철회할 수 있어요. 철회하면 아이 계정의 기록은 삭제돼요.</span>
+</div>
+</div>
+</div>
+<div style="flex:none;padding:12px 16px 26px">
+<div onClick="{{ consentNext }}" style="{{ consentCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ consentCtaLabel }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isParentDone }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="text-align:center;padding:10px 0 2px">
+<img src="assets/hero-bull.png" width="132" alt="영웅이" style="display:block;margin:0 auto;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.2))">
+<div style="font-size:24px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:12px">{{ doneTitle }}</div>
+<div style="font-size:14.5px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:8px;text-wrap:pretty;white-space:pre-line">{{ doneBody }}</div>
+</div>
+
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:17px 19px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">연결된 가족</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+<sc-for list="{{ members }}" as="m" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:11px;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:12px 14px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<span style="font-size:19px">{{ m.emoji }}</span><span style="{{ m.nameStyle }}">{{ m.label }}</span><span style="{{ m.tagStyle }}">{{ m.tag }}</span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ canInvite }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ toggleInvite }}" style="margin-top:12px;padding-top:14px;border-top:1px solid #EFEFF5;cursor:pointer">
+<div style="display:flex;align-items:center;gap:11px">
+<span style="font-size:20px">🧑‍🔧</span>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:800;color:#01185A">다른 보호자도 초대하기</div>
+<div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.6;margin-top:3px;text-wrap:pretty">{{ inviteSubtitle }}</div>
+</div>
+<span style="flex:none;font-size:16px;font-weight:700;color:#C6C9D8">{{ inviteChevron }}</span>
+</div>
+<sc-if value="{{ inviteOpen }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+<div style="text-align:center;border-radius:14px;padding:14px;background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 100%);box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)">
+<div style="font-size:11.5px;font-weight:700;color:#D5327A">가족 코드</div>
+<div style="font-size:28px;font-weight:800;color:#01185A;letter-spacing:0.1em;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ familyCode }}</div>
+</div>
+<div onClick="{{ shareKakao }}" style="display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:13px;font-size:14.5px;font-weight:800;color:#3B1E1E;cursor:pointer;background:linear-gradient(180deg,#FFE95C 0%,#FEE500 100%);box-shadow:0 6px 14px -6px rgba(180,150,0,0.5),inset 0 1px 1px rgba(255,255,255,0.7)"><span style="font-size:16px">💬</span>{{ kakaoLabel }}</div>
+<div onClick="{{ copyInvite }}" style="text-align:center;border-radius:14px;padding:12px;font-size:13.5px;font-weight:700;color:#5C6280;cursor:pointer;background:#F3F3FA;box-shadow:inset 0 1px 3px rgba(70,60,120,0.08)">{{ inviteCopyLabel }}</div>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;line-height:1.6;text-align:center;text-wrap:pretty">{{ inviteHint }}</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+
+<div style="display:flex;align-items:flex-start;gap:9px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 100%);border-radius:18px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
+<span style="font-size:15px">🏫</span>
+<span style="flex:1;font-size:13px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty">아이 계정은 평일 09:00~16:00에 주문을 쉬어요. 설정에서 바꿀 수 있어요.</span>
+</div>
+</div>
+<div style="flex:none;padding:12px 16px 26px">
+<div onClick="{{ enterHome }}" style="{{ onCta }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 홈으로</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isChildInfo }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ backToLogin }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;white-space:nowrap">내 정보</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">2</span> / 3</div>
+</div>
+<div style="flex:none;display:flex;gap:5px;padding:0 20px 14px">
+<sc-for list="{{ progBars }}" as="b" hint-placeholder-count="3">
+<div style="{{ b.style }}"></div>
+</sc-for>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:16px;font-weight:800;color:#01185A">뭐라고 부를까요?</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+<div style="background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">별명</div>
+<div style="font-size:17px;font-weight:700;color:#01185A;margin-top:3px">찬영</div>
+</div>
+<div style="background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);border-radius:16px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)">
+<div style="font-size:12.5px;font-weight:600;color:#A9AEC4">생년월일</div>
+<div style="font-size:17px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;margin-top:3px">{{ childBirthText }}</div>
+</div>
+</div>
+<div style="{{ ageBadgeStyle }}">{{ ageBadgeText }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.65;margin-top:11px;text-wrap:pretty">실명·학교·연락처는 받지 않아요. 별명과 생년월일은 부모님께 동의를 부탁하려고 먼저 받아요.</div>
+</div>
+
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:16px;font-weight:800;color:#01185A">부모님 가족 코드</div>
+<div style="font-size:13px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:7px">부모님 앱 [가족 연결]에 있는 숫자 6자리예요.</div>
+<div onClick="{{ pasteChild }}" style="{{ pasteChildBtnStyle }}">{{ pasteChildBtnLabel }}</div>
+<div style="display:flex;gap:7px;margin-top:12px">
+<sc-for list="{{ codeInputCells }}" as="d" hint-placeholder-count="6">
+<div style="{{ d.style }}">{{ d.ch }}</div>
+</sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">
+<sc-for list="{{ childCodePad }}" as="k" hint-placeholder-count="12">
+<div onClick="{{ k.tap }}" style="{{ k.style }}">{{ k.label }}</div>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{ childCodeFilled }}" hint-placeholder-val="{{ false }}">
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<div style="font-size:16px;font-weight:800;color:#01185A">누구에게 동의를 요청할까요?</div>
+<div style="font-size:13px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:7px">한 분만 동의하면 시작할 수 있어요.</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div onClick="{{ askMom }}" style="{{ askMomStyle }}">엄마</div>
+<div onClick="{{ askDad }}" style="{{ askDadStyle }}">아빠</div>
+</div>
+</div>
+</sc-if>
+</div>
+<div style="flex:none;padding:12px 16px 26px">
+<div onClick="{{ childInfoNext }}" style="{{ childInfoCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ childInfoCtaLabel }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isChildWait }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ goChildInfo }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;white-space:nowrap">부모님 동의 기다리기</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">3</span> / 3</div>
+</div>
+<div style="flex:none;display:flex;gap:5px;padding:0 20px 14px">
+<sc-for list="{{ progBars }}" as="b" hint-placeholder-count="3">
+<div style="{{ b.style }}"></div>
+</sc-for>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="text-align:center;padding:14px 0 4px">
+<img src="assets/mascot-bear.png" width="118" alt="키웅이" style="display:block;margin:0 auto;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.2))">
+<div style="font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:12px">부모님께 요청을 보냈어요</div>
+<div style="font-size:14.5px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:8px;text-wrap:pretty">부모님이 동의를 누르면 바로 시작해요.<br>조금만 기다려요.</div>
+</div>
+
+<div style="background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10),inset 0 2px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(255,255,255,0.7)">
+<sc-for list="{{ waitSteps }}" as="w" hint-placeholder-count="3">
+<div style="display:flex;align-items:flex-start;gap:11px;padding:7px 0">
+<div style="{{ w.dotStyle }}">{{ w.mark }}</div>
+<div style="flex:1">
+<div style="{{ w.labelStyle }}">{{ w.label }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:3px;text-wrap:pretty">{{ w.detail }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;align-items:flex-start;gap:9px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 100%);border-radius:18px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
+<span style="font-size:15px">🔒</span>
+<span style="flex:1;font-size:13px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty">동의를 받기 전에는 별명·생년월일 말고 아무것도 저장하지 않아요. 7일 안에 동의가 없으면 요청과 정보를 지워요.</span>
+</div>
+
+<div onClick="{{ resend }}" style="{{ resendStyle }}">{{ resendLabel }}</div>
+</div>
+<div style="flex:none;padding:12px 16px 26px">
+<div onClick="{{ approve }}" style="{{ onCta }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">부모님이 동의했어요</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isChildDone }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:22px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="text-align:center;padding:12px 0 2px">
+<img src="assets/hero-bull.png" width="132" alt="영웅이" style="display:block;margin:0 auto;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.2))">
+<div style="font-size:24px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:12px">동의 완료! 시작할 수 있어요</div>
+<div style="font-size:14.5px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:8px;text-wrap:pretty">엄마가 법정대리인으로 동의했어요.<br>이제 찬영이 계정으로 리그에 들어가요.</div>
+</div>
+
+<div style="background:linear-gradient(157deg,#FFFDF6 0%,#FFF6DF 46%,#FFEFC9 100%);border-radius:26px;padding:18px 20px;box-shadow:0 16px 34px rgba(120,90,20,0.13),inset 0 2px 1px rgba(255,255,255,0.95),inset 0 -11px 22px rgba(180,140,50,0.14),inset 0 0 0 1px rgba(255,255,255,0.6)">
+<div style="display:flex;align-items:center;gap:10px"><span style="font-size:22px">💰</span><span style="font-size:16.5px;font-weight:800;color:#01185A;white-space:nowrap">시드머니 1,000만원 지급</span></div>
+<div style="font-size:13.5px;font-weight:500;color:#8A6B1F;line-height:1.65;margin-top:9px;text-wrap:pretty">진짜 돈이 아닌 연습용 머니예요. 시즌 3은 4주 동안 이어져요.</div>
+</div>
+
+<div style="display:flex;align-items:flex-start;gap:9px;background:linear-gradient(157deg,#EFF0FA 0%,#E7E8F5 100%);border-radius:18px;padding:13px 15px;box-shadow:inset 0 2px 4px rgba(70,60,120,0.12)">
+<span style="font-size:15px">🏫</span>
+<span style="flex:1;font-size:13px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty">평일 09:00~16:00에는 주문을 쉬어요. 구경하고 배우는 건 언제든 할 수 있어요.</span>
+</div>
+</div>
+<div style="flex:none;padding:12px 16px 26px">
+<div onClick="{{ enterHome }}" style="{{ onCta }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">찬영이 홈으로 가기</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)">
+<div style="flex:none;display:flex;align-items:center;gap:11px;padding:10px 18px 12px">
+<sc-if value="{{ isMomAcct }}" hint-placeholder-val="{{ true }}">
+<img src="assets/profile-mom.png" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
+</sc-if>
+<sc-if value="{{ isDadAcct }}" hint-placeholder-val="{{ false }}">
+<img src="assets/profile-dad.png" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
+</sc-if>
+<sc-if value="{{ isChildRole }}" hint-placeholder-val="{{ false }}">
+<img src="assets/profile-child.png" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
+</sc-if>
+<div style="flex:1;min-width:0">
+<div style="font-size:12px;font-weight:700;color:#8E7BC7">{{ homeSeason }}</div>
+<div style="font-size:17.5px;font-weight:800;color:#01185A;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ homeGreeting }}</div>
+</div>
+<div onClick="{{ toggleMenu }}" style="flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><g stroke="#3B3F60" stroke-width="2.2" stroke-linecap="round"><path d="M1.5 2h19"></path><path d="M1.5 8h19"></path><path d="M1.5 14h19"></path></g></svg>
+</div>
+</div>
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:16px;top:104px;z-index:2;width:184px;border-radius:20px;padding:6px;background:#fff;box-shadow:0 18px 34px -12px rgba(35,25,80,0.3),inset 0 0 0 1px rgba(35,25,80,0.06)">
+<div onClick="{{ openSettings }}" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#01185A;cursor:pointer">알림</div>
+<div onClick="{{ logout }}" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#D5327A;cursor:pointer;border-top:1px solid #F1F1F7">로그아웃</div>
+</div>
+</sc-if>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px" data-home-body="1">
+<sc-if value="{{ showConsentRequest }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ openConsent }}" style="border-radius:24px;padding:16px 18px;cursor:pointer;background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 100%);box-shadow:0 12px 26px -14px rgba(180,40,110,0.35),inset 0 0 0 1.5px rgba(245,50,127,0.25)">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="flex:none;width:44px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:22px;background:#fff;box-shadow:0 6px 12px -6px rgba(180,40,110,0.3)">🐮</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:12px;font-weight:800;color:#D5327A">동의를 기다리는 요청 1건</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:3px">찬영이가 법정대리인 동의를 요청했어요</div>
+</div>
+<span style="flex:none;font-size:16px;font-weight:700;color:#D5327A">›</span>
+</div>
+<div style="text-align:center;border-radius:14px;padding:12px;margin-top:13px;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(180deg,#F663A1 0%,#EE4A8E 100%);box-shadow:0 8px 15px -7px rgba(214,54,124,0.5)">동의 항목 확인하기</div>
+</div>
+</sc-if>
+</div>
+
+<div style="flex:none;display:flex;align-items:center;gap:8px;padding:10px 14px 20px">
+<div style="flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:#fff;box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(35,25,80,0.05)">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#5B23D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path></svg>
+<span style="font-size:11px;font-weight:800;color:#01185A">홈</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><circle cx="20" cy="7" r="1.5" fill="#B7BACB" stroke="none"></circle></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">모의투자</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="15" width="16" height="3" rx="1"></rect><rect x="5" y="11" width="14" height="3" rx="1"></rect><rect x="6" y="7" width="12" height="3" rx="1"></rect></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">아카이브</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4a4 4 0 0 1-8 0z"></path><path d="M8 5H5a3 3 0 0 0 3 5"></path><path d="M16 5h3a3 3 0 0 1-3 5"></path><path d="M12 13v3"></path><path d="M9 20h6"></path><path d="M9 20a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"></path></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">랭킹</span>
+</div>
+</div>
+<div style="flex:none;width:48px;height:48px;border-radius:999px;cursor:pointer;overflow:hidden">
+<img src="assets/chatbot-bear.png" alt="웅이 챗봇" style="width:100%;height:100%;object-fit:cover;display:block">
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 14px">
+<div onClick="{{ enterHome }}" style="{{ backBtnStyle }}">‹</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;white-space:nowrap">설정</div>
+<div style="width:38px"></div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<div style="font-size:13px;font-weight:800;color:#8E7BC7;padding-left:6px">알림</div>
+<div style="background:#fff;border-radius:26px;padding:4px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10)">
+<sc-for list="{{ settingRows }}" as="r" hint-placeholder-count="3">
+<div onClick="{{ r.tap }}" style="{{ r.rowStyle }}">
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:700;color:#01185A">{{ r.label }}</div>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;line-height:1.5;margin-top:3px;text-wrap:pretty">{{ r.desc }}</div>
+</div>
+<div style="{{ r.switchStyle }}"><div style="{{ r.knobStyle }}"></div></div>
+</div>
+</sc-for>
+</div>
+<div onClick="{{ logout }}" style="text-align:center;border-radius:999px;padding:15px;font-size:15px;font-weight:800;color:#D5327A;cursor:pointer;background:#fff;box-shadow:0 8px 15px -8px rgba(35,25,80,0.25),inset 0 0 0 1.5px rgba(245,50,127,0.25)">로그아웃</div>
+</div>
+</div>
+</sc-if>
+
+<img src="assets/statusbar.svg" width="402" height="59" alt="" style="position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:block">
+<div style="position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;z-index:3;pointer-events:none"><div style="width:140px;height:5px;border-radius:999px;background:#1A2233;opacity:0.85"></div></div>
+</div>
+<div style="position:absolute;left:24px;top:23px;width:402px;height:874px;border-radius:40px;pointer-events:none;z-index:4;opacity:0.18;mix-blend-mode:overlay;background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNjAnIGhlaWdodD0nMTYwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzE2MCcgaGVpZ2h0PScxNjAnIGZpbHRlcj0ndXJsKCNuKScvPjwvc3ZnPg==)"></div>
+<img src="assets/iphone-frame.png" width="450" height="920" alt="" style="position:absolute;left:0;top:0;display:block;z-index:5;pointer-events:none">
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;flex:none">
+<div style="font-size:15px;font-weight:800;color:#01185A">계정별 홈 화면 3개 나란히 보기</div>
+<div style="display:flex;gap:18px;flex-wrap:wrap;padding-top:12px">
+<sc-for list="{{ homeViews }}" as="v" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px;flex:none">
+<div style="font-size:13px;font-weight:800;color:#5C6280;padding-left:24px">{{ v.label }}</div>
+<div style="position:relative;width:450px;height:920px;flex:none">
+<div style="position:absolute;left:24px;top:23px;width:402px;height:874px;border-radius:40px;overflow:hidden;background:#F5F2F8">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)">
+<div style="flex:none;display:flex;align-items:center;gap:11px;padding:10px 18px 12px">
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}">
+<img src="assets/profile-mom.png" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
+</sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}">
+<img src="assets/profile-dad.png" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
+</sc-if>
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}">
+<img src="assets/profile-child.png" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
+</sc-if>
+<div style="flex:1;min-width:0">
+<div style="font-size:12px;font-weight:700;color:#8E7BC7">{{ v.season }}</div>
+<div style="font-size:17.5px;font-weight:800;color:#01185A;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ v.greeting }}</div>
+</div>
+<div onClick="{{ v.toggleMenu }}" style="flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><g stroke="#3B3F60" stroke-width="2.2" stroke-linecap="round"><path d="M1.5 2h19"></path><path d="M1.5 8h19"></path><path d="M1.5 14h19"></path></g></svg>
+</div>
+</div>
+<sc-if value="{{ v.menuOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:16px;top:104px;z-index:2;width:184px;border-radius:20px;padding:6px;background:#fff;box-shadow:0 18px 34px -12px rgba(35,25,80,0.3),inset 0 0 0 1px rgba(35,25,80,0.06)">
+<div onClick="{{ v.openNotif }}" style="border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#01185A;cursor:pointer">알림</div>
+<div onClick="{{ v.logout }}" style="border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#D5327A;cursor:pointer;border-top:1px solid #F1F1F7">로그아웃</div>
+</div>
+</sc-if>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ v.isNotif }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px">
+<div onClick="{{ v.backHome }}" style="{{ backBtnStyle }}">‹</div>
+<div style="font-size:16px;font-weight:800;color:#01185A">알림 설정</div>
+</div>
+<div style="background:#fff;border-radius:26px;padding:4px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10)">
+<sc-for list="{{ v.settingRows }}" as="r" hint-placeholder-count="3">
+<div onClick="{{ r.tap }}" style="{{ r.rowStyle }}">
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:700;color:#01185A">{{ r.label }}</div>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;line-height:1.5;margin-top:3px;text-wrap:pretty">{{ r.desc }}</div>
+</div>
+<div style="{{ r.switchStyle }}"><div style="{{ r.knobStyle }}"></div></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ v.isOut }}" hint-placeholder-val="{{ false }}">
+<div style="background:#fff;border-radius:26px;padding:22px;text-align:center;box-shadow:0 12px 28px rgba(35,25,80,0.10)">
+<div style="font-size:16px;font-weight:800;color:#01185A">로그아웃했어요</div>
+<div style="font-size:13px;font-weight:500;color:#A9AEC4;line-height:1.6;margin-top:8px">{{ v.outHint }}</div>
+<div onClick="{{ v.backHome }}" style="text-align:center;border-radius:999px;padding:13px;margin-top:14px;font-size:14.5px;font-weight:800;color:#fff;cursor:pointer;background:linear-gradient(180deg,#F663A1 0%,#EE4A8E 100%);box-shadow:0 8px 15px -7px rgba(214,54,124,0.5)">다시 로그인</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.isHomeView }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ v.showRequest }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ v.openConsent }}" style="border-radius:24px;padding:16px 18px;cursor:pointer;background:linear-gradient(157deg,#FEF3F7 0%,#FBE4EC 100%);box-shadow:0 12px 26px -14px rgba(180,40,110,0.35),inset 0 0 0 1.5px rgba(245,50,127,0.25)">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+<div style="flex:1;min-width:0">
+<div style="font-size:12px;font-weight:800;color:#D5327A">동의를 기다리는 요청 1건</div>
+<div style="font-size:15px;font-weight:800;color:#01185A;margin-top:3px">찬영이가 법정대리인 동의를 요청했어요</div>
+</div>
+<span style="flex:none;font-size:16px;font-weight:700;color:#D5327A">›</span>
+</div>
+<div style="text-align:center;border-radius:14px;padding:12px;margin-top:13px;font-size:14px;font-weight:800;color:#fff;background:linear-gradient(180deg,#F663A1 0%,#EE4A8E 100%);box-shadow:0 8px 15px -7px rgba(214,54,124,0.5)">동의 항목 확인하기</div>
+</div>
+</sc-if>
+<div style="text-align:center;padding:6px 0 2px">
+<div style="display:inline-block;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 6px 12px -8px rgba(35,25,80,0.3)">{{ v.dayCount }}</div>
+<div style="font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:10px">{{ v.itemLine }}</div>
+<div style="font-size:19px;font-weight:800;color:#D5327A;letter-spacing:-0.02em;margin-top:4px">{{ v.rateText }}</div>
+</div>
+<div style="position:relative">
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}">
+<img src="assets/goal-child.png" width="228" alt="" onClick="{{ v.popGoal }}" style="display:block;width:228px;height:auto;margin:-6px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18));cursor:pointer">
+</sc-if>
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}">
+<img src="assets/goal-mom.png" width="246" alt="" onClick="{{ v.popGoal }}" style="display:block;width:246px;height:auto;margin:-8px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18));cursor:pointer">
+</sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}">
+<img src="assets/goal-dad.png" width="200" alt="" onClick="{{ v.popGoal }}" style="display:block;width:200px;height:auto;margin:2px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18));cursor:pointer">
+</sc-if>
+<sc-if value="{{ v.pop0.on }}" hint-placeholder-val="{{ false }}"><div style="{{ v.pop0.style }}">
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}"><img src="assets/item-mom.png" alt="" style="{{ v.pop0.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}"><img src="assets/item-dad.png" alt="" style="{{ v.pop0.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}"><img src="assets/item-child.png" alt="" style="{{ v.pop0.imgStyle }}"></sc-if>
+</div></sc-if>
+<sc-if value="{{ v.pop1.on }}" hint-placeholder-val="{{ false }}"><div style="{{ v.pop1.style }}">
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}"><img src="assets/item-mom.png" alt="" style="{{ v.pop1.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}"><img src="assets/item-dad.png" alt="" style="{{ v.pop1.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}"><img src="assets/item-child.png" alt="" style="{{ v.pop1.imgStyle }}"></sc-if>
+</div></sc-if>
+<sc-if value="{{ v.pop2.on }}" hint-placeholder-val="{{ false }}"><div style="{{ v.pop2.style }}">
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}"><img src="assets/item-mom.png" alt="" style="{{ v.pop2.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}"><img src="assets/item-dad.png" alt="" style="{{ v.pop2.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}"><img src="assets/item-child.png" alt="" style="{{ v.pop2.imgStyle }}"></sc-if>
+</div></sc-if>
+<sc-if value="{{ v.pop3.on }}" hint-placeholder-val="{{ false }}"><div style="{{ v.pop3.style }}">
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}"><img src="assets/item-mom.png" alt="" style="{{ v.pop3.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}"><img src="assets/item-dad.png" alt="" style="{{ v.pop3.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}"><img src="assets/item-child.png" alt="" style="{{ v.pop3.imgStyle }}"></sc-if>
+</div></sc-if>
+<sc-if value="{{ v.pop4.on }}" hint-placeholder-val="{{ false }}"><div style="{{ v.pop4.style }}">
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}"><img src="assets/item-mom.png" alt="" style="{{ v.pop4.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}"><img src="assets/item-dad.png" alt="" style="{{ v.pop4.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}"><img src="assets/item-child.png" alt="" style="{{ v.pop4.imgStyle }}"></sc-if>
+</div></sc-if>
+<sc-if value="{{ v.pop5.on }}" hint-placeholder-val="{{ false }}"><div style="{{ v.pop5.style }}">
+<sc-if value="{{ v.isMom }}" hint-placeholder-val="{{ true }}"><img src="assets/item-mom.png" alt="" style="{{ v.pop5.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isDad }}" hint-placeholder-val="{{ false }}"><img src="assets/item-dad.png" alt="" style="{{ v.pop5.imgStyle }}"></sc-if>
+<sc-if value="{{ v.isChild }}" hint-placeholder-val="{{ false }}"><img src="assets/item-child.png" alt="" style="{{ v.pop5.imgStyle }}"></sc-if>
+</div></sc-if>
+</div>
+<div onClick="{{ v.toggleHoldings }}" style="background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);cursor:pointer;margin-top:auto">
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<span style="font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap">{{ v.holdingsTitle }}</span>
+<span style="font-size:12.5px;font-weight:700;color:#A9AEC4;white-space:nowrap">{{ v.holdingsCount }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+<sc-for list="{{ v.holdingsPreview }}" as="h" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:11px;border-radius:16px;padding:12px 13px;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%)">
+<div style="flex:none;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 4px 8px -5px rgba(35,25,80,0.3)">{{ h.tick }}</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:14.5px;font-weight:700;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;margin-top:2px;white-space:nowrap">{{ h.qty }}</div>
+</div>
+<div style="flex:none;text-align:right">
+<div style="font-size:14px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.value }}</div>
+<div style="{{ h.pctStyle }}">{{ h.pct }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+<div style="flex:none;display:flex;align-items:center;gap:8px;padding:10px 14px 20px">
+<div style="flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:#fff;box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(35,25,80,0.05)">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#5B23D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path></svg>
+<span style="font-size:11px;font-weight:800;color:#01185A">홈</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><circle cx="20" cy="7" r="1.5" fill="#B7BACB" stroke="none"></circle></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">모의투자</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="15" width="16" height="3" rx="1"></rect><rect x="5" y="11" width="14" height="3" rx="1"></rect><rect x="6" y="7" width="12" height="3" rx="1"></rect></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">아카이브</span>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4a4 4 0 0 1-8 0z"></path><path d="M8 5H5a3 3 0 0 0 3 5"></path><path d="M16 5h3a3 3 0 0 1-3 5"></path><path d="M12 13v3"></path><path d="M9 20h6"></path><path d="M9 20a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"></path></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">랭킹</span>
+</div>
+</div>
+<div style="flex:none;width:48px;height:48px;border-radius:999px;cursor:pointer;overflow:hidden">
+<img src="assets/chatbot-bear.png" alt="웅이 챗봇" style="width:100%;height:100%;object-fit:cover;display:block">
+</div>
+</div>
+</div>
+<sc-if value="{{ v.holdingsExpanded }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ v.toggleHoldings }}" style="position:absolute;inset:0;z-index:7;background:rgba(15,10,40,0.42);animation:sheetFade 0.28s ease-out"></div>
+<div style="{{ v.sheetStyle }}">
+<div onMouseDown="{{ v.dragStart }}" onTouchStart="{{ v.dragStart }}" style="flex:none;display:flex;justify-content:center;padding:10px 0 2px;cursor:grab;touch-action:none"><div style="width:38px;height:5px;border-radius:999px;background:#D9D8E6"></div></div>
+<div onMouseDown="{{ v.dragStart }}" onTouchStart="{{ v.dragStart }}" style="flex:none;display:flex;align-items:center;gap:10px;padding:10px 18px 8px;cursor:grab;touch-action:none">
+<div onClick="{{ v.toggleHoldings }}" style="{{ backBtnStyle }}">‹</div>
+<div style="font-size:16px;font-weight:800;color:#01185A">{{ v.holdingsTitle }}</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 16px 24px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ v.holdings }}" as="h" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:11px;border-radius:16px;padding:14px;background:#fff;box-shadow:0 4px 12px -6px rgba(35,25,80,0.12)">
+<div style="flex:none;width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5B23D6;background:#F4F4FA">{{ h.tick }}</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:700;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:2px">{{ h.qty }}</div>
+</div>
+<div style="flex:none;text-align:right">
+<div style="font-size:15px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ h.value }}</div>
+<div style="{{ h.pctStyle }}">{{ h.pct }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<img src="assets/statusbar.svg" width="402" height="59" alt="" style="position:absolute;left:0;top:0;z-index:9;pointer-events:none;display:block">
+<div style="position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;z-index:9;pointer-events:none"><div style="width:140px;height:5px;border-radius:999px;background:#1A2233;opacity:0.85"></div></div>
+</div>
+<img src="assets/iphone-frame.png" width="450" height="920" alt="" style="position:absolute;left:0;top:0;display:block;z-index:5;pointer-events:none">
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="width:330px;display:flex;flex-direction:column;gap:14px">
+<div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
+<div style="font-size:17px;font-weight:800;color:#01185A">가입 경로가 둘로 나뉩니다</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.75;margin-top:10px;text-wrap:pretty">엄마·아빠·아이가 각자 계정과 각자 기기를 씁니다. v1의 프로필 스위처와 공용 PIN은 빼고, 계정끼리는 숫자 6자리 가족 코드로 연결합니다. 로그인은 소셜 없이 서비스 자체 아이디·비밀번호만 씁니다.</div>
+<div style="margin-top:16px;padding-top:15px;border-top:1px solid #EFEFF5">
+<div style="font-size:13px;font-weight:700;color:#01185A">부모 경로 (4단계)</div>
+<div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:6px">로그인 → 보호자 본인확인 → 가족 만들기/참여(코드 발급) → 아이 요청에 법정대리인 동의</div>
+</div>
+<div style="margin-top:13px;padding-top:13px;border-top:1px solid #EFEFF5">
+<div style="font-size:13px;font-weight:700;color:#01185A">아이 경로 (3단계)</div>
+<div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:6px">아이디·비밀번호 가입 → 별명·생년월일 + 가족 코드 입력 → 부모 동의 대기 → 승인되면 시작</div>
+</div>
+<div style="margin-top:13px;padding-top:13px;border-top:1px solid #EFEFF5">
+<div style="font-size:13px;font-weight:700;color:#01185A">두 번째 보호자</div>
+<div style="font-size:12.5px;font-weight:500;color:#8E93A8;line-height:1.7;margin-top:6px">아빠는 자기 계정으로 가입한 뒤 같은 가족 코드로 [기존 가족에 참여]합니다. 법정대리인 동의는 한 보호자가 하면 되고, 나머지는 가족 구성원으로 봅니다.</div>
+</div>
+</div>
+
+<div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">동의 순서를 이렇게 잡은 이유</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.8;margin-top:10px">· 동의는 특정 아이에 대한 것이어야 하므로, 부모 화면에서 <b style="color:#01185A">그 아이의 요청</b>을 보고 동의합니다<br>· 아이 쪽은 동의 요청에 필요한 최소 정보(별명·생년월일)만 먼저 받습니다<br>· 동의 전에는 계정이 시작되지 않고, 7일 미동의 시 요청·정보를 삭제합니다<br>· 필수·선택 동의 분리, 전체동의 기본 미체크, 철회 경로 병기</div>
+</div>
+
+<div style="background:#fff;border-radius:22px;padding:22px 24px;box-shadow:0 4px 18px rgba(35,25,80,0.07)">
+<div style="font-size:15.5px;font-weight:800;color:#01185A">확인이 필요한 것</div>
+<div style="font-size:13.5px;font-weight:500;color:#6E7488;line-height:1.8;margin-top:10px">· 아이 아이디를 아이가 직접 만들지, 부모가 만들어 전달할지<br>· 법정대리인 확인을 휴대폰 본인확인만으로 볼지<br>· 만 14세 이상 자녀 수용 여부 (본인 동의 경로 분기)<br>· 보호자 2명이 모두 동의해야 하는지 (지금은 1명)<br>· 문구는 법무 검토 전 초안입니다</div>
+</div>
+</div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;childAge&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:11,&quot;min&quot;:6,&quot;max&quot;:17,&quot;unit&quot;:&quot;세&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;아이&quot;},&quot;showMarketingOptIn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;동의 화면&quot;},&quot;guestPreview&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;시작 화면&quot;}}">
+const CTA_ON = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%),radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)";
+const CTA_OFF = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:linear-gradient(180deg,#D3D5E2 0%,#C3C6D6 60%,#B7BACC 100%);box-shadow:0 8px 14px -6px rgba(35,25,80,0.18),inset 0 2px 3px rgba(255,255,255,0.6)";
+const CARD = "background:linear-gradient(157deg,#FFFFFF 0%,#FFFFFF 46%,#F6F6FC 100%);box-shadow:0 12px 28px rgba(35,25,80,0.10),0 2px 5px rgba(35,25,80,0.05),inset 0 2px 1px rgba(255,255,255,1),inset 0 -8px 16px rgba(70,60,120,0.06),inset 0 0 0 1px rgba(255,255,255,0.7)";
+const PAD_KEY = "text-align:center;padding:13px 0;border-radius:16px;font-size:18px;font-weight:800;color:#01185A;cursor:pointer;font-variant-numeric:tabular-nums;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -3px rgba(35,25,80,0.16),inset 0 1.5px 1px rgba(255,255,255,1)";
+const CELL = "flex:1;text-align:center;padding:14px 0;border-radius:14px;font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);box-shadow:inset 0 2px 4px rgba(70,60,120,0.10)";
+const TERMS = [
+  { k: 'tos', req: true, label: '서비스 이용약관', detail: '리그 참여·모의투자 기능 제공 · 회원 탈퇴 시까지' },
+  { k: 'privacy', req: true, label: '보호자 개인정보 수집·이용 동의', detail: '이름·생년월일·연락처 · 계정 확인과 알림 발송 · 탈퇴 후 30일' },
+  { k: 'child', req: true, label: '만 14세 미만 아동 개인정보 처리에 대한 법정대리인 동의', detail: '별명·생년월일·모의투자 기록 · 리그 운영과 학습 리포트 · 탈퇴 시 즉시 삭제' },
+  { k: 'demo', req: true, label: '모의투자 특약 확인', detail: '실제 매매·실제 수익이 아니며 투자권유가 아니라는 점을 확인' },
+  { k: 'mkt', req: false, label: '마케팅·이벤트 정보 수신', detail: '새 시즌 안내 알림 · 언제든 철회 가능' }
+];
+
+class Component extends DCLogic {
+  state = { screen: 'splash', role: 'parent', mode: 'signup', carrier: 'SKT', codeSent: false, authCode: '', agree: {}, familyMode: 'create', joinCode: '', childCode: '', codeCopied: false, inviteOpen: false, inviteCopied: false, joinPasted: false, joinPasteFail: false, guardian: 'mom', resendCount: 0, resendSent: false, joined: {}, legalGuardian: null, legalPick: null, legalPending: false, requestTarget: 'mom' };
+
+  set(patch) { this.setState(s => Object.assign({}, s, patch)); }
+
+  copy(text, flag) {
+    try { navigator.clipboard && navigator.clipboard.writeText(text); } catch (e) {}
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    } catch (e) {}
+    try { localStorage.setItem('heroKiwoom.clip', text); } catch (e) {}
+    this.set({ [flag]: true });
+    clearTimeout(this['_t_' + flag]);
+    this['_t_' + flag] = setTimeout(() => this.set({ [flag]: false }), 1800);
+  }
+  go(screen) { this.set({ screen }); }
+
+  activeTerms() { return TERMS.filter(t => t.k !== 'mkt' || (this.props.showMarketingOptIn ?? true)); }
+  requiredOk() { return this.activeTerms().every(t => !t.req || this.state.agree[t.k]); }
+  mark(on) {
+    return 'flex:none;width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;cursor:pointer;'
+      + (on
+        ? 'color:#fff;background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 62%,#EE4A8E 100%);box-shadow:0 5px 10px -4px rgba(214,54,124,0.45),inset 0 1.5px 1px rgba(255,255,255,0.5)'
+        : 'color:#D7D9E6;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:inset 0 0 0 1.5px #E4E5EF');
+  }
+  buildViews() {
+    const s = this.state;
+    const vs = s.viewState || {};
+    const base = [
+      { k: 'mom', label: '엄마 계정 홈', isMom: true, isDad: false, isParent: true, isChild: false, season: '보호자 계정', greeting: '찬영 어머님, 어서 오세요' },
+      { k: 'dad', label: '아빠 계정 홈', isMom: false, isDad: true, isParent: true, isChild: false, season: '보호자 계정', greeting: '찬영 아버님, 어서 오세요' },
+      { k: 'child', label: '찬영이 계정 홈', isMom: false, isDad: false, isParent: false, isChild: true, season: '아이 계정', greeting: '찬영아, 어서 와요!' }
+    ];
+    const setView = (k, patch) => this.setState(st => {
+      const cur = Object.assign({}, (st.viewState || {})[k], patch);
+      return Object.assign({}, st, { viewState: Object.assign({}, st.viewState, { [k]: cur }) });
+    });
+    return base.map(v => {
+      const st = vs[v.k] || {};
+      const screen = st.screen || 'home';
+      const rows = [
+        { key: 'consent', label: '동의 요청 알림', desc: '아이가 동의를 요청하면 알려줘요' },
+        { key: 'push', label: '푸시 알림', desc: '앱 알림을 받아요' },
+        { key: 'league', label: '리그 소식 알림', desc: '순위 변동과 시즌 안내' }
+      ].map((r, i) => {
+        const on = st[r.key] !== false;
+        return {
+          label: r.label, desc: r.desc,
+          tap: () => setView(v.k, { [r.key]: !on }),
+          rowStyle: 'display:flex;align-items:center;gap:12px;padding:15px 0;cursor:pointer;' + (i === 0 ? '' : 'border-top:1px solid #F1F1F7'),
+          switchStyle: 'flex:none;width:48px;height:28px;border-radius:999px;padding:3px;display:flex;'
+            + (on ? 'justify-content:flex-end;background:linear-gradient(180deg,#F663A1 0%,#EE4A8E 100%)' : 'justify-content:flex-start;background:#E4E5EF'),
+          knobStyle: 'width:22px;height:22px;border-radius:999px;background:#fff;box-shadow:0 2px 4px rgba(35,25,80,0.25)'
+        };
+      });
+      const info = {
+        mom: { day: '28일째', goal: '샤넬 코코 마드모아젤', brand: '샤넬', unit: '향수', img: 'assets/item-mom.png', unitPrice: 210000, profit: 211000,
+          holdings: [
+            { tick: '삼성', name: '삼성전자', qty: '4주', value: '318,000원', pct: '+2.4%', up: true },
+            { tick: 'LG', name: 'LG생활건강', qty: '1주', value: '412,000원', pct: '+5.1%', up: true },
+            { tick: '아모', name: '아모레퍼시픽', qty: '2주', value: '246,000원', pct: '-1.2%', up: false }
+          ] },
+        dad: { day: '28일째', goal: '나이키 에어조던 1', brand: '나이키', unit: '신발', img: 'assets/item-dad.png', unitPrice: 219000, profit: 452000,
+          holdings: [
+            { tick: '현대', name: '현대차', qty: '2주', value: '486,000원', pct: '+3.8%', up: true },
+            { tick: 'NAV', name: 'NAVER', qty: '1주', value: '198,000원', pct: '-0.6%', up: false },
+            { tick: '카카', name: '카카오', qty: '5주', value: '215,000원', pct: '+1.9%', up: true },
+            { tick: 'SK', name: 'SK하이닉스', qty: '1주', value: '178,000원', pct: '+6.2%', up: true }
+          ] },
+        child: { day: '14일째', goal: '왁뿌볼 모으기', brand: '', unit: '왁뿌볼', img: 'assets/item-child.png', unitPrice: 12000, profit: 428600,
+          holdings: [
+            { tick: '삼성', name: '삼성전자', qty: '3주', value: '238,500원', pct: '+4.3%', up: true },
+            { tick: '롯데', name: '롯데웰푸드', qty: '2주', value: '124,000원', pct: '+2.1%', up: true },
+            { tick: '오리', name: '오리온', qty: '1주', value: '96,500원', pct: '-0.8%', up: false }
+          ] }
+      }[v.k];
+      const count = Math.floor(info.profit / info.unitPrice);
+      const totalHold = info.holdings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
+      const rate = totalHold ? (info.profit / totalHold * 100) : 0;
+      const popped = !!st.popped;
+      const popSlot = (i) => {
+        const on = popped && i < count;
+        const seed = (i + 1) * 47;
+        const left = (15 + (seed * 7 % 70)).toFixed(1);
+        const bottom = (12 + (seed * 13 % 55)).toFixed(1);
+        const rot = (-35 + (seed * 5 % 70)).toFixed(1);
+        return {
+          on: on,
+          style: 'position:absolute;left:' + left + '%;bottom:' + bottom + '%;' + (on ? 'animation:popItem 1.3s ease-out forwards;animation-delay:' + (i * 0.1) + 's;' : '') + 'pointer-events:none',
+          imgStyle: 'display:block;width:64px;height:64px;object-fit:contain;transform:rotate(' + rot + 'deg);filter:drop-shadow(0 6px 10px rgba(35,25,80,0.3))'
+        };
+      };
+      return Object.assign({}, v, {
+        isHomeView: screen === 'home',
+        dayCount: '시즌 3 · ' + info.day,
+        itemLine: (info.brand ? info.brand + ' ' : '') + info.unit + ' ' + count + '개',
+        rateText: '+' + rate.toFixed(1) + '%',
+        popped: popped,
+        pop0: popSlot(0), pop1: popSlot(1), pop2: popSlot(2), pop3: popSlot(3), pop4: popSlot(4), pop5: popSlot(5),
+        popGoal: () => {
+          setView(v.k, { popped: true });
+          setTimeout(() => setView(v.k, { popped: false }), 1500);
+        },
+        holdingsExpanded: !!st.holdingsExpanded,
+        toggleHoldings: () => setView(v.k, { holdingsExpanded: !st.holdingsExpanded, dragY: 0 }),
+        sheetStyle: 'position:absolute;left:0;right:0;bottom:0;height:82%;z-index:8;background:#F5F2F8;border-radius:28px 28px 0 0;display:flex;flex-direction:column;box-shadow:0 -20px 40px -12px rgba(20,10,50,0.35);transform:translateY(' + (st.dragY || 0) + 'px);'
+          + (st.dragging ? 'transition:none' : 'transition:transform 0.25s ease') + ';animation:' + (st.dragging ? 'none' : 'sheetUp 0.34s cubic-bezier(0.22,1,0.36,1)'),
+        dragStart: (e) => {
+          e.preventDefault && e.preventDefault();
+          const startY = e.touches ? e.touches[0].clientY : e.clientY;
+          let last = 0;
+          const onMove = (ev) => {
+            const y = ev.touches ? ev.touches[0].clientY : ev.clientY;
+            last = Math.max(0, y - startY);
+            setView(v.k, { dragY: last, dragging: true });
+          };
+          const onUp = () => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', onUp);
+            if (last > 130) setView(v.k, { holdingsExpanded: false, dragY: 0, dragging: false });
+            else setView(v.k, { dragY: 0, dragging: false });
+          };
+          document.addEventListener('mousemove', onMove);
+          document.addEventListener('mouseup', onUp);
+          document.addEventListener('touchmove', onMove, { passive: false });
+          document.addEventListener('touchend', onUp);
+        },
+        holdingsTitle: '내 보유 종목',
+        holdingsCount: '전체보기',
+        holdings: info.holdings.map(h => Object.assign({}, h, {
+          pctStyle: 'font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:' + (h.up ? '#D5327A' : '#2E6BE6')
+        })),
+        holdingsPreview: info.holdings.slice(0, 3).map(h => Object.assign({}, h, {
+          pctStyle: 'font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:' + (h.up ? '#D5327A' : '#2E6BE6')
+        })),
+        menuOpen: !!st.menuOpen,
+        isNotif: screen === 'notif',
+        isOut: screen === 'out',
+        outHint: v.k === 'child' ? '찬영이 계정에서 나왔어요.' : '보호자 계정에서 나왔어요.',
+        settingRows: rows,
+        showRequest: screen === 'home' && v.k !== 'child' && s.requestTarget === v.k && (!s.legalGuardian || s.legalPending),
+        toggleMenu: () => setView(v.k, { menuOpen: !st.menuOpen }),
+        openNotif: () => setView(v.k, { screen: 'notif', menuOpen: false }),
+        logout: () => setView(v.k, { screen: 'out', menuOpen: false }),
+        backHome: () => setView(v.k, { screen: 'home', menuOpen: false }),
+        openConsent: () => this.set({ screen: 'consent', role: 'parent', guardian: v.k, menuOpen: false })
+      });
+    });
+  }
+  legalIsMeNow() {
+    const s = this.state;
+    return (s.legalPick || s.guardian) === s.guardian;
+  }
+  activeCodeKey() {
+    const s = this.state;
+    if (s.screen === 'verify' && s.codeSent) return 'authCode';
+    if (s.screen === 'family' && s.familyMode === 'join') return 'joinCode';
+    if (s.screen === 'childInfo') return 'childCode';
+    return null;
+  }
+  ensureKeyListeners() {
+    if (window.__hkKeyOwner === this) return;
+    if (window.__hkKeyOff) { try { window.__hkKeyOff(); } catch (e) {} }
+    const onKey = (e) => {
+      const key = this.activeCodeKey();
+      if (!key) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const cur = this.state[key] || '';
+      if (/^[0-9]$/.test(e.key)) {
+        if (cur.length < 6) this.set({ [key]: cur + e.key });
+        e.preventDefault();
+      } else if (e.key === 'Backspace') {
+        this.set({ [key]: cur.slice(0, -1) });
+        e.preventDefault();
+      }
+    };
+    const onPaste = (e) => {
+      const key = this.activeCodeKey();
+      if (!key) return;
+      const t = (e.clipboardData && e.clipboardData.getData('text')) || '';
+      const d = t.replace(/\D/g, '').slice(0, 6);
+      if (d) { this.set({ [key]: d }); e.preventDefault(); }
+    };
+    document.addEventListener('keydown', onKey, true);
+    document.addEventListener('paste', onPaste, true);
+    window.__hkKeyOwner = this;
+    window.__hkKeyOff = () => {
+      document.removeEventListener('keydown', onKey, true);
+      document.removeEventListener('paste', onPaste, true);
+      window.__hkKeyOwner = null;
+      window.__hkKeyOff = null;
+    };
+  }
+  keypad(value, key, len, onFull) {
+    const labels = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+    return labels.map(label => ({
+      label,
+      style: label === '' ? 'pointer-events:none' : PAD_KEY,
+      tap: () => {
+        if (label === '') return;
+        if (label === '⌫') { this.set({ [key]: value.slice(0, -1) }); return; }
+        if (value.length >= len) return;
+        const next = value + label;
+        this.set({ [key]: next });
+        if (next.length === len && onFull) setTimeout(onFull, 240);
+      }
+    }));
+  }
+  cells(value, len) {
+    return Array.from({ length: len }, (unused, i) => ({
+      ch: value[i] || '',
+      style: CELL + (i === value.length ? ';box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.4)' : '')
+    }));
+  }
+
+  renderVals() {
+    const s = this.state;
+    const isParent = s.role === 'parent';
+    const legalTaken = !!s.legalGuardian && s.legalGuardian !== s.guardian;
+    this.ensureKeyListeners();
+    const age = Math.max(6, Math.min(17, this.props.childAge ?? 11));
+    const under14 = age < 14;
+    const stepOf = { login: 1, verify: 2, family: 3, consent: 4, childInfo: 2, childWait: 3 };
+    const step = stepOf[s.screen] || 0;
+    const total = isParent ? 4 : 3;
+    const progBars = Array.from({ length: total }, (unused, i) => ({
+      style: 'flex:1;height:5px;border-radius:999px;background:' + (i + 1 <= step ? 'linear-gradient(90deg,#FFA0C6 0%,#EE4A8E 100%)' : '#E4E5EF')
+    }));
+    const terms = this.activeTerms().map(t => {
+      const on = !!s.agree[t.k];
+      return {
+        label: t.label,
+        detail: t.detail,
+        tag: t.req ? '필수' : '선택',
+        tagStyle: 'display:inline-block;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;'
+          + (t.req ? 'color:#D5327A;background:#FDEAF2' : 'color:#8E93A8;background:#EFEFF6'),
+        rowStyle: 'display:flex;align-items:flex-start;gap:11px;border-radius:22px;padding:14px 15px;' + CARD
+          + (on ? ';box-shadow:0 10px 22px rgba(35,25,80,0.09),inset 0 0 0 1.5px rgba(245,50,127,0.28)' : ''),
+        markStyle: this.mark(on),
+        tap: () => this.setState(st => Object.assign({}, st, { agree: Object.assign({}, st.agree, { [t.k]: !st.agree[t.k] }) }))
+      };
+    });
+    const allOn = this.activeTerms().every(t => s.agree[t.k]);
+    const carriers = ['SKT', 'KT', 'LG U+', '알뜰폰'].map(name => ({
+      name,
+      pick: () => this.set({ carrier: name }),
+      style: 'flex:1;text-align:center;padding:11px 0;border-radius:999px;font-size:13.5px;cursor:pointer;'
+        + (s.carrier === name
+          ? 'font-weight:700;color:#fff;background:linear-gradient(180deg,#3E4E86 0%,#01185A 100%);box-shadow:0 7px 13px -5px rgba(1,24,90,0.4)'
+          : 'font-weight:600;color:#5C6280;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -4px rgba(35,25,80,0.14),inset 0 1.5px 1px rgba(255,255,255,1)')
+    }));
+    const segCard = on => 'flex:1;text-align:center;border-radius:24px;padding:17px 12px;cursor:pointer;' + CARD
+      + (on ? ';box-shadow:0 12px 26px rgba(214,54,124,0.16),inset 0 0 0 2px rgba(245,50,127,0.5),inset 0 2px 1px rgba(255,255,255,1)' : '');
+    const segPill = (on) => 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;cursor:pointer;'
+      + (on
+        ? 'font-weight:800;color:#fff;background:linear-gradient(180deg,#3E4E86 0%,#01185A 100%);box-shadow:0 7px 13px -5px rgba(1,24,90,0.4)'
+        : 'font-weight:600;color:#5C6280;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -4px rgba(35,25,80,0.14),inset 0 1.5px 1px rgba(255,255,255,1)');
+    const waitSteps = [
+      { label: '요청 보냈어요', detail: '찬영 ' + (this.state.requestTarget === 'dad' ? '아빠' : '엄마') + ' 계정에 알림이 갔어요', done: true },
+      { label: '부모님이 확인하는 중', detail: '부모님 앱에서 동의 항목을 읽고 있어요', done: false, active: true },
+      { label: '시작하기', detail: '동의가 끝나면 바로 열려요', done: false }
+    ].map(w => ({
+      label: w.label,
+      detail: w.detail,
+      mark: w.done ? '✓' : '',
+      dotStyle: 'flex:none;width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;'
+        + (w.done
+          ? 'background:linear-gradient(180deg,#3FC79A 0%,#0F8A68 100%);box-shadow:0 5px 9px -4px rgba(15,138,104,0.5)'
+          : w.active
+            ? 'background:linear-gradient(180deg,#FFA0C6 0%,#EE4A8E 100%);box-shadow:0 5px 9px -4px rgba(214,54,124,0.5)'
+            : 'background:#DFE0EC'),
+      labelStyle: 'font-size:15px;font-weight:' + (w.active ? '800' : '700') + ';color:' + (w.done || w.active ? '#01185A' : '#A9AEC4')
+    }));
+
+    return {
+      isSplash: s.screen === 'splash',
+      isLogin: s.screen === 'login',
+      isVerify: s.screen === 'verify',
+      isFamily: s.screen === 'family',
+      isConsent: s.screen === 'consent',
+      isParentDone: s.screen === 'parentDone',
+      isChildInfo: s.screen === 'childInfo',
+      isChildWait: s.screen === 'childWait',
+      isChildDone: s.screen === 'childDone',
+      isHome: s.screen === 'home',
+      showGuest: this.props.guestPreview ?? true,
+
+      startParent: () => this.set({ screen: 'login', role: 'parent', mode: 'signup' }),
+      startChild: () => this.set({ screen: 'login', role: 'child', mode: 'signup' }),
+      startSignin: () => this.set({ screen: 'login', role: 'parent', mode: 'signin' }),
+      goSplash: () => this.set({ screen: 'splash', agree: {}, codeSent: false, joinCode: '', childCode: '' }),
+      logout: () => this.set({ screen: 'splash', agree: {}, codeSent: false, authCode: '', joinCode: '', childCode: '', inviteOpen: false, legalPick: null, menuOpen: false }),
+      resetAll: () => this.set({
+        screen: 'splash', role: 'parent', mode: 'signup', agree: {}, codeSent: false, authCode: '',
+        familyMode: 'create', joinCode: '', childCode: '', guardian: 'mom', joined: {},
+        legalGuardian: null, legalPick: null, legalPending: false, inviteOpen: false, resendCount: 0
+      }),
+      backToLogin: () => this.go('login'),
+      goVerify: () => this.go('verify'),
+      goFamily: () => this.go('family'),
+      goChildInfo: () => this.go('childInfo'),
+      enterHome: () => this.go('home'),
+
+      backBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:radial-gradient(ellipse 66% 56% at 50% -6%,rgba(255,255,255,0.98) 0%,rgba(255,255,255,0.5) 44%,rgba(255,255,255,0) 86%),linear-gradient(180deg,#FCFCFE 0%,#F4F5FB 36%,#EBEDF7 70%,#E2E5F1 100%);box-shadow:0 9px 15px -5px rgba(35,25,80,0.2),inset 0 -12px 18px -9px rgba(255,255,255,0.9),inset 0 2px 3px rgba(255,255,255,1)',
+      stepPillStyle: 'min-width:58px;text-align:center;border-radius:999px;padding:8px 12px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#A9AEC4;background:linear-gradient(180deg,#FCFCFE 0%,#F5F6FB 36%,#ECEEF8 70%,#E4E6F2 100%);box-shadow:0 8px 13px -5px rgba(35,25,80,0.18),inset 0 1.5px 2px rgba(255,255,255,1)',
+      progBars,
+      onCta: CTA_ON,
+
+      loginTitle: s.mode === 'signin' ? '로그인' : (isParent ? '보호자 계정 만들기' : '아이 계정 만들기'),
+      stepText: s.mode === 'signin' ? '로그인' : '1 / ' + total,
+      loginVerb: s.mode === 'signin' ? '로그인' : '가입하고 계속하기',
+      isSignup: s.mode === 'signup',
+      isSignin: s.mode === 'signin',
+      credTitle: s.mode === 'signin' ? '아이디로 로그인' : '아이디·비밀번호 만들기',
+      credId: isParent ? (s.guardian === 'dad' ? 'chanyoung_dad' : 'chanyoung_mom') : 'chanyoung',
+      showGuardianPick: isParent,
+      pickParentRole: () => this.set({ role: 'parent' }),
+      pickChildRole: () => this.set({ role: 'child' }),
+      roleParentStyle: 'flex:1;text-align:center;padding:12px 8px;border-radius:14px;font-size:13.5px;line-height:1.35;cursor:pointer;'
+        + (isParent
+          ? 'font-weight:800;color:#fff;background:linear-gradient(180deg,#3E4E86 0%,#01185A 100%);box-shadow:0 7px 13px -5px rgba(1,24,90,0.4)'
+          : 'font-weight:600;color:#5C6280;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -4px rgba(35,25,80,0.14),inset 0 1.5px 1px rgba(255,255,255,1)'),
+      roleChildStyle: 'flex:1;text-align:center;padding:12px 8px;border-radius:14px;font-size:13.5px;line-height:1.35;cursor:pointer;'
+        + (!isParent
+          ? 'font-weight:800;color:#fff;background:linear-gradient(180deg,#3E4E86 0%,#01185A 100%);box-shadow:0 7px 13px -5px rgba(1,24,90,0.4)'
+          : 'font-weight:600;color:#5C6280;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 5px 10px -4px rgba(35,25,80,0.14),inset 0 1.5px 1px rgba(255,255,255,1)'),
+      familyCode: '742 913',
+      loginHeadline: s.mode === 'signin'
+        ? '내 계정으로 로그인해요'
+        : (isParent ? '보호자 계정은 각자 하나씩이에요' : '아이 계정도 아이 것이에요'),
+      loginBody: s.mode === 'signin'
+        ? '찬영 엄마·아빠·찬영이가 각각 자기 계정으로 들어와요. 한 기기에서 계정을 바꿔 쓰지 않아요.'
+        : (isParent
+          ? '엄마와 아빠는 서로 다른 계정을 만들어요. 가입 뒤에 본인확인을 하고, 아이 요청에 법정대리인으로 동의하게 돼요.'
+          : '아이 이름으로 계정을 만들어요. 만 14세 미만이면 시작하기 전에 부모님 동의가 필요해요.'),
+      loginFootnote: isParent
+        ? '로그인 정보는 계정 확인 목적으로만 이용해요.'
+        : '아이 계정은 부모님 동의가 끝날 때까지 기록을 저장하지 않아요.',
+      loginNext: () => {
+        if (s.mode === 'signin') { this.go('home'); return; }
+        this.go(isParent ? 'verify' : 'childInfo');
+      },
+
+      carriers,
+      codeSent: s.codeSent,
+      codeCells: this.cells(s.authCode, 6),
+      authPad: this.keypad(s.authCode, 'authCode', 6),
+      sendCode: () => this.set({ codeSent: true, authCode: '' }),
+      sendCodeLabel: s.codeSent ? '인증번호를 다시 받기' : '인증번호 받기',
+      sendCodeStyle: 'margin-top:12px;text-align:center;border-radius:16px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;'
+        + (s.codeSent
+          ? 'color:#8E93A8;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:inset 0 0 0 1.5px #E4E5EF'
+          : 'color:#fff;background:linear-gradient(180deg,#3E4E86 0%,#01185A 100%);box-shadow:0 9px 16px -6px rgba(1,24,90,0.42),inset 0 1.5px 1px rgba(255,255,255,0.3)'),
+      verifyCtaStyle: s.authCode === '123456' ? CTA_ON : CTA_OFF,
+      verifyCtaLabel: !s.codeSent
+        ? '인증번호를 먼저 받아 주세요'
+        : s.authCode.length < 6
+          ? '인증번호 6자리를 입력해 주세요'
+          : s.authCode === '123456' ? '확인했어요' : '인증번호가 맞지 않아요',
+      verifyNext: () => { if (s.authCode === '123456') this.go('family'); },
+
+      isCreate: s.familyMode === 'create',
+      isJoin: s.familyMode === 'join',
+      pickCreate: () => this.set({ familyMode: 'create' }),
+      pickJoin: () => this.set({ familyMode: 'join' }),
+      createStyle: segCard(s.familyMode === 'create'),
+      joinStyle: segCard(s.familyMode === 'join'),
+      joinLookupDone: s.joinCode.length === 6,
+      joinFound: s.joinCode === '742913',
+      joinLookupLabel: s.joinCode === '742913' ? '이 가족에 참여할까요?' : '코드를 다시 확인해 주세요',
+      joinLookupAccent: s.joinCode === '742913' ? '#0F8A68' : '#D5327A',
+      joinFamilyEmoji: s.joinCode === '742913' ? '🏡' : '❓',
+      joinFamilyName: s.joinCode === '742913' ? '이서연 가족 (찬영이네)' : '가족을 찾을 수 없어요',
+      joinFamilyMembers: s.joinCode === '742913'
+        ? '보호자 이서연 · 아이 찬영 · 시즌 3 참여 중'
+        : '먼저 가입한 보호자에게 코드 6자리를 다시 받아요.',
+      joinLookupStyle: 'border-radius:20px;padding:14px 15px;margin-top:12px;'
+        + (s.joinCode === '742913'
+          ? 'background:linear-gradient(157deg,#F1FAF6 0%,#E4F4EC 100%);box-shadow:inset 0 0 0 1.5px rgba(15,138,104,0.22)'
+          : 'background:linear-gradient(157deg,#FFF3F7 0%,#FDE6EF 100%);box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)'),
+      joinCells: this.cells(s.joinCode, 6),
+      joinPad: this.keypad(s.joinCode, 'joinCode', 6),
+      familyCtaStyle: (s.familyMode === 'create' || s.joinCode === '742913') ? CTA_ON : CTA_OFF,
+      familyCtaLabel: s.familyMode === 'create'
+        ? '다음'
+        : (s.joinCode === '742913'
+          ? '이서연 가족에 참여하기'
+          : (s.joinCode.length === 6 ? '코드를 다시 확인해 주세요' : '코드 6자리를 입력해 주세요')),
+      familyNext: () => { if (s.familyMode === 'create' || s.joinCode === '742913') this.go('consent'); },
+
+      pickMom: () => this.set({ guardian: 'mom' }),
+      pickDad: () => this.set({ guardian: 'dad' }),
+      momStyle: segPill(s.guardian !== 'dad'),
+      dadStyle: segPill(s.guardian === 'dad'),
+      guardianName: s.guardian === 'dad' ? '김도현 (찬영 아빠)' : '이서연 (찬영 엄마)',
+      guardianBirth: s.guardian === 'dad' ? '1986.11.03' : '1988.04.12',
+      doneTitle: legalTaken
+        ? '찬영이 가족에 참여했어요'
+        : s.legalPending
+        ? (s.legalGuardian === 'dad' ? '아빠' : '엄마') + '에게 동의 요청을 보냈어요'
+        : '찬영이의 법정대리인 등록 완료',
+      doneBody: legalTaken
+        ? '법정대리인은 ' + (s.legalGuardian === 'dad' ? '아빠' : '엄마') + '예요.\n나는 보호자로 찬영이 리그를 함께 봐요.'
+        : s.legalPending
+        ? (s.legalGuardian === 'dad' ? '아빠' : '엄마') + ' 계정에서 동의를 마치면 찬영이 계정이 시작돼요.\n나는 가족 구성원(보호자)으로 함께 봐요.'
+        : '찬영이 기기에 시작 알림을 보냈어요.\n이제 각자 계정에서 리그를 함께 봐요.',
+      members: [
+        { k: 'mom', emoji: '🧑‍🍳', base: '찬영 엄마' },
+        { k: 'dad', emoji: '🧑‍🔧', base: '찬영 아빠' },
+        { k: 'child', emoji: '🐮', base: '찬영' }
+      ].map(m => {
+        const isLegal = m.k === s.legalGuardian;
+        const joined = m.k === 'child' ? !s.legalPending : (!!(s.joined || {})[m.k] || isLegal);
+        const me = m.k === s.guardian;
+        return {
+          emoji: m.emoji,
+          label: m.base + (me ? ' (나)' : ''),
+          tag: m.k === 'child'
+            ? (s.legalPending ? '동의 대기' : '동의 완료')
+            : (isLegal
+              ? (s.legalPending ? '법정대리인 · 동의 대기' : '법정대리인')
+              : ((s.joined || {})[m.k] ? '보호자' : '초대 대기')),
+          nameStyle: 'flex:1;font-size:14.5px;font-weight:700;color:' + (joined ? '#01185A' : '#8E93A8'),
+          tagStyle: 'font-size:12.5px;font-weight:700;white-space:nowrap;color:'
+            + (isLegal && s.legalPending ? '#D5327A' : (joined ? '#0F8A68' : '#A9AEC4'))
+        };
+      }),
+      canInvite: !((s.joined || {}).mom && (s.joined || {}).dad),
+      meLabel: s.guardian === 'dad' ? '찬영 아빠 (나)' : '찬영 엄마 (나)',
+      otherLabel: s.guardian === 'dad' ? '찬영 엄마' : '찬영 아빠',
+      inviteSubtitle: s.guardian === 'dad'
+        ? '엄마도 자기 계정으로 가입한 뒤 같은 코드로 참여해요'
+        : '아빠도 자기 계정으로 가입한 뒤 같은 코드로 참여해요',
+
+      copyBtnLabel: s.codeCopied ? '복사됐어요 ✓' : '코드 복사',
+      copyBtnStyle: 'margin-top:15px;text-align:center;border-radius:14px;padding:13px;font-size:14.5px;font-weight:800;cursor:pointer;'
+        + (s.codeCopied
+          ? 'color:#D5327A;background:#fff;box-shadow:0 5px 10px -4px rgba(120,40,80,0.2),inset 0 0 0 1.5px rgba(245,50,127,0.35)'
+          : 'color:#01185A;background:rgba(255,255,255,0.85);box-shadow:0 5px 10px -4px rgba(120,40,80,0.2)'),
+      copyCode: () => this.copy('742913', 'codeCopied'),
+
+      inviteOpen: s.inviteOpen,
+      inviteChevron: s.inviteOpen ? '⌄' : '›',
+      toggleInvite: () => this.set({ inviteOpen: !s.inviteOpen }),
+      copyInvite: () => this.copy('742913', 'inviteCopied'),
+      inviteCopyLabel: s.inviteCopied ? '가족 코드 복사됐어요 ✓' : '가족 코드 복사하기',
+      shareKakao: () => this.copy('영웅키움 가족 모의투자 가족 코드 742913 — [기존 가족에 참여]에서 입력해 주세요.', 'kakaoSent'),
+      kakaoLabel: s.kakaoSent ? '카카오톡 공유 시트를 열었어요' : '카카오톡으로 가족 코드 보내기',
+      inviteHint: s.kakaoSent
+        ? '공유 메시지에 가족 코드 742 913이 담겨요.'
+        : '받은 보호자가 [기존 가족에 참여]에서 이 코드 6자리를 넣으면 연결돼요.',
+
+      pasteJoin: async () => {
+        let t = '';
+        try { t = await navigator.clipboard.readText(); } catch (e) {}
+        if (!t) { try { t = localStorage.getItem('heroKiwoom.clip') || ''; } catch (e) {} }
+        const d = (t || '').replace(/\D/g, '').slice(0, 6);
+        if (d) this.set({ joinCode: d, joinPasted: true });
+        else this.set({ joinPasteFail: true });
+        setTimeout(() => this.set({ joinPasted: false, joinPasteFail: false }), 1800);
+      },
+      pasteBtnLabel: s.joinPasted ? '붙여넣었어요 ✓' : (s.joinPasteFail ? '복사된 코드가 없어요' : '복사한 코드 붙여넣기'),
+      pasteBtnStyle: 'margin-top:12px;text-align:center;border-radius:14px;padding:12px;font-size:13.5px;font-weight:800;cursor:pointer;'
+        + (s.joinPasted
+          ? 'color:#D5327A;background:#FFF3F7;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.3)'
+          : 'color:#01185A;background:#F3F3FA;box-shadow:inset 0 1px 3px rgba(70,60,120,0.08)'),
+
+      childBirthText: (2026 - age) + '.06.14',
+      ageBadgeText: under14 ? '만 ' + age + '세 · 법정대리인 동의 대상이에요' : '만 ' + age + '세 · 본인 동의로 가입해요',
+      ageBadgeStyle: 'display:flex;align-items:center;gap:8px;border-radius:16px;padding:12px 14px;margin-top:12px;font-size:13.5px;font-weight:700;line-height:1.5;'
+        + (under14
+          ? 'color:#D5327A;background:linear-gradient(157deg,#FFF3F7 0%,#FDE6EF 100%);box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)'
+          : 'color:#0F8A68;background:linear-gradient(157deg,#F1FAF6 0%,#E4F4EC 100%);box-shadow:inset 0 0 0 1.5px rgba(15,138,104,0.25)'),
+
+      terms,
+      toggleAll: () => this.setState(st => {
+        const next = {};
+        if (!this.activeTerms().every(t => st.agree[t.k])) this.activeTerms().forEach(t => { next[t.k] = true; });
+        return Object.assign({}, st, { agree: next });
+      }),
+      allBoxStyle: 'display:flex;align-items:center;gap:12px;border-radius:24px;padding:17px 18px;cursor:pointer;' + CARD
+        + (allOn ? ';box-shadow:0 12px 26px rgba(214,54,124,0.16),inset 0 0 0 2px rgba(245,50,127,0.5),inset 0 2px 1px rgba(255,255,255,1)' : ''),
+      allMarkStyle: this.mark(allOn),
+      consentCtaStyle: (legalTaken || !this.legalIsMeNow() || this.requiredOk()) ? CTA_ON : CTA_OFF,
+      consentCtaLabel: legalTaken
+        ? '확인'
+        : !this.legalIsMeNow()
+        ? (s.legalPick === 'dad' ? '아빠' : '엄마') + '에게 동의 요청 보내기'
+        : (this.requiredOk() ? '찬영이의 법정대리인으로 동의합니다' : '필수 항목에 동의해 주세요'),
+      legalTakenFlag: legalTaken,
+      pickLegalMom: () => this.set({ legalPick: 'mom' }),
+      pickLegalDad: () => this.set({ legalPick: 'dad' }),
+      legalMomStyle: segPill((s.legalPick || s.guardian) === 'mom'),
+      legalDadStyle: segPill((s.legalPick || s.guardian) === 'dad'),
+      legalAlready: legalTaken,
+      legalPickable: !legalTaken,
+      legalIsMe: !legalTaken && (s.legalPick || s.guardian) === s.guardian,
+      legalIsOther: !legalTaken && (s.legalPick || s.guardian) !== s.guardian,
+      legalAlreadyTitle: (s.legalGuardian === 'dad' ? '아빠' : '엄마') + '로 법정대리인이 설정되어 있어요',
+      legalAlreadyBody: s.legalPending
+        ? (s.legalGuardian === 'dad' ? '아빠' : '엄마') + ' 계정에서 동의가 진행 중이에요. 따로 요청할 필요 없어요. 나는 가족 구성원(보호자)으로 함께 봐요.'
+        : '법정대리인 동의는 이미 끝났어요. 따로 동의할 필요 없어요. 나는 가족 구성원(보호자)으로 함께 봐요.',
+      consentIntro: legalTaken
+        ? '법정대리인은 이미 등록돼 있어요. 확인만 하면 가족에 참여해요.'
+        : (s.legalPick || s.guardian) === s.guardian
+        ? '이 아이의 법정대리인이 맞나요? 맞다면 아래 항목에 동의해 주세요.'
+        : '법정대리인을 다른 보호자로 지정했어요. 그 보호자 계정에서 동의를 완료해야 아이 계정이 시작돼요.',
+      legalOtherTitle: (s.legalPick === 'dad' ? '아빠' : '엄마') + '가 법정대리인으로 동의해요',
+      legalOtherBody: (s.legalPick === 'dad' ? '아빠' : '엄마')
+        + ' 계정에 동의 요청 알림을 보내요. 그 계정으로 로그인해 동의 항목을 확인하면 찬영이 계정이 시작돼요. 나는 가족 구성원(보호자)으로 함께 봐요.',
+
+      consentNext: () => {
+        if (legalTaken) {
+          this.set({ joined: Object.assign({}, s.joined, { [s.guardian]: true }), screen: 'parentDone' });
+          return;
+        }
+        if (!this.legalIsMeNow()) {
+          this.set({
+            joined: Object.assign({}, s.joined, { [s.guardian]: true }),
+            legalGuardian: s.legalPick,
+            legalPending: true,
+            screen: 'parentDone'
+          });
+          return;
+        }
+        if (!this.requiredOk()) return;
+        this.set({
+          joined: Object.assign({}, s.joined, { [s.guardian]: true }),
+          legalGuardian: s.guardian,
+          legalPending: false,
+          screen: 'parentDone'
+        });
+      },
+
+      pasteChild: async () => {
+        let t = '';
+        try { t = await navigator.clipboard.readText(); } catch (e) {}
+        if (!t) { try { t = localStorage.getItem('heroKiwoom.clip') || ''; } catch (e) {} }
+        const d = (t || '').replace(/\D/g, '').slice(0, 6);
+        if (d) this.set({ childCode: d, childPasted: true });
+        else this.set({ childPasteFail: true });
+        setTimeout(() => this.set({ childPasted: false, childPasteFail: false }), 1800);
+      },
+      pasteChildBtnLabel: s.childPasted ? '붙여넣었어요 ✓' : (s.childPasteFail ? '복사된 코드가 없어요' : '복사한 코드 붙여넣기'),
+      pasteChildBtnStyle: 'margin-top:12px;text-align:center;border-radius:14px;padding:12px;font-size:13.5px;font-weight:800;cursor:pointer;'
+        + (s.childPasted
+          ? 'color:#D5327A;background:#FFF3F7;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.3)'
+          : 'color:#01185A;background:#F3F3FA;box-shadow:inset 0 1px 3px rgba(70,60,120,0.08)'),
+
+      codeInputCells: this.cells(s.childCode, 6),
+      childCodePad: this.keypad(s.childCode, 'childCode', 6),
+      childCodeFilled: s.childCode.length === 6,
+      askMom: () => this.set({ requestTarget: 'mom' }),
+      askDad: () => this.set({ requestTarget: 'dad' }),
+      askMomStyle: segPill(s.requestTarget === 'mom'),
+      askDadStyle: segPill(s.requestTarget === 'dad'),
+      childInfoCtaStyle: s.childCode.length === 6 ? CTA_ON : CTA_OFF,
+      childInfoCtaLabel: s.childCode.length === 6
+        ? (s.requestTarget === 'dad' ? '아빠' : '엄마') + '에게 동의 요청 보내기'
+        : '가족 코드 6자리를 입력해 주세요',
+      childInfoNext: () => { if (s.childCode.length === 6) this.go('childWait'); },
+
+      waitSteps,
+      resend: () => {
+        if (s.resendCount >= 3) return;
+        this.set({ resendCount: (s.resendCount || 0) + 1, resendSent: true });
+        clearTimeout(this._tResend);
+        this._tResend = setTimeout(() => this.set({ resendSent: false }), 2200);
+      },
+      resendLabel: s.resendSent
+        ? '다시 보냈어요 ✓ (오늘 ' + s.resendCount + '/3회)'
+        : (s.resendCount >= 3 ? '오늘 재요청 3회를 모두 썼어요' : '요청 다시 보내기'),
+      resendStyle: 'text-align:center;border-radius:999px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;'
+        + (s.resendSent
+          ? 'color:#D5327A;background:#FFF3F7;box-shadow:0 8px 15px -6px rgba(180,40,110,0.22),inset 0 0 0 1.5px rgba(245,50,127,0.32)'
+          : s.resendCount >= 3
+            ? 'color:#A9AEC4;cursor:not-allowed;background:#F3F3FA;box-shadow:inset 0 1px 3px rgba(70,60,120,0.08)'
+            : 'color:#01185A;background:linear-gradient(180deg,#FCFCFE 0%,#F1F2F9 100%);box-shadow:0 8px 15px -6px rgba(35,25,80,0.2),inset 0 1.5px 1px rgba(255,255,255,1)'),
+      approve: () => this.go('childDone'),
+
+      homeGreeting: isParent
+        ? (s.guardian === 'dad' ? '찬영 아버님, 어서 오세요' : '찬영 어머님, 어서 오세요')
+        : '찬영아, 어서 와요!',
+      isParent,
+      isChildRole: !isParent,
+      homeViews: this.buildViews(),
+      showConsentRequest: isParent && s.guardian === s.requestTarget && (!s.legalGuardian || s.legalPending),
+      openConsent: () => this.set({ screen: 'consent' }),
+      homeSeason: isParent ? '보호자 계정 · 시즌 3' : '아이 계정 · 시즌 3',
+      homeBalanceLabel: isParent ? '찬영이 모의투자 평가금액' : '내 평가금액',
+      homePrimaryAction: isParent ? '아이 계정 관리' : '주식 둘러보기',
+      homeNotice: isParent
+        ? '평일 09:00~16:00에는 아이 주문이 쉬어요. [설정 → 아이 계정 관리]에서 바꿀 수 있어요.'
+        : '평일 09:00~16:00에는 주문을 쉬어요. 구경하고 배우는 건 언제든 할 수 있어요.',
+      leagueRows: [
+        { rank: 1, emoji: '🐮', name: '찬영', pct: '+4.28%', up: true },
+        { rank: 2, emoji: '🧑‍🍳', name: '찬영 엄마', pct: '+2.11%', up: true },
+        { rank: 3, emoji: '🧑‍🔧', name: '찬영 아빠', pct: '-0.64%', up: false }
+      ].map(r => ({
+        rank: r.rank, emoji: r.emoji, name: r.name, pct: r.pct,
+        rowStyle: 'display:flex;align-items:center;gap:10px;border-radius:16px;padding:11px 13px;'
+          + (r.rank === 1
+            ? 'background:linear-gradient(157deg,#FFFDF6 0%,#FFF3D8 100%);box-shadow:inset 0 0 0 1.5px rgba(230,170,30,0.28)'
+            : 'background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%);box-shadow:inset 0 2px 4px rgba(70,60,120,0.08)'),
+        pctStyle: 'flex:none;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:' + (r.up ? '#D5327A' : '#2E6BE6')
+      })),
+      homeTiles: isParent
+        ? [
+            { emoji: '📊', title: '학습 리포트', desc: '이번 주 찬영이가 배운 것' },
+            { emoji: '🛡️', title: '한도·시간 설정', desc: '주문 한도와 쉬는 시간' }
+          ]
+        : [
+            { emoji: '🎯', title: '오늘의 퀘스트', desc: '3개 중 1개 완료' },
+            { emoji: '📚', title: '주식 배우기', desc: '3분 카드로 배워요' }
+          ],
+      homeTabs: [
+        { emoji: '🏠', label: '홈', on: true, dot: false },
+        { emoji: '🏆', label: '리그', on: false, dot: false },
+        { emoji: '🔔', label: '내 활동', on: false, dot: true },
+        { emoji: '⋯', label: '더 보기', on: false, dot: false }
+      ].map(t => ({
+        emoji: t.emoji, label: t.label, tap: () => {},
+        style: 'flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0 2px;cursor:pointer;'
+          + (t.on ? 'color:#5B23D6' : 'color:#A9AEC4'),
+        labelStyle: 'font-size:11px;font-weight:' + (t.on ? '800' : '600') + ';color:' + (t.on ? '#01185A' : '#A9AEC4'),
+        dotStyle: t.dot
+          ? 'position:absolute;right:-3px;top:-1px;width:7px;height:7px;border-radius:999px;background:#F5327F'
+          : 'display:none'
+      })),
+      isMomAcct: isParent && s.guardian !== 'dad',
+      isDadAcct: isParent && s.guardian === 'dad',
+      isSettings: s.screen === 'settings',
+      menuOpen: s.menuOpen,
+      toggleMenu: () => this.set({ menuOpen: !s.menuOpen }),
+      openSettings: () => this.set({ screen: 'settings', menuOpen: false }),
+      settingRows: [
+        { k: 'pushOn', label: '푸시 알림', desc: '앱 알림을 받아요' },
+        { k: 'consentAlarmOn', label: '동의 요청 알림', desc: '아이가 동의를 요청하면 알려줘요' },
+        { k: 'leagueAlarmOn', label: '리그 소식 알림', desc: '순위 변동과 시즌 안내' }
+      ].map((r, i) => {
+        const on = s[r.k] !== false;
+        return {
+          label: r.label, desc: r.desc,
+          tap: () => this.set({ [r.k]: !on }),
+          rowStyle: 'display:flex;align-items:center;gap:12px;padding:15px 0;cursor:pointer;'
+            + (i === 0 ? '' : 'border-top:1px solid #F1F1F7'),
+          switchStyle: 'flex:none;width:48px;height:28px;border-radius:999px;padding:3px;display:flex;'
+            + (on
+              ? 'justify-content:flex-end;background:linear-gradient(180deg,#F663A1 0%,#EE4A8E 100%)'
+              : 'justify-content:flex-start;background:#E4E5EF'),
+          knobStyle: 'width:22px;height:22px;border-radius:999px;background:#fff;box-shadow:0 2px 4px rgba(35,25,80,0.25)'
+        };
+      })
+    };
+  }
+}
+
+</script>
+</body>
+</html>
