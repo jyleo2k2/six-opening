@@ -63,7 +63,7 @@
     if (saved && saved.acc) {
       const migratedAcc = {};
       Object.keys(saved.acc).forEach(key => { migratedAcc[key] = migrateLegacyAccount(saved.acc[key], saved.sellRecords || []); });
-      restored = { acc:migratedAcc, records:saved.records || [], sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq, watchlist:saved.watchlist || [] };
+      restored = { acc:migratedAcc, records:saved.records || [], sellRecords:saved.sellRecords || [], events:saved.events || [], seq:saved.seq, watchlist:saved.watchlist || [] };
     }
     this.setState(s => Object.assign({}, s, restored || {}, { reasonOrder: order }), () => { this.notifyChatContext(); this.processScheduledOrders(); });
     this.liveRefreshTimer = null;

@@ -771,12 +771,6 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="font-size:24px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;white-space:pre-line;text-wrap:pretty">{{ sellDoneHeadline }}</div>
 <div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ sellDoneNote }}</div>
 
-<sc-if value="{{ hasBadge }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:11px;background:#FFF8E4;border-radius:20px;padding:13px 16px;margin-top:16px;width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)">
-<span style="font-size:14.5px;font-weight:700;color:#8A6B1F;line-height:1.5">계획 실천 배지를 받았어!</span>
-</div>
-</sc-if>
-
 <div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:20px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneStock }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneQty }}</span></div>
 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneMoneyLabel }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneProceeds }}</span></div>
@@ -1982,7 +1976,7 @@ class Component extends DCLogic {
     sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0,
     orderDone: null, sellDone: null, watchlist: [], stockQuery: '',
     draft: this.blankDraft(),
-    records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
+    records: [], events: [], sellRecords: [], seq: 1, tf: 'daily', chartType: 'line',
     closes: {},
     sellStep: 1, arcTab: 'report', sellPick: 'all',
     arcLikes: {}, arcCmts: {}, arcCmtOpen: {}, arcCmtDraft: {},
@@ -2138,7 +2132,7 @@ class Component extends DCLogic {
     if (saved && saved.acc) {
       const migratedAcc = {};
       Object.keys(saved.acc).forEach(key => { migratedAcc[key] = migrateLegacyAccount(saved.acc[key], saved.sellRecords || []); });
-      restored = { acc:migratedAcc, records:saved.records || [], sellRecords:saved.sellRecords || [], events:saved.events || [], badges:saved.badges || 0, seq:saved.seq, watchlist:saved.watchlist || [] };
+      restored = { acc:migratedAcc, records:saved.records || [], sellRecords:saved.sellRecords || [], events:saved.events || [], seq:saved.seq, watchlist:saved.watchlist || [] };
     }
     this.setState(s => Object.assign({}, s, restored || {}, { reasonOrder: order }), () => { this.notifyChatContext(); this.processScheduledOrders(); });
     this.liveRefreshTimer = null;
@@ -2500,7 +2494,7 @@ class Component extends DCLogic {
   }
 
   persist(next){
-    try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], badges: next.badges || 0, seq: next.seq, watchlist: next.watchlist || [] })); } catch(e){}
+    try { localStorage.setItem('kw_proto_v1', JSON.stringify({ acc: next.acc, records: next.records, sellRecords: next.sellRecords || [], events: next.events || [], seq: next.seq, watchlist: next.watchlist || [] })); } catch(e){}
   }
   set(patch){ this.setState(s => { const n = Object.assign({}, s, patch); this.persist(n); return n; }); }
   setDraft(patch){ this.setState(s => Object.assign({}, s, { draft: Object.assign({}, s.draft, patch) })); }
@@ -3940,7 +3934,6 @@ class Component extends DCLogic {
       secModalPctStyle: arc.secModalPctStyle, secModalRows: arc.secModalRows,
       pnlPctText: (pnl >= 0 ? '+' : '') + (pnl / SEED * 100).toFixed(2) + '%',
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      badgeCount: s.badges || 0,
       sellCount: (s.sellRecords || []).length,
       memoRecordCount: s.records.filter(r => r.memo).length + (s.sellRecords || []).filter(r => r.memo).length,
       detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened').length,
@@ -4078,7 +4071,6 @@ class Component extends DCLogic {
       })) : [],
 
       planMatched: showJudge && planMatch === true, planChanged: showJudge && planMatch === false,
-      hasBadgeNow: showJudge && planMatch === true,
       changeQuestion: buyRec ? ('처음에는 ' + ((PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).short || '') + ' 가지려고 했었네. 무엇이 달라졌어?') : '무엇이 달라졌어?',
       changeBtns: CHANGES.map(c => ({
         label: c.label,
@@ -4110,7 +4102,6 @@ class Component extends DCLogic {
       sellDoneQty: sdQty,
       sellDoneMoneyLabel: sd.limit || sd.scheduled ? '예상 금액' : '받은 돈',
       sellDoneProceeds: won(sd.proceeds || 0),
-      hasBadge: !!sd.badge,
       sellMemo: s.sellDraft.memo, sellMemoCount: s.sellDraft.memo.length,
       sellMemoInput: e => { const v = e.target.value.slice(0, 50); this.setSell({ memo: v, memoSaved: false }); },
       sellMemoBtnLabel: s.sellDraft.memoSaved ? '저장됐어 ✓' : '저장하기',
@@ -4172,7 +4163,6 @@ class Component extends DCLogic {
           sell_reason_code: s.sellDraft.reason,
           plan_match: planMatch,
           change_reason_code: (showJudge && planMatch === false) ? s.sellDraft.change : null,
-          badge_awarded: showJudge && planMatch === true,
           retro_card_viewed_ms: this.retroMs || 0,
           pnl_pct_at_sell: Math.round(heldPct * 10) / 10,
           held_days: heldDays, avg: heldAvg, memo: null, ts: new Date().toISOString()
@@ -4183,10 +4173,9 @@ class Component extends DCLogic {
         };
         this.set({
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
-          badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, sellStep: 3,
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
-          sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null, badge: showJudge && planMatch === true }
+          sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null }
         });
         if (isLimit || isScheduled) return;
         this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, null);
@@ -4282,7 +4271,7 @@ class Component extends DCLogic {
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();
-        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft() , watchlist: [] });
+        this.set({ acc: fresh, records: [], events: [], sellRecords: [], seq: 1, screen:'home', draft: this.blankDraft() , watchlist: [] });
       }
     };
   }
