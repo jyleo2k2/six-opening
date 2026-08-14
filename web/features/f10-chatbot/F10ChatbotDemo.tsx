@@ -164,10 +164,10 @@ const COPY = {
   openChat: "\ud0a4\uc6c5\uc774 \ucc57\ubd07 \uc5f4\uae30",
   close: "\ub2eb\uae30",
   greeting:
-    "\uc548\ub155, \ub098\ub294 \ud0a4\uc6c5\uc774\uc57c. \ud22c\uc790 \uae30\ucd08\uc640 \ud654\uba74 \uc0ac\uc6a9\ubc95\uc744 \ud568\uaed8 \ubcfc \uc218 \uc788\uc5b4.",
+    "\uc548\ub155\ud558\uc138\uc694, \uc800\ub294 \ud0a4\uc6c5\uc774\uc608\uc694. \ud22c\uc790 \uae30\ucd08\uc640 \ud654\uba74 \uc0ac\uc6a9\ubc95\uc744 \ud568\uaed8 \uc0b4\ud3b4\ubcfc \uc218 \uc788\uc5b4\uc694.",
   recommended: "\ucd94\ucc9c \uc9c8\ubb38",
   status: "\ucc98\ub9ac \uc0c1\ud0dc",
-  input: "\uad81\uae08\ud55c \uac83\uc744 \uc785\ub825\ud574 \uc918",
+  input: "\uad81\uae08\ud55c \uac83\uc744 \uc785\ub825\ud574 \uc8fc\uc138\uc694",
   send: "\ubcf4\ub0b4\uae30",
   relatedScreen: "관련 화면 보기",
   openArchive: "아카이브에서 보기",
@@ -721,7 +721,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     clearStoredMessages();
     setMessages([]);
     setInput("");
-    setStatus("질문을 기다리고 있어");
+    setStatus("질문을 기다리고 있어요");
     setExplainAction(null);
     setStockExploreAction(null);
     setSectorExploreAction(null);
