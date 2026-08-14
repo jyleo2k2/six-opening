@@ -288,17 +288,40 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 
 `POST /api/profile` 이 이 스냅샷과 Luna 서술을 함께 낸다. 오늘 날짜는 `deps.now()` 로 주입받는다 — 주간 카드가 오늘에 매달리므로 테스트가 고정할 수 있어야 한다.
 
-### 6.8 아직 연결 안 된 것
+### 6.8 두 입력 경로 — 같은 엔진
 
-- **화면이 신버전을 부르지 않는다.** `app.html` 은 여전히 §3 구버전을 쓴다.
-- **`stock_tab_views` 로는 신버전 근거력을 못 낸다.** 컬럼이 `(user_id, stock_id, tab_count, created_at)` 뿐이라 어느 탭인지·몇 초 봤는지·매수 전인지가 없다. localStorage `events` 경유로 갈지 스키마를 넓힐지 결정이 필요하다.
-- **`info_detail_opened` 가 화면에서 한 번도 안 찍힌다.** `logEvent` 호출부는 `news_detail_opened`·`chart_detail_opened` 둘뿐이라 "3탭 중 2탭" 규칙이 실질 "2탭 중 2탭"이다.
-- **주차 카드 산출이 둘이다.** PR #150 이 `GET /api/profile/season-cards` 를 먼저 붙였다 — 구버전 산식으로 Supabase `transactions` 를 주 단위로 묶되 **과거 주 정확은 채점하지 않고 기본값**이고 이번 주는 다루지 않는다. 신버전 `weeks[]` 는 정확을 채점 주에 귀속하고 이번 주도 포함한다. 화면을 붙이기 전에 어느 쪽을 남길지 정해야 한다.
+주차 카드를 내는 곳이 둘인데 **산식은 한 벌**이다. 입력 저장소만 다르다.
+
+| | `POST /api/profile` | `GET /api/profile/season-cards` |
+|---|---|---|
+| 입력 | 화면이 보낸 `kw_proto_v1` + F11 시드 | 로그인 세션의 Supabase 기록 |
+| 세션 | 불필요 (body 로 받음) | `kw_uid` 쿠키 필요 |
+| 근거력 입력 | `events` 의 탭 열람(종류·체류 그대로) | `stock_tab_views` 복원 (§6.9) |
+| 계획 일치 | `sellRecords.plan_match` | DB 에 없어 `actionAlignment` 는 항상 0 |
+| 현재가 | 유니버스 시세 | 보관 종가의 마지막 값 |
+
+`season-cards` 응답의 `weeks[]` 는 화면이 아직 읽는 `weekStart`·`count`·`scores`(**0~100**, 집중·분산·정확·직관·근거 순)를 유지하고, 신버전 값 전체를 `card` 에 함께 넣는다. 화면 이관이 끝나면 호환 필드를 지운다.
+
+### 6.9 `stock_tab_views` → 근거력 복원 [가정]
+
+화면은 `flushTabViews` 를 **매수할 때만** 부른다. 그래서 `stock_tab_views` 한 행은 **"이 매수 직전에 10초 넘게 본 방문 N번"** 을 뜻한다. 행에는 어느 탭인지·언제 봤는지가 없으므로 그 뜻을 엔진 입력 형태로 되살린다.
+
+- 행을 시간순으로 매수에 짝지운다. 체결과 flush 가 거의 동시라 `TAB_FLUSH_TOLERANCE_MS = 60_000` 만큼 여유를 둔다.
+- `tab_count` 만큼(최대 3) 서로 다른 탭을 매수 직전 시각으로 만든다. 엔진은 **종류 수**만 보므로 라벨은 결과를 바꾸지 않는다.
+- 체류는 서버가 이미 10초 이상을 검산해 저장한 값이라 기준값을 그대로 넣는다.
+
+**한계:** 같은 탭을 세 번 본 것과 세 탭을 한 번씩 본 것을 구분하지 못한다. 구분하려면 `stock_tab_views` 에 탭 종류 컬럼이 필요하다.
+
+### 6.10 아직 연결 안 된 것
+
+- **화면이 신버전 계약을 직접 읽지 않는다.** `app.html` 은 여전히 §3 구버전으로 이번 주를 계산하고, 지난 주만 `season-cards` 의 0~100 호환 배열을 쓴다.
+- **`info_detail_opened` 가 화면에서 한 번도 안 찍힌다.** `logEvent` 호출부는 `news_detail_opened`·`chart_detail_opened` 둘뿐이라 로컬 경로의 "3탭 중 2탭" 규칙이 실질 "2탭 중 2탭"이다.
+- `archive-profile.js` 의 `weekStartKstOf` 는 `season-cards` 가 신버전으로 옮겨가며 쓰이지 않게 됐다. 구버전을 지울 때 함께 정리한다.
 - `shared/store/family-trade-seed.ts` 주석이 아직 "5거래일" 기준으로 적혀 있다 (다른 세션 소유 경로).
 
 ## 7. 현재 알려진 불일치·미완료
 
-- **지난 주 카드의 정확은 기본값 50이다.** 카드는 그 주 기록만으로 다섯 축을 다시 내는데, 그 시점 기준 채점을 따로 하지 않는다. 이번 주 카드만 실제 채점을 쓴다.
+- **지난 주 카드의 정확은 로컬 기록만 있을 때 여전히 기본값이다.** `season-cards`(Supabase 경로)는 §6 신버전으로 실제 채점하지만, 화면이 로컬 `records` 만으로 그리는 주는 구버전 `computeAbilityScores` 를 채점 없이 부른다. 화면 이관 때 함께 없어진다.
 - 종가 배치가 밀리면 최근 거래가 오래 `pending` 에 남아 정확이 기본값 50에 머문다.
 - 수익률 탭에서 `보유 종목 · 섹터별` 레일을 뺐다. 그 레일에서만 열리던 **섹터 상세 모달(`secModal*`)과 `retSectors` 계산이 화면에서 도달 불가**로 남아 있다. 되살리거나 지우는 판단이 필요하다.
 - 가족 비교의 아빠(`dad`)는 앱 계정이 없어 값이 비어 있다.
