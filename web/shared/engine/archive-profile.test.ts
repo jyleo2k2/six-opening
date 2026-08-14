@@ -8,6 +8,7 @@ import {
   kstDateOf,
   resolveCharacter,
   resolveCharacterFromBehaviorSignals,
+  weekStartKstOf,
 } from "./archive-profile.js";
 
 const SECTORS: Record<string, string> = {
@@ -187,4 +188,13 @@ test("채점 결과가 다섯 축의 정확 자리에 들어간다", () => {
 test("kstDateOf 는 UTC 시각을 KST 날짜로 옮긴다", () => {
   assert.equal(kstDateOf("2026-08-03T16:00:00.000Z"), "2026-08-04");
   assert.equal(kstDateOf("2026-08-03T14:59:00.000Z"), "2026-08-03");
+});
+
+// ── 카드 모아보기 주 경계 ────────────────────────────────────────────
+test("weekStartKstOf 는 KST 월요일 00:00 을 그 주의 시작으로 삼는다", () => {
+  // 2026-08-03 은 KST 월요일이다.
+  assert.equal(weekStartKstOf("2026-08-02T15:00:00.000Z"), "2026-08-03"); // KST 8/3 00:00 (월)
+  assert.equal(weekStartKstOf("2026-08-02T14:59:00.000Z"), "2026-07-27"); // KST 8/2 23:59 (일, 전 주)
+  assert.equal(weekStartKstOf("2026-08-09T14:59:00.000Z"), "2026-08-03"); // KST 8/9 23:59 (일, 같은 주)
+  assert.equal(weekStartKstOf("2026-08-09T15:00:00.000Z"), "2026-08-10"); // KST 8/10 00:00 (다음 월)
 });

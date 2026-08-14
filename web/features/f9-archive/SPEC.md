@@ -1,6 +1,6 @@
 # F9 — 가족 아카이브 기능 명세
 
-> **현재 구현 단일 원본** · 2026-08-14 · 기준 브랜치 `claude/이재용/아카이브랭킹-설빈판`
+> **현재 구현 단일 원본** · 2026-08-14 · 기준 브랜치 `claude/김경렬/아카이브-시즌카드`
 >
 > 현행 동작은 **`web/public/ui/app.html` 렌더링 → `buildArchive()` → `shared/engine/archive-profile.js` → 이 문서** 순으로 확인한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따른다.
 
@@ -15,7 +15,7 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 
 | 오버레이 | 여는 곳 | 내용 |
 |---|---|---|
-| 카드 모아보기 | 성향 탭 | 주 단위 성향 카드. 기록이 있는 주 + 이번 주 |
+| 카드 모아보기 | 성향 탭 | 주 단위 성향 카드. 기록이 있는 주(로컬 또는 Supabase, §3.5) + 이번 주 |
 | 카드 상세 시트 | 카드 모아보기 | 그 주 카드 한 장 |
 | 가족 투자 성향 비교 | 성향 탭 | 구성원 오각형 겹치기 |
 
@@ -35,6 +35,8 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 원본 데이터 | `localStorage["kw_proto_v1"]` | `acc`·`records`·`sellRecords`·`events` |
 | 행동 데이터 판정 API | `web/app/api/profile/behavior/route.ts` | 로그인 세션의 `stock_tab_views`·`transactions` 집계 → 캐릭터 키 |
 | 행동 데이터 조회 | `web/ui-src/methods/loadBehaviorProfile.js` | 진입 시 위 API를 불러 `this.dbBehavior`에 저장 |
+| 지난 주차 카드 API | `web/app/api/profile/season-cards/route.ts` | 로그인 세션의 `transactions`(매수만)를 KST 주 단위로 묶어 주차별 다섯 축 점수 반환. 이번 주는 제외 |
+| 지난 주차 카드 조회 | `web/ui-src/methods/loadSeasonCards.js` | 진입 시 위 API를 불러 `this.dbSeasonCards`에 저장 |
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
@@ -111,6 +113,29 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 - 요청이 실패하면 `closes` 가 비어 전부 `pending` 이 되고, 화면은 기본값으로 그대로 뜬다.
 - 종가 적재는 장마감 배치와 `web/scripts/seed-candles.ts` 가 담당한다. 배치가 밀리면 최근 거래가 오래 `pending` 에 남는다.
 
+### 3.5 지난 주차 카드의 Supabase 대체 입력
+
+로컬스토리지가 초기화되면 지난 주 기록도 함께 사라진다. 카드 모아보기가 로그인 기간 동안의
+지난 주를 계속 보여 줄 수 있도록, 로컬에 없는 지난 주는 Supabase `transactions` 로 다시 낸다.
+
+- 조회·계산: `web/app/api/profile/season-cards/route.ts` (GET, 로그인 세션 필요). 그 사용자의
+  `transactions`에서 `side = 'buy'` 행만 모아 `weekStartKstOf`(KST 월요일 날짜)로 주 단위로
+  묶고, 주마다 `computeAbilityScores`(§3.1과 같은 함수)로 다섯 축을 낸다. **이번 주는 이 API가
+  다루지 않는다** — 화면은 이번 주에 항상 로컬 계산 + §3.2 행동 데이터 오버라이드를 쓴다.
+- 섹터는 `stocks.category`를 그대로 쓴다. 정확은 과거 주차 공통 관례(§3.3 서두, §7)대로 채점하지
+  않고 `ACCURACY_PLACEHOLDER`(50) 그대로 둔다 — 로컬 지난 주 카드와 동일하다.
+- 주 경계 함수: `web/shared/engine/archive-profile.js`의 `weekStartKstOf(iso)`. 화면의 로컬 주
+  경계(`monday()`, 브라우저 로컬 시간)와 다른 함수지만 KST 단일 시장을 가정해 같은 월요일로
+  맞아떨어진다.
+- 화면 연결: `componentDidMount`가 진입 시 `loadSeasonCards()`로 이 API를 한 번 불러
+  `this.dbSeasonCards`에 저장한다. `buildArchive()`는 로컬 주 그룹(`weeks`)에 없는 지난 주만
+  이 응답으로 채우고, 이번 주와 로컬에 이미 기록이 있는 주는 그대로 로컬 계산을 쓴다.
+- **`stock_tab_views`는 이 계산에 들어가지 않는다.** 지난 주차 카드는 로컬 지난 주 카드와 같은
+  산식(매수 이유 비율·섹터 수)만 쓴다. 다만 `stock_tab_views`·`transactions`에 지난 주 더미
+  행을 넣으면 §3.2의 "로그인 사용자 행동 데이터" 오버라이드는 **기간 제한 없이 전체 누적**이라
+  이번 주 카드의 캐릭터 표시에도 함께 영향을 줄 수 있다 — 별개 경로이지만 같은 원본 테이블을
+  공유하기 때문이다.
+
 ## 4. 엔진 복사본과 드리프트 검출
 
 `app.html`은 정적 파일이라 TypeScript 모듈을 import 할 수 없다. 그래서 엔진 원본을 **복사본으로 넣는다.**
@@ -165,7 +190,8 @@ app.html 안 `// >>> archive-engine` ~ `// <<< archive-engine`
 - 종가 배치가 밀리면 최근 거래가 오래 `pending` 에 남아 정확이 기본값 50에 머문다.
 - 수익률 탭에서 `보유 종목 · 섹터별` 레일을 뺐다. 그 레일에서만 열리던 **섹터 상세 모달(`secModal*`)과 `retSectors` 계산이 화면에서 도달 불가**로 남아 있다. 되살리거나 지우는 판단이 필요하다.
 - 가족 비교의 아빠(`dad`)는 앱 계정이 없어 값이 비어 있다.
-- 시즌 기록 탭은 없다. 주별 누적은 카드 모아보기가 대신한다.
+- 시즌 기록 탭은 없다. 주별 누적은 카드 모아보기가 대신하고, 로컬에 없는 지난 주는 §3.5 가 Supabase `transactions` 로 채운다. "시즌" 이라는 이름의 화면·데이터 개념은 여전히 없다 — 카드에는 "이번 주"·"○월 ○주차" 라벨만 있다.
+- §3.5 의 지난 주차 카드와 §3.2 의 이번 주 행동 데이터 오버라이드는 같은 `transactions`·`stock_tab_views` 테이블을 다른 기간으로 읽는다. 한쪽에 더미·과거 행을 넣으면 다른 쪽 표시도 바뀔 수 있다는 점을 잊지 않는다.
 - 부모 단독 화면으로 전환하는 전역 계정 스위처가 메인 앱에 없다.
 - 매수 기록이 없어도 캐릭터가 나온다. 관찰 초기 상태를 따로 두지 않는다.
 

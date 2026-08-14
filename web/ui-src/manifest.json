@@ -35,6 +35,7 @@
     "methods/componentDidUpdate.js",
     "methods/loadDbUser.js",
     "methods/loadBehaviorProfile.js",
+    "methods/loadSeasonCards.js",
     "methods/validNewsItem.js",
     "methods/loadDailyCloses.js",
     "methods/loadNews.js",

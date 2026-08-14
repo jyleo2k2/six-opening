@@ -111,6 +111,19 @@ export function kstDateOf(iso) {
   return new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
 }
 
+// ── 카드 모아보기 주 경계 ──────────────────────────────────────────────
+// 화면(로컬 records)과 서버(Supabase transactions)가 같은 주를 같은 카드로
+// 묶으려면 월요일 경계를 한 곳에서만 정해야 한다. 호스트 타임존에 기대지 않도록
+// kstDateOf 처럼 +9시간 뒤 UTC getter 로 KST 벽시계 값을 읽는다.
+
+/** ISO 시각 → 그 시각이 속한 KST 주의 월요일 날짜(YYYY-MM-DD). */
+export function weekStartKstOf(iso) {
+  const kst = new Date(new Date(iso).getTime() + 9 * 3600000);
+  const mondayOffset = (kst.getUTCDay() + 6) % 7; // 0=월요일
+  kst.setUTCDate(kst.getUTCDate() - mondayOffset);
+  return kst.toISOString().slice(0, 10);
+}
+
 /** `date` 다음 거래일부터 세어 `days` 번째 종가. 아직 안 지났으면 null */
 export function closeAfterTradingDays(closes, date, days) {
   let seen = 0;
