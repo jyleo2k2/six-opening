@@ -1,4 +1,9 @@
-import type { MaterialEventType, NewsArticleScope } from "./contracts";
+import type {
+  ChildNewsStyleExample,
+  MaterialEventType,
+  NewsArticleScope,
+  PriceConnectionKind,
+} from "./contracts";
 
 export type GoldenArticleRef =
   | { fixture: "daily-2026-08-12" | "daily-2026-08-13"; caseId: string }
@@ -8,17 +13,6 @@ export type CitedGoldenText = {
   text: string;
   sourceIds: string[];
 };
-
-export type PriceConnectionKind =
-  | "market_index"
-  | "observed_price_move"
-  | "production_capacity"
-  | "business_combination"
-  | "operational_continuity"
-  | "shareholder_return"
-  | "recurring_sales"
-  | "ownership_and_credit"
-  | "business_performance";
 
 export type GoldenReadyCase = {
   caseId: string;
@@ -298,3 +292,25 @@ export const PRICE_LINKED_GOLDEN_CASES: PriceLinkedGoldenCase[] = [
     reasonSourceIds: ["S3", "S4", "S10"],
   },
 ];
+
+export const PRICE_LINKED_EDITOR_EXAMPLES: ChildNewsStyleExample[] =
+  PRICE_LINKED_GOLDEN_CASES.flatMap((item) => item.status === "ready_for_human_review"
+    ? [{
+        scope: item.scope,
+        eventType: item.eventType,
+        headline: item.headline.text,
+        summaryLines: item.summaryLines.map((line) => ({
+          factKey: line.factKey,
+          text: line.text,
+        })),
+        priceConnection: {
+          kind: item.priceConnection.kind,
+          basis: item.priceConnection.basis,
+          text: item.priceConnection.text,
+        },
+        termExplanations: item.termExplanations.map((term) => ({
+          term: term.term,
+          easyText: term.text,
+        })),
+      }]
+    : []);

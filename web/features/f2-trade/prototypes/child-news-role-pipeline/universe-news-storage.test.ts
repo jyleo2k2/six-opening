@@ -6,6 +6,7 @@ import type {
   UniverseNewsCaseResult,
   UniverseNewsReport,
 } from "./universe-news-evaluation";
+import { renderUniverseComparisonHtml } from "./universe-news-evaluation";
 import { renderUniverseNewsStorageSql } from "./universe-news-storage";
 
 const allChecks = Object.fromEntries(
@@ -68,13 +69,24 @@ function reportWithOneReady(): UniverseNewsReport {
       draft: {
         articleId: "A1",
         headline: { text: "테스트기업1이 100억원을 팔았어", sourceIds: [sourceId] },
-        homeSummary: { text: "테스트기업1이 물건을 팔아 100억원을 받았어.", sourceIds: [sourceId] },
+        homeSummary: { text: "테스트기업1이 100억원을 팔았어", sourceIds: [sourceId] },
         body: [
-          { role: "core_event", text: "테스트기업1이 100억원을 팔았어.", sourceIds: [sourceId] },
-          { role: "business_connection", text: "매출은 물건을 팔아 받은 돈이야.", sourceIds: [sourceId] },
-          { role: "context", text: "기사에 나온 확정 숫자만 전했어.", sourceIds: [sourceId] },
+          { role: "key_detail", factKey: "revenue", text: "기사에 나온 매출은 100억원이에요.", sourceIds: [sourceId] },
+          { role: "business_detail", factKey: "revenue_definition", text: "매출은 물건을 팔아 받은 돈이야.", sourceIds: [sourceId] },
+          { role: "context", factKey: "source_scope", text: "기사에 나온 확정 숫자만 전했어.", sourceIds: [sourceId] },
         ],
-        termTreatments: [{ term: "매출", treatment: "replaced", easyText: "물건을 팔아 받은 돈" }],
+        priceConnection: {
+          kind: "business_performance",
+          basis: "event_education",
+          text: "매출은 회사의 사업 규모와 연결돼요.",
+          sourceIds: [sourceId],
+        },
+        termTreatments: [{
+          term: "매출",
+          treatment: "explained",
+          easyText: "물건을 팔아 받은 전체 금액",
+          sourceIds: [sourceId],
+        }],
       },
       review: {
         articleId: "A1",
@@ -120,22 +132,19 @@ function reportWithOneReady(): UniverseNewsReport {
   };
 }
 
-test("통과 기사만 같은 article_id의 원문·요약·인용으로 적재 SQL을 만든다", () => {
-  const sql = renderUniverseNewsStorageSql(reportWithOneReady());
-  assert.match(sql, /insert into public\.news_pipeline_runs/u);
-  assert.match(sql, /51, 1, 50, true/u);
-  assert.match(sql, /insert into public\.news_articles/u);
-  assert.match(sql, /insert into public\.news_source_units/u);
-  assert.match(sql, /insert into public\.news_publications/u);
-  assert.match(sql, /insert into public\.news_citations/u);
-  assert.match(sql, /NEWS_SOURCE_PUBLICATION_OUTPUT_MISMATCH/u);
-  assert.match(sql, /where not exists \(\s*select 1 from public\.news_source_units/u);
-  assert.match(sql, /where not exists \(\s*select 1 from public\.news_citations/u);
-  assert.match(sql, /'S1_1'/u);
-  assert.doesNotMatch(sql, /'S1\.1'/u);
-  assert.match(sql, /join public\.news_articles as article on article\.id = publication\.article_id/u);
-  assert.match(sql, /where status = 'ready_for_storage'/u);
-  assert.doesNotMatch(sql, /테스트기업2 기사/u);
+test("새 주가 연결·factKey DB 계약 전에는 적재 SQL 생성을 막는다", () => {
+  assert.throws(
+    () => renderUniverseNewsStorageSql(reportWithOneReady()),
+    /주가 연결 설명과 factKey를 저장할 DB 계약/u,
+  );
+});
+
+test("51종목 비교 HTML은 짧은 카드와 상세에 같은 제목과 주가 연결을 표시한다", () => {
+  const html = renderUniverseComparisonHtml(reportWithOneReady(), new Map());
+  assert.equal(html.split("테스트기업1이 100억원을 팔았어").length - 1, 2);
+  assert.match(html, /왜 주가와 관련 있어\?/u);
+  assert.match(html, /매출은 회사의 사업 규모와 연결돼요/u);
+  assert.match(html, /기사 속 말 배우기/u);
 });
 
 test("51종목이 끝나지 않았거나 실행 오류가 있으면 SQL 생성을 막는다", () => {

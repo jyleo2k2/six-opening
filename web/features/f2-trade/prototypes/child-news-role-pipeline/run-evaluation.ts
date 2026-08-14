@@ -15,10 +15,27 @@ const defaultInput = resolve(
   "evaluation-fixtures/latest-economic-news-2026-08-12.json",
 );
 const EVALUATION_ROLE_TIMEOUT_MS = 180_000;
+const MAX_EVALUATION_ROLE_TIMEOUT_MS = 900_000;
 
 function option(name: string) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : undefined;
+}
+
+function roleTimeoutMs() {
+  const raw = option("--role-timeout-ms");
+  if (raw === undefined) return EVALUATION_ROLE_TIMEOUT_MS;
+  const parsed = Number(raw);
+  if (
+    !Number.isInteger(parsed) ||
+    parsed < EVALUATION_ROLE_TIMEOUT_MS ||
+    parsed > MAX_EVALUATION_ROLE_TIMEOUT_MS
+  ) {
+    throw new Error(
+      `--role-timeout-ms는 ${EVALUATION_ROLE_TIMEOUT_MS}~${MAX_EVALUATION_ROLE_TIMEOUT_MS} 사이의 정수여야 합니다.`,
+    );
+  }
+  return parsed;
 }
 
 function parseInput(value: unknown): NewsEvaluationInput {
@@ -69,7 +86,7 @@ async function main() {
     {
       runRole: runOpenAiNewsRole,
       universe,
-      timeoutMs: EVALUATION_ROLE_TIMEOUT_MS,
+      timeoutMs: roleTimeoutMs(),
     },
     {
       runId: input.runId,

@@ -1,6 +1,6 @@
 import type { HeadlineScreeningExample } from "./contracts";
 
-/** 평가 10건과 겹치지 않는 정책 교정용 제목 예시다. 대표님 검수 전 초안이다. */
+/** 평가 10건과 겹치지 않는 정책 교정용 제목 예시다. */
 export const HEADLINE_SCREENING_EXAMPLES: HeadlineScreeningExample[] = [
   {
     title: "코스피, 외국인 순매수에 장중 상승",
@@ -31,6 +31,18 @@ export const HEADLINE_SCREENING_EXAMPLES: HeadlineScreeningExample[] = [
     decision: "pass",
     reasonCodes: [],
     reason: "제목만으로 단순 홍보인지 실제 생산·판매 사건인지 확정할 수 없어 본문으로 넘긴다.",
+  },
+  {
+    title: "외국인 관광객에 웃은 유통업계 주요 회사들",
+    decision: "pass",
+    reasonCodes: [],
+    reason: "업계 묶음 제목만으로 선정 기업의 직접 사건인지 확정할 수 없어 본문으로 넘긴다.",
+  },
+  {
+    title: "K-윤활기유, 글로벌 핵심 공급망 부상",
+    decision: "pass",
+    reasonCodes: [],
+    reason: "산업 제목만으로 선정 기업의 개별 실적·생산 근거가 있는지 알 수 없어 본문으로 넘긴다.",
   },
   {
     title: "CJ대한통운, 대학생 채용설명회 개최",
