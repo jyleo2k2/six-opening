@@ -7,4 +7,3 @@
       .then(d => { if (d && d.character) { this.dbBehavior = d; this.forceUpdate(); } })
       .catch(() => {});
   }
-

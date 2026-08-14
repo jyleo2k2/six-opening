@@ -1929,7 +1929,6 @@ class Component extends DCLogic {
       .then(d => { if (d && d.character) { this.dbBehavior = d; this.forceUpdate(); } })
       .catch(() => {});
   }
-
   validNewsItem(item, stockCode){
     if (!item || !Number.isSafeInteger(item.newsId) || item.newsId <= 0 || !Number.isSafeInteger(item.articleId) || item.articleId <= 0) return false;
     if (item.scope !== 'company') return false;
