@@ -548,7 +548,6 @@
       })) : [],
 
       planMatched: showJudge && planMatch === true, planChanged: showJudge && planMatch === false,
-      hasBadgeNow: showJudge && planMatch === true,
       changeQuestion: buyRec ? ('처음에는 ' + ((PLANS.filter(p => p.code === buyRec.plan_code)[0] || {}).short || '') + ' 가지려고 했었네. 무엇이 달라졌어?') : '무엇이 달라졌어?',
       changeBtns: CHANGES.map(c => ({
         label: c.label,
@@ -580,7 +579,6 @@
       sellDoneQty: sdQty,
       sellDoneMoneyLabel: sd.limit || sd.scheduled ? '예상 금액' : '받은 돈',
       sellDoneProceeds: won(sd.proceeds || 0),
-      hasBadge: !!sd.badge,
       sellMemo: s.sellDraft.memo, sellMemoCount: s.sellDraft.memo.length,
       sellMemoInput: e => { const v = e.target.value.slice(0, 50); this.setSell({ memo: v, memoSaved: false }); },
       sellMemoBtnLabel: s.sellDraft.memoSaved ? '저장됐어 ✓' : '저장하기',
@@ -654,7 +652,7 @@
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           seq: s.seq + 1, sellStep: 3,
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
-          sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null, badge: showJudge && planMatch === true }
+          sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null }
         });
         if (isLimit || isScheduled) return;
         this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, null);

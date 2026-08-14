@@ -164,12 +164,6 @@
 <div style="font-size:24px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;white-space:pre-line;text-wrap:pretty">{{ sellDoneHeadline }}</div>
 <div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ sellDoneNote }}</div>
 
-<sc-if value="{{ hasBadge }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex;align-items:center;gap:11px;background:#FFF8E4;border-radius:20px;padding:13px 16px;margin-top:16px;width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)">
-<span style="font-size:14.5px;font-weight:700;color:#8A6B1F;line-height:1.5">계획 실천 배지를 받았어!</span>
-</div>
-</sc-if>
-
 <div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:20px;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneStock }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneQty }}</span></div>
 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ sellDoneMoneyLabel }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ sellDoneProceeds }}</span></div>
