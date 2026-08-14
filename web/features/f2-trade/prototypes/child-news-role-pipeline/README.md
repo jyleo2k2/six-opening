@@ -10,7 +10,7 @@
 원문 후보
   → 제목 1차 선별자(max, 정책 교정 제목 예시 제공)
   → 통과 후보만 본문 관련성 선별자(max)
-  → 선별 문장만 어린이 편집자에게 전달(high, 필요 시 high 1회)
+  → 선별 문장과 승인 형식 예시만 어린이 편집자에게 전달(max, 필요 시 max 1회)
   → 결정적 근거·숫자·용어·안전 게이트
   → 원문과 노출문만 보는 독립 출고 검수자(max)
   → ready_for_storage 또는 rejected
@@ -44,7 +44,7 @@
 - `collect-universe-news.ts`: 종목마다 체크포인트를 남기고 `--resume`할 수 있는 51종목 수집 CLI
 - `universe-news-evaluation.ts`: 51종목 결과 계약, 대상 종목 주인공 게이트, 현재 목업 대 실제 결과 비교 HTML
 - `run-universe-evaluation.ts`: 51종목을 Luna 역할 파이프라인으로 판정하고 종목마다 JSON·HTML을 갱신하는 CLI
-- `universe-news-storage.ts`: 완전한 51종목 보고서에서 기술 오류가 없을 때 통과 기사만 동일 `article_id`·인용 근거로 묶는 SQL 생성기
+- `universe-news-storage.ts`: 완전한 51종목 보고서를 검사하되, 승인된 v2 필드를 담을 DB 계약이 생기기 전에는 적재 SQL을 차단하는 가드
 
 ## 실행
 
@@ -77,7 +77,7 @@ node features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs
 
 사람 기준표의 기대 상태·허용 reject 코드와 실제 결과가 다르거나, 저장 판정에 구체적인 근거가 없으면 CLI는 JSON·HTML을 남긴 뒤 실패 종료한다. 탈락 단계 뒤의 기준은 실패로 꾸미지 않고 `not_applicable`로 표시한다.
 
-10건 평가 실행은 max 추론 역할의 응답 시간을 확인할 수 있도록 역할당 180초를 허용한다. 시간 안에 응답하지 않으면 기존과 같이 해당 기사를 `ROLE_ERROR`로 닫힌 실패 처리한다. 운영 파이프라인의 기본 제한은 바꾸지 않는다.
+10건 평가 실행은 max 추론 역할의 응답 시간을 확인할 수 있도록 기본 역할당 180초를 허용한다. 시간 안에 응답하지 않으면 해당 기사를 `ROLE_ERROR`로 닫힌 실패 처리한다. 실측 재검증에서는 `--role-timeout-ms 600000`처럼 180,000~900,000ms 범위의 제한을 명시할 수 있으며, 추론 수준은 계속 `max`다. 운영 파이프라인의 기본 제한은 바꾸지 않는다.
 
 이 평가는 모델 간 A/B가 아니다. 모든 역할은 `web/shared/llm`의 `gpt-5.6-luna`와 서버 전용 Responses API를 사용하고, 역할별 입력 격리와 결정적 게이트의 실제 품질을 검증한다.
 
@@ -120,7 +120,7 @@ node features/f2-trade/prototypes/child-news-role-pipeline/run-universe-evaluati
   --retry-technical-errors `
   --role-timeout-ms 600000
 
-# 51건 완료·기술 오류 0건일 때만 통과 기사 적재 SQL 생성
+# 후속 DB v2 계약 연결 뒤 사용할 적재 명령. 현재는 새 필드 누락을 막기 위해 실패한다.
 node features/f2-trade/prototypes/child-news-role-pipeline/generate-universe-storage.cjs `
   --report features/f2-trade/prototypes/child-news-role-pipeline/reports/selected-company-news-2026-08-13-luna/report.json `
   --overwrite
@@ -128,9 +128,9 @@ node features/f2-trade/prototypes/child-news-role-pipeline/generate-universe-sto
 
 비교 HTML은 종목마다 왼쪽에 현재 `universe.js`의 업종 공통 짧은 카드·상세 목업을, 오른쪽에 실제 파이프라인 결과를 둔다. 통과 기사는 짧은 카드와 자세히 보기가 같은 파이프라인 결과를 쓰고, 거부 기사는 `서비스 카드 없음`과 단계·코드·설명을 보여준다. 종목명·제목 검색, 통과·거부, 업종 필터를 제공하며 원문 보기는 실제 언론사 URL을 새 탭으로 연다.
 
-51종목 실행에서 제목·본문 선별과 독립 검수는 `max`, 편집은 `high`를 유지한다. 추론 토큰이 보이는 JSON 출력 전에 한도를 모두 쓰는 문제를 막기 위해 역할별 출력 여유를 32,000~48,000으로 두고 `max_output_tokens` 불완전 응답일 때만 64,000으로 한 번 재시도한다. 역할당 기본 제한은 360초이며 기술 오류 재시도 때는 `--role-timeout-ms`로 최대 900초까지 명시할 수 있다. 최종 보고서에 `ROLE_ERROR`나 `PIPELINE_EXECUTION_ERROR`가 하나라도 있으면 적재 SQL 생성 자체를 막는다.
+51종목 실행의 제목·본문 선별, 편집, 독립 검수는 모두 `max`를 사용한다. 추론 토큰이 보이는 JSON 출력 전에 한도를 모두 쓰는 문제를 막기 위해 역할별 출력 여유를 32,000~48,000으로 두고 `max_output_tokens` 불완전 응답일 때만 64,000으로 한 번 재시도한다. 역할당 기본 제한은 360초이며 기술 오류 재시도 때는 `--role-timeout-ms`로 최대 900초까지 명시할 수 있다. 최종 보고서에 `ROLE_ERROR`나 `PIPELINE_EXECUTION_ERROR`가 하나라도 있으면 적재 SQL 생성 자체를 막는다.
 
-DB에는 `ready_for_storage` 결과만 넣는다. `report.json`은 51건의 통과·거부 감사 기록을 모두 보존하지만, 거부 기사를 서비스 카드로 만들지 않는다. SQL은 원문 URL의 SHA-256을 `source_key`, 원문 근거 배열의 SHA-256을 `evidence_hash`로 사용하고, 같은 원문이 다른 근거·다른 요약으로 중복 통과하면 저장 전에 실패한다.
+DB에는 `ready_for_storage` 결과만 넣는 원칙을 유지한다. 현재는 `priceConnection`과 3개 `factKey`를 담을 DB 계약이 없어 통과 기사가 한 건이라도 있으면 적재 SQL 생성을 차단한다. `report.json`은 51건의 통과·거부 감사 기록을 모두 보존하며, 거부 기사를 서비스 카드로 만들지 않는다.
 
 ### 2026-08-13 제목 선별·3줄 요약 추가 후 실측 결과
 
@@ -187,7 +187,32 @@ npx tsx features/f2-trade/prototypes/child-news-role-pipeline/generate-price-lin
 - `왜 주가와 관련 있어?`는 기사에서 확인된 연결과 사건 유형에 따른 교육 설명을 구분한다.
 - 코스피 시장 뉴스는 개별 종목의 빈자리를 채우는 폴백으로 쓰지 않는다.
 - 입찰 참여처럼 계약이 확정되지 않은 사건은 중요해 보여도 서비스 카드를 만들지 않는다.
-- 이 골든 문안이 사람 검수를 통과하기 전에는 기존 AI 프롬프트·DB 적재 계약에 연결하지 않는다.
+- 2026-08-14 대표 검수를 통과해 이 형식을 기존 AI 편집·독립 검수 계약에 연결했다.
+
+연결된 파이프라인에서는 제목 선별자·본문 선별자·편집자·독립 검수자 모두 `max` 추론을 사용한다. 편집자는 승인된 9개 통과 문안을 사실 답안이 아닌 문장 구조 예시로 받고, 후보 기사에서는 선별된 원문 ID만 사용한다.
+
+- 모델은 짧은 카드와 상세에 함께 쓰는 `headline` 하나만 생성하며, 파이프라인이 DB 하위 호환 `homeSummary`를 같은 값으로 만든다.
+- 3줄에는 서로 다른 snake_case `factKey`가 필요하다.
+- `priceConnection`은 기사에서 확인된 연결(`article_fact`)과 사건 유형 교육 설명(`event_education`)을 구분한다.
+- 어려운 용어는 원래 이름을 유지하고 별도 풀이·원문 ID를 모두 남긴다.
+- 독립 검수자는 같은 제목, 사실 중복, 주가 연결 근거, 용어 풀이 완전성을 명시적 boolean으로 다시 판정한다.
+- 현재 Supabase 스키마에는 `priceConnection`과 `factKey` 컬럼이 없으므로 통과 기사가 있는 보고서의 적재 SQL 생성은 닫힌 실패한다. 새 DB 계약을 붙이기 전에는 결과 JSON·HTML만 검수한다.
+
+### 승인 형식 연결 후 실제 10건 재검증
+
+2026-08-14에 승인된 골든 형식을 실제 역할 파이프라인에 연결하고, 2026-08-13 표본 10건을 네 역할 모두 `max`로 다시 실행했다. 결과는 `reports/latest-economic-news-2026-08-13-price-linked-v2/`에 보존한다.
+
+- 사람 기대 판정 일치: 10/10
+- `ready_for_storage`: 코스피 시황, 삼성전자 생산라인, 한국전력 실적 3건
+- 구체적 사유로 거부: 7건
+- 기술 오류: 0건
+- 짧은 카드와 상세 화면 제목은 동일한 `headline`을 사용한다.
+- 상세 화면은 제목과 겹치지 않는 3개 사실, 주가 연결 설명, 원문 근거가 있는 용어 풀이를 보여준다.
+
+```powershell
+cd web
+node features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/latest-economic-news-2026-08-13.json --output features/f2-trade/prototypes/child-news-role-pipeline/reports/latest-economic-news-2026-08-13-price-linked-v2 --overwrite --role-timeout-ms 600000
+```
 
 ## 운영 연결 전 남은 일
 

@@ -176,12 +176,18 @@ const readyResult: ReadyNews = {
   draft: {
     articleId: readyCase.article.articleId,
     headline: { text: "<아이>가 읽는 오늘의 시장 뉴스", sourceIds: ["S1"] },
-    homeSummary: { text: "홈에서 먼저 읽는 한 줄 요약입니다.", sourceIds: ["S1"] },
+    homeSummary: { text: "<아이>가 읽는 오늘의 시장 뉴스", sourceIds: ["S1"] },
     body: [
-      { role: "core_event", text: "서비스 뉴스 상세에 보이는 본문입니다.", sourceIds: ["S1"] },
-      { role: "business_connection", text: "두 번째 핵심 사실을 짧게 보여줍니다.", sourceIds: ["S1"] },
-      { role: "context", text: "어려운 말은 마지막 줄에서 설명합니다.", sourceIds: ["S1"] },
+      { role: "key_detail", factKey: "market_event", text: "서비스 뉴스 상세에 보이는 본문입니다.", sourceIds: ["S1"] },
+      { role: "business_detail", factKey: "market_number", text: "두 번째 핵심 사실을 짧게 보여줍니다.", sourceIds: ["S1"] },
+      { role: "context", factKey: "market_context", text: "세 번째 사실을 겹치지 않게 설명합니다.", sourceIds: ["S1"] },
     ],
+    priceConnection: {
+      kind: "market_index",
+      basis: "event_education",
+      text: "시장 숫자는 국내 주식 흐름과 연결돼요.",
+      sourceIds: ["S1"],
+    },
     termTreatments: [],
   },
   review: {
@@ -201,6 +207,10 @@ const readyResult: ReadyNews = {
       noIrrelevantDetail: true,
       attributionAndTiming: true,
       allTermsEasy: true,
+      sameHeadlineAcrossSurfaces: true,
+      distinctSummaryFacts: true,
+      priceConnectionGrounded: true,
+      termExplanationCoverage: true,
       investmentSafety: true,
       noSentimentLabel: true,
     },
@@ -223,9 +233,15 @@ assert.ok(auditStart > readyHtml.indexOf('<section class="service-output"'));
 assert.match(readyHtml, /3줄 요약/u);
 assert.match(readyHtml, /서비스 뉴스 상세에 보이는 본문입니다/u);
 assert.match(readyHtml, /두 번째 핵심 사실을 짧게 보여줍니다/u);
-assert.match(readyHtml, /어려운 말은 마지막 줄에서 설명합니다/u);
+assert.match(readyHtml, /세 번째 사실을 겹치지 않게 설명합니다/u);
+assert.match(readyHtml, /왜 주가와 관련 있어\?/u);
+assert.match(readyHtml, /시장 숫자는 국내 주식 흐름과 연결돼요/u);
 assert.equal(readyHtml.includes("<아이>"), false);
 assert.equal(readyHtml.includes("&lt;아이&gt;가 읽는 오늘의 시장 뉴스"), true);
+assert.equal(
+  servicePreview.split("&lt;아이&gt;가 읽는 오늘의 시장 뉴스").length - 1,
+  2,
+);
 assert.equal(readyHtml.slice(0, auditStart).includes("채용설명회"), false);
 assert.equal(readyHtml.slice(0, auditStart).includes("홈에서 먼저 읽는 한 줄 요약입니다"), false);
 assert.match(

@@ -127,26 +127,37 @@ function draft(
     articleId: target.articleId,
     headline: { text: "삼성전자·SK하이닉스 주가 상승", sourceIds: [sourceId] },
     homeSummary: {
-      text: "오늘 두 반도체 회사의 주가가 올랐어요.",
+      text: "삼성전자·SK하이닉스 주가 상승",
       sourceIds: [sourceId],
     },
     body: [
       {
-        role: "core_event",
+        role: "key_detail",
+        factKey: "observed_move",
         text: "삼성전자와 SK하이닉스 주가가 올랐어요.",
         sourceIds: [sourceId],
       },
       {
-        role: "business_connection",
+        role: "business_detail",
+        factKey: "price_definition",
         text: "주가는 주식 한 주의 가격을 뜻해요.",
         sourceIds: [sourceId],
       },
       {
         role: "context",
+        factKey: "observation_date",
         text: "오늘 국내 시장에서 확인된 움직임이에요.",
         sourceIds: [sourceId],
       },
     ],
+    priceConnection: {
+      kind: target.scope === "market" ? "observed_price_move" : "business_performance",
+      basis: "event_education",
+      text: target.scope === "market"
+        ? "기사에 나온 주가 움직임을 확인해요."
+        : "실적은 회사의 사업 결과와 연결돼요.",
+      sourceIds: [sourceId],
+    },
     termTreatments: [],
     ...overrides,
   };
@@ -174,6 +185,10 @@ function approvedReview(
       noIrrelevantDetail: true,
       attributionAndTiming: true,
       allTermsEasy: true,
+      sameHeadlineAcrossSurfaces: true,
+      distinctSummaryFacts: true,
+      priceConnectionGrounded: true,
+      termExplanationCoverage: true,
       investmentSafety: true,
       noSentimentLabel: true,
     },
@@ -210,7 +225,8 @@ async function testFocusIsolation() {
       return selection;
     }
     if (request.role === "child_news_editor") {
-      assert.equal(request.reasoningEffort, "high");
+      assert.equal(request.reasoningEffort, "max");
+      assert.equal(request.examples.length, 9);
       editorInput = request;
       return draft(target, "S1");
     }
@@ -223,6 +239,9 @@ async function testFocusIsolation() {
 
   const result = await processNewsCandidate(target, { runRole, universe });
   assert.equal(result.status, "ready_for_storage");
+  if (result.status === "ready_for_storage") {
+    assert.equal(result.draft.homeSummary.text, result.draft.headline.text);
+  }
   assert.deepEqual(editorInput?.sourceUnits.map((unit) => unit.id), ["S1"]);
   assert.equal(
     editorInput?.sourceUnits.some((unit) => unit.text.includes("코스닥")),
@@ -256,6 +275,12 @@ async function testHeadlineScreenRejectsRoutineNews() {
     assert.equal(headlineRequest?.reasoningEffort, "max");
     assert.equal("sourceUnits" in (headlineRequest?.article ?? {}), false);
     assert.equal((headlineRequest?.examples.length ?? 0) > 0, true);
+    assert.equal(
+      headlineRequest?.examples.some(
+        (example) => example.decision === "pass" && example.title.includes("업계"),
+      ),
+      true,
+    );
   }
 }
 
@@ -302,17 +327,20 @@ async function testAllTermsAndRetry() {
     },
     body: [
       {
-        role: "core_event",
+        role: "key_detail",
+        factKey: "total_sales",
         text: "펄어비스 게임이 지금까지 600만 장 넘게 팔렸어요.",
         sourceIds: ["S1"],
       },
       {
-        role: "business_connection",
+        role: "business_detail",
+        factKey: "sales_definition",
         text: "처음부터 지금까지 팔린 수가 600만 장을 넘었어.",
         sourceIds: ["S1"],
       },
       {
         role: "context",
+        factKey: "company_attribution",
         text: "판매량을 알린 회사는 펄어비스야.",
         sourceIds: ["S1"],
       },
@@ -320,8 +348,9 @@ async function testAllTermsAndRetry() {
     termTreatments: [
       {
         term: "누적 판매량",
-        treatment: "replaced",
+        treatment: "explained",
         easyText: "처음부터 지금까지 팔린 수",
+        sourceIds: ["S1"],
       },
     ],
   });
@@ -348,7 +377,7 @@ async function testAllTermsAndRetry() {
   const result = await processNewsCandidate(target, { runRole, universe });
   assert.equal(result.status, "ready_for_storage");
   assert.equal(result.editorAttempts, 2);
-  assert.deepEqual(reasoning, ["high", "high"]);
+  assert.deepEqual(reasoning, ["max", "max"]);
   assert.equal(revisionReasons[1].some((reason) => reason.includes("어려운 용어")), true);
 }
 
@@ -377,23 +406,31 @@ async function testFamiliarNumbersIgnoredAndExactTermReplacementAccepted() {
     },
     body: [
       {
-        role: "core_event",
+        role: "key_detail",
+        factKey: "price_move",
         text: "12일 삼성전자 주식값은 2% 올랐어.",
         sourceIds: ["S1"],
       },
       {
-        role: "business_connection",
+        role: "business_detail",
+        factKey: "price_definition",
         text: "주식값은 주식 한 주의 가격을 뜻해.",
         sourceIds: ["S1"],
       },
       {
         role: "context",
+        factKey: "trading_value",
         text: "주가지수 거래금액은 1.7조원이었어.",
         sourceIds: ["S1"],
       },
     ],
     termTreatments: [
-      { term: "주가", treatment: "replaced", easyText: "주식값" },
+      {
+        term: "주가",
+        treatment: "explained",
+        easyText: "주식 한 주의 가격",
+        sourceIds: ["S1"],
+      },
     ],
   });
 
@@ -437,17 +474,20 @@ async function testThreeLineSummaryAndKospiExplanation() {
     },
     body: [
       {
-        role: "core_event",
+        role: "key_detail",
+        factKey: "kospi_level",
         text: "12일 코스피가 6500선을 다시 넘었어.",
         sourceIds: ["S1"],
       },
       {
-        role: "business_connection",
+        role: "business_detail",
+        factKey: "company_moves",
         text: "삼성전자는 4%, SK하이닉스는 2% 올랐어.",
         sourceIds: ["S1"],
       },
       {
         role: "context",
+        factKey: "kospi_definition",
         text: "코스피는 국내 주식시장을 대표하는 숫자야.",
         sourceIds: ["S1"],
       },
@@ -457,6 +497,7 @@ async function testThreeLineSummaryAndKospiExplanation() {
         term: "코스피",
         treatment: "explained",
         easyText: "국내 주식시장을 대표하는 숫자",
+        sourceIds: ["S1"],
       },
     ],
   });
@@ -503,13 +544,7 @@ async function testThreeLineSummaryAndKospiExplanation() {
   assert.equal(result.status, "ready_for_storage");
   assert.equal(result.editorAttempts, 2);
   assert.equal(
-    revisionReasons[1].some((reason) => reason.includes("같은 사실")),
-    true,
-  );
-  assert.equal(
-    revisionReasons[1].some((reason) =>
-      reason.includes("서비스 3줄 요약"),
-    ),
+    revisionReasons[1].some((reason) => reason.includes("서로 다른 사실")),
     true,
   );
   if (result.status === "ready_for_storage") {
@@ -543,17 +578,20 @@ async function testSummaryLineLengthRetry() {
     },
     body: [
       {
-        role: "core_event",
+        role: "key_detail",
+        factKey: "earnings_release",
         text: "삼성전자가 회사의 실적을 발표했어.",
         sourceIds: ["S1"],
       },
       {
-        role: "business_connection",
+        role: "business_detail",
+        factKey: "earnings_definition",
         text: "실적은 회사가 거둔 결과를 뜻해.",
         sourceIds: ["S1"],
       },
       {
         role: "context",
+        factKey: "company_attribution",
         text: "발표한 회사는 삼성전자야.",
         sourceIds: ["S1"],
       },
@@ -617,17 +655,20 @@ async function testReviewerFailClosedAndNoQuotaFill() {
         },
         body: [
           {
-            role: "core_event",
+            role: "key_detail",
+            factKey: "profit_release",
             text: "삼성전자가 영업이익을 발표했어요.",
             sourceIds: ["S1"],
           },
           {
-            role: "business_connection",
+            role: "business_detail",
+            factKey: "profit_definition",
             text: "영업이익은 사업 운영 뒤 남은 돈이야.",
             sourceIds: ["S1"],
           },
           {
             role: "context",
+            factKey: "company_attribution",
             text: "발표한 회사는 삼성전자야.",
             sourceIds: ["S1"],
           },
@@ -710,6 +751,158 @@ async function testRequiredPrimaryStockStopsBeforeEditing() {
   assert.equal(editorCalls, 0);
 }
 
+async function testPriceConnectionAndFactKeysRetry() {
+  const target = article(
+    "price-link-contract",
+    "삼성전자 실적 발표",
+    ["삼성전자가 실적을 발표했다."],
+  );
+  const selection = accepted(target);
+  const goodDraft = draft(target, "S1", {
+    headline: { text: "삼성전자 실적 발표", sourceIds: ["S1"] },
+  });
+  const invalidDraft = {
+    ...goodDraft,
+    body: goodDraft.body.map((line) => ({ ...line, factKey: "same_fact" })),
+    priceConnection: {
+      ...goodDraft.priceConnection,
+      kind: "market_index",
+    },
+  };
+  let editorCalls = 0;
+  const revisions: string[][] = [];
+  const result = await processNewsCandidate(target, {
+    universe,
+    runRole: async (request) => {
+      if (request.role === "headline_screener") return headlinePassed(target);
+      if (request.role === "relevance_selector") return selection;
+      if (request.role === "child_news_editor") {
+        editorCalls += 1;
+        revisions.push(request.revisionReasons);
+        return editorCalls === 1 ? invalidDraft : goodDraft;
+      }
+      return approvedReview(target);
+    },
+  });
+
+  assert.equal(result.status, "ready_for_storage");
+  assert.equal(result.editorAttempts, 2);
+  assert.equal(revisions[1].some((reason) => reason.includes("서로 다른 사실")), true);
+  assert.equal(revisions[1].some((reason) => reason.includes("주가 연결")), true);
+}
+
+async function testReviewerDiscoveredTermCanBeExplained() {
+  const target = article(
+    "reviewer-term",
+    "삼성전자 매출 발표",
+    ["삼성전자의 매출은 100억원이다."],
+  );
+  const selection = accepted(target, {
+    focusStatement: "삼성전자의 매출은 100억원이다.",
+    difficultTerms: [],
+  });
+  const edited = draft(target, "S1", {
+    headline: { text: "삼성전자 매출 100억원 발표", sourceIds: ["S1"] },
+    body: [
+      { role: "key_detail", factKey: "revenue", text: "기사에 나온 매출은 100억원이에요.", sourceIds: ["S1"] },
+      { role: "business_detail", factKey: "company", text: "이 숫자를 발표한 회사는 삼성전자예요.", sourceIds: ["S1"] },
+      { role: "context", factKey: "source_scope", text: "기사에서 확인된 숫자만 담았어요.", sourceIds: ["S1"] },
+    ],
+    termTreatments: [{
+      term: "매출",
+      treatment: "explained",
+      easyText: "제품이나 서비스를 팔아 받은 전체 금액",
+      sourceIds: ["S1"],
+    }],
+  });
+  const result = await processNewsCandidate(target, {
+    universe,
+    runRole: async (request) => {
+      if (request.role === "headline_screener") return headlinePassed(target);
+      if (request.role === "relevance_selector") return selection;
+      if (request.role === "child_news_editor") return edited;
+      return approvedReview(target);
+    },
+  });
+
+  assert.equal(result.status, "ready_for_storage");
+}
+
+async function testCollectiveComparisonCannotBeSplitIntoOneCompany() {
+  const target = article(
+    "collective-comparison",
+    "반도체 빅2 실적 비교",
+    [
+      "삼성전자의 영업이익이 늘었다.",
+      "SK하이닉스의 영업이익도 늘었다.",
+    ],
+  );
+  let editorCalls = 0;
+  const result = await processNewsCandidate(target, {
+    universe,
+    runRole: async (request) => {
+      if (request.role === "headline_screener") return headlinePassed(target);
+      if (request.role === "relevance_selector") {
+        return accepted(target, {
+          primaryStockIds: ["KRX:005930"],
+          focusStatement: "삼성전자의 영업이익이 늘었다.",
+          includedSourceIds: ["S1"],
+          excludedSourceIds: ["S2"],
+        });
+      }
+      editorCalls += 1;
+      return draft(target, "S1");
+    },
+  });
+
+  assert.equal(result.status, "rejected");
+  assert.equal(result.stage, "selector");
+  assert.equal(result.reasonCodes.includes("COMPANY_NOT_PRIMARY_SUBJECT"), true);
+  assert.equal(editorCalls, 0);
+}
+
+async function testSupportingLineMayUseDifferentSelectedEvidence() {
+  const target = article(
+    "supporting-evidence",
+    "삼성전자 생산라인 완공",
+    [
+      "삼성전자가 생산라인을 완공했다.",
+      "생산 규모는 연간 6500대다.",
+    ],
+  );
+  const selection = accepted(target, {
+    eventType: "sales_or_production",
+    focusStatement: "삼성전자가 생산라인을 완공했다.",
+    anchorSourceId: "S1",
+    includedSourceIds: ["S1", "S2"],
+  });
+  const edited = draft(target, "S1", {
+    headline: { text: "삼성전자 생산라인 완공", sourceIds: ["S1"] },
+    body: [
+      { role: "key_detail", factKey: "annual_capacity", text: "연간 6500대를 만들 수 있어요.", sourceIds: ["S2"] },
+      { role: "business_detail", factKey: "facility_use", text: "제품을 만드는 새 공간이에요.", sourceIds: ["S1"] },
+      { role: "context", factKey: "company", text: "생산 주체는 삼성전자예요.", sourceIds: ["S1"] },
+    ],
+    priceConnection: {
+      kind: "production_capacity",
+      basis: "event_education",
+      text: "생산 수량은 제품 공급 규모와 연결돼요.",
+      sourceIds: ["S2"],
+    },
+  });
+  const result = await processNewsCandidate(target, {
+    universe,
+    runRole: async (request) => {
+      if (request.role === "headline_screener") return headlinePassed(target);
+      if (request.role === "relevance_selector") return selection;
+      if (request.role === "child_news_editor") return edited;
+      return approvedReview(target, { eventType: "sales_or_production" });
+    },
+  });
+
+  assert.equal(result.status, "ready_for_storage");
+}
+
 async function main() {
   await testFocusIsolation();
   await testHeadlineScreenRejectsRoutineNews();
@@ -721,6 +914,10 @@ async function main() {
   await testReviewerFailClosedAndNoQuotaFill();
   await testMalformedOutputFailsClosed();
   await testRequiredPrimaryStockStopsBeforeEditing();
+  await testPriceConnectionAndFactKeysRetry();
+  await testReviewerDiscoveredTermCanBeExplained();
+  await testCollectiveComparisonCannotBeSplitIntoOneCompany();
+  await testSupportingLineMayUseDifferentSelectedEvidence();
   console.log("news role pipeline regression tests passed");
 }
 

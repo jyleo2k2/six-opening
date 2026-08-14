@@ -402,6 +402,11 @@ export function renderUniverseNewsStorageSql(report: UniverseNewsReport) {
   if (!criteriaPassed) {
     throw new Error("모델 또는 파이프라인 실행 오류가 남아 있어 DB 적재 SQL을 만들지 않습니다.");
   }
+  if (report.readyForStorageCount > 0) {
+    throw new Error(
+      "주가 연결 설명과 factKey를 저장할 DB 계약이 아직 없어 적재 SQL을 만들지 않습니다.",
+    );
+  }
   const items = readyStorageItems(report);
   return `-- ${report.runId}
 -- JSON/HTML 검수 결과에서 ready_for_storage인 기사만 공개 DB에 적재합니다.

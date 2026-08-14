@@ -104,9 +104,26 @@ export type CitedText = {
   sourceIds: string[];
 };
 
+export const PRICE_CONNECTION_KINDS = [
+  "market_index",
+  "observed_price_move",
+  "production_capacity",
+  "contracted_business",
+  "business_combination",
+  "operational_continuity",
+  "shareholder_return",
+  "recurring_sales",
+  "ownership_and_credit",
+  "business_performance",
+  "regulatory_permission",
+  "legal_or_recall_cost",
+] as const;
+
+export type PriceConnectionKind = (typeof PRICE_CONNECTION_KINDS)[number];
+
 export const NEWS_BODY_ROLES = [
-  "core_event",
-  "business_connection",
+  "key_detail",
+  "business_detail",
   "context",
 ] as const;
 
@@ -118,12 +135,18 @@ export type NewsBodyRole = (typeof NEWS_BODY_ROLES)[number];
 export type ChildNewsDraft = {
   articleId: string;
   headline: CitedText;
+  /** DB 하위 호환 필드. 파서가 headline과 같은 값으로만 만든다. */
   homeSummary: CitedText;
-  body: Array<CitedText & { role: NewsBodyRole }>;
+  body: Array<CitedText & { role: NewsBodyRole; factKey: string }>;
+  priceConnection: CitedText & {
+    kind: PriceConnectionKind;
+    basis: "article_fact" | "event_education";
+  };
   termTreatments: Array<{
     term: string;
-    treatment: "replaced" | "explained";
+    treatment: "explained";
     easyText: string;
+    sourceIds: string[];
   }>;
 };
 
@@ -137,6 +160,10 @@ export const REVIEW_CHECK_NAMES = [
   "noIrrelevantDetail",
   "attributionAndTiming",
   "allTermsEasy",
+  "sameHeadlineAcrossSurfaces",
+  "distinctSummaryFacts",
+  "priceConnectionGrounded",
+  "termExplanationCoverage",
   "investmentSafety",
   "noSentimentLabel",
 ] as const;
@@ -178,7 +205,7 @@ export type SelectorRoleRequest = {
 
 export type EditorRoleRequest = {
   role: "child_news_editor";
-  reasoningEffort: NewsReasoningEffort;
+  reasoningEffort: "max";
   article: Pick<
     NewsSourceArticle,
     "articleId" | "runDateKst" | "scope" | "publisher" | "publishedAt"
@@ -194,7 +221,21 @@ export type EditorRoleRequest = {
   >;
   selectedCompanies: NewsUniverseCompany[];
   sourceUnits: NewsSourceUnit[];
+  examples: ChildNewsStyleExample[];
   revisionReasons: string[];
+};
+
+export type ChildNewsStyleExample = {
+  scope: NewsArticleScope;
+  eventType: MaterialEventType;
+  headline: string;
+  summaryLines: Array<{ factKey: string; text: string }>;
+  priceConnection: {
+    kind: PriceConnectionKind;
+    basis: "article_fact" | "event_education";
+    text: string;
+  };
+  termExplanations: Array<{ term: string; easyText: string }>;
 };
 
 export type ReviewerRoleRequest = {
@@ -466,11 +507,14 @@ export function parseChildNewsDraft(value: unknown): ChildNewsDraft | null {
   if (!isRecord(value)) return null;
   const articleId = readString(value.articleId);
   const headline = parseCitedText(value.headline);
-  const homeSummary = parseCitedText(value.homeSummary);
+  const priceConnection = parseCitedText(value.priceConnection);
   if (
     articleId === null ||
     headline === null ||
-    homeSummary === null ||
+    priceConnection === null ||
+    !isRecord(value.priceConnection) ||
+    !isOneOf(value.priceConnection.kind, PRICE_CONNECTION_KINDS) ||
+    !isOneOf(value.priceConnection.basis, ["article_fact", "event_education"] as const) ||
     !Array.isArray(value.body) ||
     !Array.isArray(value.termTreatments)
   ) {
@@ -480,14 +524,16 @@ export function parseChildNewsDraft(value: unknown): ChildNewsDraft | null {
   const body: ChildNewsDraft["body"] = [];
   for (const item of value.body) {
     const cited = parseCitedText(item);
+    const factKey = isRecord(item) ? readString(item.factKey) : null;
     if (
       cited === null ||
       !isRecord(item) ||
+      factKey === null ||
       !isOneOf(item.role, NEWS_BODY_ROLES)
     ) {
       return null;
     }
-    body.push({ ...cited, role: item.role });
+    body.push({ ...cited, role: item.role, factKey });
   }
 
   const termTreatments: ChildNewsDraft["termTreatments"] = [];
@@ -495,17 +541,35 @@ export function parseChildNewsDraft(value: unknown): ChildNewsDraft | null {
     if (!isRecord(item)) return null;
     const term = readString(item.term);
     const easyText = readString(item.easyText);
+    const sourceIds = readStringArray(item.sourceIds);
     if (
       term === null ||
       easyText === null ||
-      (item.treatment !== "replaced" && item.treatment !== "explained")
+      sourceIds === null ||
+      item.treatment !== "explained"
     ) {
       return null;
     }
-    termTreatments.push({ term, easyText, treatment: item.treatment });
+    termTreatments.push({
+      term,
+      easyText,
+      treatment: item.treatment,
+      sourceIds,
+    });
   }
 
-  return { articleId, headline, homeSummary, body, termTreatments };
+  return {
+    articleId,
+    headline,
+    homeSummary: { ...headline, sourceIds: [...headline.sourceIds] },
+    body,
+    priceConnection: {
+      ...priceConnection,
+      kind: value.priceConnection.kind,
+      basis: value.priceConnection.basis,
+    },
+    termTreatments,
+  };
 }
 
 export function parsePublicationReview(value: unknown): PublicationReview | null {

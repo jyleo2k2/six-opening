@@ -7,6 +7,7 @@ import {
   type ChildNewsDraft,
   type EditorRoleRequest,
   type HeadlineScreenResult,
+  type MaterialEventType,
   type NewsPipelineResult,
   type NewsRoleRequest,
   type NewsRoleRunner,
@@ -14,6 +15,7 @@ import {
   type NewsSourceUnit,
   type NewsUniverseCompany,
   type PublicationReview,
+  type PriceConnectionKind,
   type ReadyNews,
   type RejectedNews,
   type SelectorAccept,
@@ -24,10 +26,23 @@ import {
   parseSelectorResult,
 } from "./contracts";
 import { HEADLINE_SCREENING_EXAMPLES } from "./headline-screening-examples";
+import { PRICE_LINKED_EDITOR_EXAMPLES } from "./price-linked-news-golden";
 
 const DEFAULT_ROLE_TIMEOUT_MS = 90_000;
 const MAX_SOURCE_UNIT_LENGTH = 700;
 const MAX_EDITOR_ATTEMPTS = 2;
+
+const EVENT_PRICE_CONNECTION_KINDS: Record<MaterialEventType, readonly PriceConnectionKind[]> = {
+  observed_market_move: ["market_index", "observed_price_move"],
+  earnings: ["business_performance"],
+  sales_or_production: ["production_capacity", "recurring_sales", "business_performance"],
+  binding_contract: ["contracted_business"],
+  merger_or_ownership: ["business_combination", "ownership_and_credit"],
+  capital_or_dividend: ["shareholder_return", "ownership_and_credit"],
+  regulatory_decision: ["regulatory_permission"],
+  litigation_or_recall: ["legal_or_recall_cost", "operational_continuity"],
+  material_operational_risk: ["operational_continuity"],
+};
 
 type GateIssue = { code: string; message: string };
 
@@ -406,6 +421,24 @@ function validateSelectorAccept(
           message: "선정 기업이 제목이나 기사 앞부분의 주체로 확인되지 않습니다.",
         });
       }
+      const isCollectiveArticle = /(?:빅\s*\d+|\d+\s*사|업계|주요\s*(?:기업|회사)|비교)/u.test(
+        article.title,
+      );
+      const fullArticleText = [article.title, ...article.sourceUnits.map((unit) => unit.text)].join(" ");
+      const mentionedStockIds = universe
+        .filter((company) => textMentionsCompany(fullArticleText, company))
+        .map((company) => company.stockId);
+      if (
+        isCollectiveArticle &&
+        (result.primaryStockIds.length === 1 ||
+          (mentionedStockIds.length > 1 &&
+            !sameSet(mentionedStockIds, result.primaryStockIds)))
+      ) {
+        issues.push({
+          code: "COMPANY_NOT_PRIMARY_SUBJECT",
+          message: "여러 회사를 함께 비교한 기사를 한 회사 뉴스로 잘라낼 수 없습니다.",
+        });
+      }
     }
   }
 
@@ -449,9 +482,11 @@ function extractNumbers(text: string) {
 function visibleDraftText(draft: ChildNewsDraft, includeTerms = true) {
   return [
     draft.headline.text,
-    draft.homeSummary.text,
     ...draft.body.map((block) => block.text),
-    ...(includeTerms ? draft.termTreatments.map((item) => item.easyText) : []),
+    draft.priceConnection.text,
+    ...(includeTerms
+      ? draft.termTreatments.flatMap((item) => [item.term, item.easyText])
+      : []),
   ].join("\n");
 }
 
@@ -463,52 +498,57 @@ function validateDraft(
 ): GateIssue[] {
   const issues: GateIssue[] = [];
   const allowedIds = new Set(selection.includedSourceIds);
-  const citedBlocks = [draft.headline, draft.homeSummary, ...draft.body];
+  const citedBlocks = [draft.headline, ...draft.body, draft.priceConnection];
   const visibleText = visibleDraftText(draft);
 
   if (draft.articleId !== article.articleId) {
     issues.push({ code: "INVALID_ROLE_OUTPUT", message: "편집 결과의 articleId가 다릅니다." });
   }
-  if (!draft.headline.text.trim() || draft.headline.text.length > 60) {
-    issues.push({ code: "INVALID_DRAFT_SHAPE", message: "제목은 1~60자여야 합니다." });
+  if (!draft.headline.text.trim() || draft.headline.text.length > 44) {
+    issues.push({ code: "INVALID_DRAFT_SHAPE", message: "제목은 1~44자여야 합니다." });
   }
-  if (!draft.homeSummary.text.trim() || draft.homeSummary.text.length > 180) {
-    issues.push({ code: "INVALID_DRAFT_SHAPE", message: "홈 요약은 1~180자여야 합니다." });
+  if (
+    draft.homeSummary.text !== draft.headline.text ||
+    !sameSet(draft.homeSummary.sourceIds, draft.headline.sourceIds)
+  ) {
+    issues.push({
+      code: "HEADLINE_SURFACE_MISMATCH",
+      message: "짧은 카드와 상세 화면은 같은 제목을 사용해야 합니다.",
+    });
   }
   if (
     draft.body.length !== CHILD_NEWS_SUMMARY_LINE_COUNT ||
-    draft.body[0]?.role !== "core_event" ||
+    draft.body[0]?.role !== "key_detail" ||
     draft.body.some((block, index) => block.role !== NEWS_BODY_ROLES[index]) ||
     draft.body.some(
       (block) =>
+        !/^[a-z][a-z0-9_]*$/u.test(block.factKey) ||
         !block.text.trim() ||
         block.text.length > CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
     )
   ) {
     issues.push({
       code: "INVALID_DRAFT_SHAPE",
-      message: `본문은 core_event, business_connection, context 순서의 3줄 요약이어야 하며 각 줄은 ${CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH}자 이하여야 합니다.`,
+      message: `본문은 key_detail, business_detail, context 순서의 3줄 요약이어야 하며 각 줄은 ${CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH}자 이하여야 합니다.`,
     });
   }
   const summaryLines = draft.body.map((block) => block.text);
   if (
+    new Set(draft.body.map((block) => block.factKey)).size !== CHILD_NEWS_SUMMARY_LINE_COUNT ||
     hasRedundantSummaryLines(summaryLines) ||
+    summaryLines.some((line) => compactSummaryClaim(line) === compactSummaryClaim(draft.headline.text)) ||
     (selection.kind === "market" &&
       hasRepeatedMarketMove(summaryLines, universe))
   ) {
     issues.push({
       code: "REDUNDANT_SUMMARY",
-      message: "3줄 요약에서 같은 사실을 반복하지 않아야 합니다.",
+      message: "제목과 3줄 요약은 서로 다른 사실 역할을 가져야 합니다.",
     });
   }
-  if (
-    !draft.headline.sourceIds.includes(selection.anchorSourceId) ||
-    !draft.homeSummary.sourceIds.includes(selection.anchorSourceId) ||
-    !draft.body[0]?.sourceIds.includes(selection.anchorSourceId)
-  ) {
+  if (!draft.headline.sourceIds.includes(selection.anchorSourceId)) {
     issues.push({
       code: "ANCHOR_MISSING_FROM_HOME",
-      message: "제목·홈 요약·첫 요약 줄이 모두 중심 사건을 근거로 해야 합니다.",
+      message: "제목은 중심 사건의 근거를 포함해야 합니다.",
     });
   }
   if (
@@ -517,6 +557,12 @@ function validateDraft(
         block.sourceIds.length === 0 ||
         hasDuplicates(block.sourceIds) ||
         block.sourceIds.some((id) => !allowedIds.has(id)),
+    )
+    || draft.termTreatments.some(
+      (item) =>
+        item.sourceIds.length === 0 ||
+        hasDuplicates(item.sourceIds) ||
+        item.sourceIds.some((id) => !allowedIds.has(id)),
     )
   ) {
     issues.push({
@@ -527,7 +573,7 @@ function validateDraft(
 
   if (selection.kind === "company") {
     const universeById = new Map(universe.map((company) => [company.stockId, company]));
-    const lead = `${draft.headline.text} ${draft.homeSummary.text}`;
+    const lead = draft.headline.text;
     if (
       selection.primaryStockIds.some((id) => {
         const company = universeById.get(id);
@@ -536,7 +582,7 @@ function validateDraft(
     ) {
       issues.push({
         code: "PRIMARY_SUBJECT_MISSING_FROM_HOME",
-        message: "제목과 홈 요약에 모든 중심 기업이 분명히 드러나야 합니다.",
+        message: "제목에 모든 중심 기업이 분명히 드러나야 합니다.",
       });
     }
   }
@@ -545,7 +591,7 @@ function validateDraft(
   const treatedTerms = draft.termTreatments.map((item) => compactText(item.term));
   if (
     hasDuplicates(treatedTerms) ||
-    !sameSet(expectedTerms, treatedTerms) ||
+    expectedTerms.some((term) => !treatedTerms.includes(term)) ||
     draft.termTreatments.some((item) => !item.easyText.trim())
   ) {
     issues.push({
@@ -553,32 +599,22 @@ function validateDraft(
       message: "선별된 어려운 용어를 모두 쉬운 말로 처리하지 않았습니다.",
     });
   }
-  const articleTextOnly = visibleDraftText(draft, false);
-  const serviceSummaryText = draft.body.map((block) => block.text).join("\n");
-  const compactServiceSummaryText = compactText(serviceSummaryText);
   for (const treatment of draft.termTreatments) {
-    if (!compactServiceSummaryText.includes(compactText(treatment.easyText))) {
-      issues.push({
-        code: "UNEXPLAINED_TERM",
-        message: `'${treatment.term}'의 쉬운 설명이 서비스 3줄 요약에 없습니다.`,
-      });
-    }
+    const selectedTerm = selection.difficultTerms.find(
+      (item) => compactText(item.term) === compactText(treatment.term),
+    );
+    const citedSourceText = article.sourceUnits
+      .filter((unit) => treatment.sourceIds.includes(unit.id))
+      .map((unit) => unit.text)
+      .join(" ");
     if (
-      treatment.treatment === "replaced" &&
-      termAppearsInVisibleText(articleTextOnly, treatment.term)
+      selectedTerm
+        ? !sameSet(selectedTerm.sourceIds, treatment.sourceIds)
+        : !termAppearsInVisibleText(citedSourceText, treatment.term)
     ) {
       issues.push({
         code: "UNEXPLAINED_TERM",
-        message: `바꿨다고 표시한 '${treatment.term}'이 노출문에 남아 있습니다.`,
-      });
-    }
-    if (
-      treatment.treatment === "explained" &&
-      !termAppearsInVisibleText(serviceSummaryText, treatment.term)
-    ) {
-      issues.push({
-        code: "UNEXPLAINED_TERM",
-        message: `설명할 '${treatment.term}' 이름이 서비스 3줄 요약에 없습니다.`,
+        message: `'${treatment.term}'의 풀이 근거가 선별 결과와 다릅니다.`,
       });
     }
   }
@@ -591,22 +627,22 @@ function validateDraft(
     const kospiTreatment = draft.termTreatments.find(
       (item) => compactText(item.term) === compactText("코스피"),
     );
-    const hasKospiExplanationLine = draft.body.some(
-      (block) =>
-        termAppearsInVisibleText(block.text, "코스피") &&
-        isEasyKospiExplanation(block.text),
-    );
     if (
-      !termAppearsInVisibleText(serviceSummaryText, "코스피") ||
+      !termAppearsInVisibleText(visibleDraftText(draft, false), "코스피") ||
       kospiTreatment?.treatment !== "explained" ||
-      !isEasyKospiExplanation(kospiTreatment.easyText) ||
-      !hasKospiExplanationLine
+      !isEasyKospiExplanation(kospiTreatment.easyText)
     ) {
       issues.push({
         code: "UNEXPLAINED_TERM",
-        message: "코스피는 이름을 유지하고 국내 주식시장을 대표하는 숫자라고 서비스 3줄 요약에서 설명해야 합니다.",
+        message: "코스피는 이름을 유지하고 별도 풀이에서 국내 주식시장을 대표하는 숫자라고 설명해야 합니다.",
       });
     }
+  }
+  if (!EVENT_PRICE_CONNECTION_KINDS[selection.eventType].includes(draft.priceConnection.kind)) {
+    issues.push({
+      code: "INVALID_PRICE_CONNECTION",
+      message: "주가 연결 설명의 유형이 중심 사건과 맞지 않습니다.",
+    });
   }
   const allowedNumbers = new Set(
     extractNumbers(
@@ -637,7 +673,7 @@ function validateDraft(
     });
   }
   if (
-    /(?:호재|악재|긍정적|부정적|(?:매수|매도|보유).{0,12}(?:추천|해야|하자|시점|기회)|(?:사라|팔아|추천해)|목표가|(?:수익률|주가|가격).{0,16}(?:예상|전망|오를\s*것|내릴\s*것|상승할|하락할)|(?:앞으로|향후|전망|예상|가능성).{0,20}(?:상승|하락|오를|내릴)|(?:상승|하락|오를|내릴).{0,8}(?:전망|예상|가능성))/u.test(
+    /(?:호재|악재|긍정적|부정적|(?:매수|매도|보유).{0,12}(?:추천|해야|하자|시점|기회)|(?:사라|팔아라|팔아야|팔자|추천해)|목표가|(?:수익률|주가|가격).{0,16}(?:예상|전망|오를\s*것|내릴\s*것|상승할|하락할)|(?:앞으로|향후|전망|예상|가능성).{0,20}(?:상승|하락|오를|내릴)|(?:상승|하락|오를|내릴).{0,8}(?:전망|예상|가능성))/u.test(
       visibleText,
     )
   ) {
@@ -736,14 +772,13 @@ function editorRequest(
   article: NewsSourceArticle,
   selection: SelectorAccept,
   universe: readonly NewsUniverseCompany[],
-  reasoningEffort: "medium" | "high",
   revisionReasons: string[],
 ): EditorRoleRequest {
   const selectedIds = new Set(selection.primaryStockIds);
   const includedIds = new Set(selection.includedSourceIds);
   return {
     role: "child_news_editor",
-    reasoningEffort,
+    reasoningEffort: "max",
     article: {
       articleId: article.articleId,
       runDateKst: article.runDateKst,
@@ -761,6 +796,7 @@ function editorRequest(
     },
     selectedCompanies: universe.filter((company) => selectedIds.has(company.stockId)),
     sourceUnits: article.sourceUnits.filter((unit) => includedIds.has(unit.id)),
+    examples: PRICE_LINKED_EDITOR_EXAMPLES,
     revisionReasons,
   };
 }
@@ -920,7 +956,6 @@ export async function processNewsCandidate(
           article,
           selection,
           dependencies.universe,
-          "high",
           revisionReasons,
         ),
         timeoutMs,

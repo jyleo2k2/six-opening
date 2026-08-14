@@ -274,8 +274,8 @@ function renderActualSide(item: UniverseNewsCaseResult) {
   const lines = result.draft.body.map((line) => line.text);
   return `<section class="side actual-side ready-side">
     <div class="side-title"><span>실제 파이프라인</span><small class="ready-badge">통과</small></div>
-    <div class="short-card"><small>짧은 뉴스 카드 · 같은 articleId</small><p>${escapeHtml(result.draft.homeSummary.text)}</p></div>
-    <div class="detail-card"><small>자세히 보기 · 같은 articleId</small><h3>${escapeHtml(result.draft.headline.text)}</h3><ol>${renderLines(lines)}</ol>${result.draft.termTreatments.length > 0 ? `<div class="terms"><b>쉬운 말 처리</b>${result.draft.termTreatments.map((term) => `<p><span>${escapeHtml(term.term)}</span> → ${escapeHtml(term.easyText)}</p>`).join("")}</div>` : ""}</div>
+    <div class="short-card"><small>짧은 뉴스 카드 · 같은 headline</small><p>${escapeHtml(result.draft.headline.text)}</p></div>
+    <div class="detail-card"><small>자세히 보기 · 같은 headline</small><h3>${escapeHtml(result.draft.headline.text)}</h3><ol>${renderLines(lines)}</ol><div class="terms price-link"><b>왜 주가와 관련 있어?</b><p>${escapeHtml(result.draft.priceConnection.text)}</p><small>${result.draft.priceConnection.basis === "article_fact" ? "기사에서 확인된 연결" : "사건 유형에 따른 교육 설명"}</small></div>${result.draft.termTreatments.length > 0 ? `<div class="terms"><b>기사 속 말 배우기</b>${result.draft.termTreatments.map((term) => `<p><span>${escapeHtml(term.term)}</span> ${escapeHtml(term.easyText)}</p>`).join("")}</div>` : ""}</div>
   </section>`;
 }
 

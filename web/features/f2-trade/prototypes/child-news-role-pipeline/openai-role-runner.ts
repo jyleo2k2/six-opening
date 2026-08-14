@@ -6,6 +6,7 @@ import {
   CHILD_NEWS_SUMMARY_LINE_MAX_LENGTH,
   MATERIAL_EVENT_TYPES,
   NEWS_BODY_ROLES,
+  PRICE_CONNECTION_KINDS,
   REVIEW_CHECK_NAMES,
   SELECTOR_REJECT_CODES,
   type NewsRole,
@@ -98,14 +99,13 @@ const ROLE_SCHEMAS: Record<NewsRole, Record<string, unknown>> = {
     required: [
       "articleId",
       "headline",
-      "homeSummary",
       "body",
+      "priceConnection",
       "termTreatments",
     ],
     properties: {
       articleId: { type: "string" },
       headline: citedTextSchema,
-      homeSummary: citedTextSchema,
       body: {
         type: "array",
         minItems: CHILD_NEWS_SUMMARY_LINE_COUNT,
@@ -113,9 +113,13 @@ const ROLE_SCHEMAS: Record<NewsRole, Record<string, unknown>> = {
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["role", "text", "sourceIds"],
+          required: ["role", "factKey", "text", "sourceIds"],
           properties: {
             role: { type: "string", enum: NEWS_BODY_ROLES },
+            factKey: {
+              type: "string",
+              pattern: "^[a-z][a-z0-9_]*$",
+            },
             text: {
               type: "string",
               minLength: 1,
@@ -125,16 +129,28 @@ const ROLE_SCHEMAS: Record<NewsRole, Record<string, unknown>> = {
           },
         },
       },
+      priceConnection: {
+        type: "object",
+        additionalProperties: false,
+        required: ["kind", "basis", "text", "sourceIds"],
+        properties: {
+          kind: { type: "string", enum: PRICE_CONNECTION_KINDS },
+          basis: { type: "string", enum: ["article_fact", "event_education"] },
+          text: { type: "string" },
+          sourceIds: stringArray,
+        },
+      },
       termTreatments: {
         type: "array",
         items: {
           type: "object",
           additionalProperties: false,
-          required: ["term", "treatment", "easyText"],
+          required: ["term", "treatment", "easyText", "sourceIds"],
           properties: {
             term: { type: "string" },
-            treatment: { type: "string", enum: ["replaced", "explained"] },
+            treatment: { type: "string", enum: ["explained"] },
             easyText: { type: "string" },
+            sourceIds: stringArray,
           },
         },
       },
