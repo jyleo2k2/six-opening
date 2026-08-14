@@ -875,6 +875,9 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
                   scriptId: explainTurn.scriptId,
                   stage: explainTurn.stage,
                   ...(explainChoiceId ? { choiceId: explainChoiceId } : {}),
+                  ...(explainTurn.reaskCount
+                    ? { reaskCount: explainTurn.reaskCount }
+                    : {}),
                   ...(previousAnswer ? { previousAnswer } : {}),
                 },
               }
@@ -1249,7 +1252,12 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
             borderRadius: 40 * prototypeScreen.scale,
           }}
         >
-          <div aria-hidden="true" className="absolute inset-0 z-0 bg-navy/20 backdrop-blur-[1px]" />
+          <button
+            aria-label={COPY.close}
+            className="absolute inset-0 z-0 bg-navy/20 backdrop-blur-[1px]"
+            onClick={closeChat}
+            type="button"
+          />
 
           <section
             aria-label="키웅이 챗봇"

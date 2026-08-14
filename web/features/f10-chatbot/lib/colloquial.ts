@@ -59,17 +59,25 @@ const AFFIRMATIVE = lexicon([
 
 const NEGATIVE = lexicon([
   // 초성체
-  "ㄴㄴ", "ㄴ", "ㅁㄹ",
+  "ㄴㄴ", "ㄴ",
   // 구어
   "아니", "아냐", "아니야", "아니요", "아뇨", "아닌데", "아니당",
   "노", "노노", "no", "nope", "n",
-  // 모르겠다 계열 — 4단계에서는 "모르겠어" 선택지로 간다
-  "몰라", "모르겠어", "모르겠다", "모르겠는데", "모름", "모르겠어요",
+  "다시", "다시설명", "다시말해줘", "다시알려줘",
+]);
+
+/**
+ * "모르겠다" 계열 — 정답도 오답도 아닌 세 번째 반응이다. 순수 부정("아니")과
+ * 섞으면 안 된다: "아니야"는 brief 단계에서 여전히 모호해서 되물어야 하지만,
+ * "몰라요"는 어느 단계에서든 바로 인정하고 도움을 줘야 한다.
+ */
+const UNSURE = lexicon([
+  "ㅁㄹ",
+  "몰라", "몰라요", "모르겠어", "모르겠다", "모르겠는데", "모름", "모르겠어요",
   "잘모르겠어", "하나도모르겠어", "아직모르겠어", "여전히모르겠어",
   "어려워", "어렵다", "어려운데", "어려워요",
   "헷갈려", "헷갈린다", "헷갈리는데",
   "이해안돼", "이해안됨", "이해못했어", "못알아들었어",
-  "다시", "다시설명", "다시말해줘", "다시알려줘",
 ]);
 
 /**
@@ -85,16 +93,17 @@ export function looksLikeNewQuestion(input: string) {
   return /[?？]|뭐|무엇|왜|어떻게|어디|누가|언제|알려\s*줘|설명/.test(input);
 }
 
-export type ColloquialIntent = "yes" | "no";
+export type ColloquialIntent = "yes" | "no" | "unsure";
 
 /**
- * 긍정·부정을 판정한다. 확실하지 않으면 `null`.
+ * 긍정·부정·모르겠음을 판정한다. 확실하지 않으면 `null`.
  * 부분 일치는 쓰지 않는다 — "아니면 뭐야?"가 부정으로 잡히면 안 된다.
  */
 export function matchColloquialIntent(input: string): ColloquialIntent | null {
   const normalized = normalizeReply(input);
   if (!normalized) return null;
   if (AFFIRMATIVE.has(normalized)) return "yes";
+  if (UNSURE.has(normalized)) return "unsure";
   if (NEGATIVE.has(normalized)) return "no";
   return null;
 }

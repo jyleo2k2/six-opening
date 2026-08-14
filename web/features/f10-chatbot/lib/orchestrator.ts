@@ -177,7 +177,7 @@ function resolveExplainStep(
       return looksLikeNewQuestion(request.message) ||
         (routed.route !== "fallback" && !isGenericOutOfScope(routed))
         ? null
-        : reaskExplain(script, request.explain.stage);
+        : reaskExplain(script, request.explain.stage, request.explain.reaskCount ?? 0);
     }
     if (choiceId === "ask" && looksLikeNewQuestion(request.message)) {
       return routed.explainScript ? startExplain(routed.explainScript) : null;
