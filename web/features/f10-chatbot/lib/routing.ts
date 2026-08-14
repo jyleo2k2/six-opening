@@ -3487,6 +3487,26 @@ function getOwnDataReply(message: string): ChatReply | null {
 }
 
 function getFinancialConceptReply(message: string): ChatReply | null {
+  if (includesAny(message, ["수익이랑손해", "수익하고손해", "수익과손해", "이익이랑손해", "수익손해차이"])) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "수익은 산 값보다 지금 값이 커진 상태이고, 손해는 작아진 상태예요. 아직 팔지 않았다면 화면에 보이는 값이 바뀔 수 있어요.",
+      ["수익·손해 차이 설명"],
+      { suggestedQuestions: ["평가손익이 뭐예요?", "수익률이 뭐예요?"] },
+    );
+  }
+
+  if (includesAny(message, ["회사가돈을많이벌면주식값도꼭올라", "돈을많이벌면주가도꼭올라"])) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "회사가 돈을 많이 벌어도 주식값이 꼭 오르는 것은 아니에요. 사람들이 앞으로의 회사 모습을 어떻게 생각하는지처럼 여러 이유가 함께 영향을 줘요.",
+      ["회사 실적과 주가 관계 설명"],
+      { suggestedQuestions: ["주식 가격은 왜 바뀌어요?", "회사는 어떻게 돈을 벌어요?"] },
+    );
+  }
+
   if (includesAny(message, ["손익이마이너스면내가빚진", "손익마이너스면내가빚진"])) {
     return reply(
       "faq",
@@ -3505,6 +3525,122 @@ function getFinancialConceptReply(message: string): ChatReply | null {
       { suggestedQuestions: ["평가손익이 뭐예요?", "분산투자가 뭐예요?"] },
     );
   }
+  return null;
+}
+
+function getChildFriendlyIntentReply(message: string, context: ChatContext): ChatReply | null {
+  const stockDetails = context.stockId ? { stockId: context.stockId } : {};
+
+  if (includesAny(message, ["수익이랑손해", "수익하고손해", "수익과손해", "이익이랑손해"])) return null;
+
+  if (includesAny(message, ["주식사는연습", "주식연습은어떻게", "모의투자는어떻게시작"])) {
+    return serviceHowToReply(
+      "모의투자 화면에서 회사를 고른 다음 주문을 연습할 수 있어요.",
+      "모의투자 시작하기",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  if (includesAny(message, ["주문넣었는데다음", "주문하고다음에", "주문넣고다음"])) {
+    return serviceHowToReply(
+      "주문을 넣은 뒤에는 주문 상태와 내용을 확인하면 돼요. 기다리는 주문은 포트폴리오에서 볼 수 있어요.",
+      "주문 상태 확인하기",
+      "portfolio",
+    );
+  }
+
+  if (includesAny(message, ["주식몇주살지어디", "몇주살지어디", "수량어디에적어", "몇개살지어디", "몇개살지는어디"] )) {
+    return serviceHowToReply(
+      "주문 화면에서 살 주식 수를 적거나 금액을 고르면 돼요. 수량과 예상 금액을 확인한 뒤 직접 주문 내용을 결정해요.",
+      "주문 수량 적기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "quantity" },
+    );
+  }
+
+  if (includesAny(message, ["왜이회사를골랐는지쓰는칸", "고른이유쓰는칸", "거래이유쓰는칸"])) {
+    return serviceHowToReply(
+      "회사를 고른 이유는 주문 화면에서 고르는 단계에 적을 수 있어요.",
+      context.stockId ? "고른 이유 적기" : "회사 고르고 주문 시작하기",
+      context.stockId ? "order" : "stock",
+      context.stockId
+        ? { ...stockDetails, orderSide: "buy", orderStep: "reason" }
+        : { stockView: "explore" },
+    );
+  }
+
+  if (includesAny(message, ["내가고른회사다시보", "고른회사다시보", "선택한회사다시보"])) {
+    return serviceHowToReply(
+      "종목 탐색에서 회사 이름을 찾아 다시 볼 수 있어요.",
+      "종목 탐색에서 다시 보기",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  if (includesAny(message, ["처음으로돌아", "첫화면으로", "메인으로돌아", "화면이너무많아"])) {
+    return serviceHowToReply("처음 화면으로 돌아가면 모의투자와 진행 상황을 다시 볼 수 있어요.", "처음으로 가기", "home");
+  }
+
+  if (includesAny(message, ["회사종류별", "회사종류로나눠", "업종별로나눠"])) {
+    return serviceHowToReply(
+      "종목 탐색 화면에서 업종별로 회사를 모아 볼 수 있어요.",
+      "업종별 회사 보기",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  const aliasStock = includesAny(message, ["불닭", "불닭볶음면"])
+    ? STOCKS.find((stock) => stock.name === "삼양식품")
+    : undefined;
+  if (aliasStock && includesAny(message, ["회사", "이름", "뭐", "만드는"])) {
+    return reply("tool", "stock_facts", "", ["생활어 종목 별칭 확인"], {
+      tool: "approved_stock_facts",
+      stockFact: { stockId: aliasStock.id, topic: "company" },
+    });
+  }
+
+  if (includesAny(message, ["이회사랑비슷한회사", "이회사비슷한회사", "비슷한회사도보여"])) {
+    const currentStock = context.stockId ? STOCKS.find((stock) => stock.id === context.stockId) : undefined;
+    if (currentStock) {
+      return serviceHowToReply(
+        `${currentStock.name}와 같은 업종의 승인 종목을 종목 탐색에서 볼 수 있어요. 어느 회사가 더 낫다고 고르지는 않아요.`,
+        `${SECTORS.find((sector) => sector.key === currentStock.sector)?.label ?? "같은 업종"} 회사 보기`,
+        "stock",
+        { stockView: "explore", sectorId: currentStock.sector },
+      );
+    }
+    return serviceHowToReply("어느 회사를 말하는지 알려주면 같은 업종의 승인 종목을 찾아볼 수 있어요.", "종목 탐색에서 회사 찾기", "stock", { stockView: "explore" });
+  }
+
+  const sector = includesAny(message, ["과자", "라면", "식품회사"])
+    ? "food"
+    : includesAny(message, ["게임만드는회사", "게임회사"])
+      ? "game"
+      : includesAny(message, ["영화", "드라마", "엔터테인먼트회사"])
+        ? "entertainment"
+        : undefined;
+  if (!findMentionedStock(message) && sector && includesAny(message, ["여기있어", "찾아", "볼수있어", "도있어"])) {
+    const sectorLabel = SECTORS.find((candidate) => candidate.key === sector)?.label ?? "해당 업종";
+    return serviceHowToReply(
+      `${sectorLabel} 업종의 승인 회사를 종목 탐색에서 볼 수 있어요.`,
+      `${sectorLabel} 회사 보기`,
+      "stock",
+      { stockView: "explore", sectorId: sector },
+    );
+  }
+
+  if (includesAny(message, ["핸드폰만드는회사", "휴대폰만드는회사", "스마트폰만드는회사"])) {
+    return serviceHowToReply(
+      "종목 탐색에서 삼성전자나 LG전자처럼 전자기기와 관련된 회사를 찾아볼 수 있어요.",
+      "종목 탐색에서 회사 찾기",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
   return null;
 }
 
@@ -4042,14 +4178,22 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const privacyReply = getPrivacyReply(message);
   if (privacyReply) return privacyReply;
 
-  const financialConceptReply = getFinancialConceptReply(message);
-  if (financialConceptReply) return financialConceptReply;
+  const explicitServiceReply = getChildFriendlyIntentReply(message, context);
+  if (explicitServiceReply?.intent === "service_help" && !findRecommendationKind(message)) {
+    return explicitServiceReply;
+  }
 
   // SPEC §6.1.2 의 입력 안전 우선순위대로 보호 판정을 사용법 FAQ 앞에 둔다.
   // 뒤에 두면 "다 포기하고 싶어 매수 버튼 누르면 끝이야?" 처럼 위기 표현에
   // 서비스 낱말이 섞였을 때 큐레이트 FAQ 가 먼저 잡아 보호 응답이 사라진다.
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);
+
+  const childFriendlyIntentReply = getChildFriendlyIntentReply(message, context);
+  if (childFriendlyIntentReply) return childFriendlyIntentReply;
+
+  const financialConceptReply = getFinancialConceptReply(message);
+  if (financialConceptReply) return financialConceptReply;
 
   const navigationReply = getScreenNavigationReply(message);
   if (navigationReply) return navigationReply;
