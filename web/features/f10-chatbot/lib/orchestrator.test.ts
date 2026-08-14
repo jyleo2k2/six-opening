@@ -206,6 +206,112 @@ async function main() {
     assert.equal(ownRecords.action.uiAction?.target, "archive");
   }
 
+  // ── 2단: 지시어 후속 질문 되살리기 (SPEC §3.5) ───────────────────────────
+  // "수익률이 뭐야?" 뒤의 "그럼 이게 높으면 좋은거야?" 는 그 문장만으로는 어떤
+  // 허용 목적도 판정되지 않아 범위 밖으로 끝난다. 다시 써서 같은 라우터에 넣는다.
+  let rewriteCalls = 0;
+  const rewriteTo = (result: string | null) => async () => {
+    rewriteCalls += 1;
+    return result;
+  };
+
+  const followUp = await createChatOutcome(
+    {
+      message: "그럼 낮으면 좋은거야?",
+      context,
+      lastAnswer: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자예요.",
+      lastTopicId: "term:per",
+    },
+    session,
+    { generateAnswer: noModel, rewriteQuestion: rewriteTo("PER이 낮으면 좋은 건가요?") },
+  );
+  assert.equal(rewriteCalls, 1);
+  assert.equal(followUp.rewritten, true);
+  assert.equal(followUp.source, "fixed");
+  assert.equal(modelCalls, 0, "2단에서 풀리면 답변 모델을 부르지 않는다");
+  assert.equal(followUp.response.text.includes("PER이 낮다는 사실만으로"), true);
+
+  // 재작성이 직전과 같은 용어 정의로 흡수되면 아이가 물은 각도를 놓친다 → 3단.
+  let generated = "";
+  const followUpToModel = await createChatOutcome(
+    {
+      message: "그거는 언제 써?",
+      context,
+      lastAnswer: "시장가는 지금 시장에 나와 있는 값으로 바로 주문하는 방법이에요.",
+      lastTopicId: "term:market-order",
+    },
+    session,
+    {
+      rewriteQuestion: rewriteTo("시장가는 언제 쓰나요?"),
+      generateAnswer: async (message: string) => {
+        generated = message;
+        return "시장가는 지금 바로 사고 싶을 때 골라요.";
+      },
+      judgeOutput: async () => ({ violation: false, rule: 0 }),
+    },
+  );
+  assert.equal(followUpToModel.source, "model");
+  assert.equal(generated, "시장가는 언제 쓰나요?", "모델은 지시어가 풀린 질문을 받는다");
+
+  // 1단이 이미 잡은 입력은 재작성을 타지 않는다 — 차단 우회로가 생기면 안 된다.
+  rewriteCalls = 0;
+  const blockedFollowUp = await createChatOutcome(
+    {
+      message: "그거 사도 돼?",
+      context,
+      lastAnswer: "삼성전자는 반도체와 가전을 만드는 회사예요.",
+    },
+    session,
+    { generateAnswer: noModel, rewriteQuestion: rewriteTo("삼성전자를 사도 되나요?") },
+  );
+  assert.equal(rewriteCalls, 0, "추천 차단은 1단에서 끝난다");
+  assert.equal(blockedFollowUp.route, "refusal");
+
+  // 재작성 실패는 1단 결과를 그대로 쓴다. 답변 경로를 넓히지 않는다.
+  const rewriteFailed = await createChatOutcome(
+    { message: "그럼 이게 높으면 좋은거야?", context, lastAnswer: "수익률은 비율로 보는 값이에요." },
+    session,
+    {
+      generateAnswer: noModel,
+      rewriteQuestion: async () => {
+        throw new Error("rewrite down");
+      },
+    },
+  );
+  assert.equal(rewriteFailed.route, "outOfScope");
+  assert.equal(rewriteFailed.rewritten, undefined);
+  assert.equal(modelCalls, 0);
+
+  // 직전 답변이 없으면 재작성 자체를 시도하지 않는다.
+  rewriteCalls = 0;
+  await createChatOutcome({ message: "그럼 이게 높으면 좋은거야?", context }, session, {
+    generateAnswer: noModel,
+    rewriteQuestion: rewriteTo("수익률이 높으면 좋은 건가요?"),
+  });
+  assert.equal(rewriteCalls, 0);
+
+  // 성향·시즌 기록은 화면으로 보내는 안내다. 이해 확인 전이를 붙이지 않고
+  // 이동 버튼과 후속 질문만 준다.
+  const ownProfile = await createChatOutcome(
+    { message: "현재 내 성향 뭐야?", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(ownProfile.source, "tool");
+  assert.equal(isExplainAction(ownProfile.action), false);
+  assert.equal(ownProfile.action?.uiAction?.target, "archive");
+  assert.equal(ownProfile.action?.uiAction?.archiveTab, "report");
+  assert.equal(ownProfile.action?.suggestedQuestions?.length, 2);
+  assert.equal(ownProfile.response.text.startsWith("내 성향 결과는"), true);
+
+  const ownArchive = await createChatOutcome(
+    { message: "내 지난 시즌 기록 보여줘", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(isExplainAction(ownArchive.action), false);
+  assert.equal(ownArchive.action?.uiAction?.archiveTab, "return");
+
   const screenAmount = await createChatOutcome(
     {
       message: "예상 금액이 얼마야?",

@@ -74,6 +74,54 @@ type Message = {
   sectorExploreTurn?: SectorExploreTurn;
   uiAction?: ChatUiAction;
 };
+/**
+ * 새로고침해도 보던 대화가 남게 한다. 탭을 닫으면 사라지는 `sessionStorage` 만
+ * 쓰고 서버로 보내지 않는다 — 대화 원문은 저장·전달하지 않는다는 SPEC §11 을
+ * 그대로 지킨다.
+ */
+const CHAT_STORAGE_KEY = "kw_f10_chat_v1";
+const MAX_STORED_MESSAGES = 40;
+
+function readStoredMessages(): Message[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.sessionStorage.getItem(CHAT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item): item is Message =>
+        Boolean(item) &&
+        typeof item === "object" &&
+        typeof (item as Message).text === "string" &&
+        ((item as Message).role === "user" || (item as Message).role === "assistant"),
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredMessages(messages: Message[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify(messages.slice(-MAX_STORED_MESSAGES)),
+    );
+  } catch {
+    // 저장 실패는 대화를 막지 않는다.
+  }
+}
+
+function clearStoredMessages() {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(CHAT_STORAGE_KEY);
+  } catch {
+    // 무시
+  }
+}
+
 type SheetDragState = {
   pointerId: number;
   startY: number;
@@ -357,6 +405,14 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const [isSheetDragging, setIsSheetDragging] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  // \uc11c\ubc84 \ub80c\ub354\uc640 \uc5b4\uae0b\ub098\uc9c0 \uc54a\ub3c4\ub85d \uc800\uc7a5\ub41c \ub300\ud654\ub294 \ub9c8\uc6b4\ud2b8 \ub4a4\uc5d0 \ub418\uc0b4\ub9b0\ub2e4.
+  useEffect(() => {
+    const stored = readStoredMessages();
+    if (stored.length > 0) setMessages(stored);
+  }, []);
+  useEffect(() => {
+    writeStoredMessages(messages);
+  }, [messages]);
   const [status, setStatus] = useState("\uc9c8\ubb38\uc744 \uae30\ub2e4\ub9ac\uace0 \uc788\uc5b4");
   const [isLoading, setIsLoading] = useState(false);
   const [isBuyHesitationBubbleVisible, setIsBuyHesitationBubbleVisible] =
@@ -631,6 +687,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     chatSessionVersionRef.current += 1;
     requestAbortRef.current?.abort();
     requestAbortRef.current = null;
+    clearStoredMessages();
     setMessages([]);
     setInput("");
     setStatus("질문을 기다리고 있어");
@@ -773,6 +830,15 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
         body: JSON.stringify({
           message: question,
           context: chatContext,
+          // 지시어("이게"·"그거")를 풀 수 있도록 직전 서버 답변 한 건과 그때 다룬
+          // 용어만 보낸다. 대화 이력 전체는 보내지 않는다.
+          ...(previousMessage?.role === "assistant" && previousMessage.text
+            ? { lastAnswer: previousMessage.text.slice(0, 800) }
+            : {}),
+          ...(previousMessage?.role === "assistant" &&
+          previousMessage.explainTurn?.scriptId.startsWith("term:")
+            ? { lastTopicId: previousMessage.explainTurn.scriptId }
+            : {}),
           // 버튼을 눌렀으면 choiceId를 보내고, 직접 타이핑했으면 진행 중인 단계만 보내
           // 서버가 구어체("ㅇㅇ", "몰라"…)를 해석하게 한다.
           ...(explainTurn && explainTurn.stage !== "example"

@@ -19,6 +19,7 @@ import {
 } from "./explain";
 import { generateChatAnswer } from "./openai";
 import { judgeChatOutput } from "./output-judge";
+import { rewriteFollowUp } from "./rewrite";
 import { looksLikeNewQuestion } from "./colloquial";
 import { isHaeyoKorean, toPoliteKorean } from "./polite";
 import { routeMessage, type ChatIntent, type ChatRoute } from "./routing";
@@ -51,14 +52,18 @@ export type ChatOutcome = {
     | "judge_unavailable"
     | "tone_violation";
   failure?: "timeout" | "model_error" | "tool_error";
+  /** 지시어 후속 질문을 다시 써서 라우팅했는지. 원문은 남기지 않는다. */
+  rewritten?: boolean;
 };
 
 type ChatOrchestratorDependencies = {
   generateAnswer?: typeof generateChatAnswer;
   judgeOutput?: typeof judgeChatOutput;
+  rewriteQuestion?: typeof rewriteFollowUp;
   runTool?: typeof runReadOnlyTool;
   timeoutMs?: number;
   judgeTimeoutMs?: number;
+  rewriteTimeoutMs?: number;
   requestSignal?: AbortSignal;
   onStatus?: (status: string) => void;
 };
@@ -265,13 +270,101 @@ function toPoliteAction(
   };
 }
 
+/**
+ * 2단 — 지시어 후속 질문 되살리기 (SPEC §3.5).
+ *
+ * 1단이 어떤 허용 목적도 판정하지 못했을 때만 돈다. 위기·추천·개인정보처럼 1단이
+ * 이미 잡은 입력은 여기에 오지 않으므로 재작성이 차단을 우회하는 통로가 되지
+ * 않는다. 재작성문은 같은 `routeMessage` 를 처음부터 다시 통과한다.
+ */
+async function resolveFollowUp(
+  request: ChatRequest,
+  firstPass: ReturnType<typeof routeMessage>,
+  dependencies: ChatOrchestratorDependencies,
+  onStatus: (status: string) => void,
+): Promise<{
+  routed: ReturnType<typeof routeMessage>;
+  modelMessage: string;
+  rewritten?: string;
+  /** 3단으로 보낸 경우의 2단 승인 답변. 모델 답변이 게이트에 막히면 이걸 쓴다. */
+  approvedFallbackText?: string;
+}> {
+  const unresolved =
+    isGenericOutOfScope(firstPass) ||
+    firstPass.route === "fallback" ||
+    // "말한 회사 이름을 찾지 못했어요" 도 사실은 못 알아들은 것이다. 지시어로 회사를
+    // 가리킨 후속 질문("그럼 거기는 돈을 어떻게 벌어?")이 여기로 떨어진다.
+    firstPass.steps[0] === "미등록 종목명 대체 차단";
+  if (!unresolved || !request.lastAnswer) {
+    return { routed: firstPass, modelMessage: request.message };
+  }
+
+  onStatus("무엇을 묻는지 확인하는 중");
+  const timed = createTimedSignal(
+    dependencies.requestSignal,
+    dependencies.rewriteTimeoutMs ?? 4_000,
+  );
+  let rewritten: string | null = null;
+  try {
+    rewritten = await raceWithAbort(
+      (dependencies.rewriteQuestion ?? rewriteFollowUp)(
+        request.message,
+        request.lastAnswer,
+        timed.signal,
+      ),
+      timed.signal,
+    );
+  } catch (error) {
+    // 재작성 실패는 1단 결과를 그대로 쓴다. 답변 경로를 넓히지 않는다.
+    if (!timed.signal.aborted) {
+      console.error(
+        "F10 follow-up rewrite failed",
+        error instanceof Error ? error.name : "unknown",
+      );
+    }
+  } finally {
+    timed.cleanup();
+  }
+  if (!rewritten) return { routed: firstPass, modelMessage: request.message };
+
+  const secondPass = routeMessage(rewritten, request.context);
+  if (isGenericOutOfScope(secondPass)) {
+    return { routed: firstPass, modelMessage: request.message };
+  }
+
+  // 재작성이 직전과 같은 용어 정의로 흡수되면 아이가 물은 각도를 놓친다.
+  // ("시장가는 언제 쓰나요?" → 시장가 정의 반복) 이럴 때만 모델에게 넘긴다.
+  if (
+    secondPass.route === "faq" &&
+    request.lastTopicId &&
+    secondPass.explainScript?.id === request.lastTopicId
+  ) {
+    return {
+      routed: { ...secondPass, route: "fallback", explainScript: undefined },
+      modelMessage: rewritten,
+      rewritten,
+      // 모델이 게이트에 막히면 안전 거절 대신 이 승인 정의로 되돌린다. "수익률이
+      // 높으면 좋은가?" 같은 정상 질문에 거절이 나가는 편이 훨씬 나쁘다.
+      approvedFallbackText: secondPass.text,
+    };
+  }
+
+  return { routed: secondPass, modelMessage: rewritten, rewritten };
+}
+
 export async function createChatOutcome(
   request: ChatRequest,
   session: ChatSession,
   dependencies: ChatOrchestratorDependencies = {},
 ): Promise<ChatOutcome> {
   const onStatus = dependencies.onStatus ?? (() => undefined);
-  const routed = routeMessage(request.message, request.context);
+  const firstPass = routeMessage(request.message, request.context);
+  const { routed, modelMessage, rewritten, approvedFallbackText } = await resolveFollowUp(
+    request,
+    firstPass,
+    dependencies,
+    onStatus,
+  );
   const explainStep = resolveExplainStep(request, routed);
   const stockExploreStep = resolveStockExploreStep(request, routed);
   const sectorExploreStep = resolveSectorExploreStep(request, routed);
@@ -407,8 +500,9 @@ export async function createChatOutcome(
     try {
       response = {
         text: await raceWithAbort(
+          // 지시어가 풀린 단독 질문을 준다. 모델이 "그거"를 추측하지 않는다.
           (dependencies.generateAnswer ?? generateChatAnswer)(
-            request.message,
+            modelMessage,
             request.context,
             timed.signal,
           ),
@@ -441,12 +535,17 @@ export async function createChatOutcome(
     routed.route === "safety" ||
     routed.route === "outOfScope";
   const directServiceHelp = routed.intent === "service_help";
+  // 성향·시즌 기록은 값을 설명하지 않고 그 화면으로 보낸다. 이해 확인 전이를
+  // 붙이면 다음 행동이 버튼과 선택지로 갈라진다 — 답변 자체가 다음 행동이다.
+  const screenGuidance =
+    routed.intent === "own_profile" || routed.intent === "own_archive";
   if (
     explainStep === null &&
     stockExploreStep === null &&
     sectorExploreStep === null &&
     !protectedRoute &&
-    !directServiceHelp
+    !directServiceHelp &&
+    !screenGuidance
   ) {
     const guided = startGuidedExplain(
       response.text,
@@ -509,7 +608,13 @@ export async function createChatOutcome(
   const gateReason = gate.ok ? judgeReason : gate.reason;
   const useSimplerFallback =
     explainStep === "simpler" && gateReason !== undefined && simplerFallbackText;
-  const safeOutput = gateReason === undefined || Boolean(useSimplerFallback);
+  // 재작성 뒤 모델에 넘겼는데 게이트가 막으면 2단 승인 답변으로 되돌린다.
+  const useApprovedFallback =
+    !useSimplerFallback && gateReason !== undefined && approvedFallbackText;
+  const safeOutput =
+    gateReason === undefined ||
+    Boolean(useSimplerFallback) ||
+    Boolean(useApprovedFallback);
   const standardAction = safeOutput
     ? sanitizeActionPayload(response)
     : undefined;
@@ -525,6 +630,8 @@ export async function createChatOutcome(
   const gatedResponse: ChatResponse = {
     text: useSimplerFallback
       ? useSimplerFallback
+      : useApprovedFallback
+      ? useApprovedFallback
       : gateReason === undefined
       ? (gate as { ok: true; text: string }).text
       : gateReason === "prohibited" || gateReason === "judge_violation"
@@ -550,5 +657,6 @@ export async function createChatOutcome(
     gate: gateReason === undefined ? "passed" : "replaced",
     ...(gateReason !== undefined ? { gateReason } : {}),
     ...(failure ? { failure } : {}),
+    ...(rewritten ? { rewritten: true } : {}),
   };
 }

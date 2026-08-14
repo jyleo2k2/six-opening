@@ -46,8 +46,18 @@ async function main() {
   assert.equal(tradeResult.status, "ok");
   assert.equal(tradeResult.response.text.includes("2개"), true);
 
+  // 성향은 값을 읽어 주지 않고 성향 화면으로 보낸다. 저장된 요약이 있어도 마찬가지다.
   const profileResult = await runTool("own_behavior_profile", { screen: "archive" }, session);
-  assert.equal(profileResult.response.text.includes("골고루 탐험형"), true);
+  assert.equal(profileResult.status, "ok");
+  assert.equal(profileResult.response.text.includes("성향 화면"), true);
+  assert.equal(profileResult.response.text.includes("골고루 탐험형"), false);
+  assert.deepEqual(profileResult.response.uiAction, {
+    type: "open_screen",
+    target: "archive",
+    archiveTab: "report",
+    label: "성향 화면 열기",
+  });
+  assert.equal(profileResult.response.suggestedQuestions?.length, 2);
 
   const heldStock = await runTool(
     "own_holdings",
@@ -80,10 +90,17 @@ async function main() {
   assert.equal(noHolding.evidence.length, 0);
 
   const archiveResult = await runTool("own_archive", { screen: "archive" }, session);
-  assert.equal(archiveResult.response.text.includes("여름 시즌"), true);
+  assert.equal(archiveResult.status, "ok");
+  assert.equal(archiveResult.response.text.includes("수익률 화면"), true);
+  assert.deepEqual(archiveResult.response.uiAction, {
+    type: "open_screen",
+    target: "archive",
+    archiveTab: "return",
+    label: "수익률 화면 열기",
+  });
+
+  // 성향·아카이브는 개인 데이터를 조회하지 않는다. 거래·보유만 세션 사용자를 읽는다.
   assert.deepEqual(requestedUserIds, [
-    "session-child",
-    "session-child",
     "session-child",
     "session-child",
     "session-child",

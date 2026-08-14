@@ -192,42 +192,41 @@ export function createReadOnlyToolRunner(
       };
     }
 
+    // 성향과 시즌 기록은 챗봇이 값을 읽어 주지 않고 그 화면으로 보낸다.
+    // 아카이브가 캐릭터·오각형 레이더·서술을 이미 그리므로 같은 값을 문장으로
+    // 옮기면 두 곳이 어긋날 뿐이다. 결과는 화면에서 직접 본다.
     if (tool === "own_behavior_profile") {
-      const profile = await dataSource.getBehaviorProfileSummary(session.userId);
-      if (!profile || profile.observationState === "initial") {
-        return unavailable(
-          tool,
-          "아직 관찰 초기라 투자 성향을 단정할 수 없어요. 기록이 쌓이면 기간을 표시해서 행동 특징을 설명해 줄게요.",
-          "archive",
-        );
-      }
       return {
         tool,
         status: "ok",
         response: {
-          text: `${profile.periodLabel}의 성향은 “${profile.typeLabel ?? "관찰 중"}”으로 정리됐어요. 이건 실력 점수가 아니라 그 기간에 보인 행동 특징이에요.`,
-          uiAction: { type: "open_screen", target: "archive" },
+          text: "내 성향 결과는 아카이브의 성향 화면에서 볼 수 있어요. 캐릭터와 능력치 그림으로 한눈에 정리돼 있어요.",
+          uiAction: {
+            type: "open_screen",
+            target: "archive",
+            archiveTab: "report",
+            label: "성향 화면 열기",
+          },
+          suggestedQuestions: ["성향이 뭐예요?", "내 거래 기록 보여주세요"],
         },
-        evidence: [`behavior-profile:${profile.periodLabel}`],
+        evidence: ["archive-screen:report"],
       };
     }
 
-    const archive = await dataSource.getArchiveSummary(session.userId);
-    if (!archive) {
-      return unavailable(
-        tool,
-        "아직 저장된 시즌 기록이 없어요. 시즌 기록이 생기면 기록만 찾아서 보여 줄게요.",
-        "archive",
-      );
-    }
     return {
       tool,
       status: "ok",
       response: {
-        text: `아카이브에는 시즌 기록이 ${archive.seasonCount}개 있어요.${archive.latestSeasonLabel ? ` 가장 최근 기록은 ${archive.latestSeasonLabel}이에요.` : ""}`,
-        uiAction: { type: "open_screen", target: "archive" },
+        text: "지난 시즌 기록은 아카이브의 수익률 화면에서 볼 수 있어요. 시즌마다 어떻게 달라졌는지 그대로 남아 있어요.",
+        uiAction: {
+          type: "open_screen",
+          target: "archive",
+          archiveTab: "return",
+          label: "수익률 화면 열기",
+        },
+        suggestedQuestions: ["시즌 기록이 뭐예요?", "내 성향 결과 알려주세요"],
       },
-      evidence: [`archive-season-count:${archive.seasonCount}`],
+      evidence: ["archive-screen:return"],
     };
   };
 }

@@ -23,6 +23,7 @@ import {
 } from "../../../shared/types/chatbot";
 import { STOCKS } from "../../../shared/data/stocks";
 import { SECTORS } from "../../../shared/data/sectors";
+import { findExplainScript } from "../../../shared/data/chatbot-knowledge";
 import { findNextStockExploreTopic } from "./stock-explore";
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -43,6 +44,14 @@ type ChatExplainReply = ExplainReply & { previousAnswer?: string };
 export type ChatRequest = {
   message: string;
   context: ChatContext;
+  /**
+   * 직전에 서버가 보낸 답변 한 건. 지시어("이게"·"그거")를 푸는 재작성 입력으로만
+   * 쓴다. 아이가 쓴 말은 담지 않으므로 입력 게이트를 통과한 적 없는 텍스트가
+   * 모델로 되돌아가지 않는다. 대화 이력 전체는 받지 않는다.
+   */
+  lastAnswer?: string;
+  /** 직전에 다룬 용어 스크립트 id. 재작성이 같은 정의를 되풀이하는지 판정한다. */
+  lastTopicId?: string;
   explain?: ChatExplainReply;
   stockExplore?: StockExploreReply;
   sectorExplore?: SectorExploreReply;
@@ -224,6 +233,18 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
     return null;
   }
 
+  // 재작성 입력은 서버가 직전에 내보낸 답변이어야 한다. 길이만 검증하고 모델
+  // 프롬프트에만 쓰며, 라우팅·수치 허용 목록에는 절대 넣지 않는다.
+  const lastAnswer = optionalString(value.lastAnswer, MAX_PREVIOUS_ANSWER_LENGTH);
+  const lastTopicId = optionalString(value.lastTopicId, MAX_EXPLAIN_ID_LENGTH);
+  if (
+    lastAnswer === null ||
+    lastTopicId === null ||
+    (lastTopicId !== undefined && !findExplainScript(lastTopicId))
+  ) {
+    return null;
+  }
+
   const explain = parseExplainReply(value.explain);
   const stockExplore = parseStockExploreReply(value.stockExplore);
   const sectorExplore = parseSectorExploreReply(value.sectorExplore);
@@ -245,6 +266,8 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
       ...(quantity ? { quantity } : {}),
       ...(unitPrice ? { unitPrice } : {}),
     },
+    ...(lastAnswer ? { lastAnswer } : {}),
+    ...(lastTopicId ? { lastTopicId } : {}),
     ...(explain ? { explain } : {}),
     ...(stockExplore ? { stockExplore } : {}),
     ...(sectorExplore ? { sectorExplore } : {}),
