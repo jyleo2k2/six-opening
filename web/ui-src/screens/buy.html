@@ -1,0 +1,183 @@
+<sc-if value="{{ isBuy }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
+<div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
+<div onClick="{{ buyBack }}" style="{{ backBtnStyle }}">{{ buyBackGlyph }}</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">사기(매수)</div>
+<div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ buyStepNo }}</span> / 3</div>
+</div>
+<div style="flex:none;display:flex;gap:5px;padding:0 20px 12px">
+<div style="{{ prog1 }}"></div><div style="{{ prog2 }}"></div><div style="{{ prog3 }}"></div>
+</div>
+
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:0 16px 0;display:flex;flex-direction:column;gap:12px">
+
+<div style="flex:none;background:#FFFFFF;border-radius:22px;padding:12px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="{{ miniBadgeStyle }}">{{ stockEmoji }}</div>
+<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:800;color:#01185A;white-space:nowrap">{{ stockName }}</div><div style="font-size:12.5px;font-weight:500;color:#8E93A8;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap">{{ stockPriceText }}</div></div>
+<span style="{{ detailChangeStyleSm }}">{{ stockChangeText }}</span>
+</div>
+
+<sc-if value="{{ isBuy1 }}" hint-placeholder-val="{{ true }}">
+<div id="tut-buy1" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:9px;background:#ECEDF7;border-radius:20px;padding:12px 15px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<span style="font-size:14px;font-weight:600;color:#5C6280;white-space:nowrap">내 지갑</span>
+<span style="flex:1;text-align:right;font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span>
+</div>
+
+<div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="font-size:16px;font-weight:800;color:#01185A">얼마나 살까?</div>
+<div style="display:flex;gap:6px;margin-top:12px">
+<div onClick="{{ pickByAmount }}" style="{{ byAmountStyle }}">금액으로</div>
+<div onClick="{{ pickByQty }}" style="{{ byQtyStyle }}">주 수로</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:16px 0 4px">
+<span style="font-size:34px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ buyInputText }}</span>
+<span style="font-size:20px;font-weight:800;color:#01185A">{{ buyInputUnit }}</span>
+</div>
+<div style="text-align:center;font-size:14.5px;font-weight:600;color:#F5327F;margin-top:10px">{{ qtyHint }}</div>
+<div style="text-align:center;font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:6px;white-space:nowrap">{{ buyMaxHint }}</div>
+<div style="display:flex;gap:8px;margin-top:16px">
+<sc-if value="{{ buyByAmount }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ amt1 }}" style="{{ chip1 }}">1만원</div>
+<div onClick="{{ amt3 }}" style="{{ chip3 }}">3만원</div>
+<div onClick="{{ amt5 }}" style="{{ chip5 }}">5만원</div>
+<div onClick="{{ amtCustom }}" style="{{ chipC }}">직접</div>
+</sc-if>
+<sc-if value="{{ buyByQty }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ qtyChips }}" as="c" hint-placeholder-count="4">
+<div onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</div>
+</sc-for>
+</sc-if>
+</div>
+<sc-if value="{{ showPad }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px">
+<sc-for list="{{ buyPadKeys }}" as="k" hint-placeholder-count="12">
+<div onClick="{{ k.tap }}" style="text-align:center;padding:13px 0;border-radius:16px;font-size:17px;font-weight:800;color:#01185A;cursor:pointer;background:#F4F4FA;box-shadow:inset 0 0 0 1px #E4E6F1">{{ k.label }}</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div style="background:#FFFFFF;border-radius:22px;padding:6px 8px;display:flex;gap:6px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div onClick="{{ pickMarket }}" style="{{ mktStyle }}">지금 가격에 바로</div>
+<div onClick="{{ pickLimit }}" style="{{ limStyle }}">내가 정한 가격에</div>
+</div>
+
+<sc-if value="{{ showLimit }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
+<div style="font-size:16px;font-weight:800;color:#01185A">얼마가 되면 살까?</div>
+<div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:14px 0 2px">
+<span style="font-size:30px;font-weight:800;color:#F5327F;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ limitPriceText }}</span>
+<span style="font-size:18px;font-weight:800;color:#F5327F">원</span>
+</div>
+<div style="text-align:center;font-size:14px;font-weight:500;color:#7E849B;margin-top:9px;white-space:nowrap">{{ limitDiffText }}</div>
+<div style="display:flex;gap:7px;margin-top:15px">
+<div onClick="{{ lim10 }}" style="{{ limChip10 }}">-10%</div>
+<div onClick="{{ lim5 }}" style="{{ limChip5 }}">-5%</div>
+<div onClick="{{ lim3 }}" style="{{ limChip3 }}">-3%</div>
+<div onClick="{{ lim0 }}" style="{{ limChip0 }}">지금값</div>
+</div>
+<div style="display:flex;align-items:flex-start;gap:9px;background:#ECEDF7;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 살게. 기다리는 동안 그 돈은 잠깐 맡아둘게.</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasWarn }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:9px;background:#FFF1F6;border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
+<span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ warnText }}</span>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBuy2 }}" hint-placeholder-val="{{ false }}">
+<div id="tut-buy2" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:flex-start;gap:10px">
+<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
+<div style="flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)">
+<div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5;text-wrap:pretty">왜 이 회사가 좋아 보였어?</div>
+<div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:5px">정답은 없어, 솔직한 게 최고야!</div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<sc-for list="{{ reasonBtns }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.pick }}" style="{{ r.style }}">
+<div style="font-size:14.5px;font-weight:600;color:#01185A;line-height:1.45">{{ r.label }}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">언제까지 가질 생각이야?</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ planBtns }}" as="p" hint-placeholder-count="4">
+<div onClick="{{ p.pick }}" style="{{ p.style }}"><span style="font-size:15.5px;font-weight:600;color:#01185A">{{ p.label }}</span></div>
+</sc-for>
+</div>
+
+<sc-if value="{{ showTarget }}" hint-placeholder-val="{{ false }}">
+<div style="background:#FFFFFF;border-radius:20px;padding:16px 18px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="font-size:15px;font-weight:700;color:#01185A">목표 가격을 정해볼까?</div>
+<div style="display:flex;gap:8px;margin-top:12px">
+<div onClick="{{ tgt5 }}" style="{{ tgtChip5 }}">+5%</div>
+<div onClick="{{ tgt10 }}" style="{{ tgtChip10 }}">+10%</div>
+<div onClick="{{ tgt20 }}" style="{{ tgtChip20 }}">+20%</div>
+</div>
+<div style="font-size:14px;font-weight:600;color:#5C6280;margin-top:13px;font-variant-numeric:tabular-nums;white-space:nowrap">{{ targetHint }}</div>
+</div>
+</sc-if>
+
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">하고 싶은 말 남겨둘래? <span style="font-size:13px;font-weight:500;color:#A9AEC4">(안 써도 괜찮아)</span></div>
+<input value="{{ buyMemo }}" onInput="{{ buyMemoInput }}" maxlength="50" placeholder="예: 월드투어 시작한대" style="width:100%;box-sizing:border-box;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="text-align:right;font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums;margin-top:-4px">{{ buyMemoCount }} / 50</div>
+
+<div style="background:#FFFFFF;border-radius:20px;padding:15px 17px;margin-top:2px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ qtyText }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>사는 방법</span><span style="font-weight:700;color:#01185A;white-space:nowrap">{{ orderTypeText }}</span></div>
+<div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#01185A">주문 금액</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
+<div id="tut-buy3" style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px">
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none">
+<sc-for list="{{ balloons }}" as="b" hint-placeholder-count="5">
+<div style="{{ b.style }}">{{ b.emoji }}</div>
+</sc-for>
+<sc-for list="{{ confetti }}" as="c" hint-placeholder-count="14">
+<div style="{{ c.style }}"></div>
+</sc-for>
+</div>
+
+<div style="position:relative;display:flex;flex-direction:column;align-items:center;width:100%">
+<img src="assets/mascot-bear.png" width="132" alt="키웅이" style="display:block;animation:kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.18))">
+<div style="font-size:14px;font-weight:700;color:#F5327F;letter-spacing:0.08em;margin-top:14px">{{ doneKicker }}</div>
+<div style="font-size:26px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;text-wrap:pretty">{{ doneHeadline }}</div>
+<div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ donePraise }}</div>
+
+<div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:22px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ doneStockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneQty }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>주문 금액</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ doneAmount }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>남은 지갑</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ cashText }}</span></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ buyInProgress }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;padding:8px 16px 10px">
+<div id="tut-next" onClick="{{ buyNext }}" style="{{ buyCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">{{ buyCtaLabel }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ isBuy3 }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none;padding:8px 16px 10px;display:flex;gap:10px">
+<div onClick="{{ goHome }}" style="{{ subCtaStyle }}">홈으로</div>
+<div id="tut-to-account" onClick="{{ goPortfolio }}" style="{{ mainCtaStyle }}"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">내 계좌 보기</span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
