@@ -3627,6 +3627,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
         ...(earlyKnowledge.actionTarget
           ? { uiAction: { type: "open_screen", target: earlyKnowledge.actionTarget } }
           : {}),
+        ...(earlyKnowledge.explainScript
+          ? { explainScript: earlyKnowledge.explainScript }
+          : {}),
       },
     );
   }

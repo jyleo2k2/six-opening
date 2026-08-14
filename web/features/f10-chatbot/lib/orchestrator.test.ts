@@ -434,7 +434,7 @@ async function main() {
 
   // 사전의 모든 승인 용어는 전용 DAPIE, 서비스 FAQ는 직답을 제공한다.
   for (const entry of CHATBOT_KNOWLEDGE) {
-    if (entry.kind === "glossary") {
+    if (entry.explainScript) {
       assert.ok(entry.explainScript, `${entry.id}에 전용 DAPIE 스크립트가 없어`);
       const script = entry.explainScript;
       const adjust = script.adjust;
@@ -484,7 +484,7 @@ async function main() {
       session,
       { generateAnswer: noModel },
     );
-    if (entry.kind === "glossary") {
+    if (entry.explainScript) {
       assert.equal(isExplainAction(outcome.action), true, `${entry.id}에 DAPIE action이 없어`);
       if (!isExplainAction(outcome.action)) continue;
       assert.equal(outcome.action.turn.scriptId, `term:${entry.id}`);
