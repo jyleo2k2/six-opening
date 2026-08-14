@@ -27,6 +27,8 @@ html.runtime body{background:#F6F7FA;overflow:hidden}
 html.runtime x-dc>div,html.runtime .sc-host>div{padding:0!important;display:flex!important;justify-content:center!important;align-items:center!important;flex-wrap:nowrap!important;height:100dvh!important}
 html.runtime x-dc>div>div:first-child,html.runtime .sc-host>div>div:first-child{transform:scale(var(--runtime-scale,.9));transform-origin:center center}
 html.runtime x-dc>div>div:nth-child(2),html.runtime .sc-host>div>div:nth-child(2){display:none!important}
+@keyframes popItem{0%{opacity:0;transform:translateY(0) scale(0.3)}20%{opacity:1;transform:translateY(-14px) scale(1.05)}80%{opacity:1;transform:translateY(-55px) scale(1)}100%{opacity:0;transform:translateY(-115px) scale(0.85)}}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 </style>
 <script>
 if(new URLSearchParams(location.search).get('runtime')==='1'){
@@ -42,73 +44,112 @@ if(new URLSearchParams(location.search).get('runtime')==='1'){
 <div style="position:absolute;left:24px;top:23px;width:402px;height:874px;border-radius:40px;overflow:hidden;background:#F5F2F8">
 
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
-<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 20px 12px">
-<div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:20px;font-weight:800;color:#01185A;letter-spacing:-0.02em">영웅 키움</span><span style="font-size:13px;font-weight:500;color:#A9AEC4">시즌 3</span></div>
-</div>
-
-<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
-
-<div style="background:#FFFFFF;border-radius:30px;padding:20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:11px">
-<div style="width:44px;height:44px;border-radius:999px;background:#01185A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">{{ initial }}</div>
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)">
+<div style="flex:none;display:flex;align-items:center;gap:11px;padding:10px 18px 12px">
+<img src="{{ homeAvatarImg }}" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
 <div style="flex:1;min-width:0">
-<div style="font-size:17px;font-weight:800;color:#01185A">{{ meName }}</div>
-<div style="font-size:12.5px;font-weight:500;color:#8E93A8;margin-top:2px;white-space:nowrap">모의투자 계좌 · 8***-**42</div>
+<div style="font-size:12px;font-weight:700;color:#8E7BC7">{{ homeSeason }}</div>
+<div style="font-size:17.5px;font-weight:800;color:#01185A;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ homeGreeting }}</div>
+</div>
+<div onClick="{{ toggleMenu }}" style="flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><g stroke="#3B3F60" stroke-width="2.2" stroke-linecap="round"><path d="M1.5 2h19"></path><path d="M1.5 8h19"></path><path d="M1.5 14h19"></path></g></svg>
 </div>
 </div>
-<div style="height:1px;background:#EFEFF5;margin:16px 0 14px"></div>
-<div style="font-size:13.5px;font-weight:500;color:#8E93A8">내 지갑 전체</div>
-<div style="font-size:32px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:6px;white-space:nowrap">{{ totalAssetText }}</div>
-<div style="display:flex;align-items:baseline;gap:9px;margin-top:8px">
-<span style="{{ pnlStyle }}">{{ pnlText }}</span>
-<span style="font-size:13px;font-weight:500;color:#A9AEC4;white-space:nowrap">시작할 때 10,000,000원</span>
-</div>
-<div style="display:flex;gap:10px;margin-top:16px">
-<div style="flex:1;background:#F4F4FA;border-radius:16px;padding:11px 13px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<div style="font-size:12.5px;font-weight:500;color:#8E93A8">쓸 수 있는 돈</div>
-<div style="font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ cashText }}</div>
-</div>
-<div style="flex:1;background:#F4F4FA;border-radius:16px;padding:11px 13px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<div style="font-size:12.5px;font-weight:500;color:#8E93A8">가진 회사</div>
-<div style="font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ holdCountText }}</div>
-</div>
-</div>
-<div onClick="{{ goPortfolio }}" style="margin-top:14px;text-align:center;border-radius:16px;padding:14px;font-size:15.5px;font-weight:800;color:#01185A;cursor:pointer;background:#F1F2F8">내 계좌 보기</div>
-</div>
-
-<div style="padding:2px 4px">
-<div style="display:flex;justify-content:space-between;align-items:baseline">
-<span style="font-size:14px;font-weight:600;color:#01185A">시즌 진행</span>
-<span style="font-size:13.5px;font-weight:600;color:#8E93A8;font-variant-numeric:tabular-nums;white-space:nowrap"><b style="color:#F5327F">3주차</b> / 4주</span>
-</div>
-<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px;box-shadow:none"><div style="width:75%;height:100%;border-radius:999px;background:#F5327F"></div></div>
-</div>
-
-<sc-if value="{{ isParentAcct }}" hint-placeholder-val="{{ false }}">
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:13px">
-<div style="flex:1;min-width:0">
-<div style="font-size:15.5px;font-weight:800;color:#01185A">학교 시간엔 매매 쉬기</div>
-<div style="font-size:13px;font-weight:500;color:#8E93A8;margin-top:4px;white-space:nowrap">평일 09:00~16:00 · 김찬영 계정에만</div>
-</div>
-<div onClick="{{ toggleLock }}" style="{{ lockToggleStyle }}"><div style="{{ lockKnobStyle }}"></div></div>
-</div>
-<div style="font-size:13px;font-weight:600;color:#5C6280;background:#F4F4FA;border-radius:14px;padding:11px 13px;margin-top:13px;box-shadow:inset 0 0 0 1px #E4E6F1">{{ schoolStateText }}</div>
-<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.65;margin-top:10px;text-wrap:pretty">구경하고 배우는 건 언제든 할 수 있어요. 주문만 잠깐 쉬어요.</div>
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ toggleMenu }}" style="position:absolute;left:0;top:0;right:0;bottom:0;z-index:1"></div>
+<div style="position:absolute;right:16px;top:104px;z-index:2;width:184px;border-radius:20px;padding:6px;background:#fff;box-shadow:0 18px 34px -12px rgba(35,25,80,0.3),inset 0 0 0 1px rgba(35,25,80,0.06)">
+<div onClick="{{ openNotifications }}" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#01185A;cursor:pointer">알림</div>
+<div onClick="{{ logout }}" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#D5327A;cursor:pointer;border-top:1px solid #F1F1F7">로그아웃</div>
 </div>
 </sc-if>
 
-<div onClick="{{ goExplore }}" style="position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%),radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">모의투자 하러 가기</span></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ notifyOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ dismissNotify }}" style="text-align:center;border-radius:16px;padding:12px 14px;font-size:13px;font-weight:600;color:#5C6280;background:#F4F4FA;cursor:pointer">새 알림이 없어요</div>
+</sc-if>
 
+<div style="text-align:center;padding:6px 0 2px">
+<div style="display:inline-block;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 6px 12px -8px rgba(35,25,80,0.3)">{{ homeDayCount }}</div>
+<div style="font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:10px">{{ homeItemLine }}</div>
+<div style="font-size:19px;font-weight:800;color:#D5327A;letter-spacing:-0.02em;margin-top:4px">{{ homeRateText }}</div>
 </div>
 
-<div style="{{ navStyle }}">
-<div onClick="{{ goHome }}" style="{{ navHome }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">홈</div></div>
-<div id="tut-nav-trade" onClick="{{ goExplore }}" style="{{ navTrade }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">모의투자</div></div>
-<div onClick="{{ goArchive }}" style="{{ navArchive }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">아카이브</div></div>
-<div onClick="{{ goRanking }}" style="{{ navRanking }}"><div style="font-size:13.5px;font-weight:700;padding:4px 0">랭킹</div></div>
+<div onClick="{{ popGoal }}" style="position:relative;cursor:pointer">
+<img src="{{ goalImg }}" width="228" alt="" style="display:block;width:228px;height:auto;margin:-6px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18))">
+<sc-for list="{{ popItems }}" as="p" hint-placeholder-count="6">
+<img src="{{ goalItemImg }}" alt="" style="{{ p.style }}">
+</sc-for>
 </div>
+
+<div onClick="{{ toggleHoldings }}" style="background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);cursor:pointer;margin-top:auto">
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<span style="font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap">{{ holdingsTitle }}</span>
+<span style="font-size:12.5px;font-weight:700;color:#A9AEC4;white-space:nowrap">{{ holdingsCount }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+<sc-for list="{{ holdingsPreview }}" as="h" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:11px;border-radius:16px;padding:12px 13px;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%)">
+<div style="flex:none;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 4px 8px -5px rgba(35,25,80,0.3)">{{ h.tick }}</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:14.5px;font-weight:700;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;margin-top:2px;white-space:nowrap">{{ h.qty }}</div>
+</div>
+<div style="flex:none;text-align:right">
+<div style="font-size:14px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.value }}</div>
+<div style="{{ h.pctStyle }}">{{ h.pct }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+
+<div style="flex:none;display:flex;align-items:center;gap:8px;padding:10px 14px 20px">
+<div style="flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:#fff;box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(35,25,80,0.05)">
+<div onClick="{{ goHome }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#5B23D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"></path></svg>
+<span style="font-size:11px;font-weight:800;color:#01185A">홈</span>
+</div>
+<div id="tut-nav-trade" onClick="{{ goExplore }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"></path><circle cx="20" cy="7" r="1.5" fill="#B7BACB" stroke="none"></circle></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">모의투자</span>
+</div>
+<div onClick="{{ goArchive }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="15" width="16" height="3" rx="1"></rect><rect x="5" y="11" width="14" height="3" rx="1"></rect><rect x="6" y="7" width="12" height="3" rx="1"></rect></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">아카이브</span>
+</div>
+<div onClick="{{ goRanking }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+<svg width="23" height="23" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#B7BACB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4a4 4 0 0 1-8 0z"></path><path d="M8 5H5a3 3 0 0 0 3 5"></path><path d="M16 5h3a3 3 0 0 1-3 5"></path><path d="M12 13v3"></path><path d="M9 20h6"></path><path d="M9 20a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"></path></svg>
+<span style="font-size:11px;font-weight:600;color:#A9AEC4">랭킹</span>
+</div>
+</div>
+</div>
+
+<sc-if value="{{ holdingsExpanded }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ toggleHoldings }}" style="position:absolute;inset:0;z-index:7;background:rgba(15,10,40,0.42)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:82%;z-index:8;background:#F5F2F8;border-radius:28px 28px 0 0;display:flex;flex-direction:column;box-shadow:0 -20px 40px -12px rgba(20,10,50,0.35);animation:sheetUp 0.34s cubic-bezier(0.22,1,0.36,1)">
+<div style="flex:none;display:flex;justify-content:center;padding:10px 0 2px"><div style="width:38px;height:5px;border-radius:999px;background:#D9D8E6"></div></div>
+<div style="flex:none;display:flex;align-items:center;gap:10px;padding:10px 18px 8px">
+<div onClick="{{ toggleHoldings }}" style="{{ backBtnStyle }}">‹</div>
+<div style="font-size:16px;font-weight:800;color:#01185A">{{ holdingsTitle }}</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 16px 24px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ holdingsFull }}" as="h" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:11px;border-radius:16px;padding:14px;background:#fff;box-shadow:0 4px 12px -6px rgba(35,25,80,0.12)">
+<div style="flex:none;width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5B23D6;background:#F4F4FA">{{ h.tick }}</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:700;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:2px">{{ h.qty }}</div>
+</div>
+<div style="flex:none;text-align:right">
+<div style="font-size:15px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ h.value }}</div>
+<div style="{{ h.pctStyle }}">{{ h.pct }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
 </div>
 </sc-if>
 
@@ -2200,7 +2241,7 @@ class Component extends DCLogic {
     this.dbUser = null;
     fetch('/api/account', { cache:'no-store' })
       .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d && d.user_id) this.dbUser = d; })
+      .then(d => { if (d && d.user_id) { this.dbUser = d; this.forceUpdate(); } })
       .catch(() => {});
   }
 
@@ -3141,6 +3182,51 @@ class Component extends DCLogic {
     const s = this.state, m = this.me(), st = this.stock(), u = this.uni();
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
+    // 홈 화면 — 로그인 계정(dbUser)에 따라 아빠/엄마/아이 홈을 통째로 다르게 그린다.
+    // 디자인 시안(front UI 로그인·가입 v2)의 "계정별 홈 화면 3개" 데모 그대로이며, 아직 실제 보유
+    // 종목·수익과는 연동하지 않은 고정 데모 데이터다.
+    const HOME_INFO = {
+      mom: {
+        season: '보호자 계정', greeting: '찬영 어머님, 어서 오세요', avatarImg: 'assets/profile-mom.png',
+        day: '28일째', goal: '샤넬 코코 마드모아젤', brand: '샤넬', unit: '향수',
+        img: 'assets/item-mom.png', goalImg: 'assets/goal-mom.png', unitPrice: 210000, profit: 211000,
+        holdings: [
+          { tick: '삼성', name: '삼성전자', qty: '4주', value: '318,000원', pct: '+2.4%', up: true },
+          { tick: 'LG', name: 'LG생활건강', qty: '1주', value: '412,000원', pct: '+5.1%', up: true },
+          { tick: '아모', name: '아모레퍼시픽', qty: '2주', value: '246,000원', pct: '-1.2%', up: false }
+        ]
+      },
+      dad: {
+        season: '보호자 계정', greeting: '찬영 아버님, 어서 오세요', avatarImg: 'assets/profile-dad.png',
+        day: '28일째', goal: '나이키 에어조던 1', brand: '나이키', unit: '신발',
+        img: 'assets/item-dad.png', goalImg: 'assets/goal-dad.png', unitPrice: 219000, profit: 452000,
+        holdings: [
+          { tick: '현대', name: '현대차', qty: '2주', value: '486,000원', pct: '+3.8%', up: true },
+          { tick: 'NAV', name: 'NAVER', qty: '1주', value: '198,000원', pct: '-0.6%', up: false },
+          { tick: '카카', name: '카카오', qty: '5주', value: '215,000원', pct: '+1.9%', up: true },
+          { tick: 'SK', name: 'SK하이닉스', qty: '1주', value: '178,000원', pct: '+6.2%', up: true }
+        ]
+      },
+      child: {
+        season: '아이 계정', greeting: '찬영아, 어서 와요!', avatarImg: 'assets/profile-child.png',
+        day: '14일째', goal: '왁뿌볼 모으기', brand: '', unit: '왁뿌볼',
+        img: 'assets/item-child.png', goalImg: 'assets/goal-child.png', unitPrice: 12000, profit: 428600,
+        holdings: [
+          { tick: '삼성', name: '삼성전자', qty: '3주', value: '238,500원', pct: '+4.3%', up: true },
+          { tick: '롯데', name: '롯데웰푸드', qty: '2주', value: '124,000원', pct: '+2.1%', up: true },
+          { tick: '오리', name: '오리온', qty: '1주', value: '96,500원', pct: '-0.8%', up: false }
+        ]
+      }
+    };
+    const dbRole = this.dbUser ? (this.dbUser.parent_child === 'child' ? 'child' : this.dbUser.guardian_role) : null;
+    // dbUser 를 아직 못 불러왔을 때는 빈 화면 대신 아이 계정 데모로 보여준다.
+    const home = HOME_INFO[dbRole] || HOME_INFO.child;
+    const goalCount = Math.max(0, Math.floor(home.profit / home.unitPrice));
+    const homeHoldingsTotal = home.holdings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
+    const homeRate = homeHoldingsTotal ? (home.profit / homeHoldingsTotal * 100) : 0;
+    const homeHoldingStyle = (h) => Object.assign({}, h, {
+      pctStyle: 'font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:' + (h.up ? '#D5327A' : '#2E6BE6')
+    });
     // 주문 직후 값 — 매수 3단계 축하 화면과 매도 3단계 완료 화면이 이걸로 문구를 만든다
     const od = s.orderDone || {};
     const odQty = od.scheduled && od.requestMode === 'amount'
@@ -3377,6 +3463,48 @@ class Component extends DCLogic {
       isPortfolio: s.screen === 'portfolio', isArchive: s.screen === 'archive',
       isBuy1: s.buyStep === 1, isBuy2: s.buyStep === 2, isBuy3: s.buyStep === 3,
       buyInProgress: s.buyStep < 3,
+
+      homeAvatarImg: home.avatarImg,
+      homeSeason: home.season,
+      homeGreeting: home.greeting,
+      homeDayCount: '시즌 3 · ' + home.day,
+      homeItemLine: (home.brand ? home.brand + ' ' : '') + home.unit + ' ' + goalCount + '개',
+      homeRateText: '+' + homeRate.toFixed(1) + '%',
+      goalImg: home.goalImg,
+      goalItemImg: home.img,
+      popGoal: () => {
+        this.set({ goalPopupOpen: true });
+        setTimeout(() => this.set({ goalPopupOpen: false }), 1500);
+      },
+      popItems: Array.from({ length: 6 }, (_, i) => {
+        const on = Boolean(s.goalPopupOpen) && i < Math.min(goalCount, 6);
+        const seed = (i + 1) * 47;
+        const left = (15 + (seed * 7 % 70)).toFixed(1);
+        const bottom = (12 + (seed * 13 % 55)).toFixed(1);
+        const rot = (-35 + (seed * 5 % 70)).toFixed(1);
+        return {
+          style: 'position:absolute;left:' + left + '%;bottom:' + bottom + '%;width:44px;height:44px;object-fit:contain;pointer-events:none;'
+            + (on
+              ? 'opacity:0;transform:rotate(' + rot + 'deg);animation:popItem 1.3s ease-out forwards;animation-delay:' + (i * 0.1) + 's'
+              : 'display:none')
+        };
+      }),
+
+      holdingsTitle: '내 보유 종목',
+      holdingsCount: '전체보기',
+      holdingsPreview: home.holdings.slice(0, 3).map(homeHoldingStyle),
+      holdingsFull: home.holdings.map(homeHoldingStyle),
+      holdingsExpanded: Boolean(s.holdingsExpanded),
+      toggleHoldings: () => this.set({ holdingsExpanded: !s.holdingsExpanded }),
+
+      menuOpen: Boolean(s.menuOpen),
+      toggleMenu: () => this.set({ menuOpen: !s.menuOpen }),
+      notifyOpen: Boolean(s.notifyOpen),
+      openNotifications: () => this.set({ menuOpen: false, notifyOpen: true }),
+      dismissNotify: () => this.set({ notifyOpen: false }),
+      logout: () => {
+        fetch('/api/auth/login', { method: 'DELETE' }).finally(() => { window.top.location.href = '/'; });
+      },
 
       meName: m.name, initial: m.name.charAt(0),
       totalAssetText: won(total), cashText: won(m.cash), navAccount: this.navItem(s.screen === 'portfolio'),

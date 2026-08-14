@@ -33,8 +33,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE() {
-  return Response.json(
-    { ok: true },
-    { headers: { "Set-Cookie": `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0` } },
-  );
+  const parts = [`${SESSION_COOKIE}=`, "Path=/", "HttpOnly", "SameSite=Lax", "Max-Age=0"];
+  if (process.env.NODE_ENV === "production") parts.push("Secure");
+  return Response.json({ ok: true }, { headers: { "Set-Cookie": parts.join("; ") } });
 }
