@@ -1,5 +1,52 @@
+import { PROTOTYPE_PHONE, type PrototypeScreenRect } from "./bottom-sheet";
+
 export const FLOATING_AVATAR_IDLE_ROTATION_MS = 3 * 60 * 1_000;
 export const FLOATING_AVATAR_DRAG_THRESHOLD_PX = 4;
+
+// ── 삭제 타깃 ───────────────────────────────────────────────────────────────
+// 드래그 중에만 화면 하단 가운데에 나타나는 동그라미 X. 버튼을 그 위에 놓으면 사라진다.
+
+/** 타깃 지름. 버튼(56px)보다 커야 겨냥이 쉽다 */
+export const DISMISS_TARGET_DIAMETER_PX = 64;
+/** 흡입 반경 안에 들어왔을 때 커지는 지름 */
+export const DISMISS_TARGET_ARMED_DIAMETER_PX = 78;
+/**
+ * 타깃 중심이 화면 아래에서 떨어진 거리.
+ * 하단 탭바(52px) + 활성 타깃 반지름(39px) + 여유를 더한 값이라 탭바를 덮지 않는다.
+ */
+export const DISMISS_TARGET_BOTTOM_OFFSET_PX = 120;
+/** 버튼 중심이 이 거리 안에 들어오면 놓았을 때 사라진다 */
+export const DISMISS_TARGET_SNAP_RADIUS_PX = 45;
+
+export type FloatingPoint = { x: number; y: number };
+
+/**
+ * 삭제 타깃의 중심 좌표.
+ * 버튼 위치를 자르는 `clampFloatingChatPosition` 과 **같은 MTS 화면 사각형**을 기준으로 삼는다.
+ * 기준이 갈리면 버튼이 닿을 수 없는 곳에 타깃이 놓인다.
+ */
+export function dismissTargetPosition(screen: PrototypeScreenRect | null): FloatingPoint {
+  if (!screen) {
+    return {
+      x: PROTOTYPE_PHONE.screenWidth / 2,
+      y: PROTOTYPE_PHONE.screenHeight - DISMISS_TARGET_BOTTOM_OFFSET_PX,
+    };
+  }
+  return {
+    x: screen.left + screen.width / 2,
+    y: screen.top + screen.height - DISMISS_TARGET_BOTTOM_OFFSET_PX * screen.scale,
+  };
+}
+
+/** 버튼 중심이 타깃 흡입 반경 안에 있는지. 반경도 화면 배율을 따라간다 */
+export function isOverDismissTarget(
+  button: FloatingPoint,
+  target: FloatingPoint,
+  scale = 1,
+): boolean {
+  const radius = DISMISS_TARGET_SNAP_RADIUS_PX * (scale > 0 ? scale : 1);
+  return Math.hypot(button.x - target.x, button.y - target.y) <= radius;
+}
 
 export function hasFloatingAvatarDragStarted(
   startX: number,

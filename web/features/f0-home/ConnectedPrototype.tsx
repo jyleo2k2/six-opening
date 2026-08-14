@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
 import type { ChatContext, ChatUiAction } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
-import { FeedScreen } from "../f11-feed";
 import {
   isRecord,
   parseBehaviorEvent,
@@ -13,23 +12,13 @@ import {
 
 const CHAT_CONTEXT_MESSAGE = "kiwoom:chat-context";
 const CHAT_BEHAVIOR_MESSAGE = "kiwoom:chat-behavior";
-const OPEN_STOCK_MESSAGE = "kiwoom:open-stock";
 const OPEN_CHAT_ACTION_MESSAGE = "kiwoom:open-chat-action";
 
+// 가족 피드는 app.html 아카이브 수익률 탭이 소유한다. 여기 오버레이로 겹쳐 두지 않는다.
 export function ConnectedPrototype() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const chatContextRef = useRef<ChatContext>({ screen: "home" });
   const [chatContext, setChatContext] = useState<ChatContext>({ screen: "home" });
-  const [feedOpen, setFeedOpen] = useState(false);
-
-  // 피드에서 종목을 고르면 iframe 안 app.html 을 그 종목 상세로 옮긴다.
-  const openChart = (symbol: string) => {
-    setFeedOpen(false);
-    iframeRef.current?.contentWindow?.postMessage(
-      { type: OPEN_STOCK_MESSAGE, symbol },
-      window.location.origin,
-    );
-  };
 
   const openChatAction = (action: ChatUiAction) => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -84,20 +73,6 @@ export function ConnectedPrototype() {
       <div className="prototype-chat-overlay">
         <F10ChatbotDemo context={chatContext} onUiAction={openChatAction} />
       </div>
-
-      <button
-        className="prototype-feed-button"
-        onClick={() => setFeedOpen(true)}
-        type="button"
-      >
-        가족 기록
-      </button>
-
-      {feedOpen && (
-        <div className="prototype-feed-overlay">
-          <FeedScreen onClose={() => setFeedOpen(false)} onOpenChart={openChart} />
-        </div>
-      )}
     </div>
   );
 }
