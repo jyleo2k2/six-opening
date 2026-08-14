@@ -11,9 +11,18 @@ export const EVIDENCE_REASON_CODES = ["buy_news", "buy_chart", "buy_familiar"];
 // 오각형 축 순서. 화면 라벨(집중·분산·정확·직관·근거)과 같은 순서다.
 export const ABILITY_ORDER = ["focus", "diversification", "accuracy", "intuition", "evidence"];
 
-// 정확은 사고판 시점이 맞았는지라 5거래일 종가가 있어야 채점된다.
-// 아직 채점 경로가 화면에 없어 중간값으로 둔다. [가정]
-export const ACCURACY_PLACEHOLDER = 50;
+// 정확은 체결 후 이만큼 거래일이 지난 종가로 채점한다.
+export const ACCURACY_WAIT_TRADING_DAYS = 5;
+
+// 채점된 거래가 하나도 없으면 이 비율에서 시작한다. [가정]
+export const ACCURACY_DEFAULT_RATIO = 0.5;
+
+// 레벨 경계. 반올림 전 비율로 판정해 66.7% 경계가 흔들리지 않게 한다.
+export const ACCURACY_LEVEL_3_RATIO = 2 / 3;
+export const ACCURACY_LEVEL_2_RATIO = 1 / 3;
+
+// 채점 전 화면에 쓰는 기본 정확 점수.
+export const ACCURACY_PLACEHOLDER = Math.round(ACCURACY_DEFAULT_RATIO * 100);
 
 // 섹터가 하나 늘 때마다 집중이 이만큼 내려간다. [가정]
 const FOCUS_STEP_PER_SECTOR = 22;
@@ -25,9 +34,10 @@ const clamp100 = (n) => Math.max(0, Math.min(100, n));
  *
  * @param {Array<{symbol: string, reason_code: string}>} records 한 사람의 매수 기록
  * @param {(symbol: string) => (string|null|undefined)} sectorOf 종목 코드 -> 섹터
+ * @param {number} [accuracy] 채점된 정확 점수 0~100. 없으면 채점 전 기본값
  * @returns {{count: number, evidencePct: number, focus: number, scores: number[]}}
  */
-export function computeAbilityScores(records, sectorOf) {
+export function computeAbilityScores(records, sectorOf, accuracy = ACCURACY_PLACEHOLDER) {
   const list = Array.isArray(records) ? records : [];
   const sectors = {};
   list.forEach((r) => {
@@ -46,7 +56,7 @@ export function computeAbilityScores(records, sectorOf) {
     evidencePct,
     focus,
     // 집중·분산과 근거·직관은 서로 보완쌍이라 합이 100 이다.
-    scores: [focus, 100 - focus, ACCURACY_PLACEHOLDER, 100 - evidencePct, evidencePct],
+    scores: [focus, 100 - focus, clamp100(Math.round(accuracy)), 100 - evidencePct, evidencePct],
   };
 }
 
@@ -55,9 +65,10 @@ export function computeAbilityScores(records, sectorOf) {
  * 5:5 동점은 근거·집중 쪽으로 귀속한다.
  *
  * @param {number[]} scores computeAbilityScores 의 scores
+ * @param {1|2|3} [level] gradeAccuracy 가 낸 레벨. 없으면 정확 점수로 되짚는다
  * @returns {{key: "sniper"|"strategist"|"fighter"|"explorer", level: 1|2|3}}
  */
-export function resolveCharacter(scores) {
+export function resolveCharacter(scores, level) {
   const focus = scores[0];
   const diversification = scores[1];
   const accuracy = scores[2];
@@ -73,6 +84,82 @@ export function resolveCharacter(scores) {
         ? "fighter"
         : "explorer";
 
-  const level = accuracy >= 70 ? 3 : accuracy >= 40 ? 2 : 1;
-  return { key, level };
+  return { key, level: level || accuracyLevelOf(accuracy / 100) };
+}
+
+// ── 정확 채점 ──────────────────────────────────────────────────────────
+// 체결 5거래일 뒤 종가로 맞았는지 본다. 매수는 오르면, 매도는 내리면 적중이다.
+
+/** ISO 시각 → KST 날짜(YYYY-MM-DD). 일봉 `date` 와 같은 축이다. */
+export function kstDateOf(iso) {
+  return new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
+}
+
+/** `date` 다음 거래일부터 세어 `days` 번째 종가. 아직 안 지났으면 null */
+export function closeAfterTradingDays(closes, date, days) {
+  let seen = 0;
+  for (const candle of closes) {
+    if (candle.date > date && (seen += 1) === days) return candle.close;
+  }
+  return null;
+}
+
+/** `date` 당일 종가, 없으면 직전 거래일 종가 */
+export function closeOnOrBefore(closes, date) {
+  let last = null;
+  for (const candle of closes) {
+    if (candle.date > date) break;
+    last = candle.close;
+  }
+  return last;
+}
+
+/** 적중 비율 → 레벨. 반올림 전 비율로 판정한다 */
+export function accuracyLevelOf(ratio) {
+  if (ratio >= ACCURACY_LEVEL_3_RATIO) return 3;
+  if (ratio >= ACCURACY_LEVEL_2_RATIO) return 2;
+  return 1;
+}
+
+/**
+ * 정확 = 채점된 거래의 적중률 퍼센트(0~100, 반올림).
+ * 종가가 모자란 거래는 `pending` 으로 빼고 적중률에서 제외한다.
+ *
+ * @param {Array<{symbol: string, price: number, tradedAt: string}>} buys
+ * @param {Array<{symbol: string, tradedAt: string}>} sells
+ * @param {Record<string, Array<{date: string, close: number}>>} dailyClosesBySymbol
+ * @returns {{accuracy: number, level: 1|2|3, graded: number, pending: number, hits: number}}
+ */
+export function gradeAccuracy(buys, sells, dailyClosesBySymbol) {
+  let graded = 0;
+  let hits = 0;
+  let pending = 0;
+
+  for (const buy of buys || []) {
+    const closes = dailyClosesBySymbol[buy.symbol] || [];
+    const settle = closeAfterTradingDays(closes, kstDateOf(buy.tradedAt), ACCURACY_WAIT_TRADING_DAYS);
+    if (settle === null) {
+      pending += 1;
+      continue;
+    }
+    graded += 1;
+    if (settle > buy.price) hits += 1;
+  }
+
+  for (const sell of sells || []) {
+    const closes = dailyClosesBySymbol[sell.symbol] || [];
+    const soldDate = kstDateOf(sell.tradedAt);
+    // 매도 체결가는 매도 당일(없으면 직전 거래일) 종가로 근사한다 [가정]
+    const sellPrice = closeOnOrBefore(closes, soldDate);
+    const settle = closeAfterTradingDays(closes, soldDate, ACCURACY_WAIT_TRADING_DAYS);
+    if (sellPrice === null || settle === null) {
+      pending += 1;
+      continue;
+    }
+    graded += 1;
+    if (settle < sellPrice) hits += 1;
+  }
+
+  const ratio = graded > 0 ? hits / graded : ACCURACY_DEFAULT_RATIO;
+  return { accuracy: Math.round(ratio * 100), level: accuracyLevelOf(ratio), graded, pending, hits };
 }

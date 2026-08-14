@@ -22,10 +22,18 @@
     // ── 성향 다섯 축 ──────────────────────────────────────────────
     // 산출식은 shared/engine/archive-profile.js 가 갖고 있다. 여기서는 부르기만 한다.
     const sectorOfCode = code => { const st = u.stocks.filter(v => v.code === code)[0]; return st ? st.sector : null; };
+    // 정확 채점 입력. 대기 주문은 체결이 아니라 빼고, 매수가는 주문금액 ÷ 주 수로 낸다.
+    const buysOf = userId => (s.records || [])
+      .filter(r => r.user_id === userId && r.order_status === 'filled' && r.qty > 0 && r.amount_krw > 0)
+      .map(r => ({ symbol: r.symbol, price: r.amount_krw / r.qty, tradedAt: r.ts }));
+    const sellsOf = userId => (s.sellRecords || [])
+      .filter(r => r.user_id === userId && r.order_status === 'filled')
+      .map(r => ({ symbol: r.symbol, tradedAt: r.ts }));
     const scoresOf = userId => {
       const recs = (s.records || []).filter(r => r.user_id === userId);
-      const out = computeAbilityScores(recs, sectorOfCode);
-      return { n: out.count, gr: out.evidencePct, list: out.scores };
+      const grade = gradeAccuracy(buysOf(userId), sellsOf(userId), s.closes || {});
+      const out = computeAbilityScores(recs, sectorOfCode, grade.accuracy);
+      return { n: out.count, gr: out.evidencePct, list: out.scores, grade: grade };
     };
 
     // ── 투자 유형 네 가지 ─────────────────────────────────────────
@@ -40,8 +48,8 @@
       explorer:   { name:'탐험가', img:'explorer',   pal:['#B2D2C7','#87B6A7','#619484','#1B3F35'],
         desc:'여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.' }
     };
-    const typeOf = sc => {
-      const decided = resolveCharacter(sc);
+    const typeOf = (sc, level) => {
+      const decided = resolveCharacter(sc, level);
       const t = TYPES[decided.key], lv = decided.level;
       return { key:decided.key, name:t.name, desc:t.desc, img:t.img, pal:t.pal, lv:lv, title:t.name + ' LV' + lv };
     };
@@ -57,7 +65,7 @@
     ];
 
     const mine = scoresOf('child_minji');
-    const myType = typeOf(mine.list);
+    const myType = typeOf(mine.list, mine.grade.level);
     const MPL = myType.pal, mInk = MPL[3];
 
     const R = 48, CX = 80, CY = 80;
@@ -102,14 +110,9 @@
     const WEEKS = weekKeys.map(k => {
       const recs = weeks[k], isNow = k === thisMon;
       let list;
+      // 지난 주 카드는 그 주 기록만으로 다시 낸다. 정확은 그 시점 채점이 없어 기본값이다.
       if (isNow) list = mine.list;
-      else {
-        const nSec = {};
-        recs.forEach(r => { const st = u.stocks.filter(v => v.code === r.symbol)[0]; if (st) nSec[st.sector] = 1; });
-        const g = recs.length ? Math.round(recs.filter(r => ['buy_news','buy_chart','buy_familiar'].indexOf(r.reason_code) >= 0).length / recs.length * 100) : 0;
-        const f = Math.max(0, Math.min(100, 100 - (Math.max(1, Object.keys(nSec).length) - 1) * 22));
-        list = [f, 100 - f, 50, 100 - g, g];
-      }
+      else list = computeAbilityScores(recs, sectorOfCode).scores;
       const t = typeOf(list);
       const mon = new Date(k), sun = new Date(k + 6 * 86400000);
       return {
@@ -185,7 +188,7 @@
     // 아빠는 아직 앱 계정이 없어 점수가 비어 있다.
     const FAM = MEMBERS.map(f => {
       const sc = f.acc ? scoresOf(f.user) : null;
-      const t = sc && sc.n ? typeOf(sc.list) : null;
+      const t = sc && sc.n ? typeOf(sc.list, sc.grade.level) : null;
       return {
         key: f.key, name: f.name, face: f.face, col: f.col, fill: f.fill,
         has: !!(sc && sc.n), scores: sc ? sc.list : [0, 0, 0, 0, 0],
