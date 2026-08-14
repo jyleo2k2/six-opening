@@ -8,7 +8,9 @@ const source = readFileSync(
 
 assert.match(source, /fetch\('\/api\/news\?stockId='/u);
 assert.match(source, /fetch\('\/api\/news\/'/u);
-assert.match(source, /stockNews: newsItem \? newsItem\.homeSummary/u);
+assert.match(source, /stockNews: newsItem \? newsItem\.headline/u);
+assert.match(source, /if \(item\.scope !== 'company'\) return false/u);
+assert.doesNotMatch(source, /detailNews\.scope === 'market'/u);
 assert.match(source, /activeNewsId:item\.newsId, activeNews:item/u);
 assert.match(
   source,

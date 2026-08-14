@@ -1,6 +1,6 @@
 # 어린이 뉴스 역할 파이프라인 프로토타입
 
-> 상태: **프로토타입** — 뉴스 수집 스케줄과 Supabase 저장에는 아직 연결하지 않는다.
+> 상태: **프로토타입** — 수동 검증을 통과한 결과만 Supabase에 넣을 수 있으며, 일일 수집 스케줄에는 아직 연결하지 않는다.
 
 오늘 국내 시황 또는 선정 51개 기업의 직접적인 중요 사건만 골라, 10~13세가 읽을 수 있는 뉴스 후보로 바꾸고 독립 검수하는 실험 구현이다.
 
@@ -40,6 +40,11 @@
 - `evaluation-fixtures/latest-economic-news-2026-08-12.json`: 최신 기사 후보에서 고정한 사람 기준표와 출처 사실 단위
 - `evaluation-fixtures/latest-economic-news-2026-08-13.json`: 앞선 표본과 URL이 겹치지 않는 두 번째 최신 기사 10건 기준표
 - `evaluation.test.ts`: 평가 판정·10건 제한·HTML 이스케이프 회귀 테스트
+- `naver-news-collector.ts`: 네이버 검색에서는 후보 URL만 찾고 실제 기사 페이지에서 제목·시각·언론사 원문 URL·본문 근거를 읽는 51종목 수집기
+- `collect-universe-news.ts`: 종목마다 체크포인트를 남기고 `--resume`할 수 있는 51종목 수집 CLI
+- `universe-news-evaluation.ts`: 51종목 결과 계약, 대상 종목 주인공 게이트, 현재 목업 대 실제 결과 비교 HTML
+- `run-universe-evaluation.ts`: 51종목을 Luna 역할 파이프라인으로 판정하고 종목마다 JSON·HTML을 갱신하는 CLI
+- `universe-news-storage.ts`: 완전한 51종목 보고서에서 기술 오류가 없을 때 통과 기사만 동일 `article_id`·인용 근거로 묶는 SQL 생성기
 
 ## 실행
 
@@ -56,7 +61,7 @@ npm run build
 
 ```powershell
 cd web
-node --conditions=react-server --import tsx features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs
+node features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs
 ```
 
 기본 출력은 `reports/latest-economic-news-2026-08-12-luna/`의 `report.json`과 `index.html`이다. 같은 경로가 있으면 덮어쓰지 않으며 재실행은 `--overwrite`를 명시한다. HTML 첫 화면에는 `ready_for_storage` 기사의 제목과 겹치지 않는 3줄 요약을 실제 서비스 뉴스 카드 형태로만 보여준다. 홈 화면 전용 요약을 상세 카드에 다시 노출하지 않는다. `원문 보기`는 새 창 팝업을 만들지 않고 같은 탭에서 출처 URL로 이동한다. 원문 근거 문장과 제목 선별·본문 선별·1~2차 편집·독립 검수의 실제 JSON, 거부 기사 판정은 아래 `검수 상세 보기`를 펼쳐 확인한다. 프로세스는 다음을 기사별로 남긴다.
@@ -72,9 +77,60 @@ node --conditions=react-server --import tsx features/f2-trade/prototypes/child-n
 
 사람 기준표의 기대 상태·허용 reject 코드와 실제 결과가 다르거나, 저장 판정에 구체적인 근거가 없으면 CLI는 JSON·HTML을 남긴 뒤 실패 종료한다. 탈락 단계 뒤의 기준은 실패로 꾸미지 않고 `not_applicable`로 표시한다.
 
-평가 실행은 max 추론 역할의 응답 시간을 확인할 수 있도록 역할당 180초를 허용한다. 시간 안에 응답하지 않으면 기존과 같이 해당 기사를 `ROLE_ERROR`로 닫힌 실패 처리한다. 운영 파이프라인의 기본 제한은 바꾸지 않는다.
+10건 평가 실행은 max 추론 역할의 응답 시간을 확인할 수 있도록 역할당 180초를 허용한다. 시간 안에 응답하지 않으면 기존과 같이 해당 기사를 `ROLE_ERROR`로 닫힌 실패 처리한다. 운영 파이프라인의 기본 제한은 바꾸지 않는다.
 
 이 평가는 모델 간 A/B가 아니다. 모든 역할은 `web/shared/llm`의 `gpt-5.6-luna`와 서버 전용 Responses API를 사용하고, 역할별 입력 격리와 결정적 게이트의 실제 품질을 검증한다.
+
+## 51종목 수집·파이프라인·목업 비교
+
+51종목 각각에 대해 최신순 검색 후보를 최대 3페이지에서 찾고 표준 기사 페이지를 다시 읽는다. 검색 결과의 짧은 설명은 근거로 사용하지 않는다. 종목명이 제목 또는 실제 본문에 없는 후보는 수집 단계에서 제외하고, 실적·계약·생산 같은 직접 사건을 우선하되 적절한 후보가 없으면 일상·홍보·주인공 불일치 후보를 억지로 통과시키지 않는다.
+
+```powershell
+cd web
+
+# 51종목 실제 기사 후보 수집. 종목마다 같은 JSON에 체크포인트를 쓴다.
+node features/f2-trade/prototypes/child-news-role-pipeline/collect-universe-news.cjs `
+  --date 2026-08-13 `
+  --run-id selected-company-news-2026-08-13-luna `
+  --overwrite
+
+# 중단된 수집 재개
+node features/f2-trade/prototypes/child-news-role-pipeline/collect-universe-news.cjs `
+  --date 2026-08-13 `
+  --run-id selected-company-news-2026-08-13-luna `
+  --resume
+
+# 51종목 Luna 판정과 현재 목업 대 실제 결과 비교 HTML 생성
+node features/f2-trade/prototypes/child-news-role-pipeline/run-universe-evaluation.cjs `
+  --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/selected-company-news-2026-08-13-luna.json `
+  --output features/f2-trade/prototypes/child-news-role-pipeline/reports/selected-company-news-2026-08-13-luna `
+  --overwrite
+
+# 중단된 모델 판정 재개
+node features/f2-trade/prototypes/child-news-role-pipeline/run-universe-evaluation.cjs `
+  --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/selected-company-news-2026-08-13-luna.json `
+  --output features/f2-trade/prototypes/child-news-role-pipeline/reports/selected-company-news-2026-08-13-luna `
+  --resume
+
+# 완료 보고서에서 ROLE_ERROR·PIPELINE_EXECUTION_ERROR 종목만 다시 실행
+node features/f2-trade/prototypes/child-news-role-pipeline/run-universe-evaluation.cjs `
+  --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/selected-company-news-2026-08-13-luna.json `
+  --output features/f2-trade/prototypes/child-news-role-pipeline/reports/selected-company-news-2026-08-13-luna `
+  --resume `
+  --retry-technical-errors `
+  --role-timeout-ms 600000
+
+# 51건 완료·기술 오류 0건일 때만 통과 기사 적재 SQL 생성
+node features/f2-trade/prototypes/child-news-role-pipeline/generate-universe-storage.cjs `
+  --report features/f2-trade/prototypes/child-news-role-pipeline/reports/selected-company-news-2026-08-13-luna/report.json `
+  --overwrite
+```
+
+비교 HTML은 종목마다 왼쪽에 현재 `universe.js`의 업종 공통 짧은 카드·상세 목업을, 오른쪽에 실제 파이프라인 결과를 둔다. 통과 기사는 짧은 카드와 자세히 보기가 같은 파이프라인 결과를 쓰고, 거부 기사는 `서비스 카드 없음`과 단계·코드·설명을 보여준다. 종목명·제목 검색, 통과·거부, 업종 필터를 제공하며 원문 보기는 실제 언론사 URL을 새 탭으로 연다.
+
+51종목 실행에서 제목·본문 선별과 독립 검수는 `max`, 편집은 `high`를 유지한다. 추론 토큰이 보이는 JSON 출력 전에 한도를 모두 쓰는 문제를 막기 위해 역할별 출력 여유를 32,000~48,000으로 두고 `max_output_tokens` 불완전 응답일 때만 64,000으로 한 번 재시도한다. 역할당 기본 제한은 360초이며 기술 오류 재시도 때는 `--role-timeout-ms`로 최대 900초까지 명시할 수 있다. 최종 보고서에 `ROLE_ERROR`나 `PIPELINE_EXECUTION_ERROR`가 하나라도 있으면 적재 SQL 생성 자체를 막는다.
+
+DB에는 `ready_for_storage` 결과만 넣는다. `report.json`은 51건의 통과·거부 감사 기록을 모두 보존하지만, 거부 기사를 서비스 카드로 만들지 않는다. SQL은 원문 URL의 SHA-256을 `source_key`, 원문 근거 배열의 SHA-256을 `evidence_hash`로 사용하고, 같은 원문이 다른 근거·다른 요약으로 중복 통과하면 저장 전에 실패한다.
 
 ### 2026-08-13 제목 선별·3줄 요약 추가 후 실측 결과
 
@@ -98,7 +154,7 @@ node --conditions=react-server --import tsx features/f2-trade/prototypes/child-n
 
 ```powershell
 cd web
-node --conditions=react-server --import tsx features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/latest-economic-news-2026-08-13.json
+node features/f2-trade/prototypes/child-news-role-pipeline/run-evaluation.cjs --input features/f2-trade/prototypes/child-news-role-pipeline/evaluation-fixtures/latest-economic-news-2026-08-13.json
 ```
 
 - 사람 기준표 일치: **8/10**
@@ -111,13 +167,12 @@ node --conditions=react-server --import tsx features/f2-trade/prototypes/child-n
 - LG와 LG전자, 삼성생명과 삼성전자, 현대차 정몽구 재단과 현대차를 구분했고, 네이버·음악 홍보·포럼·정유사 합산 기사는 모두 거부했다.
 - 서비스 카드의 `원문 보기`는 정확한 출처 `href`를 유지하고 `target="_blank"`를 제거하는 회귀 테스트를 통과했다.
 
-실제 서비스 저장 연결은 하지 않았으며, 위 두 불일치를 해결하고 새 표본을 다시 통과하기 전까지 후속 단계로 남긴다.
+이 10건 역사적 실행에서는 실제 서비스 저장 연결을 하지 않았다. 이후 51종목 실행은 51건 완료·기술 오류 0건을 별도 조건으로 두고, 그 실행에서 통과한 기사만 수동 적재한다.
 
 ## 운영 연결 전 남은 일
 
-1. 최신 기사 10건 평가에서 사람 기준표와 역할 결과 일치 확인
+1. 51종목 비교 HTML 사람 검수와 통과·거부 이견 해결
 2. 일일 수집기와 이 프로토타입 입력 계약 연결
-3. 별도 Supabase 프로젝트의 테이블·멱등 upsert 연결
-4. 스케줄 재실행·부분 실패·관측 로그 검증
+3. 스케줄 재실행·부분 실패·관측 로그 검증
 
-이 조건이 끝나기 전에는 `ready_for_storage`를 실제 DB insert와 동일하게 취급하지 않는다.
+51종목 수동 실행과 DB 적재는 일일 수집기 연결 승인으로 간주하지 않는다.
