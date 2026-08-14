@@ -18,6 +18,16 @@ const dataSource: PersonalChatDataSource = {
       typeLabel: "골고루 탐험형",
     };
   },
+  getHoldingSummary: async (userId, stockId) => {
+    requestedUserIds.push(userId);
+    if (stockId === "KRX:000660") {
+      return {
+        current: { stockName: "SK하이닉스", quantity: 3, averagePrice: 178_000 },
+        holdingCount: 2,
+      };
+    }
+    return { current: null, holdingCount: 2 };
+  },
   getArchiveSummary: async (userId) => {
     requestedUserIds.push(userId);
     return { seasonCount: 1, latestSeasonLabel: "여름 시즌" };
@@ -39,9 +49,45 @@ async function main() {
   const profileResult = await runTool("own_behavior_profile", { screen: "archive" }, session);
   assert.equal(profileResult.response.text.includes("골고루 탐험형"), true);
 
+  const heldStock = await runTool(
+    "own_holdings",
+    { screen: "stock", stockId: "KRX:000660", stockName: "SK하이닉스" },
+    session,
+  );
+  assert.equal(heldStock.status, "ok");
+  assert.equal(heldStock.response.text.includes("3주"), true);
+  assert.equal(heldStock.response.text.includes("178,000원"), true);
+  assert.deepEqual(heldStock.response.uiAction, {
+    type: "open_screen",
+    target: "portfolio",
+  });
+
+  // 화면 종목을 갖고 있지 않으면 그 사실을 밝히고 보유 종목 수만 알린다.
+  const notHeld = await runTool(
+    "own_holdings",
+    { screen: "stock", stockId: "KRX:259960", stockName: "크래프톤" },
+    session,
+  );
+  assert.equal(notHeld.status, "ok");
+  assert.equal(notHeld.response.text.includes("2곳"), true);
+
+  const noHolding = await createReadOnlyToolRunner()(
+    "own_holdings",
+    { screen: "home" },
+    session,
+  );
+  assert.equal(noHolding.status, "unavailable");
+  assert.equal(noHolding.evidence.length, 0);
+
   const archiveResult = await runTool("own_archive", { screen: "archive" }, session);
   assert.equal(archiveResult.response.text.includes("여름 시즌"), true);
-  assert.deepEqual(requestedUserIds, ["session-child", "session-child", "session-child"]);
+  assert.deepEqual(requestedUserIds, [
+    "session-child",
+    "session-child",
+    "session-child",
+    "session-child",
+    "session-child",
+  ]);
 
   const draftStock = await runTool(
     "approved_stock_facts",

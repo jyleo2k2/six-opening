@@ -958,6 +958,29 @@ const CODING_PATTERNS = [
   "프로그래밍으로",
 ];
 const RECORD_PATTERNS = ["내기록", "내거래", "지난거래", "왜골랐", "거래이유", "내보유기간"];
+/**
+ * 본인 계좌의 보유 현황을 묻는 표현. 용어 사전보다 먼저 잡아야 한다 —
+ * `수량`·`몇 주`·`평균`이 사전 트리거라 그냥 두면 "지금 몇 주 갖고 있어?"가
+ * 보유 조회가 아니라 "수량은 사고팔 주식의 개수예요" 라는 낱말 뜻으로 답한다.
+ */
+const HOLDING_PATTERNS = [
+  "갖고있",
+  "가지고있",
+  "들고있",
+  "보유중",
+  "보유수량",
+  "보유종목",
+  "내보유",
+  "평단",
+  "평균단가",
+  "내평균매수",
+  "얼마나샀",
+  "얼마에샀",
+  "몇주샀",
+  "몇주남",
+];
+/** 보유 조회는 본인 계좌만 본다. 타인을 가리키면 앞선 보호 판정에 맡긴다. */
+const HOLDING_OTHER_PATTERNS = [...FAMILY_MEMBER_PATTERNS, "친구", "다른사람", "남의"];
 const PROFILE_PATTERNS = ["내성향", "투자성향", "성향분석", "나는어떤투자"];
 const ARCHIVE_PATTERNS = ["내아카이브", "지난시즌", "시즌기록", "시즌변화", "예전기록"];
 const STOCK_PATTERNS = [
@@ -1235,11 +1258,17 @@ function findUnsafeKind(message: string): UnsafeKind | null {
   const familyComparisonHelp =
     includesAny(message, ["가족비교", "비교화면", "엄마랑비교", "아빠랑비교"]) &&
     includesAny(message, ["어떻게", "어디", "방법", "화면"]);
+  // "엄마는 몇 주 갖고 있어?" 처럼 보유를 묻는 말은 데이터 낱말도 접근 동사도
+  // 없어서 위 세 조건 조합을 빠져나간다. 보유 표현 자체가 곧 조회 요구다.
+  const familyHoldingRequest =
+    includesAny(message, FAMILY_MEMBER_PATTERNS) &&
+    includesAny(message, HOLDING_PATTERNS);
   const familyDataRequest =
     !familyComparisonHelp &&
-    includesAny(message, FAMILY_MEMBER_PATTERNS) &&
-    includesAny(message, FAMILY_DATA_PATTERNS) &&
-    includesAny(message, FAMILY_DATA_ACCESS_PATTERNS);
+    ((includesAny(message, FAMILY_MEMBER_PATTERNS) &&
+      includesAny(message, FAMILY_DATA_PATTERNS) &&
+      includesAny(message, FAMILY_DATA_ACCESS_PATTERNS)) ||
+      familyHoldingRequest);
   const ownDataSharing =
     (message.includes("내성향") &&
       message.includes("친구") &&
@@ -3756,6 +3785,14 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const contextReply = getContextReply(message, context);
   if (contextReply) return contextReply;
 
+  if (
+    includesAny(message, HOLDING_PATTERNS) &&
+    !includesAny(message, HOLDING_OTHER_PATTERNS)
+  ) {
+    return reply("tool", "own_records", "", ["본인 보유 현황 조회"], {
+      tool: "own_holdings",
+    });
+  }
   if (includesAny(message, RECORD_PATTERNS)) {
     return reply("tool", "own_records", "", ["본인 투자 기록 조회"], {
       tool: "own_trade_records",
