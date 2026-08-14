@@ -62,22 +62,17 @@ const GAP = 50;
 const TAIL = 10;
 
 /**
- * 차트 페인 높이. 아래 `h-[238px]` 두 곳과 같은 값이어야 한다.
+ * 뱃지를 플롯 영역 안에 가둔다.
  *
- * Tailwind 는 클래스명을 정적으로 읽으므로 className 쪽을 이 상수로 바꿀 수 없다.
- * 값이 갈리면 마커가 페인 밖으로 삐져나가거나 안쪽에서 미리 멈춘다.
- */
-const PANE_HEIGHT = 238;
-
-/**
- * 뱃지를 페인 안에 가둔다.
+ * 끝에 가까운 체결은 `GAP` 만큼 벌리면 뱃지가 위아래로 삐져나간다. 위로는 SVG 뷰포트
+ * 밖이라 통째로 사라지고 — 마커가 없는 것과 구분이 안 된다 — 아래로는 시간축을 덮어
+ * 날짜 위에 뱃지가 얹힌다. 뱃지를 끝에 붙여 세우고, 꼬리는 뱃지 변에서 따므로 같이 따라간다.
  *
- * 페인 끝에 가까운 체결은 `GAP` 만큼 벌리면 뱃지가 위아래로 잘려 나간다. SVG 는 제
- * 뷰포트 밖을 안 그리므로 잘리면 통째로 사라진다 — 마커가 없는 것과 구분이 안 된다.
- * 뱃지를 끝에 붙여 세우고, 꼬리는 뱃지 변에서 따므로 같이 따라간다.
+ * `paneHeight` 는 컨테이너 높이(238)가 아니라 `chart.paneSize().height` 다. 두 축을 뺀
+ * 값이라 시간축 위에서 정확히 멈춘다.
  */
-function clampBadgeTop(top: number) {
-  return Math.min(Math.max(top, 0), PANE_HEIGHT - BADGE);
+function clampBadgeTop(top: number, paneHeight: number) {
+  return Math.min(Math.max(top, 0), paneHeight - BADGE);
 }
 
 /**
@@ -176,8 +171,14 @@ export function TradingViewChart({ symbol, period, chartType }: {
   const [trades, setTrades] = useState<ChartTrade[]>([]);
   /** 이 종목에서 찾은 체결 수. `placed` 와 갈리면 좌표를 못 잡았다는 뜻이다. */
   const [found, setFound] = useState(0);
-  /** 가격축을 뺀 차트 폭. 마커 SVG 를 여기까지만 그려 축을 덮지 않게 한다. */
-  const [paneWidth, setPaneWidth] = useState(0);
+  /**
+   * 가격축·시간축을 뺀 플롯 영역 크기. 마커 SVG 를 여기까지만 그려 축을 덮지 않게 한다.
+   *
+   * 높이를 상수 238 로 박아두면 안 된다. 컨테이너는 238 이지만 그 아래쪽을 시간축이
+   * 쓰므로 실제 플롯은 그보다 짧고, 238 을 기준으로 가두면 매도 뱃지가 x 축 위로 내려앉는다.
+   * `paneSize()` 는 두 축을 뺀 값을 준다.
+   */
+  const [pane, setPane] = useState({ width: 0, height: 0 });
   const { period: shownPeriod, chartType: shownChartType } = shown;
 
   /**
@@ -365,9 +366,11 @@ export function TradingViewChart({ symbol, period, chartType }: {
     const follow = () => {
       const next = placeMarkers(markers, chart, series);
       setPlaced((current) => (samePlacement(current, next) ? current : next));
-      setPaneWidth((current) => {
-        const width = chart.paneSize().width;
-        return current === width ? current : width;
+      setPane((current) => {
+        const { width, height } = chart.paneSize();
+        return current.width === width && current.height === height
+          ? current
+          : { width, height };
       });
       frame = requestAnimationFrame(follow);
     };
@@ -407,14 +410,18 @@ export function TradingViewChart({ symbol, period, chartType }: {
         까지 준다. 이 SVG 가 `auto` 로 남으면 좌표를 제대로 잡고도 캔버스 밑에 깔려
         화면에 안 나온다.
 
-        폭은 가격축을 뺀 페인 폭이다. SVG 는 제 뷰포트 밖을 그리지 않으므로, 체결일이
-        오른쪽 끝을 지나면 뱃지가 가격축 숫자를 덮는 대신 여기서 잘린다. 마커 x 를
-        페인 안으로 밀어 넣지 않는 이유이기도 하다 (SPEC §6).
+        폭·높이 모두 두 축을 뺀 플롯 크기다. SVG 는 제 뷰포트 밖을 그리지 않으므로,
+        체결일이 오른쪽 끝을 지나면 뱃지가 가격축 숫자를 덮는 대신 여기서 잘린다.
+        마커 x 를 페인 안으로 밀어 넣지 않는 이유이기도 하다 (SPEC §6).
+
+        높이도 같은 이유로 묶는다. `clampBadgeTop` 이 이미 시간축 위에서 멈추지만,
+        뷰포트까지 맞춰 두면 계산이 어긋나도 축 위로는 못 넘어간다.
       */}
-      {state === "ready" && placed.length > 0 && paneWidth > 0 && (
+      {state === "ready" && placed.length > 0 && pane.width > 0 && pane.height > 0 && (
         <svg
-          className="pointer-events-none absolute left-0 top-0 z-[60] h-[238px]"
-          width={paneWidth}
+          className="pointer-events-none absolute left-0 top-0 z-[60]"
+          width={pane.width}
+          height={pane.height}
         >
           {placed.map((marker) => {
             const fill =
@@ -433,6 +440,7 @@ export function TradingViewChart({ symbol, period, chartType }: {
             // 간격이 줄어든 마커도 꼬리가 뱃지에 붙은 채 같은 길이로 나온다.
             const badgeY = clampBadgeTop(
               marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP,
+              pane.height,
             );
             const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
             const tip = marker.side === "buy" ? base + TAIL : base - TAIL;
