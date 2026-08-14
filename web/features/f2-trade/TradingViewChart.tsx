@@ -348,7 +348,13 @@ export function TradingViewChart({ symbol, period, chartType }: {
       },
       grid: { vertLines: { color: bg }, horzLines: { color: bg } },
       rightPriceScale: { borderColor: gray },
-      timeScale: { borderColor: gray, timeVisible: shownPeriod === "minute", secondsVisible: false },
+      timeScale: {
+        borderColor: gray,
+        timeVisible: shownPeriod === "minute",
+        secondsVisible: false,
+        // lightweight-charts 기본 눈금 포맷터는 UTC 그대로 찍어 KST 와 9시간 어긋난다.
+        tickMarkFormatter: (time: Time) => formatTime(time, shownPeriod),
+      },
       localization: {
         locale: "ko-KR",
         priceFormatter: (price: number) => `${Math.round(price).toLocaleString("ko-KR")}원`,
