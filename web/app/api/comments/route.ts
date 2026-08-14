@@ -1,6 +1,11 @@
 import type { NextRequest } from "next/server";
-import { deleteRows, insertRow, selectRows, sessionUserId } from "../supabase";
-import { authorizeFeedTarget, isTransactionId } from "../feed/access";
+import { deleteRows, findProfileById, insertRow, selectRows, sessionUserId } from "../supabase";
+import {
+  authorizeFeedTarget,
+  filterFamilyTransactionIds,
+  isTransactionId,
+  parseTransactionIds,
+} from "../feed/access";
 import { COMMENT_MAX_LENGTH, gateComment } from "../../../shared/engine/comment-filter";
 
 export const runtime = "nodejs";
@@ -17,7 +22,7 @@ export const dynamic = "force-dynamic";
  * 화면에서도 돌지만, 저장 경로가 생긴 이상 화면 검사만 믿으면 우회된다.
  * 자녀→부모는 검사하지 않는다 (SPEC §4.1).
  */
-type CommentRow = {
+export type CommentRow = {
   id: string;
   transaction_id: string;
   user_id: number;
@@ -39,7 +44,7 @@ export type FeedComment = {
   mine: boolean;
 };
 
-function toComment(row: CommentRow, userId: number): FeedComment {
+export function toComment(row: CommentRow, userId: number): FeedComment {
   return {
     id: row.id,
     transactionId: row.transaction_id,
@@ -64,26 +69,32 @@ export function resolveCommentGate(input: {
   return { author, result: gateComment({ body: input.body, author, target: input.ownerRole }) };
 }
 
-/** GET /api/comments?transaction_id=<id> */
+/** GET /api/comments?transaction_id=a,b,c — 피드 카드 반응을 한 번에 받는다. */
 export async function GET(request: NextRequest) {
   const userId = sessionUserId(request);
   if (!userId) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
-  const transactionId = request.nextUrl.searchParams.get("transaction_id");
-  if (!isTransactionId(transactionId)) {
-    return Response.json({ error: "거래 id 가 올바르지 않습니다." }, { status: 400 });
-  }
+  const ids = parseTransactionIds(request.nextUrl.searchParams.get("transaction_id"));
+  if (!ids) return Response.json({ error: "거래 id 가 올바르지 않습니다." }, { status: 400 });
 
   try {
-    const access = await authorizeFeedTarget(userId, transactionId);
-    if (!access.ok) return Response.json({ error: access.error }, { status: access.status });
+    const viewer = await findProfileById(userId);
+    if (!viewer) return Response.json({ error: "사용자를 찾을 수 없습니다." }, { status: 404 });
+    const allowed = await filterFamilyTransactionIds(viewer, ids);
+    if (ids.length === 1 && allowed.length === 0) {
+      return Response.json({ error: "거래를 찾을 수 없습니다." }, { status: 404 });
+    }
+    if (allowed.length === 0) return Response.json({ transactionIds: [], comments: [] });
 
     const rows = await selectRows<CommentRow>("trade_comments", {
       select: SELECT,
-      transaction_id: `eq.${transactionId}`,
+      transaction_id: `in.(${allowed.join(",")})`,
       order: "created_at.asc",
     });
-    return Response.json({ transactionId, comments: rows.map((row) => toComment(row, userId)) });
+    return Response.json({
+      transactionIds: allowed,
+      comments: rows.map((row) => toComment(row, userId)),
+    });
   } catch (error) {
     console.error(JSON.stringify({ event: "comments_read", result: "error", message: String(error) }));
     return Response.json({ error: "코멘트를 불러오지 못했습니다." }, { status: 502 });

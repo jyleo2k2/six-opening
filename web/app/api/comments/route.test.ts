@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveCommentGate } from "./route";
+import { resolveCommentGate, toComment } from "./route";
 
 // 라우트의 401·502 분기는 세션·DB 에 의존한다. `DEMO_USER_ID` 가 개발용 `.env` 에서
 // 늦게 주입되므로 여기서 검사하면 환경에 따라 결과가 달라진다.
@@ -32,6 +32,19 @@ function main() {
   const fine = resolveCommentGate({ body: "  왜 이 회사를 골랐어?  ", viewerRole: "parent", ownerRole: "child" });
   assert.equal(fine.result.ok, true);
   if (fine.result.ok) assert.equal(fine.result.body, "왜 이 회사를 골랐어?");
+
+  // 부모가 둘이어도 API는 역할명이 아니라 profiles.name 을 그대로 내려 준다.
+  const dad = toComment({
+    id: "7",
+    transaction_id: "t1",
+    user_id: 3,
+    body: "왜 이 회사를 골랐어?",
+    created_at: "2026-08-14T00:00:00.000Z",
+    profiles: { name: "찬영아빠", parent_child: "parent" },
+  }, 3);
+  assert.equal(dad.authorName, "찬영아빠");
+  assert.equal(dad.author, "parent");
+  assert.equal(dad.mine, true);
 
   // 빈 코멘트와 200자 초과는 방향과 무관하게 막힌다
   assert.equal(resolveCommentGate({ body: "   ", viewerRole: "child", ownerRole: "parent" }).result.ok, false);

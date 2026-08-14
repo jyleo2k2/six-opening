@@ -37,6 +37,7 @@
     "methods/loadDbUser.js",
     "methods/loadBehaviorProfile.js",
     "methods/loadSeasonCards.js",
+    "methods/loadFamilyProfiles.js",
     "methods/validNewsItem.js",
     "methods/loadDailyCloses.js",
     "methods/loadNews.js",
