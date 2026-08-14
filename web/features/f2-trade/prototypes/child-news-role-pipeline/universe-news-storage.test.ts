@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import test from "node:test";
 import type { ReviewCheckName } from "./contracts";
 import { REVIEW_CHECK_NAMES } from "./contracts";
@@ -132,11 +134,35 @@ function reportWithOneReady(): UniverseNewsReport {
   };
 }
 
-test("새 주가 연결·factKey DB 계약 전에는 적재 SQL 생성을 막는다", () => {
-  assert.throws(
-    () => renderUniverseNewsStorageSql(reportWithOneReady()),
-    /주가 연결 설명과 factKey를 저장할 DB 계약/u,
+test("v2 DB 계약으로 factKey·주가 연결·용어 근거를 적재한다", () => {
+  const sql = renderUniverseNewsStorageSql(reportWithOneReady());
+  assert.match(sql, /child-news-role-pipeline-v2/u);
+  assert.match(sql, /summary_line_1_fact_key/u);
+  assert.match(sql, /price_connection_kind/u);
+  assert.match(sql, /review_same_headline_across_surfaces/u);
+  assert.match(sql, /'price_connection'/u);
+  assert.match(sql, /"sourceIds":\["S1_1"\]/u);
+});
+
+test("Supabase 마이그레이션과 시드가 v2 공개 계약을 보존한다", () => {
+  const migration = readFileSync(
+    resolve(
+      process.cwd(),
+      "../supabase/migrations/20260814044114_upgrade_news_pipeline_v2_contract.sql",
+    ),
+    "utf8",
   );
+  const seed = readFileSync(resolve(process.cwd(), "../supabase/seed.sql"), "utf8");
+
+  assert.match(migration, /summary_line_1_fact_key text/u);
+  assert.match(migration, /price_connection_kind text/u);
+  assert.match(migration, /home_summary = headline/u);
+  assert.match(migration, /valid_term_treatments_v2\(term_treatments\)/u);
+  assert.match(migration, /with \(security_invoker = true\)/u);
+  assert.match(migration, /review_term_explanation_coverage/u);
+  assert.match(seed, /child-news-role-pipeline-v2/u);
+  assert.match(seed, /"sourceIds":\["S1"\]/u);
+  assert.match(seed, /'price_connection', 'S1'/u);
 });
 
 test("51종목 비교 HTML은 짧은 카드와 상세에 같은 제목과 주가 연결을 표시한다", () => {
