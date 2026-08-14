@@ -36,11 +36,53 @@ const CHART_TYPES: readonly PrototypeChartType[] = ["line", "candlestick"];
 /** 화면에 찍을 자리가 잡힌 마커. */
 type PlacedMarker = TradeMarker & { x: number; y: number };
 
+/**
+ * 마커를 그리는 기간. 주봉은 뺀다.
+ *
+ * 봉 하나가 한 주라 그 주의 매매가 전부 같은 x 로 몰린다. 봉·방향당 하나만 남기므로
+ * 나머지는 화면에서 사라지고, 남은 하나도 그 주 어느 날 체결인지 짚지 못한다.
+ * 일봉·분봉은 봉이 곧 하루·1분이라 대표 하나가 그 구간을 그대로 가리킨다.
+ */
+const MARKER_PERIODS: readonly PrototypeChartPeriod[] = ["minute", "daily"];
+
 /** 뱃지 한 변. 원본 시안(서비스 개요 HTML)의 22×22 rx=6 을 따른다. */
 const BADGE = 22;
 
-/** 체결가를 가리키는 꼬리 높이. 뱃지 변에 맞닿는다. */
-const TAIL = 7;
+/**
+ * 체결가와 뱃지 사이 간격.
+ *
+ * 7px 일 때는 뱃지가 봉에 거의 붙어 캔들 몸통·꼬리를 덮었다. 100px 은 페인 높이(238)의
+ * 절반에 가까워 대부분의 마커가 `clampBadgeTop` 에 걸려 천장·바닥에 눌러앉았다 —
+ * 간격이 아니라 화면 끝이 위치를 정하는 꼴이었다. 50px 은 뱃지까지 72px 이라 웬만한
+ * 체결이 잘리지 않고 이 간격을 그대로 받는다.
+ */
+const GAP = 50;
+
+/**
+ * 꼬리 높이. 뱃지 변에서 체결가 쪽으로 뻗는다.
+ *
+ * `GAP` 과 갈라져 있다. 예전에는 하나였고 꼬리가 뱃지에서 체결가까지 전 구간을 이었는데,
+ * 간격을 50px 로 벌리자 꼬리가 그만큼 길어져 화면을 갈랐다. 꼬리를 짧게 끊으면 어느 봉의
+ * 체결인지는 **뱃지의 x** 가 그대로 답하므로 읽는 데 지장이 없다.
+ *
+ * 대신 꼭짓점이 체결가에 정확히 닿지는 않는다. 꼬리는 이제 정확한 y 를 짚는 바늘이 아니라
+ * 어느 쪽 봉을 가리키는지만 알려주는 방향 표시다.
+ */
+const TAIL = 10;
+
+/**
+ * 뱃지를 플롯 영역 안에 가둔다.
+ *
+ * 끝에 가까운 체결은 `GAP` 만큼 벌리면 뱃지가 위아래로 삐져나간다. 위로는 SVG 뷰포트
+ * 밖이라 통째로 사라지고 — 마커가 없는 것과 구분이 안 된다 — 아래로는 시간축을 덮어
+ * 날짜 위에 뱃지가 얹힌다. 뱃지를 끝에 붙여 세우고, 꼬리는 뱃지 변에서 따므로 같이 따라간다.
+ *
+ * `paneHeight` 는 컨테이너 높이(238)가 아니라 `chart.paneSize().height` 다. 두 축을 뺀
+ * 값이라 시간축 위에서 정확히 멈춘다.
+ */
+function clampBadgeTop(top: number, paneHeight: number) {
+  return Math.min(Math.max(top, 0), paneHeight - BADGE);
+}
 
 /**
  * 처음 보여줄 봉 개수.
@@ -138,8 +180,14 @@ export function TradingViewChart({ symbol, period, chartType }: {
   const [trades, setTrades] = useState<ChartTrade[]>([]);
   /** 이 종목에서 찾은 체결 수. `placed` 와 갈리면 좌표를 못 잡았다는 뜻이다. */
   const [found, setFound] = useState(0);
-  /** 가격축을 뺀 차트 폭. 마커 SVG 를 여기까지만 그려 축을 덮지 않게 한다. */
-  const [paneWidth, setPaneWidth] = useState(0);
+  /**
+   * 가격축·시간축을 뺀 플롯 영역 크기. 마커 SVG 를 여기까지만 그려 축을 덮지 않게 한다.
+   *
+   * 높이를 상수 238 로 박아두면 안 된다. 컨테이너는 238 이지만 그 아래쪽을 시간축이
+   * 쓰므로 실제 플롯은 그보다 짧고, 238 을 기준으로 가두면 매도 뱃지가 x 축 위로 내려앉는다.
+   * `paneSize()` 는 두 축을 뺀 값을 준다.
+   */
+  const [pane, setPane] = useState({ width: 0, height: 0 });
   const { period: shownPeriod, chartType: shownChartType } = shown;
 
   /**
@@ -304,10 +352,9 @@ export function TradingViewChart({ symbol, period, chartType }: {
     }
 
     // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
-    const markers = buildTradeMarkers({
-      trades,
-      candleTimes: points.map((point) => point.time),
-    });
+    const markers = MARKER_PERIODS.includes(shownPeriod)
+      ? buildTradeMarkers({ trades, candleTimes: points.map((point) => point.time) })
+      : [];
     setFound(markers.length);
 
     showRecentBars(chart, points.length, shownPeriod);
@@ -327,9 +374,11 @@ export function TradingViewChart({ symbol, period, chartType }: {
     const follow = () => {
       const next = placeMarkers(markers, chart, series);
       setPlaced((current) => (samePlacement(current, next) ? current : next));
-      setPaneWidth((current) => {
-        const width = chart.paneSize().width;
-        return current === width ? current : width;
+      setPane((current) => {
+        const { width, height } = chart.paneSize();
+        return current.width === width && current.height === height
+          ? current
+          : { width, height };
       });
       frame = requestAnimationFrame(follow);
     };
@@ -369,31 +418,45 @@ export function TradingViewChart({ symbol, period, chartType }: {
         까지 준다. 이 SVG 가 `auto` 로 남으면 좌표를 제대로 잡고도 캔버스 밑에 깔려
         화면에 안 나온다.
 
-        폭은 가격축을 뺀 페인 폭이다. SVG 는 제 뷰포트 밖을 그리지 않으므로, 체결일이
-        오른쪽 끝을 지나면 뱃지가 가격축 숫자를 덮는 대신 여기서 잘린다. 마커 x 를
-        페인 안으로 밀어 넣지 않는 이유이기도 하다 (SPEC §6).
+        폭·높이 모두 두 축을 뺀 플롯 크기다. SVG 는 제 뷰포트 밖을 그리지 않으므로,
+        체결일이 오른쪽 끝을 지나면 뱃지가 가격축 숫자를 덮는 대신 여기서 잘린다.
+        마커 x 를 페인 안으로 밀어 넣지 않는 이유이기도 하다 (SPEC §6).
+
+        높이도 같은 이유로 묶는다. `clampBadgeTop` 이 이미 시간축 위에서 멈추지만,
+        뷰포트까지 맞춰 두면 계산이 어긋나도 축 위로는 못 넘어간다.
       */}
-      {state === "ready" && placed.length > 0 && paneWidth > 0 && (
+      {state === "ready" && placed.length > 0 && pane.width > 0 && pane.height > 0 && (
         <svg
-          className="pointer-events-none absolute left-0 top-0 z-[60] h-[238px]"
-          width={paneWidth}
+          className="pointer-events-none absolute left-0 top-0 z-[60]"
+          width={pane.width}
+          height={pane.height}
         >
           {placed.map((marker) => {
             const fill =
               marker.member === "child"
                 ? "var(--color-trade-child)"
                 : "var(--color-trade-parent)";
-            // 말풍선 꼬리처럼 뱃지 변에 붙는다. 꼭짓점이 체결가를 가리키고
-            // 밑변은 뱃지 모서리와 정확히 맞닿는다 — 같은 fill 이라 이음매가 안 보인다.
+            // 말풍선 꼬리처럼 뱃지 변에 붙는다. 밑변은 뱃지 모서리와 정확히 맞닿아
+            // 같은 fill 이라 이음매가 안 보이고, 꼭짓점은 체결가 쪽을 가리킨다.
             // 밑변 너비(10)가 rx=6 으로 둥글린 모서리 사이 평평한 구간 안에 들어간다.
-            const badgeY =
-              marker.side === "buy" ? marker.y + TAIL : marker.y - TAIL - BADGE;
-            const base = marker.side === "buy" ? marker.y + TAIL : marker.y - TAIL;
+            //
+            // 매수는 봉 위, 매도는 봉 아래로 나눈다. 방향만 봐도 산 자리와 판 자리가
+            // 구분되고, 같은 봉에서 매수·매도가 겹쳐도 뱃지가 서로 포개지지 않는다.
+            // SVG 는 y 가 아래로 자라므로 "위"가 뺄셈이다.
+            //
+            // 밑변·꼭짓점 모두 **잘린 뒤의 뱃지 위치**에서 딴다. 그래야 천장·바닥에 붙어
+            // 간격이 줄어든 마커도 꼬리가 뱃지에 붙은 채 같은 길이로 나온다.
+            const badgeY = clampBadgeTop(
+              marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP,
+              pane.height,
+            );
+            const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
+            const tip = marker.side === "buy" ? base + TAIL : base - TAIL;
             return (
               <g key={marker.id}>
                 <title>{marker.label}</title>
                 <polygon
-                  points={`${marker.x - 5},${base} ${marker.x + 5},${base} ${marker.x},${marker.y}`}
+                  points={`${marker.x - 5},${base} ${marker.x + 5},${base} ${marker.x},${tip}`}
                   fill={fill}
                 />
                 <rect
