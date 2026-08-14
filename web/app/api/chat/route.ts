@@ -8,6 +8,7 @@ import {
   createChatOutcome,
 } from "../../../features/f10-chatbot/lib/orchestrator";
 import { resolveChatSession } from "../../../features/f10-chatbot/lib/session";
+import { classifyTermKind } from "../../../features/f10-chatbot/lib/term-classify";
 import { createReadOnlyToolRunner } from "../../../features/f10-chatbot/lib/tools";
 import { createSupabasePersonalData } from "./personal-data";
 
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
           requestSignal: request.signal,
           onStatus: (status) => send("status", status),
           runTool,
+          classifyTerm: classifyTermKind,
         });
 
         send("text", outcome.response.text);
