@@ -4,6 +4,7 @@ import {
   parseNaverArticleHtml,
   parseNaverSearchArticleUrls,
   scoreArticleForStock,
+  selectPipelineArticleCandidates,
   selectSourceUnits,
 } from "./naver-news-collector";
 
@@ -91,4 +92,39 @@ test("원문 근거는 기사 순서를 유지하며 최대 10개만 고른다",
   assert.deepEqual(units.map((unit) => unit.id), ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10"]);
   const sourceIndexes = units.map((unit) => Number(unit.text.match(/(\d+)번째/u)?.[1]));
   assert.deepEqual(sourceIndexes, [...sourceIndexes].sort((left, right) => left - right));
+});
+
+test("폴백 후보는 최신 날짜부터 고르고 같은 날짜는 2건까지만 둔다", () => {
+  const articles = [
+    ...Array.from({ length: 4 }, (_, index) => ({ day: "2026-08-14", index })),
+    ...Array.from({ length: 4 }, (_, index) => ({ day: "2026-08-13", index: index + 4 })),
+    ...Array.from({ length: 4 }, (_, index) => ({ day: "2026-08-12", index: index + 8 })),
+    ...Array.from({ length: 4 }, (_, index) => ({ day: "2026-08-11", index: index + 12 })),
+    ...Array.from({ length: 4 }, (_, index) => ({ day: "2026-08-10", index: index + 16 })),
+  ].map(({ day, index }) => ({
+    articleId: `NAVER-001-${String(index).padStart(10, "0")}`,
+    title: `삼성전자, ${index + 1}번째 실적 발표`,
+    publisher: "테스트경제",
+    publishedAt: `${day}T01:00:00.000Z`,
+    sourceUrl: `https://news.example.com/${index}`,
+    naverUrl: `https://n.news.naver.com/mnews/article/001/${String(index).padStart(10, "0")}`,
+    bodySegments: ["삼성전자는 매출과 영업이익을 발표했다."],
+  }));
+
+  const selected = selectPipelineArticleCandidates(
+    articles,
+    stock,
+    [stock],
+    "2026-08-14",
+  );
+  assert.equal(selected.length, 8);
+  assert.deepEqual(
+    selected.map((item) => item.publishedDayKst),
+    [
+      "2026-08-14", "2026-08-14",
+      "2026-08-13", "2026-08-13",
+      "2026-08-12", "2026-08-12",
+      "2026-08-11", "2026-08-11",
+    ],
+  );
 });
