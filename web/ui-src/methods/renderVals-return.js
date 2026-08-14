@@ -292,7 +292,6 @@
         // 체결이 났으니 성향 스냅샷을 비워 다음 아카이브 진입에서 다시 계산하게 둔다
         this.set({
           acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3,
-          profiles: null, profileStatus: 'idle',
           orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null }
         });
         if (!isLimit) {
@@ -626,7 +625,6 @@
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, sellStep: 3,
-          profiles: null, profileStatus: 'idle',
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
           sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, badge: showJudge && planMatch === true }
         });
@@ -711,7 +709,7 @@
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
-      goArchive: () => { this.set({ screen:'archive' }); this.loadProfiles(); },
+      goArchive: () => { this.set({ screen:'archive' }); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();

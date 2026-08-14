@@ -1632,7 +1632,6 @@ class Component extends DCLogic {
     orderDone: null, sellDone: null, watchlist: [], stockQuery: '',
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
-    profiles: null, profileStatus: 'idle',
     sellStep: 1, arcTab: 'report', sellPick: 'all',
     sellDraft: { sellBy:'qty', qty:0, amountInput:0, orderType:'market', limitPct:0, reason:null, change:null, memo:'', memoSaved:false },
     schoolLock: true, forceSchool: 'auto', rankTab: 'week',
@@ -1662,34 +1661,6 @@ class Component extends DCLogic {
 
   // 성향 스냅샷(F9)은 서버 엔진이 계산한다. 두 계정을 한 번에 받아 두면 계정 전환·가족 비교에 재요청이 없다.
   // 체결이 새로 나면 profiles 를 비워 다음 아카이브 진입에서 다시 계산한다.
-  loadProfiles(){
-    if (this.profileBusy || this.state.profileStatus === 'loading' || this.state.profileStatus === 'ready') return;
-    this.profileBusy = true;
-    this.setState(s => Object.assign({}, s, { profileStatus: 'loading' }));
-    const snap = this.state;
-    const ask = (account, narrate) => fetch('/api/profile', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ account: account, narrate: narrate, state: { acc: snap.acc, records: snap.records, sellRecords: snap.sellRecords || [], events: snap.events || [] } })
-    }).then(r => r.ok ? r.json() : null);
-    // 1차는 서술 없이 즉시 받아 화면을 채우고(룰 기반 폴백 서술 포함), Luna 서술은 도착하는 대로 바꿔 끼운다.
-    Promise.all([ask('child', false), ask('parent', false)])
-      .then(pair => {
-        if (!pair[0] || !pair[1]) throw new Error('profile unavailable');
-        this.setState(s => Object.assign({}, s, { profiles: { child: pair[0], parent: pair[1] }, profileStatus: 'ready' }));
-        return Promise.all([ask('child', true), ask('parent', true)]);
-      })
-      .then(pair => {
-        if (!pair || !pair[0] || !pair[1]) return;
-        this.setState(s => s.profileStatus === 'ready'
-          ? Object.assign({}, s, { profiles: { child: pair[0], parent: pair[1] } })
-          : s);
-      })
-      .catch(() => {
-        this.setState(s => s.profileStatus === 'ready' ? s : Object.assign({}, s, { profileStatus: 'error' }));
-      })
-      .finally(() => { this.profileBusy = false; });
-  }
-
   openRequestedScreen(data){
     if (!data) return;
     if (data.type === 'kiwoom:open-stock' && /^\d{6}$/.test(String(data.symbol))) {
@@ -1707,9 +1678,8 @@ class Component extends DCLogic {
     } else if (action.target === 'portfolio') {
       this.set({ screen:'portfolio' });
     } else if (action.target === 'archive') {
-      const archiveTabs = ['report', 'return', 'compare', 'season'];
+      const archiveTabs = ['report', 'return'];
       this.set({ screen:'archive', arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report' });
-      this.loadProfiles();
     } else if (action.target === 'stock') {
       const sector = (this.uni().sectors || []).filter(x => x.id === action.sectorId)[0];
       if (sector) this.set({ screen:'explore', sectorId:sector.id, cardIndex:0 });
@@ -3093,7 +3063,6 @@ class Component extends DCLogic {
         // 체결이 났으니 성향 스냅샷을 비워 다음 아카이브 진입에서 다시 계산하게 둔다
         this.set({
           acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3,
-          profiles: null, profileStatus: 'idle',
           orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null }
         });
         if (!isLimit) {
@@ -3427,7 +3396,6 @@ class Component extends DCLogic {
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
           badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, sellStep: 3,
-          profiles: null, profileStatus: 'idle',
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
           sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, badge: showJudge && planMatch === true }
         });
@@ -3512,7 +3480,7 @@ class Component extends DCLogic {
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
       goPortfolio: () => this.set({ screen:'portfolio' }),
-      goArchive: () => { this.set({ screen:'archive' }); this.loadProfiles(); },
+      goArchive: () => { this.set({ screen:'archive' }); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();

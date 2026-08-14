@@ -29,7 +29,6 @@
     "logic/gap-25.js",
     "methods/blankDraft.js",
     "methods/pickOrderType.js",
-    "methods/loadProfiles.js",
     "methods/openRequestedScreen.js",
     "methods/componentDidMount.js",
     "methods/componentWillUnmount.js",

@@ -15,9 +15,8 @@
     } else if (action.target === 'portfolio') {
       this.set({ screen:'portfolio' });
     } else if (action.target === 'archive') {
-      const archiveTabs = ['report', 'return', 'compare', 'season'];
+      const archiveTabs = ['report', 'return'];
       this.set({ screen:'archive', arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report' });
-      this.loadProfiles();
     } else if (action.target === 'stock') {
       const sector = (this.uni().sectors || []).filter(x => x.id === action.sectorId)[0];
       if (sector) this.set({ screen:'explore', sectorId:sector.id, cardIndex:0 });
