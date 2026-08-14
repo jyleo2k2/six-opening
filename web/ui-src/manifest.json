@@ -25,6 +25,7 @@
     "template/script-open.html",
     "logic/constants.js",
     "logic/archive-engine.js",
+    "logic/scheduled-orders.js",
     "logic/class-open.js",
     "logic/gap-25.js",
     "methods/blankDraft.js",

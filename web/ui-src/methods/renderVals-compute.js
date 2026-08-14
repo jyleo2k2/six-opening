@@ -4,7 +4,9 @@
     const up = '#E8322E', down = '#1668DC';
     // 주문 직후 값 — 매수 3단계 축하 화면과 매도 3단계 완료 화면이 이걸로 문구를 만든다
     const od = s.orderDone || {};
-    const odQty = od.qty === undefined ? '' : ((Math.round(od.qty * 100) / 100) + '주');
+    const odQty = od.scheduled && od.requestMode === 'amount'
+      ? '시가 확인 뒤 결정'
+      : (od.qty === undefined ? '' : ((Math.round(od.qty * 100) / 100) + '주'));
     const sd = s.sellDone || {};
     const sdQty = sd.qty === undefined ? '' : ((Math.round(sd.qty * 100) / 100) + '주');
     const rankTab = s.rankTab || 'week';
@@ -21,6 +23,8 @@
     const amount = byQty ? Math.round(shares * execPrice) : s.draft.amount;
     const qty = byQty ? shares : (execPrice > 0 ? amount / execPrice : 0);
     const grand = amount;
+    const marketOpen = isRegularMarketOpen(new Date());
+    const scheduledFor = nextOpeningDate(new Date());
     const overCash = grand > m.cash;
     const tooSmall = amount > 0 && qty < 0.01;
     const warn = overCash ? (byQty ? '지갑으로 살 수 있는 주 수보다 많아!' : '지갑보다 많이 살 수는 없어!')
@@ -127,9 +131,11 @@
       const val = x.price * h.qty, cost = h.avg * h.qty, d = val - cost;
       const pct = cost > 0 ? d / cost * 100 : 0;
       const sec = this.sectorOf(x.sector);
+      const reservedQty = reservedSellQty(m.pending || [], h.code);
+      const availableQty = Math.max(0, h.qty - reservedQty);
       return {
         name: x.name, emoji: (sec.name || '').charAt(0),
-        qtyText: h.qty.toFixed(2) + '주',
+        qtyText: h.qty.toFixed(2) + '주' + (reservedQty > 0 ? ' · ' + reservedQty.toFixed(2) + '주 예약' : ''),
         avgText: Math.round(h.avg).toLocaleString('ko-KR') + '원',
         valueText: won(val),
         pnlText: (d >= 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(1) + '%',
@@ -138,18 +144,18 @@
         buyStyle: 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;' + (locked
           ? 'color:#B9BDCE;cursor:not-allowed;background:#F1F2F8'
           : 'color:#01185A;cursor:pointer;background:#F1F2F8'),
-        sellStyle: 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;' + (locked
+        sellStyle: 'flex:1;text-align:center;border-radius:14px;padding:12px;font-size:14.5px;font-weight:700;' + (locked || availableQty < 0.01
           ? 'color:#E4B7CD;cursor:not-allowed;background:#FAF2F6'
           : 'color:#D5327A;cursor:pointer;background:#FDECF4'),
         buy: () => { if (locked) return; this.set({ code: x.code, screen: 'buy', buyStep: 1, draft: this.blankDraft(), showPad:false }); },
         sell: () => {
-          if (locked) return;
+          if (locked || availableQty < 0.01) return;
           const order = [0,1,2,3,4];
           for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
           this.retroMs = 0; this.retroAt = null;
           this.set({ code: x.code, screen: 'sell', sellStep: 1, sellReasonOrder: order.concat([5]),
             showSellPad: false, sellQtyStr: '', sellPick: 'all',
-            sellDraft: { qty: h.qty, reason:null, change:null, memo:'', memoSaved:false } });
+            sellDraft: { qty: availableQty, reason:null, change:null, memo:'', memoSaved:false } });
         }
       };
     }).filter(Boolean);
@@ -172,7 +178,8 @@
     const sellLimPrice = Math.round(price * (1 + sellLimPct / 100));
     const sellExecPrice = s.sellDraft.orderType === 'limit' ? sellLimPrice : price;
     const sellByQty = s.sellDraft.sellBy !== 'amount';
-    const sellMaxQty = heldQty;
+    const sellReservedQty = reservedSellQty(m.pending || [], st ? st.code : '');
+    const sellMaxQty = Math.max(0, heldQty - sellReservedQty);
     const sellWant = sellByQty
       ? (s.sellDraft.qty || 0)
       : (sellExecPrice > 0 ? (s.sellDraft.amountInput || 0) / sellExecPrice : 0);
