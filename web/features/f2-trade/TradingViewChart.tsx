@@ -158,9 +158,10 @@ function formatTime(time: Time, period: PrototypeChartPeriod) {
   if (typeof time !== "number") return String(time);
   return new Intl.DateTimeFormat("ko-KR", {
     timeZone: "Asia/Seoul",
-    month: "numeric",
-    day: "numeric",
-    ...(period === "minute" ? { hour: "2-digit", minute: "2-digit" } : {}),
+    // 분봉은 하루 안에서만 움직이므로 날짜 없이 시:분만 보여준다.
+    ...(period === "minute"
+      ? { hour: "2-digit", minute: "2-digit" }
+      : { month: "numeric", day: "numeric" }),
   }).format(new Date(time * 1000));
 }
 
