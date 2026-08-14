@@ -1,4 +1,4 @@
-import type { ChartPeriod, ChartPoint } from "./kiwoom";
+import type { ChartPeriod, ChartPoint } from "./providers/types";
 
 type StoredPeriod = Exclude<ChartPeriod, "minute">;
 

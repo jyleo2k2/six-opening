@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getQuote } from "../kiwoom";
+import { getQuote } from "../quotes";
 
 export const dynamic = "force-dynamic";
 

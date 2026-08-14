@@ -1,13 +1,17 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { getChart, getQuote, hasKiwoomCredentials } from "../quote/kiwoom";
+import { getChart, getQuote } from "../quote/quotes";
+import { activeLimits, hasQuoteCredentials } from "../quote/providers";
+import type { ProviderId } from "../quote/providers";
+import type { QuoteSource } from "../quote/providers/types";
 import { getQuoteFixtures } from "../quote/fixtures";
 import { readLatestDailyCloses } from "../quote/stock-candles";
 
 type WarmQuote = {
   price: number;
   rate: number;
-  source: "kiwoom" | "fixture";
+  source: QuoteSource;
+  provider: ProviderId | null;
   updatedAt: string;
 };
 
@@ -39,13 +43,24 @@ function toSpark(prices: number[]) {
   );
 }
 
-async function refresh(preferredSymbol: string | null, includeChart: boolean) {
-  if (!hasKiwoomCredentials() || codes.length === 0) return;
-  const symbol =
-    preferredSymbol && codes.includes(preferredSymbol)
-      ? preferredSymbol
-      : codes[quoteCursor++ % codes.length];
+/**
+ * 이번 폴링에서 데울 종목. 사용자가 보고 있는 종목이 항상 먼저다.
+ *
+ * 나머지는 커서로 돌아가며 채운다. 몇 개를 데울지는 제공자의 초당 제한에 달렸다 —
+ * 초당 1건인 키움에서는 1개, 여유가 있는 제공자에서는 여러 개를 한 바퀴에 넣는다.
+ */
+function refreshTargets(preferredSymbol: string | null) {
+  const size = Math.max(1, Math.min(activeLimits().refreshBatchSize, codes.length));
+  const targets: string[] = [];
+  if (preferredSymbol && codes.includes(preferredSymbol)) targets.push(preferredSymbol);
+  while (targets.length < size) {
+    const symbol = codes[quoteCursor++ % codes.length];
+    if (!targets.includes(symbol)) targets.push(symbol);
+  }
+  return targets;
+}
 
+async function refreshSymbol(symbol: string, includeChart: boolean) {
   try {
     // 카드 시세 폴링은 5초마다 돈다. 사용자가 누른 차트가 이 뒤에 밀리지 않도록 후순위로 보낸다.
     const quote = await getQuote(symbol, true);
@@ -53,6 +68,7 @@ async function refresh(preferredSymbol: string | null, includeChart: boolean) {
       price: quote.price,
       rate: quote.rate,
       source: quote.source,
+      provider: quote.provider,
       updatedAt: quote.updatedAt,
     };
     const chartIsStale =
@@ -66,8 +82,16 @@ async function refresh(preferredSymbol: string | null, includeChart: boolean) {
       }
     }
   } catch {
-    // The public fixture remains visible when Kiwoom is unavailable.
+    // 제공자를 못 쓰면 공개 픽스처가 그대로 보인다.
   }
+}
+
+async function refresh(preferredSymbol: string | null, includeChart: boolean) {
+  if (!hasQuoteCredentials() || codes.length === 0) return;
+  // 제공자 어댑터가 자체 큐로 간격을 지키므로 여기서는 한 번에 넣어도 된다.
+  await Promise.all(
+    refreshTargets(preferredSymbol).map((symbol) => refreshSymbol(symbol, includeChart)),
+  );
 }
 
 export async function getUniverseSnapshot(
@@ -88,6 +112,7 @@ export async function getUniverseSnapshot(
         price: fixture.price,
         rate: fixture.rate,
         source: "fixture" as const,
+        provider: null,
         updatedAt,
       },
     ]),
@@ -109,6 +134,7 @@ export async function getUniverseSnapshot(
             ? ((candle.close - candle.previousClose) / candle.previousClose) * 100
             : 0,
           source: "fixture" as const,
+          provider: null,
           updatedAt: new Date(candle.time * 1000).toISOString(),
         },
       ]),
@@ -117,10 +143,12 @@ export async function getUniverseSnapshot(
     // Supabase 미설정·장애면 픽스처 시세를 그대로 쓴다.
   }
 
+  const live = Object.values(warmQuotes).find((quote) => quote.source === "live");
+
   return {
-    source: Object.values(warmQuotes).some((quote) => quote.source === "kiwoom")
-      ? ("kiwoom" as const)
-      : ("fixture" as const),
+    // 제공자 이름이 아니라 실시간 여부다. 어느 제공자였는지는 `provider` 로 싣는다.
+    source: live ? ("live" as const) : ("fixture" as const),
+    provider: live?.provider ?? null,
     quotes: { ...fixtureQuotes, ...storedQuotes, ...warmQuotes },
     sparks: { ...fixtureSparks, ...sparks },
     updatedAt,

@@ -14,7 +14,7 @@
  */
 
 import { STOCKS } from "../shared/data/stocks";
-import { hasKiwoomCredentials, refreshStoredChart } from "../app/api/quote/kiwoom";
+import { hasQuoteCredentials, refreshStoredChart } from "../app/api/quote/quotes";
 import { readLatestDailyCloses } from "../app/api/quote/stock-candles";
 
 const PERIODS = ["daily", "weekly"] as const;
@@ -32,8 +32,10 @@ async function main() {
   const requested = process.argv.slice(2).filter((argument) => /^\d{6}$/.test(argument));
   const symbols = requested.length ? requested : STOCKS.map((stock) => stock.symbol);
 
-  if (!hasKiwoomCredentials()) {
-    console.error("키움 자격증명이 없습니다. .env 의 KIWOOM_APP_KEY · KIWOOM_SECRET_KEY 를 채우고 다시 실행하세요.");
+  if (!hasQuoteCredentials()) {
+    console.error(
+      "시세 제공자 자격증명이 없습니다. .env 의 KIWOOM_APP_KEY·KIWOOM_SECRET_KEY 또는 TOSS_CLIENT_ID·TOSS_CLIENT_SECRET 를 채우고 다시 실행하세요.",
+    );
     process.exitCode = 1;
     return;
   }

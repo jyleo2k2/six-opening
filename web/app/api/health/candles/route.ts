@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { STOCKS } from "../../../../shared/data/stocks";
-import { hasKiwoomCredentials } from "../../quote/kiwoom";
+import { availableProviders } from "../../quote/providers";
 import { readLatestDailyCloses } from "../../quote/stock-candles";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +30,8 @@ function seoulDate(timestamp: number) {
 export async function GET() {
   const symbols = STOCKS.map((stock) => stock.symbol);
   // 루트 .env 를 읽어들이는 부수효과가 있다. 로컬 개발에서 Supabase 설정보다 먼저 와야 한다.
-  const kiwoomReady = hasKiwoomCredentials();
+  // 키가 채워진 제공자를 시도 순서대로 싣는다. 비어 있으면 픽스처로만 도는 상태다.
+  const quoteProviders = availableProviders().map((provider) => provider.id);
 
   try {
     const stored = await readLatestDailyCloses(WINDOW_DAYS);
@@ -49,7 +50,7 @@ export async function GET() {
         latestDaily: times.length ? seoulDate(Math.max(...times)) : null,
         allSymbolsThrough: times.length ? seoulDate(Math.min(...times)) : null,
         staleOrMissing,
-        kiwoomReady,
+        quoteProviders,
       },
       { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store" } },
     );
@@ -64,7 +65,7 @@ export async function GET() {
         latestDaily: null,
         allSymbolsThrough: null,
         staleOrMissing: symbols,
-        kiwoomReady,
+        quoteProviders,
         error: error instanceof Error ? error.message : "보관 DB를 읽지 못했습니다.",
       },
       { status: 503, headers: { "Cache-Control": "no-store" } },
