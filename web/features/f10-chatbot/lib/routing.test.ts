@@ -1893,4 +1893,36 @@ for (const question of [
   );
 }
 
+const childFriendlyQuestionVariants = [
+  ["수익이랑 손해는 뭐가 달라?", "financial_concept", undefined],
+  ["수익하고 손해 차이가 뭐야?", "financial_concept", undefined],
+  ["불닭 만드는 회사 이름이 뭐야?", "stock_facts", undefined],
+  ["내가 아는 게임 만드는 회사도 여기 있어?", "service_help", "stock"],
+  ["게임 회사 여기에도 있어?", "service_help", "stock"],
+  ["핸드폰 만드는 회사는 어디서 찾아?", "service_help", "stock"],
+  ["과자 만드는 회사도 있어?", "service_help", "stock"],
+  ["영화나 드라마 관련 회사도 찾아볼 수 있어?", "service_help", "stock"],
+  ["회사 종류별로 나눠서 보고 싶어.", "service_help", "stock"],
+  ["주식 사는 연습은 어떻게 해?", "service_help", "stock"],
+  ["주문 넣었는데 다음엔 뭐 해야 해?", "service_help", "portfolio"],
+  ["내가 고른 회사 다시 보려면 어디 가?", "service_help", "stock"],
+  ["주식 몇 주 살지 어디에 적어?", "service_help", "order"],
+  ["몇 개 살지는 어디 써?", "service_help", "order"],
+  ["왜 이 회사를 골랐는지 쓰는 칸은 어디야?", "service_help", "stock"],
+  ["화면이 너무 많아. 처음으로 돌아가고 싶어.", "service_help", "home"],
+] as const;
+for (const [question, intent, target] of childFriendlyQuestionVariants) {
+  const routed = routeMessage(question, { screen: "home" });
+  assert.equal(routed.intent, intent, `구어체 질문의 의도가 달라짐: ${question}`);
+  assert.equal(routed.uiAction?.target, target, `구어체 질문의 화면 연결이 달라짐: ${question}`);
+}
+
+const sameSectorComparison = routeMessage("이 회사랑 비슷한 회사도 보여줘.", stockContext);
+assert.equal(sameSectorComparison.intent, "service_help");
+assert.equal(sameSectorComparison.uiAction?.target, "stock");
+assert.equal(sameSectorComparison.uiAction?.sectorId, "semiconductor");
+assert.equal(sameSectorComparison.text.includes("더 낫다고 고르지"), true);
+
+assert.equal(routeMessage("몇 주 살까 추천해줘", stockContext).route, "refusal");
+
 console.log("routing tests passed");
