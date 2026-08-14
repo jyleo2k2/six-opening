@@ -10,9 +10,10 @@
 - `GET /api/family`가 로그인 세션과 같은 `family_tag`의 구성원과 Supabase 체결을 최신순으로 제공한다.
 - `전체`와 실제 구성원 이름 필터로 자녀·부모 각각의 거래를 볼 수 있다. 필터는 로그인 사용자를 바꾸지 않는다.
 - 자신의 카드에는 수량과 주당 체결가를 표시하고, 다른 가족 카드에는 서버 응답 단계부터 둘 다 `null`로 숨긴다.
-- 코멘트는 브라우저 로컬 상태에 저장하며 부모→자녀 방향의 추천·타이밍·훈계·채점 표현을 차단한다.
-- `차트에서 이 지점 보기`는 현재 차트가 아니라 iframe의 **종목 상세 화면**을 연다.
-- 좋아요 UI, 코멘트 삭제 UI, 서버 코멘트 동기화는 노출되지 않는다.
+- 코멘트는 Supabase에 저장하며 부모→자녀 방향의 추천·타이밍·훈계·채점 표현을 서버에서 차단한다.
+- 코멘트 작성자는 실제 `profiles.name`으로 표시해 엄마·아빠를 구분하고, 본인이 쓴 코멘트만 삭제할 수 있다.
+- 좋아요는 가족 전체 개수와 로그인 사용자의 선택 상태를 DB에 저장하며 다시 누르면 취소한다.
+- `종목 자세히 보기`는 iframe의 **종목 상세 화면**을 연다.
 
 ## 2. 소유권
 
@@ -21,8 +22,7 @@
 | `web/features/f11-feed/FeedScreen.tsx` | 피드 오버레이, 카드, 열람 기준 전환, 코멘트 입력 |
 | `web/features/f0-home/ConnectedPrototype.tsx` | F11 열기·닫기, `kiwoom:open-stock` 중계 |
 | `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 전체 체결 조회와 타인 수량·체결가 마스킹 |
-| `web/shared/store/use-family-feed-store.ts` | 로컬 코멘트의 Zustand 저장소 |
-| `web/shared/engine/comment-filter.ts` | 클라이언트 코멘트 게이트 |
+| `web/shared/engine/comment-filter.ts` | 서버 저장 전 코멘트 문구 게이트 |
 | `web/shared/engine/trade-markers.ts` | 차트 마커 데이터 변환 |
 | `web/app/api/trades/route.ts` | 세션 가족의 종목별 체결 조회와 타인 수량 마스킹 |
 | `web/app/api/comments/route.ts` | 서버 코멘트 조회·작성·삭제 계약 |
@@ -44,14 +44,9 @@ F11은 F10과 함께 iframe 밖 React 오버레이이다. 메인 화면 정본�
 | 본인 `trade_quantity`·`trade_price` | `quantity`·`price` |
 | 타인 `trade_quantity`·`trade_price` | 서버에서 `null` |
 
-### 3.2 가족 거래와 코멘트
+### 3.2 가족 반응
 
-`useFamilyFeedStore`는 코멘트 작성자 역할과 로컬 코멘트를 `kiwoom-family-feed` 키로 저장한다. 거래와 구성원은 저장하지 않고 매번 DB에서 읽는다.
-
-- `viewer`: API의 로그인 사용자 역할로 맞춘다.
-- `comments`: 코드 시드와 사용자가 남긴 코멘트다.
-
-구성원 필터와 거래 카드 이름은 API가 반환한 실제 `profiles.name`을 쓴다.
+가족 거래를 받은 뒤 모든 거래 id를 한 번에 `/api/comments`와 `/api/likes`로 보내 반응을 읽는다. 코멘트 작성·삭제와 좋아요 토글이 성공하면 해당 카드 상태만 서버 응답으로 갱신한다. 거래는 계속 표시하고 반응 API만 실패하면 별도 오류를 보여 준다.
 
 ### 3.3 카드 표시
 
@@ -69,20 +64,22 @@ F11은 F10과 함께 iframe 밖 React 오버레이이다. 메인 화면 정본�
 ## 4. 코멘트 계약
 
 ```ts
-type TradeComment = {
-  id: string;
-  tradeId: string;
+type FeedComment = {
+  id: string | number;
+  transactionId: string;
   author: "child" | "parent";
+  authorName: string;
   body: string;
   createdAt: string;
+  mine: boolean;
 };
 ```
 
 - 텍스트만 허용하며 공백은 거절하고 최대 200자이다.
-- 현재 작성자는 서버 세션이 아니라 피드의 `viewer` 값이다.
+- 작성자 `user_id`와 이름은 서버 세션 및 `profiles` 관계에서 정한다. 화면이 작성자를 보내지 않는다.
 - 부모가 자녀 거래에 남길 때만 추천·매매 타이밍·훈계·채점 표현을 게이트한다.
 - 차단하면 저장하지 않고 재작성 안내를 보여준다.
-- 현재 프론트에는 수정·삭제 기능이 없다.
+- `mine`인 코멘트만 삭제 버튼을 표시하며 서버가 작성자를 다시 검사한다. 수정 기능은 없다.
 - 코멘트는 성향 계산과 F10 입력에 사용하지 않는다.
 
 ## 5. 차트 가족 체결 마커
@@ -107,19 +104,18 @@ type TradeComment = {
 |---|---|---|
 | 가족 전체 체결·구성원·성향 조회 | `/api/family` 구현 | `FeedScreen`에서 사용 |
 | 종목별 가족 체결 조회 | `/api/trades` 구현 | TradingView 차트에서 사용 |
-| 코멘트 조회·작성·본인 삭제 | `/api/comments` 구현 | **호출하지 않음** |
-| 좋아요 조회·토글 | `/api/likes` 구현 | **UI와 호출 없음** |
-| 가족 범위 검사 | 두 API에서 구현 | 세션 `family_tag` 기준 응답만 사용 |
+| 코멘트 배치 조회·작성·본인 삭제 | `/api/comments` 구현 | `FeedScreen`에서 사용 |
+| 좋아요 배치 조회·토글 | `/api/likes` 구현 | `FeedScreen`에서 사용 |
+| 가족 범위 검사 | 가족·거래·반응 API에서 구현 | 세션 `family_tag` 기준 응답만 사용 |
 | 로그인·계정 전환 | `/api/auth/login`, `/api/auth/switch` 구현 | **호출하지 않음** |
 
-거래와 구성원은 DB 연동됐지만 코멘트·좋아요는 아직 로컬 또는 미연결이다.
+거래·구성원·코멘트·좋아요는 모두 DB가 원본이다.
 
 ## 7. 확인된 불일치와 제약
 
 1. 구성원 필터는 메인 앱 계정이나 `kw_uid`를 바꾸지 않는다.
 2. 본인 카드의 원 표시는 총액이 아니라 주당 체결가이다.
-3. 코멘트 작성자 계약은 아직 부모·자녀 역할 단위라 부모가 둘일 때 어느 부모인지 구분하지 못한다.
-4. 서버 코멘트·좋아요 API는 프론트에서 사용하지 않는다.
+3. 코멘트 수정과 좋아요를 누른 사람 목록은 제공하지 않는다.
 
 ## 8. 현재 완료 기준
 
@@ -128,6 +124,8 @@ type TradeComment = {
 - 실제 구성원 이름 필터로 각자의 거래를 따로 볼 수 있다.
 - 로그인 사용자의 카드에만 수량·단가가 보이고 타인은 API 응답부터 `null`이다.
 - 부모→자녀의 금지 코멘트는 저장되지 않고 안내가 보인다.
+- 코멘트 작성자의 실제 이름이 보이고 본인 코멘트만 삭제할 수 있다.
+- 좋아요 개수와 본인 선택 상태가 새로 열어도 유지된다.
 - 종목 이동 버튼이 메인 iframe의 해당 종목 상세를 연다.
 - 차트 마커는 서버 거래만 표시하고 타인 수량을 노출하지 않는다.
 - `web`의 테스트와 빌드가 통과한다.
