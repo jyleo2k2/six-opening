@@ -201,10 +201,8 @@ async function main() {
     { generateAnswer: noModel },
   );
   assert.equal(ownRecords.source, "tool");
-  assert.equal(isExplainAction(ownRecords.action), true);
-  if (isExplainAction(ownRecords.action)) {
-    assert.equal(ownRecords.action.uiAction?.target, "archive");
-  }
+  assert.equal(isExplainAction(ownRecords.action), false);
+  assert.equal(ownRecords.action?.uiAction?.target, "archive");
 
   // ── 2단: 지시어 후속 질문 되살리기 (SPEC §3.5) ───────────────────────────
   // "수익률이 뭐야?" 뒤의 "그럼 이게 높으면 좋은거야?" 는 그 문장만으로는 어떤

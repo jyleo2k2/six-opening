@@ -228,25 +228,25 @@ const SCREENS: Record<
     label: "\ud648",
     title: "\uc774\ubc88 \uc8fc \uac00\uc871 \ubaa8\uc758\ud22c\uc790 \ub9ac\uadf8",
     description: "\uc774\ubc88 \uc8fc \ud3ec\ud2b8\ud3f4\ub9ac\uc624\uc640 \ub9ac\uadf8 \uc9c4\ud589 \uc0c1\ud669\uc744 \ud655\uc778\ud574 \ubd10.",
-    chips: ["\ub9e4\uc218 \uc5b4\ub5bb\uac8c \ud574?", "\uc218\uc775\ub960\uc774 \ubb50\uc57c?", "\ud0a4\uc6c5\uc774\uac00 \ubb58 \ub3c4\uc640\uc918?"],
+    chips: ["\ub9e4\uc218\ub294 \uc5b4\ub5bb\uac8c \ud558\ub098\uc694?", "\uc218\uc775\ub960\uc774 \ubb34\uc5c7\uc778\uac00\uc694?", "\ud0a4\uc6c5\uc774\ub294 \ubb34\uc5c7\uc744 \ub3c4\uc640\uc8fc\ub098\uc694?"],
   },
   stock: {
     label: "\uc885\ubaa9 \uc0c1\uc138",
     title: "삼성전자",
     description: "\uae30\uc5c5 \uc815\ubcf4\uc640 \uacf5\uac1c\ub41c \uacfc\uac70 \ub370\uc774\ud130\ub97c \uc0b4\ud3b4\ubcf4\ub294 \ud654\uba74\uc774\uc57c.",
-    chips: ["\uc774 \ud68c\uc0ac\ub294 \ubb50 \ud558\ub294 \ud68c\uc0ac\uc57c?", "PER\uc774 \ubb50\uc57c?", "\uc2dc\uc7a5\uac00\uac00 \ubb50\uc57c?"],
+    chips: ["\uc774 \ud68c\uc0ac\ub294 \ubb34\uc5c7\uc744 \ud558\ub294 \ud68c\uc0ac\uc778\uac00\uc694?", "PER\uc740 \ubb34\uc5c7\uc778\uac00\uc694?", "\uc2dc\uc7a5\uac00\ub294 \ubb34\uc5c7\uc778\uac00\uc694?"],
   },
   order: {
     label: "\uc8fc\ubb38",
     title: "삼성전자 매수",
     description: "\uc218\ub7c9\uacfc \uc608\uc0c1 \uae08\uc561\uc744 \ud655\uc778\ud558\uace0 \ub124 \uc0dd\uac01\uc744 \uae30\ub85d\ud558\ub294 \ud654\uba74\uc774\uc57c.",
-    chips: ["\uc2dc\uc7a5\uac00\uac00 \ubb50\uc57c?", "\uc8fc\ubb38 \uc804\uc5d0 \ubb58 \ud655\uc778\ud574?", "\uc218\uc775\ub960\uc774 \ubb50\uc57c?"],
+    chips: ["\uc2dc\uc7a5\uac00\ub294 \ubb34\uc5c7\uc778\uac00\uc694?", "\uc8fc\ubb38 \uc804\uc5d0 \ubb34\uc5c7\uc744 \ud655\uc778\ud558\ub098\uc694?", "\uc218\uc775\ub960\uc774 \ubb34\uc5c7\uc778\uac00\uc694?"],
   },
   archive: {
     label: "\uc544\uce74\uc774\ube0c",
     title: "\ubbfc\uc900\uc758 \ud22c\uc790 \uae30\ub85d",
     description: "\ub0b4\uac00 \uace0\ub978 \uc774\uc720\uc640 \uae30\ub85d\uc744 \ub2e4\uc2dc \ucc3e\uc544\ubcf4\ub294 \ud654\uba74\uc774\uc57c.",
-    chips: ["\uc9c0\ub09c \uae30\ub85d\uc740 \uc5b4\ub5bb\uac8c \ubd10?", "\uc218\uc775\ub960\uc774 \ubb50\uc57c?"],
+    chips: ["\uc9c0\ub09c \uae30\ub85d\uc740 \uc5b4\ub514\uc11c \ubd10\uc694?", "\uc218\uc775\ub960\uc774 \ubb34\uc5c7\uc778\uac00\uc694?"],
   },
 };
 
@@ -450,6 +450,11 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
 
   const currentScreen = SCREENS[screen];
+  const recommendedQuestions =
+    [...messages]
+      .reverse()
+      .find((message) => message.role === "assistant" && message.suggestedQuestions?.length)
+      ?.suggestedQuestions?.slice(0, 3) ?? currentScreen.chips;
   const resolvedFloatingChatPosition = clampFloatingChatPosition(
     floatingChatPosition ?? defaultFloatingChatPosition(prototypeScreen),
     prototypeScreen,
@@ -1336,10 +1341,10 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
               <p className="mb-2 text-xs font-semibold text-navy">
                 {COPY.recommended}
               </p>
-              <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
-                {currentScreen.chips.map((question) => (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {recommendedQuestions.map((question) => (
                   <button
-                    className="shrink-0 rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                    className="max-w-full rounded-full bg-bg px-3 py-2 text-left text-xs font-medium text-navy"
                     key={question}
                     disabled={isLoading}
                     onClick={() => void ask(question)}

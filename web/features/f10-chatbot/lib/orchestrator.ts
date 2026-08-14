@@ -538,7 +538,9 @@ export async function createChatOutcome(
   // 성향·시즌 기록은 값을 설명하지 않고 그 화면으로 보낸다. 이해 확인 전이를
   // 붙이면 다음 행동이 버튼과 선택지로 갈라진다 — 답변 자체가 다음 행동이다.
   const screenGuidance =
-    routed.intent === "own_profile" || routed.intent === "own_archive";
+    routed.intent === "own_records" ||
+    routed.intent === "own_profile" ||
+    routed.intent === "own_archive";
   if (
     explainStep === null &&
     stockExploreStep === null &&
