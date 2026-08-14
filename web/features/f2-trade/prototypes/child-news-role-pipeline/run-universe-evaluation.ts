@@ -17,7 +17,7 @@ import {
 } from "./universe-news-evaluation";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const ROLE_TIMEOUT_MS = 180_000;
+const ROLE_TIMEOUT_MS = 360_000;
 
 type RawMockUniverse = {
   sectors?: Array<{ id?: unknown; name?: unknown }>;
@@ -131,6 +131,10 @@ async function main() {
     option("--input") ?? resolve(here, "evaluation-fixtures", `${defaultRunId}.json`),
   );
   const collection = parseCollection(JSON.parse(await readFile(inputPath, "utf8")));
+  const roleTimeoutMs = Number(option("--role-timeout-ms") ?? ROLE_TIMEOUT_MS);
+  if (!Number.isSafeInteger(roleTimeoutMs) || roleTimeoutMs < 60_000 || roleTimeoutMs > 900_000) {
+    throw new Error("--role-timeout-ms는 60000~900000 사이의 정수여야 합니다.");
+  }
   const outputDirectory = resolve(
     option("--output") ?? resolve(here, "reports", collection.runId),
   );
@@ -144,6 +148,14 @@ async function main() {
   const existingReport = resume && existsSync(jsonPath)
     ? parseExistingReport(JSON.parse(await readFile(jsonPath, "utf8")), collection)
     : undefined;
+  const retryTechnicalErrors = process.argv.includes("--retry-technical-errors");
+  const existingCases = existingReport?.cases.filter((item) =>
+    !retryTechnicalErrors ||
+    item.pipelineResult.status === "ready_for_storage" ||
+    !item.pipelineResult.reasonCodes.some((code) =>
+      code === "ROLE_ERROR" || code === "PIPELINE_EXECUTION_ERROR"
+    ),
+  );
   const mocks = await loadCurrentMocks();
   const universe = STOCKS.map((stock) => ({
     stockId: stock.id,
@@ -156,10 +168,10 @@ async function main() {
     {
       runRole: runOpenAiNewsRole,
       universe,
-      timeoutMs: ROLE_TIMEOUT_MS,
+      timeoutMs: roleTimeoutMs,
     },
     {
-      existingCases: existingReport?.cases,
+      existingCases,
       async onCaseCompleted(partial, latest) {
         await writeReport(outputDirectory, partial, mocks);
         console.log(

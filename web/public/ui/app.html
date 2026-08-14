@@ -1556,10 +1556,9 @@ class Component extends DCLogic {
 
   validNewsItem(item, stockCode){
     if (!item || !Number.isSafeInteger(item.newsId) || item.newsId <= 0 || !Number.isSafeInteger(item.articleId) || item.articleId <= 0) return false;
-    if (item.scope !== 'market' && item.scope !== 'company') return false;
+    if (item.scope !== 'company') return false;
     if (!Array.isArray(item.stockCodes) || item.stockCodes.some(code => !/^\d{6}$/.test(code))) return false;
-    if (item.scope === 'market' && item.stockCodes.length !== 0) return false;
-    if (item.scope === 'company' && item.stockCodes.indexOf(stockCode) < 0) return false;
+    if (item.stockCodes.indexOf(stockCode) < 0) return false;
     if (typeof item.headline !== 'string' || !item.headline.trim() || typeof item.homeSummary !== 'string' || !item.homeSummary.trim()) return false;
     if (!Array.isArray(item.summaryLines) || item.summaryLines.length !== 3 || item.summaryLines.some(line => typeof line !== 'string' || !line.trim() || line.length > 36)) return false;
     if (typeof item.publisher !== 'string' || !item.publisher.trim() || typeof item.sourcePublishedAt !== 'string' || !Number.isFinite(Date.parse(item.sourcePublishedAt))) return false;
@@ -2250,7 +2249,7 @@ class Component extends DCLogic {
       stockLineColor: st && st.change >= 0 ? up : down,
       stockSparkBig: st ? this.polyline(st.spark, 336, 112) : '',
       stockDescLong: st ? (st.name + this.topic(st.name) + ' ' + st.desc + '.') : '',
-      stockNews: newsItem ? newsItem.homeSummary : (newsStatus === 'error' ? '뉴스를 불러오지 못했어. 다시 눌러 줘.' : (newsStatus === 'empty' ? '아직 검수를 통과한 새 소식이 없어.' : '검수를 통과한 새 소식을 찾고 있어.')),
+      stockNews: newsItem ? newsItem.headline : (newsStatus === 'error' ? '뉴스를 불러오지 못했어. 다시 눌러 줘.' : (newsStatus === 'empty' ? '아직 검수를 통과한 새 소식이 없어.' : '검수를 통과한 새 소식을 찾고 있어.')),
       detailBadgeStyle: bigBadge(52, 18, 25),
       miniBadgeStyle: bigBadge(38, 13, 18),
 
@@ -2752,7 +2751,7 @@ class Component extends DCLogic {
       // 통째로 다시 열려 차트 번들과 데이터를 다시 받는다. 두 값은 postChartOptions 로 넘긴다.
       tradingViewChartUrl: st ? '/tradingview-chart?symbol=' + encodeURIComponent(st.code) : '',
       sectorNameText: st ? this.sectorOf(st.sector).name : '',
-      newsKicker: detailNews ? (detailNews.scope === 'market' ? '오늘 국내 시황' : (st ? st.name + ' 이야기' : '기업 이야기')) : '',
+      newsKicker: detailNews ? (st ? st.name + ' 이야기' : '기업 이야기') : '',
       newsHeadline: detailNews ? detailNews.headline : '',
       newsLines: detailNews ? detailNews.summaryLines.map((t, i) => ({
         text: t, n: i + 1,

@@ -182,6 +182,7 @@ export async function runUniverseNewsEvaluation(
         await processNewsCandidate(candidate.article, {
           ...dependencies,
           runRole: observedRunRole,
+          requiredPrimaryStockId: candidate.stock.stockId,
         }),
         candidate.stock.stockId,
       );

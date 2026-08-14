@@ -682,6 +682,34 @@ async function testMalformedOutputFailsClosed() {
   assert.equal(result.reasonCodes.includes("INVALID_ROLE_OUTPUT"), true);
 }
 
+async function testRequiredPrimaryStockStopsBeforeEditing() {
+  const target = article(
+    "target-mismatch",
+    "SK하이닉스 실적 발표",
+    ["SK하이닉스가 영업이익을 발표했다."],
+  );
+  let editorCalls = 0;
+  const result = await processNewsCandidate(target, {
+    universe,
+    requiredPrimaryStockId: "KRX:005930",
+    runRole: async (request) => {
+      if (request.role === "headline_screener") return headlinePassed(target);
+      if (request.role === "relevance_selector") {
+        return accepted(target, {
+          primaryStockIds: ["KRX:000660"],
+          focusStatement: "SK하이닉스가 영업이익을 발표했다.",
+        });
+      }
+      editorCalls += 1;
+      return draft(target, "S1");
+    },
+  });
+  assert.equal(result.status, "rejected");
+  assert.equal(result.stage, "selector");
+  assert.deepEqual(result.reasonCodes, ["TARGET_STOCK_NOT_PRIMARY"]);
+  assert.equal(editorCalls, 0);
+}
+
 async function main() {
   await testFocusIsolation();
   await testHeadlineScreenRejectsRoutineNews();
@@ -692,6 +720,7 @@ async function main() {
   await testSummaryLineLengthRetry();
   await testReviewerFailClosedAndNoQuotaFill();
   await testMalformedOutputFailsClosed();
+  await testRequiredPrimaryStockStopsBeforeEditing();
   console.log("news role pipeline regression tests passed");
 }
 

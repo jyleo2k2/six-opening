@@ -53,13 +53,15 @@ async function main() {
   assert.equal(companyQueries.length, 1);
   assert.equal(companyQueries[0].stock_codes, "cs.{015760}");
 
-  let fallbackCall = 0;
-  const fallbackSelect: SelectNewsRows = async () => {
-    fallbackCall += 1;
-    return fallbackCall === 1 ? [] : [marketRow];
+  let emptyCall = 0;
+  const emptySelect: SelectNewsRows = async (params) => {
+    emptyCall += 1;
+    assert.equal(params.scope, "eq.company");
+    assert.equal(params.stock_codes, "cs.{005930}");
+    return [];
   };
-  assert.equal((await loadPublishedNewsForStock("KRX:005930", fallbackSelect))?.newsId, 1);
-  assert.equal(fallbackCall, 2);
+  assert.equal(await loadPublishedNewsForStock("KRX:005930", emptySelect), null);
+  assert.equal(emptyCall, 1);
 
   const detailSelect: SelectNewsRows = async (params) => {
     assert.equal(params.news_id, "eq.3");

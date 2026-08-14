@@ -60,12 +60,10 @@ export async function loadPublishedNewsForStock(
   const stockCode = stockCodeFromId(stockId);
   if (!stockCode) throw new TypeError("잘못된 종목 ID입니다.");
 
-  const companyNews = await latest(
+  return latest(
     { scope: "eq.company", stock_codes: `cs.{${stockCode}}` },
     selectNewsRows,
   );
-  if (companyNews) return companyNews;
-  return latest({ scope: "eq.market" }, selectNewsRows);
 }
 
 export async function loadPublishedNewsById(
