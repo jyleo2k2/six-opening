@@ -31,12 +31,12 @@ const CANDLES_PER_PAGE = 200;
 const MAX_PAGES = 6;
 
 /**
- * 요청 간격. 토스로 바꾸는 목적이 곧 이 값이다.
+ * 요청 간격. 확인된 한도는 초당 15건이다.
  *
- * 키움의 2.6초를 그대로 물려주면 어댑터만 갈아끼우고 속도는 그대로다. 실제 한도를
- * 확인하기 전까지는 넉넉히 잡고 `.env` 로 조절한다.
+ * `1000ms / 15 ≈ 67ms` 가 이론상 한계지만 지터·동시 사용자 겹침 대비 여유를 두고
+ * 70ms(초당 ~14건)로 잡는다. 필요하면 `.env` 로 더 좁힐 수 있다.
  */
-const DEFAULT_REQUEST_INTERVAL_MS = 200;
+const DEFAULT_REQUEST_INTERVAL_MS = 70;
 
 let accessToken = "";
 let tokenExpiresAt = 0;
@@ -213,14 +213,18 @@ export const tossProvider: QuoteProvider = {
     return {
       requestIntervalMs: requestIntervalMs(),
       /**
-       * 초당 여러 건을 보낼 수 있으므로 카드 폴링에서 한 번에 여러 종목을 데운다.
-       * 51종을 5초 폴링으로 채우는 데 한 바퀴면 충분한 크기다.
+       * 상세화면 차트 하나가 초당 1건(1초 재조회)을 쓰는 걸 우선하고, 카드 폴링은
+       * 남는 예산만 쓴다. 51종을 5초 폴링으로 여러 바퀴 도는 데 충분한 크기다.
        */
-      refreshBatchSize: 8,
+      refreshBatchSize: 15,
       /** 분봉 2일치가 한 페이지(200개)를 넘을 수 있어 페이지 상한을 조금 더 둔다. */
       minuteMaxPages: MAX_PAGES,
-      /** 대기가 짧아 낡은 분봉을 오래 붙들 이유가 없다. 메모리 캐시 수명과 맞춘다. */
-      minuteStaleMs: 5 * 60 * 1000,
+      /**
+       * 상세화면이 1초마다 다시 조회하므로 이 값도 짧아야 한다. `CHART_CACHE_MS`(1초)
+       * 보다는 조금 더 둬서, 배경 갱신이 한 틱 늦어도 요청이 즉시 응답을 기다리며
+       * 막히지 않고 낡은 값을 먼저 돌려주게 한다.
+       */
+      minuteStaleMs: 2000,
     };
   },
   hasCredentials,

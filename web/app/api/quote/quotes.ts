@@ -32,12 +32,20 @@ export type Quote = {
   provider: ProviderId | null;
 };
 
-const CHART_CACHE_MS = 5 * 60 * 1000;
+/**
+ * 상세화면 차트가 1초마다 이 값을 다시 받아 실시간처럼 갱신한다(SPEC 상 확인된
+ * 토스 초당 15건 한도 안에서 종목 하나당 초당 1건이면 넉넉하다).
+ *
+ * 그래서 이 캐시는 "요청을 아끼는" 용도가 아니라 "같은 1초 안에 중복 조회하지 않는" 용도로
+ * 짧게 잡는다. 예전에는 5분이었고, 그때는 상세화면이 아예 다시 조회하지 않았다.
+ */
+const CHART_CACHE_MS = 1000;
 /**
  * 보관 캔들 재조회 최소 간격. 요청마다 큐에 넣으면 큐가 백그라운드로 가득 찬다.
  *
- * 장중에는 오늘 봉이 계속 자라므로 이 값이 곧 차트가 멈춰 보이는 시간이다.
- * 메모리 캐시(`CHART_CACHE_MS`)와 같은 5분으로 맞춰 둘 중 하나만 낡는 일이 없게 한다.
+ * 메모리 캐시(`CHART_CACHE_MS`)와 같은 값으로 맞춰 둘 중 하나만 낡는 일이 없게 한다.
+ * `refreshStoredChart`는 마지막 보관 봉 이후만 증분으로 받으므로(아래 참고) 1초마다
+ * 불려도 매번 1건짜리 요청이다.
  */
 const STORED_REFRESH_INTERVAL_MS = CHART_CACHE_MS;
 
@@ -283,17 +291,28 @@ export function refreshStoredChart(symbol: string, period: Exclude<ChartPeriod, 
   return refresh;
 }
 
-/** 분봉 캐시를 뒤에서 새로 채운다. 보관 DB가 없는 유일한 기간이라 따로 둔다. */
+/**
+ * 분봉 캐시를 뒤에서 새로 채운다. 보관 DB가 없는 유일한 기간이라 따로 둔다.
+ *
+ * 마지막으로 받아둔 봉 이후만 증분으로 받는다. 1초 주기로 불리는데 매번 2일치를
+ * 통째로 다시 받으면(페이지 여러 장) 열린 차트 하나가 초당 여러 건을 쓰게 된다.
+ */
 function refreshMinuteChart(symbol: string) {
   const lockKey = `${symbol}:minute`;
   const pending = minuteRefreshes.get(lockKey);
   if (pending) return pending;
 
-  const refresh = fetchLiveChart(symbol, "minute", undefined, true)
+  const previous = anyCached(chartCache, symbol, "minute")?.value ?? [];
+  const cutoff = chartRetentionCutoff("minute");
+
+  const refresh = fetchLiveChart(symbol, "minute", previous.at(-1)?.time, true)
     .then((fresh) => {
       if (fresh) {
+        const points = mergeChartPoints(previous, fresh.points).filter(
+          (point) => point.time >= cutoff,
+        );
         chartCache.set(cacheKey(fresh.provider, symbol, "minute"), {
-          value: fresh.points,
+          value: points,
           at: Date.now(),
         });
       }
