@@ -1658,6 +1658,19 @@ function kstDateOf(iso) {
   return new Date(new Date(iso).getTime() + 9 * 3600000).toISOString().slice(0, 10);
 }
 
+// ── 카드 모아보기 주 경계 ──────────────────────────────────────────────
+// 화면(로컬 records)과 서버(Supabase transactions)가 같은 주를 같은 카드로
+// 묶으려면 월요일 경계를 한 곳에서만 정해야 한다. 호스트 타임존에 기대지 않도록
+// kstDateOf 처럼 +9시간 뒤 UTC getter 로 KST 벽시계 값을 읽는다.
+
+/** ISO 시각 → 그 시각이 속한 KST 주의 월요일 날짜(YYYY-MM-DD). */
+function weekStartKstOf(iso) {
+  const kst = new Date(new Date(iso).getTime() + 9 * 3600000);
+  const mondayOffset = (kst.getUTCDay() + 6) % 7; // 0=월요일
+  kst.setUTCDate(kst.getUTCDate() - mondayOffset);
+  return kst.toISOString().slice(0, 10);
+}
+
 /** `date` 다음 거래일부터 세어 `days` 번째 종가. 아직 안 지났으면 null */
 function closeAfterTradingDays(closes, date, days) {
   let seen = 0;
@@ -1814,6 +1827,7 @@ class Component extends DCLogic {
   componentDidMount(){
     this.loadDbUser();
     this.loadBehaviorProfile();
+    this.loadSeasonCards();
     let saved = null;
     try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
     const order = [0,1,2,3,4,5];
@@ -1927,6 +1941,15 @@ class Component extends DCLogic {
     fetch('/api/profile/behavior', { cache:'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d && d.character) { this.dbBehavior = d; this.forceUpdate(); } })
+      .catch(() => {});
+  }
+  // F9-archive — Supabase transactions 기반 지난 주차 카드. 로그인 아니거나 표본이
+  // 없으면 null 로 남고, buildArchive() 는 로컬 records 주차만으로 카드 모아보기를 그린다.
+  loadSeasonCards(){
+    this.dbSeasonCards = null;
+    fetch('/api/profile/season-cards', { cache:'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && Array.isArray(d.weeks) && d.weeks.length) { this.dbSeasonCards = d; this.forceUpdate(); } })
       .catch(() => {});
   }
   validNewsItem(item, stockCode){
@@ -2180,6 +2203,12 @@ class Component extends DCLogic {
   bindCardRail(el){
     if (!el || el === this.railEl) return;
     this.railEl = el;
+    // 카드 모아보기를 여는 순간 이 콜백이 레일 DOM 과 함께 바로 실행된다. openCards()
+    // 의 jumpCard() 호출은 이 레일이 아직 없을 때 일어날 수 있어 여기서도 한 번 더
+    // 현재 카드로 맞춘다. 다시 열 때(레일이 새로 생길 때)도 이 분기를 함께 탄다.
+    if (this.state.cardActive !== undefined && this.state.cardActive !== null) {
+      this.jumpCard(this.state.cardActive);
+    }
     el.addEventListener('scroll', () => {
       const mid = el.scrollLeft + el.clientWidth / 2;
       let best = 0, bd = 1e9;
@@ -2189,6 +2218,14 @@ class Component extends DCLogic {
       }
       if (best !== this.state.cardActive) this.setState({ cardActive: best });
     }, { passive: true });
+  }
+  jumpCard(index){
+    const card = this.railEl && this.railEl.children[index];
+    if (card) card.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+  }
+  snapCard(index){
+    const card = this.railEl && this.railEl.children[index];
+    if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }
 
   /**
@@ -2308,20 +2345,29 @@ class Component extends DCLogic {
     myRecs.forEach(r => { const k = monday(r.ts).getTime(); (weeks[k] || (weeks[k] = [])).push(r); });
     const thisMon = monday(Date.now()).getTime();
     if (!weeks[thisMon]) weeks[thisMon] = [];
+    // Supabase 지난 주차 카드(loadSeasonCards, F9-archive SPEC §3.1 재사용) — 로컬에
+    // 기록이 없는 지난 주만 채운다. 이번 주는 항상 로컬 계산을 쓴다.
+    const dbWeeks = (this.dbSeasonCards && this.dbSeasonCards.weeks) || [];
+    dbWeeks.forEach(w => {
+      const k = new Date(w.weekStart + 'T00:00:00').getTime();
+      if (k !== thisMon && !weeks[k]) weeks[k] = { fromDb: true, count: w.count, scores: w.scores };
+    });
     const weekKeys = Object.keys(weeks).map(Number).sort((a, b) => a - b);
     const WEEKS = weekKeys.map(k => {
-      const recs = weeks[k], isNow = k === thisMon;
+      const raw = weeks[k], isNow = k === thisMon, fromDb = !Array.isArray(raw);
+      const count = fromDb ? raw.count : raw.length;
       let list;
       // 지난 주 카드는 그 주 기록만으로 다시 낸다. 정확은 그 시점 채점이 없어 기본값이다.
       if (isNow) list = mine.list;
-      else list = computeAbilityScores(recs, sectorOfCode).scores;
+      else if (fromDb) list = raw.scores;
+      else list = computeAbilityScores(raw, sectorOfCode).scores;
       // 이번 주 카드는 위에서 낸 myType(행동 데이터 오버라이드 포함)과 같은 캐릭터를 써야 한다.
       const t = isNow ? myType : typeOf(list);
       const mon = new Date(k), sun = new Date(k + 6 * 86400000);
       return {
         week: isNow ? '이번 주' : (mon.getMonth() + 1) + '월 ' + Math.ceil((mon.getDate() + 6) / 7) + '주차',
         date: md(mon) + ' – ' + md(sun),
-        title: t.title, img: t.img, desc: recs.length === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
+        title: t.title, img: t.img, desc: count === 0 ? '이번 주는 아직 산 게 없어요.\n한 번 사고 나면 여기에 채워질 거예요.' : t.desc,
         scores: list
       };
     });
