@@ -149,9 +149,7 @@ function defaultFloatingChatPosition(
       y: prototypeScreen.top + prototypeScreen.height - 108 * prototypeScreen.scale,
     };
   }
-  const width = typeof window === "undefined" ? 390 : window.innerWidth;
-  const height = typeof window === "undefined" ? 844 : window.innerHeight;
-  return { x: width - 44, y: height - 108 };
+  return { x: 390 - 44, y: 844 - 108 };
 }
 
 function clampFloatingChatPosition(
@@ -160,8 +158,8 @@ function clampFloatingChatPosition(
 ): FloatingChatPosition {
   const left = prototypeScreen?.left ?? 0;
   const top = prototypeScreen?.top ?? 0;
-  const width = prototypeScreen?.width ?? (typeof window === "undefined" ? 390 : window.innerWidth);
-  const height = prototypeScreen?.height ?? (typeof window === "undefined" ? 844 : window.innerHeight);
+  const width = prototypeScreen?.width ?? 390;
+  const height = prototypeScreen?.height ?? 844;
   return {
     x: Math.min(left + width - FLOATING_CHAT_RADIUS, Math.max(left + FLOATING_CHAT_RADIUS, position.x)),
     y: Math.min(top + height - FLOATING_CHAT_RADIUS, Math.max(top + FLOATING_CHAT_RADIUS, position.y)),
@@ -392,11 +390,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     prototypeScreen,
   );
   const bubbleOpensLeft = resolvedFloatingChatPosition.x >=
-    (prototypeScreen
-      ? prototypeScreen.left + prototypeScreen.width / 2
-      : typeof window === "undefined"
-        ? 195
-        : window.innerWidth / 2);
+    (prototypeScreen ? prototypeScreen.left + prototypeScreen.width / 2 : 195);
   const floatingAvatar = isFloatingChatDragging
     ? VILLAIN_AVATARS[dragAvatarIndex ?? 0]
     : HERO_AVATARS[idleAvatarIndex ?? 0];
