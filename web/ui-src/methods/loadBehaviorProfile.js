@@ -1,5 +1,3 @@
-  // F9-archive SPEC §3.2 대체 입력 — 로그인 사용자의 Supabase 행동 데이터로 낸 캐릭터.
-  // 표본이 없거나 비로그인이면 null 로 남고, buildArchive() 가 기존 로컬 계산으로 폴백한다.
   loadBehaviorProfile(){
     this.dbBehavior = null;
     fetch('/api/profile/behavior', { cache:'no-store' })
@@ -7,3 +5,5 @@
       .then(d => { if (d && d.character) { this.dbBehavior = d; this.forceUpdate(); } })
       .catch(() => {});
   }
+  // F9-archive — Supabase transactions 기반 지난 주차 카드. 로그인 아니거나 표본이
+  // 없으면 null 로 남고, buildArchive() 는 로컬 records 주차만으로 카드 모아보기를 그린다.
