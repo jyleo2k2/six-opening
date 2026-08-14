@@ -753,6 +753,7 @@ const SEASON_RULE_QUESTION_PATTERNS = [
   "가능",
 ];
 const RANKING_RULE_PATTERNS = [
+  "순위",
   "가족순위",
   "리그순위",
   "리그점수",
@@ -767,6 +768,7 @@ const RANKING_RULE_PATTERNS = [
   "상품",
 ];
 const RANKING_RULE_QUESTION_PATTERNS = [
+  "언제",
   "정해",
   "계산",
   "거래횟수",
@@ -799,6 +801,7 @@ const VISIBILITY_RULE_PATTERNS = [
   "부모화면",
 ];
 const VIRTUAL_MONEY_RULE_PATTERNS = [
+  "가상돈다쓰면끝",
   "투자금도합쳐",
   "투자금이합쳐",
   "백만원같이쓰",
@@ -814,6 +817,8 @@ const VIRTUAL_MONEY_RULE_PATTERNS = [
   "모투머니출금",
   "가상머니출금",
   "현금으로바꿀",
+  "실제돈으로바꿀",
+  "진짜돈으로바꿀",
 ];
 const EXECUTION_RULE_PATTERNS = [
   "어떤시점의값으로체결",
@@ -957,7 +962,17 @@ const CODING_PATTERNS = [
   "코딩으로",
   "프로그래밍으로",
 ];
-const RECORD_PATTERNS = ["내기록", "내거래", "지난거래", "왜골랐", "거래이유", "내보유기간"];
+const RECORD_PATTERNS = [
+  "내기록",
+  "내거래",
+  "지난거래",
+  "왜골랐",
+  "거래이유",
+  "내보유기간",
+  "최근에뭐샀",
+  "왜샀다고적",
+  "예전에적은생각",
+];
 /**
  * 본인 계좌의 보유 현황을 묻는 표현. 용어 사전보다 먼저 잡아야 한다 —
  * `수량`·`몇 주`·`평균`이 사전 트리거라 그냥 두면 "지금 몇 주 갖고 있어?"가
@@ -978,6 +993,11 @@ const HOLDING_PATTERNS = [
   "얼마에샀",
   "몇주샀",
   "몇주남",
+  "내가진돈",
+  "내가가진돈",
+  "내돈어디서",
+  "가진돈어디서",
+  "내손익",
 ];
 /** 보유 조회는 본인 계좌만 본다. 타인을 가리키면 앞선 보호 판정에 맡긴다. */
 const HOLDING_OTHER_PATTERNS = [...FAMILY_MEMBER_PATTERNS, "친구", "다른사람", "남의"];
@@ -1192,7 +1212,8 @@ function getSectorFactReply(message: string): ChatReply | null {
   if (includesAny(message, ["per", "pbr", "주가", "고평가", "저평가", "수익률", "매수", "매도"])) return null;
   const sector = findMentionedSector(message);
   if (!sector) return null;
-  if (!includesAny(message, ["섹터", "업종"])) {
+  const asksCoreSectorWork = includesAny(message, ["택배", "칩"]);
+  if (!includesAny(message, ["섹터", "업종"]) && !asksCoreSectorWork) {
     return null;
   }
   return reply("faq", "sector_facts", sector.summary, ["승인 섹터 교육 데이터 확인"], {
@@ -1701,6 +1722,9 @@ function findMetaKind(
       "강제로계속",
       "계속시키",
       "그만두고싶",
+      "그만하고싶으면",
+      "그냥닫아도돼",
+      "그냥닫아도되",
       "대화그만",
       "대화끝",
       "대화를바로끄",
@@ -1709,7 +1733,7 @@ function findMetaKind(
       "챗봇끄",
       "멈출수",
     ]) &&
-    (hasMetaActor || message.includes("대화"));
+    (hasMetaActor || message.includes("대화") || message.includes("그냥닫아"));
   if (asksAboutAutonomy) return "autonomy";
 
   const asksAboutRealtime =
@@ -3406,6 +3430,7 @@ function getArchiveAbilityReply(message: string, context: ChatContext): ChatRepl
   if (
     context.screen !== "archive" ||
     message.includes("확신도") ||
+    includesAny(message, ["주식", "주가", "per", "pbr", "수익률", "손익", "차트", "매수", "매도"]) ||
     !includesAny(message, ARCHIVE_ABILITY_QUESTION_PATTERNS)
   ) {
     return null;
@@ -3415,6 +3440,67 @@ function getArchiveAbilityReply(message: string, context: ChatContext): ChatRepl
   if (!ability) return null;
 
   return serviceHowToReply(ability.text, "성향 화면 보기", "archive", { archiveTab: "report" });
+}
+
+function getOwnDataReply(message: string): ChatReply | null {
+  const hasOwnRecordReference = includesAny(message, [
+    "내가",
+    "내기록",
+    "내거래",
+    "내성향",
+    "내아카이브",
+    "내손익",
+    "내돈",
+    "최근에",
+    "예전에",
+    "왜샀다고",
+    "보여줘",
+    "알려줘",
+    "확인해",
+  ]);
+  if (hasOwnRecordReference && includesAny(message, RECORD_PATTERNS)) {
+    return reply("tool", "own_records", "", ["본인 투자 기록 조회"], {
+      tool: "own_trade_records",
+    });
+  }
+  const asksProfileResult = includesAny(message, ["결과", "보여", "알려", "언제", "어디서"]);
+  if (
+    hasOwnRecordReference &&
+    asksProfileResult &&
+    includesAny(message, PROFILE_PATTERNS)
+  ) {
+    return reply("tool", "own_profile", "", ["본인 성향 결과 조회"], {
+      tool: "own_behavior_profile",
+    });
+  }
+  if (hasOwnRecordReference && includesAny(message, ARCHIVE_PATTERNS)) {
+    return reply("tool", "own_archive", "", ["본인 시즌 기록 조회"], {
+      tool: "own_archive",
+    });
+  }
+  return null;
+}
+
+function getFinancialConceptReply(message: string): ChatReply | null {
+  if (includesAny(message, ["손익이마이너스면내가빚진", "손익마이너스면내가빚진"])) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "손익이 마이너스라는 말만으로 빚이 생기는 것은 아니에요. 가진 가상 돈이나 보유한 주식의 값이 줄어든 상태를 뜻하며, 실제로 빌린 돈이 있는지는 별도로 확인해야 해요.",
+      ["손익 개념 안내"],
+      { suggestedQuestions: ["평가손익이 뭐예요?", "실현손익이 뭐예요?"] },
+    );
+  }
+  if (includesAny(message, ["물타기는왜하는거야", "물타기를왜하는거야"])) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "물타기는 같은 주식을 더 사서 처음 산 가격의 평균을 바꾸는 행동을 말해요. 왜 하거나 언제 할지는 제가 정해 줄 수 없지만, 이 말의 뜻과 손익이 어떻게 달라지는지는 설명할 수 있어요.",
+      ["물타기 개념 안내"],
+      { suggestedQuestions: ["평가손익이 뭐예요?", "분산투자가 뭐예요?"] },
+    );
+  }
+  return null;
 }
 
 function isNavigationQuestion(message: string) {
@@ -3586,6 +3672,32 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
   const stockDetails = context.stockId ? { stockId: context.stockId } : {};
 
   if (message.includes("실수로매수한기록을archive에서지울")) return null;
+
+  if (includesAny(message, ["지정가걸어두면바로사", "지정가주문바로체결"])) {
+    return serviceHowToReply(
+      "지정가는 정한 가격 조건이 맞아야 체결되는 주문이에요. 조건이 맞지 않으면 바로 사지 않고 기다리는 주문으로 남을 수 있어요.",
+      "주문 화면에서 확인하기",
+      "order",
+      { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
+    );
+  }
+
+  if (includesAny(message, ["매수는어디눌러", "매수어디눌러", "매수어디서해"])) {
+    return serviceHowToReply(
+      "종목 상세에서 매수 버튼을 누르면 주문을 시작할 수 있어요. 수량이나 금액과 이유를 확인한 뒤 마지막 단계에서 직접 주문을 확인해요.",
+      "종목 화면으로 이동",
+      "stock",
+      stockDetails,
+    );
+  }
+
+  if (includesAny(message, ["매수한거취소", "매수취소할수있", "주문취소할수있"])) {
+    return serviceHowToReply(
+      "아직 체결되지 않은 기다리는 주문은 취소할 수 있어요. 이미 체결된 시장가 주문은 취소할 수 없으니, 보유 현황과 주문 상태를 먼저 확인해 주세요.",
+      "기다리는 주문 보기",
+      "portfolio",
+    );
+  }
 
   if (includesAny(message, ["이거누르면바로사지", "매수버튼누르면끝"])) {
     return serviceHowToReply(
@@ -3925,6 +4037,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const privacyReply = getPrivacyReply(message);
   if (privacyReply) return privacyReply;
 
+  const financialConceptReply = getFinancialConceptReply(message);
+  if (financialConceptReply) return financialConceptReply;
+
   // SPEC §6.1.2 의 입력 안전 우선순위대로 보호 판정을 사용법 FAQ 앞에 둔다.
   // 뒤에 두면 "다 포기하고 싶어 매수 버튼 누르면 끝이야?" 처럼 위기 표현에
   // 서비스 낱말이 섞였을 때 큐레이트 FAQ 가 먼저 잡아 보호 응답이 사라진다.
@@ -3983,6 +4098,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const recommendationKind = findRecommendationKind(message);
   const metaKind = findMetaKind(message, recommendationKind);
   if (metaKind) return metaReply(metaKind, message);
+
+  const ownDataReply = getOwnDataReply(message);
+  if (ownDataReply) return ownDataReply;
 
   const termKind = findTermKind(message);
   const termTakesPriorityOverCompany =

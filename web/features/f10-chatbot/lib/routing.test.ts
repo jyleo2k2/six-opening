@@ -19,6 +19,32 @@ for (const script of Object.values(PROACTIVE_SCRIPTS)) {
 
 assert.equal(routeMessage("PER이 뭐야?", stockContext).route, "faq");
 assert.equal(routeMessage("ETF가 뭐야?", stockContext).intent, "financial_concept");
+
+// 실제 초등·중학생 구어체 질문은 용어·화면·본인 기록의 목적을 섞어도 맞는 경로로 보낸다.
+const archiveContext = { screen: "archive" as const };
+const stockDefinition = routeMessage("주식이 정확히 뭐야?", archiveContext);
+assert.equal(stockDefinition.intent, "financial_concept");
+assert.notEqual(stockDefinition.uiAction?.target, "archive");
+
+const limitOrder = routeMessage("지정가 걸어두면 바로 사져?", stockContext);
+assert.equal(limitOrder.intent, "service_help");
+assert.equal(limitOrder.uiAction?.target, "order");
+assert.equal(limitOrder.text.includes("조건"), true);
+
+assert.equal(routeMessage("손익이 마이너스면 내가 빚진 거야?", stockContext).intent, "financial_concept");
+assert.equal(routeMessage("물타기는 왜 하는 거야?", stockContext).intent, "financial_concept");
+assert.equal(routeMessage("매수는 어디 눌러서 해?", stockContext).uiAction?.target, "stock");
+assert.equal(routeMessage("매수한 거 취소할 수 있어?", stockContext).uiAction?.target, "portfolio");
+assert.equal(routeMessage("물류 회사는 택배만 하는 거야?", stockContext).intent, "sector_facts");
+assert.equal(routeMessage("반도체 회사는 칩만 만드는 거야?", stockContext).intent, "sector_facts");
+assert.equal(routeMessage("내가 최근에 뭐 샀는지 보여줘.", stockContext).tool, "own_trade_records");
+assert.equal(routeMessage("내가 왜 샀다고 적었는지 알려줘.", stockContext).tool, "own_trade_records");
+assert.equal(routeMessage("내 손익은 어디서 확인해?", stockContext).tool, "own_holdings");
+assert.equal(routeMessage("예전에 적은 생각도 볼 수 있어?", stockContext).tool, "own_trade_records");
+assert.equal(routeMessage("가상 돈 다 쓰면 끝이야?", stockContext).intent, "service_help");
+assert.equal(routeMessage("순위는 언제 바뀌어?", stockContext).intent, "service_help");
+assert.equal(routeMessage("실제 돈으로 바꿀 수 있어?", stockContext).intent, "service_help");
+assert.equal(routeMessage("나 이제 그만하고 싶으면 그냥 닫아도 돼?", stockContext).route, "faq");
 assert.equal(routeMessage("매수 어떻게 해?", stockContext).route, "faq");
 assert.equal(routeMessage("매수 어떻게 해?", stockContext).uiAction?.target, "order");
 assert.equal(routeMessage("이 회사는 뭐 하는 회사야?", stockContext).tool, "approved_stock_facts");
