@@ -206,6 +206,28 @@ async function main() {
     assert.equal(ownRecords.action.uiAction?.target, "archive");
   }
 
+  // 성향·시즌 기록은 화면으로 보내는 안내다. 이해 확인 전이를 붙이지 않고
+  // 이동 버튼과 후속 질문만 준다.
+  const ownProfile = await createChatOutcome(
+    { message: "현재 내 성향 뭐야?", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(ownProfile.source, "tool");
+  assert.equal(isExplainAction(ownProfile.action), false);
+  assert.equal(ownProfile.action?.uiAction?.target, "archive");
+  assert.equal(ownProfile.action?.uiAction?.archiveTab, "report");
+  assert.equal(ownProfile.action?.suggestedQuestions?.length, 2);
+  assert.equal(ownProfile.response.text.startsWith("내 성향 결과는"), true);
+
+  const ownArchive = await createChatOutcome(
+    { message: "내 지난 시즌 기록 보여줘", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(isExplainAction(ownArchive.action), false);
+  assert.equal(ownArchive.action?.uiAction?.archiveTab, "return");
+
   const screenAmount = await createChatOutcome(
     {
       message: "예상 금액이 얼마야?",
