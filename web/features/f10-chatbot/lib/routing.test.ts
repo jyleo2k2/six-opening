@@ -1724,6 +1724,37 @@ for (const [question, expectedTarget] of howtoQuestions) {
   }
 }
 
+const navigationQuestions = [
+  ["홈은 어디에 있어?", "home", { label: "홈으로 가기" }],
+  ["모의투자는 어디서 시작해?", "stock", { stockView: "explore" }],
+  ["아카이브는 어디서 봐?", "archive", { archiveTab: "report" }],
+  ["랭킹은 어떤 버튼을 눌러?", "ranking", {}],
+  ["내 계좌 보기는 어디에 있어?", "portfolio", {}],
+  ["모의투자 하러 가기는 어디에 있어?", "stock", { stockView: "explore" }],
+  ["학교 시간엔 매매 쉬기 토글은 어떻게 써?", "home", {}],
+  ["오늘 많이 오른 순은 어디에 있어?", "stock", { stockView: "explore", sectorId: "rank" }],
+  ["관심 기업은 어디서 봐?", "stock", { stockView: "explore", sectorId: "watch" }],
+  ["에너지 업종 칩은 어디에 있어?", "stock", { stockView: "explore", sectorId: "energy" }],
+  ["업종 칩 13종은 어디서 봐?", "stock", { stockView: "explore" }],
+  ["종목 카드는 어디서 찾아?", "stock", { stockView: "explore" }],
+  ["주차 카드는 어디서 봐?", "archive", { archiveTab: "report", archiveOverlay: "cards" }],
+] as const;
+
+for (const [question, target, action] of navigationQuestions) {
+  const routed = routeMessage(question, howtoContexts.order);
+  assert.equal(routed.route, "faq", `화면 찾기 질문이 FAQ가 아니야: ${question}`);
+  assert.equal(routed.intent, "service_help", `화면 찾기 목적이 달라: ${question}`);
+  assert.equal(routed.uiAction?.target, target, `화면 이동 대상이 달라: ${question}`);
+  assert.equal(Boolean(routed.uiAction?.label), true, `화면 이동 버튼 라벨이 없어: ${question}`);
+  for (const [key, value] of Object.entries(action)) {
+    assert.equal(
+      routed.uiAction?.[key as keyof NonNullable<typeof routed.uiAction>],
+      value,
+      `화면 이동 세부 상태가 달라: ${question} / ${key}`,
+    );
+  }
+}
+
 // 보호 신호에 서비스 낱말이 섞인 입력. 큐레이트 사용법 FAQ 가 보호 판정보다
 // 앞에 있으면 여기서 route 가 faq 로 떨어진다 (SPEC §6.1.2 입력 안전 우선순위).
 const protectionBeatsHowto = [
