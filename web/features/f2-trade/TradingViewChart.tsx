@@ -44,8 +44,31 @@ const BADGE = 22;
  *
  * 7px 일 때는 뱃지가 봉에 거의 붙어 캔들 몸통·꼬리를 덮었다. 체결가는 꼬리 끝이
  * 가리키므로 뱃지 자체는 봉에서 떨어져 있어도 되고, 떨어져야 봉이 안 가려진다.
+ *
+ * 페인 높이(238)의 절반에 가까우므로 이 간격을 그대로 받는 마커는 오히려 드물다.
+ * 대부분 `clampBadgeTop` 이 화면 끝에서 잘라 준다 — 그래서 이 값은 "여기까지 벌린다"가
+ * 아니라 "천장·바닥에 닿을 때까지 벌린다"에 가깝다.
  */
-const TAIL = 18;
+const TAIL = 100;
+
+/**
+ * 차트 페인 높이. 아래 `h-[238px]` 두 곳과 같은 값이어야 한다.
+ *
+ * Tailwind 는 클래스명을 정적으로 읽으므로 className 쪽을 이 상수로 바꿀 수 없다.
+ * 값이 갈리면 마커가 페인 밖으로 삐져나가거나 안쪽에서 미리 멈춘다.
+ */
+const PANE_HEIGHT = 238;
+
+/**
+ * 뱃지를 페인 안에 가둔다.
+ *
+ * `TAIL` 이 페인 높이의 절반쯤이라 벌린 만큼 그대로 두면 뱃지가 위아래로 잘려 나간다.
+ * SVG 는 제 뷰포트 밖을 안 그리므로 잘리면 통째로 사라진다 — 마커가 없는 것과 구분이
+ * 안 된다. 뱃지만 끝에 붙여 세우고 꼬리를 그만큼 늘여 체결가를 계속 가리키게 한다.
+ */
+function clampBadgeTop(top: number) {
+  return Math.min(Math.max(top, 0), PANE_HEIGHT - BADGE);
+}
 
 /**
  * 처음 보여줄 봉 개수.
@@ -395,9 +418,13 @@ export function TradingViewChart({ symbol, period, chartType }: {
             // 매수는 봉 위, 매도는 봉 아래로 나눈다. 방향만 봐도 산 자리와 판 자리가
             // 구분되고, 같은 봉에서 매수·매도가 겹쳐도 뱃지가 서로 포개지지 않는다.
             // SVG 는 y 가 아래로 자라므로 "위"가 뺄셈이다.
-            const badgeY =
-              marker.side === "buy" ? marker.y - TAIL - BADGE : marker.y + TAIL;
-            const base = marker.side === "buy" ? marker.y - TAIL : marker.y + TAIL;
+            //
+            // 밑변은 `TAIL` 이 아니라 **잘린 뒤의 뱃지 위치**에서 딴다. 그래야 천장·바닥에
+            // 붙어 간격이 줄어든 마커도 꼬리가 뱃지에 붙은 채 체결가까지 닿는다.
+            const badgeY = clampBadgeTop(
+              marker.side === "buy" ? marker.y - TAIL - BADGE : marker.y + TAIL,
+            );
+            const base = marker.side === "buy" ? badgeY + BADGE : badgeY;
             return (
               <g key={marker.id}>
                 <title>{marker.label}</title>
