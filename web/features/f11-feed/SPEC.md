@@ -6,21 +6,24 @@
 
 ## 1. 현재 사용자 경험
 
-- 가족 기록은 별도 라우트가 아니라 `/`의 React 오버레이 `FeedScreen`으로 열린다.
+- 가족 기록은 별도 라우트도 React 오버레이도 아니다. `app.html` 아카이브 화면의 **수익률(`return`) 탭**이 피드를 소유한다.
 - `GET /api/family`가 로그인 세션과 같은 `family_tag`의 구성원과 Supabase 체결을 최신순으로 제공한다.
 - `전체`와 실제 구성원 이름 필터로 자녀·부모 각각의 거래를 볼 수 있다. 필터는 로그인 사용자를 바꾸지 않는다.
 - 자신의 카드에는 수량과 주당 체결가를 표시하고, 다른 가족 카드에는 서버 응답 단계부터 둘 다 `null`로 숨긴다.
 - 코멘트는 Supabase에 저장하며 부모→자녀 방향의 추천·타이밍·훈계·채점 표현을 서버에서 차단한다.
 - 코멘트 작성자는 실제 `profiles.name`으로 표시해 엄마·아빠를 구분하고, 본인이 쓴 코멘트만 삭제할 수 있다.
 - 좋아요는 가족 전체 개수와 로그인 사용자의 선택 상태를 DB에 저장하며 다시 누르면 취소한다.
-- `종목 자세히 보기`는 iframe의 **종목 상세 화면**을 연다.
 
 ## 2. 소유권
 
 | 위치 | 현재 책임 |
 |---|---|
-| `web/features/f11-feed/FeedScreen.tsx` | 피드 오버레이, 카드, 열람 기준 전환, 코멘트 입력 |
-| `web/features/f0-home/ConnectedPrototype.tsx` | F11 열기·닫기, `kiwoom:open-stock` 중계 |
+| `web/public/ui/app.html` 아카이브 `return` 탭 | 피드 카드, 구성원 필터, 코멘트·좋아요 입력 |
+| `web/ui-src/methods/loadFamilyProfiles.js` | `/api/family` 조회와 `dbFamily` 보관 |
+| `web/ui-src/methods/loadArchiveFeedReactions.js` | 거래 id 일괄 반응 조회 |
+| `web/ui-src/methods/sendArchiveComment.js` · `deleteArchiveComment.js` | 코멘트 작성·본인 삭제 |
+| `web/ui-src/methods/toggleArchiveLike.js` | 좋아요 토글 |
+| `web/ui-src/methods/buildArchive.js` | 응답이 없을 때의 로컬 데모 폴백 |
 | `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 전체 체결 조회와 타인 수량·체결가 마스킹 |
 | `web/shared/engine/comment-filter.ts` | 서버 저장 전 코멘트 문구 게이트 |
 | `web/shared/engine/trade-markers.ts` | 차트 마커 데이터 변환 |
@@ -28,13 +31,13 @@
 | `web/app/api/comments/route.ts` | 서버 코멘트 조회·작성·삭제 계약 |
 | `web/app/api/likes/route.ts` | 서버 좋아요 조회·토글 계약 |
 
-F11은 F10과 함께 iframe 밖 React 오버레이이다. 메인 화면 정본은 계속 `web/public/ui/app.html`에 있다.
+F11에는 자체 React 화면이 없다. 화면 정본은 `web/public/ui/app.html`이고 `web/ui-src/`가 그 분해본이므로 양쪽을 함께 고친 뒤 `node scripts/ui-build.mjs verify`로 확인한다. 이 폴더에는 SPEC과 가드만 남는다.
 
 ## 3. 프론트 데이터 흐름
 
 ### 3.1 가족 거래
 
-`FeedScreen`이 열릴 때 `/api/family`를 한 번 호출한다. 서버는 클라이언트가 넘긴 가족값을 받지 않고 세션 사용자의 `family_tag`로 범위를 정한다. 태그가 없으면 본인만 반환한다.
+`app.html`의 `componentDidMount`가 앱 부팅 시 `loadFamilyProfiles()`로 `/api/family`를 한 번 호출한다(아카이브 탭 진입 시점이 아니다). 응답은 `dbFamily`에 보관하고 수익률 탭이 그때 표시한다. 서버는 클라이언트가 넘긴 가족값을 받지 않고 세션 사용자의 `family_tag`로 범위를 정한다. 태그가 없으면 본인만 반환한다.
 
 | Supabase / 서버 응답 | `FamilyTrade` 변환 |
 |---|---|
@@ -52,12 +55,11 @@ F11은 F10과 함께 iframe 밖 React 오버레이이다. 메인 화면 정본�
 
 | 항목 | 현재 동작 |
 |---|---|
-| 정렬 | `tradedAt` 내림차순 |
+| 정렬 | `tradedAt` 내림차순 후 **최근 12건만** (`slice(0, 12)`) |
 | 본인 판정 | `trade.userId === family.viewer.id` |
-| 본인 상세 | `quantity`주 + `formatWon(trade.price)` |
-| 타인 상세 | 수량·가격 숨김 |
+| 본인 상세 | 주당 체결가를 `won(avg)`로 표시 |
+| 타인 상세 | 서버가 가격을 `null`로 주므로 **`비공개`** 문구 |
 | 이유 | `trade_reason`, 없으면 빈 상태 문구 |
-| 종목 이동 | `postMessage({ type: "kiwoom:open-stock", symbol })` → 종목 상세 |
 
 카드는 `trade.price`를 표시하므로 현재 문구의 금액은 **총 거래금액이 아니라 주당 단가**이다.
 
@@ -102,10 +104,10 @@ type FeedComment = {
 
 | 기능 | 서버 | 현재 F11 프론트 |
 |---|---|---|
-| 가족 전체 체결·구성원·성향 조회 | `/api/family` 구현 | `FeedScreen`에서 사용 |
+| 가족 전체 체결·구성원·성향 조회 | `/api/family` 구현 | 아카이브 수익률 탭에서 사용 |
 | 종목별 가족 체결 조회 | `/api/trades` 구현 | TradingView 차트에서 사용 |
-| 코멘트 배치 조회·작성·본인 삭제 | `/api/comments` 구현 | `FeedScreen`에서 사용 |
-| 좋아요 배치 조회·토글 | `/api/likes` 구현 | `FeedScreen`에서 사용 |
+| 코멘트 배치 조회·작성·본인 삭제 | `/api/comments` 구현 | 아카이브 수익률 탭에서 사용 |
+| 좋아요 배치 조회·토글 | `/api/likes` 구현 | 아카이브 수익률 탭에서 사용 |
 | 가족 범위 검사 | 가족·거래·반응 API에서 구현 | 세션 `family_tag` 기준 응답만 사용 |
 | 로그인·계정 전환 | `/api/auth/login`, `/api/auth/switch` 구현 | **호출하지 않음** |
 
@@ -119,13 +121,13 @@ type FeedComment = {
 
 ## 8. 현재 완료 기준
 
-- `/`에서 가족 기록 오버레이가 열리고 닫힌다.
-- 같은 `family_tag`의 자녀·부모 구성원과 DB 체결이 최신순으로 보인다.
+- 아카이브 화면의 수익률 탭에서 가족 피드가 보인다.
+- 같은 `family_tag`의 자녀·부모 구성원과 DB 체결이 최신순 12건까지 보인다.
 - 실제 구성원 이름 필터로 각자의 거래를 따로 볼 수 있다.
 - 로그인 사용자의 카드에만 수량·단가가 보이고 타인은 API 응답부터 `null`이다.
 - 부모→자녀의 금지 코멘트는 저장되지 않고 안내가 보인다.
 - 코멘트 작성자의 실제 이름이 보이고 본인 코멘트만 삭제할 수 있다.
 - 좋아요 개수와 본인 선택 상태가 새로 열어도 유지된다.
-- 종목 이동 버튼이 메인 iframe의 해당 종목 상세를 연다.
 - 차트 마커는 서버 거래만 표시하고 타인 수량을 노출하지 않는다.
+- `app.html`과 `ui-src`를 함께 고쳤고 `node scripts/ui-build.mjs verify`가 통과한다.
 - `web`의 테스트와 빌드가 통과한다.

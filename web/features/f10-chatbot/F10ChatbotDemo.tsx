@@ -158,10 +158,6 @@ const COPY = {
   orderPractice: "주문 확인 연습",
   orderPracticeDescription: "종목과 상관없이 매수 최종 확인 화면을 세 번 연이어 나가면 도움 신호가 나타나요.",
   abandonBuy: "매수 최종 확인에서 뒤로가기",
-  proactive: "\ud0a4\uc6c5\uc774\uc758 \uc120\uc81c \ub3c4\uc6c0",
-  explain: "\uc0c1\ud669 \uc124\uba85",
-  askDirectly: "\uc9c1\uc811 \uc9c8\ubb38",
-  dismiss: "\uad1c\ucc2e\uc544",
   openChat: "\ud0a4\uc6c5\uc774 \ucc57\ubd07 \uc5f4\uae30",
   close: "\ub2eb\uae30",
   greeting:

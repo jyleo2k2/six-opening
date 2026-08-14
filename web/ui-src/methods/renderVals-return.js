@@ -411,7 +411,6 @@
       secModalPctStyle: arc.secModalPctStyle, secModalRows: arc.secModalRows,
       pnlPctText: (pnl >= 0 ? '+' : '') + (pnl / SEED * 100).toFixed(2) + '%',
       pnlPctStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (pnl >= 0 ? up : down),
-      badgeCount: s.badges || 0,
       sellCount: (s.sellRecords || []).length,
       memoRecordCount: s.records.filter(r => r.memo).length + (s.sellRecords || []).filter(r => r.memo).length,
       detailViewCount: (s.events || []).filter(e => e.event === 'chart_detail_opened' || e.event === 'news_detail_opened').length,
@@ -643,7 +642,6 @@
           sell_reason_code: s.sellDraft.reason,
           plan_match: planMatch,
           change_reason_code: (showJudge && planMatch === false) ? s.sellDraft.change : null,
-          badge_awarded: showJudge && planMatch === true,
           retro_card_viewed_ms: this.retroMs || 0,
           pnl_pct_at_sell: Math.round(heldPct * 10) / 10,
           held_days: heldDays, avg: heldAvg, memo: null, ts: new Date().toISOString()
@@ -654,7 +652,6 @@
         };
         this.set({
           acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
-          badges: s.badges + ((showJudge && planMatch === true) ? 1 : 0),
           seq: s.seq + 1, sellStep: 3,
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
           sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null, badge: showJudge && planMatch === true }
@@ -753,7 +750,7 @@
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },
       resetAll: () => {
         const fresh = seedAccounts();
-        this.set({ acc: fresh, records: [], events: [], sellRecords: [], badges: 0, seq: 1, screen:'home', draft: this.blankDraft() , watchlist: [] });
+        this.set({ acc: fresh, records: [], events: [], sellRecords: [], seq: 1, screen:'home', draft: this.blankDraft() , watchlist: [] });
       }
     };
   }

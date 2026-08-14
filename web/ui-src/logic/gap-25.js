@@ -4,7 +4,7 @@
     sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0,
     orderDone: null, sellDone: null, watchlist: [], stockQuery: '',
     draft: this.blankDraft(),
-    records: [], events: [], sellRecords: [], badges: 0, seq: 1, tf: 'daily', chartType: 'line',
+    records: [], events: [], sellRecords: [], seq: 1, tf: 'daily', chartType: 'line',
     closes: {},
     sellStep: 1, arcTab: 'report', sellPick: 'all',
     arcLikes: {}, arcCmts: {}, arcCmtOpen: {}, arcCmtDraft: {},
