@@ -31,6 +31,10 @@ const FOLLOWUP_CHOICES: readonly ExplainChoice[] = [
   { id: "ask", label: "다른 것도 물어볼래요" },
   { id: "done", label: "여기까지 볼래요" },
 ];
+const UNSURE_CHOICE: ExplainChoice = { id: "unsure", label: "잘 모르겠어요" };
+
+/** 같은 단계에서 이 횟수만큼 되물은 뒤에는 더 안 묻고 정답을 바로 알려준다. */
+export const MAX_REASK_COUNT = 2;
 
 export const GUIDED_SCRIPT_ID = "flow:guided";
 
@@ -55,6 +59,10 @@ const FEEDBACK = {
   wrong: "음, 그건 아니에요.",
   understood: "좋아요, 이제 알겠네요!",
   example: "그럼 예를 들어볼게요.",
+  /** 정답·오답이 아니라 "모르겠어요"에 쓴다. 틀렸다고 말하지 않는다. */
+  unsure: "괜찮아요, 같이 한 조각씩 볼게요.",
+  /** 되묻기 상한(MAX_REASK_COUNT)에 닿아 정답을 바로 보여줄 때 쓴다. */
+  giveUp: "그럼 답을 같이 확인해 볼게요.",
 } as const;
 
 /** 타이핑을 알아듣지 못했을 때. 추측하지 않고 선택지를 다시 보여준다. */
@@ -70,6 +78,7 @@ function turnStep(
   text: string,
   prompt: string,
   choices: readonly ExplainChoice[],
+  reaskCount?: number,
 ): ExplainStep {
   return {
     kind: "turn",
@@ -79,12 +88,21 @@ function turnStep(
       stage,
       prompt: toPoliteKorean(prompt),
       choices: choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+      ...(reaskCount ? { reaskCount } : {}),
     },
   };
 }
 
+/**
+ * brief 단계의 진단형 퀴즈(guiding 아님)에는 "잘 모르겠어요"를 항상 붙인다.
+ * guiding 스크립트는 "더 쉽게 볼래요"가 이미 같은 역할을 한다.
+ */
 function stageChoices(script: ExplainScript, stage: ExplainReply["stage"]) {
-  if (stage === "brief") return script.check.choices;
+  if (stage === "brief") {
+    return script.check.kind === "guiding"
+      ? script.check.choices
+      : [...script.check.choices, UNSURE_CHOICE];
+  }
   if (stage === "followup") return FOLLOWUP_CHOICES;
   return script.check.kind === "guiding"
     ? GUIDED_DETAIL_CHOICES
@@ -98,7 +116,7 @@ export function startExplain(script: ExplainScript): ExplainStep {
     "brief",
     `${script.feedback ?? "궁금한 걸 잘 짚었어요"} — ${script.brief}`,
     script.check.question,
-    script.check.choices,
+    stageChoices(script, "brief"),
   );
 }
 
@@ -131,8 +149,11 @@ function followupExplain(script: ExplainScript, text: string): ExplainStep {
 /**
  * 버튼을 누르지 않고 타이핑한 답을 선택지 id로 바꾼다.
  *
- * - 진단형 확인 단계(`detail`)는 구어체 긍정·부정을 받는다 ("ㅇㅇ", "웅", "몰라"…).
- * - 이해 확인 단계(`brief`)는 선택지 라벨이 정확히 일치할 때만 받는다.
+ * - "몰라요"·"모르겠어요"·"어려워요" 계열은 단계·정답 여부와 무관하게 항상
+ *   `unsure`로 받는다(guiding 스크립트는 제외 — "더 쉽게 볼래요"가 같은 역할).
+ *   정답도 오답도 아닌 세 번째 반응이라 추측 없이 바로 인정해야 한다.
+ * - 진단형 확인 단계(`detail`)는 그 밖의 구어체 긍정·부정도 받는다 ("ㅇㅇ", "웅"…).
+ * - 이해 확인 단계(`brief`)의 그 밖의 응답은 선택지 라벨이 정확히 일치할 때만 받는다.
  * - 새 질문으로 보이거나 애매하면 `null` — 호출부가 되묻거나 일반 라우팅으로 보낸다.
  */
 export function resolveTextReply(
@@ -158,6 +179,10 @@ export function resolveTextReply(
   if (labelMatches.length === 1) return labelMatches[0].id;
   if (labelMatches.length > 1) return null;
 
+  if (script.check.kind !== "guiding" && matchColloquialIntent(message) === "unsure") {
+    return "unsure";
+  }
+
   if (stage !== "detail" || script.check.kind === "guiding") return null;
   const intent = matchColloquialIntent(message);
   if (script.adjust) return intent === "no" ? "unsure" : null;
@@ -175,8 +200,28 @@ export function advanceExplain(
   if (reply.scriptId !== script.id) return null;
 
   if (reply.stage === "brief") {
-    if (!script.check.choices.some((choice) => choice.id === reply.choiceId)) {
+    if (
+      reply.choiceId !== "unsure" &&
+      !script.check.choices.some((choice) => choice.id === reply.choiceId)
+    ) {
       return null;
+    }
+    if (reply.choiceId === "unsure" && script.check.kind !== "guiding") {
+      return script.adjust
+        ? turnStep(
+            script,
+            "detail",
+            `${FEEDBACK.unsure} ${script.adjust.explanation}`,
+            script.adjust.question,
+            script.adjust.choices,
+          )
+        : turnStep(
+            script,
+            "detail",
+            `${FEEDBACK.unsure} ${script.detail}`,
+            CONFIRM_PROMPT,
+            CONFIRM_CHOICES,
+          );
     }
     if (reply.choiceId === script.check.answerId) {
       return followupExplain(
@@ -265,11 +310,19 @@ export function advanceExplain(
   return null;
 }
 
-/** 같은 단계를 유지한 채 선택지만 다시 보여준다. */
+/**
+ * 같은 단계를 유지한 채 선택지만 다시 보여준다. 같은 단계에서
+ * `MAX_REASK_COUNT`번 되물었으면 더 묻지 않고 정답과 설명을 바로 주고
+ * followup으로 넘긴다 — 어떤 입력이든 무한히 되묻지 않는다.
+ */
 export function reaskExplain(
   script: ExplainScript,
   stage: ExplainReply["stage"],
+  reaskCount = 0,
 ): ExplainStep {
+  if (reaskCount >= MAX_REASK_COUNT) {
+    return followupExplain(script, `${FEEDBACK.giveUp} ${script.detail}`);
+  }
   return turnStep(
     script,
     stage,
@@ -284,5 +337,6 @@ export function reaskExplain(
             ? script.adjust.question
             : CONFIRM_PROMPT,
     stageChoices(script, stage),
+    reaskCount + 1,
   );
 }

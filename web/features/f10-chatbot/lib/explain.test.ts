@@ -38,7 +38,8 @@ const per: ExplainScript = {
     "똑같이 한 해에 1000원을 버는 가게가 두 곳 있다고 해 보자. 한 곳은 1만원, 다른 곳은 2만원에 판다면 두 번째 가게의 PER이 더 높아.",
 };
 
-// ① 시작하면 피드백·1줄 설명·이해 확인 질문이 함께 나온다.
+// ① 시작하면 피드백·1줄 설명·이해 확인 질문이 함께 나온다. brief 선택지에는
+// "잘 모르겠어요"가 항상 따라붙는다(guiding 아닌 진단형 스크립트).
 const first = startExplain(per);
 assert.equal(first.kind, "turn");
 assert.equal(first.text, toPoliteKorean(`궁금한 걸 잘 짚었어요 — ${per.brief}`));
@@ -46,7 +47,10 @@ assert.deepEqual(first.kind === "turn" ? first.turn : null, {
   scriptId: "term:per",
   stage: "brief",
   prompt: toPoliteKorean(per.check.question),
-  choices: per.check.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+  choices: [
+    ...per.check.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+    { id: "unsure", label: toPoliteKorean("잘 모르겠어요") },
+  ],
 });
 
 // ② 정답이면 구체적으로 피드백하고 다음 행동을 묻는다.
@@ -170,9 +174,27 @@ assert.equal(resolveTextReply(politePer, "detail", "들어가지 않아요"), "n
 assert.equal(resolveTextReply(politePer, "detail", "들어가요"), "yes");
 // 새 질문은 응답으로 삼지 않는다.
 assert.equal(resolveTextReply(per, "detail", "PBR은 뭐야?"), null);
-// 이해 확인 단계는 선택지 라벨이 정확히 맞을 때만 받는다.
+// 이해 확인 단계는 선택지 라벨이 정확히 맞을 때만 받는다 — 단 "몰라요" 계열은
+// 예외로, brief에서도 추측 없이 바로 unsure로 받는다.
 assert.equal(resolveTextReply(per, "brief", "비싼 편이야"), "expensive");
 assert.equal(resolveTextReply(per, "brief", "ㅇㅇ"), null);
+assert.equal(resolveTextReply(per, "brief", "몰라요"), "unsure");
+assert.equal(resolveTextReply(per, "brief", "잘 모르겠어"), "unsure");
+
+// brief에서 unsure면 "틀렸다"고 하지 않고 unsure 전용 피드백으로 adjust
+// 스캐폴딩(작은 질문)으로 곧장 내려간다.
+const unsureAtBrief = advanceExplain(per, {
+  scriptId: "term:per",
+  stage: "brief",
+  choiceId: "unsure",
+});
+assert.equal(unsureAtBrief?.kind, "turn");
+assert.equal(
+  unsureAtBrief?.text,
+  toPoliteKorean(`괜찮아요, 같이 한 조각씩 볼게요. ${per.adjust?.explanation}`),
+);
+assert.equal(unsureAtBrief?.kind === "turn" ? unsureAtBrief.turn.stage : null, "detail");
+assert.equal(gateChatOutput({ text: unsureAtBrief!.text, source: "fixed" }).ok, true);
 
 // 되묻기는 단계를 유지하고 선택지를 그대로 다시 준다.
 const reask = reaskExplain(per, "detail");
@@ -182,6 +204,17 @@ assert.deepEqual(reask.kind === "turn" ? reask.turn.choices : null, [
   { id: "no", label: "들어가지 않아요" },
   { id: "yes", label: "들어가" },
 ]);
+// 되물을 때마다 turn에 횟수를 실어 보낸다 — 클라이언트가 다음 요청에 그대로
+// 돌려보내야 상한을 셀 수 있다.
+assert.equal(reask.kind === "turn" ? reask.turn.reaskCount : null, 1);
+
+// 같은 단계에서 최대 횟수만큼 되물었으면 더 안 묻고 정답 설명을 바로 주고
+// followup으로 넘긴다 — 어떤 입력이든 무한 루프가 되지 않는다.
+const gaveUp = reaskExplain(per, "detail", 2);
+assert.equal(gaveUp.kind, "turn");
+assert.equal(gaveUp.text, toPoliteKorean(`그럼 답을 같이 확인해 볼게요. ${per.detail}`));
+assert.equal(gaveUp.kind === "turn" ? gaveUp.turn.stage : null, "followup");
+assert.equal(gateChatOutput({ text: gaveUp.text, source: "fixed" }).ok, true);
 
 // 전용 스크립트가 없는 답변도 공통 유도형 DAPIE 턴을 사용한다.
 const guided = startGuidedExplain("주식은 회사의 작은 조각이야.");

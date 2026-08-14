@@ -118,6 +118,8 @@ export type ExplainTurn = {
   stage: ExplainStage;
   prompt: string;
   choices: readonly ExplainChoice[];
+  /** 같은 단계에서 되묻은 횟수. 클라이언트는 다음 요청에 그대로 되돌려 보낸다. */
+  reaskCount?: number;
 };
 
 /**
@@ -128,6 +130,7 @@ export type ExplainReply = {
   scriptId: string;
   stage: Exclude<ExplainStage, "example">;
   choiceId?: string;
+  reaskCount?: number;
 };
 
 /** 선택지 id가 확정된 응답. 전이 함수는 이것만 받는다. */

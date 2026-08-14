@@ -24,6 +24,7 @@ import {
 import { STOCKS } from "../../../shared/data/stocks";
 import { SECTORS } from "../../../shared/data/sectors";
 import { findExplainScript } from "../../../shared/data/chatbot-knowledge";
+import { MAX_REASK_COUNT } from "./explain";
 import { findNextStockExploreTopic } from "./stock-explore";
 
 const MAX_MESSAGE_LENGTH = 500;
@@ -111,7 +112,7 @@ function parseExplainReply(value: unknown): ChatExplainReply | null | undefined 
   if (value === undefined) return undefined;
   if (!isRecord(value)) return null;
 
-  const { scriptId, stage, choiceId, previousAnswer } = value;
+  const { scriptId, stage, choiceId, previousAnswer, reaskCount } = value;
   if (
     typeof scriptId !== "string" ||
     !/^(term|stock|sector|flow):\S{1,80}$/.test(scriptId) ||
@@ -123,7 +124,12 @@ function parseExplainReply(value: unknown): ChatExplainReply | null | undefined 
       (typeof choiceId !== "string" ||
         choiceId.length < 1 ||
         choiceId.length > MAX_EXPLAIN_ID_LENGTH ||
-        choiceId.trim() !== choiceId))
+        choiceId.trim() !== choiceId)) ||
+    (reaskCount !== undefined &&
+      (typeof reaskCount !== "number" ||
+        !Number.isInteger(reaskCount) ||
+        reaskCount < 0 ||
+        reaskCount > MAX_REASK_COUNT))
   ) {
     return null;
   }
@@ -144,6 +150,7 @@ function parseExplainReply(value: unknown): ChatExplainReply | null | undefined 
     scriptId,
     stage: stage as ExplainReply["stage"],
     ...(choiceId ? { choiceId: choiceId as string } : {}),
+    ...(typeof reaskCount === "number" ? { reaskCount } : {}),
     ...(parsedPreviousAnswer
       ? { previousAnswer: parsedPreviousAnswer }
       : {}),

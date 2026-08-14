@@ -27,15 +27,22 @@ for (const yes of [
   assert.equal(matchColloquialIntent(yes), "yes", `긍정 실패: ${yes}`);
 }
 
-// 부정 — "모르겠다" 계열은 4단계에서 예시로 내려가야 한다
+// 순수 부정 — "모르겠다" 계열과 섞이지 않는다
 for (const no of [
   "ㄴㄴ", "ㄴ",
   "아니", "아냐", "아니야", "아니요", "아뇨", "노노", "no",
-  "몰라", "모르겠어", "모름", "잘모르겠어", "잘 모르겠어",
-  "어려워", "헷갈려", "이해안돼", "못알아들었어",
   "아니...", "ㄴㄴㄴㄴ", "👎",
 ]) {
   assert.equal(matchColloquialIntent(no), "no", `부정 실패: ${no}`);
+}
+
+// "모르겠다" 계열 — 정답/오답과 별개인 unsure다
+for (const unsure of [
+  "ㅁㄹ",
+  "몰라", "몰라요", "모르겠어", "모름", "잘모르겠어", "잘 모르겠어",
+  "어려워", "헷갈려", "이해안돼", "못알아들었어",
+]) {
+  assert.equal(matchColloquialIntent(unsure), "unsure", `unsure 실패: ${unsure}`);
 }
 
 // 판단 불가 — 추측하지 않는다
