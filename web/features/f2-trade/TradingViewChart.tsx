@@ -36,6 +36,15 @@ const CHART_TYPES: readonly PrototypeChartType[] = ["line", "candlestick"];
 /** 화면에 찍을 자리가 잡힌 마커. */
 type PlacedMarker = TradeMarker & { x: number; y: number };
 
+/**
+ * 마커를 그리는 기간. 주봉은 뺀다.
+ *
+ * 봉 하나가 한 주라 그 주의 매매가 전부 같은 x 로 몰린다. 봉·방향당 하나만 남기므로
+ * 나머지는 화면에서 사라지고, 남은 하나도 그 주 어느 날 체결인지 짚지 못한다.
+ * 일봉·분봉은 봉이 곧 하루·1분이라 대표 하나가 그 구간을 그대로 가리킨다.
+ */
+const MARKER_PERIODS: readonly PrototypeChartPeriod[] = ["minute", "daily"];
+
 /** 뱃지 한 변. 원본 시안(서비스 개요 HTML)의 22×22 rx=6 을 따른다. */
 const BADGE = 22;
 
@@ -343,10 +352,9 @@ export function TradingViewChart({ symbol, period, chartType }: {
     }
 
     // 마커는 표시만 한다. 클릭 이동은 붙이지 않는다 — F11 SPEC §6 참고.
-    const markers = buildTradeMarkers({
-      trades,
-      candleTimes: points.map((point) => point.time),
-    });
+    const markers = MARKER_PERIODS.includes(shownPeriod)
+      ? buildTradeMarkers({ trades, candleTimes: points.map((point) => point.time) })
+      : [];
     setFound(markers.length);
 
     showRecentBars(chart, points.length, shownPeriod);

@@ -68,7 +68,19 @@ export function buildTradeMarkers(options: {
   const { trades, candleTimes } = options;
   if (trades.length === 0 || candleTimes.length === 0) return [];
 
-  const markers: TradeMarker[] = [];
+  /**
+   * 봉 하나에 방향 하나씩만 남긴다. 키는 `봉 시각|매수·매도`.
+   *
+   * 같은 날 다섯 번 산 체결은 x 가 모두 같고, 가격이 달라도 세로 차이가 몇 px 에 그쳐
+   * 뱃지가 한 덩어리로 뭉갠다. 겹쳐 봐야 몇 건인지 못 읽으므로 대표 하나만 찍는다.
+   *
+   * 매수·매도는 키를 나눠 따로 남긴다. 화면에서 위아래로 갈라 놓았으므로 서로 가리지
+   * 않고, 하나로 합치면 "그날 사고팔았다"가 통째로 사라진다.
+   *
+   * 대표는 **그 봉의 마지막 체결**이다. 오름차순으로 돌며 덮어쓰므로 뒤가 이긴다.
+   * `Map` 은 처음 넣은 자리를 지키므로 덮어써도 마커 순서는 시간순 그대로다.
+   */
+  const byCandleSide = new Map<string, TradeMarker>();
   // 서버가 created_at 오름차순으로 주지만, 마커 순서가 응답 순서에 매달리지 않게 한 번 더 세운다.
   const ordered = [...trades].sort((left, right) => left.tradedAt.localeCompare(right.tradedAt));
 
@@ -79,7 +91,7 @@ export function buildTradeMarkers(options: {
     if (time === null) continue;
 
     const quantity = trade.quantity === null ? "" : ` ${trade.quantity}주`;
-    markers.push({
+    byCandleSide.set(`${time}|${trade.side}`, {
       id: trade.id,
       member: trade.member,
       side: trade.side,
@@ -88,5 +100,5 @@ export function buildTradeMarkers(options: {
       label: `${trade.name} ${trade.side === "buy" ? "매수" : "매도"}${quantity}`,
     });
   }
-  return markers;
+  return [...byCandleSide.values()];
 }

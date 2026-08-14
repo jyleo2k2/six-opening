@@ -48,4 +48,42 @@ assert.equal(buildTradeMarkers({ trades: [older], candleTimes }).length, 0);
 assert.deepEqual(buildTradeMarkers({ trades: [], candleTimes }), []);
 assert.deepEqual(buildTradeMarkers({ trades, candleTimes: [] }), []);
 
+// 같은 봉·같은 방향은 하나로 접는다 — 겹쳐 찍어야 한 덩어리로 뭉갠다
+const sameDay: ChartTrade[] = [
+  { id: "s1", name: "엄마", member: "parent", side: "buy", price: 71000, quantity: null, tradedAt: "2026-08-06T01:00:00.000Z" },
+  { id: "s2", name: "아빠", member: "parent", side: "buy", price: 71500, quantity: null, tradedAt: "2026-08-06T03:00:00.000Z" },
+  { id: "s3", name: "김찬영", member: "child", side: "buy", price: 72000, quantity: 2, tradedAt: "2026-08-06T05:00:00.000Z" },
+];
+const folded = buildTradeMarkers({ trades: sameDay, candleTimes });
+assert.equal(folded.length, 1);
+// 대표는 그 봉의 마지막 체결이다 — 가격·이름·수량 모두 마지막 것을 쓴다
+assert.equal(folded[0].id, "s3");
+assert.equal(folded[0].price, 72000);
+assert.equal(folded[0].member, "child");
+assert.equal(folded[0].label, "김찬영 매수 2주");
+
+// 응답 순서가 뒤집혀 와도 대표는 그대로 마지막 체결이다
+assert.equal(buildTradeMarkers({ trades: [...sameDay].reverse(), candleTimes })[0].id, "s3");
+
+// 매수·매도는 같은 봉이어도 따로 남는다 — 위아래로 갈라 그리므로 서로 안 가린다
+const bothSides: ChartTrade[] = [
+  ...sameDay,
+  { id: "x1", name: "엄마", member: "parent", side: "sell", price: 73000, quantity: null, tradedAt: "2026-08-06T06:00:00.000Z" },
+  { id: "x2", name: "김찬영", member: "child", side: "sell", price: 73500, quantity: 1, tradedAt: "2026-08-06T07:00:00.000Z" },
+];
+const mixed = buildTradeMarkers({ trades: bothSides, candleTimes });
+assert.equal(mixed.length, 2);
+assert.deepEqual(mixed.map((marker) => marker.id), ["s3", "x2"]);
+assert.deepEqual(mixed.map((marker) => marker.side), ["buy", "sell"]);
+
+// 다른 봉이면 접지 않는다 — 접는 기준은 봉이지 종목이 아니다
+const acrossDays: ChartTrade[] = [
+  { id: "d1", name: "엄마", member: "parent", side: "buy", price: 71000, quantity: null, tradedAt: "2026-08-05T01:00:00.000Z" },
+  { id: "d2", name: "엄마", member: "parent", side: "buy", price: 71500, quantity: null, tradedAt: "2026-08-06T01:00:00.000Z" },
+];
+assert.deepEqual(
+  buildTradeMarkers({ trades: acrossDays, candleTimes }).map((marker) => marker.id),
+  ["d1", "d2"],
+);
+
 console.log("trade marker tests passed");
