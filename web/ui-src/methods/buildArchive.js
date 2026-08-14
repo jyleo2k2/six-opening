@@ -387,9 +387,16 @@
     const dbTrades = (this.dbFamily && Array.isArray(this.dbFamily.trades)) ? this.dbFamily.trades : null;
     const events = (dbTrades !== null ? dbTrades.map(trade => ({
       sell:trade.side === 'sell',
+      // 로컬 기록과 같은 키로 맞춘다. 이유 코드는 매수·매도 자리가 다르고, 코드가 없으면
+      // 아래 카드가 기본 문구로 떨어진다. 예전에는 memo 에 이유 코드를 그대로 넣어
+      // 카드에 'buy_news' 가 찍혔다 — 이제 진짜 메모가 온다 (F2 SPEC §7.1).
       r:{ db_trade:true, order_id:trade.id, user_id:'db_' + trade.userId, symbol:trade.symbol,
         stock_name:trade.stockName, ts:trade.tradedAt, trade_price:trade.price, qty:trade.quantity,
-        reason_code:trade.reason, memo:trade.reason }
+        reason_code:trade.side === 'sell' ? null : trade.reasonCode,
+        sell_reason_code:trade.side === 'sell' ? trade.reasonCode : null,
+        plan_code:trade.planCode, plan_target_price:trade.planTargetPrice,
+        plan_match:trade.planMatch, change_reason_code:trade.planChangedReason,
+        memo:trade.memo }
     })) : localEvents)
       .filter(e => { const m = byUser[e.r.user_id]; return m && (who === 'all' || m.key === who); })
       .sort((a, b) => String(b.r.ts).localeCompare(String(a.r.ts)))
@@ -405,6 +412,13 @@
       const likeCount = rawLike && typeof rawLike === 'object' ? Number(rawLike.count || 0) : (liked ? 1 : 0);
       const d = new Date(r.ts);
       const reason = (e.sell ? SELL_REASONS : REASONS).filter(x => x.code === (r.sell_reason_code || r.reason_code))[0];
+      // 매수는 보유 계획과 목표가를, 매도는 계획 준수 여부와 변경 이유를 덧붙인다 (F2 SPEC §7.1).
+      const plan = (!e.sell && r.plan_code) ? PLANS.filter(x => x.code === r.plan_code)[0] : null;
+      const change = (e.sell && r.change_reason_code) ? CHANGES.filter(x => x.code === r.change_reason_code)[0] : null;
+      const planText = plan
+        ? ' ' + plan.short + ' 가지려고 했어.' + (r.plan_target_price ? ' 목표 ' + won(r.plan_target_price) + '.' : '')
+        : (e.sell && r.plan_match === true ? ' 계획대로 팔았어.' : '')
+          + (change ? ' 계획을 바꿨어 — ' + change.label : '');
       const list = cmts[id] || [];
       return {
         name: m.name, time: ago(r.ts), avatarStyle: avat(m, 44),
@@ -416,7 +430,7 @@
         avgPctText: avg ? won(avg) : '비공개',
         avgPctStyle: 'font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-top:4px;white-space:nowrap;color:' + (avg ? (pos ? up : down) : '#A9AEC4'),
         oneLiner: reason ? reason.short : (e.sell ? '팔았어' : '담았어'),
-        text: (e.sell ? '팔았어. ' : '담았어. ') + (r.memo || (reason ? reason.short + ' 결정했어.' : '')),
+        text: (e.sell ? '팔았어. ' : '담았어. ') + (r.memo || (reason ? reason.short + ' 결정했어.' : '')) + planText,
         cmtCount: list.length,
         cmtOpen: !!cmtOpen[id],
         toggleCmt: () => this.set({ arcCmtOpen: Object.assign({}, cmtOpen, { [id]: !cmtOpen[id] }) }),

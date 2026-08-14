@@ -18,12 +18,33 @@ type TransactionRow = {
   side: "buy" | "sell";
   trade_price: number | string;
   trade_quantity: number | string;
+  trade_reason: string | null;
+  plan_code: string | null;
+  plan_target_price: number | string | null;
+  memo: string | null;
+  plan_match: boolean | null;
+  plan_changed_reason: string | null;
   created_at: string;
   profiles: { name: string; parent_child: "parent" | "child" | null } | null;
 };
 
+/**
+ * 마커 계산에 필요한 `ChartTrade` 에 질문식 기록을 얹은 모양 (F2 SPEC §7.1).
+ * `buildTradeMarkers` 는 이 필드를 읽지 않으므로 `ChartTrade` 자체는 그대로 둔다.
+ */
+type TradeResponseRow = ChartTrade & {
+  reasonCode: string | null;
+  planCode: string | null;
+  planTargetPrice: number | null;
+  memo: string | null;
+  planMatch: boolean | null;
+  planChangedReason: string | null;
+};
+
 const SELECT =
-  "id,user_id,side,trade_price,trade_quantity,created_at,stocks!inner(stock_code),profiles!inner(name,parent_child,family_tag)";
+  "id,user_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
+  "memo,plan_match,plan_changed_reason,created_at," +
+  "stocks!inner(stock_code),profiles!inner(name,parent_child,family_tag)";
 
 export async function GET(request: NextRequest) {
   const userId = sessionUserId(request);
@@ -50,7 +71,7 @@ export async function GET(request: NextRequest) {
       order: "created_at.asc",
     });
 
-    const trades: ChartTrade[] = rows.map((row) => ({
+    const trades: TradeResponseRow[] = rows.map((row) => ({
       id: row.id,
       name: row.profiles?.name ?? "가족",
       member: row.profiles?.parent_child === "parent" ? "parent" : "child",
@@ -59,6 +80,13 @@ export async function GET(request: NextRequest) {
       // 남의 체결 수량은 지운다 — 자산 규모 비노출 (SPEC §6).
       quantity: row.user_id === userId ? Number(row.trade_quantity) : null,
       tradedAt: row.created_at,
+      // 이유·계획·메모는 자산 규모가 아니라 가리지 않는다 (F2 SPEC §7.1).
+      reasonCode: row.trade_reason?.trim() || null,
+      planCode: row.plan_code,
+      planTargetPrice: row.plan_target_price === null ? null : Number(row.plan_target_price),
+      memo: row.memo?.trim() || null,
+      planMatch: row.plan_match,
+      planChangedReason: row.plan_changed_reason,
     }));
 
     return Response.json({ symbol, trades });

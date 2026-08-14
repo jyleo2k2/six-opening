@@ -29,12 +29,16 @@ const deps: FamilyDataDeps = {
     return [
       {
         id: "mine", user_id: 1, side: "buy", trade_price: 70000, trade_quantity: 2,
-        trade_reason: "뉴스를 읽었어요", created_at: "2026-08-14T00:00:00.000Z",
+        trade_reason: "buy_news", plan_code: "plan_target", plan_target_price: "84000",
+        memo: " 목표 오면 팔기 ", plan_match: null, plan_changed_reason: null,
+        created_at: "2026-08-14T00:00:00.000Z",
         stocks: { stock_code: "005930", stock_name: "삼성전자" },
       },
       {
         id: "dad", user_id: 3, side: "sell", trade_price: 120000, trade_quantity: 4,
-        trade_reason: null, created_at: "2026-08-13T00:00:00.000Z",
+        trade_reason: null, plan_code: null, plan_target_price: null, memo: null,
+        plan_match: false, plan_changed_reason: "change_price_emotion",
+        created_at: "2026-08-13T00:00:00.000Z",
         stocks: { stock_code: "035420", stock_name: "NAVER" },
       },
     ];
@@ -56,6 +60,17 @@ async function main() {
   assert.equal(family.trades[1].price, null);
   assert.equal(family.trades[1].quantity, null);
   assert.equal(family.trades[1].reason, "이유를 남기지 않았어요.");
+
+  // 계획·메모는 자산 규모가 아니므로 남의 거래에서도 가리지 않는다 (F2 SPEC §7.1)
+  assert.equal(family.trades[0].reasonCode, "buy_news");
+  assert.equal(family.trades[0].planCode, "plan_target");
+  assert.equal(family.trades[0].planTargetPrice, 84000);
+  assert.equal(family.trades[0].memo, "목표 오면 팔기");
+  assert.equal(family.trades[0].planMatch, null);
+  assert.equal(family.trades[1].planMatch, false);
+  assert.equal(family.trades[1].planChangedReason, "change_price_emotion");
+  assert.equal(family.trades[1].reasonCode, null);
+  assert.equal(family.trades[1].memo, null);
 
   const solo: Profile = { ...profiles[0], id: 9, family_tag: null };
   let selectedProfiles = false;

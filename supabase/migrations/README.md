@@ -8,6 +8,7 @@
 | `20260813100750_create_news_storage.sql` 외 news 계열 4건 | 어린이 뉴스 저장·검수 스키마. `news_article_stocks` 가 `stocks` 를 참조하므로 베이스보다 뒤에 온다 |
 | `20260814052538_stock_tab_views_per_stock_category_count.sql` | `stock_tab_views` 를 종목별 카운트로 개편 |
 | `20260814190000_add_profiles_guardian_role.sql` | `profiles.guardian_role`·`updated_at` 추가 |
+| `20260814210000_add_trade_plan_fields.sql` | `transactions` 에 `plan_code`·`plan_target_price`·`memo`·`plan_match`·`plan_changed_reason` 추가, `apply_trade` 인자 확장 (F2 SPEC §7.1) |
 
 베이스 파일은 **뒤의 ALTER 2건이 아직 적용되지 않은 모양**이다. 즉 `stock_tab_views` 에는
 `duration_seconds`·`opened_at`·`closed_at` 만 있고 `stock_id`·`created_at` 은 없으며,
@@ -15,7 +16,27 @@
 `updated_at` 컬럼보다 먼저 있었던 라이브 순서 그대로 베이스에 둔다. 베이스를 고칠 때는
 뒤의 ALTER 가 같은 변경을 두 번 적용하지 않는지 항상 함께 확인한다.
 
-## 라이브(hero-kiwoom)에는 적용하지 않는다
+## 배포 순서 — 코드보다 마이그레이션이 먼저다
+
+`20260814210000_add_trade_plan_fields.sql` 부터는 **새 스키마**다. 되가져오기가 아니라 실제로
+적용해야 한다. `GET /api/family`·`GET /api/trades`·`GET /api/profile/season-cards` 가 새 컬럼을
+`select` 에 넣으므로, 마이그레이션 없이 코드만 올라가면 PostgREST 가 다음처럼 거절하고 세 경로가
+모두 502 가 된다.
+
+```
+Supabase HTTP 400: {"code":"42703","message":"column transactions.plan_code does not exist"}
+```
+
+그래서 **머지 전에 또는 머지와 함께** 적용한다.
+
+```bash
+supabase db push        # 아직 적용되지 않은 마이그레이션만 올린다
+supabase migration list # local·remote 양쪽에 같은 목록이 보이는지 확인
+```
+
+`repair` 는 이미 라이브에 있는 스키마의 이력만 맞추는 명령이라 여기에는 쓰지 않는다.
+
+## 라이브(hero-kiwoom)에는 적용하지 않는다 — 베이스 파일 한정
 
 베이스 파일은 이미 라이브에 존재하는 스키마를 저장소로 되가져온 것이다. 라이브에 다시 실행하면
 `already exists` 로 깨진다. 라이브에는 **SQL 을 실행하지 말고 이력만 등록한다.**
