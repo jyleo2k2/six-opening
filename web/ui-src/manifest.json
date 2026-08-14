@@ -68,7 +68,8 @@
     "methods/navItem.js",
     "methods/rkSeg.js",
     "methods/navItemX.js",
-    "methods/renderVals.js",
+    "methods/renderVals-compute.js",
+    "methods/renderVals-return.js",
     "template/doc-tail.html"
   ]
 }
