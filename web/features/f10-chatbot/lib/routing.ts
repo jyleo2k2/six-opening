@@ -17,6 +17,13 @@ import { toPoliteKorean } from "./polite";
 
 export type { ChatContext, ProactiveSignal } from "../../../shared/types/chatbot";
 
+const EARLY_SCREEN_TERM_IDS = new Set([
+  "goal-price",
+  "buy-day-record",
+  "profile-definition",
+  "season-record",
+]);
+
 export type ChatRoute =
   | "faq"
   | "context"
@@ -2513,25 +2520,25 @@ function termReply(kind: TermKind, message: string): ChatReply {
       questions = ["내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘"];
       if (message.includes("표준편차")) {
         text =
-          "표준편차는 숫자들이 평균에서 얼마나 퍼져 있는지 나타내는 통계예요. 현재 서비스의 성향 유형은 표준편차나 5축 점수 대신 판단 근거와 포트폴리오 폭 2축으로 계산해요.";
+          "표준편차는 숫자들이 평균에서 얼마나 퍼져 있는지 나타내는 통계예요. 현재 서비스의 성향은 표준편차가 아니라 근거력·직관력·집중력·분산력·정확력 기록으로 보여줘요.";
       } else if (includesAny(message, ["평균이랑중앙값", "평균과중앙값", "평균하고중앙값"])) {
         text =
-          "평균은 모든 값을 더해 개수로 나눈 값이고 중앙값은 순서대로 놓았을 때 가운데 값이에요. 현재 성향 유형은 이 두 통계의 평균이 아니라 판단 근거와 포트폴리오 폭 2축을 사용해요.";
+          "평균은 모든 값을 더해 개수로 나눈 값이고 중앙값은 순서대로 놓았을 때 가운데 값이에요. 현재 성향 캐릭터는 이 둘의 평균이 아니라 근거·직관과 집중·분산의 조합으로 정해요.";
       } else if (message.includes("상관관계")) {
         text =
           "상관관계가 높다는 것은 두 행동이 함께 늘거나 줄어드는 모습이 자주 보인다는 뜻이에요. 한 행동이 다른 행동의 원인이라고 바로 결론 내리는 말은 아니에요.";
       } else if (message.includes("위험감수성")) {
         text =
-          "위험감수성은 보통 가격 변화나 손실 가능성을 얼마나 받아들이는지 설명하는 말이에요. 현재 서비스는 위험감수성 5축을 쓰지 않고 판단 근거와 포트폴리오 폭 2축으로 성향을 보여줘요.";
+          "위험감수성은 보통 가격 변화나 손실 가능성을 얼마나 받아들이는지 설명하는 말이에요. 현재 서비스는 위험감수성 축을 쓰지 않고 다섯 능력치로 행동 기록을 보여줘요.";
       } else if (message.includes("공격성축")) {
         text =
-          "현재 서비스에는 공격성 축이 없고 한 행동만으로 위험한 사람이라고 판단하지 않아요. 판단 근거와 포트폴리오 폭 2축은 실력이나 위험 등급이 아니라 행동을 돌아보는 분류예요.";
+          "현재 서비스에는 공격성 축이 없고 한 행동만으로 위험한 사람이라고 판단하지 않아요. 다섯 능력치는 실력이나 위험 등급이 아니라 행동을 돌아보는 기록이에요.";
       } else if (message.includes("성향점수")) {
         text =
-          "현재 서비스는 거래 표본의 평균으로 하나의 성향 점수를 만들지 않아요. 매수 전 확인한 자료와 시즌에 거래한 회사 수를 바탕으로 판단 근거·포트폴리오 폭 2축의 유형을 계산해요.";
+          "현재 서비스는 거래 표본의 평균으로 하나의 성향 점수를 만들지 않아요. 매수 전 자료 확인, 보유 섹터와 현금 비중, 거래 뒤 5거래일 기록을 나누어 보여줘요.";
       } else {
         text =
-          "현재 서비스는 5축 점수의 평균을 쓰지 않아요. 매수 전 확인한 자료에 따른 판단 근거와 시즌에 거래한 회사 수에 따른 포트폴리오 폭 2축으로 네 가지 유형을 만들어요.";
+          "현재 서비스는 다섯 능력치의 평균으로 성향을 정하지 않아요. 근거·직관과 집중·분산의 조합으로 네 가지 캐릭터를 만들고, 정확력은 따로 보여줘요.";
       }
       break;
     }
@@ -3601,6 +3608,28 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
 
   const archiveManagementReply = getArchiveManagementReply(message);
   if (archiveManagementReply) return archiveManagementReply;
+
+  // 안전·개인정보·규칙 안내 뒤에는 승인된 화면 용어를 먼저 설명한다.
+  // "목표 가격"처럼 매매 요청과 같은 단어를 쓰더라도, 단순 용어 질문은
+  // 추천·예측 거절로 보내지 않고 화면의 실제 뜻을 알려 준다.
+  const earlyKnowledge = findChatbotKnowledge(message);
+  if (
+    earlyKnowledge &&
+    EARLY_SCREEN_TERM_IDS.has(earlyKnowledge.id) &&
+    !findMentionedStock(message)
+  ) {
+    return reply(
+      "faq",
+      "service_help",
+      earlyKnowledge.answer,
+      ["사용법 FAQ 확인"],
+      {
+        ...(earlyKnowledge.actionTarget
+          ? { uiAction: { type: "open_screen", target: earlyKnowledge.actionTarget } }
+          : {}),
+      },
+    );
+  }
 
   const recommendationKind = findRecommendationKind(message);
   const metaKind = findMetaKind(message, recommendationKind);

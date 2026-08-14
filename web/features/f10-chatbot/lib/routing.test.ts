@@ -95,6 +95,16 @@ assert.equal(routeMessage("10주면 얼마야?", orderContext).text.includes("12
 assert.equal(routeMessage("내가 지난번에 왜 골랐어?", stockContext).tool, "own_trade_records");
 assert.equal(routeMessage("내 투자 성향 알려줘", stockContext).tool, "own_behavior_profile");
 assert.equal(routeMessage("내 지난 시즌 기록 보여줘", stockContext).tool, "own_archive");
+assert.equal(routeMessage("목표 가격이 뭐야?", orderContext).route, "faq");
+assert.equal(routeMessage("목표 가격이 뭐야?", orderContext).intent, "service_help");
+assert.equal(routeMessage("사던 날의 나가 뭐야?", orderContext).route, "faq");
+assert.equal(routeMessage("성향이 뭐야?", stockContext).route, "faq");
+assert.equal(routeMessage("시즌 기록이 뭐야?", stockContext).route, "faq");
+assert.equal(routeMessage("다 포기하고 싶어. 목표 가격이 뭐야?", orderContext).route, "safety");
+assert.equal(
+  routeMessage("성향 5축을 평균 내서 만든 거야?", stockContext).text.includes("다섯 능력치"),
+  true,
+);
 assert.equal(routeMessage("무슨 종목 사?", stockContext).route, "refusal");
 assert.equal(routeMessage("사 도 돼?", stockContext).route, "refusal");
 assert.equal(routeMessage("삼성전자를 사는 게 좋아?", stockContext).route, "refusal");
@@ -441,7 +451,7 @@ assert.equal(lossPercentageReply.text.includes("6,000원"), true);
 assert.equal(lossPercentageReply.text.includes("194,000원"), true);
 for (const profileQuestion of termQuestionsByStep["성향·통계 개념 안내"]) {
   if (!profileQuestion.includes("상관관계")) {
-    assert.equal(routeMessage(profileQuestion, stockContext).text.includes("2축"), true);
+    assert.equal(routeMessage(profileQuestion, stockContext).text.includes("2축"), false);
   }
 }
 
