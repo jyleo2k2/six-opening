@@ -8,7 +8,7 @@
 --   20260814052538_stock_tab_views_per_stock_category_count.sql
 --     → stock_tab_views 의 duration_seconds/opened_at/closed_at 을 지우고 stock_id/created_at 을 넣는다.
 --       따라서 여기서는 앞의 셋만 만들고 뒤의 둘은 만들지 않는다.
---   20260814190000_add_profiles_guardian_role.sql
+--   20260814111455_add_profiles_guardian_role.sql
 --     → profiles 에 guardian_role 과 updated_at 을 넣는다.
 --       따라서 여기서는 둘 다 만들지 않는다. profiles_set_updated_at 트리거는
 --       그 마이그레이션의 주석대로 updated_at 컬럼보다 먼저 존재했으므로 여기서 만든다.
@@ -215,7 +215,7 @@ create table public.trade_comments (
 
 create index trade_comments_transaction_idx on public.trade_comments using btree (transaction_id, created_at);
 
--- profiles.updated_at 은 20260814190000 이 추가한다. 트리거가 먼저 있던 라이브 순서를 유지한다.
+-- profiles.updated_at 은 20260814111455 가 추가한다. 트리거가 먼저 있던 라이브 순서를 유지한다.
 create function public.set_updated_at()
 returns trigger
 language plpgsql
