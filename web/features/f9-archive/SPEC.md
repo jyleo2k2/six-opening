@@ -19,7 +19,7 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 카드 상세 시트 | 카드 모아보기 | 그 주 카드 한 장 |
 | 가족 투자 성향 비교 | 성향 탭 | 구성원 오각형 겹치기 |
 
-가족 체결 마커는 F2 차트 안에 있고, 가족 거래 피드는 F11 React 오버레이다.
+가족 체결 마커는 F2 차트 안에 있다. 가족 거래 피드는 F11 React 오버레이와 이 화면의 수익률 탭에 있으며, 두 화면 모두 같은 가족·댓글·좋아요 API를 사용한다.
 
 ## 2. 소유권과 실행 경로
 
@@ -38,6 +38,8 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 지난 주차 카드 API | `web/app/api/profile/season-cards/route.ts` | 로그인 세션의 `transactions`(매수만)를 KST 주 단위로 묶어 주차별 다섯 축 점수 반환. 이번 주는 제외 |
 | 지난 주차 카드 조회 | `web/ui-src/methods/loadSeasonCards.js` | 진입 시 위 API를 불러 `this.dbSeasonCards`에 저장 |
 | 가족 성향 조회 | `web/ui-src/methods/loadFamilyProfiles.js` | `/api/family`의 실제 가족 구성원과 누적 성향을 `this.dbFamily`에 저장 |
+| 가족 피드 반응 조회 | `web/ui-src/methods/loadArchiveFeedReactions.js` | 실제 가족 거래 ID별 댓글·좋아요를 일괄 조회 |
+| 가족 피드 반응 변경 | `web/ui-src/methods/{toggleArchiveLike,sendArchiveComment,deleteArchiveComment}.js` | 좋아요 토글, 댓글 저장, 본인 댓글 삭제를 서버 API로 처리 |
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
@@ -175,6 +177,10 @@ app.html 안 `// >>> archive-engine` ~ `// <<< archive-engine`
 가족 비교는 로그인 사용자의 `family_tag`에 속한 모든 `profiles`를 표시한다. 각 구성원의 오각형은 `/api/family`가 신버전 행동 엔진으로 계산한 누적 성향을 0~100 화면 값으로 변환해 그리며, 거래가 없는 구성원도 이름과 빈 상태 카드는 표시한다. API를 사용할 수 없을 때만 기존 로컬 데모 계산으로 폴백한다.
 
 `renderVals()` 는 `const arc = this.buildArchive()` 로 받아 화면 키에 펼친다.
+
+### 5.1 수익률 탭 가족 피드
+
+수익률 탭의 `가족 피드`는 `this.dbFamily.trades`를 원본으로 사용한다. 각 카드의 거래 ID는 Supabase `transactions.id`와 같아야 하며, 앱 진입과 아카이브 재진입 때 `/api/comments`와 `/api/likes`를 일괄 조회한다. 댓글 작성·본인 댓글 삭제·좋아요 토글은 성공한 서버 응답으로만 화면 상태를 갱신한다. 다른 가족의 체결가는 `/api/family`에서 마스킹된 값을 그대로 사용하며 화면에서 추론하지 않는다.
 
 ## 6. 신버전 엔진 — `shared/engine/behavior-profile.ts` (화면 이관 전)
 

@@ -340,62 +340,70 @@
       if (min < 1440) return Math.round(min / 60) + '시간 전';
       return Math.round(min / 1440) + '일 전';
     };
-    const meMember = byUser[s.account === 'child' ? 'child_minji' : 'parent_mom'];
+    const dbFeedMembers = {};
+    dbFamilyMembers.forEach(member => {
+      const isDad = /아빠|부/.test(member.name || '');
+      const base = member.role === 'child' ? MEMBERS[2] : (isDad ? MEMBERS[0] : MEMBERS[1]);
+      const visual = Object.assign({}, base, { key:'db_' + member.id, user:'db_' + member.id, name:member.name, short:member.name });
+      dbFeedMembers[member.id] = visual;
+      byKey[visual.key] = visual;
+      byUser[visual.user] = visual;
+    });
+    const viewer = this.dbFamily && this.dbFamily.viewer;
+    const meMember = (viewer && dbFeedMembers[viewer.id]) || byUser[s.account === 'child' ? 'child_minji' : 'parent_mom'];
     const cmts = s.arcCmts || {}, cmtOpen = s.arcCmtOpen || {}, cmtD = s.arcCmtDraft || {};
-    const edit = s.arcCmtEdit || null;
-    const events = []
+    const localEvents = []
       .concat((s.records || []).map(r => ({ r: r, sell: false })))
-      .concat((s.sellRecords || []).map(r => ({ r: r, sell: true })))
+      .concat((s.sellRecords || []).map(r => ({ r: r, sell: true })));
+    const dbTrades = (this.dbFamily && Array.isArray(this.dbFamily.trades)) ? this.dbFamily.trades : null;
+    const events = (dbTrades !== null ? dbTrades.map(trade => ({
+      sell:trade.side === 'sell',
+      r:{ db_trade:true, order_id:trade.id, user_id:'db_' + trade.userId, symbol:trade.symbol,
+        stock_name:trade.stockName, ts:trade.tradedAt, trade_price:trade.price, qty:trade.quantity,
+        reason_code:trade.reason, memo:trade.reason }
+    })) : localEvents)
       .filter(e => { const m = byUser[e.r.user_id]; return m && (who === 'all' || m.key === who); })
       .sort((a, b) => String(b.r.ts).localeCompare(String(a.r.ts)))
       .slice(0, 12);
     const retFeed = events.map(e => {
       const r = e.r, m = byUser[r.user_id], id = r.order_id;
-      const now = price(r.symbol), avg = e.sell ? (r.avg || now) : (r.amount_krw / (r.qty || 1));
+      const now = price(r.symbol);
+      const avg = r.db_trade ? (r.trade_price === null || r.trade_price === undefined ? null : Number(r.trade_price))
+        : (e.sell ? (r.avg || now) : (r.amount_krw / (r.qty || 1)));
       const pc = avg ? (now - avg) / avg * 100 : 0, pos = pc >= 0;
-      const liked = (s.arcLikes || {})[id];
+      const rawLike = (s.arcLikes || {})[id];
+      const liked = rawLike && typeof rawLike === 'object' ? !!rawLike.liked : !!rawLike;
+      const likeCount = rawLike && typeof rawLike === 'object' ? Number(rawLike.count || 0) : (liked ? 1 : 0);
       const d = new Date(r.ts);
       const reason = (e.sell ? SELL_REASONS : REASONS).filter(x => x.code === (r.sell_reason_code || r.reason_code))[0];
       const list = cmts[id] || [];
       return {
         name: m.name, time: ago(r.ts), avatarStyle: avat(m, 44),
-        dateLabel: (d.getMonth() + 1) + '월 ' + d.getDate() + '일 수익률',
-        stockName: nameOf(r.symbol),
-        bigPctText: (pos ? '+' : '−') + Math.abs(pc).toFixed(2) + '%',
+        dateLabel: (d.getMonth() + 1) + '월 ' + d.getDate() + (avg ? '일 수익률' : '일 거래'),
+        stockName: r.stock_name || nameOf(r.symbol),
+        bigPctText: avg ? (pos ? '+' : '−') + Math.abs(pc).toFixed(2) + '%' : (e.sell ? '매도' : '매수'),
         blockStyle: 'flex:none;width:39%;position:relative;overflow:hidden;padding:13px 14px 14px;display:flex;flex-direction:column;justify-content:space-between;background:' + (pos ? accent : '#001E5A'),
         blockEmojiStyle: 'position:absolute;right:-2px;bottom:-2px;width:56px;height:60px;background:url(' + m.pose + ') right bottom/contain no-repeat;filter:drop-shadow(0 4px 7px rgba(0,0,0,0.3))',
-        avgPctText: won(avg),
-        avgPctStyle: 'font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-top:4px;white-space:nowrap;color:' + (pos ? up : down),
+        avgPctText: avg ? won(avg) : '비공개',
+        avgPctStyle: 'font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-top:4px;white-space:nowrap;color:' + (avg ? (pos ? up : down) : '#A9AEC4'),
         oneLiner: reason ? reason.short : (e.sell ? '팔았어' : '담았어'),
         text: (e.sell ? '팔았어. ' : '담았어. ') + (r.memo || (reason ? reason.short + ' 결정했어.' : '')),
         cmtCount: list.length,
         cmtOpen: !!cmtOpen[id],
         toggleCmt: () => this.set({ arcCmtOpen: Object.assign({}, cmtOpen, { [id]: !cmtOpen[id] }) }),
         cmtBtnStyle: 'display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;color:' + (cmtOpen[id] ? '#0A3272' : '#A9AEC4'),
-        likeCount: liked ? 1 : 0,
+        likeCount: likeCount,
         likeIcon: '좋아요',
         likeStyle: 'display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;cursor:pointer;font-variant-numeric:tabular-nums;color:' + (liked ? accent : '#A9AEC4'),
-        like: () => this.set({ arcLikes: Object.assign({}, s.arcLikes || {}, { [id]: !liked }) }),
-        comments: list.map((c, i) => {
-          const q = byKey[c.who] || meMember;
-          const isEd = !!(edit && edit.id === id && edit.i === i);
+        like: () => this.toggleArchiveLike(id),
+        comments: list.map(c => {
+          const base = c.author === 'child' ? MEMBERS[2] : (/아빠|부/.test(c.authorName || '') ? MEMBERS[0] : MEMBERS[1]);
+          const q = Object.assign({}, base, { name:c.authorName || base.name });
           return {
-            name: q.name, text: c.text, avatarStyle: avat(q, 26),
-            canEdit: c.who === meMember.key && !isEd, editing: isEd, notEditing: !isEd,
-            editDraft: isEd ? (s.arcCmtEditDraft || '') : '',
+            name:q.name, text:c.body || c.text, avatarStyle:avat(q, 26),
+            canDelete:!!c.mine,
             actStyle: 'font-size:11.5px;font-weight:700;color:#A9AEC4;padding:4px 8px;border-radius:999px;background:#F2F3FA;cursor:pointer;white-space:nowrap',
-            onEditDraft: ev => this.setState({ arcCmtEditDraft: ev.target.value }),
-            startEdit: () => this.setState({ arcCmtEdit: { id: id, i: i }, arcCmtEditDraft: c.text }),
-            saveEdit: () => {
-              const v = (this.state.arcCmtEditDraft || '').trim(); if (!v) return;
-              const arr = (cmts[id] || []).slice(); arr[i] = { who: c.who, text: v };
-              this.set({ arcCmts: Object.assign({}, cmts, { [id]: arr }), arcCmtEdit: null, arcCmtEditDraft: '' });
-            },
-            cancelEdit: () => this.setState({ arcCmtEdit: null, arcCmtEditDraft: '' }),
-            del: () => {
-              const arr = (cmts[id] || []).slice(); arr.splice(i, 1);
-              this.set({ arcCmts: Object.assign({}, cmts, { [id]: arr }), arcCmtEdit: null, arcCmtEditDraft: '' });
-            }
+            del:() => this.deleteArchiveComment(id, c.id)
           };
         }),
         meAvatarStyle: avat(meMember, 30),
@@ -404,13 +412,7 @@
         sendStyle: 'flex:none;font-size:12.5px;font-weight:800;padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;' + ((cmtD[id] || '').trim()
           ? 'color:#fff;background:#001E5A'
           : 'color:#B8BDD0;background:#F0F1F7'),
-        send: () => {
-          const v = (cmtD[id] || '').trim(); if (!v) return;
-          this.set({
-            arcCmts: Object.assign({}, cmts, { [id]: (cmts[id] || []).concat([{ who: meMember.key, text: v }]) }),
-            arcCmtDraft: Object.assign({}, cmtD, { [id]: '' })
-          });
-        }
+        send: () => this.sendArchiveComment(id)
       };
     });
 

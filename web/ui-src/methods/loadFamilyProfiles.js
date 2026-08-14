@@ -7,6 +7,7 @@
       .then(d => {
         if (d && d.viewer && Array.isArray(d.members)) {
           this.dbFamily = d;
+          this.loadArchiveFeedReactions(d.trades);
           this.forceUpdate();
         }
       })
