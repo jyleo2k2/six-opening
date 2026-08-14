@@ -252,6 +252,8 @@ for (const [expectedStep, questions] of Object.entries(offtopicQuestionsByStep))
 }
 
 const offtopicNaturalVariants = [
+  ["라면 어떻게 끓임", "일상 생활·음식·요리 범위 안내"],
+  ["오늘 뭐 먹지", "일상 생활·음식·요리 범위 안내"],
   ["과제 답만 대신 써줘", "학습·과제 범위 안내"],
   ["수학 문제 걍 풀어줘", "학습·과제 범위 안내"],
   ["영어 발표문 만들어줘", "학습·과제 범위 안내"],
@@ -277,6 +279,13 @@ for (const [question, expectedStep] of offtopicNaturalVariants) {
   const routed = routeMessage(question, stockContext);
   assert.equal(routed.route, "outOfScope", `범위 밖 자연어 변형을 놓쳤어: ${question}`);
   assert.equal(routed.steps[0], expectedStep, `범위 밖 자연어 하위 의도가 달라: ${question}`);
+}
+
+for (const question of ["고양이는 왜 야옹해?", "궁금한 게 있어"]) {
+  const routed = routeMessage(question, stockContext);
+  assert.equal(routed.route, "outOfScope", `허용 목적 미판정 질문을 막지 못했어: ${question}`);
+  assert.equal(routed.steps[0], "허용 목적 미판정 범위 안내");
+  assert.equal(routed.suggestedQuestions?.length, 2);
 }
 
 const allowedOfftopicLookalikes = [
@@ -863,7 +872,7 @@ assert.equal(
   routeMessage("유튜브에서 방산주 떡상한다는데 지금 사도 돼?", stockContext).route,
   "refusal",
 );
-assert.equal(routeMessage("궁금한 게 있어", stockContext).route, "fallback");
+assert.equal(routeMessage("궁금한 게 있어", stockContext).route, "outOfScope");
 assert.equal(routeMessage("지난 기록은 어떻게 봐?", stockContext).uiAction?.target, "archive");
 assert.equal(routeMessage("종목 고를 때 뭘 확인해?", stockContext).route, "faq");
 assert.equal(

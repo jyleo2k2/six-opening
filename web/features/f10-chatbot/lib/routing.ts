@@ -99,6 +99,7 @@ type RuleKind =
 type OfftopicKind =
   | "schoolwork"
   | "schoolLife"
+  | "dailyLife"
   | "game"
   | "videoSocial"
   | "entertainment"
@@ -881,6 +882,17 @@ const SCHOOL_LIFE_PATTERNS = [
   "선생님화내",
   "숙제안하고친구랑게임하면혼나",
 ];
+const DAILY_LIFE_PATTERNS = [
+  "라면어떻게",
+  "라면끓",
+  "레시피",
+  "요리",
+  "끓여",
+  "끓임",
+  "뭐먹지",
+  "메뉴추천",
+  "간식추천",
+];
 const GAME_PATTERNS = [
   "게임",
   "끝말잇기",
@@ -1469,7 +1481,13 @@ function findOfftopicKind(
 ): OfftopicKind | null {
   const explicitInvestmentDecision =
     recommendationKind !== null &&
-    includesAny(message, [
+    ((findMentionedStock(message) !== undefined &&
+      !includesAny(message, [
+        ...GAME_PATTERNS,
+        ...VIDEO_SOCIAL_PATTERNS,
+        ...ENTERTAINMENT_PATTERNS,
+      ])) ||
+      includesAny(message, [
       "종목",
       "주식",
       "주가",
@@ -1494,8 +1512,8 @@ function findOfftopicKind(
       "가진돈",
       "돈전부",
       "넣을래",
-      "어디에넣",
-    ]);
+        "어디에넣",
+      ]));
   if (explicitInvestmentDecision) return null;
 
   const companyFactQuestion =
@@ -1576,6 +1594,9 @@ function findOfftopicKind(
   if (includesAny(message, SCHOOL_LIFE_PATTERNS)) return "schoolLife";
   if (includesAny(message, SCHOOLWORK_PATTERNS)) return "schoolwork";
   if (includesAny(message, VIDEO_SOCIAL_PATTERNS)) return "videoSocial";
+  if (includesAny(message, DAILY_LIFE_PATTERNS)) {
+    return "dailyLife";
+  }
   if (
     message.includes("게임") &&
     includesAny(message, ["재밌", "추천", "공략", "캐릭터"])
@@ -2949,6 +2970,13 @@ function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
       questions = ["키웅이가 뭘 도와줘?", "리그 참여 규칙 알려줘"];
       break;
     }
+    case "dailyLife": {
+      step = "일상 생활·음식·요리 범위 안내";
+      text =
+        "음식을 만들거나 메뉴를 고르는 생활 조언은 이 서비스에서 도와줄 수 없어요. 대신 금융 기초와 모의투자 서비스 사용법은 설명할 수 있어요. 🐻";
+      questions = ["주식이 뭐야?", "주문 전에 뭘 확인해?"];
+      break;
+    }
     case "game": {
       step = "게임·놀이 범위 안내";
       text =
@@ -3002,6 +3030,71 @@ function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
   return reply("outOfScope", "safety", text, [step], {
     suggestedQuestions: questions,
   });
+}
+
+function unclassifiedReply(): ChatReply {
+  return reply(
+    "outOfScope",
+    "safety",
+    "저는 금융 기초와 이 모의투자 서비스 사용법을 도와주는 챗봇이에요. 그 범위에서 궁금한 점을 물어봐 주세요. 🐻",
+    ["허용 목적 미판정 범위 안내"],
+    {
+      suggestedQuestions: ["PER이 뭐야?", "주문 전에 뭘 확인해?"],
+    },
+  );
+}
+
+function isModelEligibleFallback(message: string, context: ChatContext): boolean {
+  const financeQuestion = includesAny(message, [
+    "주식",
+    "주가",
+    "수익률",
+    "변동성",
+    "per",
+    "pbr",
+    "eps",
+    "배당",
+    "시가총액",
+    "물타기",
+    "분산투자",
+    "손절",
+    "익절",
+    "매수",
+    "매도",
+    "거래량",
+    "차트",
+    "실적",
+    "매출",
+    "이익",
+    "재무",
+    "투자",
+    "포트폴리오",
+    "시장가",
+    "지정가",
+  ]);
+  if (financeQuestion) return true;
+
+  const serviceQuestion = includesAny(message, [
+    "모의투자",
+    "리그",
+    "시즌",
+    "주문",
+    "계좌",
+    "아카이브",
+    "성향",
+    "거래기록",
+    "종목탐색",
+    "매수화면",
+    "매도화면",
+  ]);
+  if (serviceQuestion) return true;
+
+  const hasApprovedStockContext =
+    (context.screen === "stock" || context.screen === "order") && context.stockId !== undefined;
+  return (
+    hasApprovedStockContext &&
+    includesAny(message, ["이회사", "이종목", "회사", "종목", "사업", "제품", "돈을벌"])
+  );
 }
 
 function ruleReply(kind: RuleKind, message: string): ChatReply {
@@ -3728,12 +3821,16 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     });
   }
 
-  return reply(
-    "fallback",
-    "general_allowed",
-    "저는 투자 기초와 서비스 사용법을 도와줄 수 있어요. 예를 들어 ‘PER이 뭐예요?’, ‘주문 전에 뭘 확인해요?’처럼 물어봐 주세요. 🐻",
-    ["허용 질문 확인"],
-  );
+  if (isModelEligibleFallback(message, context)) {
+    return reply(
+      "fallback",
+      "general_allowed",
+      "금융 기초와 서비스 사용법을 확인하고 있어요.",
+      ["허용 목적 확인"],
+    );
+  }
+
+  return unclassifiedReply();
 }
 
 export const PROACTIVE_SCRIPTS: Record<

@@ -37,6 +37,15 @@ async function main() {
   assert.equal(faq.response.text.startsWith("궁금한 걸 잘 짚었어요 —"), true);
   if (!isExplainAction(faq.action)) throw new Error("explain action missing");
 
+  const outOfScope = await createChatOutcome(
+    { message: "라면 어떻게 끓임", context },
+    session,
+    { generateAnswer: noModel },
+  );
+  assert.equal(outOfScope.route, "outOfScope");
+  assert.equal(outOfScope.source, "fixed");
+  assert.equal(modelCalls, 0, "범위 밖 생활 질문은 모델을 호출하면 안 돼");
+
   const continued = await createChatOutcome(
     {
       message: "회사의 직원 수와 주가",
@@ -539,7 +548,7 @@ async function main() {
 
   // 룰을 통과한 재표현 추천은 T5b 가 잡는다.
   const judgeBlocked = await createChatOutcome(
-    { message: "이 회사 어때?", context: { screen: "home" } },
+    { message: "주가와 회사 이익은 어떻게 달라?", context: { screen: "home" } },
     session,
     {
       generateAnswer: async () => "장기적으로 보면 유망한 회사예요.",
@@ -553,7 +562,7 @@ async function main() {
 
   // 판정 실패는 닫힌 실패다. 검사하지 못한 생성문을 내보내지 않는다.
   const judgeDown = await createChatOutcome(
-    { message: "이 회사 어때?", context: { screen: "home" } },
+    { message: "주가와 회사 이익은 어떻게 달라?", context: { screen: "home" } },
     session,
     {
       generateAnswer: async () => "회사는 반도체를 만들어요.",
@@ -567,7 +576,7 @@ async function main() {
   assert.equal(judgeDown.response.text, CHAT_FALLBACK);
 
   const judgeTimedOut = await createChatOutcome(
-    { message: "이 회사 어때?", context: { screen: "home" } },
+    { message: "주가와 회사 이익은 어떻게 달라?", context: { screen: "home" } },
     session,
     {
       generateAnswer: async () => "회사는 반도체를 만들어요.",
@@ -590,7 +599,7 @@ async function main() {
   assert.equal(quotedNumber.gate, "passed");
 
   const blocked = await createChatOutcome(
-    { message: "조금 더 설명해 줘", context },
+    { message: "주가와 회사 이익을 조금 더 설명해 줘", context },
     session,
     { generateAnswer: async () => "회사를 먼저 살펴봐. 지금 이 종목을 사는 게 좋아." },
   );
@@ -600,14 +609,14 @@ async function main() {
   assert.equal(blocked.response.text.includes("회사를 먼저"), false);
 
   const unverifiedNumber = await createChatOutcome(
-    { message: "숫자로 알려줘", context },
+    { message: "주가와 회사 이익을 숫자로 알려줘", context },
     session,
     { generateAnswer: async () => "수익률은 12%야." },
   );
   assert.equal(unverifiedNumber.response.text, CHAT_FALLBACK);
 
   const timedOut = await createChatOutcome(
-    { message: "길게 알려줘", context },
+    { message: "주가와 회사 이익을 길게 설명해 줘", context },
     session,
     {
       timeoutMs: 5,

@@ -134,7 +134,7 @@ function resolveExplainStep(
   const protectedRoute =
     routed.route === "refusal" ||
     routed.route === "safety" ||
-    routed.route === "outOfScope";
+    (routed.route === "outOfScope" && !isGenericOutOfScope(routed));
   if (protectedRoute) return null;
 
   if (request.explain) {
@@ -150,7 +150,8 @@ function resolveExplainStep(
     if (!choiceId) {
       // 새 전용 설명 질문이면 해당 스크립트를 시작하고, 그 밖의 새 질문은 일반 라우팅으로 넘긴다.
       if (routed.explainScript) return startExplain(routed.explainScript);
-      return looksLikeNewQuestion(request.message) || routed.route !== "fallback"
+      return looksLikeNewQuestion(request.message) ||
+        (routed.route !== "fallback" && !isGenericOutOfScope(routed))
         ? null
         : reaskExplain(script, request.explain.stage);
     }
@@ -171,6 +172,10 @@ function resolveExplainStep(
   return routed.explainScript ? startExplain(routed.explainScript) : null;
 }
 
+function isGenericOutOfScope(routed: ReturnType<typeof routeMessage>): boolean {
+  return routed.route === "outOfScope" && routed.steps[0] === "허용 목적 미판정 범위 안내";
+}
+
 function resolveStockExploreStep(
   request: ChatRequest,
   routed: ReturnType<typeof routeMessage>,
@@ -178,7 +183,7 @@ function resolveStockExploreStep(
   const protectedRoute =
     routed.route === "refusal" ||
     routed.route === "safety" ||
-    routed.route === "outOfScope";
+    (routed.route === "outOfScope" && !isGenericOutOfScope(routed));
   if (protectedRoute) return null;
 
   if (request.stockExplore) {
@@ -197,7 +202,13 @@ function resolveSectorExploreStep(
   request: ChatRequest,
   routed: ReturnType<typeof routeMessage>,
 ) {
-  if (routed.route === "refusal" || routed.route === "safety" || routed.route === "outOfScope") return null;
+  if (
+    routed.route === "refusal" ||
+    routed.route === "safety" ||
+    (routed.route === "outOfScope" && !isGenericOutOfScope(routed))
+  ) {
+    return null;
+  }
   if (request.sectorExplore) return resolveSectorExplore(request.sectorExplore) ?? "invalid";
   return null;
 }
