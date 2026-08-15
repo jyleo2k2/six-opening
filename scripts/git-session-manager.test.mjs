@@ -9,7 +9,9 @@ import { fileURLToPath } from "node:url";
 import {
   POLICY,
   SessionError,
+  analyzeLocalConflicts,
   auditWorktreeEntries,
+  classifySession,
   expectedWorktreePath,
   localConflicts,
   matchingHotspots,
@@ -114,6 +116,65 @@ test("활성 claim이 겹치면 충돌을 반환하고 release된 claim은 무�
   };
   assert.equal(localConflicts(registry, ["web/shared"], "codex/이재용/통합-연결").length, 1);
   assert.equal(localConflicts(registry, ["docs"], "codex/이재용/통합-연결").length, 0);
+});
+
+test("claim 은 겹쳐도 실제 수정 파일이 안 겹치면 경고로 낮춘다", () => {
+  const registry = {
+    sessions: [
+      {
+        branch: "claude/김설빈/렌더값-분해",
+        worker: "김설빈",
+        status: "active",
+        paths: ["web/ui-src"],
+      },
+    ],
+  };
+  const scopes = ["web/ui-src/methods/notifyChatContext.js"];
+  const mine = "claude/이재용/지갑값-전달";
+
+  // 상대가 다른 파일만 고쳤다 -> 통과시키고 경고만 남긴다.
+  const apart = analyzeLocalConflicts(registry, scopes, mine, {
+    changedFilesOf: () => ["web/ui-src/methods/renderVals-return.js"],
+  });
+  assert.equal(apart.conflicts.length, 0);
+  assert.equal(apart.warnings.length, 1);
+
+  // 같은 파일을 고쳤다 -> 그대로 차단한다.
+  const same = analyzeLocalConflicts(registry, scopes, mine, {
+    changedFilesOf: () => ["web/ui-src/methods/notifyChatContext.js"],
+  });
+  assert.equal(same.conflicts.length, 1);
+
+  // 아직 아무것도 안 고쳤으면 앞으로 고칠 수 있으므로 차단을 유지한다.
+  const untouched = analyzeLocalConflicts(registry, scopes, mine, {
+    changedFilesOf: () => [],
+  });
+  assert.equal(untouched.conflicts.length, 1);
+
+  // 조회 실패(null)도 안전하게 차단한다.
+  const unknown = analyzeLocalConflicts(registry, scopes, mine, {
+    changedFilesOf: () => null,
+  });
+  assert.equal(unknown.conflicts.length, 1);
+});
+
+test("claim 이 끝났는지를 관측값으로 판정한다", () => {
+  const base = { status: "active", worktreeExists: true, dirty: false, ahead: 0, minutesSinceUpdate: 600 };
+
+  // 미병합 0 + clean -> 정리 가능
+  assert.equal(classifySession(base), "done");
+  // worktree 가 이미 없어도 정리 대상
+  assert.equal(classifySession({ ...base, worktreeExists: false }), "done");
+  // 미커밋 변경은 남의 미완성 작업일 수 있다 -> 절대 정리하지 않는다
+  assert.equal(classifySession({ ...base, dirty: true }), "working");
+  // 미병합 커밋 + 최근 활동 -> 진행 중
+  assert.equal(classifySession({ ...base, ahead: 2, minutesSinceUpdate: 5 }), "working");
+  // 미병합 커밋 + 오래 조용 -> 사람이 확인할 것 (자동으로 뺏지 않는다)
+  assert.equal(classifySession({ ...base, ahead: 2, minutesSinceUpdate: 600 }), "idle");
+  // 갓 만든 빈 세션을 done 으로 오판하지 않는다
+  assert.equal(classifySession({ ...base, minutesSinceUpdate: 1 }), "working");
+  // 해제된 세션
+  assert.equal(classifySession({ ...base, status: "released" }), "released");
 });
 
 test("공용 앱·shared·기술 문서를 핫스팟으로 찾는다", () => {
