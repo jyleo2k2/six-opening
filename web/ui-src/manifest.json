@@ -85,7 +85,14 @@
     "methods/navIcon.js",
     "methods/navLabel.js",
     "methods/renderVals-compute.js",
-    "methods/renderVals-return.js",
+    "methods/renderVals-return-0-common.js",
+    "methods/renderVals-return-1-home.js",
+    "methods/renderVals-return-2-explore.js",
+    "methods/renderVals-return-3-buy.js",
+    "methods/renderVals-return-4-archive.js",
+    "methods/renderVals-return-5-ranking.js",
+    "methods/renderVals-return-6-sell.js",
+    "methods/renderVals-return-7-shared.js",
     "template/doc-tail.html"
   ]
 }
