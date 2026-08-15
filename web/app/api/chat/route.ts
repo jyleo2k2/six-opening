@@ -7,6 +7,7 @@ import {
   CHAT_FALLBACK,
   createChatOutcome,
 } from "../../../features/f10-chatbot/lib/orchestrator";
+import { checkAnswerRelevance } from "../../../features/f10-chatbot/lib/answer-relevance";
 import { resolveChatSession } from "../../../features/f10-chatbot/lib/session";
 import { classifyTermKind } from "../../../features/f10-chatbot/lib/term-classify";
 import { createReadOnlyToolRunner } from "../../../features/f10-chatbot/lib/tools";
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
           onStatus: (status) => send("status", status),
           runTool,
           classifyTerm: classifyTermKind,
+          checkRelevance: checkAnswerRelevance,
         });
 
         send("text", outcome.response.text);
@@ -99,6 +101,7 @@ export async function POST(request: NextRequest) {
           gate: outcome.gate,
           gateReason: outcome.gateReason ?? null,
           rewritten: outcome.rewritten ?? false,
+          relevanceRedirected: outcome.relevanceRedirected ?? false,
           failure: outcome.failure ?? null,
           result: "completed",
         });
