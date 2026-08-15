@@ -259,6 +259,44 @@ function assemble(keep = () => true) {
     .join("");
 }
 
+// ── 조립 무결성 ─────────────────────────────────────────────────────────
+// 합친 결과가 스스로 온전한지 본다. `this.foo()` 를 부르는데 `foo` 가 어디에도 없으면
+// 브라우저는 **첫 렌더에서 죽는다**. 그런데 `npm test` 도 `next build` 도 app.html 을
+// 실행하지 않아 아무도 못 잡는다. 실제로 아카이브를 React 로 옮기며 `buildArchive` 를
+// 지우고 호출부를 남긴 적이 있고(PR #238), `renderVals()` 가 화면 분기 밖 공통 경로라
+// 매수·매도가 통째로 죽은 채 병합됐다.
+//
+// 클래스가 상속으로 받는 것과 런타임에 붙이는 것(`this.tick = () => {}`)은 정의로 본다.
+
+/** DCLogic·React 에서 물려받아 이 파일에는 정의가 없는 것들. */
+const INHERITED_METHODS = new Set(["setState", "forceUpdate", "render"]);
+
+function danglingMethodRefs(text) {
+  const defined = new Set(INHERITED_METHODS);
+  // 클래스 본문의 메서드는 두 칸 들여쓰기로 시작한다.
+  for (const m of text.matchAll(/^ {2}([A-Za-z_$][\w$]*)\s*\(/gm)) defined.add(m[1]);
+  // 런타임 대입도 정의다. `==` 비교와 섞이지 않게 뒤에 `=` 가 또 오는 건 뺀다.
+  for (const m of text.matchAll(/this\.([A-Za-z_$][\w$]*)\s*=[^=]/g)) defined.add(m[1]);
+
+  const missing = new Set();
+  for (const m of text.matchAll(/this\.([A-Za-z_$][\w$]*)\s*\(/g)) {
+    if (!defined.has(m[1])) missing.add(m[1]);
+  }
+  return [...missing].sort();
+}
+
+/** 깨진 참조가 있으면 조립을 실패시킨다. 반쯤 죽은 app.html 을 내보내지 않는다. */
+function assertNoDanglingRefs(text) {
+  const missing = danglingMethodRefs(text);
+  if (missing.length === 0) return;
+  console.error(
+    `조립 거부: 정의가 없는 메서드를 부른다 — ${missing.join(", ")}\n` +
+      "  이 상태로 만들면 app.html 이 첫 렌더에서 죽는다. 부르는 쪽을 지우거나\n" +
+      "  manifest 에서 빠진 methods 조각을 되돌린다.",
+  );
+  process.exit(1);
+}
+
 // ── 내보내기 ────────────────────────────────────────────────────────────
 // 디자이너에게 넘길 파일은 서버 없이 혼자 열려야 한다. 서버가 주던 것(런타임 스크립트,
 // 종목 데이터, 폰트, 이미지, API 응답)을 전부 파일 안에 넣거나 CDN 으로 돌린다.
@@ -394,10 +432,14 @@ if (command === "split") {
   const methods = parts.filter((p) => p.file.startsWith("methods/")).length;
   console.log(`split: 조각 ${parts.length}개 (화면 ${screens} · 메서드 ${methods}) -> web/ui-src/`);
 } else if (command === "build") {
-  writeFileSync(APP_HTML, assemble());
+  const text = assemble();
+  assertNoDanglingRefs(text);
+  writeFileSync(APP_HTML, text);
   console.log("build: web/public/ui/app.html 을 다시 만들었다");
 } else if (command === "verify") {
-  const built = Buffer.from(assemble(), "utf8");
+  const text = assemble();
+  assertNoDanglingRefs(text);
+  const built = Buffer.from(text, "utf8");
   const current = readFileSync(APP_HTML);
   if (built.equals(current)) {
     console.log(`verify: 바이트 동일 (${current.length} bytes)`);
