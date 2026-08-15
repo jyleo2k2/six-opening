@@ -1,0 +1,76 @@
+{
+  "stockId": "KRX:041510",
+  "second": true,
+  "eventType": "sales_or_production",
+  "article": {
+    "articleId": "MANUAL-QUEEN-20260810",
+    "title": "에스파, 첫 고척돔서 입증한 막강 티켓 파워…25개 지역 월드투어 출격",
+    "publisher": "이코노미퀸",
+    "publishedAt": "2026-08-10T04:27:00.000Z",
+    "sourceUrl": "https://www.queen.co.kr/news/articleView.html?idxno=461495",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "에스파(카리나, 윈터, 지젤, 닝닝)는 지난 7일부터 8일까지 서울 고척스카이돔에서 '2026-27 에스파 라이브 투어 싱크 : 컴플랙시티'(2026-27 aespa LIVE TOUR - SYNK : COMPLaeXITY)를 개최했다."
+      },
+      {
+        "id": "S2",
+        "text": "이틀간 총 3만5000명의 관객을 동원하며 강력한 티켓 파워를 입증했다."
+      },
+      {
+        "id": "S3",
+        "text": "에스파는 북미, 남미, 유럽 등 총 25개 지역을 순회하는 네 번째 월드투어 일정을 본격적으로 이어갈 예정이다."
+      },
+      {
+        "id": "S4",
+        "text": "이번 공연은 에스파의 첫 고척스카이돔 입성이자 새로운 월드투어의 시작을 알리는 자리였다."
+      }
+    ]
+  },
+  "focusStatement": "에스엠 소속 그룹 에스파가 서울 고척스카이돔 공연으로 25개 지역을 도는 네 번째 월드투어를 시작했다.",
+  "anchorSourceId": "S3",
+  "headline": {
+    "text": "에스엠 소속 에스파, 25개 지역 월드투어 시작",
+    "sourceIds": ["S3", "S4"]
+  },
+  "body": [
+    {
+      "text": "서울 고척스카이돔에서 이틀 공연했어요.",
+      "sourceIds": ["S1"],
+      "role": "key_detail",
+      "factKey": "seoul_concert"
+    },
+    {
+      "text": "관객 3만5000명이 모였어요.",
+      "sourceIds": ["S2"],
+      "role": "business_detail",
+      "factKey": "audience_count"
+    },
+    {
+      "text": "북미·남미·유럽 등을 돌 예정이에요.",
+      "sourceIds": ["S3"],
+      "role": "context",
+      "factKey": "tour_regions"
+    }
+  ],
+  "priceConnection": {
+    "text": "공연 표가 많이 팔리면 회사가 버는 돈도 함께 늘어요.",
+    "sourceIds": ["S2", "S3"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "월드투어",
+      "easyText": "여러 나라를 돌면서 공연하는 것",
+      "treatment": "explained",
+      "sourceIds": ["S3"]
+    },
+    {
+      "term": "관객",
+      "easyText": "공연을 보러 온 사람들",
+      "treatment": "explained",
+      "sourceIds": ["S2"]
+    }
+  ]
+}

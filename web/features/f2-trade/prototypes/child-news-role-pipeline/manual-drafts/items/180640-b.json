@@ -1,0 +1,80 @@
+{
+  "stockId": "KRX:180640",
+  "second": true,
+  "eventType": "capital_or_dividend",
+  "article": {
+    "articleId": "MANUAL-ASIATODAY-20260813",
+    "title": "한진칼, 자사주 6473주 소각 결정…5443만원 규모",
+    "publisher": "아시아투데이",
+    "publishedAt": "2026-08-13T09:37:00.000Z",
+    "sourceUrl": "https://www.asiatoday.co.kr/kn/view.php?key=20260813010004805",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "한진칼은 13일 이사회를 열고 보통주 4주와 우선주 6469주를 소각하기로 결정했다고 공시했다."
+      },
+      {
+        "id": "S2",
+        "text": "소각 예정일은 오는 25일이다."
+      },
+      {
+        "id": "S3",
+        "text": "소각 예정금액은 장부가액 기준 5442만7477원이다."
+      },
+      {
+        "id": "S4",
+        "text": "소각 대상은 한진칼이 회사 설립 과정에서 취득해 보유해온 자기주식이다."
+      },
+      {
+        "id": "S5",
+        "text": "이번 소각으로 발행주식총수는 감소하지만 자본금에는 변동이 없다."
+      }
+    ]
+  },
+  "focusStatement": "한진칼이 이사회에서 회사 설립 때부터 보유해 온 자기주식 보통주 4주와 우선주 6469주를 소각하기로 결정했다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "한진칼, 가지고 있던 자기주식 소각 결정",
+    "sourceIds": ["S1", "S4"]
+  },
+  "body": [
+    {
+      "text": "보통주 4주와 우선주 6469주예요.",
+      "sourceIds": ["S1"],
+      "role": "key_detail",
+      "factKey": "share_counts"
+    },
+    {
+      "text": "소각 예정일은 이달 25일이에요.",
+      "sourceIds": ["S2"],
+      "role": "business_detail",
+      "factKey": "burn_date"
+    },
+    {
+      "text": "회사 전체 주식 수가 줄어들어요.",
+      "sourceIds": ["S5"],
+      "role": "context",
+      "factKey": "share_count_drop"
+    }
+  ],
+  "priceConnection": {
+    "text": "회사가 자기주식을 소각하면 나눠 가진 주식 수가 줄어요.",
+    "sourceIds": ["S1", "S5"],
+    "kind": "shareholder_return",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "자기주식",
+      "easyText": "회사가 자기 회사 주식을 사서 가지고 있는 것",
+      "treatment": "explained",
+      "sourceIds": ["S4"]
+    },
+    {
+      "term": "소각",
+      "easyText": "가지고 있던 주식을 없애는 것",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    }
+  ]
+}

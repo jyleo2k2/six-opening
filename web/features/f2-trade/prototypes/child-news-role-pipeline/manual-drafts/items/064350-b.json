@@ -1,0 +1,80 @@
+{
+  "stockId": "KRX:064350",
+  "second": true,
+  "eventType": "binding_contract",
+  "article": {
+    "articleId": "MANUAL-BLOTER-20260423",
+    "title": "현대로템, 베트남 호찌민 2호선 전동차 사업 수주…4911억 규모",
+    "publisher": "블로터",
+    "publishedAt": "2026-04-23T07:44:00.000Z",
+    "sourceUrl": "https://www.bloter.net/news/articleView.html?idxno=660405",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "현대로템이 베트남 호찌민 2호선 전동차 현지화 사업과 관련해 총 2건의 공급 계약을 체결했다고 23일 공시했다."
+      },
+      {
+        "id": "S2",
+        "text": "1단계 사업의 계약금은 1566억원으로 이는 지난해 매출의 2.7%에 해당한다."
+      },
+      {
+        "id": "S3",
+        "text": "2·3단계 사업의 계약금은 3345억원으로 지난해 매출 대비 5.7% 수준이다."
+      },
+      {
+        "id": "S4",
+        "text": "계약기간은 2032년 12월31일까지다."
+      },
+      {
+        "id": "S5",
+        "text": "두 계약을 합산한 총계약금은 4911억원이다."
+      }
+    ]
+  },
+  "focusStatement": "현대로템이 베트남 호찌민 2호선 전동차 현지화 사업으로 총 4911억원 규모의 공급 계약 2건을 체결했다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "현대로템, 베트남 호찌민 전동차 4911억원 계약",
+    "sourceIds": ["S1", "S5"]
+  },
+  "body": [
+    {
+      "text": "베트남 호찌민 2호선 전동차예요.",
+      "sourceIds": ["S1"],
+      "role": "key_detail",
+      "factKey": "project_name"
+    },
+    {
+      "text": "두 계약을 합치면 4911억원이에요.",
+      "sourceIds": ["S5"],
+      "role": "business_detail",
+      "factKey": "contract_amount"
+    },
+    {
+      "text": "계약기간은 2032년까지예요.",
+      "sourceIds": ["S4"],
+      "role": "context",
+      "factKey": "contract_period"
+    }
+  ],
+  "priceConnection": {
+    "text": "계약으로 정해진 일은 앞으로 여러 해 동안 할 일이 돼요.",
+    "sourceIds": ["S1", "S4"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "전동차",
+      "easyText": "지하철처럼 전기로 달리는 열차",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    },
+    {
+      "term": "계약",
+      "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    }
+  ]
+}

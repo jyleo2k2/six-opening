@@ -1,0 +1,80 @@
+{
+  "stockId": "KRX:003490",
+  "second": true,
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-ASIAE-20260713",
+    "title": "대한항공, 2분기 매출 5조 돌파…영업익은 유가 상승에 34%↓",
+    "publisher": "아시아경제",
+    "publishedAt": "2026-07-13T08:01:00.000Z",
+    "sourceUrl": "https://view.asiae.co.kr/article/2026071317013117513",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "대한항공은 올해 2분기 별도 기준 매출이 5조 199억원으로 전년 동기 대비 25.9% 증가했다고 13일 밝혔다."
+      },
+      {
+        "id": "S2",
+        "text": "역대 2분기 기준 최대 매출이다."
+      },
+      {
+        "id": "S3",
+        "text": "2분기 영업이익은 유가 상승에 따른 연료비 증가 등으로 인해 전년 동기 대비 34.4% 감소한 2618억원을 기록했다."
+      },
+      {
+        "id": "S4",
+        "text": "2분기 여객사업 매출은 2조 8479억원으로 전년 동기 대비 4514억원 증가했다."
+      },
+      {
+        "id": "S5",
+        "text": "화물사업 매출은 1조 5419억원으로 전년 동기 대비 4865억원 증가했다."
+      }
+    ]
+  },
+  "focusStatement": "대한항공이 2026년 2분기에 역대 2분기 최대인 매출 5조199억원을 냈지만 연료비가 늘어 영업이익은 2618억원으로 줄었다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "대한항공, 2분기 매출 5조199억원 역대 최대",
+    "sourceIds": ["S1", "S2"]
+  },
+  "body": [
+    {
+      "text": "2분기 매출은 5조199억원이에요.",
+      "sourceIds": ["S1"],
+      "role": "key_detail",
+      "factKey": "quarter_revenue"
+    },
+    {
+      "text": "영업이익은 2618억원으로 줄었어요.",
+      "sourceIds": ["S3"],
+      "role": "business_detail",
+      "factKey": "operating_profit"
+    },
+    {
+      "text": "짐을 실어 번 돈은 1조5419억원이에요.",
+      "sourceIds": ["S5"],
+      "role": "context",
+      "factKey": "cargo_revenue"
+    }
+  ],
+  "priceConnection": {
+    "text": "손님과 짐이 늘어도 기름값이 오르면 남는 돈은 줄 수 있어요.",
+    "sourceIds": ["S3", "S5"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "매출",
+      "easyText": "회사가 물건이나 서비스를 팔아서 받은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    },
+    {
+      "term": "영업이익",
+      "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S3"]
+    }
+  ]
+}

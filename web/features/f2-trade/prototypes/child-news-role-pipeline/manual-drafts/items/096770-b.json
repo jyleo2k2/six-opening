@@ -1,0 +1,80 @@
+{
+  "stockId": "KRX:096770",
+  "second": true,
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-AJUNEWS-20260730",
+    "title": "윤활유·배터리 날개 단 SK이노, 2분기 영업익 3조4873억원",
+    "publisher": "아주경제",
+    "publishedAt": "2026-07-30T07:24:00.000Z",
+    "sourceUrl": "https://www.ajunews.com/view/20260730161626853",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "SK이노베이션은 2026년 2분기 매출액 29조1572억원, 영업이익 3조4873억원을 달성했다고 30일 공시했다."
+      },
+      {
+        "id": "S2",
+        "text": "2분기 영업이익 호조는 윤활유 및 배터리 사업에서의 실적 개선 영향이 컸다."
+      },
+      {
+        "id": "S3",
+        "text": "SK엔무브의 영업이익이 전분기 대비 5034억원 증가한 6919억원을 기록했다."
+      },
+      {
+        "id": "S4",
+        "text": "SK온 배터리 사업 영업이익은 8218억원으로, 전분기 대비 영업손익이 1조1710억원 개선되며 흑자 전환이라는 쾌거를 이뤘다."
+      },
+      {
+        "id": "S5",
+        "text": "SK에너지의 2분기 영업이익은 6512억원으로, 이 가운데 재고 관련 이익은 약 5600억원이다."
+      }
+    ]
+  },
+  "focusStatement": "SK이노베이션이 2026년 2분기에 매출 29조1572억원, 영업이익 3조4873억원을 냈고 배터리 사업이 흑자로 돌아섰다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "SK이노베이션, 2분기 영업이익 3조4873억원",
+    "sourceIds": ["S1"]
+  },
+  "body": [
+    {
+      "text": "2분기 매출은 29조1572억원이에요.",
+      "sourceIds": ["S1"],
+      "role": "key_detail",
+      "factKey": "quarter_revenue"
+    },
+    {
+      "text": "영업이익은 3조4873억원을 냈어요.",
+      "sourceIds": ["S1"],
+      "role": "business_detail",
+      "factKey": "operating_profit"
+    },
+    {
+      "text": "배터리 사업이 흑자로 돌아섰어요.",
+      "sourceIds": ["S4"],
+      "role": "context",
+      "factKey": "battery_turnaround"
+    }
+  ],
+  "priceConnection": {
+    "text": "손해를 보던 사업이 흑자가 되면 회사 형편이 달라져요.",
+    "sourceIds": ["S1", "S4"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "영업이익",
+      "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    },
+    {
+      "term": "흑자",
+      "easyText": "번 돈이 쓴 돈보다 많아서 남는 상태",
+      "treatment": "explained",
+      "sourceIds": ["S4"]
+    }
+  ]
+}
