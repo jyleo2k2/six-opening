@@ -2200,6 +2200,36 @@ assert.ok(
   `차트 보는 법이 화면 조작을 알려주지 않아: ${chartHowTo.text}`,
 );
 
+// ── 없는 화면은 "없다"를 먼저 말한다 (SPEC §3.3.1) ──────────────────────────
+//
+// 호가창은 이 모의투자 서비스에 없다. 그래서 어느 경로에도 안 걸려 "저는 금융 기초와
+// 이 모의투자 서비스 사용법을 도와주는 챗봇이에요" 로 끝났고, 아이는 왜 안 되는지
+// 모른 채 화면에서 호가창을 계속 찾았다. 범위 안내가 아니라 사용법 FAQ 로 답한다.
+for (const unsupported of [
+  "호가창은 어떻게 봐요?",
+  "호가창이 뭐야?",
+  "호가창 어디서 봐요?",
+  "매수호가 보여줘",
+]) {
+  const routed = routeMessage(unsupported, stockContext);
+  assert.equal(routed.route, "faq", `없는 화면 질문이 범위 밖으로 떨어졌어: ${unsupported}`);
+  assert.equal(routed.intent, "service_help", `없는 화면 질문의 목적이 달라: ${unsupported}`);
+  assert.ok(
+    routed.text.includes("모의투자") && routed.text.includes("제공하지 않아요"),
+    `없는 화면이라는 사실을 먼저 밝히지 않아: ${unsupported} -> ${routed.text}`,
+  );
+  assert.equal(
+    routed.explainScript,
+    undefined,
+    `없는 화면 안내에 되묻기가 붙었어: ${unsupported}`,
+  );
+  assert.equal(
+    gateChatOutput({ text: routed.text, source: "fixed" }).ok,
+    true,
+    `없는 화면 안내가 출력 게이트를 통과하지 못해: ${unsupported}`,
+  );
+}
+
 // Screenshot regressions are grouped by question act, not a single literal.
 const QUESTION_ACT_GOLDENS = [
   ["\uBD84\uC0B0\uD22C\uC790\uB294 \uC65C \uD558\uB294 \uAC70\uC57C?", "faq", "financial_concept", undefined, "\uC774\uC720"],
