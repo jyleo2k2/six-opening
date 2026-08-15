@@ -173,20 +173,61 @@ export function matchingHotspots(scopes, policy = POLICY) {
   return policy.hotspots.filter((hotspot) => scopes.some((scope) => pathOverlaps(scope, hotspot)));
 }
 
-export function localConflicts(registry, scopes, branch) {
+/**
+ * claim 겹침을 본다. claim 은 "예상 범위"라 넓게 잡는 게 맞지만, 넓게 잡은
+ * 탓에 **실제로는 안 겹치는 작업까지 막혔다** — `web/ui-src` 전체를 claim 한
+ * 세션이 실제로는 `renderVals-*` 만 고쳤는데 `notifyChatContext.js` 작업이
+ * 막힌 적이 있다.
+ *
+ * `changedFilesOf` 를 주면 상대 브랜치가 **실제로 고친 파일**을 확인해, 겹치는
+ * 파일이 하나도 없으면 차단 대신 경고로 낮춘다. 아직 아무것도 안 고친 세션은
+ * 앞으로 고칠 수 있으므로 그대로 차단한다.
+ */
+export function analyzeLocalConflicts(registry, scopes, branch, options = {}) {
+  const { changedFilesOf } = options;
   const conflicts = [];
+  const warnings = [];
   for (const session of registry.sessions ?? []) {
     if (!["starting", "active"].includes(session.status) || session.branch === branch) continue;
     const collisions = scopes.filter((scope) =>
       (session.paths ?? []).some((other) => pathOverlaps(scope, other)),
     );
-    if (collisions.length > 0) {
-      conflicts.push(
-        `${session.branch} (${session.worker ?? "작업자 미상"}): ${[...new Set(collisions)].join(", ")}`,
+    if (collisions.length === 0) continue;
+    const label = `${session.branch} (${session.worker ?? "작업자 미상"}): ${[...new Set(collisions)].join(", ")}`;
+
+    const touched = changedFilesOf ? changedFilesOf(session) : null;
+    if (Array.isArray(touched) && touched.length > 0) {
+      const realOverlap = touched.some((file) =>
+        collisions.some((scope) => scopeContains(scope, file) || pathOverlaps(scope, file)),
       );
+      if (!realOverlap) {
+        warnings.push(`${label} — claim 은 겹치지만 실제 수정 파일은 겹치지 않습니다.`);
+        continue;
+      }
     }
+    conflicts.push(label);
   }
-  return conflicts;
+  return { conflicts, warnings };
+}
+
+export function localConflicts(registry, scopes, branch, options = {}) {
+  return analyzeLocalConflicts(registry, scopes, branch, options).conflicts;
+}
+
+/** 상대 브랜치가 origin/main 이후 실제로 고친 파일. 조회 실패는 null 이다. */
+function changedFilesOfSession(context) {
+  return (session) => {
+    const result = git(
+      ["diff", "--name-only", "-z", `origin/${POLICY.defaultBranch}...${session.branch}`],
+      context.root,
+      true,
+    );
+    if (result.status !== 0) return null;
+    return result.stdout
+      .split("\0")
+      .filter(Boolean)
+      .map((file) => file.normalize("NFC").replaceAll("\\", "/"));
+  };
 }
 
 function assertOwnerScope(identity, scopes, policy = POLICY) {
@@ -283,9 +324,14 @@ function reserveSession(context, identity, worktree, scopes) {
   return withRegistryLock(context, () => {
     const registry = readRegistry(context);
     const branch = sessionId(identity);
-    const conflicts = localConflicts(registry, scopes, branch);
-    if (conflicts.length > 0) {
-      throw new SessionError(`활성 claim과 작업 범위가 겹칩니다:\n- ${conflicts.join("\n- ")}`);
+    const analysis = analyzeLocalConflicts(registry, scopes, branch, {
+      changedFilesOf: changedFilesOfSession(context),
+    });
+    for (const warning of analysis.warnings) {
+      process.stderr.write(`[git-session] 경고: ${warning}\n`);
+    }
+    if (analysis.conflicts.length > 0) {
+      throw new SessionError(`활성 claim과 작업 범위가 겹칩니다:\n- ${analysis.conflicts.join("\n- ")}`);
     }
     if (
       registry.sessions.some(
@@ -338,9 +384,14 @@ function registerCurrentSession(context, identity, scopes) {
   return withRegistryLock(context, () => {
     const registry = readRegistry(context);
     const branch = sessionId(identity);
-    const conflicts = localConflicts(registry, scopes, branch);
-    if (conflicts.length > 0) {
-      throw new SessionError(`활성 claim과 작업 범위가 겹칩니다:\n- ${conflicts.join("\n- ")}`);
+    const analysis = analyzeLocalConflicts(registry, scopes, branch, {
+      changedFilesOf: changedFilesOfSession(context),
+    });
+    for (const warning of analysis.warnings) {
+      process.stderr.write(`[git-session] 경고: ${warning}\n`);
+    }
+    if (analysis.conflicts.length > 0) {
+      throw new SessionError(`활성 claim과 작업 범위가 겹칩니다:\n- ${analysis.conflicts.join("\n- ")}`);
     }
     let session = registry.sessions.find(
       (item) => item.branch === branch && samePath(item.worktree, context.root),
@@ -443,10 +494,15 @@ function remotePullRequestConflicts(context, scopes, branch) {
 function preflightClaim(context, identity, scopes) {
   assertOwnerScope(identity, scopes);
   const branch = sessionId(identity);
-  const local = localConflicts(readRegistry(context), scopes, branch);
+  const local = analyzeLocalConflicts(readRegistry(context), scopes, branch, {
+    changedFilesOf: changedFilesOfSession(context),
+  });
+  for (const warning of local.warnings) {
+    process.stderr.write(`[git-session] 경고: ${warning}\n`);
+  }
   const remote = remotePullRequestConflicts(context, scopes, branch);
   if (remote.warning) process.stderr.write(`[git-session] 경고: ${remote.warning}\n`);
-  const conflicts = [...local, ...remote.conflicts];
+  const conflicts = [...local.conflicts, ...remote.conflicts];
   if (conflicts.length > 0) {
     throw new SessionError(`활성 세션 또는 열린 PR과 작업 범위가 겹칩니다:\n- ${conflicts.join("\n- ")}`);
   }
@@ -670,6 +726,55 @@ function sessionIsLive(session) {
   return result.status === 0 && result.stdout.trim().normalize("NFC") === session.branch;
 }
 
+/** 이 시간 넘게 편집이 없고 미병합 커밋이 남아 있으면 `idle` 로 본다. */
+export const SESSION_IDLE_MINUTES = 90;
+/** 갓 만든 세션을 `done` 으로 오판하지 않게 두는 유예. */
+export const SESSION_GRACE_MINUTES = 10;
+
+/**
+ * claim 이 끝났는지를 **관측값으로 계산**한다.
+ *
+ * `live` 는 "폴더가 있고 그 브랜치가 체크아웃돼 있다" 는 뜻뿐이라 끝났는지
+ * 알려주지 못했다. 그래서 매번 손으로 PR 병합·clean·origin/main 포함·프로세스
+ * 네 가지를 확인해야 했다. 그 네 가지는 전부 자동으로 알 수 있는 값이다.
+ *
+ * - `done`    정리해도 잃을 게 없다 (미병합 0 + clean, 또는 worktree 없음)
+ * - `working` 진행 중 (미커밋 변경 또는 최근 편집된 미병합 커밋)
+ * - `idle`    미병합 커밋이 남았는데 오래 조용하다 — 사람이 확인할 것
+ * - `released` 이미 해제됨
+ */
+export function classifySession(facts, options = {}) {
+  const idleMinutes = options.idleMinutes ?? SESSION_IDLE_MINUTES;
+  const graceMinutes = options.graceMinutes ?? SESSION_GRACE_MINUTES;
+  if (facts.status !== "active") return "released";
+  if (!facts.worktreeExists) return "done";
+  if (facts.dirty) return "working";
+  if (facts.ahead > 0) {
+    return facts.minutesSinceUpdate > idleMinutes ? "idle" : "working";
+  }
+  // 미병합 커밋이 없고 깨끗하다. 방금 만든 세션일 수 있으니 유예를 준다.
+  return facts.minutesSinceUpdate > graceMinutes ? "done" : "working";
+}
+
+/** 한 세션의 관측값을 모은다. git 만 읽고 아무것도 바꾸지 않는다. */
+function sessionFacts(context, session) {
+  const worktreeExists = fs.existsSync(session.worktree);
+  const dirty =
+    worktreeExists &&
+    Boolean(git(["status", "--porcelain"], session.worktree, true).stdout.trim());
+  const aheadResult = git(
+    ["rev-list", "--count", `origin/${POLICY.defaultBranch}..${session.branch}`],
+    context.root,
+    true,
+  );
+  const ahead = aheadResult.status === 0 ? Number(aheadResult.stdout.trim()) || 0 : 0;
+  const updatedAt = Date.parse(session.updatedAt ?? "");
+  const minutesSinceUpdate = Number.isFinite(updatedAt)
+    ? (Date.now() - updatedAt) / 60_000
+    : Number.POSITIVE_INFINITY;
+  return { status: session.status, worktreeExists, dirty, ahead, minutesSinceUpdate };
+}
+
 export function parseWorktreePorcelain(raw) {
   const entries = [];
   let current = null;
@@ -727,10 +832,16 @@ export function auditWorktreeEntries(entries, sessions, controlRoot, policy = PO
 
 function commandStatus(options) {
   const context = repositoryContext();
-  const sessions = readRegistry(context).sessions.map((session) => ({
-    ...session,
-    live: sessionIsLive(session),
-  }));
+  git(["fetch", "origin", POLICY.defaultBranch], context.root, true);
+  const sessions = readRegistry(context).sessions.map((session) => {
+    const facts = sessionFacts(context, session);
+    return {
+      ...session,
+      live: sessionIsLive(session),
+      facts,
+      state: classifySession(facts),
+    };
+  });
   const worktrees = parseWorktreePorcelain(
     git(["worktree", "list", "--porcelain"], context.root).stdout,
   ).map((entry) => ({
@@ -745,13 +856,93 @@ function commandStatus(options) {
   if (sessions.length === 0) {
     process.stdout.write("[git-session] 등록된 세션이 없습니다.\n");
   } else {
-    for (const session of sessions) {
+    // 끝났는지 사람이 매번 따지지 않게 판정을 먼저 보여준다.
+    for (const session of sessions.filter((item) => item.state !== "released")) {
+      const { dirty, ahead, minutesSinceUpdate } = session.facts;
+      const quiet = Number.isFinite(minutesSinceUpdate)
+        ? `${Math.round(minutesSinceUpdate)}분 전`
+        : "시각 미상";
+      const why = dirty
+        ? "미커밋 변경 있음"
+        : ahead > 0
+          ? `미병합 ${ahead}커밋`
+          : "미병합 없음 · 정리 가능";
       process.stdout.write(
-        `[${session.status}] live=${session.live} ${session.branch} paths=${session.paths.join(",")} port=${session.port} updated=${session.updatedAt}\n`,
+        `[${session.state}] ${session.branch} — ${why} · 마지막 활동 ${quiet} · port=${session.port}\n` +
+          `          paths=${session.paths.join(",")}\n`,
+      );
+    }
+    const done = sessions.filter((item) => item.state === "done").length;
+    if (done > 0) {
+      process.stdout.write(
+        `[git-session] 정리 가능한 세션 ${done}개 — 'git-session-manager gc' 로 한 번에 정리합니다.\n`,
       );
     }
   }
+  const behind = git(
+    ["rev-list", "--count", `${POLICY.defaultBranch}..origin/${POLICY.defaultBranch}`],
+    context.controlRoot,
+    true,
+  );
+  const behindCount = behind.status === 0 ? Number(behind.stdout.trim()) || 0 : 0;
+  if (behindCount > 0) {
+    process.stdout.write(
+      `[주의] 루트 ${POLICY.defaultBranch} 이 origin/${POLICY.defaultBranch} 보다 ${behindCount}커밋 뒤처져 있습니다.\n`,
+    );
+  }
   for (const violation of violations) process.stdout.write(`[주의] ${violation}\n`);
+}
+
+/**
+ * 끝난 세션을 한 번에 정리한다 — claim 해제 → worktree 제거 → 병합된 로컬
+ * 브랜치 삭제. 손으로 하던 Phase 4 절차 그대로다.
+ *
+ * `done` 판정(미병관 커밋 0 + clean)만 건드린다. 미커밋 변경이 있는 worktree는
+ * 남의 미완성 작업일 수 있어 절대 손대지 않는다.
+ */
+function commandGc(options) {
+  const context = repositoryContext();
+  if (!samePath(context.root, context.controlRoot)) {
+    throw new SessionError("gc 는 루트 관제 worktree 에서 실행합니다.");
+  }
+  git(["fetch", "--prune", "origin", POLICY.defaultBranch], context.root, true);
+
+  const sessions = readRegistry(context).sessions.map((session) => ({
+    session,
+    state: classifySession(sessionFacts(context, session)),
+  }));
+  const targets = sessions.filter((item) => item.state === "done").map((item) => item.session);
+  const kept = sessions.filter((item) => item.state === "working" || item.state === "idle");
+
+  if (targets.length === 0) {
+    process.stdout.write("[git-session] 정리할 세션이 없습니다.\n");
+  }
+  for (const session of targets) {
+    if (options.dryRun) {
+      process.stdout.write(`[gc] (예정) ${session.branch}\n`);
+      continue;
+    }
+    withRegistryLock(context, () => {
+      const registry = readRegistry(context);
+      const entry = registry.sessions.find((item) => item.id === session.id && item.status === "active");
+      if (entry) {
+        entry.status = "released";
+        entry.updatedAt = new Date().toISOString();
+        writeRegistry(context, registry);
+      }
+    });
+    const removed = fs.existsSync(session.worktree)
+      ? git(["worktree", "remove", session.worktree], context.root, true).status === 0
+      : true;
+    // -d 는 병합된 브랜치만 지운다. 안 지워지면 그대로 두고 알린다.
+    const branchDeleted = git(["branch", "-d", session.branch], context.root, true).status === 0;
+    process.stdout.write(
+      `[gc] ${session.branch} — claim 해제${removed ? " · worktree 제거" : ""}${branchDeleted ? " · 브랜치 삭제" : " · 브랜치 유지(미병합)"}\n`,
+    );
+  }
+  for (const item of kept) {
+    process.stdout.write(`[gc] 유지 ${item.session.branch} (${item.state})\n`);
+  }
 }
 
 function guardPairs(root) {
@@ -798,7 +989,41 @@ function commandCheckStaged() {
   process.stdout.write(`[git-session] pre-commit 통과: ${managed.branch}\n`);
 }
 
+/**
+ * pre-push 는 `<local ref> <local sha> <remote ref> <remote sha>` 줄들을 stdin 으로 준다.
+ * 삭제 push 는 local sha 가 전부 0 이다.
+ */
+export function parsePushRefs(raw) {
+  return String(raw)
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [localRef, localSha, remoteRef, remoteSha] = line.split(/\s+/u);
+      return { localRef, localSha, remoteRef, remoteSha };
+    });
+}
+
+/** 삭제만 있는 push 인가. 하나라도 실제 갱신이 섞이면 false 다. */
+export function isDeleteOnlyPush(refs) {
+  return refs.length > 0 && refs.every((ref) => /^0+$/u.test(ref.localSha ?? ""));
+}
+
 function commandCheckPush() {
+  // 병합 끝난 원격 브랜치를 지우는 건 정상 정리 절차인데, 그때는 claim 도
+  // worktree 도 이미 없어서 아래 검사에 걸렸다. 훅이 우회(gh api)를 유도하던
+  // 지점이다. ref 삭제는 파일을 건드리지 않으므로 그대로 통과시킨다.
+  let refs = [];
+  try {
+    refs = parsePushRefs(fs.readFileSync(0, "utf8"));
+  } catch {
+    refs = [];
+  }
+  if (isDeleteOnlyPush(refs)) {
+    process.stdout.write("[git-session] pre-push 통과: 원격 ref 삭제\n");
+    return;
+  }
+
   const context = repositoryContext();
   const managed = validateManagedSession(context);
   validateChangedPaths(context, managed.identity, managed.claim, changedPaths(context.root));
@@ -854,7 +1079,7 @@ function commandInstallHooks() {
 }
 
 function printHelp() {
-  process.stdout.write(`병렬 Git 세션 관리자\n\n명령:\n  start --ai <codex|claude> --worker <이름> --task <한글-작업명> --path <경로>...\n  claim --ai <codex|claude> --worker <이름> --path <경로>...\n  status [--json]\n  guard [--file <경로>|--hook-input]\n  check-start\n  heartbeat\n  release\n  check-staged\n  check-push\n  check-branch --branch <브랜치>\n  check-guards\n  check-pr --event <GitHub 이벤트 JSON>\n  install-hooks\n`);
+  process.stdout.write(`병렬 Git 세션 관리자\n\n명령:\n  start --ai <codex|claude> --worker <이름> --task <한글-작업명> --path <경로>...\n  claim --ai <codex|claude> --worker <이름> --path <경로>...\n  status [--json]\n  gc [--dry-run]\n  guard [--file <경로>|--hook-input]\n  check-start\n  heartbeat\n  release\n  check-staged\n  check-push\n  check-branch --branch <브랜치>\n  check-guards\n  check-pr --event <GitHub 이벤트 JSON>\n  install-hooks\n`);
 }
 
 function dispatch(argv) {
@@ -864,6 +1089,7 @@ function dispatch(argv) {
     start: commandStart,
     claim: commandClaim,
     status: commandStatus,
+    gc: commandGc,
     guard: commandGuard,
     "check-start": commandCheckStart,
     heartbeat: commandHeartbeat,
