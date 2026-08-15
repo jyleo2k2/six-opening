@@ -64,7 +64,7 @@ import {
   isOverDismissTarget,
   pickNextAvatarIndex,
 } from "./lib/floating-avatar";
-import { PROACTIVE_SCRIPTS } from "./lib/routing";
+import { PROACTIVE_FOLLOWUP_QUESTION, PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
@@ -651,7 +651,8 @@ export function F10ChatbotDemo({
     ]);
     acceptActiveSignal();
     openChat();
-    if (signal === "orderMethodConfusion") void ask("시장가가 뭐예요?");
+    const followUp = PROACTIVE_FOLLOWUP_QUESTION[signal];
+    if (followUp) void ask(followUp);
   }
 
   function dismissProactiveHelp() {
