@@ -9,6 +9,8 @@ import {
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
 import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
+import type { WalletAccountId } from "./lib/use-wallet";
+import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
 import {
   isRecord,
@@ -41,13 +43,16 @@ const OPEN_ROUTE_MESSAGE = "kiwoom:open-route";
  * 오기 전까지 `renderVals-compute.js` 가 아이 계정 데모로 폴백해 **남의 계좌가 잠깐 보인다.**
  * 문서를 그대로 두면 그 왕복이 앱을 처음 열 때 한 번뿐이다.
  */
-const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>(["ranking"]);
+const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>(["ranking", "portfolio"]);
 
 const isMigrated = (route: ScreenRoute | null) =>
   route !== null && MIGRATED_SCREENS.has(route.screen);
 
 // 가족 피드는 app.html 아카이브 수익률 탭이 소유한다. 여기 오버레이로 겹쳐 두지 않는다.
-export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
+export function ConnectedPrototype({
+  route,
+  account = "child",
+}: { route?: ScreenRoute; account?: WalletAccountId } = {}) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   // 옮긴 화면은 첫 렌더부터 보여 준다 — iframe 로드를 기다리면 그동안 app.html 이 비친다.
   const [overlay, setOverlay] = useState<ScreenRoute | null>(
@@ -240,9 +245,12 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
         처음부터 다시 뜨고, `display:none` 으로 감추면 챗봇이 맞출 화면 사각형을 못 잰다.
         챗봇 오버레이(z-index 10)보다는 아래에 둔다.
       */}
-      {overlay?.screen === "ranking" && (
+      {overlay && (
         <div style={{ position: "fixed", inset: 0, zIndex: 5 }}>
-          <RankingScreen onLeave={leaveToPath} />
+          {overlay.screen === "ranking" && <RankingScreen onLeave={leaveToPath} />}
+          {overlay.screen === "portfolio" && (
+            <PortfolioScreen account={account} onLeave={leaveToPath} />
+          )}
         </div>
       )}
       <div

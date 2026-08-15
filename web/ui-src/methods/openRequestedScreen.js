@@ -16,7 +16,8 @@
       // 랭킹 화면은 여기 없다. 주소로 넘겨 React 화면이 그리게 한다.
       this.leaveToRoute('/ranking');
     } else if (action.target === 'portfolio') {
-      this.set({ screen:'portfolio' });
+      // 계좌 화면은 여기 없다. 주소로 넘겨 React 화면이 그리게 한다.
+      this.leaveToRoute('/portfolio');
     } else if (action.target === 'archive') {
       const archiveTabs = ['report', 'return'];
       this.set({
