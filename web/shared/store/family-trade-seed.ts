@@ -1,5 +1,4 @@
-import type { FamilyMember, Trade } from "../types/trade";
-import type { EvidenceTab } from "../types/behavior-profile";
+import type { Trade } from "../types/trade";
 
 /**
  * 데모 시드 — 민지·엄마의 2주치 거래. 피드·차트 마커·성향 분석(F9)이 같은 값을 읽는다.
@@ -129,38 +128,4 @@ export const FAMILY_SEED_TRADES: Trade[] = [
     memo: "처음 생각한 만큼 와서 절반만 정리했어.",
     tradedAt: "2026-08-07T05:02:00.000Z",
   },
-];
-
-export type SeedTabView = {
-  member: FamilyMember;
-  tab: EvidenceTab;
-  symbol: string;
-  viewedAt: string;
-  dwellMs: number;
-};
-
-/**
- * 매수 직전 탭 유효 열람 시드 — 근거력(F9)의 표본이다. 유효 열람 기준은 10초 이상 체류.
- * 민지는 매수 4건 중 3건(크래프톤×2·하이브)을 알아보고 샀고 삼성전자만 느낌으로 샀다.
- * 엄마는 매수 3건 중 2건을 두 탭 이상 확인했다. 기업정보 탭(info)은 화면보다 먼저 시드에 반영한다.
- */
-export const FAMILY_SEED_TAB_VIEWS: SeedTabView[] = [
-  // 민지 — 크래프톤 첫 매수 전
-  { member: "child", tab: "news", symbol: "259960", viewedAt: "2026-08-03T01:00:00.000Z", dwellMs: 21000 },
-  { member: "child", tab: "chart", symbol: "259960", viewedAt: "2026-08-03T01:07:00.000Z", dwellMs: 34000 },
-  // 민지 — 하이브 매수 전
-  { member: "child", tab: "news", symbol: "352820", viewedAt: "2026-08-04T00:50:00.000Z", dwellMs: 18000 },
-  { member: "child", tab: "info", symbol: "352820", viewedAt: "2026-08-04T00:56:00.000Z", dwellMs: 15000 },
-  // 민지 — 크래프톤 추가 매수 전
-  { member: "child", tab: "chart", symbol: "259960", viewedAt: "2026-08-05T01:30:00.000Z", dwellMs: 26000 },
-  { member: "child", tab: "news", symbol: "259960", viewedAt: "2026-08-05T01:40:00.000Z", dwellMs: 12000 },
-  // 엄마 — HMM 첫 매수 전
-  { member: "parent", tab: "news", symbol: "011200", viewedAt: "2026-08-03T03:50:00.000Z", dwellMs: 25000 },
-  { member: "parent", tab: "chart", symbol: "011200", viewedAt: "2026-08-03T03:58:00.000Z", dwellMs: 15000 },
-  // 엄마 — 삼성전자 매수 전
-  { member: "parent", tab: "news", symbol: "005930", viewedAt: "2026-08-04T00:40:00.000Z", dwellMs: 40000 },
-  { member: "parent", tab: "info", symbol: "005930", viewedAt: "2026-08-04T00:55:00.000Z", dwellMs: 22000 },
-  { member: "parent", tab: "chart", symbol: "005930", viewedAt: "2026-08-04T01:05:00.000Z", dwellMs: 18000 },
-  // 엄마 — HMM 추가 매수 전 (한 탭만 훑고 추가 매수)
-  { member: "parent", tab: "news", symbol: "011200", viewedAt: "2026-08-06T04:20:00.000Z", dwellMs: 14000 },
 ];

@@ -22,9 +22,6 @@
 /** 시즌 시작 가상 자금. */
 export const SEED = 10000000;
 
-/** 체결 수수료율. */
-export const FEE = 0.00015;
-
 /**
  * 시드 2주치 거래(`shared/store/family-trade-seed.ts`)를 다 체결한 뒤의 잔고.
  *
