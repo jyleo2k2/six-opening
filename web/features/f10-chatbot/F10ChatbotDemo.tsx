@@ -175,6 +175,16 @@ const COPY = {
   reset: "초기화",
 } as const;
 
+/**
+ * 답변 아래 붙는 선택지·추천 질문 칩.
+ *
+ * 답변 말풍선이 `bg-bg` 채움이라 칩도 같은 채움이면 **읽을 것과 누를 것이 구분되지 않는다.**
+ * 디자인 토큰에는 회색이 한 단계뿐이라 색을 더 만들 수 없으므로, 같은 말풍선의 화면 이동
+ * 버튼처럼 흰 채움 + 남색 테두리로 성격을 가른다. 글씨는 답변 본문과 같은 `text-sm` 이다.
+ */
+const CHOICE_CHIP_CLASS =
+  "rounded-full border border-navy/20 bg-white px-3 py-2 text-sm font-medium text-navy";
+
 const GREETING_SUGGESTED_QUESTIONS: string[] = [
   "매수는 어떻게 하나요?",
   "수익률이 무엇인가요?",
@@ -290,7 +300,7 @@ function MessageBubble({
         </p>
         {!userMessage && uiAction && (
           <button
-            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
+            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy"
             disabled={actionsDisabled}
             onClick={() => onAction(uiAction)}
             type="button"
@@ -302,7 +312,7 @@ function MessageBubble({
           <div className="mt-2 flex flex-wrap gap-2">
             {message.suggestedQuestions?.map((question) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                className={CHOICE_CHIP_CLASS}
                 disabled={actionsDisabled}
                 key={question}
                 onClick={() => onQuestion(question)}
@@ -315,10 +325,10 @@ function MessageBubble({
         )}
         {!userMessage && message.explainTurn && (
           <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-xs text-ink/70">{message.explainTurn.prompt}</p>
+            <p className="w-full text-sm text-ink/70">{message.explainTurn.prompt}</p>
             {message.explainTurn.choices.map((choice) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                className={CHOICE_CHIP_CLASS}
                 disabled={actionsDisabled}
                 key={choice.id}
                 onClick={() => onExplainChoice(choice)}
@@ -331,12 +341,12 @@ function MessageBubble({
         )}
         {!userMessage && message.stockExploreTurn && (
           <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-xs text-ink/70">
+            <p className="w-full text-sm text-ink/70">
               {message.stockExploreTurn.prompt}
             </p>
             {message.stockExploreTurn.choices.map((choice) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy disabled:opacity-50"
+                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
                 disabled={actionsDisabled}
                 key={choice.id}
                 onClick={() => onStockExploreChoice(choice.label, choice.id)}
@@ -349,10 +359,10 @@ function MessageBubble({
         )}
         {!userMessage && message.sectorExploreTurn && (
           <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-xs text-ink/70">{message.sectorExploreTurn.prompt}</p>
+            <p className="w-full text-sm text-ink/70">{message.sectorExploreTurn.prompt}</p>
             {message.sectorExploreTurn.choices.map((choice) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy disabled:opacity-50"
+                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
                 disabled={actionsDisabled}
                 key={choice.id}
                 onClick={() => onSectorExploreChoice(choice.label, choice.id)}
