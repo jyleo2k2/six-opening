@@ -515,6 +515,9 @@ const FAMILY_DATA_ACCESS_PATTERNS = [
   "똑같이",
 ];
 const PROXY_ACTION_PATTERNS = [
+  "\uCE5C\uAD6C\uD3F0\uC73C\uB85C\uC8FC\uBB38",
+  "\uCE5C\uAD6C\uD3F0\uC73C\uB85C\uB9E4\uC218",
+  "\uCE5C\uAD6C\uD3F0\uC73C\uB85C\uB9E4\uB3C4",
   "친구폰으로내주문",
   "친구가내계정으로주문",
   "대신주문",
@@ -840,6 +843,8 @@ const SOCIAL_RULE_PATTERNS = [
   "가족추천",
 ];
 const SOCIAL_RULE_QUESTION_PATTERNS = [
+  "\uBC18\uCE59",
+  "\uBB38\uC81C\uB3FC",
   "리그규칙",
   "규칙위반",
   "위반처리",
@@ -1373,6 +1378,12 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 }
 
 function findRecommendationKind(message: string): RecommendationKind | null {
+  if (
+    includesAny(message, ["\uC81C\uC77C\uC88B\uC544\uD558\uB294\uC8FC\uC2DD", "\uCD5C\uC560\uC8FC\uC2DD", "\uB108\uB77C\uBA74\uC88B\uC544\uD560\uC8FC\uC2DD"])
+  ) {
+    return "selection";
+  }
+
   const asksForSelectionCriteria =
     includesAny(message, ["종목고를때", "주식고를때", "회사고를때", "투자기준"]) &&
     !includesAny(message, [
@@ -3671,6 +3682,165 @@ function getPersonalScreenGuidance(message: string): ChatReply | null {
   return null;
 }
 
+/**
+ * A term alone does not decide the answer.  Keep the small set of question
+ * acts that change either the explanation or the next screen ahead of the
+ * glossary, so variants such as "why diversify?" do not become "what is
+ * diversification?".
+ */
+function getQuestionActReply(message: string, context: ChatContext): ChatReply | null {
+  const questionForm = findChatbotQuestionForm(message);
+  const asksLocation = questionForm === "location" || includesAny(message, ["\uC5B4\uB514\uC11C\uBD10", "\uC5B4\uB514\uC11C\uBCF4"]);
+
+  if (questionForm === "definition" && includesAny(message, ["\uC190\uC775", "\uC190\uD574\uC640\uC774\uC775"])) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uC190\uC775\uC740 \uC0AC\uACE0\uD314\uBA74\uC11C \uC5BB\uC740 \uC774\uC775\uACFC \uC190\uD574\uB97C \uD569\uCCD0 \uBCF4\uB294 \uB9D0\uC774\uC5D0\uC694. \uB0B4 \uACC4\uC88C\uC5D0\uC11C\uB294 \uC9C0\uAE08 \uAE30\uB85D\uC744 \uD1B5\uD574 \uD655\uC778\uD560 \uC218 \uC788\uC5B4\uC694.",
+      ["\uC190\uC775\uC758 \uB73B \uD655\uC778"],
+    );
+  }
+
+  if (
+    questionForm === "reason" &&
+    includesAny(message, ["\uBD84\uC0B0\uD22C\uC790", "\uB098\uB220\uC0AC", "\uB098\uB220\uB450"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uBD84\uC0B0\uD22C\uC790\uB97C \uD558\uB294 \uC774\uC720\uB294 \uD55C \uD68C\uC0AC\uC5D0\uB9CC \uC548 \uC88B\uC740 \uC77C\uC774 \uC0DD\uACA8\uB3C4 \uC601\uD5A5\uC744 \uD55C\uCABD\uC5D0\uB9CC \uBC1B\uC9C0 \uC54A\uAE30 \uC704\uD574\uC11C\uC608\uC694. \uC5EC\uB7EC \uC885\uBAA9\uC5D0 \uB098\uB220 \uB450\uBA74 \uD55C \uC885\uBAA9\uC758 \uC6C0\uC9C1\uC784\uC5D0\uB9CC \uC758\uC874\uD558\uB294 \uC815\uB3C4\uB97C \uC904\uC77C \uC218 \uC788\uC5B4\uC694. \uB2E4\uB9CC \uC218\uC775\uC744 \uBCF4\uC7A5\uD558\uB294 \uBC29\uBC95\uC740 \uC544\uB2C8\uC5D0\uC694.",
+      ["\uBD84\uC0B0\uD22C\uC790\uC758 \uC774\uC720 \uD655\uC778"],
+    );
+  }
+
+  if (
+    includesAny(message, ["per"]) &&
+    includesAny(message, ["\uB0AE\uC73C\uBA74", "\uB0AE\uC740"]) &&
+    includesAny(message, ["\uC88B\uC740\uD68C\uC0AC", "\uC88B\uC740\uAC70", "\uC88B\uC544"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "PER\uC774 \uB0AE\uB2E4\uACE0 \uBB34\uC870\uAC74 \uC88B\uC740 \uD68C\uC0AC\uB77C\uB294 \uB73B\uC740 \uC544\uB2C8\uC5D0\uC694. \uD68C\uC0AC\uC758 \uC774\uC775\uACFC \uC8FC\uAC00\uB97C \uBE44\uAD50\uD558\uB294 \uC22B\uC790\uC778\uB370, \uD68C\uC0AC\uC758 \uC0C1\uD669\uACFC \uB2E4\uB978 \uC815\uBCF4\uB3C4 \uD568\uAED8 \uBCF4\uC544\uC57C \uD574\uC694.",
+      ["PER\uC740 \uD55C \uC815\uBCF4\uB85C\uB9CC \uD655\uC778"],
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC6D4\uB4DC", "\uCE94\uB4E4"]) &&
+    includesAny(message, ["\uBE68\uAC15", "\uD30C\uB791", "\uC0C9"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uCE94\uB4E4\uC758 \uC0C9\uC740 \uC815\uD55C \uAE30\uAC04\uC758 \uC2DC\uC791\uAC00\uC640 \uB05D\uAC12\uC758 \uC704\uCE58\uB97C \uBCF4\uC5EC \uC8FC\uB294 \uD45C\uC2DC\uC608\uC694. \uC774 \uC11C\uBE44\uC2A4\uC5D0\uC11C\uB294 \uBE68\uAC15\uC740 \uB05D\uAC12\uC774 \uC2DC\uC791\uAC00\uBCF4\uB2E4 \uB192\uC740 \uACBD\uC6B0, \uD30C\uB791\uC740 \uB0AE\uC740 \uACBD\uC6B0\uC608\uC694. \uB2E4\uC74C \uAC00\uACA9\uC744 \uB9DE\uD788\uB294 \uC0C9\uC740 \uC544\uB2C8\uC5D0\uC694.",
+      ["\uCE94\uB4E4 \uC0C9\uC758 \uB73B \uD655\uC778"],
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC8FC\uC2DD\uAC00\uACA9", "\uC8FC\uAC00"]) &&
+    includesAny(message, ["\uB204\uAC00\uC815\uD574", "\uB204\uAC00\uC815\uD568", "\uC5B4\uB5BB\uAC8C\uC815\uD574"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uC8FC\uC2DD \uAC00\uACA9\uC740 \uD55C \uC0AC\uB78C\uC774 \uC815\uD558\uB294 \uAC83\uC774 \uC544\uB2C8\uB77C, \uC0AC\uACE0 \uC2F6\uC740 \uC0AC\uB78C\uACFC \uD314\uACE0 \uC2F6\uC740 \uC0AC\uB78C\uC758 \uC8FC\uBB38\uC774 \uB9CC\uB098\uBA74\uC11C \uC815\uD574\uC838\uC694. \uD68C\uC0AC\uC758 \uC0C1\uD669\uACFC \uC0AC\uB78C\uB4E4\uC758 \uAE30\uB300\uAC00 \uD568\uAED8 \uC601\uD5A5\uC744 \uC918\uC694.",
+      ["\uC8FC\uAC00\uAC00 \uC815\uD574\uC9C0\uB294 \uBC29\uC2DD \uD655\uC778"],
+    );
+  }
+
+  if (asksLocation && includesAny(message, ["\uB0B4\uAC00\uAC00\uC9C4\uAC70", "\uB0B4\uAC00\uAC16\uACE0", "\uB0B4\uC8FC\uC2DD"])) {
+    return serviceHowToReply(
+      "\uB0B4\uAC00 \uAC00\uC9C4 \uC8FC\uC2DD\uACFC \uAE30\uB2E4\uB9AC\uB294 \uC8FC\uBB38\uC740 \uB0B4 \uACC4\uC88C \uD654\uBA74\uC5D0\uC11C \uBCFC \uC218 \uC788\uC5B4\uC694.",
+      "\uB0B4 \uACC4\uC88C \uBCF4\uAE30",
+      "portfolio",
+    );
+  }
+
+  if (asksLocation && includesAny(message, ["\uB274\uC2A4", "\uAE30\uC0AC"])) {
+    return serviceHowToReply(
+      "\uC885\uBAA9 \uC0C1\uC138 \uD654\uBA74\uC758 \uB274\uC2A4 \uD0ED\uC5D0\uC11C \uD574\uB2F9 \uD68C\uC0AC\uC640 \uAD00\uB828\uB41C \uAE30\uC0AC\uB97C \uBCFC \uC218 \uC788\uC5B4\uC694.",
+      "\uC885\uBAA9 \uB274\uC2A4 \uBCF4\uAE30",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  if (
+    includesAny(message, ["\uCC28\uD2B8"]) &&
+    includesAny(message, ["\uD06C\uAC8C", "\uD06C\uAC8C\uBCF4", "\uB113\uAC8C"])
+  ) {
+    return serviceHowToReply(
+      "\uC885\uBAA9 \uC0C1\uC138 \uD654\uBA74\uC5D0\uC11C \uCC28\uD2B8\uB97C \uD06C\uAC8C \uBCF4\uACE0, \uAE30\uAC04\uC744 \uBC14\uAFE8 \uAC00\uBA70 \uC9C0\uB098\uAC04 \uAC00\uACA9 \uC6C0\uC9C1\uC784\uC744 \uD655\uC778\uD560 \uC218 \uC788\uC5B4\uC694.",
+      "\uC885\uBAA9 \uC0C1\uC138\uC5D0\uC11C \uCC28\uD2B8 \uBCF4\uAE30",
+      "stock",
+      context.stockId ? { stockId: context.stockId } : {},
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC8FC\uBB38\uCDE8\uC18C", "\uC8FC\uBB38\uC744\uCDE8\uC18C"]) &&
+    (asksLocation || questionForm === "procedure")
+  ) {
+    return serviceHowToReply(
+      "\uAE30\uB2E4\uB9AC\uB294 \uC8FC\uBB38\uC740 \uB0B4 \uACC4\uC88C\uC5D0\uC11C \uCDE8\uC18C\uD560 \uC218 \uC788\uC5B4\uC694. \uC774\uBBF8 \uCCB4\uACB0\uB41C \uC8FC\uBB38\uC740 \uCDE8\uC18C\uB418\uC9C0 \uC54A\uC544\uC694.",
+      "\uAE30\uB2E4\uB9AC\uB294 \uC8FC\uBB38 \uBCF4\uAE30",
+      "portfolio",
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC8FC\uBB38\uBC84\uD2BC", "\uB9E4\uC218\uBC84\uD2BC"]) &&
+    includesAny(message, ["\uC548\uB20C\uB7EC", "\uC548\uB428", "\uC548\uB3FC", "\uACE0\uC7A5"])
+  ) {
+    return serviceHowToReply(
+      "\uC8FC\uBB38 \uBC84\uD2BC\uC774 \uC548 \uB20C\uB9AC\uBA74 \uC885\uBAA9\uC774\uB098 \uC218\uB7C9, \uC8FC\uBB38 \uB0B4\uC6A9\uC744 \uBA3C\uC800 \uD655\uC778\uD574 \uC8FC\uC138\uC694. \uC774 \uC11C\uBE44\uC2A4\uC5D0\uC11C\uB294 \uD559\uAD50 \uC2DC\uAC04 \uB4F1 \uB9E4\uB9E4 \uC81C\uD55C \uC2DC\uAC04\uC5D0\uB3C4 \uC8FC\uBB38\uC774 \uC7A0\uC2DC \uB9C9\uD790 \uC218 \uC788\uC5B4\uC694.",
+      "\uC8FC\uBB38 \uD654\uBA74 \uD655\uC778\uD558\uAE30",
+      "order",
+      { ...(context.stockId ? { stockId: context.stockId } : {}), orderSide: "buy", orderStep: "confirmation" },
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC800\uBC88\uC5D0", "\uC608\uC804\uC5D0"]) &&
+    includesAny(message, ["\uC65C\uC0C0", "\uC65C\uC0C0\uB2E4", "\uC0B0\uC774\uC720"])
+  ) {
+    return reply("tool", "own_records", "", ["\uB0B4 \uB9E4\uC218 \uC774\uC720 \uAE30\uB85D \uC870\uD68C"], { tool: "own_trade_records" });
+  }
+
+  if (
+    includesAny(message, ["\uBA87\uBC88\uD314", "\uBA87\uBC88\uB9E4\uB3C4", "\uD310\uD69F\uC218"]) &&
+    includesAny(message, ["\uB0B4", "\uB098"])
+  ) {
+    return reply("tool", "own_records", "", ["\uB0B4 \uB9E4\uB3C4 \uAE30\uB85D \uC870\uD68C"], { tool: "own_trade_records" });
+  }
+
+  if (
+    includesAny(message, ["\uB0B4\uC131\uD5A5", "\uC131\uD5A5\uACB0\uACFC"]) &&
+    includesAny(message, ["\uCE5C\uAD6C\uB4E4", "\uCE5C\uAD6C\uB3C4"]) &&
+    includesAny(message, ["\uBCFC\uC218\uC788", "\uBCF4\uC5EC"])
+  ) {
+    return reply(
+      "faq",
+      "service_help",
+      "\uC131\uD5A5 \uACB0\uACFC\uB294 \uBCF8\uC778\uACFC \uBD80\uBAA8\uB2D8\uC774 \uBCFC \uC218 \uC788\uB294 \uAE30\uB85D\uC774\uC5D0\uC694. \uCE5C\uAD6C\uB4E4\uC5D0\uAC8C \uACF5\uAC1C\uB418\uC9C0 \uC54A\uC544\uC694.",
+      ["\uC131\uD5A5 \uACF5\uAC1C \uBC94\uC704 \uD655\uC778"],
+    );
+  }
+
+  if (includesAny(message, ["\uACC4\uC18D\uAC00\uACA9\uD655\uC778", "\uAC00\uACA9\uACC4\uC18D\uD655\uC778"]) && includesAny(message, ["\uBD88\uC548", "\uBD88\uC548\uD574"])) {
+    return reply(
+      "safety",
+      "safety",
+      "\uACC4\uC18D \uD655\uC778\uD558\uB2E4 \uBCF4\uBA74 \uB9C8\uC74C\uC774 \uB354 \uBD88\uC548\uD574\uC9C8 \uC218 \uC788\uC5B4\uC694. \uC9C0\uAE08\uC740 \uC7A0\uAE50 \uAC00\uACA9 \uD654\uBA74\uC5D0\uC11C \uB5A8\uC5B4\uC838 \uC26C\uC5B4\uB3C4 \uAD1C\uCC2E\uC544\uC694. \uBD88\uC548\uD55C \uB9C8\uC74C\uC774 \uACC4\uC18D\uB418\uBA74 \uBD80\uBAA8\uB2D8\uC774\uB098 \uBBFF\uC744 \uC218 \uC788\uB294 \uC5B4\uB978\uC5D0\uAC8C \uC774\uC57C\uAE30\uD574 \uC8FC\uC138\uC694.",
+      ["\uC7A0\uC2DC \uAC00\uACA9 \uD654\uBA74\uC5D0\uC11C \uC26C\uAE30"],
+    );
+  }
+
+  return null;
+}
+
 function getFinancialConceptReply(message: string): ChatReply | null {
   if (includesAny(message, ["수익이랑손해", "수익하고손해", "수익과손해", "이익이랑손해", "수익손해차이"])) {
     return reply(
@@ -4403,16 +4573,19 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const privacyReply = getPrivacyReply(message);
   if (privacyReply) return privacyReply;
 
-  const explicitServiceReply = getChildFriendlyIntentReply(message, context);
-  if (explicitServiceReply?.intent === "service_help" && !findRecommendationKind(message)) {
-    return explicitServiceReply;
-  }
-
   // SPEC §6.1.2 의 입력 안전 우선순위대로 보호 판정을 사용법 FAQ 앞에 둔다.
   // 뒤에 두면 "다 포기하고 싶어 매수 버튼 누르면 끝이야?" 처럼 위기 표현에
   // 서비스 낱말이 섞였을 때 큐레이트 FAQ 가 먼저 잡아 보호 응답이 사라진다.
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);
+
+  const questionActReply = getQuestionActReply(message, context);
+  if (questionActReply) return questionActReply;
+
+  const explicitServiceReply = getChildFriendlyIntentReply(message, context);
+  if (explicitServiceReply?.intent === "service_help" && !findRecommendationKind(message)) {
+    return explicitServiceReply;
+  }
 
   // 안전 판정 뒤. 화면이 실어 보낸 내 지갑 값은 사전·FAQ보다 먼저 답한다 —
   // "나 쓸 수 있는 돈 얼마 남았어?" 에 잔고 대신 용어 설명이 나가는 걸 막는
@@ -4435,6 +4608,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const curatedServiceHowToReply = getCuratedServiceHowToReply(message, context);
   if (curatedServiceHowToReply) return curatedServiceHowToReply;
 
+  const ruleKind = findRuleKind(message, context);
+  if (ruleKind) return ruleReply(ruleKind, message);
+
   if (includesAny(message, HARMFUL_PATTERNS)) {
     return reply(
       "safety",
@@ -4443,9 +4619,6 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       ["안전 안내"],
     );
   }
-
-  const ruleKind = findRuleKind(message, context);
-  if (ruleKind) return ruleReply(ruleKind, message);
 
   const archiveManagementReply = getArchiveManagementReply(message);
   if (archiveManagementReply) return archiveManagementReply;

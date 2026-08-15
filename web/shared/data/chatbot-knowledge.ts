@@ -1058,6 +1058,9 @@ function normalize(value: string) {
 
 export function findChatbotQuestionForm(query: string): ChatbotQuestionForm | null {
   const normalized = normalize(query);
+  // "왜 ... 뭐야?" is still a reason question.  Decide the question act
+  // before the conversational filler "뭐" can turn it into a definition.
+  if (["\uC65C", "\uC774\uC720", "\uAE4C\uB2ED"].some((word) => normalized.includes(word))) return "reason";
   if (["뭐", "무엇", "무슨뜻", "뜻", "의미"].some((word) => normalized.includes(word))) return "definition";
   if (["어디", "어느화면", "어떤버튼"].some((word) => normalized.includes(word))) return "location";
   if (["어떻게", "어케", "방법", "순서", "하는법"].some((word) => normalized.includes(word))) return "procedure";
