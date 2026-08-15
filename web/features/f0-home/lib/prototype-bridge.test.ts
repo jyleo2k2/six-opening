@@ -337,6 +337,54 @@ test("app.html 이 실제로 그 id 를 갖고 있다 — 없으면 실측이 �
   assert.ok(appHtml.includes(`id="${PROTOTYPE_SCREEN_ID}"`));
 });
 
+test("chat sector IDs resolve to prototype filter IDs", () => {
+  const source = readFileSync(
+    new URL("../../../ui-src/methods/openRequestedScreen.js", import.meta.url),
+    "utf8",
+  );
+  const openRequestedScreen = Function(
+    `return ({${source}}).openRequestedScreen`,
+  )() as (data: unknown) => void;
+  const expected = {
+    game: "game",
+    logistics: "logi",
+    semiconductor: "semi",
+    defense: "defense",
+    food: "food",
+    energy: "energy",
+    entertainment: "enter",
+    retail: "retail",
+    finance: "bank",
+    automotive: "auto",
+    shipbuilding: "ship",
+    airline: "air",
+    cosmetics: "beauty",
+  };
+
+  for (const [chatSectorId, prototypeSectorId] of Object.entries(expected)) {
+    const updates: Array<Record<string, unknown>> = [];
+    openRequestedScreen.call(
+      {
+        uni: () => ({ sectors: Object.values(expected).map((id) => ({ id })) }),
+        stock: () => null,
+        set: (update: Record<string, unknown>) => updates.push(update),
+      },
+      {
+        type: "kiwoom:open-chat-action",
+        action: {
+          type: "open_screen",
+          target: "stock",
+          stockView: "explore",
+          sectorId: chatSectorId,
+        },
+      },
+    );
+    assert.deepEqual(updates, [
+      { screen: "explore", sectorId: prototypeSectorId, cardIndex: 0 },
+    ]);
+  }
+});
+
 test("iframe 안 좌표에 iframe 위치를 더해 부모 좌표로 옮긴다", () => {
   const rect = readPrototypeScreenRect(
     fakeFrame({
