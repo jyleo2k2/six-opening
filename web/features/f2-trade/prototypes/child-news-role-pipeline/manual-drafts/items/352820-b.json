@@ -22,7 +22,7 @@
   "body": [
     { "text": "23개 나라를 돌아요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "country_count" },
     { "text": "K팝 역사상 가장 큰 규모예요.", "sourceIds": ["S3"], "role": "context", "factKey": "largest_kpop_tour" },
-    { "text": "4월 9일 고양에서 처음 시작했어요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "tour_start" }
+    { "text": "월드투어는 4월 9일 고양에서 시작했어요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "tour_start" }
   ],
   "priceConnection": {
     "text": "공연을 많이 하면 표를 판 돈도 늘어나요.",

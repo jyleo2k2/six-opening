@@ -22,7 +22,7 @@
   "headline": { "text": "크래프톤 새 게임, 5일 만에 400만 장 팔렸다", "sourceIds": ["S1"] },
   "body": [
     { "text": "나온 첫날에만 100만 장 팔렸어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "first_day_sales" },
-    { "text": "한때 46만7000명이 함께 접속했어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "peak_concurrent_users" },
+    { "text": "동시접속이 46만7000명까지 갔어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "peak_concurrent_users" },
     { "text": "친구 4명이 같이 하는 기능이 처음 생겼어요.", "sourceIds": ["S6"], "role": "context", "factKey": "coop_mode" }
   ],
   "priceConnection": {

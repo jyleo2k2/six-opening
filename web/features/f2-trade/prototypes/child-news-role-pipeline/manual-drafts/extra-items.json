@@ -530,6 +530,172 @@
     },
     {
       "stock": {
+        "stockId": "KRX:259960",
+        "symbol": "259960",
+        "name": "크래프톤",
+        "aliases": [
+          "KRAFTON"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-MT-2026052109544094417",
+          "title": "크래프톤 '서브노티카 2', 출시 5일 만에 400만장 돌파…스팀 동접 46만명",
+          "publisher": "머니투데이",
+          "publishedAt": "2026-05-21T00:56:00.000Z",
+          "sourceUrl": "https://www.mt.co.kr/tech/2026/05/21/2026052109544094417",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "크래프톤의 기대작 '서브노티카 2'가 출시 5일 만에 글로벌 판매 400만장을 돌파했다."
+            },
+            {
+              "id": "S2",
+              "text": "출시와 동시에 판매 100만장을 기록한 데 이어, 12시간 만에 200만장을 돌파했다."
+            },
+            {
+              "id": "S3",
+              "text": "스팀 기준 최고 동시접속자 수는 46만7000명을 기록했다."
+            },
+            {
+              "id": "S4",
+              "text": "일평균 활성 이용자 수는 130만명에 달했다."
+            },
+            {
+              "id": "S5",
+              "text": "누적 플레이 시간은 2857만시간으로 집계됐다."
+            },
+            {
+              "id": "S6",
+              "text": "시리즈 최초로 최대 4인 협동(Co-op) 모드도 도입했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-MT-2026052109544094417",
+          "primaryStockIds": [
+            "KRX:259960"
+          ],
+          "focusStatement": "크래프톤의 '서브노티카 2'가 출시 5일 만에 글로벌 판매 400만장을 돌파했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "동시접속"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-MT-2026052109544094417",
+          "headline": {
+            "text": "크래프톤 새 게임, 5일 만에 400만 장 팔렸다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "크래프톤 새 게임, 5일 만에 400만 장 팔렸다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "나온 첫날에만 100만 장 팔렸어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "first_day_sales"
+            },
+            {
+              "text": "동시접속이 46만7000명까지 갔어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "peak_concurrent_users"
+            },
+            {
+              "text": "친구 4명이 같이 하는 기능이 처음 생겼어요.",
+              "sourceIds": [
+                "S6"
+              ],
+              "role": "context",
+              "factKey": "coop_mode"
+            }
+          ],
+          "priceConnection": {
+            "text": "게임이 많이 팔리면 회사가 버는 돈도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "동시접속",
+              "easyText": "같은 시간에 함께 게임에 들어와 있는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-MT-2026052109544094417",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:259960"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "크래프톤의 '서브노티카 2'가 출시 5일 만에 글로벌 판매 400만장을 돌파했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
+      }
+    },
+    {
+      "stock": {
         "stockId": "KRX:282330",
         "symbol": "282330",
         "name": "BGF리테일",
@@ -667,6 +833,167 @@
           "focusStatement": "BGF리테일이 운영하는 CU가 3월 말 기준 몽골·말레이시아·카자흐스탄·미국 하와이에서 해외 점포 790곳을 운영 중이다.",
           "anchorSourceIds": [
             "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:352820",
+        "symbol": "352820",
+        "name": "하이브",
+        "aliases": [
+          "HYBE"
+        ],
+        "sector": "entertainment",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-THEGURU-100946",
+          "title": "하이브 BTS \"전 세계에 K-아리랑 전하고 올게요\"…월드투어 출국 현장",
+          "publisher": "THE GURU",
+          "publishedAt": "2026-04-23T04:59:16.000Z",
+          "sourceUrl": "https://www.theguru.co.kr/news/article.html?no=100946",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "BTS 멤버들은 23일 오전 인천국제공항 제2여객터미널을 통해 미국 애틀란타로 출국했다."
+            },
+            {
+              "id": "S2",
+              "text": "이번 출국으로 BTS는 오는 25일부터 북미에서 월드투어를 이어간다."
+            },
+            {
+              "id": "S3",
+              "text": "이번 BTS 월드투어는 '아리랑'은 전 세계 23개국 34개 도시에서 82회 이상 공연이 예정돼 있으며 K-팝 사상 최대 규모의 월드투어다."
+            },
+            {
+              "id": "S4",
+              "text": "지난 9일 경기 고양종합운동장을 시작으로 월드투어에 나서며 본격적인 완전체 활동에 돌입했다."
+            },
+            {
+              "id": "S5",
+              "text": "지난 18일에는 일본 도쿄돔에서 팬들을 만났다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-THEGURU-100946",
+          "primaryStockIds": [
+            "KRX:352820"
+          ],
+          "focusStatement": "하이브 소속 BTS가 23개국 34개 도시에서 82회 이상 공연하는 월드투어 '아리랑'을 진행하며 북미 일정에 들어갔다.",
+          "anchorSourceId": "S3",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "월드투어"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-THEGURU-100946",
+          "headline": {
+            "text": "하이브 BTS, 34개 도시에서 82번 공연한다",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "homeSummary": {
+            "text": "하이브 BTS, 34개 도시에서 82번 공연한다",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "body": [
+            {
+              "text": "23개 나라를 돌아요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "country_count"
+            },
+            {
+              "text": "K팝 역사상 가장 큰 규모예요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "largest_kpop_tour"
+            },
+            {
+              "text": "월드투어는 4월 9일 고양에서 시작했어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "tour_start"
+            }
+          ],
+          "priceConnection": {
+            "text": "공연을 많이 하면 표를 판 돈도 늘어나요.",
+            "sourceIds": [
+              "S3",
+              "S4"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "월드투어",
+              "easyText": "여러 나라를 돌아다니며 하는 공연",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-THEGURU-100946",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:352820"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "하이브 소속 BTS가 23개국 34개 도시에서 82회 이상 공연하는 월드투어 '아리랑'을 진행하며 북미 일정에 들어갔다.",
+          "anchorSourceIds": [
+            "S3"
           ],
           "checks": {
             "allowedScope": true,

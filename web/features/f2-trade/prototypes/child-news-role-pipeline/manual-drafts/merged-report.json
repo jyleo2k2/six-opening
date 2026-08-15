@@ -4,7 +4,7 @@
   "runDateKst": "2026-08-15",
   "sourceRetrievedAt": "2026-08-15T07:31:13.537Z",
   "sourceBasis": "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함",
-  "generatedAt": "2026-08-15T11:56:38.144Z",
+  "generatedAt": "2026-08-15T11:59:49.728Z",
   "model": "gpt-5.6-luna",
   "stockCount": 51,
   "completedCount": 51,
