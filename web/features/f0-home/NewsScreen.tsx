@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatNewsDate, validNewsItem, type NewsItem } from "./lib/stock-news";
 import {
-  BuyCtaFooter,
+  StockFooter,
   SUB_PAGE,
   SUB_SCROLL,
   SubScreenHeader,
@@ -47,6 +47,7 @@ export function NewsScreen({
   item,
   locked,
   onBack,
+  onLeave,
   onStartBuy,
 }: {
   code: string;
@@ -54,6 +55,8 @@ export function NewsScreen({
   item: NewsItem;
   locked: boolean;
   onBack: () => void;
+  /** 하단 탭바가 쓴다. 뒤로가기(`onBack`)는 상세로 돌아가지만 탭은 앱의 다른 화면으로 나간다. */
+  onLeave: (path: string) => void;
   onStartBuy: () => void;
 }) {
   const [news, setNews] = useState<NewsItem>(item);
@@ -130,7 +133,7 @@ export function NewsScreen({
           </div>
         </div>
       </div>
-      <BuyCtaFooter locked={locked} onStartBuy={onStartBuy} />
+      <StockFooter locked={locked} onLeave={onLeave} onStartBuy={onStartBuy} />
     </div>
   );
 }

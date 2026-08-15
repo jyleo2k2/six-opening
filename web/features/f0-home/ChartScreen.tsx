@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  BuyCtaFooter,
+  StockFooter,
   SUB_PAGE,
   SUB_SCROLL,
   SubScreenHeader,
@@ -79,6 +79,7 @@ export function ChartScreen({
   changeStyle,
   locked,
   onBack,
+  onLeave,
   onStartBuy,
 }: {
   code: string;
@@ -88,6 +89,8 @@ export function ChartScreen({
   changeStyle: React.CSSProperties;
   locked: boolean;
   onBack: () => void;
+  /** 하단 탭바가 쓴다. 뒤로가기(`onBack`)는 상세로 돌아가지만 탭은 앱의 다른 화면으로 나간다. */
+  onLeave: (path: string) => void;
   onStartBuy: () => void;
 }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -231,7 +234,7 @@ export function ChartScreen({
           />
         </div>
       </div>
-      <BuyCtaFooter locked={locked} onStartBuy={onStartBuy} />
+      <StockFooter locked={locked} onLeave={onLeave} onStartBuy={onStartBuy} />
     </div>
   );
 }
