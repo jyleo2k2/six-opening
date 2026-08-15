@@ -189,18 +189,9 @@ export type HomeView = {
   rateText: string;
   profitText: string;
   rateColor: string;
-  /** 수익률 부호에 따른 황소 마스코트: 양수=역할별 목표 이미지, 보합(0)=걱정, 음수=울음. */
-  moodImg: string;
   /** 계좌를 읽었는데 보유가 하나도 없을 때만 참. */
   noHoldings: boolean;
 };
-
-/** 수익률 부호별 홈 마스코트. 양수는 역할별 목표 이미지, 0은 보합으로 본다. */
-export function moodImg(rate: number, goalImg: string): string {
-  if (rate > 0) return goalImg;
-  if (rate < 0) return "/ui/assets/mascot-bull-bear-sad.png";
-  return "/ui/assets/mascot-bull-flat.png";
-}
 
 /**
  * 수익도 실제 보유에서 낸다. 데모 상수(`info.profit`)를 실제 평가금액으로 나누면
@@ -237,7 +228,6 @@ export function homeView(
     rateText: (rate >= 0 ? "+" : "−") + Math.abs(rate).toFixed(1) + "%",
     profitText: (profit >= 0 ? "+" : "−") + won(Math.abs(profit)),
     rateColor: rate >= 0 ? "#D5327A" : "#2E6BE6",
-    moodImg: moodImg(rate, info.goalImg),
     noHoldings: loaded && live.length === 0,
   };
 }
