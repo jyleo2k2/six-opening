@@ -41,6 +41,21 @@ node scripts/git-session-manager.mjs claim `
 - 작업명은 한글 낱말과 단어 사이 하이픈만 사용한다.
 - 브랜치와 worktree 마지막 세 경로는 정확히 같아야 한다.
 
+## Phase 1.5: 개발 서버
+
+개발 서버는 `npm run dev`를 직접 부르지 않고 세션 명령으로 띄운다. 세션 worktree 안에서 실행한다.
+
+```powershell
+node scripts/git-session-manager.mjs serve
+node scripts/git-session-manager.mjs stop
+```
+
+- 포트는 세션이 배정받은 값만 쓴다. 사람이 포트를 고르면 어느 포트가 어느 브랜치인지 아무도 모르게 되고, 며칠 전 코드를 보면서 "고쳤는데 그대로"를 반복한다.
+- `serve`는 pid와 시작 시각을 등록에 남기고 로그 파일 경로를 알려 준다. 이미 떠 있으면 다시 띄우지 않는다.
+- `status`는 세션마다 `dev=<포트> 실행 중(pid …)`·`꺼짐`·`기록만 남음`을 함께 보여 준다. `12시간`을 넘긴 서버는 오래됐다고 따로 알린다.
+- 화면이 이상하면 먼저 어느 포트를 보고 있는지 확인한다. 죽은 서버를 향한 화면은 요청만 실패하고 화면은 멀쩡해 보인다.
+- 작업을 끝내면 `stop`한다. `gc`는 worktree를 지우기 전에 그 세션의 서버를 먼저 끈다.
+
 ## Phase 2: 충돌 예방
 
 1. 파일을 수정하기 전에 예상 경로를 모두 claim한다.
@@ -62,7 +77,7 @@ node scripts/git-session-manager.mjs claim `
 ## Phase 4: 종료
 
 1. PR을 병합하고 worktree가 깨끗한지 확인한다.
-2. `node scripts/git-session-manager.mjs release`로 claim을 해제한다.
+2. `node scripts/git-session-manager.mjs stop`으로 개발 서버를 끈 뒤 `release`로 claim을 해제한다.
 3. release는 파일·브랜치·worktree를 삭제하지 않는다.
 4. 병합 여부, `origin/main` 조상 여부, clean 상태를 확인한 뒤에만 안전 정리한다.
 
@@ -91,6 +106,8 @@ node scripts/git-session-manager.mjs install-hooks
 - GitHub 조회 실패: 로컬 claim만 유지하되 Draft PR을 열기 전에 열린 PR 파일을 수동 확인한다.
 - 잠금 충돌: 병렬로 재시도하지 않고 현재 Git 관리 명령이 끝난 뒤 다시 실행한다.
 - dirty worktree: 강제 삭제·reset하지 않고 남은 파일을 정확히 보고한다.
+- 개발 서버 기록만 남음: 프로세스가 이미 없다. `stop`으로 기록을 지우고 다시 `serve`한다.
+- 개발 서버가 오래됨: 지금 브랜치를 보여 주지 않을 수 있다. `stop` 후 다시 띄운다.
 
 ## 테스트 시나리오
 

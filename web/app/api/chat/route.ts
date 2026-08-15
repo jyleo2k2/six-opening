@@ -13,11 +13,35 @@ import { classifyTermKind } from "../../../features/f10-chatbot/lib/term-classif
 import { createReadOnlyToolRunner } from "../../../features/f10-chatbot/lib/tools";
 import { findProfileById, sessionUserId } from "../supabase";
 import { createSupabasePersonalData } from "./personal-data";
-import { isChatRateLimited } from "./rate-limit";
+import { chatRateLimitRetryAfterSeconds, isChatRateLimited } from "./rate-limit";
 
 export const runtime = "nodejs";
 
 const encoder = new TextEncoder();
+
+/**
+ * 실패한 요청에도 요청 ID 를 붙여 돌려준다.
+ *
+ * 화면은 지금까지 모든 실패를 "키웅이가 잠깐 낮잠 중이에요" 하나로 보여 줬다. 분당 한도에
+ * 막힌 것과 서버가 죽은 것이 같은 문구라, 화면만 봐서는 무엇이 잘못됐는지 알 수 없었고
+ * 서버 로그의 `requestId` 와 이어 붙일 실마리도 없었다. 성공·실패를 가리지 않고 같은
+ * 머리글을 실어 두 기록을 같은 ID 로 맞춰 본다.
+ *
+ * `code` 는 사람이 로그에서 읽으라고 넣는다. 화면이 문구를 가르는 기준은 HTTP 상태 코드와
+ * `Retry-After` 로 충분해서, 이 값을 읽으려고 계약 타입을 새로 만들지는 않는다.
+ */
+function failure(
+  requestId: string,
+  status: number,
+  code: string,
+  error: string,
+  headers: Record<string, string> = {},
+) {
+  return Response.json(
+    { error, code },
+    { status, headers: { ...headers, "X-Request-Id": requestId } },
+  );
+}
 
 type ChatEvent = "status" | "text" | "action" | "done";
 
@@ -47,9 +71,13 @@ export async function POST(request: NextRequest) {
   const userId = sessionUserId(request);
 
   // 본문을 읽기 전에 막는다. 잘못된 요청도 연타면 그대로 부하다.
-  if (isChatRateLimited(String(userId ?? "anonymous"))) {
-    logChatResult({ requestId, result: "rate_limited" });
-    return Response.json({ error: "Too many requests" }, { status: 429 });
+  const rateLimitKey = String(userId ?? "anonymous");
+  if (isChatRateLimited(rateLimitKey)) {
+    const retryAfterSeconds = chatRateLimitRetryAfterSeconds(rateLimitKey);
+    logChatResult({ requestId, result: "rate_limited", retryAfterSeconds });
+    return failure(requestId, 429, "rate_limited", "Too many requests", {
+      "Retry-After": String(retryAfterSeconds),
+    });
   }
 
   let body: unknown;
@@ -57,13 +85,13 @@ export async function POST(request: NextRequest) {
     body = await request.json();
   } catch {
     logChatResult({ requestId, result: "invalid_json" });
-    return Response.json({ error: "Invalid request" }, { status: 400 });
+    return failure(requestId, 400, "invalid_json", "Invalid request");
   }
 
   const chatRequest = parseChatRequest(body);
   if (!chatRequest) {
     logChatResult({ requestId, result: "invalid_payload" });
-    return Response.json({ error: "Invalid chat payload" }, { status: 400 });
+    return failure(requestId, 400, "invalid_payload", "Invalid chat payload");
   }
 
   // 조회 대상 사용자는 요청 쿠키가 정한다. 본문 식별자는 parseChatRequest 가 이미 거부했다.
@@ -125,6 +153,8 @@ export async function POST(request: NextRequest) {
       Connection: "keep-alive",
       "Content-Type": "text/event-stream; charset=utf-8",
       "X-Accel-Buffering": "no",
+      // 성공한 요청에도 같은 머리글을 붙인다. 답은 왔는데 이상하다는 신고도 로그에서 찾아야 한다.
+      "X-Request-Id": requestId,
     },
   });
 }
