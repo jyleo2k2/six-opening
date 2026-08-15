@@ -5,9 +5,14 @@ import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
 import type { ChatContext, ChatUiAction } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
 import {
+  getPrototypeScreenRect,
+  type PrototypeScreenRect,
+} from "../f10-chatbot/lib/bottom-sheet";
+import {
   isRecord,
   parseBehaviorEvent,
   parseChatContext,
+  readPrototypeScreenRect,
 } from "./lib/prototype-bridge";
 
 const CHAT_CONTEXT_MESSAGE = "kiwoom:chat-context";
@@ -19,6 +24,33 @@ export function ConnectedPrototype() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const chatContextRef = useRef<ChatContext>({ screen: "home" });
   const [chatContext, setChatContext] = useState<ChatContext>({ screen: "home" });
+  const [screenRect, setScreenRect] = useState<PrototypeScreenRect | null>(null);
+
+  // 챗봇 시트는 폰 프레임 안 화면에 딱 맞아야 한다. 배율은 app.html 이 자기 뷰포트로 정하므로
+  // 여기서 다시 계산하지 않고 실제 요소를 잰다. 창이 바뀌면 app.html 의 배율 갱신이 먼저
+  // 끝나야 하므로 다음 프레임에 읽는다.
+  // 아직 로드 전이거나 어떤 이유로든 못 재면 창 크기로 근사한다. 프레임과 어긋날 수 있지만
+  // 챗봇이 아예 안 열리는 것보다는 낫다 — 로드가 끝나면 onLoad 가 실측값으로 덮는다.
+  const measureScreen = () =>
+    setScreenRect(
+      readPrototypeScreenRect(iframeRef.current) ??
+        getPrototypeScreenRect(window.innerWidth, window.innerHeight),
+    );
+
+  useEffect(() => {
+    let frameId = 0;
+    const remeasure = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(measureScreen);
+    };
+
+    remeasure();
+    window.addEventListener("resize", remeasure);
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", remeasure);
+    };
+  }, []);
 
   const openChatAction = (action: ChatUiAction) => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -66,12 +98,17 @@ export function ConnectedPrototype() {
     <div className="h-dvh min-h-[640px] overflow-hidden bg-bg text-ink">
       <iframe
         className="block h-full w-full border-0"
+        onLoad={measureScreen}
         ref={iframeRef}
         src="/ui/app.html?runtime=1"
         title="키움 가족 모의투자 리그"
       />
       <div className="prototype-chat-overlay">
-        <F10ChatbotDemo context={chatContext} onUiAction={openChatAction} />
+        <F10ChatbotDemo
+          context={chatContext}
+          onUiAction={openChatAction}
+          screenRect={screenRect}
+        />
       </div>
     </div>
   );

@@ -53,6 +53,7 @@
 | `web/features/f10-chatbot/F10ChatbotDemo.tsx` | 채팅 시트 UI, 추천 질문, SSE 수신·렌더링 |
 | `web/features/f10-chatbot/assets/floating/` | 플로팅 버튼에 표시하는 키웅이 5종·악당곰 5종 이미지 |
 | `web/features/f10-chatbot/lib/bottom-sheet.ts` | 휴대폰 화면 사각형·80% 시트 높이 계산, 드래그 닫기 임계값 순수 함수 |
+| `web/features/f0-home/lib/prototype-bridge.ts` | 프로토타입 호스트가 `app.html` 의 화면 요소를 재서 넘기는 실측 사각형(§3.1) |
 | `web/features/f10-chatbot/lib/floating-avatar.ts` | 플로팅 버튼의 이동 판정과 직전 이미지 중복 없는 무작위 선택 순수 함수 |
 | `web/features/f10-chatbot/lib/routing.ts` | 입력 분류, FAQ·맥락 응답, 고정 거절, 선제 신호 |
 | `web/features/f10-chatbot/lib/openai.ts` | Luna Responses API 호출과 F10 시스템 지시문 |
@@ -122,6 +123,7 @@ flowchart LR
 - **되살리기는 이 기능의 범위가 아니다.** 홈 화면 버튼이 맡으며, 그 버튼이 숨김 상태를 해제한다. 유일한 예외는 아래 §7 선제 도움이다.
 - 탭하면 모바일 바텀시트 챗 UI를 연다.
 - 바텀시트는 브라우저 전체가 아니라 렌더된 휴대폰 화면에 맞추고, 그 화면 높이의 80%를 차지한다.
+- **기준 사각형은 계산하지 않고 잰다.** 프로토타입 호스트(`ConnectedPrototype`)가 iframe 안 `#kw-screen`(`ui-src/template/shell-0.html` 의 402×874 화면)을 `getBoundingClientRect()` 로 재서 `screenRect` 로 넘기고, 이 폴더는 그 값을 그대로 쓴다. `app.html` 이 자기 뷰포트로 `--runtime-scale` 을 정하므로 부모에서 같은 식을 다시 계산하면 두 뷰포트가 조금만 달라도 배율이 어긋나 시트가 프레임 밖으로 삐져나온다. `getPrototypeScreenRect`(창 크기 근사)는 `screenRect` 를 받지 않는 단독 데모와 아직 iframe 이 로드되지 않은 순간의 폴백으로만 남는다.
 - 바텀시트가 열린 상태에서 시트 영역을 아래로 드래그해 임계값을 넘기면 닫힌다. 시트 위쪽 어두워진 배경(스크림)을 탭해도 닫힌다.
 - 시트 헤더는 드래그 핸들과 우측 `초기화` 버튼만 표시한다. 초기화는 시트를 닫지 않고, 대화·입력·진행 중인 DAPIE/종목/섹터 후속 상태를 비우며 전송 중인 요청은 취소한다.
 - 자유 입력창을 제공한다. 화면 맥락 기반 추천 질문은 답변마다 붙는 `suggestedQuestions`(§3.3)만 쓰고, 시트 하단에 별도 고정 추천 질문 목록은 두지 않는다 — 답변당 하나로 일원화해 중복을 없앤다. 대화가 비어 있을 때 보이는 첫 인사말도 같은 필드로 고정 시작 질문 3개를 붙인다.

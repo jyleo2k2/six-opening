@@ -69,6 +69,11 @@ type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
   context?: ChatContext;
   onUiAction?: (action: ChatUiAction) => void;
+  /**
+   * 폰 프레임 안 화면의 실제 사각형. 프로토타입 호스트가 `app.html` 요소를 재서 준다.
+   * 넘기지 않으면(단독 데모) 창 크기로 같은 값을 근사한다 — 그 경우 iframe 이 없어 어긋날 일이 없다.
+   */
+  screenRect?: PrototypeScreenRect | null;
 };
 type Message = {
   role: "assistant" | "user";
@@ -399,11 +404,18 @@ function ResponsePreparation({ status }: { status: string }) {
   );
 }
 
-export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}) {
+export function F10ChatbotDemo({
+  context,
+  onUiAction,
+  screenRect,
+}: F10ChatbotDemoProps = {}) {
   const [screen, setScreen] = useState<Screen>(context?.screen ?? "stock");
   const [isOpen, setIsOpen] = useState(false);
-  const [prototypeScreen, setPrototypeScreen] =
+  const [measuredScreen, setMeasuredScreen] =
     useState<PrototypeScreenRect | null>(null);
+  // 호스트가 실측값을 주면 그것만 쓴다. 두 값을 섞으면 프레임과 어긋나는 원래 문제로 돌아간다.
+  const hostMeasures = screenRect !== undefined;
+  const prototypeScreen = hostMeasures ? screenRect : measuredScreen;
   const [sheetDragY, setSheetDragY] = useState(0);
   const [isSheetDragging, setIsSheetDragging] = useState(false);
   const [input, setInput] = useState("");
@@ -479,8 +491,10 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   }, [context]);
 
   useEffect(() => {
+    if (hostMeasures) return;
+
     const syncPrototypeScreen = () => {
-      setPrototypeScreen(
+      setMeasuredScreen(
         getPrototypeScreenRect(window.innerWidth, window.innerHeight),
       );
     };
@@ -488,7 +502,7 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
     syncPrototypeScreen();
     window.addEventListener("resize", syncPrototypeScreen);
     return () => window.removeEventListener("resize", syncPrototypeScreen);
-  }, []);
+  }, [hostMeasures]);
 
   useEffect(() => {
     setIdleAvatarIndex(
@@ -601,9 +615,11 @@ export function F10ChatbotDemo({ context, onUiAction }: F10ChatbotDemoProps = {}
   }, [signal, signalVersion]);
 
   function openChat() {
-    setPrototypeScreen(
-      getPrototypeScreenRect(window.innerWidth, window.innerHeight),
-    );
+    if (!hostMeasures) {
+      setMeasuredScreen(
+        getPrototypeScreenRect(window.innerWidth, window.innerHeight),
+      );
+    }
     setSheetDragY(0);
     setIsSheetDragging(false);
     sheetDragRef.current = null;
