@@ -30,7 +30,8 @@
       forceOff: () => this.set({ forceSchool:'off' }),
       forceAutoStyle: devChip(s.forceSchool === 'auto'), forceOnStyle: devChip(s.forceSchool === 'on'), forceOffStyle: devChip(s.forceSchool === 'off'),
 
-      goHome: () => this.set({ screen:'home' }),
+      // 홈도 React 로 옮겨 갔다. 문서는 그대로 두고 부모가 그 화면을 얹는다.
+      goHome: () => this.leaveToRoute('/'),
       // 탐색 화면은 React 로 옮겨 갔다. 문서는 그대로 두고 부모가 그 화면을 얹는다.
       goExplore: () => this.leaveToRoute('/explore'),
       // 랭킹은 React 로 옮겨 갔다. 문서를 갈아끼우므로 화면 임시값을 넘길 표시를 남긴다.
@@ -40,7 +41,8 @@
       goArchive: () => { this.set({ screen:'archive' }); this.loadDailyCloses(); },
       resetAll: () => {
         const fresh = seedAccounts();
-        this.set({ acc: fresh, records: [], events: [], sellRecords: [], seq: 1, screen:'home', draft: this.blankDraft() , watchlist: [] });
+        this.set({ acc: fresh, records: [], events: [], sellRecords: [], seq: 1, draft: this.blankDraft() , watchlist: [] });
+        this.leaveToRoute('/');
       }
     };
   }

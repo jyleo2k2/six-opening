@@ -12,6 +12,7 @@ import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
 import type { WalletAccountId } from "./lib/use-wallet";
 import { DetailScreen } from "./DetailScreen";
 import { ExploreScreen } from "./ExploreScreen";
+import { HomeScreen } from "./HomeScreen";
 import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
 import {
@@ -46,6 +47,7 @@ const OPEN_ROUTE_MESSAGE = "kiwoom:open-route";
  * 문서를 그대로 두면 그 왕복이 앱을 처음 열 때 한 번뿐이다.
  */
 const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>([
+  "home",
   "ranking",
   "portfolio",
   "stock",
@@ -258,6 +260,7 @@ export function ConnectedPrototype({
       */}
       {overlay && (
         <div style={{ position: "fixed", inset: 0, zIndex: 5 }}>
+          {overlay.screen === "home" && <HomeScreen onLeave={leaveToPath} />}
           {overlay.screen === "ranking" && <RankingScreen onLeave={leaveToPath} />}
           {overlay.screen === "portfolio" && (
             <PortfolioScreen account={account} onLeave={leaveToPath} />

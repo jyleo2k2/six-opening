@@ -40,7 +40,8 @@
     const stockCode = /^KRX:\d{6}$/.test(String(action.stockId || '')) ? String(action.stockId).slice(4) : null;
     const stock = stockCode ? (this.uni().stocks || []).filter(x => x.code === stockCode)[0] : this.stock();
     if (action.target === 'home') {
-      this.set({ screen:'home' });
+      // 홈 화면은 여기 없다. 주소로 넘겨 React 화면이 그리게 한다.
+      this.leaveToRoute('/');
     } else if (action.target === 'ranking') {
       // 랭킹 화면은 여기 없다. 주소로 넘겨 React 화면이 그리게 한다.
       this.leaveToRoute('/ranking');
