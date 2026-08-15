@@ -218,9 +218,6 @@ export function ArchiveScreen({
   const [who, setWho] = useState("all");
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  // 끌어서 넘기고, 멎은 자리의 가운데 카드를 켠다. 켜는 쪽이 없으면 손가락으로 밀었을 때
-  // 엉뚱한 카드가 커진 채로 남고, 가운데 카드를 눌러도 시트가 아니라 스냅만 다시 걸린다.
-  const rail = useRailDrag(setCardActive);
   const sheet = useSheetDrag(SHEET_HEIGHT);
 
   const prices = useMemo(
@@ -251,6 +248,11 @@ export function ArchiveScreen({
     [data.season, mine.scores.join(), myType.key, records, universe],
   );
   const activeCard = Math.max(0, Math.min(cardActive ?? cards.length - 1, cards.length - 1));
+  // 끌어서 넘기고, 멎은 자리의 가운데 카드를 켠다. 켜는 쪽이 없으면 손가락으로 밀었을 때
+  // 엉뚱한 카드가 커진 채로 남고, 가운데 카드를 눌러도 시트가 아니라 스냅만 다시 걸린다.
+  // 지금 켜진 카드(`activeCard`)를 함께 넘겨 **바뀔 때만** 다시 그린다 — 이 화면은 한 번
+  // 그릴 때 가족·피드 계산이 통째로 돌아서, 스크롤마다 그리면 튕길 때 눈에 띄게 버벅인다.
+  const rail = useRailDrag(setCardActive, activeCard);
 
   const family = familyMembers(data.family?.members ?? []);
   const famShown = family.filter((f) => f.has && (famPick === "all" || f.key === famPick));

@@ -23,8 +23,16 @@ const FLING_MAX_MS = 1_200;
  *
  * 쓰는 쪽은 레일에 `onPointerDown` 과 `onScroll` 을 붙이고, 카드의 `onClick` 은
  * `dragged()` 로 감싼다. 끌고 난 직후의 click 을 삼키지 않으면 카드가 열린다.
+ *
+ * 켜진 카드를 이 훅이 정하게 하려면 `onActiveChange` 와 함께 **지금 켜져 있는 값**을
+ * `activeIndex` 로 넘긴다. 그 값과 같으면 알리지 않는다 — 훅이 마지막으로 알린 값을
+ * 따로 기억하지 않는 이유는, 쓰는 쪽이 다른 길로 값을 되돌렸을 때(카드 모아보기를
+ * 다시 열며 `null` 로 두는 것처럼) 그 기억이 정당한 갱신까지 삼키기 때문이다.
  */
-export function useRailDrag(onActiveChange?: (index: number) => void) {
+export function useRailDrag(
+  onActiveChange?: (index: number) => void,
+  activeIndex?: number | null,
+) {
   const rail = useRef<HTMLDivElement>(null);
   const drag = useRef<RailDrag | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -95,7 +103,13 @@ export function useRailDrag(onActiveChange?: (index: number) => void) {
     window.addEventListener("pointercancel", up);
   };
 
-  /** 스크롤이 멎은 자리에서 가운데 카드를 알린다. 끌든 손가락으로 밀든 같은 길을 탄다. */
+  /**
+   * 스크롤이 멎은 자리에서 가운데 카드를 알린다. 끌든 손가락으로 밀든 같은 길을 탄다.
+   *
+   * **바뀔 때만 알린다.** 스크롤은 관성 한 프레임(16ms)마다도 오는데 그때마다 알리면
+   * 레일을 한 번 튕기는 동안 화면이 수십 번 다시 그려진다. 아카이브처럼 렌더가 무거운
+   * 화면은 그 값이 같아도 눈에 띄게 버벅인다.
+   */
   const onScroll = (event: React.UIEvent<HTMLDivElement>) => {
     if (!onActiveChange) return;
     const el = event.currentTarget;
@@ -104,7 +118,9 @@ export function useRailDrag(onActiveChange?: (index: number) => void) {
       width: (node as HTMLElement).offsetWidth,
     }));
     if (cards.length === 0) return;
-    onActiveChange(nearestCardByCenter(cards, el.scrollLeft + el.clientWidth / 2));
+    const index = nearestCardByCenter(cards, el.scrollLeft + el.clientWidth / 2);
+    if (index === activeIndex) return;
+    onActiveChange(index);
   };
 
   return {
