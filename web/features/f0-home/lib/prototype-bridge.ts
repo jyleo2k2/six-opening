@@ -10,6 +10,25 @@ import {
 } from "../../../shared/types/chatbot";
 
 const STOCK_ID_PATTERN = /^KRX:\d{6}$/;
+const STOCK_CODE_PATTERN = /^\d{6}$/;
+
+/** `app.html` 이 화면 전환마다 보내는 원래 화면 이름. 주소를 적는 데 쓴다. */
+export type PrototypeScreenMessage = { screen: string; code: string | null };
+
+/**
+ * `kiwoom:screen` 메시지를 검증한다. 챗봇 맥락(`kiwoom:chat-context`)과 달리
+ * 뭉뚱그리지 않은 원래 화면 이름이 온다. 화면 이름 목록을 여기서 좁히지는 않는다 —
+ * 주소로 옮길 수 있는 이름인지는 `screen-route` 가 판단한다.
+ */
+export function parseScreenMessage(value: unknown): PrototypeScreenMessage | null {
+  if (!isRecord(value)) return null;
+  const { screen, code } = value;
+  if (typeof screen !== "string" || !screen || screen.length > 40) return null;
+  return {
+    screen,
+    code: typeof code === "string" && STOCK_CODE_PATTERN.test(code) ? code : null,
+  };
+}
 
 /** `ui-src/template/shell-0.html` 의 402×874 화면 div. 두 곳이 같은 값을 써야 한다. */
 export const PROTOTYPE_SCREEN_ID = "kw-screen";

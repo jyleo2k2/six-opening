@@ -113,6 +113,7 @@ export function actionFromRoute(route: ScreenRoute): ChatUiAction | null {
  * `app.html` 이 보내는 챗봇 맥락을 주소로 바꾼다.
  *
  * 맥락의 `screen` 은 챗봇용으로 뭉뚱그려진 값이라 여기서 되살릴 수 있는 화면도 그만큼이다.
+ * 원래 화면 이름은 `routeFromAppScreen` 이 받으며, 이 함수는 그 메시지를 못 받았을 때의 폴백이다.
  * 종목 코드가 없는 `stock`·`order` 는 주소로 만들 수 없으므로 `null` 을 준다 —
  * 호출한 쪽이 주소를 건드리지 않는다.
  */
@@ -126,4 +127,37 @@ export function routeFromChatContext(context: ChatContext): ScreenRoute | null {
   // 맥락만으로는 매수·매도를 구분할 수 없다. 주소는 종목까지만 좁힌다.
   if (context.screen === "order") return { screen: "stock", code };
   return null;
+}
+
+/**
+ * `app.html` 의 **원래 화면 이름**을 주소로 바꾼다 (`kiwoom:screen` 메시지).
+ *
+ * 챗봇 맥락과 달리 홈·탐색·랭킹·계좌가 구분되고 매수·매도도 갈린다.
+ * 여기 없는 화면(`chart`·`news`)은 종목 상세와 같은 주소를 쓴다 — 아직 자기 주소가 없고,
+ * 상세에서 열리는 하위 화면이라 뒤로 가면 상세로 돌아온다.
+ */
+export function routeFromAppScreen(screen: string, code: string | null): ScreenRoute | null {
+  switch (screen) {
+    case "home":
+      return { screen: "home" };
+    case "explore":
+      return { screen: "explore" };
+    case "ranking":
+      return { screen: "ranking" };
+    case "portfolio":
+      return { screen: "portfolio" };
+    case "archive":
+      return { screen: "archive" };
+    case "detail":
+    case "chart":
+    case "news":
+      return code && STOCK_CODE.test(code) ? { screen: "stock", code } : null;
+    case "buy":
+    case "sell":
+      return code && STOCK_CODE.test(code)
+        ? { screen: "order", code, side: screen }
+        : null;
+    default:
+      return null;
+  }
 }

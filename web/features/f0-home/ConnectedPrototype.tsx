@@ -12,11 +12,13 @@ import {
   isRecord,
   parseBehaviorEvent,
   parseChatContext,
+  parseScreenMessage,
   readPrototypeScreenRect,
 } from "./lib/prototype-bridge";
 import {
   actionFromRoute,
   pathFromRoute,
+  routeFromAppScreen,
   routeFromChatContext,
   routeFromPath,
   type ScreenRoute,
@@ -25,6 +27,7 @@ import {
 const CHAT_CONTEXT_MESSAGE = "kiwoom:chat-context";
 const CHAT_BEHAVIOR_MESSAGE = "kiwoom:chat-behavior";
 const OPEN_CHAT_ACTION_MESSAGE = "kiwoom:open-chat-action";
+const SCREEN_MESSAGE = "kiwoom:screen";
 
 // 가족 피드는 app.html 아카이브 수익률 탭이 소유한다. 여기 오버레이로 겹쳐 두지 않는다.
 export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
@@ -85,14 +88,19 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
   // 히스토리를 쌓지 않는다(replaceState) — 앱 안에 자체 뒤로가기 버튼이 있어서
   // pushState 로 쌓으면 두 개의 뒤로가기가 서로 어긋난다.
   const pushedPath = useRef<string | null>(null);
-  const syncPathFromContext = (context: ChatContext) => {
-    const next = routeFromChatContext(context);
+  const writePath = (next: ScreenRoute | null) => {
     if (!next) return;
     const path = pathFromRoute(next);
     if (path === window.location.pathname || path === pushedPath.current) return;
     pushedPath.current = path;
     window.history.replaceState(null, "", path);
   };
+  // 원래 화면 이름(`kiwoom:screen`)이 정확하다. 챗봇 맥락은 그 메시지를 못 받았을 때의 폴백이다.
+  const syncPathFromContext = (context: ChatContext) => {
+    if (sawScreenMessage.current) return;
+    writePath(routeFromChatContext(context));
+  };
+  const sawScreenMessage = useRef(false);
 
   // 브라우저 뒤로·앞으로 가기.
   useEffect(() => {
@@ -121,6 +129,15 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
           chatContextRef.current = nextContext;
           setChatContext(nextContext);
           syncPathFromContext(nextContext);
+        }
+        return;
+      }
+
+      if (event.data.type === SCREEN_MESSAGE) {
+        const message = parseScreenMessage(event.data);
+        if (message) {
+          sawScreenMessage.current = true;
+          writePath(routeFromAppScreen(message.screen, message.code));
         }
         return;
       }
