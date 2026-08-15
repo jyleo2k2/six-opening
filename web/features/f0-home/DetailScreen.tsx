@@ -11,7 +11,7 @@ import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import { won } from "./lib/portfolio-view";
 import {
-  BuyCtaFooter,
+  StockFooter,
   SUB_PAGE,
   SubScreenHeader,
 } from "./lib/stock-chrome";
@@ -291,6 +291,7 @@ export function DetailScreen({
         locked={locked}
         name={stock.name}
         onBack={() => setView("detail")}
+        onLeave={onLeave}
         onStartBuy={startBuy}
         priceText={priceText}
         changeText={changeText}
@@ -301,6 +302,7 @@ export function DetailScreen({
         item={activeNews}
         locked={locked}
         onBack={() => setView("detail")}
+        onLeave={onLeave}
         onStartBuy={startBuy}
         stockName={stock.name}
       />
@@ -420,7 +422,7 @@ export function DetailScreen({
             </div>
           </div>
         </div>
-        <BuyCtaFooter locked={locked} onStartBuy={startBuy} />
+        <StockFooter locked={locked} onLeave={onLeave} onStartBuy={startBuy} />
       </div>
     );
 

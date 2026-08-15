@@ -83,9 +83,19 @@ const TABS: { id: NavTab; label: string; path: string; icon: (color: string) => 
 
 export function BottomNav({
   active,
+  atTabRoot = true,
   onLeave,
 }: {
   active: NavTab | null;
+  /**
+   * 지금 화면이 켜진 탭의 **첫 화면**인가. 기본은 그렇다 — 홈·탐색·아카이브·랭킹은
+   * 자기 탭의 첫 화면이라 그 탭을 다시 눌러도 갈 곳이 없다.
+   *
+   * 종목 상세·차트·뉴스처럼 탭 안쪽으로 한 걸음 들어온 화면은 `false` 다. 이때는 켜진
+   * 탭을 눌러도 이동한다 — 안 그러면 목록으로 돌아가려고 `모의투자` 를 누른 손이
+   * 아무 일도 일어나지 않는 화면 앞에 남는다.
+   */
+  atTabRoot?: boolean;
   onLeave: (path: string) => void;
 }) {
   return (
@@ -98,7 +108,7 @@ export function BottomNav({
             <div
               key={tab.id}
               onClick={() => {
-                if (!on) onLeave(tab.path);
+                if (!on || !atTabRoot) onLeave(tab.path);
               }}
               style={TAB}
             >
