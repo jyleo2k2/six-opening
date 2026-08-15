@@ -3514,6 +3514,29 @@ function isPersonalDataQuestion(message: string) {
   return PERSONAL_DATA_QUESTION.test(message);
 }
 
+/**
+ * 용어 사전이 답해도 되는 **정의 질문 형태**인지.
+ *
+ * 사전은 정의 질문에 강하다 — 600문항 실측에서 `term` 의도 정확도가 98% 였다.
+ * 문제는 정의를 묻지 않은 문장까지 낱말만 보고 카드를 냈다는 것이다.
+ * "왜 주식 가격이 매일 바뀌어?" 에 "주식은 회사의 작은 조각이에요" 가 나갔다.
+ *
+ * 여기서 걸러진 질문은 `fallback` 으로 내려가 생성 + 2단 판정을 받는다.
+ * 그 경로는 이미 있는데 트래픽이 0.3% 뿐이라 놀고 있었다.
+ */
+/**
+ * [측정 후 폐기] 사전을 "정의 질문 형태"로만 좁혀 나머지를 모델로 내려보내는
+ * 게이트를 만들어 600문항으로 재봤다. 두 방향 모두 값을 내지 못했다.
+ *
+ * - 허용 형태 나열: 정의·성질·확인 질문의 표현이 끝없이 갈라져
+ *   ("~ 거야?", "~ 건가요?", "~ 수도 있음?") 목록이 따라가지 못했다.
+ * - 제외 형태만(왜·어떻게·언제·어디): fallback 이 3→12건으로 2% 만 움직였고,
+ *   "차트 빨간색이 왜 이렇게 많아" 처럼 큐레이트 답이 맞는 질문까지 걷어냈다.
+ *
+ * 남은 오답은 "답이 주제는 맞는데 물은 지점을 비껴간" 경우라 **문장 형태로는
+ * 구분되지 않는다.** 답과 질문을 함께 읽어야 판정되므로 다음 단계는
+ * 의미 기반 답변 적합성 검사다 — 그때 이 자리를 다시 쓴다.
+ */
 const ASKS_PNL = ["수익률", "수익율", "손익", "얼마나올랐", "얼마나내렸", "몇퍼", "몇프로"];
 const ASKS_CASH = ["잔고", "현금", "쓸수있는돈", "남은돈", "예수금", "돈얼마", "얼마남았"];
 const ASKS_HOLDINGS = ["보유", "가진회사", "가진종목", "몇곳", "몇개샀", "종목수"];
@@ -4457,6 +4480,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const explicitCompanyFactReply = getExplicitCompanyFactReply(message, context);
   if (explicitCompanyFactReply) return explicitCompanyFactReply;
 
+  // `findChatbotKnowledge` 는 항목마다 고른 트리거로 매칭하므로 정확도가 높다
+  // (실측 term 98%). 여기에는 정의 형태 게이트를 걸지 않는다 — 게이트는 낱말
+  // 조합으로 넓게 잡는 `findTermKind` 쪽 오답만 막는 게 목적이다.
   const knowledge = findChatbotKnowledge(message);
   if (knowledge) {
     return reply(
