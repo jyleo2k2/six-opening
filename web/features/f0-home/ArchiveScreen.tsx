@@ -561,10 +561,18 @@ export function ArchiveScreen({
                   <div style={{ fontSize: 16, fontWeight: 700, color: "#001E5A", letterSpacing: "-0.01em", padding: "6px 0 0" }}>
                     보유 종목 · 섹터별
                   </div>
+                  {/*
+                    **`touch-action` 을 두지 않는다(기본 `auto`).** 카드 모아보기 레일은
+                    `pan-x` 를 쓰지만 그건 세로로 스크롤되지 않는 자기 자리에 있어서다.
+                    이 레일은 세로로 스크롤되는 `BODY` 안에 있으므로 `pan-x` 를 걸면
+                    "세로 팬은 브라우저가 처리하지 말라"가 돼, 섹터 카드에 손가락을 얹고
+                    아래로 밀 때 피드가 따라 내려오지 않는다. `useRailDrag` 는 터치를
+                    아예 무시하고 네이티브 스크롤에 맡기므로 여기서 막으면 대신할 것이 없다.
+                  */}
                   <div
                     onPointerDown={sectorRail.onPointerDown}
                     ref={sectorRail.ref}
-                    style={{ display: "flex", alignItems: "stretch", gap: 9, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "11px 2px 4px", scrollbarWidth: "none", cursor: "grab", touchAction: "pan-x", userSelect: "none", WebkitUserSelect: "none" }}
+                    style={{ display: "flex", alignItems: "stretch", gap: 9, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "11px 2px 4px", scrollbarWidth: "none", cursor: "grab", userSelect: "none", WebkitUserSelect: "none" }}
                   >
                     {sectors.map((sector) => (
                       <div
