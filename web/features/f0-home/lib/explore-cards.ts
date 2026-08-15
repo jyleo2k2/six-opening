@@ -1,3 +1,4 @@
+import { searchAliasesFor } from "../../../shared/data/stocks";
 import type { Universe, UniverseLive } from "./use-universe";
 
 /**
@@ -9,6 +10,55 @@ import type { Universe, UniverseLive } from "./use-universe";
  */
 const UP = "#E8322E";
 const DOWN = "#1668DC";
+
+const CHOSUNG = [
+  "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ",
+  "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ",
+];
+const CHOSUNG_SET = new Set(CHOSUNG);
+const HANGUL_BASE = 0xac00;
+const HANGUL_LAST = 0xd7a3;
+
+/** 완성형 한글 한 글자를 초성으로 줄인다. 한글이 아니면 그대로 둔다. */
+function toChosung(char: string): string {
+  const code = char.charCodeAt(0);
+  if (code < HANGUL_BASE || code > HANGUL_LAST) return char;
+  return CHOSUNG[Math.floor((code - HANGUL_BASE) / (21 * 28))];
+}
+
+function chosungString(text: string): string {
+  return [...text].map(toChosung).join("");
+}
+
+/** "ㅅㅅㅈㅈ" 처럼 자음만 쳤으면 초성 검색으로 본다. */
+function isChosungQuery(query: string): boolean {
+  return [...query].every((char) => CHOSUNG_SET.has(char));
+}
+
+/**
+ * `query`의 글자가 `text`에 이 순서 그대로 나오면(붙어 있지 않아도 된다) 맞는다.
+ * "SK하이닉스"에서 "하"(3번째) 다음에 "닉"(5번째)이 나오므로 "하닉"이 걸리는 식이다.
+ * 한 글자짜리 검색어는 부분일치와 결과가 같다.
+ */
+function isOrderedSubsequence(query: string, text: string): boolean {
+  let i = 0;
+  for (const char of text) {
+    if (i < query.length && char === query[i]) i += 1;
+  }
+  return i === query.length;
+}
+
+/**
+ * 종목명은 순서만 맞으면 붙어 있지 않아도 찾는다("하닉"→SK하이닉스, "현차"→현대차).
+ * 별칭(`shared/data/stocks`의 `searchAliases`)은 정확한 표기라 부분일치로만 찾는다 —
+ * "YG"로 와이지엔터테인먼트를 찾는 식이다. 자음만 쳤으면 초성으로 줄여 견준다 —
+ * "ㅅㅅㅈㅈ"로 삼성전자를 찾는 식이다.
+ */
+function matchesQuery(name: string, code: string, query: string): boolean {
+  if (isChosungQuery(query)) return chosungString(name).includes(query);
+  if (isOrderedSubsequence(query, name.toLowerCase())) return true;
+  return searchAliasesFor(code).some((alias) => alias.toLowerCase().includes(query));
+}
 
 export type ExploreFilter = string; // 'all' | 'watch' | 유니버스 섹터 id
 
@@ -81,7 +131,7 @@ export function exploreList(
   // `Array.sort` 가 안정 정렬이라, 업종별에서 같은 업종끼리는 유니버스 차례가 그대로 남는다.
   const ordered = (rows: ExploreStockRow[]) => rows.sort(comparator(sort, universe));
   const q = query.trim().toLowerCase();
-  if (q) return ordered(merged.filter((stock) => stock.name.toLowerCase().includes(q)));
+  if (q) return ordered(merged.filter((stock) => matchesQuery(stock.name, stock.code, q)));
   if (filter === "all") return ordered(merged);
   if (filter === "watch") return ordered(merged.filter((stock) => watchlist.includes(stock.code)));
   return ordered(merged.filter((stock) => stock.sector === filter));

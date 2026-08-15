@@ -39,6 +39,19 @@ assert.deepEqual(exploreList(universe, live, "watch", "", ["036570"]).map((s) =>
 // 검색이 섹터·관심 선택보다 앞선다.
 assert.deepEqual(exploreList(universe, live, "game", "삼성", ["036570"]).map((s) => s.code), ["005930"]);
 
+// 별칭도 이름처럼 찾는다 — `shared/data/stocks`의 searchAliases를 그대로 쓴다(엔씨소프트 = "NC").
+assert.deepEqual(exploreList(universe, live, "game", "nc", []).map((s) => s.code), ["036570"]);
+
+// 자음만 쳐도(초성) 찾는다 — 삼성전자 = ㅅㅅㅈㅈ.
+assert.deepEqual(exploreList(universe, live, "semi", "ㅅㅅㅈㅈ", []).map((s) => s.code), ["005930"]);
+
+// 붙어 있지 않아도 순서만 맞으면 찾는다 — 엔씨소프트에서 "엔"(1번째)·"프"(4번째)를 그 순서로.
+// 실제 서비스에서는 "SK하이닉스"→"하닉", "현대차"→"현차" 같은 준말이 이 규칙으로 걸린다.
+assert.deepEqual(exploreList(universe, live, "game", "엔프", []).map((s) => s.code), ["036570"]);
+
+// 순서가 뒤집히면 붙어 있어도 찾지 않는다.
+assert.deepEqual(exploreList(universe, live, "game", "프엔", []), []);
+
 // 업종별(기본) — 유니버스 업종 차례로 묶인다. 같은 업종 안에서는 원래 차례가 남는다.
 assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), [
   "259960",
