@@ -17,9 +17,6 @@
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
     }
-    if (this.state.screen === 'archive' && (!prevState || prevState.screen !== 'archive')) {
-      this.loadArchiveFeedReactions();
-    }
   }
 
   // --- Supabase 연동 -------------------------------------------------
