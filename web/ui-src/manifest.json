@@ -48,7 +48,6 @@
     "methods/notifyChatContext.js",
     "methods/notifyChatBehavior.js",
     "methods/sectorOf.js",
-    "methods/jumpCard.js",
     "methods/totalAsset.js",
     "methods/chip.js",
     "methods/navItem.js",
