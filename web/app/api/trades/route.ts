@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { findProfileById, selectRows, sessionUserId } from "../supabase";
+import { findProfileById, selectFilledTrades, sessionUserId } from "../supabase";
 import type { ChartTrade } from "../../../shared/engine/trade-markers";
 
 export const runtime = "nodejs";
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       ? { "profiles.family_tag": `eq.${profile.family_tag}` }
       : { user_id: `eq.${userId}` };
 
-    const rows = await selectRows<TransactionRow>("transactions", {
+    const rows = await selectFilledTrades<TransactionRow>({
       select: SELECT,
       "stocks.stock_code": `eq.${symbol}`,
       ...scope,

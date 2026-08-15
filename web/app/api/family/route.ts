@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { buildSeasonCards } from "../profile/season-cards/route";
-import { findProfileById, selectRows, sessionUserId, type Profile } from "../supabase";
+import { findProfileById, selectFilledTrades, selectRows, sessionUserId, type Profile } from "../supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ export type FamilyDataDeps = {
 const defaultDeps: FamilyDataDeps = {
   findProfileById,
   selectProfiles: (params) => selectRows<Profile>("profiles", params),
-  selectTransactions: (params) => selectRows<TransactionRow>("transactions", params),
+  selectTransactions: (params) => selectFilledTrades<TransactionRow>(params),
   buildProfile: buildSeasonCards,
 };
 

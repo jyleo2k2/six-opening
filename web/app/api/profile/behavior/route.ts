@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { resolveCharacterFromBehaviorSignals } from "../../../../shared/engine/archive-profile.js";
-import { selectRows, sessionUserId } from "../../supabase";
+import { selectFilledTrades, selectRows, sessionUserId } from "../../supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   try {
     const [tabViews, transactions] = await Promise.all([
       selectRows<TabViewRow>("stock_tab_views", { select: "tab_count", user_id: `eq.${userId}` }),
-      selectRows<TransactionRow>("transactions", { select: "stock_id", user_id: `eq.${userId}` }),
+      selectFilledTrades<TransactionRow>({ select: "stock_id", user_id: `eq.${userId}` }),
     ]);
 
     const tabCountTotal = sumTabCounts(tabViews);
