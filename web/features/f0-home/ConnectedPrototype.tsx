@@ -10,7 +10,12 @@ import {
 } from "../f10-chatbot/lib/bottom-sheet";
 import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
 import { invalidateAccount } from "./lib/use-account";
-import type { WalletAccountId } from "./lib/use-wallet";
+import {
+  schoolOverride,
+  setSchoolOverride,
+  type SchoolOverride,
+  type WalletAccountId,
+} from "./lib/use-wallet";
 import { ArchiveScreen } from "./ArchiveScreen";
 import { DetailScreen } from "./DetailScreen";
 import { ExploreScreen } from "./ExploreScreen";
@@ -62,6 +67,72 @@ const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>([
 const isMigrated = (route: ScreenRoute | null) =>
   route !== null && MIGRATED_SCREENS.has(route.screen);
 
+/**
+ * 시연용 스쿨락 칩. `app.html` 오른쪽 패널에 있던 세 칩만 가져왔다 — 설명 카드는 옮기지
+ * 않는다. 시연에 필요한 것은 잠금 상태를 바꾸는 이 셋뿐이다.
+ *
+ * **화면 오버레이(z-5)와 폰 프레임(z-20)보다 위에 둔다.** 그 아래에 두면 `inset:0` 오버레이가
+ * 클릭을 먼저 먹는다 — `app.html` 쪽 칩이 눌리지 않게 된 것이 정확히 그 이유였다.
+ *
+ * 색은 `ui-src` 의 `devChip` 과 같은 값을 쓴다. 폰 밖 시연용 크롬이라 디자인 시스템 토큰
+ * 대상이 아니고, 원래 패널과 달라 보일 이유도 없다.
+ */
+function SchoolLockChips({
+  value,
+  onPick,
+}: {
+  value: SchoolOverride;
+  onPick: (next: SchoolOverride) => void;
+}) {
+  const chip = (next: SchoolOverride, label: string) => {
+    const on = value === next;
+    return (
+      <button
+        key={next}
+        onClick={() => onPick(next)}
+        style={{
+          padding: "7px 13px",
+          borderRadius: 10,
+          border: "none",
+          fontSize: 12.5,
+          fontWeight: on ? 800 : 600,
+          cursor: "pointer",
+          color: on ? "#fff" : "#6E7488",
+          background: on ? "#01185A" : "#F1F2F8",
+        }}
+        type="button"
+      >
+        {label}
+      </button>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        left: 16,
+        bottom: 16,
+        zIndex: 30,
+        display: "flex",
+        gap: 6,
+        alignItems: "center",
+        background: "#fff",
+        borderRadius: 16,
+        padding: "9px 12px",
+        boxShadow: "0 4px 18px rgba(35,25,80,0.12)",
+      }}
+    >
+      <span style={{ fontSize: 12.5, fontWeight: 700, color: "#01185A", marginRight: 2 }}>
+        시연 · 학교 시간
+      </span>
+      {chip("auto", "자동")}
+      {chip("on", "학교 시간")}
+      {chip("off", "하교 후")}
+    </div>
+  );
+}
+
 // 가족 피드는 app.html 아카이브 수익률 탭이 소유한다. 여기 오버레이로 겹쳐 두지 않는다.
 export function ConnectedPrototype({
   route,
@@ -80,6 +151,14 @@ export function ConnectedPrototype({
   // 자기 화면 맥락을 그대로 들고 있을 뿐이다.
   const [overlayContext, setOverlayContext] = useState<ChatContext | null>(null);
   const [screenRect, setScreenRect] = useState<PrototypeScreenRect | null>(null);
+  /**
+   * 스쿨락 강제 설정. **마운트 뒤에 읽는다** — 저장소는 서버에 없으므로 첫 렌더에서 읽으면
+   * 서버와 클라이언트의 칩 상태가 갈린다. `null` 인 동안은 칩을 그리지 않는다.
+   *
+   * 이 상태가 바뀌면 옮겨 온 화면이 함께 다시 그려지고, 그때 `canTrade` 가 새 값을 읽는다.
+   */
+  const [school, setSchool] = useState<SchoolOverride | null>(null);
+  useEffect(() => setSchool(schoolOverride()), []);
 
   // 챗봇 시트는 폰 프레임 안 화면에 딱 맞아야 한다. 배율은 app.html 이 자기 뷰포트로 정하므로
   // 여기서 다시 계산하지 않고 실제 요소를 잰다. 창이 바뀌면 app.html 의 배율 갱신이 먼저
@@ -336,6 +415,15 @@ export function ConnectedPrototype({
             zIndex: 20,
             pointerEvents: "none",
           }}
+        />
+      )}
+      {school !== null && (
+        <SchoolLockChips
+          onPick={(next) => {
+            setSchoolOverride(next);
+            setSchool(next);
+          }}
+          value={school}
         />
       )}
     </div>

@@ -106,13 +106,45 @@ export function useWallet() {
 }
 
 /**
- * 자녀는 정규장(평일 09:00~15:30) 동안 매매가 잠긴다.
+ * 시연용 스쿨락 강제. `auto` 면 시계를 보고, `on`·`off` 면 시계를 무시한다.
  *
- * **[제약]** 시연용 강제 설정(`forceSchool`)은 `app.html` 의 화면 상태라 저장되지 않는다.
- * 그래서 옮겨 온 화면은 시계만 보고 판단한다 — 오른쪽 패널로 '학교 시간'을 강제해도
- * 이 화면에는 반영되지 않는다. 강제 설정이 저장 대상이 되면 그때 같이 읽는다.
+ * 예전에는 `app.html` 오른쪽 패널의 화면 상태(`forceSchool`)였다. 주문 화면까지 React 로
+ * 옮기면서 오버레이가 iframe 을 항상 덮게 돼 그 칩을 **누를 수 없게 됐고**, 장중이 아니면
+ * 스쿨락을 시연할 방법이 사라졌다. 그래서 판정이 모이는 이 파일로 가져온다.
+ *
+ * 화면을 오가도 남아야 하므로 `localStorage` 에 적는다. 주소 파라미터로 두면 `openRoute` 가
+ * 경로만 `replaceState` 하므로 화면을 옮기는 순간 사라진다.
  */
+export type SchoolOverride = "auto" | "on" | "off";
+
+const FORCE_SCHOOL_KEY = "kw_force_school";
+
+// `isSchoolTime` 은 렌더 중에 불린다. 매 렌더마다 저장소를 읽지 않도록 모듈에 들고 있는다.
+let override: SchoolOverride = "auto";
+let overrideLoaded = false;
+
+function readOverride(): SchoolOverride {
+  if (overrideLoaded || typeof window === "undefined") return override;
+  const saved = window.localStorage.getItem(FORCE_SCHOOL_KEY);
+  if (saved === "on" || saved === "off") override = saved;
+  overrideLoaded = true;
+  return override;
+}
+
+export const schoolOverride = () => readOverride();
+
+export function setSchoolOverride(next: SchoolOverride) {
+  override = next;
+  overrideLoaded = true;
+  if (typeof window === "undefined") return;
+  if (next === "auto") window.localStorage.removeItem(FORCE_SCHOOL_KEY);
+  else window.localStorage.setItem(FORCE_SCHOOL_KEY, next);
+}
+
+/** 자녀는 정규장(평일 09:00~15:30) 동안 매매가 잠긴다. 강제 설정이 있으면 그쪽이 이긴다. */
 export function isSchoolTime(now = new Date()) {
+  const forced = readOverride();
+  if (forced !== "auto") return forced === "on";
   const day = now.getDay();
   const hour = now.getHours() + now.getMinutes() / 60;
   return day >= 1 && day <= 5 && hour >= 9 && hour < 15.5;
