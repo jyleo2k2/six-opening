@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatNewsDate, validNewsItem, type NewsItem } from "./lib/stock-news";
+import { visibleTermTreatments } from "../f2-trade/lib/news/contracts";
 import {
   StockFooter,
   SUB_PAGE,
@@ -26,6 +27,15 @@ const LINE_NUM = styleFromCss(
 );
 const LINE_TEXT = styleFromCss(
   "flex:1;font-size:14px;font-weight:500;color:#5C6280;line-height:1.6;padding-top:2px",
+);
+const TERM_CARD = styleFromCss(
+  "background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)",
+);
+const TERM_WORD = styleFromCss(
+  "flex:none;font-size:13px;font-weight:800;color:#D5327A;background:#FDEFF5;border-radius:999px;padding:5px 11px",
+);
+const TERM_TEXT = styleFromCss(
+  "flex:1;font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6;padding-top:4px",
 );
 const SOURCE_ROW = styleFromCss(
   "display:flex;align-items:center;justify-content:space-between;gap:12px;background:#FFFFFF;border-radius:22px;padding:14px 16px;" +
@@ -81,6 +91,9 @@ export function NewsScreen({
     };
   }, [item, code]);
 
+  // 화면에 나온 낱말만 최대 3개. 고르는 규칙은 뉴스 계약이 갖는다.
+  const terms = visibleTermTreatments(news);
+
   const openSource = () => {
     if (!validNewsItem(news, code)) return;
     // app.html 은 iframe 안에서 원문으로 이동했지만, 여기서 그대로 이동하면 앱이
@@ -108,6 +121,23 @@ export function NewsScreen({
             ))}
           </div>
         </div>
+
+        {terms.length > 0 ? (
+          <div style={TERM_CARD}>
+            <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A" }}>이 말은 무슨 뜻이야?</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 11, marginTop: 13 }}>
+              {terms.map((treatment) => (
+                <div
+                  key={treatment.term}
+                  style={{ display: "flex", alignItems: "flex-start", gap: 10 }}
+                >
+                  <div style={TERM_WORD}>{treatment.term}</div>
+                  <div style={TERM_TEXT}>{treatment.easyText}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div style={SOURCE_ROW}>
           <div style={styleFromCss("min-width:0;font-size:13px;font-weight:500;color:#8E93A8;line-height:1.5")}>

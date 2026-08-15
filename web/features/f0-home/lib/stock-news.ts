@@ -4,6 +4,8 @@
  * 서버 응답을 화면이 다시 검사하는 이유: 뉴스는 외부 기사에서 만든 값이라, 계약이
  * 어긋난 항목이 한 건이라도 화면에 오르면 안 된다(3줄 요약 아니면 버린다).
  */
+import type { NewsTermTreatment } from "../../f2-trade/lib/news/contracts";
+
 export type NewsItem = {
   newsId: number;
   articleId: number;
@@ -15,9 +17,26 @@ export type NewsItem = {
   publisher: string;
   sourcePublishedAt: string;
   sourceUrl: string;
+  /** 서버가 안 보내던 시절의 응답도 화면에 오를 수 있어 없을 수 있다. */
+  termTreatments?: NewsTermTreatment[];
 };
 
 const STOCK_CODE = /^\d{6}$/u;
+
+function validTermTreatments(value: unknown): value is NewsTermTreatment[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (entry) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        typeof (entry as NewsTermTreatment).term === "string" &&
+        (entry as NewsTermTreatment).term.trim().length > 0 &&
+        typeof (entry as NewsTermTreatment).easyText === "string" &&
+        (entry as NewsTermTreatment).easyText.trim().length > 0,
+    )
+  );
+}
 
 export function validNewsItem(item: unknown, stockCode: string): item is NewsItem {
   if (typeof item !== "object" || item === null) return false;
@@ -43,6 +62,7 @@ export function validNewsItem(item: unknown, stockCode: string): item is NewsIte
   ) {
     return false;
   }
+  if (news.termTreatments !== undefined && !validTermTreatments(news.termTreatments)) return false;
   if (typeof news.publisher !== "string" || !news.publisher.trim()) return false;
   if (
     typeof news.sourcePublishedAt !== "string" ||
