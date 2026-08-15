@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:055550",
+  "eventType": "capital_or_dividend",
+  "second": "실적 말고 다른 사건. 자사주 매입.",
+  "article": {
+    "articleId": "MANUAL-BLOTER-667020",
+    "title": "신한, 자사주 7000억 매입 목표 조기 달성…KB금융 보다 앞섰다",
+    "publisher": "블로터",
+    "publishedAt": "2026-07-01T02:23:19.000Z",
+    "sourceUrl": "https://www.bloter.net/news/articleView.html?idxno=667020",
+    "sourceUnits": [
+      { "id": "S1", "text": "신한금융그룹이 상반기 7000억원 규모의 자사주 매입 목표를 조기 달성했다." },
+      { "id": "S2", "text": "신한금융은 1~6월에 걸쳐 7001억원 규모의 자사주를 매입했다." },
+      { "id": "S3", "text": "신한금융은 절차에 따라 소각을 진행할 예정이다." },
+      { "id": "S4", "text": "신한금융은 상반기 자사주 매입은 공시한 계획에 따라 진행됐고, 취득한 자기주식은 절차에 맞춰 소각할 예정" }
+    ]
+  },
+  "focusStatement": "신한금융그룹이 상반기 7000억원 규모의 자사주 매입 목표를 조기 달성하고 소각을 진행할 예정이다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "신한금융, 자기 주식 7000억원어치를 사들였다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "1월부터 6월까지 사 모았어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "buyback_period" },
+    { "text": "목표보다 일찍 다 채웠어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "early_completion" },
+    { "text": "사들인 주식은 없앨 계획이에요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "cancellation_plan" }
+  ],
+  "priceConnection": {
+    "text": "회사가 자기 주식을 사서 없애면 남은 주식 하나하나의 몫이 커져요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "shareholder_return",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "주식", "easyText": "회사를 조금씩 나눠 가진 증서", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

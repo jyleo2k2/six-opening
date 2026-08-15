@@ -26,7 +26,7 @@
   "priceConnection": {
     "text": "새로 받은 주문은 앞으로 할 일이 얼마나 쌓였는지를 보여줘요.",
     "sourceIds": ["S1", "S5"],
-    "kind": "contracted_business",
+    "kind": "business_performance",
     "basis": "event_education"
   },
   "termTreatments": [

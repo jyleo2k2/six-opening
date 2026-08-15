@@ -56,8 +56,20 @@ const patch = (path, row) =>
   rest(path, { method: "PATCH", headers: { Prefer: "return=representation" }, body: JSON.stringify(row) });
 
 const report = JSON.parse(await readFile(reportPath, "utf8"));
-const ready = report.cases.filter((item) => item.pipelineResult.status === "ready_for_storage");
-console.log(`대상 ${ready.length}건 (리포트 ${report.runId})`);
+
+// 종목당 두 번째 뉴스는 리포트 cases 에 못 들어가서 따로 온다(build.mjs 참고).
+const extraPath = process.argv.includes("--extra")
+  ? resolve(process.argv[process.argv.indexOf("--extra") + 1])
+  : null;
+const extras = extraPath
+  ? JSON.parse(await readFile(extraPath, "utf8")).cases
+  : [];
+
+const ready = [
+  ...report.cases.filter((item) => item.pipelineResult.status === "ready_for_storage"),
+  ...extras,
+];
+console.log(`대상 ${ready.length}건 (대표 ${ready.length - extras.length} + 추가 ${extras.length}, 리포트 ${report.runId})`);
 
 // 파이프라인 실행 기록. 같은 run_key 가 있으면 그걸 쓴다.
 let [run] = await select(`news_pipeline_runs?run_key=eq.${encodeURIComponent(report.runId)}&select=id`);

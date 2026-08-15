@@ -16,7 +16,7 @@
     ]
   },
   "focusStatement": "포스코인터내셔널이 2026년 2분기 연결 매출액 9조6232억원, 영업이익 4290억원, 당기순이익 2473억원을 기록했다.",
-  "anchorSourceId": "S1",
+  "anchorSourceId": "S3",
   "headline": { "text": "포스코인터내셔널, 2분기 순이익 2473억원으로 173.3% 증가", "sourceIds": ["S3"] },
   "body": [
     { "text": "매출은 9조6232억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "revenue" },

@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:010140",
+  "eventType": "binding_contract",
+  "second": "실적 말고 다른 사건. 신규 수주 계약.",
+  "article": {
+    "articleId": "MANUAL-NEWDAILY-2026070800198",
+    "title": "삼성중공업, 5년만 연간 수주 100억달러 돌파 … 상선 목표 98% 채웠다",
+    "publisher": "뉴데일리",
+    "publishedAt": "2026-07-08T05:48:00.000Z",
+    "sourceUrl": "https://biz.newdaily.co.kr/site/data/html/2026/07/08/2026070800198.html",
+    "sourceUnits": [
+      { "id": "S1", "text": "삼성중공업은 버뮤다 지역 선사로부터 원유운반선 2척을 총 2849억원에 수주했다고 8일 공시했다." },
+      { "id": "S2", "text": "해당 선박은 2029년 5월까지 순차적으로 인도할 예정이다." },
+      { "id": "S3", "text": "이번 계약으로 삼성중공업의 올해 누적 수주 실적은 상선 32척과 FLNG 2기 등 총 100억달러로 늘었다." },
+      { "id": "S4", "text": "삼성중공업이 연간 수주액 100억달러를 달성한 것은 글로벌 경기 회복에 힘입어 상선 발주가 크게 늘었던 2021년 이후 5년 만이다." },
+      { "id": "S5", "text": "삼성중공업은 이번 계약까지 상선 32척, 56억달러를 수주했다." }
+    ]
+  },
+  "focusStatement": "삼성중공업이 버뮤다 선사로부터 원유운반선 2척을 2849억원에 수주해 올해 누적 수주가 100억달러가 됐다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "삼성중공업, 2849억원짜리 배 2척을 주문받았다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "기름을 실어 나르는 배예요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "vessel_type" },
+    { "text": "2029년 5월까지 만들어 줘요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "delivery_deadline" },
+    { "text": "올해 받은 주문이 100억달러가 됐어요.", "sourceIds": ["S3"], "role": "context", "factKey": "cumulative_orders" }
+  ],
+  "priceConnection": {
+    "text": "주문을 받으면 앞으로 만들 일감이 그만큼 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "주문", "easyText": "만들어 달라고 미리 부탁하는 것", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

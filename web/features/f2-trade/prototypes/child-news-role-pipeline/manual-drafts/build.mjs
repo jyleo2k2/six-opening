@@ -25,6 +25,19 @@ function option(name, fallback) {
 
 const MAX_ARTICLE_AGE_MONTHS = 6;
 
+/** DB 의 news_publications_event_price_connection_check 와 같은 짝이다. 어긋나면 적재에서 터진다. */
+const PRICE_CONNECTION_BY_EVENT = {
+  observed_market_move: ["market_index", "observed_price_move"],
+  earnings: ["business_performance"],
+  sales_or_production: ["production_capacity", "recurring_sales", "business_performance"],
+  binding_contract: ["contracted_business"],
+  merger_or_ownership: ["business_combination", "ownership_and_credit"],
+  capital_or_dividend: ["shareholder_return", "ownership_and_credit"],
+  regulatory_decision: ["regulatory_permission"],
+  litigation_or_recall: ["legal_or_recall_cost", "operational_continuity"],
+  material_operational_risk: ["operational_continuity"],
+};
+
 const CHECK_NAMES = [
   "allowedScope", "primarySubject", "directMateriality", "sourceFidelity", "focusAlignment",
   "conciseThreeLineSummary", "noIrrelevantDetail", "attributionAndTiming", "allTermsEasy",
@@ -59,7 +72,10 @@ function assertDraft(item, runDateKst) {
       `${where}: 기사가 ${MAX_ARTICLE_AGE_MONTHS}개월보다 오래됐습니다(${item.article.publishedAt.slice(0, 10)} < ${oldest.toISOString().slice(0, 10)}).`,
     );
   }
-  if (item.headline.text.length > 60) throw new Error(`${where}: 제목이 60자를 넘습니다.`);
+  // DB 의 news_publications_headline_check 와 같은 값이어야 한다. 느슨하게 두면 적재에서 터진다.
+  if (item.headline.text.length > 44) {
+    throw new Error(`${where}: 제목이 44자를 넘습니다(${item.headline.text.length}자).`);
+  }
   checkIds(item.headline.sourceIds, "headline");
 
   if (item.body.length !== 3) throw new Error(`${where}: 요약은 정확히 3줄이어야 합니다.`);
@@ -73,6 +89,14 @@ function assertDraft(item, runDateKst) {
     checkIds(line.sourceIds, `body[${index}]`);
   }
   checkIds(item.priceConnection.sourceIds, "priceConnection");
+
+  const allowedKinds = PRICE_CONNECTION_BY_EVENT[item.eventType];
+  if (!allowedKinds) throw new Error(`${where}: 모르는 eventType 입니다(${item.eventType}).`);
+  if (!allowedKinds.includes(item.priceConnection.kind)) {
+    throw new Error(
+      `${where}: eventType ${item.eventType} 에는 priceConnection.kind 가 ${allowedKinds.join("·")} 여야 합니다(${item.priceConnection.kind}).`,
+    );
+  }
 
   // 아이가 보는 카드에는 최대 3개만 뜬다(README 노출 규칙). 수기 항목은 애초에 그만큼만 쓴다.
   if (item.termTreatments.length > 3) {
@@ -90,6 +114,11 @@ function assertDraft(item, runDateKst) {
     checkIds(treatment.sourceIds, `term:${treatment.term}`);
   }
   if (!ids.has(item.anchorSourceId)) throw new Error(`${where}: anchorSourceId 가 없는 근거입니다.`);
+  // DB 트리거가 anchor 를 headline·home_summary 양쪽 인용에서 찾는다(NEWS_PUBLICATION_ANCHOR_REQUIRED).
+  // home_summary 는 headline 을 그대로 복사하므로 제목 근거에 anchor 가 있으면 된다.
+  if (!item.headline.sourceIds.includes(item.anchorSourceId)) {
+    throw new Error(`${where}: 제목 근거에 anchorSourceId(${item.anchorSourceId}) 가 없습니다.`);
+  }
 }
 
 const reportPath = resolve(option("--report", ""));
@@ -177,7 +206,8 @@ function readyResult(item, runDateKst) {
         checks: Object.fromEntries(CHECK_NAMES.map((name) => [name, true])),
         issues: [],
       },
-      editorAttempts: 0,
+      // DB 는 1~2 만 받는다(news_publications_editor_attempts_check). 사람이 한 번에 썼으므로 1.
+      editorAttempts: 1,
   };
 }
 

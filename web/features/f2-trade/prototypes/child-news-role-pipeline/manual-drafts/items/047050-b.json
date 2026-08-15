@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:047050",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 투자 확대.",
+  "article": {
+    "articleId": "MANUAL-BLOTER-669547",
+    "title": "포스코인터, 美 가스 자산 인수 추진…올해 투자 2.2조로 확대",
+    "publisher": "블로터",
+    "publishedAt": "2026-07-30T06:59:03.000Z",
+    "sourceUrl": "https://www.bloter.net/news/articleView.html?idxno=669547",
+    "sourceUnits": [
+      { "id": "S1", "text": "포스코인터내셔널이 북미·동남아 천연가스 생산자산 인수를 추진하면서 올해 투자 규모를 2조2000억원으로 확대했다." },
+      { "id": "S2", "text": "올해 미국과 동남아에서 생산 및 개발 자산 인수를 추진하고 있다" },
+      { "id": "S3", "text": "포스코인터내셔널은 현재 미국에서 LNG 공급원 확보와 트레이딩 수익 창출이 가능한 생산 자산의 인수를 검토 중이다." },
+      { "id": "S4", "text": "포스코인터내셔널은 에너지 투자 확대에 따라 올해 설비투자비용(CAPEX) 계획을 기존 1조8000억원에서 2조2000억원으로 4000억원 상향 조정했다." }
+    ]
+  },
+  "focusStatement": "포스코인터내셔널이 북미·동남아 천연가스 생산자산 인수를 추진하며 올해 투자 규모를 2조2000억원으로 늘렸다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "포스코인터내셔널, 올해 투자를 2조2000억원으로 늘린다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "원래 계획보다 4000억원 늘렸어요.", "sourceIds": ["S4"], "role": "key_detail", "factKey": "investment_increase" },
+    { "text": "미국과 동남아에서 가스를 캐는 곳을 사요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "acquisition_targets" },
+    { "text": "천연가스를 안정적으로 얻으려는 거예요.", "sourceIds": ["S3"], "role": "context", "factKey": "acquisition_purpose" }
+  ],
+  "priceConnection": {
+    "text": "가스를 캐는 곳을 사면 회사가 팔 수 있는 양이 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "투자", "easyText": "돈을 들여 사업을 키우는 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "천연가스", "easyText": "땅속에서 캐내 불을 피우는 데 쓰는 기체", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

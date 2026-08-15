@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:009540",
+  "eventType": "binding_contract",
+  "second": "실적 말고 다른 사건. 신규 수주 계약.",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260713001119",
+    "title": "HD한국조선해양, 5456억원 규모 '초대형 암모니아 운반선' 3척 수주",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-07-13T08:40:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260713001119",
+    "sourceUnits": [
+      { "id": "S1", "text": "HD한국조선해양은 유럽 선주와 초대형 암모니아 운반선 3척에 대한 건조 계약을 체결했다고 13일 밝혔다. 계약 금액은 총 5456억원이다." },
+      { "id": "S2", "text": "이번 선박은 HD현대삼호에서 건조되며, 2030년 상반기까지 순차적으로 선주사에 인도될 예정이다." },
+      { "id": "S3", "text": "초대형 암모니아 운반선은 암모니아를 대량으로 운송하는 선박이다." },
+      { "id": "S4", "text": "HD한국조선해양은 이번 계약을 포함해 올해 총 9척의 초대형 암모니아 운반선을 수주했다." },
+      { "id": "S5", "text": "올해 누적 수주량은 142척, 금액으로는 163억9000만달러다." }
+    ]
+  },
+  "focusStatement": "HD한국조선해양이 유럽 선주와 초대형 암모니아 운반선 3척 건조 계약을 총 5456억원에 체결했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "HD한국조선해양, 5456억원짜리 배 3척을 주문받았다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "유럽 회사에서 주문했어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "customer_region" },
+    { "text": "2030년 상반기까지 만들어 줘요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "delivery_deadline" },
+    { "text": "올해 받은 주문이 142척이에요.", "sourceIds": ["S5"], "role": "context", "factKey": "cumulative_orders" }
+  ],
+  "priceConnection": {
+    "text": "주문을 받으면 앞으로 만들 일감이 그만큼 늘어나요.",
+    "sourceIds": ["S1", "S5"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "주문", "easyText": "만들어 달라고 미리 부탁하는 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

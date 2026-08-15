@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:011200",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 선대 확대 투자.",
+  "article": {
+    "articleId": "MANUAL-ZDNET-20260724132902",
+    "title": "HMM, 29조원 투자 승부수…컨테이너·벌크 선대 대폭 확대",
+    "publisher": "ZDNet Korea",
+    "publishedAt": "2026-07-24T04:29:00.000Z",
+    "sourceUrl": "https://zdnet.co.kr/view/?no=20260724132902",
+    "sourceUnits": [
+      { "id": "S1", "text": "HMM이 2030년까지 총 29조원을 투자해 컨테이너선과 벌크선 선대를 276척 규모로 확대한다." },
+      { "id": "S2", "text": "투자 기간은 올해부터 2030년 말까지이며, 예상 투자금액은 약 29조원이다." },
+      { "id": "S3", "text": "HMM은 이번 투자를 통해 컨테이너선 선대를 166척, 147만TEU 규모로 확대할 계획이다." },
+      { "id": "S4", "text": "벌크선은 110척, 1352만DWT 규모로 늘린다." },
+      { "id": "S5", "text": "계획대로 투자가 이뤄지면 컨테이너선과 벌크선을 합친 전체 선대는 276척으로 확대된다." },
+      { "id": "S6", "text": "이번 중장기 전략의 투자 규모는 2024년 발표한 계획보다 8조 2000억원 늘어난 수준이다." }
+    ]
+  },
+  "focusStatement": "HMM이 2030년까지 총 29조원을 투자해 컨테이너선과 벌크선을 합쳐 276척 규모로 선대를 늘리기로 했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "HMM, 배를 276척까지 늘리기로 했다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "2030년까지 29조원을 써요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "investment_amount" },
+    { "text": "짐칸 배는 166척으로 늘려요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "container_fleet" },
+    { "text": "2년 전 계획보다 8조2000억원 늘었어요.", "sourceIds": ["S6"], "role": "context", "factKey": "plan_increase" }
+  ],
+  "priceConnection": {
+    "text": "배가 늘면 한 번에 실어 나를 수 있는 짐도 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "척", "easyText": "배를 세는 단위", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

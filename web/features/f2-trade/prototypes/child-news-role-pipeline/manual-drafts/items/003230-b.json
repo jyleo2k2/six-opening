@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:003230",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 해외 신제품 출시.",
+  "article": {
+    "articleId": "MANUAL-THEGURU-103995",
+    "title": "삼양식품, '불닭 스와이시' 말레이시아 출격…美 이어 亞 공략",
+    "publisher": "THE GURU",
+    "publishedAt": "2026-07-06T00:21:09.000Z",
+    "sourceUrl": "https://www.theguru.co.kr/news/article.html?no=103995",
+    "sourceUnits": [
+      { "id": "S1", "text": "삼양식품 말레이시아 법인은 지난 5일(현지시간) 불닭 스와이시를 출시했다." },
+      { "id": "S2", "text": "'달콤한(Sweet)'과 '매운(Spicy)'의 합성어인 스와이시는 지난해 12월 미국 시장을 겨냥해 처음 선보인 해외 전용 라인업이다." },
+      { "id": "S3", "text": "자체 기준 5단계의 매운맛 중 가장 낮은 1단계로 개발, 현재 불닭 라인업 중 가장 순한 맛을 구현했다." },
+      { "id": "S4", "text": "기존 소스의 단맛을 강화하고 단맛을 더하는 스프링클을 별도로 담아 매운맛과 달콤한 풍미가 조화를 이루도록 설계했다는 게 회사 측 설명이다." },
+      { "id": "S5", "text": "미국에 이어 말레이시아를 두 번째 출시국으로 선택한 것은 현지의 높은 K-푸드 선호도와 글로벌 소비 트렌드를 반영한 결과로 풀이된다." }
+    ]
+  },
+  "focusStatement": "삼양식품 말레이시아 법인이 해외 전용 라면 '불닭 스와이시'를 현지에 출시했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "삼양식품, 말레이시아에 불닭 스와이시를 내놨다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "달콤하고 매운 맛이라는 뜻이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "name_meaning" },
+    { "text": "불닭 중에 가장 안 매운 1단계예요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "spice_level" },
+    { "text": "미국 다음으로 두 번째 나라예요.", "sourceIds": ["S5"], "role": "context", "factKey": "second_country" }
+  ],
+  "priceConnection": {
+    "text": "새 나라에서 팔기 시작하면 살 사람이 늘어나요.",
+    "sourceIds": ["S1", "S5"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "단계", "easyText": "매운 정도를 1부터 5까지 나눈 것", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

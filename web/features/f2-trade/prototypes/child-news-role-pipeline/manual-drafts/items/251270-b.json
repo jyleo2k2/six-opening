@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:251270",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 신작 출시 계획.",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260805000497",
+    "title": "넷마블 '하반기 게임 3종만 출시'…신작효과 부진에 라인업 축소",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-08-05T23:24:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260805000497",
+    "sourceUnits": [
+      { "id": "S1", "text": "기존에 발표했던 신작들 중 '나 혼자만 레벨업: 카르마', '샹그릴라 프론티어: 일곱 최강종', '프로젝트 이지스' 3종만 출시하기로 한 것이다." },
+      { "id": "S2", "text": "이중 '나 혼자만 레벨업: 카르마'와 '샹그릴라 프론티어: 일곱 최강종'은 오는 9월 열리는 도쿄 게임쇼에서 내년 출시 목표로 개발 중인 서브컬처 수집형 RPG '펄 인 블루'와 함께 공개될 예정이다." },
+      { "id": "S3", "text": "당초 넷마블은 하반기 이들 신작 외에도 프로젝트 옥토퍼스, 이블베인 등의 신작을 출시하기로 밝힌 바 있다." },
+      { "id": "S4", "text": "하반기 라인업을 조정한 이유는 보다 엄격한 런칭의 기준을 마련할 필요성을 느꼈기 때문" }
+    ]
+  },
+  "focusStatement": "넷마블이 2026년 하반기 신작을 5종에서 3종으로 줄여 '나 혼자만 레벨업: 카르마' 등만 출시하기로 했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "넷마블, 올해 하반기에 새 게임 3개만 낸다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "원래는 더 많이 내려고 했어요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "reduced_from_plan" },
+    { "text": "9월 도쿄 게임쇼에서 보여줘요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "tokyo_game_show" },
+    { "text": "기준을 더 엄격하게 하려는 거예요.", "sourceIds": ["S4"], "role": "context", "factKey": "stricter_standard" }
+  ],
+  "priceConnection": {
+    "text": "새 게임을 몇 개 내는지는 회사가 벌 돈과 이어져요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "게임쇼", "easyText": "새 게임을 사람들에게 보여 주는 큰 행사", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

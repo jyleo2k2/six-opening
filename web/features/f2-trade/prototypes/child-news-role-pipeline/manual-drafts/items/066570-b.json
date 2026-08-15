@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:066570",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 신제품 브랜드 출시.",
+  "article": {
+    "articleId": "MANUAL-ETNEWS-20260610000158",
+    "title": "라인업 이어 브랜드도 바꾼다…LG전자, 로봇청소기 '홈봇'으로 재출격",
+    "publisher": "전자신문",
+    "publishedAt": "2026-06-10T07:00:00.000Z",
+    "sourceUrl": "https://www.etnews.com/20260610000158",
+    "sourceUnits": [
+      { "id": "S1", "text": "LG전자는 이달 출시할 차세대 로봇청소기 신제품에 '홈봇'이라는 새로운 브랜드를 적용하는 방안을 추진하고 있다." },
+      { "id": "S2", "text": "기존 'LG 코드제로 로보킹' 대신 'LG 홈봇'을 앞세워 로봇청소기 제품군을 별도 카테고리로 분리한다." },
+      { "id": "S3", "text": "기존 '코드제로'가 무선 청소기 중심의 브랜드였다면 '홈봇'은 청소 기능을 넘어 집 안 공간을 인식하고 이동하며 가전·앱·보안 서비스와 연결되는 로봇형 가전의 성격을 강조한 명칭이다." },
+      { "id": "S4", "text": "LG전자 로봇청소기 신제품에는 2way 스팀, AI 사물인식 기반 자율주행, LG쉴드 보안 체계 등이 적용될 것으로 알려졌다." },
+      { "id": "S5", "text": "일부 히든형 제품은 싱크대 걸레받이에 들어가 외부에서 보이지 않도록 설계돼 별도 거치 공간 부담을 줄였다." }
+    ]
+  },
+  "focusStatement": "LG전자가 새 로봇청소기에 '홈봇'이라는 브랜드를 적용해 로봇청소기를 별도 제품군으로 분리한다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "LG전자, 새 로봇청소기 이름을 홈봇으로 바꾼다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "예전 이름은 코드제로 로보킹이었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "previous_brand" },
+    { "text": "집 안 공간을 알아보고 스스로 움직여요.", "sourceIds": ["S3", "S4"], "role": "business_detail", "factKey": "self_navigation" },
+    { "text": "싱크대 밑에 숨는 제품도 있어요.", "sourceIds": ["S5"], "role": "context", "factKey": "hidden_type" }
+  ],
+  "priceConnection": {
+    "text": "새 제품이 잘 팔리면 회사가 버는 돈도 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "로봇청소기", "easyText": "스스로 돌아다니며 바닥을 치우는 기계", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "싱크대", "easyText": "부엌에서 설거지하는 자리", "treatment": "explained", "sourceIds": ["S5"] }
+  ]
+}

@@ -17,7 +17,7 @@
     ]
   },
   "focusStatement": "현대로템이 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했고 수주잔고가 창사 이후 처음으로 30조원을 넘었다고 밝혔다.",
-  "anchorSourceId": "S1",
+  "anchorSourceId": "S4",
   "headline": { "text": "현대로템, 수주잔고 30조원 넘어 창사 이후 최대", "sourceIds": ["S4", "S5"] },
   "body": [
     { "text": "2분기 매출은 1조6060억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "revenue" },
@@ -27,7 +27,7 @@
   "priceConnection": {
     "text": "수주잔고는 앞으로 만들어야 할 일감이 얼마나 쌓였는지를 보여줘요.",
     "sourceIds": ["S4", "S5"],
-    "kind": "contracted_business",
+    "kind": "business_performance",
     "basis": "event_education"
   },
   "termTreatments": [

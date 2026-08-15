@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:012330",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 해외 공장 가동.",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260716001167",
+    "title": "현대모비스, 유럽 전동화 거점 확대…글로벌 수주 기반 넓힌다",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-07-16T08:47:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260716001167",
+    "sourceUnits": [
+      { "id": "S1", "text": "현대모비스는 지난 3월 헝가리 중부 케치케메트에 건설한 모듈 공장의 가동을 시작했다." },
+      { "id": "S2", "text": "헝가리 공장에서는 메르세데스-벤츠 전동화 모델에 들어가는 섀시 모듈을 생산한다." },
+      { "id": "S3", "text": "스페인 나바라 지역에 건설한 배터리시스템어셈블리(BSA) 공장도 가동에 들어간다." },
+      { "id": "S4", "text": "이 공장에서는 폭스바겐 전기차에 탑재되는 배터리시스템을 생산한다." },
+      { "id": "S5", "text": "현대모비스는 지난해 글로벌 완성차 업체를 대상으로 91억7000만달러, 약 13조2000억원 규모의 핵심 부품을 수주했다." },
+      { "id": "S6", "text": "슬로바키아 공장에서는 구동모터와 감속기, 인버터를 하나로 통합한 전기차용 파워일렉트릭(PE) 시스템 양산을 추진하고 있다." }
+    ]
+  },
+  "focusStatement": "현대모비스가 헝가리 모듈 공장 가동을 시작하고 스페인 배터리시스템 공장도 가동에 들어가며 유럽 생산 거점을 넓혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "현대모비스, 헝가리 공장을 돌리기 시작했다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "벤츠 전기차 부품을 만들어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "hungary_output" },
+    { "text": "스페인 공장은 폭스바겐 것을 만들어요.", "sourceIds": ["S3", "S4"], "role": "business_detail", "factKey": "spain_output" },
+    { "text": "지난해 외국 회사에서 13조2000억원 주문받았어요.", "sourceIds": ["S5"], "role": "context", "factKey": "overseas_orders" }
+  ],
+  "priceConnection": {
+    "text": "공장이 늘면 만들어 팔 수 있는 부품도 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "공장", "easyText": "물건을 많이 만들어 내는 큰 건물", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "부품", "easyText": "기계를 이루는 조각 하나하나", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

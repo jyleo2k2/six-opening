@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:012450",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 수출 물량 선적.",
+  "article": {
+    "articleId": "MANUAL-GENEWS-20260706-K9PL",
+    "title": "폴란드행 K9PL 첫 선적… 한화에어로 '현지 생산+군수'로 37조 수주잔고 실적 전환 시동",
+    "publisher": "글로벌이코노믹",
+    "publishedAt": "2026-07-05T22:15:00.000Z",
+    "sourceUrl": "https://www.g-enews.com/article/Global-Biz/2026/07/202607060712258048fbbec65dfb_1",
+    "sourceUnits": [
+      { "id": "S1", "text": "한화에어로스페이스가 이달 3일(현지시각) 창원 공장에서 폴란드 수출용 K9PL 자주포 첫 배치를 선적했다고 지난 4일 보도했다." },
+      { "id": "S2", "text": "이번 인도 물량은 2023년 12월 1일 체결한 3조 4474억 원 규모의 2차 실행 계약에 따른 것이다." },
+      { "id": "S3", "text": "총 152문 계약 규모 중 지난해 11월 인도를 마친 K9A1 6문을 제외한 나머지 146문이 내년까지 순차 공급된다." },
+      { "id": "S4", "text": "폴란드가 두 차례 실행 계약으로 확정한 K9 자주포 누적 주문량은 총 364문이다." },
+      { "id": "S5", "text": "지난해 말 기준 약 37조 2000억 원까지 축적된 회사 전체 수주잔고 가운데 지상 방산 비중이 큰 만큼, 이번 인도가 수주잔고 실적 전환 구간 진입을 알리는 신호탄으로 평가받는다." }
+    ]
+  },
+  "focusStatement": "한화에어로스페이스가 창원 공장에서 폴란드로 보낼 K9PL 자주포 첫 물량을 선적했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "한화에어로스페이스, 폴란드로 보낼 첫 물량을 실었다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "창원 공장에서 배에 실었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "shipping_origin" },
+    { "text": "3조4474억원짜리 계약의 물량이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "contract_amount" },
+    { "text": "폴란드가 주문한 건 모두 364문이에요.", "sourceIds": ["S4"], "role": "context", "factKey": "total_order_units" }
+  ],
+  "priceConnection": {
+    "text": "주문받은 것을 실제로 보내기 시작하면 그때부터 돈이 들어와요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "계약", "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "공장", "easyText": "물건을 많이 만들어 내는 큰 건물", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

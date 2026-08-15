@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:316140",
+  "eventType": "merger_or_ownership",
+  "second": "실적 말고 다른 사건. 자회사 완전 편입.",
+  "article": {
+    "articleId": "MANUAL-EDAILY-05303766645419400",
+    "title": "우리금융, 동양생명 완전자회사 편입…ABL생명 통합 기반 마련",
+    "publisher": "이데일리",
+    "publishedAt": "2026-04-24T07:57:45.000Z",
+    "sourceUrl": "https://marketin.edaily.co.kr/News/ReadE?newsId=05303766645419400",
+    "sourceUnits": [
+      { "id": "S1", "text": "우리금융과의 포괄적 주식교환을 추진하고 100% 완전자회사로 편입될 예정" },
+      { "id": "S2", "text": "주식교환비율은 동양생명 보통주 1주당 우리금융 보통주 0.2521주" },
+      { "id": "S3", "text": "7월 24일 임시주주총회에서 특별결의를 거친 뒤 8월 중 주식교환을 완료하고 상장폐지 절차를 밟을 예정" },
+      { "id": "S4", "text": "2009년 유가증권시장 상장 이후 17년 만이다" },
+      { "id": "S5", "text": "완전자회사 전환 이후에는 ABL생명과의 통합 작업도 본격화될 수 있다는 관측이 나온다" }
+    ]
+  },
+  "focusStatement": "우리금융이 포괄적 주식교환으로 동양생명을 100% 완전자회사로 편입한다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "우리금융, 동양생명을 100% 자회사로 만든다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "주식을 서로 바꾸는 방식이에요.", "sourceIds": ["S1", "S2"], "role": "key_detail", "factKey": "share_swap_method" },
+    { "text": "8월 중에 절차가 끝나요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "completion_timing" },
+    { "text": "동양생명은 2009년에 상장했었어요.", "sourceIds": ["S4"], "role": "context", "factKey": "listing_history" }
+  ],
+  "priceConnection": {
+    "text": "회사를 완전히 자기 것으로 만들면 그 회사가 버는 돈도 전부 가져와요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_combination",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "자회사", "easyText": "어떤 회사가 주인인 다른 회사", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "주식", "easyText": "회사를 조금씩 나눠 가진 증서", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

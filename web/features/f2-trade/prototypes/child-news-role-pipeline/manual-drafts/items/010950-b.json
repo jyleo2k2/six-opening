@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:010950",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 대형 공장 건설.",
+  "article": {
+    "articleId": "MANUAL-SISAJOURNAL-363531",
+    "title": "울산시, S-OIL 샤힌 프로젝트 막바지 총력 지원…\"남은 인허가 312건 속도\"",
+    "publisher": "시사저널",
+    "publishedAt": "2026-02-23T05:47:00.000Z",
+    "sourceUrl": "https://www.sisajournal.com/news/articleView.html?idxno=363531",
+    "sourceUnits": [
+      { "id": "S1", "text": "샤힌 프로젝트는 온산국가산업단지 내 약 88만㎡ 부지에 총 9조2580억원이 투입되는 초대형 사업이다." },
+      { "id": "S2", "text": "2023년 3월 착공해 올해 6월 말 기계적 준공을 목표로 추진 중이며, 이후 연말까지 시운전을 거쳐 내년 1월 상업 운전에 들어갈 예정이다." },
+      { "id": "S3", "text": "상업 가동이 시작되면 에틸렌 180만t, 프로필렌 77만t, 부타디엔 20만t, 벤젠 28만t 등 기초유분을 생산하게 된다." },
+      { "id": "S4", "text": "LLDPE(선형저밀도폴리에틸렌) 88만t, HDPE(고밀도폴리에틸렌) 44만t 규모다." }
+    ]
+  },
+  "focusStatement": "에쓰오일이 울산 온산국가산업단지에 9조2580억원을 투입하는 샤힌 프로젝트를 2026년 6월 말 기계적 준공 목표로 추진 중이다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "에쓰오일, 울산에 9조2580억원짜리 공장을 짓는다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "2023년 3월에 짓기 시작했어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "construction_start" },
+    { "text": "내년 1월부터 진짜로 돌려요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "commercial_operation" },
+    { "text": "플라스틱 원료를 만드는 공장이에요.", "sourceIds": ["S3", "S4"], "role": "context", "factKey": "plant_output" }
+  ],
+  "priceConnection": {
+    "text": "새 공장이 돌아가면 만들어 팔 수 있는 양이 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "공장", "easyText": "물건을 많이 만들어 내는 큰 건물", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "원료", "easyText": "무엇을 만들 때 재료로 쓰는 것", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

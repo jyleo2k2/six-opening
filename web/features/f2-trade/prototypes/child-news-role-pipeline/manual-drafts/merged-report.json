@@ -4,7 +4,7 @@
   "runDateKst": "2026-08-15",
   "sourceRetrievedAt": "2026-08-15T07:31:13.537Z",
   "sourceBasis": "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함",
-  "generatedAt": "2026-08-15T11:59:49.728Z",
+  "generatedAt": "2026-08-15T12:41:25.555Z",
   "model": "gpt-5.6-luna",
   "stockCount": 51,
   "completedCount": 51,
@@ -269,7 +269,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -4733,7 +4733,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -7797,7 +7797,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -11840,7 +11840,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -12914,7 +12914,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -13599,7 +13599,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -14819,7 +14819,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -17006,7 +17006,7 @@
             "KRX:064350"
           ],
           "focusStatement": "현대로템이 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했고 수주잔고가 창사 이후 처음으로 30조원을 넘었다고 밝혔다.",
-          "anchorSourceId": "S1",
+          "anchorSourceId": "S4",
           "includedSourceIds": [
             "S1",
             "S2",
@@ -17075,7 +17075,7 @@
               "S4",
               "S5"
             ],
-            "kind": "contracted_business",
+            "kind": "business_performance",
             "basis": "event_education"
           },
           "termTreatments": [
@@ -17114,7 +17114,7 @@
           "eventType": "earnings",
           "focusStatement": "현대로템이 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했고 수주잔고가 창사 이후 처음으로 30조원을 넘었다고 밝혔다.",
           "anchorSourceIds": [
-            "S1"
+            "S4"
           ],
           "checks": {
             "allowedScope": true,
@@ -17135,7 +17135,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -18178,7 +18178,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -18881,7 +18881,7 @@
               "S1",
               "S5"
             ],
-            "kind": "contracted_business",
+            "kind": "business_performance",
             "basis": "event_education"
           },
           "termTreatments": [
@@ -18933,7 +18933,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -20893,7 +20893,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -27192,7 +27192,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -31519,7 +31519,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -32974,7 +32974,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -38857,7 +38857,7 @@
             "KRX:047050"
           ],
           "focusStatement": "포스코인터내셔널이 2026년 2분기 연결 매출액 9조6232억원, 영업이익 4290억원, 당기순이익 2473억원을 기록했다.",
-          "anchorSourceId": "S1",
+          "anchorSourceId": "S3",
           "includedSourceIds": [
             "S1",
             "S2",
@@ -38962,7 +38962,7 @@
           "eventType": "earnings",
           "focusStatement": "포스코인터내셔널이 2026년 2분기 연결 매출액 9조6232억원, 영업이익 4290억원, 당기순이익 2473억원을 기록했다.",
           "anchorSourceIds": [
-            "S1"
+            "S3"
           ],
           "checks": {
             "allowedScope": true,
@@ -38983,7 +38983,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -40559,7 +40559,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -43563,7 +43563,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -52358,7 +52358,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -53266,7 +53266,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -55445,7 +55445,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -56139,7 +56139,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -57190,7 +57190,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -57826,7 +57826,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -58439,7 +58439,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -61966,7 +61966,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -63840,7 +63840,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -66832,7 +66832,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -68685,7 +68685,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -71222,7 +71222,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -74202,7 +74202,7 @@
               "S1",
               "S5"
             ],
-            "kind": "contracted_business",
+            "kind": "business_performance",
             "basis": "event_education"
           },
           "termTreatments": [
@@ -74254,7 +74254,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -77133,7 +77133,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {
@@ -82139,7 +82139,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       },
       "roleAttempts": [
         {

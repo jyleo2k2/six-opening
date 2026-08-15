@@ -3,6 +3,168 @@
   "cases": [
     {
       "stock": {
+        "stockId": "KRX:000120",
+        "symbol": "000120",
+        "name": "CJ대한통운",
+        "aliases": [
+          "CJ 대한통운",
+          "씨제이대한통운"
+        ],
+        "sector": "logistics",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-SIDAE-2026072817445666360",
+          "title": "대형·비규격 화물도 '오네'…CJ대한통운, 배송 서비스 확장",
+          "publisher": "시대",
+          "publishedAt": "2026-07-28T08:53:38.000Z",
+          "sourceUrl": "https://www.sidae.com/article/2026072817445666360",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "CJ대한통운은 지난 27일 군포복합물류터미널에서 대신택배와 '이형 상품 배송서비스 확대 및 협업모델 구축을 위한 업무협약'(MOU)을 체결했다고 28일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "이형화물은 일반 택배 기준(가로·세로·높이의 합 160cm, 무게 25kg 이하)을 넘어서는 크기나 무게, 또는 일정하지 않은 형태로 인해 별도의 운송·취급 역량이 필요한 상품을 말한다."
+            },
+            {
+              "id": "S3",
+              "text": "최근 캠핑·낚시·골프용품 등 대형 상품의 온라인 거래가 늘고 1인 가구 증가에 따른 셀프 인테리어 수요도 확대되면서 이형화물 배송 수요는 꾸준히 증가하는 추세다."
+            },
+            {
+              "id": "S4",
+              "text": "지난해에는 주 7일 배송 서비스인 '매일오네'를 선보였다."
+            },
+            {
+              "id": "S5",
+              "text": "올해 4월에는 개인 간(C2C) 배송 서비스인 '보내오네'를 출시했고, 이번에는 대형·이형화물 배송까지 추가하며 포트폴리오를 확장했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-SIDAE-2026072817445666360",
+          "primaryStockIds": [
+            "KRX:000120"
+          ],
+          "focusStatement": "CJ대한통운이 대신택배와 업무협약을 맺고 일반 택배 기준을 넘는 대형·이형화물 배송 서비스를 확대하기로 했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "배송"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-SIDAE-2026072817445666360",
+          "headline": {
+            "text": "CJ대한통운, 크고 무거운 짐도 배송한다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "CJ대한통운, 크고 무거운 짐도 배송한다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "대신택배와 함께 하기로 했어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "partner"
+            },
+            {
+              "text": "160cm·25kg을 넘는 짐이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "size_threshold"
+            },
+            {
+              "text": "캠핑·낚시 용품 주문이 늘었대요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "demand_driver"
+            }
+          ],
+          "priceConnection": {
+            "text": "배송할 수 있는 짐이 늘면 받을 수 있는 일도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "배송",
+              "easyText": "주문한 물건을 집까지 가져다주는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-SIDAE-2026072817445666360",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:000120"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "CJ대한통운이 대신택배와 업무협약을 맺고 일반 택배 기준을 넘는 대형·이형화물 배송 서비스를 확대하기로 했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
         "stockId": "KRX:000270",
         "symbol": "000270",
         "name": "기아",
@@ -175,7 +337,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
       }
     },
     {
@@ -347,7 +509,2328 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:003230",
+        "symbol": "003230",
+        "name": "삼양식품",
+        "aliases": [
+          "삼양 식품"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-THEGURU-103995",
+          "title": "삼양식품, '불닭 스와이시' 말레이시아 출격…美 이어 亞 공략",
+          "publisher": "THE GURU",
+          "publishedAt": "2026-07-06T00:21:09.000Z",
+          "sourceUrl": "https://www.theguru.co.kr/news/article.html?no=103995",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "삼양식품 말레이시아 법인은 지난 5일(현지시간) 불닭 스와이시를 출시했다."
+            },
+            {
+              "id": "S2",
+              "text": "'달콤한(Sweet)'과 '매운(Spicy)'의 합성어인 스와이시는 지난해 12월 미국 시장을 겨냥해 처음 선보인 해외 전용 라인업이다."
+            },
+            {
+              "id": "S3",
+              "text": "자체 기준 5단계의 매운맛 중 가장 낮은 1단계로 개발, 현재 불닭 라인업 중 가장 순한 맛을 구현했다."
+            },
+            {
+              "id": "S4",
+              "text": "기존 소스의 단맛을 강화하고 단맛을 더하는 스프링클을 별도로 담아 매운맛과 달콤한 풍미가 조화를 이루도록 설계했다는 게 회사 측 설명이다."
+            },
+            {
+              "id": "S5",
+              "text": "미국에 이어 말레이시아를 두 번째 출시국으로 선택한 것은 현지의 높은 K-푸드 선호도와 글로벌 소비 트렌드를 반영한 결과로 풀이된다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-THEGURU-103995",
+          "primaryStockIds": [
+            "KRX:003230"
+          ],
+          "focusStatement": "삼양식품 말레이시아 법인이 해외 전용 라면 '불닭 스와이시'를 현지에 출시했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "단계"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-THEGURU-103995",
+          "headline": {
+            "text": "삼양식품, 말레이시아에 불닭 스와이시를 내놨다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "삼양식품, 말레이시아에 불닭 스와이시를 내놨다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "달콤하고 매운 맛이라는 뜻이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "name_meaning"
+            },
+            {
+              "text": "불닭 중에 가장 안 매운 1단계예요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "spice_level"
+            },
+            {
+              "text": "미국 다음으로 두 번째 나라예요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "context",
+              "factKey": "second_country"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 나라에서 팔기 시작하면 살 사람이 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S5"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "단계",
+              "easyText": "매운 정도를 1부터 5까지 나눈 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-THEGURU-103995",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:003230"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "삼양식품 말레이시아 법인이 해외 전용 라면 '불닭 스와이시'를 현지에 출시했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:004370",
+        "symbol": "004370",
+        "name": "농심",
+        "aliases": [
+          "Nongshim"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-HANKYUNG-2026073185261",
+          "title": "\"수출 영토 넓히자\"…라면 공장 신설 경쟁",
+          "publisher": "한국경제",
+          "publishedAt": "2026-07-31T08:27:00.000Z",
+          "sourceUrl": "https://www.hankyung.com/article/2026073185261",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "농심은 2024년 8월 부산 강서구 녹산국가산업단지에 수출 전용 라면공장을 짓겠다고 발표했다."
+            },
+            {
+              "id": "S2",
+              "text": "올해 하반기 완공되면 연 5억 개를 생산할 수 있다."
+            },
+            {
+              "id": "S3",
+              "text": "농심은 유럽과 북미, 중남미 등으로 늘어나는 수출 물량을 전담하는 생산기지로 활용할 계획이다."
+            },
+            {
+              "id": "S4",
+              "text": "삼양식품의 해외 매출 비중은 80%, 농심은 40%에 이른다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-HANKYUNG-2026073185261",
+          "primaryStockIds": [
+            "KRX:004370"
+          ],
+          "focusStatement": "농심이 부산 녹산에 짓는 수출 전용 라면공장이 2026년 하반기 완공되면 연 5억 개를 생산할 수 있다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "수출",
+            "공장"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-HANKYUNG-2026073185261",
+          "headline": {
+            "text": "농심, 수출만 하는 라면공장을 부산에 짓는다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "농심, 수출만 하는 라면공장을 부산에 짓는다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "올해 하반기에 다 지어져요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "completion_timing"
+            },
+            {
+              "text": "1년에 5억 개를 만들 수 있어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "annual_capacity"
+            },
+            {
+              "text": "유럽·북미·중남미로 보낼 거예요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "target_regions"
+            }
+          ],
+          "priceConnection": {
+            "text": "공장이 생기면 한 번에 만들 수 있는 양이 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "수출",
+              "easyText": "우리나라에서 만든 것을 외국에 파는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "공장",
+              "easyText": "물건을 많이 만들어 내는 큰 건물",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-HANKYUNG-2026073185261",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:004370"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "농심이 부산 녹산에 짓는 수출 전용 라면공장이 2026년 하반기 완공되면 연 5억 개를 생산할 수 있다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:009540",
+        "symbol": "009540",
+        "name": "HD한국조선해양",
+        "aliases": [
+          "HD 한국조선해양",
+          "에이치디한국조선해양",
+          "한국조선해양"
+        ],
+        "sector": "shipbuilding",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260713001119",
+          "title": "HD한국조선해양, 5456억원 규모 '초대형 암모니아 운반선' 3척 수주",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-07-13T08:40:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260713001119",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "HD한국조선해양은 유럽 선주와 초대형 암모니아 운반선 3척에 대한 건조 계약을 체결했다고 13일 밝혔다. 계약 금액은 총 5456억원이다."
+            },
+            {
+              "id": "S2",
+              "text": "이번 선박은 HD현대삼호에서 건조되며, 2030년 상반기까지 순차적으로 선주사에 인도될 예정이다."
+            },
+            {
+              "id": "S3",
+              "text": "초대형 암모니아 운반선은 암모니아를 대량으로 운송하는 선박이다."
+            },
+            {
+              "id": "S4",
+              "text": "HD한국조선해양은 이번 계약을 포함해 올해 총 9척의 초대형 암모니아 운반선을 수주했다."
+            },
+            {
+              "id": "S5",
+              "text": "올해 누적 수주량은 142척, 금액으로는 163억9000만달러다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260713001119",
+          "primaryStockIds": [
+            "KRX:009540"
+          ],
+          "focusStatement": "HD한국조선해양이 유럽 선주와 초대형 암모니아 운반선 3척 건조 계약을 총 5456억원에 체결했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "주문",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "binding_contract"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260713001119",
+          "headline": {
+            "text": "HD한국조선해양, 5456억원짜리 배 3척을 주문받았다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "HD한국조선해양, 5456억원짜리 배 3척을 주문받았다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "유럽 회사에서 주문했어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "customer_region"
+            },
+            {
+              "text": "2030년 상반기까지 만들어 줘요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "delivery_deadline"
+            },
+            {
+              "text": "올해 받은 주문이 142척이에요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "context",
+              "factKey": "cumulative_orders"
+            }
+          ],
+          "priceConnection": {
+            "text": "주문을 받으면 앞으로 만들 일감이 그만큼 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S5"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "주문",
+              "easyText": "만들어 달라고 미리 부탁하는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260713001119",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:009540"
+          ],
+          "eventType": "binding_contract",
+          "focusStatement": "HD한국조선해양이 유럽 선주와 초대형 암모니아 운반선 3척 건조 계약을 총 5456억원에 체결했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:010140",
+        "symbol": "010140",
+        "name": "삼성중공업",
+        "aliases": [
+          "삼성 중공업"
+        ],
+        "sector": "shipbuilding",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWDAILY-2026070800198",
+          "title": "삼성중공업, 5년만 연간 수주 100억달러 돌파 … 상선 목표 98% 채웠다",
+          "publisher": "뉴데일리",
+          "publishedAt": "2026-07-08T05:48:00.000Z",
+          "sourceUrl": "https://biz.newdaily.co.kr/site/data/html/2026/07/08/2026070800198.html",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "삼성중공업은 버뮤다 지역 선사로부터 원유운반선 2척을 총 2849억원에 수주했다고 8일 공시했다."
+            },
+            {
+              "id": "S2",
+              "text": "해당 선박은 2029년 5월까지 순차적으로 인도할 예정이다."
+            },
+            {
+              "id": "S3",
+              "text": "이번 계약으로 삼성중공업의 올해 누적 수주 실적은 상선 32척과 FLNG 2기 등 총 100억달러로 늘었다."
+            },
+            {
+              "id": "S4",
+              "text": "삼성중공업이 연간 수주액 100억달러를 달성한 것은 글로벌 경기 회복에 힘입어 상선 발주가 크게 늘었던 2021년 이후 5년 만이다."
+            },
+            {
+              "id": "S5",
+              "text": "삼성중공업은 이번 계약까지 상선 32척, 56억달러를 수주했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWDAILY-2026070800198",
+          "primaryStockIds": [
+            "KRX:010140"
+          ],
+          "focusStatement": "삼성중공업이 버뮤다 선사로부터 원유운반선 2척을 2849억원에 수주해 올해 누적 수주가 100억달러가 됐다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "주문"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "binding_contract"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWDAILY-2026070800198",
+          "headline": {
+            "text": "삼성중공업, 2849억원짜리 배 2척을 주문받았다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "삼성중공업, 2849억원짜리 배 2척을 주문받았다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "기름을 실어 나르는 배예요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "vessel_type"
+            },
+            {
+              "text": "2029년 5월까지 만들어 줘요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "delivery_deadline"
+            },
+            {
+              "text": "올해 받은 주문이 100억달러가 됐어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "cumulative_orders"
+            }
+          ],
+          "priceConnection": {
+            "text": "주문을 받으면 앞으로 만들 일감이 그만큼 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "주문",
+              "easyText": "만들어 달라고 미리 부탁하는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWDAILY-2026070800198",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:010140"
+          ],
+          "eventType": "binding_contract",
+          "focusStatement": "삼성중공업이 버뮤다 선사로부터 원유운반선 2척을 2849억원에 수주해 올해 누적 수주가 100억달러가 됐다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:010950",
+        "symbol": "010950",
+        "name": "S-OIL",
+        "aliases": [
+          "에쓰오일",
+          "에스오일",
+          "S Oil"
+        ],
+        "sector": "energy",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-SISAJOURNAL-363531",
+          "title": "울산시, S-OIL 샤힌 프로젝트 막바지 총력 지원…\"남은 인허가 312건 속도\"",
+          "publisher": "시사저널",
+          "publishedAt": "2026-02-23T05:47:00.000Z",
+          "sourceUrl": "https://www.sisajournal.com/news/articleView.html?idxno=363531",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "샤힌 프로젝트는 온산국가산업단지 내 약 88만㎡ 부지에 총 9조2580억원이 투입되는 초대형 사업이다."
+            },
+            {
+              "id": "S2",
+              "text": "2023년 3월 착공해 올해 6월 말 기계적 준공을 목표로 추진 중이며, 이후 연말까지 시운전을 거쳐 내년 1월 상업 운전에 들어갈 예정이다."
+            },
+            {
+              "id": "S3",
+              "text": "상업 가동이 시작되면 에틸렌 180만t, 프로필렌 77만t, 부타디엔 20만t, 벤젠 28만t 등 기초유분을 생산하게 된다."
+            },
+            {
+              "id": "S4",
+              "text": "LLDPE(선형저밀도폴리에틸렌) 88만t, HDPE(고밀도폴리에틸렌) 44만t 규모다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-SISAJOURNAL-363531",
+          "primaryStockIds": [
+            "KRX:010950"
+          ],
+          "focusStatement": "에쓰오일이 울산 온산국가산업단지에 9조2580억원을 투입하는 샤힌 프로젝트를 2026년 6월 말 기계적 준공 목표로 추진 중이다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "공장",
+            "원료"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-SISAJOURNAL-363531",
+          "headline": {
+            "text": "에쓰오일, 울산에 9조2580억원짜리 공장을 짓는다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "에쓰오일, 울산에 9조2580억원짜리 공장을 짓는다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "2023년 3월에 짓기 시작했어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "construction_start"
+            },
+            {
+              "text": "내년 1월부터 진짜로 돌려요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "commercial_operation"
+            },
+            {
+              "text": "플라스틱 원료를 만드는 공장이에요.",
+              "sourceIds": [
+                "S3",
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "plant_output"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 공장이 돌아가면 만들어 팔 수 있는 양이 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "공장",
+              "easyText": "물건을 많이 만들어 내는 큰 건물",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "원료",
+              "easyText": "무엇을 만들 때 재료로 쓰는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-SISAJOURNAL-363531",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:010950"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "에쓰오일이 울산 온산국가산업단지에 9조2580억원을 투입하는 샤힌 프로젝트를 2026년 6월 말 기계적 준공 목표로 추진 중이다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:011200",
+        "symbol": "011200",
+        "name": "HMM",
+        "aliases": [
+          "에이치엠엠"
+        ],
+        "sector": "logistics",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ZDNET-20260724132902",
+          "title": "HMM, 29조원 투자 승부수…컨테이너·벌크 선대 대폭 확대",
+          "publisher": "ZDNet Korea",
+          "publishedAt": "2026-07-24T04:29:00.000Z",
+          "sourceUrl": "https://zdnet.co.kr/view/?no=20260724132902",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "HMM이 2030년까지 총 29조원을 투자해 컨테이너선과 벌크선 선대를 276척 규모로 확대한다."
+            },
+            {
+              "id": "S2",
+              "text": "투자 기간은 올해부터 2030년 말까지이며, 예상 투자금액은 약 29조원이다."
+            },
+            {
+              "id": "S3",
+              "text": "HMM은 이번 투자를 통해 컨테이너선 선대를 166척, 147만TEU 규모로 확대할 계획이다."
+            },
+            {
+              "id": "S4",
+              "text": "벌크선은 110척, 1352만DWT 규모로 늘린다."
+            },
+            {
+              "id": "S5",
+              "text": "계획대로 투자가 이뤄지면 컨테이너선과 벌크선을 합친 전체 선대는 276척으로 확대된다."
+            },
+            {
+              "id": "S6",
+              "text": "이번 중장기 전략의 투자 규모는 2024년 발표한 계획보다 8조 2000억원 늘어난 수준이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ZDNET-20260724132902",
+          "primaryStockIds": [
+            "KRX:011200"
+          ],
+          "focusStatement": "HMM이 2030년까지 총 29조원을 투자해 컨테이너선과 벌크선을 합쳐 276척 규모로 선대를 늘리기로 했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "척"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-ZDNET-20260724132902",
+          "headline": {
+            "text": "HMM, 배를 276척까지 늘리기로 했다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "HMM, 배를 276척까지 늘리기로 했다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "2030년까지 29조원을 써요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "investment_amount"
+            },
+            {
+              "text": "짐칸 배는 166척으로 늘려요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "container_fleet"
+            },
+            {
+              "text": "2년 전 계획보다 8조2000억원 늘었어요.",
+              "sourceIds": [
+                "S6"
+              ],
+              "role": "context",
+              "factKey": "plan_increase"
+            }
+          ],
+          "priceConnection": {
+            "text": "배가 늘면 한 번에 실어 나를 수 있는 짐도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "척",
+              "easyText": "배를 세는 단위",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ZDNET-20260724132902",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:011200"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "HMM이 2030년까지 총 29조원을 투자해 컨테이너선과 벌크선을 합쳐 276척 규모로 선대를 늘리기로 했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:012330",
+        "symbol": "012330",
+        "name": "현대모비스",
+        "aliases": [
+          "Hyundai Mobis"
+        ],
+        "sector": "automotive",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260716001167",
+          "title": "현대모비스, 유럽 전동화 거점 확대…글로벌 수주 기반 넓힌다",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-07-16T08:47:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260716001167",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "현대모비스는 지난 3월 헝가리 중부 케치케메트에 건설한 모듈 공장의 가동을 시작했다."
+            },
+            {
+              "id": "S2",
+              "text": "헝가리 공장에서는 메르세데스-벤츠 전동화 모델에 들어가는 섀시 모듈을 생산한다."
+            },
+            {
+              "id": "S3",
+              "text": "스페인 나바라 지역에 건설한 배터리시스템어셈블리(BSA) 공장도 가동에 들어간다."
+            },
+            {
+              "id": "S4",
+              "text": "이 공장에서는 폭스바겐 전기차에 탑재되는 배터리시스템을 생산한다."
+            },
+            {
+              "id": "S5",
+              "text": "현대모비스는 지난해 글로벌 완성차 업체를 대상으로 91억7000만달러, 약 13조2000억원 규모의 핵심 부품을 수주했다."
+            },
+            {
+              "id": "S6",
+              "text": "슬로바키아 공장에서는 구동모터와 감속기, 인버터를 하나로 통합한 전기차용 파워일렉트릭(PE) 시스템 양산을 추진하고 있다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260716001167",
+          "primaryStockIds": [
+            "KRX:012330"
+          ],
+          "focusStatement": "현대모비스가 헝가리 모듈 공장 가동을 시작하고 스페인 배터리시스템 공장도 가동에 들어가며 유럽 생산 거점을 넓혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "공장",
+            "부품"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260716001167",
+          "headline": {
+            "text": "현대모비스, 헝가리 공장을 돌리기 시작했다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "현대모비스, 헝가리 공장을 돌리기 시작했다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "벤츠 전기차 부품을 만들어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "hungary_output"
+            },
+            {
+              "text": "스페인 공장은 폭스바겐 것을 만들어요.",
+              "sourceIds": [
+                "S3",
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "spain_output"
+            },
+            {
+              "text": "지난해 외국 회사에서 13조2000억원 주문받았어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "context",
+              "factKey": "overseas_orders"
+            }
+          ],
+          "priceConnection": {
+            "text": "공장이 늘면 만들어 팔 수 있는 부품도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "공장",
+              "easyText": "물건을 많이 만들어 내는 큰 건물",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "부품",
+              "easyText": "기계를 이루는 조각 하나하나",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260716001167",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:012330"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "현대모비스가 헝가리 모듈 공장 가동을 시작하고 스페인 배터리시스템 공장도 가동에 들어가며 유럽 생산 거점을 넓혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:012450",
+        "symbol": "012450",
+        "name": "한화에어로스페이스",
+        "aliases": [
+          "한화 에어로",
+          "Hanwha Aerospace"
+        ],
+        "sector": "defense",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-GENEWS-20260706-K9PL",
+          "title": "폴란드행 K9PL 첫 선적… 한화에어로 '현지 생산+군수'로 37조 수주잔고 실적 전환 시동",
+          "publisher": "글로벌이코노믹",
+          "publishedAt": "2026-07-05T22:15:00.000Z",
+          "sourceUrl": "https://www.g-enews.com/article/Global-Biz/2026/07/202607060712258048fbbec65dfb_1",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "한화에어로스페이스가 이달 3일(현지시각) 창원 공장에서 폴란드 수출용 K9PL 자주포 첫 배치를 선적했다고 지난 4일 보도했다."
+            },
+            {
+              "id": "S2",
+              "text": "이번 인도 물량은 2023년 12월 1일 체결한 3조 4474억 원 규모의 2차 실행 계약에 따른 것이다."
+            },
+            {
+              "id": "S3",
+              "text": "총 152문 계약 규모 중 지난해 11월 인도를 마친 K9A1 6문을 제외한 나머지 146문이 내년까지 순차 공급된다."
+            },
+            {
+              "id": "S4",
+              "text": "폴란드가 두 차례 실행 계약으로 확정한 K9 자주포 누적 주문량은 총 364문이다."
+            },
+            {
+              "id": "S5",
+              "text": "지난해 말 기준 약 37조 2000억 원까지 축적된 회사 전체 수주잔고 가운데 지상 방산 비중이 큰 만큼, 이번 인도가 수주잔고 실적 전환 구간 진입을 알리는 신호탄으로 평가받는다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-GENEWS-20260706-K9PL",
+          "primaryStockIds": [
+            "KRX:012450"
+          ],
+          "focusStatement": "한화에어로스페이스가 창원 공장에서 폴란드로 보낼 K9PL 자주포 첫 물량을 선적했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "계약",
+            "공장"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-GENEWS-20260706-K9PL",
+          "headline": {
+            "text": "한화에어로스페이스, 폴란드로 보낼 첫 물량을 실었다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "한화에어로스페이스, 폴란드로 보낼 첫 물량을 실었다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "창원 공장에서 배에 실었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "shipping_origin"
+            },
+            {
+              "text": "3조4474억원짜리 계약의 물량이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "contract_amount"
+            },
+            {
+              "text": "폴란드가 주문한 건 모두 364문이에요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "total_order_units"
+            }
+          ],
+          "priceConnection": {
+            "text": "주문받은 것을 실제로 보내기 시작하면 그때부터 돈이 들어와요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "계약",
+              "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "공장",
+              "easyText": "물건을 많이 만들어 내는 큰 건물",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-GENEWS-20260706-K9PL",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:012450"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "한화에어로스페이스가 창원 공장에서 폴란드로 보낼 K9PL 자주포 첫 물량을 선적했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:021240",
+        "symbol": "021240",
+        "name": "코웨이",
+        "aliases": [
+          "Coway"
+        ],
+        "sector": "retail",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ETODAY-2607303",
+          "title": "\"말레이 2차 성장기\"...코웨이, 해외 체력 더 키운다",
+          "publisher": "이투데이",
+          "publishedAt": "2026-07-26T05:28:00.000Z",
+          "sourceUrl": "https://www.etoday.co.kr/news/view/2607303",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "코웨이는 정수기를 기반으로 2023년 에어컨, 2024년 매트리스 및 안마의자 등 신규 제품을 확대했고, 해당 제품들이 시장에 안착하면서 성장세를 견인 중이다."
+            },
+            {
+              "id": "S2",
+              "text": "벽걸이형 에어컨과 세탁건조기는 삼성·LG를 제치고 판매량 1위를 기록할 만큼 브랜드 파워가 강력해지고 있다"
+            },
+            {
+              "id": "S3",
+              "text": "매트리스 신규 렌탈 판매가 분기당 3만5000개를 넘고, 에어컨은 1분기 2만대에서 2분기 3만5000대로 크게 뛰었다"
+            },
+            {
+              "id": "S4",
+              "text": "올해 1분기 처음으로 분기 매출 4000억원 시대를 연 말레이시아 법인이 2분기에도 20%(전년 대비)대의 매출 증가율을 보이며 비슷한 성장세를 이어갈 것으로 추정하고 있다."
+            },
+            {
+              "id": "S5",
+              "text": "앞서 코웨이는 1분기 태국에서 전년 동기 대비 30% 가까이 증가한 554억원의 매출을 올렸다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ETODAY-2607303",
+          "primaryStockIds": [
+            "KRX:021240"
+          ],
+          "focusStatement": "코웨이가 말레이시아에서 벽걸이형 에어컨과 세탁건조기 판매량 1위를 기록하며 해외 사업을 키우고 있다.",
+          "anchorSourceId": "S2",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "판매량"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-ETODAY-2607303",
+          "headline": {
+            "text": "코웨이 에어컨, 말레이시아에서 판매 1위를 했다",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "코웨이 에어컨, 말레이시아에서 판매 1위를 했다",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "삼성과 LG를 제치고 판매량 1위예요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "beat_competitors"
+            },
+            {
+              "text": "에어컨은 2분기에 3만5000대 팔렸어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "aircon_units"
+            },
+            {
+              "text": "태국에서도 매출이 554억원이에요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "context",
+              "factKey": "thailand_revenue"
+            }
+          ],
+          "priceConnection": {
+            "text": "많이 팔리는 나라가 늘면 회사가 버는 돈도 늘어나요.",
+            "sourceIds": [
+              "S2",
+              "S5"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "판매량",
+              "easyText": "실제로 팔린 물건의 개수",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ETODAY-2607303",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:021240"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "코웨이가 말레이시아에서 벽걸이형 에어컨과 세탁건조기 판매량 1위를 기록하며 해외 사업을 키우고 있다.",
+          "anchorSourceIds": [
+            "S2"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:036570",
+        "symbol": "036570",
+        "name": "엔씨소프트",
+        "aliases": [
+          "NC",
+          "NCSoft",
+          "엔씨"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-STARTUPTODAY-610723",
+          "title": "엔씨 아이온2, 2026년 하반기 글로벌 출시 ··· PC 플랫폼으로 서비스",
+          "publisher": "오늘경제",
+          "publishedAt": "2026-04-22T03:45:00.000Z",
+          "sourceUrl": "https://www.startuptoday.co.kr/news/articleView.html?idxno=610723",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "엔씨(공동대표 김택진, 박병무)의 MMORPG(다중접속역할수행게임) '아이온2'가 글로벌 출시 일정을 올해 하반기로 확정했다."
+            },
+            {
+              "id": "S2",
+              "text": "아이온2 글로벌 버전은 스팀(Steam)과 퍼플(PURPLE)을 통한 PC 전용 플랫폼으로 개발 중이다."
+            },
+            {
+              "id": "S3",
+              "text": "엔씨는 북미, 남미, 유럽, 일본 각 지역별 서버를 구축해 운영할 계획이다."
+            },
+            {
+              "id": "S4",
+              "text": "영어, 독일어, 프랑스어, 스페인어, 포르투갈어, 일본어, 한국어, 러시아어, 중국어(간체·번체) 등 총 10개 언어를 지원한다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-STARTUPTODAY-610723",
+          "primaryStockIds": [
+            "KRX:036570"
+          ],
+          "focusStatement": "엔씨소프트의 MMORPG 아이온2가 글로벌 출시 일정을 2026년 하반기로 확정했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "서버"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-STARTUPTODAY-610723",
+          "headline": {
+            "text": "엔씨소프트 아이온2, 올해 하반기 전 세계에 나온다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "엔씨소프트 아이온2, 올해 하반기 전 세계에 나온다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "10개 언어로 만들어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "key_detail",
+              "factKey": "language_count"
+            },
+            {
+              "text": "북미·남미·유럽·일본에 서버를 둬요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "server_regions"
+            },
+            {
+              "text": "컴퓨터로만 할 수 있어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "context",
+              "factKey": "pc_only"
+            }
+          ],
+          "priceConnection": {
+            "text": "더 많은 나라에서 팔면 게임을 살 사람도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "서버",
+              "easyText": "게임을 돌려 주는 큰 컴퓨터",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-STARTUPTODAY-610723",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:036570"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "엔씨소프트의 MMORPG 아이온2가 글로벌 출시 일정을 2026년 하반기로 확정했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:047050",
+        "symbol": "047050",
+        "name": "포스코인터내셔널",
+        "aliases": [
+          "POSCO인터내셔널",
+          "POSCO International",
+          "포스코"
+        ],
+        "sector": "logistics",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-BLOTER-669547",
+          "title": "포스코인터, 美 가스 자산 인수 추진…올해 투자 2.2조로 확대",
+          "publisher": "블로터",
+          "publishedAt": "2026-07-30T06:59:03.000Z",
+          "sourceUrl": "https://www.bloter.net/news/articleView.html?idxno=669547",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "포스코인터내셔널이 북미·동남아 천연가스 생산자산 인수를 추진하면서 올해 투자 규모를 2조2000억원으로 확대했다."
+            },
+            {
+              "id": "S2",
+              "text": "올해 미국과 동남아에서 생산 및 개발 자산 인수를 추진하고 있다"
+            },
+            {
+              "id": "S3",
+              "text": "포스코인터내셔널은 현재 미국에서 LNG 공급원 확보와 트레이딩 수익 창출이 가능한 생산 자산의 인수를 검토 중이다."
+            },
+            {
+              "id": "S4",
+              "text": "포스코인터내셔널은 에너지 투자 확대에 따라 올해 설비투자비용(CAPEX) 계획을 기존 1조8000억원에서 2조2000억원으로 4000억원 상향 조정했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-BLOTER-669547",
+          "primaryStockIds": [
+            "KRX:047050"
+          ],
+          "focusStatement": "포스코인터내셔널이 북미·동남아 천연가스 생산자산 인수를 추진하며 올해 투자 규모를 2조2000억원으로 늘렸다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "투자",
+            "천연가스"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-BLOTER-669547",
+          "headline": {
+            "text": "포스코인터내셔널, 올해 투자를 2조2000억원으로 늘린다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "포스코인터내셔널, 올해 투자를 2조2000억원으로 늘린다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "원래 계획보다 4000억원 늘렸어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "key_detail",
+              "factKey": "investment_increase"
+            },
+            {
+              "text": "미국과 동남아에서 가스를 캐는 곳을 사요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "acquisition_targets"
+            },
+            {
+              "text": "천연가스를 안정적으로 얻으려는 거예요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "acquisition_purpose"
+            }
+          ],
+          "priceConnection": {
+            "text": "가스를 캐는 곳을 사면 회사가 팔 수 있는 양이 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "투자",
+              "easyText": "돈을 들여 사업을 키우는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "천연가스",
+              "easyText": "땅속에서 캐내 불을 피우는 데 쓰는 기체",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-BLOTER-669547",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:047050"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "포스코인터내셔널이 북미·동남아 천연가스 생산자산 인수를 추진하며 올해 투자 규모를 2조2000억원으로 늘렸다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:055550",
+        "symbol": "055550",
+        "name": "신한지주",
+        "aliases": [
+          "신한 지주"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-BLOTER-667020",
+          "title": "신한, 자사주 7000억 매입 목표 조기 달성…KB금융 보다 앞섰다",
+          "publisher": "블로터",
+          "publishedAt": "2026-07-01T02:23:19.000Z",
+          "sourceUrl": "https://www.bloter.net/news/articleView.html?idxno=667020",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "신한금융그룹이 상반기 7000억원 규모의 자사주 매입 목표를 조기 달성했다."
+            },
+            {
+              "id": "S2",
+              "text": "신한금융은 1~6월에 걸쳐 7001억원 규모의 자사주를 매입했다."
+            },
+            {
+              "id": "S3",
+              "text": "신한금융은 절차에 따라 소각을 진행할 예정이다."
+            },
+            {
+              "id": "S4",
+              "text": "신한금융은 상반기 자사주 매입은 공시한 계획에 따라 진행됐고, 취득한 자기주식은 절차에 맞춰 소각할 예정"
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-BLOTER-667020",
+          "primaryStockIds": [
+            "KRX:055550"
+          ],
+          "focusStatement": "신한금융그룹이 상반기 7000억원 규모의 자사주 매입 목표를 조기 달성하고 소각을 진행할 예정이다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "주식"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "capital_or_dividend"
+        },
+        "draft": {
+          "articleId": "MANUAL-BLOTER-667020",
+          "headline": {
+            "text": "신한금융, 자기 주식 7000억원어치를 사들였다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "신한금융, 자기 주식 7000억원어치를 사들였다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "1월부터 6월까지 사 모았어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "buyback_period"
+            },
+            {
+              "text": "목표보다 일찍 다 채웠어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "early_completion"
+            },
+            {
+              "text": "사들인 주식은 없앨 계획이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "cancellation_plan"
+            }
+          ],
+          "priceConnection": {
+            "text": "회사가 자기 주식을 사서 없애면 남은 주식 하나하나의 몫이 커져요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "shareholder_return",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "주식",
+              "easyText": "회사를 조금씩 나눠 가진 증서",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-BLOTER-667020",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:055550"
+          ],
+          "eventType": "capital_or_dividend",
+          "focusStatement": "신한금융그룹이 상반기 7000억원 규모의 자사주 매입 목표를 조기 달성하고 소각을 진행할 예정이다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:066570",
+        "symbol": "066570",
+        "name": "LG전자",
+        "aliases": [
+          "LG 전자",
+          "LG Electronics",
+          "엘지전자"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ETNEWS-20260610000158",
+          "title": "라인업 이어 브랜드도 바꾼다…LG전자, 로봇청소기 '홈봇'으로 재출격",
+          "publisher": "전자신문",
+          "publishedAt": "2026-06-10T07:00:00.000Z",
+          "sourceUrl": "https://www.etnews.com/20260610000158",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "LG전자는 이달 출시할 차세대 로봇청소기 신제품에 '홈봇'이라는 새로운 브랜드를 적용하는 방안을 추진하고 있다."
+            },
+            {
+              "id": "S2",
+              "text": "기존 'LG 코드제로 로보킹' 대신 'LG 홈봇'을 앞세워 로봇청소기 제품군을 별도 카테고리로 분리한다."
+            },
+            {
+              "id": "S3",
+              "text": "기존 '코드제로'가 무선 청소기 중심의 브랜드였다면 '홈봇'은 청소 기능을 넘어 집 안 공간을 인식하고 이동하며 가전·앱·보안 서비스와 연결되는 로봇형 가전의 성격을 강조한 명칭이다."
+            },
+            {
+              "id": "S4",
+              "text": "LG전자 로봇청소기 신제품에는 2way 스팀, AI 사물인식 기반 자율주행, LG쉴드 보안 체계 등이 적용될 것으로 알려졌다."
+            },
+            {
+              "id": "S5",
+              "text": "일부 히든형 제품은 싱크대 걸레받이에 들어가 외부에서 보이지 않도록 설계돼 별도 거치 공간 부담을 줄였다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ETNEWS-20260610000158",
+          "primaryStockIds": [
+            "KRX:066570"
+          ],
+          "focusStatement": "LG전자가 새 로봇청소기에 '홈봇'이라는 브랜드를 적용해 로봇청소기를 별도 제품군으로 분리한다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "로봇청소기",
+            "싱크대"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-ETNEWS-20260610000158",
+          "headline": {
+            "text": "LG전자, 새 로봇청소기 이름을 홈봇으로 바꾼다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "LG전자, 새 로봇청소기 이름을 홈봇으로 바꾼다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "예전 이름은 코드제로 로보킹이었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "previous_brand"
+            },
+            {
+              "text": "집 안 공간을 알아보고 스스로 움직여요.",
+              "sourceIds": [
+                "S3",
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "self_navigation"
+            },
+            {
+              "text": "싱크대 밑에 숨는 제품도 있어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "context",
+              "factKey": "hidden_type"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 제품이 잘 팔리면 회사가 버는 돈도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "로봇청소기",
+              "easyText": "스스로 돌아다니며 바닥을 치우는 기계",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "싱크대",
+              "easyText": "부엌에서 설거지하는 자리",
+              "treatment": "explained",
+              "sourceIds": [
+                "S5"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ETNEWS-20260610000158",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:066570"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "LG전자가 새 로봇청소기에 '홈봇'이라는 브랜드를 적용해 로봇청소기를 별도 제품군으로 분리한다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:086790",
+        "symbol": "086790",
+        "name": "하나금융지주",
+        "aliases": [
+          "하나 금융",
+          "하나금융"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-GOODKYUNG-286298",
+          "title": "\"배당 늘리고 자사주 소각\"…하나금융, 주주환원 '실행력' 승부수",
+          "publisher": "굿모닝경제",
+          "publishedAt": "2026-04-24T07:47:00.000Z",
+          "sourceUrl": "https://www.goodkyung.com/news/articleView.html?idxno=286298",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "그룹은 상반기 총 4000억원 규모의 자사주 매입·소각을 추진 중이며 이 가운데 2000억원을 추가로 결의했다."
+            },
+            {
+              "id": "S2",
+              "text": "1분기 주당배당금(DPS)은 1145원으로 전년 평균 분기배당 대비 11.6%, 전년 동기 대비 24.6% 증가했다."
+            },
+            {
+              "id": "S3",
+              "text": "1분기 기준 주주환원 총액은 5560억원으로, 이 가운데 현금배당 3070억원, 자사주 매입 2490억원이 반영됐다."
+            },
+            {
+              "id": "S4",
+              "text": "실제로 주식 수 감소 효과가 반영되면서 1분기 주당순이익(EPS)은 전년 동기 대비 11.4% 증가했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-GOODKYUNG-286298",
+          "primaryStockIds": [
+            "KRX:086790"
+          ],
+          "focusStatement": "하나금융이 상반기 총 4000억원 규모의 자사주 매입·소각을 추진하고 1분기 주당배당금을 1145원으로 늘렸다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "배당",
+            "주주"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "capital_or_dividend"
+        },
+        "draft": {
+          "articleId": "MANUAL-GOODKYUNG-286298",
+          "headline": {
+            "text": "하나금융, 자기 주식 4000억원어치를 없앤다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "하나금융, 자기 주식 4000억원어치를 없앤다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "주식 하나당 배당은 1145원이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "dividend_per_share"
+            },
+            {
+              "text": "지난해 같은 때보다 24.6% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "dividend_growth"
+            },
+            {
+              "text": "1분기에 주주에게 5560억원을 돌려줬어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "total_shareholder_return"
+            }
+          ],
+          "priceConnection": {
+            "text": "배당은 회사가 번 돈을 주식 가진 사람에게 나눠 주는 것이에요.",
+            "sourceIds": [
+              "S2",
+              "S3"
+            ],
+            "kind": "shareholder_return",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "배당",
+              "easyText": "회사가 번 돈을 주식 가진 사람에게 나눠 주는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "주주",
+              "easyText": "그 회사 주식을 가지고 있는 사람",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-GOODKYUNG-286298",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:086790"
+          ],
+          "eventType": "capital_or_dividend",
+          "focusStatement": "하나금융이 상반기 총 4000억원 규모의 자사주 매입·소각을 추진하고 1분기 주당배당금을 1145원으로 늘렸다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
       }
     },
     {
@@ -525,7 +3008,320 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:105560",
+        "symbol": "105560",
+        "name": "KB금융",
+        "aliases": [
+          "KB 금융",
+          "케이비금융"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSFREEZONE-703018",
+          "title": "KB금융, 7000억 자사주 소각·4000억 영구채 발행",
+          "publisher": "뉴스프리존",
+          "publishedAt": "2026-08-07T06:32:00.000Z",
+          "sourceUrl": "https://www.newsfreezone.co.kr/news/articleView.html?idxno=703018",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "KB금융지주가 지난달 23일 이사회에서 7000억원 규모 자사주 매입·소각과 4000억원 한도 신종자본증권(영구채) 발행을 함께 결의했다."
+            },
+            {
+              "id": "S2",
+              "text": "소각 대상은 보통주 399만7715주로 발행주식총수 3억5468만7734주의 1.13% 수준이다."
+            },
+            {
+              "id": "S3",
+              "text": "이사회 결의 전날 종가 17만5100원을 기준으로 산정했으며 주가 변동에 따라 실제 수량은 달라질 수 있다."
+            },
+            {
+              "id": "S4",
+              "text": "자기주식 취득은 지난달 24일부터 오는 12월 16일까지 삼성증권에 위탁해 장내매수로 진행한다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSFREEZONE-703018",
+          "primaryStockIds": [
+            "KRX:105560"
+          ],
+          "focusStatement": "KB금융지주가 이사회에서 7000억원 규모 자사주 매입·소각을 결의했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "주식"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "capital_or_dividend"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSFREEZONE-703018",
+          "headline": {
+            "text": "KB금융, 자기 주식 7000억원어치를 없앤다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "KB금융, 자기 주식 7000억원어치를 없앤다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "없애는 주식은 399만7715주예요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "shares_to_cancel"
+            },
+            {
+              "text": "전체 주식의 1.13%예요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "share_ratio"
+            },
+            {
+              "text": "12월 16일까지 사들일 계획이에요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "buyback_period"
+            }
+          ],
+          "priceConnection": {
+            "text": "회사가 자기 주식을 없애면 남은 주식 하나하나의 몫이 커져요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "shareholder_return",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "주식",
+              "easyText": "회사를 조금씩 나눠 가진 증서",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSFREEZONE-703018",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:105560"
+          ],
+          "eventType": "capital_or_dividend",
+          "focusStatement": "KB금융지주가 이사회에서 7000억원 규모 자사주 매입·소각을 결의했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:251270",
+        "symbol": "251270",
+        "name": "넷마블",
+        "aliases": [
+          "Netmarble"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260805000497",
+          "title": "넷마블 '하반기 게임 3종만 출시'…신작효과 부진에 라인업 축소",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-08-05T23:24:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260805000497",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "기존에 발표했던 신작들 중 '나 혼자만 레벨업: 카르마', '샹그릴라 프론티어: 일곱 최강종', '프로젝트 이지스' 3종만 출시하기로 한 것이다."
+            },
+            {
+              "id": "S2",
+              "text": "이중 '나 혼자만 레벨업: 카르마'와 '샹그릴라 프론티어: 일곱 최강종'은 오는 9월 열리는 도쿄 게임쇼에서 내년 출시 목표로 개발 중인 서브컬처 수집형 RPG '펄 인 블루'와 함께 공개될 예정이다."
+            },
+            {
+              "id": "S3",
+              "text": "당초 넷마블은 하반기 이들 신작 외에도 프로젝트 옥토퍼스, 이블베인 등의 신작을 출시하기로 밝힌 바 있다."
+            },
+            {
+              "id": "S4",
+              "text": "하반기 라인업을 조정한 이유는 보다 엄격한 런칭의 기준을 마련할 필요성을 느꼈기 때문"
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260805000497",
+          "primaryStockIds": [
+            "KRX:251270"
+          ],
+          "focusStatement": "넷마블이 2026년 하반기 신작을 5종에서 3종으로 줄여 '나 혼자만 레벨업: 카르마' 등만 출시하기로 했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "게임쇼"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260805000497",
+          "headline": {
+            "text": "넷마블, 올해 하반기에 새 게임 3개만 낸다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "넷마블, 올해 하반기에 새 게임 3개만 낸다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "원래는 더 많이 내려고 했어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "reduced_from_plan"
+            },
+            {
+              "text": "9월 도쿄 게임쇼에서 보여줘요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "tokyo_game_show"
+            },
+            {
+              "text": "기준을 더 엄격하게 하려는 거예요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "stricter_standard"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 게임을 몇 개 내는지는 회사가 벌 돈과 이어져요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "게임쇼",
+              "easyText": "새 게임을 사람들에게 보여 주는 큰 행사",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260805000497",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:251270"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "넷마블이 2026년 하반기 신작을 5종에서 3종으로 줄여 '나 혼자만 레벨업: 카르마' 등만 출시하기로 했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
       }
     },
     {
@@ -691,7 +3487,173 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:278470",
+        "symbol": "278470",
+        "name": "에이피알",
+        "aliases": [
+          "APR"
+        ],
+        "sector": "cosmetics",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260805000268",
+          "title": "에이피알, 북미·유럽 앞세워 사상 최대 분기 실적…해외 매출 비중 92%",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-08-05T00:43:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260805000268",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "이번 분기 해외 매출은 전년 동기 대비 178% 증가해 7000억원을 돌파하며 전체 매출의 92%를 차지했다."
+            },
+            {
+              "id": "S2",
+              "text": "북미·유럽 비중이 지난해 같은 기간 40%에서 올해 68%까지 확대되며"
+            },
+            {
+              "id": "S3",
+              "text": "유럽은 영국, 프랑스, 독일, 이탈리아, 스페인 등 5개국을 중심으로 아마존, 틱톡샵 등 온라인 채널 입점을 빠르게 확대하며"
+            },
+            {
+              "id": "S4",
+              "text": "북미 매출은 전년 동기 대비 264.6% 증가한 3763억원을 기록했다."
+            },
+            {
+              "id": "S5",
+              "text": "유럽은 전년 동기 대비 380.3% 증가한 1451억원의 매출을 기록했다."
+            },
+            {
+              "id": "S6",
+              "text": "아시아는 안정적인 수요를 바탕으로 전년 동기 대비 14.5% 증가한 1211억원을 기록"
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260805000268",
+          "primaryStockIds": [
+            "KRX:278470"
+          ],
+          "focusStatement": "에이피알의 해외 매출이 전년 동기 대비 178% 늘어 7000억원을 넘었고 전체 매출의 92%를 차지했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "해외 매출"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260805000268",
+          "headline": {
+            "text": "에이피알, 파는 것의 92%를 외국에서 판다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "에이피알, 파는 것의 92%를 외국에서 판다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "해외 매출이 7000억원을 넘었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "overseas_revenue"
+            },
+            {
+              "text": "유럽에서 380.3% 늘었어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "key_detail",
+              "factKey": "europe_growth"
+            },
+            {
+              "text": "영국·프랑스 등 5개 나라에서 팔아요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "europe_countries"
+            }
+          ],
+          "priceConnection": {
+            "text": "파는 나라가 늘면 회사가 버는 돈도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S5"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "해외 매출",
+              "easyText": "외국에서 물건을 팔아 번 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260805000268",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:278470"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "에이피알의 해외 매출이 전년 동기 대비 178% 늘어 7000억원을 넘었고 전체 매출의 92%를 차지했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
       }
     },
     {
@@ -853,7 +3815,180 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:316140",
+        "symbol": "316140",
+        "name": "우리금융지주",
+        "aliases": [
+          "우리 금융",
+          "우리금융",
+          "우리은행"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-EDAILY-05303766645419400",
+          "title": "우리금융, 동양생명 완전자회사 편입…ABL생명 통합 기반 마련",
+          "publisher": "이데일리",
+          "publishedAt": "2026-04-24T07:57:45.000Z",
+          "sourceUrl": "https://marketin.edaily.co.kr/News/ReadE?newsId=05303766645419400",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "우리금융과의 포괄적 주식교환을 추진하고 100% 완전자회사로 편입될 예정"
+            },
+            {
+              "id": "S2",
+              "text": "주식교환비율은 동양생명 보통주 1주당 우리금융 보통주 0.2521주"
+            },
+            {
+              "id": "S3",
+              "text": "7월 24일 임시주주총회에서 특별결의를 거친 뒤 8월 중 주식교환을 완료하고 상장폐지 절차를 밟을 예정"
+            },
+            {
+              "id": "S4",
+              "text": "2009년 유가증권시장 상장 이후 17년 만이다"
+            },
+            {
+              "id": "S5",
+              "text": "완전자회사 전환 이후에는 ABL생명과의 통합 작업도 본격화될 수 있다는 관측이 나온다"
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-EDAILY-05303766645419400",
+          "primaryStockIds": [
+            "KRX:316140"
+          ],
+          "focusStatement": "우리금융이 포괄적 주식교환으로 동양생명을 100% 완전자회사로 편입한다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "자회사",
+            "주식"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "merger_or_ownership"
+        },
+        "draft": {
+          "articleId": "MANUAL-EDAILY-05303766645419400",
+          "headline": {
+            "text": "우리금융, 동양생명을 100% 자회사로 만든다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "우리금융, 동양생명을 100% 자회사로 만든다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "주식을 서로 바꾸는 방식이에요.",
+              "sourceIds": [
+                "S1",
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "share_swap_method"
+            },
+            {
+              "text": "8월 중에 절차가 끝나요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "completion_timing"
+            },
+            {
+              "text": "동양생명은 2009년에 상장했었어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "listing_history"
+            }
+          ],
+          "priceConnection": {
+            "text": "회사를 완전히 자기 것으로 만들면 그 회사가 버는 돈도 전부 가져와요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_combination",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "자회사",
+              "easyText": "어떤 회사가 주인인 다른 회사",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "주식",
+              "easyText": "회사를 조금씩 나눠 가진 증서",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-EDAILY-05303766645419400",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:316140"
+          ],
+          "eventType": "merger_or_ownership",
+          "focusStatement": "우리금융이 포괄적 주식교환으로 동양생명을 100% 완전자회사로 편입한다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
       }
     },
     {
@@ -1014,7 +4149,174 @@
           },
           "issues": []
         },
-        "editorAttempts": 0
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:402340",
+        "symbol": "402340",
+        "name": "SK스퀘어",
+        "aliases": [
+          "SK 스퀘어",
+          "SK Square",
+          "에스케이스퀘어"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-TECHM-150531",
+          "title": "SK스퀘어, 내년 초까지 3100억원 주주환원...올해도 AI 중심으로 투자처 물색",
+          "publisher": "테크M",
+          "publishedAt": "2026-03-25T07:00:00.000Z",
+          "sourceUrl": "https://www.techm.kr/news/articleView.html?idxno=150531",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "올해부터 내년 초까지 총 3100억원의 주주환원을 실행할 예정이다."
+            },
+            {
+              "id": "S2",
+              "text": "지난해 2000억원을 자사주 매입에 투입한데 이어 올해는 더 많은 금액을 주주들을 위해 투입한다는 방침이다."
+            },
+            {
+              "id": "S3",
+              "text": "향후 3년간 경상 배당수입 30% 이상과 투자성과 일부를 자사주 매입 및 소각 또는 현금배당 방식으로 주주에게 환원할 예정이다."
+            },
+            {
+              "id": "S4",
+              "text": "또 자본준비금 5.89조원을 이익잉여금으로 전입하기로 했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-TECHM-150531",
+          "primaryStockIds": [
+            "KRX:402340"
+          ],
+          "focusStatement": "SK스퀘어가 올해부터 내년 초까지 총 3100억원 규모의 주주환원을 실행하기로 했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "주주환원",
+            "주주"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "capital_or_dividend"
+        },
+        "draft": {
+          "articleId": "MANUAL-TECHM-150531",
+          "headline": {
+            "text": "SK스퀘어, 주주들에게 3100억원을 돌려준다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "SK스퀘어, 주주들에게 3100억원을 돌려준다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "올해부터 내년 초까지 나눠서 해요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "return_period"
+            },
+            {
+              "text": "지난해에는 2000억원을 썼어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "context",
+              "factKey": "last_year_amount"
+            },
+            {
+              "text": "앞으로 3년 동안 계속하기로 했어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "three_year_plan"
+            }
+          ],
+          "priceConnection": {
+            "text": "회사가 번 돈을 주주에게 나눠 주는 것을 주주환원이라고 해요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "shareholder_return",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "주주환원",
+              "easyText": "회사가 번 돈을 주식 가진 사람에게 돌려주는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "주주",
+              "easyText": "그 회사 주식을 가지고 있는 사람",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-TECHM-150531",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:402340"
+          ],
+          "eventType": "capital_or_dividend",
+          "focusStatement": "SK스퀘어가 올해부터 내년 초까지 총 3100억원 규모의 주주환원을 실행하기로 했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
       }
     }
   ]

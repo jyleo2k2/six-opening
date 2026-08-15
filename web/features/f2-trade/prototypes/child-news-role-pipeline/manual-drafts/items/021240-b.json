@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:021240",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 해외 판매 성과.",
+  "article": {
+    "articleId": "MANUAL-ETODAY-2607303",
+    "title": "\"말레이 2차 성장기\"...코웨이, 해외 체력 더 키운다",
+    "publisher": "이투데이",
+    "publishedAt": "2026-07-26T05:28:00.000Z",
+    "sourceUrl": "https://www.etoday.co.kr/news/view/2607303",
+    "sourceUnits": [
+      { "id": "S1", "text": "코웨이는 정수기를 기반으로 2023년 에어컨, 2024년 매트리스 및 안마의자 등 신규 제품을 확대했고, 해당 제품들이 시장에 안착하면서 성장세를 견인 중이다." },
+      { "id": "S2", "text": "벽걸이형 에어컨과 세탁건조기는 삼성·LG를 제치고 판매량 1위를 기록할 만큼 브랜드 파워가 강력해지고 있다" },
+      { "id": "S3", "text": "매트리스 신규 렌탈 판매가 분기당 3만5000개를 넘고, 에어컨은 1분기 2만대에서 2분기 3만5000대로 크게 뛰었다" },
+      { "id": "S4", "text": "올해 1분기 처음으로 분기 매출 4000억원 시대를 연 말레이시아 법인이 2분기에도 20%(전년 대비)대의 매출 증가율을 보이며 비슷한 성장세를 이어갈 것으로 추정하고 있다." },
+      { "id": "S5", "text": "앞서 코웨이는 1분기 태국에서 전년 동기 대비 30% 가까이 증가한 554억원의 매출을 올렸다." }
+    ]
+  },
+  "focusStatement": "코웨이가 말레이시아에서 벽걸이형 에어컨과 세탁건조기 판매량 1위를 기록하며 해외 사업을 키우고 있다.",
+  "anchorSourceId": "S2",
+  "headline": { "text": "코웨이 에어컨, 말레이시아에서 판매 1위를 했다", "sourceIds": ["S2"] },
+  "body": [
+    { "text": "삼성과 LG를 제치고 판매량 1위예요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "beat_competitors" },
+    { "text": "에어컨은 2분기에 3만5000대 팔렸어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "aircon_units" },
+    { "text": "태국에서도 매출이 554억원이에요.", "sourceIds": ["S5"], "role": "context", "factKey": "thailand_revenue" }
+  ],
+  "priceConnection": {
+    "text": "많이 팔리는 나라가 늘면 회사가 버는 돈도 늘어나요.",
+    "sourceIds": ["S2", "S5"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "판매량", "easyText": "실제로 팔린 물건의 개수", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

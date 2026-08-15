@@ -27,7 +27,7 @@
   "priceConnection": {
     "text": "받아 둔 주문은 앞으로 만들 일감이 얼마나 쌓였는지를 보여줘요.",
     "sourceIds": ["S1", "S5"],
-    "kind": "contracted_business",
+    "kind": "business_performance",
     "basis": "event_education"
   },
   "termTreatments": [

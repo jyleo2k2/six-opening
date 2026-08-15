@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:402340",
+  "eventType": "capital_or_dividend",
+  "second": "실적 말고 다른 사건. 주주환원 계획.",
+  "article": {
+    "articleId": "MANUAL-TECHM-150531",
+    "title": "SK스퀘어, 내년 초까지 3100억원 주주환원...올해도 AI 중심으로 투자처 물색",
+    "publisher": "테크M",
+    "publishedAt": "2026-03-25T07:00:00.000Z",
+    "sourceUrl": "https://www.techm.kr/news/articleView.html?idxno=150531",
+    "sourceUnits": [
+      { "id": "S1", "text": "올해부터 내년 초까지 총 3100억원의 주주환원을 실행할 예정이다." },
+      { "id": "S2", "text": "지난해 2000억원을 자사주 매입에 투입한데 이어 올해는 더 많은 금액을 주주들을 위해 투입한다는 방침이다." },
+      { "id": "S3", "text": "향후 3년간 경상 배당수입 30% 이상과 투자성과 일부를 자사주 매입 및 소각 또는 현금배당 방식으로 주주에게 환원할 예정이다." },
+      { "id": "S4", "text": "또 자본준비금 5.89조원을 이익잉여금으로 전입하기로 했다." }
+    ]
+  },
+  "focusStatement": "SK스퀘어가 올해부터 내년 초까지 총 3100억원 규모의 주주환원을 실행하기로 했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "SK스퀘어, 주주들에게 3100억원을 돌려준다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "올해부터 내년 초까지 나눠서 해요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "return_period" },
+    { "text": "지난해에는 2000억원을 썼어요.", "sourceIds": ["S2"], "role": "context", "factKey": "last_year_amount" },
+    { "text": "앞으로 3년 동안 계속하기로 했어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "three_year_plan" }
+  ],
+  "priceConnection": {
+    "text": "회사가 번 돈을 주주에게 나눠 주는 것을 주주환원이라고 해요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "shareholder_return",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "주주환원", "easyText": "회사가 번 돈을 주식 가진 사람에게 돌려주는 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "주주", "easyText": "그 회사 주식을 가지고 있는 사람", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}
