@@ -1,6 +1,6 @@
 # F9 — 가족 아카이브 기능 명세
 
-> **현재 구현 단일 원본** · 2026-08-15 · 기준: PR #217까지 병합된 `main`
+> **현재 구현 단일 원본** · 2026-08-15 · 기준: PR #223까지 병합된 `main`
 >
 > 현행 동작은 **`web/ui-src/`(조립 결과 `app.html`) 렌더링 → `buildArchive()` → `shared/engine/archive-profile.js` → 이 문서** 순으로 확인한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따른다.
 
@@ -300,19 +300,19 @@ AbilityCard = { scores; character; level; samples; observation }
 WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "current" }
 ```
 
-`POST /api/profile` 이 이 스냅샷과 Luna 서술을 함께 낸다. 오늘 날짜는 `deps.now()` 로 주입받는다 — 주간 카드가 오늘에 매달리므로 테스트가 고정할 수 있어야 한다.
+오늘 날짜는 `deps.now()` 로 주입받는다 — 주간 카드가 오늘에 매달리므로 테스트가 고정할 수 있어야 한다.
 
-### 6.8 두 입력 경로 — 같은 엔진
+### 6.8 입력 경로
 
-주차 카드를 내는 곳이 둘인데 **산식은 한 벌**이다. 입력 저장소만 다르다.
+주차 카드를 내는 곳은 `GET /api/profile/season-cards` 하나다. 로컬 `kw_proto_v1` 을 body 로 받아 같은 엔진을 돌리던 `POST /api/profile` 은 어느 화면도 부르지 않아 PR #221 에서 삭제했다.
 
-| | `POST /api/profile` | `GET /api/profile/season-cards` |
-|---|---|---|
-| 입력 | 화면이 보낸 `kw_proto_v1` + F11 시드 | 로그인 세션의 Supabase 기록 |
-| 세션 | 불필요 (body 로 받음) | `kw_uid` 쿠키 필요 |
-| 근거력 입력 | `events` 의 탭 열람(종류·체류 그대로) | `stock_tab_views` 복원 (§6.9) |
-| 계획 일치 | `sellRecords.plan_match` | DB 에 없어 `actionAlignment` 는 항상 0 |
-| 현재가 | 유니버스 시세 | 보관 종가의 마지막 값 |
+| | `GET /api/profile/season-cards` |
+|---|---|
+| 입력 | 로그인 세션의 Supabase 기록 |
+| 세션 | `kw_uid` 쿠키 필요 |
+| 근거력 입력 | `stock_tab_views` 복원 (§6.9) |
+| 계획 일치 | DB 에 없어 `actionAlignment` 는 항상 0 |
+| 현재가 | 보관 종가의 마지막 값 |
 
 `season-cards` 응답의 `weeks[]` 는 `weekStart`·`weekEnd`·`label`·`status`·`count`와 신버전 카드 전체(`card: AbilityCard`, **0~10**)만 담는다. 0~100 호환 배열(`scores`)은 화면 이관이 끝나 없앴다 — §6.11.
 
@@ -331,7 +331,7 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 - **`info_detail_opened` 가 화면에서 한 번도 안 찍힌다.** `logEvent` 호출부는 `news_detail_opened`·`chart_detail_opened` 둘뿐이라 로컬 경로의 "3탭 중 2탭" 규칙이 실질 "2탭 중 2탭"이다.
 - `archive-profile.js` 의 `weekStartKstOf` 는 `season-cards` 가 신버전으로 옮겨가며 쓰이지 않게 됐다. 구버전을 지울 때 함께 정리한다.
 - `shared/store/family-trade-seed.ts` 주석이 아직 "5거래일" 기준으로 적혀 있다 (다른 세션 소유 경로).
-- `POST /api/profile`(로그인 불필요, 로컬 `kw_proto_v1` 로 신버전을 계산)은 아직 화면이 부르지 않는다. 로그인 전 화면은 §3 구버전 로컬 계산으로 남는다 — §6.11.
+- 로그인 전 화면은 §3 구버전 로컬 계산으로 남는다 — §6.11.
 
 ### 6.11 화면 연결 (2026-08-14, `buildArchive()`)
 
@@ -358,7 +358,7 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 - 시즌 기록 탭은 없다. 주별 누적은 카드 모아보기가 대신하고, 로컬에 없는 지난 주는 §3.5 가 Supabase `transactions` 로 채운다. "시즌" 이라는 이름의 화면·데이터 개념은 여전히 없다 — 카드에는 "이번 주"·"○월 ○주차" 라벨만 있다.
 - §3.5 의 지난 주차 카드와 §3.2 의 이번 주 행동 데이터 오버라이드는 같은 `transactions`·`stock_tab_views` 테이블을 다른 기간으로 읽는다. 한쪽에 더미·과거 행을 넣으면 다른 쪽 표시도 바뀔 수 있다는 점을 잊지 않는다.
 - 매수 기록이 없어도 캐릭터가 나온다. 관찰 초기 상태를 따로 두지 않는다.
-- `POST /api/profile`이 만드는 Luna 서술(`lib/narration.ts`)을 어느 화면도 부르지 않는다. 배선하거나 지우는 판단이 필요하다 (`docs/기능명세.md` §7.1).
+- **F9 는 LLM 을 쓰지 않는다.** 캐릭터 카드에 붙일 Luna 서술(`lib/narration.ts` + `POST /api/profile`)은 어느 화면도 부른 적이 없어 PR #221 에서 삭제했다. 다시 붙일 때는 이 SPEC 에 계약부터 적고 화면 연결까지 한 작업으로 처리한다 (`docs/기능명세.md` §7.1).
 
 ## 8. 금지 사항
 

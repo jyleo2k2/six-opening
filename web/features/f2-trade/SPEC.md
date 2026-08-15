@@ -1,6 +1,6 @@
 # F2·F3 — 모의투자·질문식 매매 기능 명세
 
-> **현재 구현 단일 원본** · 2026-08-15 · 기준: PR #217까지 병합된 `main`
+> **현재 구현 단일 원본** · 2026-08-15 · 기준: PR #223까지 병합된 `main`
 >
 > 현행 동작을 설명할 때는 **프론트 실제 동작 → 프론트가 호출하는 백엔드 계약 → 문서** 순으로 판단한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따르되, 이 문서에 구현 완료라고 적으려면 실제 소비 코드가 있어야 한다.
 
@@ -44,7 +44,6 @@ GET /ranking
 
 - **주소가 화면을 가리킨다.** 아는 주소는 `features/f0-home/screen-route.ts`의 `routeFromPath`가 정하고 모르는 주소는 404다. `/stocks`·`/trade/[symbol]` 라우트는 없다.
 - 화면 전환은 아직 대부분 `app.html`의 `screen` 상태 변경이고, 주소는 `kiwoom:screen` 메시지를 받아 뒤따라간다. 옮겨 온 화면(`/ranking`)으로 나갈 때만 `leaveToRoute()`로 문서를 갈아끼운다.
-- `POST /api/profile`은 F9 스냅샷을 계산하지만 **화면이 호출하지 않는다**(F9 SPEC §6.11).
 - 화면은 `/api/universe/data`를 5초마다 다시 읽어 현재가와 스파크라인을 갱신한다.
 - 차트 기간·유형은 iframe을 다시 열지 않고 `kiwoom:chart-options` 메시지로 바꾼다.
 - 화면 즉시 상태는 로컬 저장이 우선이다. 서버 저장 실패가 화면 거래를 롤백하지 않으므로 두 저장소가 항상 같다고 가정할 수 없다.
@@ -213,9 +212,7 @@ type PrototypeSellRecord = {
 | `POST /api/trade` | 조건부 연결 | 정규장 시장가와 장외 예약 시장가의 실제 체결만 best-effort 전송. 응답 실패 시 로컬 거래는 유지되고 서버 재조회는 하지 않음 |
 | `POST /api/tab-view` | 조건부 연결 | 종목별 기업정보·차트·뉴스 방문 중 10초 이상인 것만 서버가 다시 세어 매수 체결 시 최종 개수 저장 |
 | `GET /api/profile/behavior`, `GET /api/profile/season-cards` | 연결 | 아카이브 진입 시 캐릭터 카드와 지난 주차 카드를 조회 |
-| `POST /api/profile` | 미연결 | 자녀·부모 로컬 상태와 시드를 합쳐 F9 엔진 JSON을 계산하지만 화면이 호출하지 않음 |
 | `GET·POST /api/orders` | 미연결 | 미체결 주문 조회와 만기 예약 정산. 화면은 아직 로컬 `acc.pending`으로 예약을 돌림 |
-| `POST /api/auth/switch` | 미연결 | Route Handler는 있으나 현재 사용자 화면에서 호출하지 않음 |
 | `POST·DELETE /api/auth/login` | 연결 | 로그인은 `LoginGate`, 로그아웃은 `app.html` 메뉴 |
 
 `POST /api/trade`는 `dbUser`가 있고 메인 화면의 `account`가 서버 프로필 역할과 같을 때만 보낸다. 화면 계정 스위처가 없으므로 부모 역할 거래의 실제 서버 생산 경로는 현재 사용자 UI에 없다. 같은 조건에서 응답이 200이면 `loadDbUser()`를 다시 호출해 홈 화면 보유종목을 서버 값으로 재동기화한다.
@@ -273,7 +270,7 @@ type PrototypeSellRecord = {
 ## 9. 현재 알려진 불일치·미완료
 
 - 지정가 자동 체결 스케줄러가 없다.
-- 메인 화면 전역 부모↔자녀 스위처와 `/api/auth/switch`가 연결되지 않았다.
+- 메인 화면에 전역 부모↔자녀 스위처가 없다. 계정 전환은 로그아웃 후 재로그인으로 확정됐고 `/api/auth/switch`는 PR #221에서 삭제했다.
 - `POST /api/trade` 응답이 실패하면 로컬 거래와 Supabase 거래가 재조정되지 않는다(성공 시에는 `applyServerHoldings`가 재동기화한다).
 - **주문 생애주기가 DB에 생겼는데 화면이 쓰지 않는다.** `transactions`는 `order_status`(`filled`·`pending`·`scheduled`·`cancelled`·`rejected`)와 예약 자원(`reserved_balance`·`reserved_quantity`)을 갖고 `GET·POST /api/orders`도 있지만, 화면의 예약은 여전히 로컬 `acc.pending`과 `lib/scheduled-orders.js`가 돌린다. 브라우저를 지우면 예약이 사라진다.
 - 거래를 읽는 서버 경로는 전부 `order_status='filled'`을 걸러야 한다(`app/api/supabase.ts`의 `selectFilledTrades`). 주문 자체를 다루는 `api/orders`만 예외로 `selectRows`를 직접 쓴다.
