@@ -1,0 +1,80 @@
+{
+  "stockId": "KRX:042660",
+  "second": true,
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-DIGITALTODAY-20260727",
+    "title": "한화오션, 2026년 2분기 당기순이익 6926억원…전년동기 대비 366.4% 증가",
+    "publisher": "디지털투데이",
+    "publishedAt": "2026-07-27T05:11:00.000Z",
+    "sourceUrl": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=687258",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "조선·플랜트 기업 한화오션(042660)이 2026년 2분기 당기순이익 6926억원을 기록하며 전년동기 대비 366.4% 증가했다고 27일 공시했다."
+      },
+      {
+        "id": "S2",
+        "text": "매출액은 5조4432억원으로 전년동기 3만2941억원보다 65.2% 증가했다."
+      },
+      {
+        "id": "S3",
+        "text": "영업이익은 7361억원으로 전년동기 3717억원 대비 98.0% 늘었다."
+      },
+      {
+        "id": "S4",
+        "text": "상반기 누계 실적을 보면 매출액은 8조6531억원으로 전년동기 누계 6조4372억원보다 34.4% 증가했다."
+      },
+      {
+        "id": "S5",
+        "text": "당기순이익 누계는 1조1926억원으로 전년동기 누계 3642억원보다 227.5% 증가했다."
+      }
+    ]
+  },
+  "focusStatement": "한화오션이 2026년 2분기에 매출 5조4432억원, 영업이익 7361억원을 내며 영업이익이 1년 전의 두 배 가까이로 늘었다.",
+  "anchorSourceId": "S3",
+  "headline": {
+    "text": "한화오션, 2분기 영업이익 7361억원 98% 늘어",
+    "sourceIds": ["S3"]
+  },
+  "body": [
+    {
+      "text": "2분기 매출은 5조4432억원이에요.",
+      "sourceIds": ["S2"],
+      "role": "key_detail",
+      "factKey": "quarter_revenue"
+    },
+    {
+      "text": "영업이익은 7361억원이에요.",
+      "sourceIds": ["S3"],
+      "role": "business_detail",
+      "factKey": "operating_profit"
+    },
+    {
+      "text": "상반기 매출은 8조6531억원이에요.",
+      "sourceIds": ["S4"],
+      "role": "context",
+      "factKey": "half_revenue"
+    }
+  ],
+  "priceConnection": {
+    "text": "배를 만들어 번 돈이 늘면 회사가 남기는 돈도 늘어요.",
+    "sourceIds": ["S3", "S4"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "매출",
+      "easyText": "회사가 물건이나 서비스를 팔아서 받은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S2"]
+    },
+    {
+      "term": "영업이익",
+      "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S3"]
+    }
+  ]
+}

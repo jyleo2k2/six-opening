@@ -1,0 +1,76 @@
+{
+  "stockId": "KRX:329180",
+  "second": true,
+  "eventType": "binding_contract",
+  "article": {
+    "articleId": "MANUAL-ALPHABIZ-20260512",
+    "title": "[공시분석] HD현대重, 2.15조 규모 '수주 잭팟'…선별 수주 전략 적중",
+    "publisher": "알파비즈",
+    "publishedAt": "2026-05-12T00:00:00.000Z",
+    "sourceUrl": "https://alphabiz.co.kr/news/view/1065582565643544",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "HD현대중공업은 최근 공시를 통해 오세아니아 및 아시아 소재 선사로부터 총 8척의 선박 건조 계약을 체결했다고 밝혔다."
+      },
+      {
+        "id": "S2",
+        "text": "이번에 수주한 금액은 총 2조 1500억 원 규모로, 이는 지난해 HD현대중공업 매출액의 12.12%에 달하는 수치다."
+      },
+      {
+        "id": "S3",
+        "text": "오세아니아 소재 선사로부터는 초대형 가스운반선(VLGC) 2척을 약 3,500억 원에 수주했다"
+      },
+      {
+        "id": "S4",
+        "text": "기술력을 바탕으로 한 고부가가치 선박 중심의 선별 수주 전략이 연이은 대형 계약으로 이어지고 있다"
+      }
+    ]
+  },
+  "focusStatement": "HD현대중공업이 오세아니아와 아시아 선사로부터 선박 8척, 2조1500억원 규모의 건조 계약을 체결했다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "HD현대중공업, 배 8척 2조1500억원 수주",
+    "sourceIds": ["S1", "S2"]
+  },
+  "body": [
+    {
+      "text": "선박 8척을 만들기로 했어요.",
+      "sourceIds": ["S1"],
+      "role": "key_detail",
+      "factKey": "ship_count"
+    },
+    {
+      "text": "계약 금액은 2조1500억원이에요.",
+      "sourceIds": ["S2"],
+      "role": "business_detail",
+      "factKey": "contract_amount"
+    },
+    {
+      "text": "가스운반선 2척도 들어 있어요.",
+      "sourceIds": ["S3"],
+      "role": "context",
+      "factKey": "vlgc_included"
+    }
+  ],
+  "priceConnection": {
+    "text": "주문을 미리 받아 두면 앞으로 여러 해 동안 만들 일이 생겨요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "수주",
+      "easyText": "일감을 주문받는 것",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    },
+    {
+      "term": "가스운반선",
+      "easyText": "가스를 싣고 바다를 건너는 배",
+      "treatment": "explained",
+      "sourceIds": ["S3"]
+    }
+  ]
+}

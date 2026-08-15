@@ -1,0 +1,84 @@
+{
+  "stockId": "KRX:086280",
+  "second": true,
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-MT-20260723",
+    "title": "현대글로비스, 2분기 역대 최대 매출…유가 상승에 영업익은 감소",
+    "publisher": "머니투데이",
+    "publishedAt": "2026-07-23T06:51:00.000Z",
+    "sourceUrl": "https://www.mt.co.kr/industry/2026/07/23/2026072315470565965",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "현대글로비스가 2분기 역대 최대 매출을 기록했지만 유가 상승, 운임 하락 영향으로 영업이익은 감소했다."
+      },
+      {
+        "id": "S2",
+        "text": "현대글로비스는 올해 2분기 매출액이 8조7054억원으로 전년동기대비 15.8% 증가해 분기 역대 최대치를 기록했다고 23일 밝혔다."
+      },
+      {
+        "id": "S3",
+        "text": "다만 영업이익은 8.1% 감소한 4950억원에 머물러 영업이익률은 5.7%를 보였다."
+      },
+      {
+        "id": "S4",
+        "text": "비계열 영업과 북미 내륙 운송 물량이 늘면서 매출액은 지난해 같은 기간 대비 10.3% 늘었다."
+      },
+      {
+        "id": "S5",
+        "text": "중동 지역 지정학적 리스크에 따른 유가 상승으로 수익성에 제한이 있었다."
+      },
+      {
+        "id": "S6",
+        "text": "회사가 제시한 2026년 실적 가이던스는 매출액 31조원 이상, 영업이익 2조1000억원 이상이다."
+      }
+    ]
+  },
+  "focusStatement": "현대글로비스가 2026년 2분기에 분기 역대 최대인 매출 8조7054억원을 냈고 영업이익은 4950억원으로 줄었다.",
+  "anchorSourceId": "S2",
+  "headline": {
+    "text": "현대글로비스, 2분기 매출 8조7054억원 역대 최대",
+    "sourceIds": ["S2"]
+  },
+  "body": [
+    {
+      "text": "2분기 매출은 8조7054억원이에요.",
+      "sourceIds": ["S2"],
+      "role": "key_detail",
+      "factKey": "quarter_revenue"
+    },
+    {
+      "text": "1년 전보다 15.8% 늘었어요.",
+      "sourceIds": ["S2"],
+      "role": "business_detail",
+      "factKey": "revenue_growth"
+    },
+    {
+      "text": "영업이익은 4950억원으로 줄었어요.",
+      "sourceIds": ["S3"],
+      "role": "context",
+      "factKey": "operating_profit"
+    }
+  ],
+  "priceConnection": {
+    "text": "매출이 늘어도 쓰는 돈이 더 늘면 남는 돈은 줄어요.",
+    "sourceIds": ["S2", "S3"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "매출",
+      "easyText": "회사가 물건이나 서비스를 팔아서 받은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S2"]
+    },
+    {
+      "term": "영업이익",
+      "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S3"]
+    }
+  ]
+}

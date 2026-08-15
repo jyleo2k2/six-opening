@@ -1,0 +1,84 @@
+{
+  "stockId": "KRX:271560",
+  "second": true,
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260814",
+    "title": "오리온, 해외 두자릿수 성장에 상반기 영업익 17.9% 상승한 2980억",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-08-14T07:01:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260814001000",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "오리온의 2026년 상반기 연결기준 매출은 전년 대비 15.5% 성장한 1조 8239억 원, 영업이익은 17.9% 증가한 2980억 원으로 집계됐다."
+      },
+      {
+        "id": "S2",
+        "text": "중동 전쟁 장기화에 따른 에너지비용과 물류비, 원부자재 가격 상승 등 어려운 경영환경 속에서도 한국 법인을 제외한 해외 법인들이 현지화 제품 확대와 성장채널 영업력 집중을 통해 두 자릿수 성장을 이끌었다."
+      },
+      {
+        "id": "S3",
+        "text": "한국 법인은 거래처 감소에도 매출이 5834억 원으로 1.7% 성장했다."
+      },
+      {
+        "id": "S4",
+        "text": "중국 법인은 최대 성수기인 '춘절' 이후에도 판매량이 늘어난 가운데, 간식점 등 고성장 채널의 전용 제품 확대와 감자스낵 판매량 증가에 힘입어 매출 7877억 원(24.4% 성장), 영업이익 1447억 원(33.7% 증가)을 기록했다."
+      },
+      {
+        "id": "S5",
+        "text": "러시아 법인은 초코파이 외에도 수박파이, 후레쉬파이, 참붕어빵, 초코송이, 젤리 등 다제품 체제가 한층 강화되며 매출 1955억 원(32.1% 성장), 영업이익 296억 원(62.2% 증가)으로 전 법인 중 가장 높은 영업이익 증가율을 보였다."
+      },
+      {
+        "id": "S6",
+        "text": "오리온은 창사 이래 처음으로 분기배당을 실시하는 등 주주환원도 지속적으로 확대하고 있으며, 배당률은 향후에도 계속 늘려간다는 방침이다."
+      }
+    ]
+  },
+  "focusStatement": "오리온이 2026년 상반기에 매출 1조8239억원, 영업이익 2980억원을 냈고 해외 법인이 성장을 이끌었다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "오리온, 상반기 매출 1조8239억원 15.5% 늘어",
+    "sourceIds": ["S1"]
+  },
+  "body": [
+    {
+      "text": "상반기 매출은 1조8239억원이에요.",
+      "sourceIds": ["S1"],
+      "role": "key_detail",
+      "factKey": "half_revenue"
+    },
+    {
+      "text": "영업이익은 2980억원이에요.",
+      "sourceIds": ["S1"],
+      "role": "business_detail",
+      "factKey": "half_operating_profit"
+    },
+    {
+      "text": "중국에서 매출 7877억원을 올렸어요.",
+      "sourceIds": ["S4"],
+      "role": "context",
+      "factKey": "china_revenue"
+    }
+  ],
+  "priceConnection": {
+    "text": "여러 나라에서 물건이 잘 팔리면 회사가 버는 돈이 늘어요.",
+    "sourceIds": ["S1", "S4"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "매출",
+      "easyText": "회사가 물건이나 서비스를 팔아서 받은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    },
+    {
+      "term": "영업이익",
+      "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+      "treatment": "explained",
+      "sourceIds": ["S1"]
+    }
+  ]
+}
