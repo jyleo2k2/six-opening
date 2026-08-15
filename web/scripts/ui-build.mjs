@@ -1,10 +1,14 @@
-// app.html 을 화면별 소스로 나누고, 다시 합치고, 혼자 열리는 HTML 로 내보낸다.
+// 화면 조각(web/ui-src)을 하나의 app.html 로 합치고, 혼자 열리는 HTML 로 내보낸다.
 //
-//   node scripts/ui-build.mjs split             app.html -> ui-src/
+// **원본은 web/ui-src 하나다.** web/public/ui/app.html 은 생성물이라 git 에서 추적하지 않고
+// npm run dev·npm run build 가 시작 전에 자동으로 만든다. 예전에는 둘 다 커밋돼 있어서
+// app.html 을 직접 고친 수정이 다음 재조립 때 조용히 사라졌다(복구 이력: PR #180·#186·#187).
+//
 //   node scripts/ui-build.mjs build             ui-src/  -> app.html
 //   node scripts/ui-build.mjs verify            ui-src/ 로 합친 결과가 app.html 과 바이트 단위로 같은지
 //   node scripts/ui-build.mjs export            ui-dist/app.standalone.html (전 화면)
 //   node scripts/ui-build.mjs export --screen=archive   ui-dist/archive.standalone.html (한 화면)
+//   node scripts/ui-build.mjs split --force     app.html -> ui-src/ (복구·외부 반입 전용, ui-src 를 통째로 덮어씀)
 //
 // 자르고 붙이는 단위는 줄이 아니라 원본 문자열의 구간이다. 개행 문자를 다시 만들지
 // 않으므로 CRLF 파일이 LF 로 바뀌는 사고가 나지 않는다.
@@ -363,6 +367,17 @@ function exportHtml(screen) {
 const command = process.argv[2];
 
 if (command === "split") {
+  // split 은 app.html 을 원본 삼아 ui-src 를 통째로 지우고 다시 만든다. 방향이 반대라
+  // 실수로 부르면 ui-src 에서 한 작업이 통째로 날아간다. 복구하거나 디자인 툴에서 받은
+  // app.html 을 반입할 때만 쓰라고 --force 를 요구한다.
+  if (!process.argv.includes("--force")) {
+    console.error(
+      "split 거부: app.html 은 생성물이다. ui-src 가 원본이므로 split 은 복구용 --force 전용이다.\n" +
+        "  화면을 고치려면 web/ui-src 를 고치고 `node scripts/ui-build.mjs build` 를 실행한다.\n" +
+        "  정말 app.html 로 ui-src 를 덮어써야 하면 `node scripts/ui-build.mjs split --force` 를 쓴다.",
+    );
+    process.exit(1);
+  }
   const parts = plan(readApp());
   rmSync(UI_SRC, { recursive: true, force: true });
   for (const part of parts) {

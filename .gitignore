@@ -16,6 +16,11 @@ web/out/
 web/next-env.d.ts
 *.tsbuildinfo
 
+# 화면 조립 산출물 — 원본은 web/ui-src 하나다.
+# 이 파일을 커밋해 두면 직접 고친 수정이 다음 재조립 때 조용히 사라진다(복구 이력: PR #180·#186·#187).
+# npm run dev·npm run build 가 시작 전에 자동으로 만든다.
+web/public/ui/app.html
+
 # Local development logs
 *.log
 

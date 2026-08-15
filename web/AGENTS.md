@@ -6,6 +6,9 @@
 - Import from `shared/` only. Changes within it follow `shared/AGENTS.md`.
 - Use fixtures first. LLM access is server-only through `shared/llm` using the `openai` Responses API; external data passes only through `app/api/quote`, never direct client calls or `NEXT_PUBLIC_*` keys.
 - Filter all LLM output. Numeric and scoring calculations use only `shared/engine`.
+- **화면 원본은 `web/ui-src`다. `public/ui/app.html`은 `scripts/ui-build.mjs`가 만드는 생성물이므로 직접 수정·커밋하지 않는다.** git이 추적하지 않으며 `npm run dev`·`npm test`·`npm run build`가 시작 전에 자동으로 조립한다. 화면 작업은 `web/ui-src` 경로로 claim한다.
+- 화면을 고칠 때는 `web/ui-src`의 해당 조각을 고치고 `npm run ui:build`(또는 작업 중 `npm run ui:watch`)로 합친다. `app.html`을 직접 고치면 다음 조립 때 사라진다 — 실제로 그렇게 홈 화면이 통째로 유실됐다(복구 이력: PR #180·#186·#187).
+- `ui-build.mjs split`은 방향이 반대라 `ui-src`를 통째로 덮어쓴다. 복구·외부 반입 전용이며 `--force` 없이는 거부된다.
 - Completion requires `npm run build`, the applicable golden-path check, and zero design-system violations.
 
 <!-- BEGIN:nextjs-agent-rules -->
