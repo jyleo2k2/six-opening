@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Jua } from "next/font/google";
 import iconChild from "./front UI/assets/icon-child.png";
 import iconParents from "./front UI/assets/icon-parents.png";
-import iphoneFrame from "./front UI/assets/iphone-frame.png";
 import splashHero from "./front UI/assets/splash-hero.png";
 import { SignupWizard } from "./SignupWizard";
 
@@ -168,7 +167,7 @@ export function LoginGate() {
           )}
         </div>
         <img
-          src={iphoneFrame.src}
+          src="/ui/assets/iphone-frame.png"
           width={450}
           height={920}
           alt=""
