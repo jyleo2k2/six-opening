@@ -65,6 +65,14 @@ import {
   pickNextAvatarIndex,
 } from "./lib/floating-avatar";
 import { PROACTIVE_FOLLOWUP_QUESTION, PROACTIVE_SCRIPTS } from "./lib/routing";
+import {
+  UNREACHABLE_CHAT_FAILURE,
+  type ChatFailure,
+  chatFailureLog,
+  chatFailureText,
+  isRetryableChatFailure,
+  readChatFailure,
+} from "./lib/request-failure";
 
 type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
@@ -88,6 +96,8 @@ type Message = {
   stockExploreTurn?: StockExploreTurn;
   sectorExploreTurn?: SectorExploreTurn;
   uiAction?: ChatUiAction;
+  /** 다시 보내 볼 만한 실패에만 붙는다. 값이 있으면 이 질문 그대로 재전송하는 버튼을 그린다. */
+  retryQuestion?: string;
 };
 /**
  * 새로고침해도 보던 대화가 남게 한다. 탭을 닫으면 사라지는 `sessionStorage` 만
@@ -174,6 +184,7 @@ const COPY = {
     "안녕하세요, 저는 키웅이예요. 투자 기초와 화면 사용법을 함께 살펴볼 수 있어요.",
   input: "궁금한 것을 입력해 주세요",
   send: "\ubcf4\ub0b4\uae30",
+  retry: "다시 보내기",
   reset: "초기화",
 } as const;
 
@@ -297,6 +308,18 @@ function MessageBubble({
         >
           {message.text}
         </p>
+        {!userMessage && message.retryQuestion && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              className={CHOICE_CHIP_CLASS}
+              disabled={actionsDisabled}
+              onClick={() => onQuestion(message.retryQuestion ?? "")}
+              type="button"
+            >
+              {COPY.retry}
+            </button>
+          </div>
+        )}
         {!userMessage && Boolean(message.suggestedQuestions?.length) && (
           <div className="mt-2 flex flex-wrap gap-2">
             {message.suggestedQuestions?.map((question) => (
@@ -910,6 +933,8 @@ export function F10ChatbotDemo({
     let pendingStockExploreAction: StockExploreActionPayload | null = null;
     let pendingSectorExploreAction: SectorExploreActionPayload | null = null;
     let pendingStandardAction: StandardChatActionPayload | null = null;
+    // 응답을 읽다 만 실패는 여기 남지 않는다. 그런 실패는 서버까지 닿지 못한 것과 똑같이 다룬다.
+    let failure: ChatFailure | null = null;
 
     try {
       const response = await fetch("/api/chat", {
@@ -963,7 +988,13 @@ export function F10ChatbotDemo({
         }),
       });
 
-      if (!response.ok || !response.body) throw new Error("Chat request failed");
+      if (!response.ok || !response.body) {
+        // 상태 코드를 여기서 읽어 둔다. catch 는 fetch 가 던진 실패와 구분할 수단이 없다.
+        failure = response.ok
+          ? UNREACHABLE_CHAT_FAILURE
+          : readChatFailure(response.status, response.headers);
+        throw new Error("Chat request failed");
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -1077,6 +1108,10 @@ export function F10ChatbotDemo({
       if (abortController.signal.aborted || chatSessionVersion !== chatSessionVersionRef.current) {
         return;
       }
+      const reason = failure ?? UNREACHABLE_CHAT_FAILURE;
+      // 서버 로그의 `{"event":"f10_chat", …}` 를 같은 요청 ID 로 찾으라고 남긴다.
+      // 질문 원문은 넣지 않는다 (SPEC §11).
+      console.error("[f10] 챗봇 요청 실패", chatFailureLog(reason));
       setStatus("연결을 다시 확인해 주세요");
       await new Promise<void>((resolve) => {
         setTimeout(resolve, remainingPreparationMs(startedAt, Date.now()));
@@ -1084,7 +1119,11 @@ export function F10ChatbotDemo({
       setMessages((current) => {
         return [
           ...current,
-          { role: "assistant", text: "키웅이가 잠깐 낮잠 중이에요! 조금 있다 다시 물어봐 주세요 🐻" },
+          {
+            role: "assistant",
+            text: chatFailureText(reason),
+            ...(isRetryableChatFailure(reason) ? { retryQuestion: question } : {}),
+          },
         ];
       });
     } finally {
