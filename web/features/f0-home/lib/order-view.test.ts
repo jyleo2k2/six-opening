@@ -10,6 +10,7 @@ import {
   buyStepOk,
   judgePlanMatch,
   lastBuyRecord,
+  orderChatContext,
   sellMath,
   shuffledIndexes,
   type BuyRecordRow,
@@ -32,6 +33,127 @@ test("매수: 금액으로 넣으면 소수 수량, 주 수로 넣으면 금액�
   assert.equal(byQty.amount, 120_000);
   assert.equal(byQty.warn, "지갑으로 살 수 있는 주 수보다 많아!");
   assert.equal(byQty.canConfirm, false);
+});
+
+test("챗봇 맥락: 주 수로 넣은 주 수를 그대로 싣는다", () => {
+  // 이 화면이 `금액 ÷ 주문가` 로 수량을 다시 계산하던 동안, 주 수로 넣은 값은 통째로
+  // 사라졌다 — 화면에 "10주"가 떠 있어도 챗봇은 몰랐다.
+  const context = orderChatContext({
+    account: account(),
+    code: "096770",
+    draft: { ...blankBuyDraft(), buyBy: "qty", shares: 10 },
+    price: 128_700,
+    reservedQty: 0,
+    seed: 1_000_000,
+    sellDraft: null,
+    side: "buy",
+    stockName: "SK이노베이션",
+    totalAsset: 1_200_000,
+  });
+  assert.equal(context.quantity, 10);
+  assert.equal(context.unitPrice, 128_700);
+  assert.equal(context.screen, "order");
+  assert.equal(context.stockId, "KRX:096770");
+  assert.equal(context.pnlPercent, 20);
+  assert.equal(context.holdingCount, 1);
+});
+
+test("챗봇 맥락: 금액으로 넣으면 소수 수량이 그대로 간다", () => {
+  const context = orderChatContext({
+    account: account(),
+    code: "096770",
+    draft: { ...blankBuyDraft(), amount: 50_000 },
+    price: 128_700,
+    reservedQty: 0,
+    seed: 1_000_000,
+    sellDraft: null,
+    side: "buy",
+    stockName: "SK이노베이션",
+    totalAsset: 1_000_000,
+  });
+  // 자리 반올림은 요청 계약이 한 곳에서 맡는다. 화면은 계산한 값을 그대로 넘긴다.
+  assert.equal(context.quantity, 50_000 / 128_700);
+  assert.equal(context.pnlPercent, 0);
+});
+
+test("챗봇 맥락: 지정가는 주문 가격을, 매도는 팔 수 있는 수량을 싣는다", () => {
+  const limit = orderChatContext({
+    account: account(),
+    code: "096770",
+    draft: { ...blankBuyDraft(), buyBy: "qty", shares: 1, orderType: "limit", limitPct: -10 },
+    price: 100_000,
+    reservedQty: 0,
+    seed: 1_000_000,
+    sellDraft: null,
+    side: "buy",
+    stockName: "SK이노베이션",
+    totalAsset: 1_000_000,
+  });
+  assert.equal(limit.unitPrice, 90_000);
+
+  // 예약이 잡은 수량은 팔 수 없다. 화면이 막는 값을 챗봇이 말하면 안 된다.
+  const sell = orderChatContext({
+    account: account(),
+    code: "259960",
+    draft: blankBuyDraft(),
+    price: 240_000,
+    reservedQty: 1,
+    seed: 1_000_000,
+    sellDraft: { ...blankSellDraft(2), qty: 2 },
+    side: "sell",
+    stockName: "크래프톤",
+    totalAsset: 1_000_000,
+  });
+  assert.equal(sell.quantity, 1);
+  assert.equal(sell.unitPrice, 240_000);
+});
+
+test("챗봇 맥락: 살 수 없는 상태에서는 수량을 싣지 않는다", () => {
+  const empty = orderChatContext({
+    account: account(),
+    code: "096770",
+    draft: blankBuyDraft(),
+    price: 128_700,
+    reservedQty: 0,
+    seed: 1_000_000,
+    sellDraft: null,
+    side: "buy",
+    stockName: "SK이노베이션",
+    totalAsset: 1_000_000,
+  });
+  assert.equal(empty.quantity, undefined);
+  assert.equal(empty.unitPrice, 128_700);
+
+  // 시세를 아직 못 받았으면 주문 가격도 싣지 않는다 — 0원을 화면 값이라고 말할 수 없다.
+  const noPrice = orderChatContext({
+    account: account(),
+    code: "096770",
+    draft: { ...blankBuyDraft(), buyBy: "qty", shares: 3 },
+    price: 0,
+    reservedQty: 0,
+    seed: 1_000_000,
+    sellDraft: null,
+    side: "buy",
+    stockName: "SK이노베이션",
+    totalAsset: 1_000_000,
+  });
+  assert.equal(noPrice.unitPrice, undefined);
+});
+
+test("챗봇 맥락: 소수 수량 매매로 생긴 현금 소수점은 정수로 맞춘다", () => {
+  const context = orderChatContext({
+    account: { ...account(), cash: 3_055_000.4237 },
+    code: "096770",
+    draft: blankBuyDraft(),
+    price: 128_700,
+    reservedQty: 0,
+    seed: 1_000_000,
+    sellDraft: null,
+    side: "buy",
+    stockName: "SK이노베이션",
+    totalAsset: 1_000_000,
+  });
+  assert.equal(context.cash, 3_055_000);
 });
 
 test("매수: 지정가는 주문 가격 기준으로 수량·최대 주 수를 센다", () => {
