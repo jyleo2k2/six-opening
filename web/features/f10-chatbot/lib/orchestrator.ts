@@ -17,6 +17,11 @@ import {
   startGuidedExplain,
   type ExplainStep,
 } from "./explain";
+import {
+  checkAnswerRelevance,
+  shouldCheckRelevance,
+  type RelevanceVerdict,
+} from "./answer-relevance";
 import { generateChatAnswer } from "./openai";
 import { judgeChatOutput } from "./output-judge";
 import { rewriteFollowUp } from "./rewrite";
@@ -61,6 +66,8 @@ export type ChatOutcome = {
   failure?: "timeout" | "model_error" | "tool_error";
   /** 지시어 후속 질문을 다시 써서 라우팅했는지. 원문은 남기지 않는다. */
   rewritten?: boolean;
+  /** 적합성 검사가 승인 문장을 버리고 생성으로 돌렸는지. */
+  relevanceRedirected?: boolean;
 };
 
 type ChatOrchestratorDependencies = {
@@ -76,15 +83,31 @@ type ChatOrchestratorDependencies = {
    */
   classifyTerm?: (message: string, signal: AbortSignal) => Promise<ClassifiedTermKind>;
   runTool?: typeof runReadOnlyTool;
+  /**
+   * 위험군 고정 답변의 적합성 검사. `classifyTerm` 과 같이 **기본값이 실제
+   * 호출이 아니라 무조건 "on"** 이다 — 호출부(`app/api/chat/route.ts`)가
+   * 명시적으로 `checkAnswerRelevance` 를 넘겨야 켜진다. 이 폴더의 기존
+   * 테스트들이 이 의존성을 넘기지 않아 기본값이 실제 호출이면 네트워크를 탄다.
+   */
+  checkRelevance?: (
+    question: string,
+    answer: string,
+    signal: AbortSignal,
+  ) => Promise<RelevanceVerdict>;
   timeoutMs?: number;
   judgeTimeoutMs?: number;
   rewriteTimeoutMs?: number;
+  relevanceTimeoutMs?: number;
   requestSignal?: AbortSignal;
   onStatus?: (status: string) => void;
 };
 
 async function noTermClassification(): Promise<ClassifiedTermKind> {
   return "none";
+}
+
+async function noRelevanceCheck(): Promise<RelevanceVerdict> {
+  return "on";
 }
 
 function createTimedSignal(parent: AbortSignal | undefined, timeoutMs: number) {
@@ -403,6 +426,8 @@ export async function createChatOutcome(
   let stockExploreAction: ChatActionPayload | undefined;
   let sectorExploreAction: ChatActionPayload | undefined;
   let simplerFallbackText: string | undefined;
+  /** 적합성 검사가 승인 문장을 버리고 생성으로 돌렸는지. 로그용이다. */
+  let relevanceRedirected = false;
 
   onStatus("질문을 안전하게 확인하는 중");
 
@@ -563,6 +588,78 @@ export async function createChatOutcome(
     }
   }
 
+  // 답변 적합성 검사 (SPEC §6.0.3) — 약한 구간의 고정 답변만 다시 읽는다.
+  // "묻지 않은 것에 답하는" 오답은 문장 형태로 구분되지 않아 규칙으로 못 막고,
+  // 질문과 답을 함께 읽어야 판정된다. `off` 면 승인 문장을 버리고 생성으로
+  // 넘겨 2단 판정까지 받게 한다. 검사 실패는 기존 승인 문장을 유지한다 —
+  // 검사기가 죽었다고 안전한 답을 생성으로 바꾸지 않는다.
+  if (
+    explainStep === null &&
+    stockExploreStep === null &&
+    sectorExploreStep === null &&
+    shouldCheckRelevance({ route: routed.route, intent: routed.intent, source })
+  ) {
+    onStatus("답이 질문에 맞는지 확인하는 중");
+    const timed = createTimedSignal(
+      dependencies.requestSignal,
+      dependencies.relevanceTimeoutMs ?? 4_000,
+    );
+    let verdict: "on" | "off" = "on";
+    try {
+      verdict = await raceWithAbort(
+        (dependencies.checkRelevance ?? noRelevanceCheck)(
+          modelMessage,
+          response.text,
+          timed.signal,
+        ),
+        timed.signal,
+      );
+    } catch (error) {
+      if (!timed.signal.aborted) {
+        console.error(
+          "F10 relevance check failed",
+          error instanceof Error ? error.name : "unknown",
+        );
+      }
+    } finally {
+      timed.cleanup();
+    }
+
+    if (verdict === "off") {
+      relevanceRedirected = true;
+      onStatus("답변을 다시 준비하는 중");
+      const generateTimed = createTimedSignal(
+        dependencies.requestSignal,
+        dependencies.timeoutMs ?? 8_000,
+      );
+      try {
+        response = {
+          text: await raceWithAbort(
+            (dependencies.generateAnswer ?? generateChatAnswer)(
+              modelMessage,
+              request.context,
+              generateTimed.signal,
+            ),
+            generateTimed.signal,
+          ),
+        };
+        source = "model";
+      } catch (error) {
+        // 생성이 실패하면 원래 승인 문장으로 돌아간다. 비껴간 답이라도
+        // 안전하고, 폴백 문구보다는 아이에게 쓸모가 있다.
+        if (!generateTimed.signal.aborted) {
+          console.error(
+            "F10 relevance redirect generation failed",
+            error instanceof Error ? error.name : "unknown",
+          );
+        }
+        relevanceRedirected = false;
+      } finally {
+        generateTimed.cleanup();
+      }
+    }
+  }
+
   if (sectorExploreStep === null && routed.sectorFact) {
     sectorExploreAction = { kind: "sector-explore", turn: createSectorExploreTurn(routed.sectorFact.sectorId) };
   }
@@ -697,5 +794,6 @@ export async function createChatOutcome(
     ...(gateReason !== undefined ? { gateReason } : {}),
     ...(failure ? { failure } : {}),
     ...(rewritten ? { rewritten: true } : {}),
+    ...(relevanceRedirected ? { relevanceRedirected: true } : {}),
   };
 }
