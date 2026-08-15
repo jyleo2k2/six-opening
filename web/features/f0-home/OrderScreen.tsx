@@ -133,6 +133,26 @@ const SHEET = styleFromCss(
     "border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -14px 34px -12px rgba(20,16,50,0.28)",
 );
 const SHEET_GRAB = styleFromCss("width:42px;height:4px;border-radius:999px;background:#E1E0EC;margin:0 auto 14px");
+// 갖고 있지 않은 회사를 팔려 할 때 뜨는 안내 — 프로토타입의 sellBlockScrim·sellBlockCard 와 같은 값이다.
+const BLOCK_SCRIM = styleFromCss(
+  "position:absolute;left:0;top:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:center;" +
+    "padding:0 32px;background:rgba(20,16,45,0.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)",
+);
+const BLOCK_CARD = styleFromCss(
+  "display:flex;flex-direction:column;align-items:center;width:100%;box-sizing:border-box;background:#FFFFFF;" +
+    "border-radius:30px;padding:26px 24px 24px;box-shadow:0 24px 48px -16px rgba(30,25,60,0.32)",
+);
+const BLOCK_TITLE = styleFromCss(
+  "font-size:18px;font-weight:800;color:#01185A;margin-top:14px;text-align:center;letter-spacing:-0.01em",
+);
+const BLOCK_BODY = styleFromCss(
+  "font-size:14.5px;font-weight:500;color:#7E849B;margin-top:9px;text-align:center;line-height:1.6;" +
+    "text-wrap:pretty;white-space:pre-line",
+);
+const BLOCK_CTA = styleFromCss(
+  "width:100%;box-sizing:border-box;margin-top:20px;border-radius:999px;padding:16px;text-align:center;" +
+    "font-size:16.5px;font-weight:800;color:#FFFFFF;cursor:pointer;background:#F5327F;box-shadow:0 8px 18px -8px rgba(245,50,127,0.6)",
+);
 const SHEET_ROW = styleFromCss(
   "display:flex;align-items:center;gap:11px;background:#F4F4FA;border-radius:18px;padding:12px 14px;box-shadow:inset 0 0 0 1px #E4E6F1",
 );
@@ -227,6 +247,8 @@ export function OrderScreen({
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<BuyDraft>(blankBuyDraft);
   const [sellDraft, setSellDraftState] = useState<SellDraft | null>(null);
+  // 갖고 있지 않은 회사를 팔려고 했을 때 뜨는 안내. 프로토타입의 `sellBlocked` 와 같다.
+  const [sellBlocked, setSellBlocked] = useState(false);
   const [showPad, setShowPad] = useState(false);
   const [sellPick, setSellPick] = useState<string>("all");
   const [sellQtyStr, setSellQtyStr] = useState("");
@@ -420,10 +442,8 @@ export function OrderScreen({
   );
 
   // ── 구매·판매·대기 탭과 대기 목록 시트 — `ui-src` 의 새 디자인(PR #252)을 옮겨 왔다 ──
-  const sellableQty = Math.max(
-    0,
-    (me.holdings.find((h) => h.code === code)?.qty ?? 0) - reservedSellQty(me.pending || [], code),
-  );
+  const ownedQty = me.holdings.find((h) => h.code === code)?.qty ?? 0;
+  const sellableQty = Math.max(0, ownedQty - reservedSellQty(me.pending || [], code));
   const pickTabBuy = () => {
     if (locked) return;
     if (side !== "buy") {
@@ -437,8 +457,18 @@ export function OrderScreen({
     setOrderSheet(false);
   };
   const pickTabSell = () => {
-    // 팔 수 있는 수량이 없으면 아무것도 하지 않는다 — `ui-src` 의 goToSell 과 같은 문턱.
-    if (locked || sellableQty < 0.01) return;
+    // 팔 수 있는 수량이 없으면 넘어가지 않는다 — `ui-src` 의 goToSell 과 같은 문턱.
+    //
+    // 갖고 있지 않아서 막힌 것이면 **왜 막혔는지 말해 준다.** 프로토타입의 `sellBlocked`
+    // 팝업이 그 자리인데 옮겨 오지 않아, 판매 탭이 눌러도 아무 반응이 없는 버튼이 돼 있었다.
+    // 갖고 있는데 전부 예약에 묶여 막히는 경우는 원본에 없는 상황이라 문구를 지어내지 않고
+    // 종전대로 조용히 막는다.
+    if (locked) return;
+    if (ownedQty < 0.01) {
+      setSellBlocked(true);
+      return;
+    }
+    if (sellableQty < 0.01) return;
     if (side !== "sell") {
       onLeave(`/sell/${code}`);
       return;
@@ -478,6 +508,25 @@ export function OrderScreen({
       side: order.side || "buy",
     });
   };
+  // 스크림을 눌러도 닫힌다. 카드 안쪽 클릭은 스크림까지 올라가면 안 되므로 여기서 멈춘다
+  // (프로토타입의 `stopTap`).
+  const sellBlockModal = sellBlocked && (
+    <div onClick={() => setSellBlocked(false)} style={BLOCK_SCRIM}>
+      <div onClick={(event) => event.stopPropagation()} style={BLOCK_CARD}>
+        <img
+          alt="키웅이"
+          src="/ui/assets/mascot-bear.png"
+          style={{ display: "block", filter: "drop-shadow(0 10px 16px rgba(35,25,80,0.16))" }}
+          width={96}
+        />
+        <div style={BLOCK_TITLE}>판매할 주식이 없어요</div>
+        <div style={BLOCK_BODY}>{"이 회사를 아직 갖고 있지 않아요.\n먼저 사고 나면 팔 수 있어요."}</div>
+        <div onClick={() => setSellBlocked(false)} style={BLOCK_CTA}>
+          알겠어요
+        </div>
+      </div>
+    </div>
+  );
   const waitSheet = orderSheet && (
     <>
       <div onClick={() => setOrderSheet(false)} style={SHEET_SCRIM} />
@@ -681,11 +730,11 @@ export function OrderScreen({
 
     const qtyHint = math.byQty
       ? draft.shares > 0
-        ? `${Math.round(draft.shares * math.execPrice).toLocaleString("ko-KR")}원이 들어가`
-        : "몇 주 살지 골라봐"
+        ? `${Math.round(draft.shares * math.execPrice).toLocaleString("ko-KR")}원이 들어가요`
+        : "몇 주 살지 골라보세요"
       : math.amount > 0
-        ? `${stock.name} 약 ${math.qty.toFixed(2)}주${draft.orderType === "limit" ? "를 살 수 있게 돼" : "를 살 수 있어"}`
-        : "얼마를 넣을지 골라봐";
+        ? `${stock.name} 약 ${math.qty.toFixed(2)}주${draft.orderType === "limit" ? "를 살 수 있게 돼요" : "를 살 수 있어요"}`
+        : "얼마를 넣을지 골라보세요";
     const buyMaxHint =
       math.execPrice > 0 && me.cash > 0
         ? `최대 ${Math.floor(me.cash / math.execPrice)}주까지 살 수 있어 · 지갑 ${won(me.cash)}`
@@ -869,8 +918,8 @@ export function OrderScreen({
             </div>
             <div style={{ textAlign: "center", fontSize: 14, fontWeight: 500, color: "#7E849B", marginTop: 9, whiteSpace: "nowrap" }}>
               {draft.limitPct === 0
-                ? "지금 가격 그대로야"
-                : `지금 ${price.toLocaleString("ko-KR")}원보다 ${Math.abs(draft.limitPct)}% 싸`}
+                ? "지금 가격 그대로예요"
+                : `지금 ${price.toLocaleString("ko-KR")}원보다 ${Math.abs(draft.limitPct)}% 싸요`}
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
               {[-10, -5, -3, 0].map((pct) => (
@@ -1067,7 +1116,7 @@ export function OrderScreen({
             width={128}
           />
           <div style={{ fontSize: 14, fontWeight: 700, color: "#F5327F", letterSpacing: "0.08em", marginTop: 14 }}>
-            {done.limit ? "기다리는 주문에 넣었어" : done.scheduled ? "다음 장 주문을 맡아뒀어" : "주문 완료!"}
+            {done.limit ? "기다리는 주문에 넣었어요" : done.scheduled ? "다음 장 주문을 맡아뒀어요" :"주문 완료!"}
           </div>
           <div
             style={{
@@ -1099,10 +1148,10 @@ export function OrderScreen({
             }}
           >
             {done.limit
-              ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게.\n그동안 그 돈은 잠깐 맡아둘게!"
+              ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 돈은 잠깐 맡아둘게요!"
               : done.scheduled
-                ? "주문 접수와 체결은 달라. 거래가 확인된 첫날의 시가로 체결하고,\n휴장하거나 거래가 멈추면 돈을 그대로 맡아둘게."
-                : "왜 샀는지까지 남긴 건 정말 잘한 거야.\n나중에 아카이브에서 오늘의 너를 다시 만나자!"}
+                ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 돈을 그대로 맡아둘게요."
+                : "왜 샀는지까지 남긴 건 정말 잘한 거예요.\n나중에 아카이브에서 오늘의 나를 다시 만나요!"}
           </div>
           <div style={{ ...DONE_BOX, marginTop: 22 }}>
             <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>
@@ -1143,6 +1192,7 @@ export function OrderScreen({
         </div>
         {stepFooter(nextOk, step === 2 ? "주문하기" : "다음", placeBuy)}
         {waitSheet}
+        {sellBlockModal}
       </div>
     );
   };
@@ -1462,7 +1512,7 @@ export function OrderScreen({
               <span style={{ fontSize: 18, fontWeight: 800, color: "#F5327F" }}>원</span>
             </div>
             <div style={{ textAlign: "center", fontSize: 14, fontWeight: 500, color: "#7E849B", marginTop: 9, whiteSpace: "nowrap" }}>
-              {math.limPct === 0 ? "지금 값 그대로야" : `지금보다 ${math.limPct}% 높은 값이야`}
+              {math.limPct === 0 ? "지금 값 그대로예요" : `지금보다 ${math.limPct}% 높은 값이에요`}
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
               {[0, 3, 5, 10].map((pct) => (
@@ -1527,8 +1577,8 @@ export function OrderScreen({
               {buyRec
                 ? `${[choiceOf(REASONS, buyRec.reason_code)?.short, choiceOf(PLANS, buyRec.plan_code)?.short]
                     .filter(Boolean)
-                    .join(",\n")} 샀어.`
-                : "기록이 없어."}
+                    .join(",\n")} 샀어요.`
+                : "기록이 없어요."}
               <span style={{ fontSize: 26, color: "#F5327F", lineHeight: 0.85, marginLeft: 3 }}>”</span>
             </div>
           </div>
@@ -1612,10 +1662,21 @@ export function OrderScreen({
 
         {showJudge && planMatch === false && (
           <>
-            <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9, lineHeight: 1.4 }}>
+            {/* 원본은 두 문장을 줄로 나눈다 — `\n` 이 살려면 `pre-line` 이 함께 있어야 한다. */}
+            <div
+              style={{
+                fontSize: 15.5,
+                fontWeight: 800,
+                color: "#01185A",
+                marginTop: 9,
+                lineHeight: 1.4,
+                textWrap: "pretty",
+                whiteSpace: "pre-line",
+              }}
+            >
               {buyRec
-                ? `처음에는 ${choiceOf(PLANS, buyRec.plan_code)?.short ?? ""} 가지려고 했었네. 무엇이 달라졌어?`
-                : "무엇이 달라졌어?"}
+                ? `처음에는 ${choiceOf(PLANS, buyRec.plan_code)?.short ?? ""} 가지려고 했었네요.\n무엇이 달라졌나요?`
+                : "무엇이 달라졌나요?"}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {CHANGES.map((change) => (
@@ -1722,7 +1783,7 @@ export function OrderScreen({
           width={150}
         />
         <div style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", letterSpacing: "0.08em", marginTop: 14 }}>
-          {done.limit ? "기다리는 주문에 넣었어" : done.scheduled ? "다음 장 주문을 맡아뒀어" : "매도 완료"}
+          {done.limit ? "기다리는 주문에 넣었어요" : done.scheduled ? "다음 장 주문을 맡아뒀어요" :"매도 완료"}
         </div>
         <div style={{ fontSize: 24, fontWeight: 800, color: "#01185A", marginTop: 6, textAlign: "center", letterSpacing: "-0.01em", lineHeight: 1.4, whiteSpace: "pre-line" }}>
           {done.limit
@@ -1733,10 +1794,10 @@ export function OrderScreen({
         </div>
         <div style={{ fontSize: 15, fontWeight: 600, color: "#5C6280", marginTop: 12, textAlign: "center", lineHeight: 1.6, whiteSpace: "pre-line" }}>
           {done.limit
-            ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게.\n그동안 그 주식은 잠깐 맡아둘게."
+            ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 주식은 잠깐 맡아둘게요."
             : done.scheduled
-              ? "주문 접수와 체결은 달라. 거래가 확인된 첫날의 시가로 체결하고,\n휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게."
-              : "왜 팔았는지까지 남겨뒀어.\n아카이브에서 산 날과 판 날을 같이 볼 수 있어."}
+              ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게요."
+              : "왜 팔았는지까지 남겨뒀어요.\n아카이브에서 산 날과 판 날을 같이 볼 수 있어요."}
         </div>
 
         {done.badge && (
@@ -1821,6 +1882,7 @@ export function OrderScreen({
         </div>
         {stepFooter(sellOk, step === 2 ? "팔기" : "다음", placeSell)}
         {waitSheet}
+        {sellBlockModal}
       </div>
     );
   };
