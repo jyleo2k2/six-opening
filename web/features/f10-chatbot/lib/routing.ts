@@ -1454,6 +1454,47 @@ function findRecommendationKind(message: string): RecommendationKind | null {
   return null;
 }
 
+/**
+ * §6.1.3 가상 지갑 규칙. `VIRTUAL_MONEY_RULE_PATTERNS` 는 "투자금도합쳐" 처럼
+ * 거의 정확일치인 긴 구절만 담고 있어서 SPEC 이 예시로 든 "팀이면 돈이 합쳐져?"
+ * 조차 놓쳤다. 답변 문구는 이미 있는데 바깥 게이트를 못 넘어 범위 안내로
+ * 떨어지던 자리다. 주제어와 문맥 단서를 조합해 표현이 달라도 같은 취지면 같은
+ * 안내로 보낸다.
+ */
+function matchesVirtualMoneyRule(message: string) {
+  if (includesAny(message, VIRTUAL_MONEY_RULE_PATTERNS)) return true;
+
+  // 주문 가능 금액("얼마까지 살 수 있어?")은 limit 이 답한다. virtualMoney 가
+  // limit 보다 먼저 판정되므로 여기서 먼저 비켜 준다.
+  if (includesAny(message, ["한도", "까지살", "까지넣", "까지주문"])) return false;
+
+  const moneyWord = includesAny(message, [
+    "돈",
+    "투자금",
+    "지갑",
+    "자산",
+    "머니",
+    "현금",
+    "시드",
+  ]);
+
+  // 가족 팀이면 지갑을 합치는지 — "팀이면 돈이 합쳐져?"
+  // 수익률·점수를 합치느냐는 순위 질문이므로 돈을 가리키는 낱말을 함께 요구한다.
+  if (moneyWord && includesAny(message, ["합쳐", "합치", "같이쓰", "한지갑", "공동"])) {
+    return true;
+  }
+
+  // 시작 시드 금액 — "얼마 갖고 시작해?", "가상 머니 얼마 줘?"
+  if (message.includes("얼마")) {
+    if (includesAny(message, ["시작", "처음"])) return true;
+    if (includesAny(message, ["가상머니", "가상돈", "가상자산", "모투머니", "모의투자머니"])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function findRuleKind(message: string, context: ChatContext): RuleKind | null {
   const visibilityRule =
     (includesAny(message, VISIBILITY_RULE_PATTERNS) ||
@@ -1474,7 +1515,7 @@ function findRuleKind(message: string, context: ChatContext): RuleKind | null {
     ]);
   if (visibilityRule) return "visibility";
 
-  if (includesAny(message, VIRTUAL_MONEY_RULE_PATTERNS)) return "virtualMoney";
+  if (matchesVirtualMoneyRule(message)) return "virtualMoney";
 
   const participationRule =
     includesAny(message, PARTICIPATION_RULE_PATTERNS) ||
@@ -1512,10 +1553,14 @@ function findRuleKind(message: string, context: ChatContext): RuleKind | null {
     includesAny(message, PREDICTION_PATTERNS) ||
     includesAny(message, TIMING_PATTERNS) ||
     includesAny(message, SIZING_PATTERNS);
+  // 동점·동률은 그 자체로 순위 규칙을 묻는 낱말이라 질문형 패턴을 따로 요구하지
+  // 않는다. 요구하면 "동점이면 누가 이기는 거야?" 처럼 어미만 다른 문장이 범위
+  // 안내로 떨어진다 — SPEC 이 예시로 든 "동점이면 어떻게 해?" 만 통과하던 자리다.
+  const standaloneRankingTopic = includesAny(message, ["동점", "동률"]);
   const rankingRule =
     styleScoringRule ||
     (includesAny(message, RANKING_RULE_PATTERNS) &&
-      includesAny(message, RANKING_RULE_QUESTION_PATTERNS) &&
+      (standaloneRankingTopic || includesAny(message, RANKING_RULE_QUESTION_PATTERNS)) &&
       !explicitRankingRecommendation);
   if (rankingRule) return "ranking";
 

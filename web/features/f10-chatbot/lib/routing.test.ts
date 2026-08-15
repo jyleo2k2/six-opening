@@ -1649,12 +1649,40 @@ const ruleNaturalVariants = [
   ["친구 픽으로 샀다고 규칙 위반 처리됨?", "추천 출처 규칙 안내"],
   ["가족 추천을 근거로 적어도 돼?", "추천 출처 규칙 안내"],
   ["친구 말 듣고 샀으면 실격이야?", "추천 출처 규칙 안내"],
+  // SPEC §6.1.3 이 예시로 든 문장인데 긴 구절 목록에 걸리지 않아 범위 안내로
+  // 떨어지던 것들이다. 답변 문구는 이미 있었고 바깥 게이트만 못 넘었다.
+  ["팀이면 돈이 합쳐져?", "가상 자산 규칙 안내"],
+  ["팀이면 엄마랑 돈 합쳐지는 거야?", "가상 자산 규칙 안내"],
+  ["나 얼마 갖고 시작하는 거야?", "가상 자산 규칙 안내"],
+  ["시작 금액이 얼마야?", "가상 자산 규칙 안내"],
+  ["가상 머니 얼마 줘?", "가상 자산 규칙 안내"],
+  ["가상 자산 얼마로 시작해?", "가상 자산 규칙 안내"],
+  // 동점·동률은 그 자체로 순위 규칙 낱말이라 질문형 어미를 따로 요구하지 않는다.
+  ["동점이면 누가 이기는 거야?", "순위·시상 규칙 안내"],
+  ["동점이면 어떻게 해?", "순위·시상 규칙 안내"],
+] as const;
+
+/**
+ * 트리거를 넓히면 과차단이 아니라 과탐으로 뒤집힌다. 가상 지갑 판정이 이웃한
+ * 규칙 하위 의도를 삼키지 않는지 같이 고정한다.
+ */
+const ruleBoundaryVariants = [
+  // 주문 가능 금액은 limit 이 답한다. "얼마"가 들어가도 가상 지갑이 아니다.
+  ["얼마까지 살 수 있어?", "주문 한도 규칙 안내"],
+  ["한 종목에 돈 다 넣어도 돼?", "주문 한도 규칙 안내"],
+  ["나눠서 주문하면 한도 넘길 수 있어?", "주문 한도 규칙 안내"],
 ] as const;
 
 for (const [question, expectedStep] of ruleNaturalVariants) {
   const routed = routeMessage(question, stockContext);
   assert.equal(routed.route, "faq", `규칙 자연어 변형을 놓쳤어: ${question}`);
   assert.equal(routed.steps[0], expectedStep, `자연어 규칙 하위 의도가 달라: ${question}`);
+}
+
+for (const [question, expectedStep] of ruleBoundaryVariants) {
+  const routed = routeMessage(question, stockContext);
+  assert.equal(routed.route, "faq", `규칙 경계 질문을 놓쳤어: ${question}`);
+  assert.equal(routed.steps[0], expectedStep, `규칙 판정이 이웃 의도를 삼켰어: ${question}`);
 }
 
 // 단일종목 한도는 2026-08-13에 폐기했다. 한도 안내가 폐기된 프리셋을 되살리면 안 된다.
