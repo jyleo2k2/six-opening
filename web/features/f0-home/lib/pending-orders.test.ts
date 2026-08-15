@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
-import { pendingFromServerOrders, type ServerOrder } from "./server-orders";
-import { reservedSellQty } from "../../f2-trade/lib/scheduled-orders.js";
+import {
+  pendingFromServerOrders,
+  reservedSellQty,
+} from "../../f2-trade/lib/scheduled-orders.js";
 import { pendingCards } from "./portfolio-view";
 
 // 서버 주문 잔고를 화면이 이미 쓰는 pending 모양으로 옮긴다. 이 변환이 틀리면 예약 수량이
 // 금액으로 읽히거나(requestMode) 매도 예약이 사용 가능 수량에서 안 빠진다(reservedQty).
 
-const limitBuy: ServerOrder = {
+const limitBuy = {
   id: "o1",
   symbol: "005930",
   side: "buy",
@@ -20,7 +22,7 @@ const limitBuy: ServerOrder = {
   createdAt: "2026-08-15T01:00:00.000Z",
 };
 
-const scheduledSell: ServerOrder = {
+const scheduledSell = {
   id: "o2",
   symbol: "259960",
   side: "sell",

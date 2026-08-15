@@ -191,14 +191,17 @@ type PrototypeSellRecord = {
 
 읽는 쪽은 `shared/store/prototype-account.js`의 `restorePrototypeState()` 하나이고 **첫 렌더 전에** 부른다. `componentDidMount`에서 되살리면 화면을 옮길 때마다 시드 지갑이 한 프레임 먼저 보였다 바뀐다.
 
-### 6.3 대기 주문
+### 6.3 대기 주문 — 원본은 서버다
 
-- 장외 시장가는 `kind: "next_open"`, `side`, `scheduledFor`, 예약 현금 또는 예약 수량을 `acc.{account}.pending`에 저장한다.
-- 금액 매수는 예약 금액을 즉시 현금에서 빼고 시가가 확인되면 `예약 금액 / 시가`의 소수 수량으로 체결한다.
-- 수량 매수는 주문 당시 예상 금액을 예약한다. 실제 시가 필요액이 예약액보다 크면 주문을 거절하고 전액 반환하며, 작으면 차액을 반환한다.
-- 매도는 보유에서 즉시 빼지 않고 예약 수량만 사용 가능 수량에서 제외한다. 체결할 때 보유를 차감하고, 취소는 pending만 제거한다.
-- 예약일 이후 `volume > 0`인 첫 일봉만 실제 거래가 확인된 날로 인정하고 그 봉의 `open`을 쓴다. 휴일·거래정지·데이터 실패에는 체결하지 않는다.
-- 체결 처리는 `order_id` 기준으로 멱등하며, 예약 주문이 pending에서 제거되고 기록이 `filled` 또는 `rejected`로 바뀐 뒤에는 다시 처리하지 않는다.
+미체결 주문(지정가 대기·장외 예약)은 **`transactions`가 유일한 원본**이다. 화면은 예약을 만들지도, 정산하지도 않는다. 브라우저를 지워도 예약이 살아 있어야 하고, 예약이 잡아 둔 현금·수량도 서버가 잠가야 하기 때문이다.
+
+- 접수는 `POST /api/orders` 하나다. `reserve_order`가 한 트랜잭션에서 매수는 현금(`account.reserved_balance`), 매도는 수량(`holdings.reserved_quantity`)을 잠근다. 잔고를 직접 깎지 않으므로 예약·취소가 총자산을 바꾸지 않는다.
+- **접수가 실패하면 주문은 없던 일이다.** 화면은 완료 화면으로 넘어가지 않고 확인 단계에 남아 거절을 알린다. 로컬 현금·보유·`pending`은 어느 쪽으로도 움직이지 않는다.
+- 조회는 `GET /api/orders`다. 응답을 `pendingFromServerOrders()`가 화면이 쓰던 `pending` 모양(`kind`·`side`·`reservedAmount`·`reservedQty`·`reservationMode`)으로 바꾸므로, 사용 가능 수량 계산과 카드 렌더는 그대로다.
+- 정산도 그 조회가 겸한다. 예약일 이후 `volume > 0`인 첫 일봉만 실제 거래가 확인된 날로 인정하고 그 봉의 `open`으로 `settle_order`를 부른다. 휴일·거래정지·데이터 실패에는 체결하지 않는다. `settle_order`는 멱등이라 같은 주문을 두 번 불러도 중복 체결되지 않는다.
+- 금액 매수는 예약 금액 전부를 `예약 금액 / 시가`의 소수 수량으로 바꾼다. 수량 매수는 실제 시가 필요액이 예약액보다 크면 거절하고 전액 반환하며, 작으면 차액을 반환한다. 이 규칙은 이제 `settle_order` SQL이 소유한다.
+- 취소는 `DELETE /api/orders?id=`다. `cancel_order`가 `user_id`까지 대조해 남의 주문을 못 지우게 하고, 잠긴 자원을 같은 트랜잭션에서 푼다. 화면은 취소 뒤 목록을 다시 읽는다.
+- 화면 상태에는 **접수 뒤 서버에서 읽어 온 목록만** 들어간다. `localStorage`의 `acc.{account}.pending`은 조회에 실패했을 때만 남는 캐시이며, 매수·매도 화면은 여기에 쓰지 않는다.
 
 ## 7. 백엔드 연결 상태
 
@@ -208,11 +211,11 @@ type PrototypeSellRecord = {
 | `GET /api/universe/data` | 연결 | 5초 현재가·스파크 갱신 |
 | `GET /api/quote/{symbol}/chart` | 연결 | TradingView 캔들 데이터 |
 | `GET /api/news`, `GET /api/news/{id}` | 연결 | 게시 상태 뉴스만 공개 |
-| `GET /api/account` | 연결 | 로그인 직후와 매매 성공 직후 `applyServerHoldings`가 서버 잔액·보유를 홈 화면 하단 보유종목 카드(`state.acc[role].holdings`)에 반영. 로그인한 역할만 덮어쓰고 반대쪽 로컬 데모 데이터는 그대로 둠 |
+| `GET /api/account` | 연결 | 로그인 직후와 매매 성공 직후 `applyServerHoldings`가 서버 잔액·보유를 `state.acc[role]`에 반영. 화면의 `cash`는 총 현금(`balance`)이 아니라 **주문가능금액(`available` = `balance` − 잠긴 현금)**이다. 로그인한 역할만 덮어쓰고 반대쪽 로컬 데모 데이터는 그대로 둠 |
 | `POST /api/trade` | 조건부 연결 | 정규장 시장가와 장외 예약 시장가의 실제 체결만 best-effort 전송. 응답 실패 시 로컬 거래는 유지되고 서버 재조회는 하지 않음 |
 | `POST /api/tab-view` | 조건부 연결 | 종목별 기업정보·차트·뉴스 방문 중 10초 이상인 것만 서버가 다시 세어 매수 체결 시 최종 개수 저장 |
 | `GET /api/profile/behavior`, `GET /api/profile/season-cards` | 연결 | 아카이브 진입 시 캐릭터 카드와 지난 주차 카드를 조회 |
-| `GET·POST /api/orders` | 미연결 | 미체결 주문 조회와 만기 예약 정산. 화면은 아직 로컬 `acc.pending`으로 예약을 돌림 |
+| `GET·POST·DELETE /api/orders` | 연결 | 미체결 주문의 유일한 원본(§6.3). `POST`는 지정가·장외 예약 접수, `GET`은 목록 조회 겸 만기 예약 정산, `DELETE`는 취소. `app.html`은 `loadOpenOrders()`, 옮겨 온 화면은 `useWallet()`이 부른다 |
 | `POST·DELETE /api/auth/login` | 연결 | 로그인은 `LoginGate`, 로그아웃은 `app.html` 메뉴 |
 
 `POST /api/trade`는 `dbUser`가 있고 메인 화면의 `account`가 서버 프로필 역할과 같을 때만 보낸다. 화면 계정 스위처가 없으므로 부모 역할 거래의 실제 서버 생산 경로는 현재 사용자 UI에 없다. 같은 조건에서 응답이 200이면 `loadDbUser()`를 다시 호출해 홈 화면 보유종목을 서버 값으로 재동기화한다.
@@ -272,7 +275,9 @@ type PrototypeSellRecord = {
 - 지정가 자동 체결 스케줄러가 없다.
 - 메인 화면에 전역 부모↔자녀 스위처가 없다. 계정 전환은 로그아웃 후 재로그인으로 확정됐고 `/api/auth/switch`는 PR #221에서 삭제했다.
 - `POST /api/trade` 응답이 실패하면 로컬 거래와 Supabase 거래가 재조정되지 않는다(성공 시에는 `applyServerHoldings`가 재동기화한다).
-- **주문 생애주기가 DB에 생겼는데 화면이 쓰지 않는다.** `transactions`는 `order_status`(`filled`·`pending`·`scheduled`·`cancelled`·`rejected`)와 예약 자원(`reserved_balance`·`reserved_quantity`)을 갖고 `GET·POST /api/orders`도 있지만, 화면의 예약은 여전히 로컬 `acc.pending`과 `lib/scheduled-orders.js`가 돌린다. 브라우저를 지우면 예약이 사라진다.
+- 미체결 주문은 서버로 옮겼지만(§6.3) **체결된 거래 기록은 아직 두 갈래다.** 정규장 시장가 체결은 여전히 로컬 `records`·`sellRecords`가 먼저고 `POST /api/trade`가 best-effort다.
+- 예약 주문의 로컬 그림자 기록이 상태를 따라가지 않는다. 접수할 때 남긴 `records`의 `order_status`는 `pending`·`scheduled`에 머무르고, 서버가 체결·취소해도 `filled`로 바뀌지 않는다. 매도 화면 회고 카드(`lastBuy`)는 그 기록을 그대로 쓰므로 화면은 맞지만, 로컬 폴백 성향 계산은 그 매수를 미체결로 본다. 로그인 상태의 정본(`GET /api/profile/behavior`)은 DB를 보므로 영향이 없다.
+- 예약 정산 트리거가 조회에 붙어 있다. 아무도 앱을 열지 않으면 만기 예약이 정산되지 않는다 — 배치가 필요하면 `settleDueOrders`를 그대로 쓰면 된다.
 - 거래를 읽는 서버 경로는 전부 `order_status='filled'`을 걸러야 한다(`app/api/supabase.ts`의 `selectFilledTrades`). 주문 자체를 다루는 `api/orders`만 예외로 `selectRows`를 직접 쓴다.
 - F11 어댑터는 매도 기록에 `amount_krw`가 없어 시장가 매도 카드 단가를 0원으로 만들 수 있다.
 

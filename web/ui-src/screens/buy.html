@@ -137,6 +137,12 @@
 <div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
 <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#01185A">주문 금액</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
 </div>
+
+<sc-if value="{{ hasOrderError }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:9px;background:#FFF1F6;border-radius:18px;padding:13px 15px;box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.25)">
+<span style="font-size:13.5px;font-weight:600;color:#D5327A;line-height:1.55">{{ orderErrorText }}</span>
+</div>
+</sc-if>
 </div>
 </sc-if>
 

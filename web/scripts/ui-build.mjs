@@ -74,6 +74,13 @@ const INJECTED_CHUNKS = {
     source: join(webRoot, "shared", "data", "trade-copy.js"),
     from: "shared/data/trade-copy.js",
   },
+  // 이 조각은 `GENERATED` 머리말만 달고 ui-src 에 손으로 복사돼 있었다. 원본을 고쳐도
+  // 화면에는 반영되지 않아 머리말이 거짓말을 하던 자리다 — 실제 주입으로 바꾼다.
+  "logic/constants-tail.js": {
+    marker: "scheduled-order-engine",
+    source: join(webRoot, "features", "f2-trade", "lib", "scheduled-orders.js"),
+    from: "features/f2-trade/lib/scheduled-orders.js",
+  },
 };
 
 const ENGINE_BEGIN = /^\/\/ >>> archive-engine/;
