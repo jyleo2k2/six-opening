@@ -66,6 +66,48 @@ assert.equal(
 assert.equal(parseChatRequest({ message: "", context: { screen: "home" } }), null);
 assert.equal(parseChatRequest({ message: "안녕", context: { screen: "admin" } }), null);
 assert.equal(parseChatRequest({ message: "안녕", context: { screen: "order", quantity: -1 } }), null);
+
+// 금액으로 사는 화면은 `금액 ÷ 주문가` 를 수량으로 쓴다. 소수를 거절하면 그 화면에서 온
+// 질문이 통째로 400 이 되고, 화면은 그것을 "낮잠" 으로 보여 준다 — 실제로 그렇게 새어 나갔다.
+assert.deepEqual(
+  parseChatRequest({
+    message: "예상 금액 얼마예요?",
+    context: { screen: "order", quantity: 50_000 / 128_700, unitPrice: 128_700 },
+  }),
+  {
+    message: "예상 금액 얼마예요?",
+    context: { screen: "order", quantity: 0.39, unitPrice: 128_700 },
+  },
+);
+// 화면이 보여 주는 자리(소수 둘째)까지만 남긴다. 화면과 챗봇이 다른 수량을 말하면 안 된다.
+assert.equal(
+  parseChatRequest({
+    message: "얼마예요?",
+    context: { screen: "order", quantity: 1.239 },
+  })?.context.quantity,
+  1.24,
+);
+// 주 수로 사면 그대로 정수다.
+assert.equal(
+  parseChatRequest({ message: "얼마예요?", context: { screen: "order", quantity: 10 } })
+    ?.context.quantity,
+  10,
+);
+// 화면에서도 살 수 없는 양(0.01주 미만)은 버리되 질문 자체는 살린다. 여기서 거절하면
+// "이 금액으로는 아직 살 수 없어" 를 띄운 화면에서 아무 것도 못 묻게 된다.
+const tooSmall = parseChatRequest({
+  message: "얼마예요?",
+  context: { screen: "order", quantity: 0.004, unitPrice: 128_700 },
+});
+assert.equal(tooSmall?.context.quantity, undefined);
+assert.equal(tooSmall?.context.unitPrice, 128_700);
+// 화면이 낼 수 없는 값은 그대로 거절한다 — 생산자가 깨진 것을 조용히 덮지 않는다.
+for (const quantity of [0, -0.5, Number.NaN, Number.POSITIVE_INFINITY, 1_000_001, "10"]) {
+  assert.equal(
+    parseChatRequest({ message: "얼마예요?", context: { screen: "order", quantity } }),
+    null,
+  );
+}
 assert.equal(parseChatRequest({ message: "안녕", context: { screen: "stock", stockId: "005930" } }), null);
 assert.equal(
   parseChatRequest({ message: "내 기록", userId: "another-user", context: { screen: "archive" } }),
