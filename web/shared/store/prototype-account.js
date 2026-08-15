@@ -58,6 +58,61 @@ export function seedAccounts() {
 }
 
 /**
+ * 저장된 상태를 읽어 초기 상태에 덮을 조각으로 준다.
+ *
+ * **첫 렌더 전에** 불러야 한다. 예전에는 `componentDidMount` 에서 되살렸는데, 화면이 실제
+ * 라우트로 나뉘면서 화면을 옮길 때마다 문서가 새로 뜨게 됐다. 그래서 시드 지갑과 홈 화면이
+ * 한 프레임 먼저 그려졌다가 바뀌는 게 **이동할 때마다** 눈에 띈다.
+ *
+ * 화면 임시값은 앱 안에서 넘어온 경우에만 되살린다(`leaveToRoute` 가 남긴 표시).
+ * 표시를 바로 지워 새로고침·새 탭에서는 처음부터 시작한다 (F2 SPEC §6.2).
+ *
+ * 계좌 이관(`migrateAccount`)은 주문 엔진 몫이라 받아서 쓴다 — 이 파일은 import 를 못 쓴다.
+ *
+ * 저장소 키는 상수로 빼지 않고 리터럴로 둔다 — `features/f0-home/lib/screen-state-handoff.test.ts`
+ * 가 조립된 `app.html` 안에서 이 문자열들을 직접 찾아 계약이 조용히 깨지는 것을 막는다.
+ *
+ * @param {(account: any, sellRecords: any[]) => any} migrateAccount
+ * @returns {Record<string, any>}
+ */
+export function restorePrototypeState(migrateAccount) {
+  /** @type {Record<string, any>} */
+  const restored = {};
+  try {
+    const saved = JSON.parse(localStorage.getItem('kw_proto_v1') || "null");
+    if (saved && saved.acc) {
+      /** @type {Record<string, any>} */
+      const acc = {};
+      Object.keys(saved.acc).forEach((key) => {
+        acc[key] = migrateAccount(saved.acc[key], saved.sellRecords || []);
+      });
+      restored.acc = acc;
+      restored.records = saved.records || [];
+      restored.sellRecords = saved.sellRecords || [];
+      restored.events = saved.events || [];
+      restored.watchlist = saved.watchlist || [];
+      if (saved.seq !== undefined && saved.seq !== null) restored.seq = saved.seq;
+    }
+  } catch (e) {}
+  try {
+    const cameFromApp = sessionStorage.getItem('kw_proto_nav_v1') === '1';
+    sessionStorage.removeItem('kw_proto_nav_v1');
+    if (cameFromApp) {
+      const ui = JSON.parse(sessionStorage.getItem('kw_proto_ui_v1') || "null");
+      if (ui && typeof ui === "object") {
+        // 이 목록 자체도 위 테스트가 리터럴로 찾는다 — 오래 남는 값이 섞이지 않았는지 본다.
+        ['screen','account','code','draft','sellDraft','buyStep','sellStep','arcTab'].forEach((k) => {
+          if (ui[k] !== undefined && ui[k] !== null) restored[k] = ui[k];
+        });
+      }
+    } else {
+      sessionStorage.removeItem('kw_proto_ui_v1');
+    }
+  } catch (e) {}
+  return restored;
+}
+
+/**
  * 총자산 = 현금 + 보유 평가액 + 매수 예약에 묶인 현금.
  *
  * 매수 예약 현금은 주문을 넣을 때 `cash` 에서 이미 빠져 있으므로 다시 더한다.
