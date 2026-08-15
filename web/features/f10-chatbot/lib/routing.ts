@@ -1830,7 +1830,25 @@ function findMetaKind(
     "왜안골",
     "못고른다고",
     "종목을안골라",
-  ]);
+  ]) &&
+    // "추천 못 하는 건 아는데 그래서 뭐가 나아?" 는 이유를 묻는 형식을 빌렸을 뿐
+    // 실제로는 우열 판단을 요구한다. SPEC §6.1.7 이 "실제 종목 선택·가격 방향을
+    // 요구한 뒤 못하면 이유를 말하라고 덧붙인 문장은 recommend 를 유지한다"고
+    // 못 박은 자리다.
+    !includesAny(message, [
+      "그래서뭐가",
+      "그래도뭐가",
+      "뭐가나아",
+      "뭐가낫",
+      "뭐가좋",
+      "어느게나아",
+      "어느쪽이나아",
+      "그래서뭘",
+      "그래서어떤",
+      "힌트",
+      "골라줘",
+      "정해줘",
+    ]);
   const asksWhyNoForecast =
     // "말은 없어?" 뿐 아니라 "말은 안 해?" 도 같은 질문이다. 뒤의 미래 낱말과
     // "왜" 가 함께 있어야 통과하므로 부정 표현을 넓혀도 범위가 벌어지지 않는다.
@@ -2080,6 +2098,15 @@ function findCompanyFactKind(message: string): CompanyFactKind | null {
  */
 const COMPARISON_PATTERN =
   /(?:뭐가|무엇이|어느게|어떤게|어느쪽|어느것)(?:[가-힣]{0,6})?더|중에어느|다른점|차이가뭐/;
+
+/**
+ * 두 개념을 견주는 질문인지. 용어 DAPIE 를 여는 판정(`findScriptedTerm`)뿐 아니라
+ * 답변 뒤에 공통 유도 질문을 붙일지도 이 값으로 정한다 — 비교 답변은 되물어서
+ * 좁혀지는 종류가 아니라 이해 확인 전이가 오히려 방해다(SPEC §3.4.1).
+ */
+export function isComparisonQuestion(input: string) {
+  return COMPARISON_PATTERN.test(normalizeChatInput(input));
+}
 
 /**
  * 뜻만 묻는 질문이고 사전에 DAPIE 스크립트가 있으면 그 스크립트를 돌려준다.

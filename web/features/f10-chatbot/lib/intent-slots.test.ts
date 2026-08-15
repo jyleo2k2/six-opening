@@ -8,7 +8,7 @@
  * 아니라 교차곱으로 적는다.
  */
 import assert from "node:assert/strict";
-import { routeMessage } from "./routing";
+import { isComparisonQuestion, routeMessage } from "./routing";
 import {
   asksFamilyData,
   asksOwnTradeRecords,
@@ -186,6 +186,44 @@ assert.notEqual(
   routeMessage("체결됐는지 어디서 확인해?", stock).route,
   "safety",
   "확인 방법을 묻는 질문은 사용법 안내다",
+);
+
+// ── 불변식 7. 비교 질문에는 이해 확인 전이를 붙이지 않는다 ─────────────────
+// SPEC §3.4.1 [결정 2026-08-15]. 답이 이미 두 대상을 갈라 놓았으므로 되묻기가
+// 다음 걸음이 되지 못한다. 다음 걸음은 각 용어의 정의 추천 질문이 맡는다.
+for (const question of [
+  "PER이랑 PBR 뭐가 더 정확함?",
+  "시장가랑 지정가 중에 뭐가 더 싸?",
+]) {
+  assert.equal(isComparisonQuestion(question), true, `비교 질문으로 보지 않습니다: "${question}"`);
+  const routed = routeMessage(question, home);
+  assert.equal(routed.route, "faq", `비교 질문이 고정 응답으로 가지 않습니다: "${question}"`);
+  assert.equal(
+    routed.explainScript,
+    undefined,
+    `비교 질문이 용어 DAPIE 스크립트를 엽니다: "${question}"`,
+  );
+}
+assert.equal(isComparisonQuestion("PER이 뭐야?"), false, "단일 용어 정의는 비교가 아니다");
+
+// ── 불변식 8. 이유를 묻는 형식이어도 우열을 요구하면 차단이다 ───────────────
+// SPEC §6.1.7. "못하면 이유를 말해" 를 덧붙여도 실제 요구가 종목 선택이면
+// recommend 를 유지한다.
+for (const question of [
+  "추천 못 하는 건 아는데 그래서 뭐가 나아?",
+  "못 골라주는 건 알겠고 그래도 힌트만",
+]) {
+  assert.equal(
+    routeMessage(question, home).route,
+    "refusal",
+    `우열 요구가 메타 응답으로 샜습니다: "${question}"`,
+  );
+}
+// 순수하게 이유만 묻는 질문은 그대로 메타다.
+assert.notEqual(
+  routeMessage("왜 추천을 안 해줘?", home).route,
+  "refusal",
+  "금지 범위의 이유를 묻는 질문은 메타로 직접 답한다",
 );
 
 // ── 슬롯 술어 자체의 경계 ────────────────────────────────────────────────
