@@ -2305,7 +2305,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       "손익 기록의 공개 범위는 가족 화면에서 확인할 수 있어. 이 채팅의 질문 원문은 엄마에게 대신 보내지 않아.";
   } else if (message.includes("친구") && includesAny(message, ["공개", "보여", "보임"])) {
     familyDataText =
-      "네 성향 결과를 친구에게 자동으로 공개하지 않아. 공개 범위가 궁금하면 가족 비교 화면의 안내를 확인해 줘.";
+      "성향 결과를 친구에게 자동으로 공개하지 않아. 공개 범위가 궁금하면 가족 비교 화면의 안내를 확인해 줘.";
   } else if (message.includes("누가더잘")) {
     familyDataText =
       "나는 부모님의 성향 데이터를 가져오거나 누가 더 잘하는지 점수를 매기지 않아. 성향은 실력이나 성적이 아니라 투자 스타일을 돌아보는 기록이야.";
@@ -2339,7 +2339,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
     { text: string; steps: readonly string[]; questions: string[] }
   > = {
     crisis: {
-      text: "지금 혼자 견디지 않아도 돼. 먼저 네가 지금 안전한지 알려 줘. 급하게 위험하면 가까운 어른이나 112·119에 바로 도움을 요청해 줘.",
+      text: "지금 혼자 견디지 않아도 돼. 먼저 지금 안전한지 알려 줘. 급하게 위험하면 가까운 어른이나 112·119에 바로 도움을 요청해 줘.",
       steps: ["안전 확인"],
       questions: ["지금은 안전해요", "도움이 필요해요"],
     },
@@ -2359,7 +2359,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       questions: familyDataQuestions,
     },
     proxyAction: {
-      text: "나는 다른 사람 대신 주문하거나 주문 버튼을 누를 수 없어. 로그인 정보를 나누지 말고 네 화면에서 주문 내용을 직접 확인해 줘.",
+      text: "나는 다른 사람 대신 주문하거나 주문 버튼을 누를 수 없어. 로그인 정보를 나누지 말고 이 화면에서 주문 내용을 직접 확인해 줘.",
       steps: ["대리 행동 차단"],
       questions: ["매수는 어떻게 하나요?", "주문 전에 뭘 확인해요?"],
     },
@@ -2373,12 +2373,12 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
           : ["키웅이는 무엇을 도와주나요?", "PER이 뭐예요?"],
     },
     familyPressure: {
-      text: "부모님 반응이 걱정되거나 누군가 계속 재촉해서 부담스러웠구나. 수익률과 순위는 네 실력이나 성적표가 아니며, 지금은 화면을 닫고 믿을 수 있는 어른에게 부담된다고 말해도 돼.",
+      text: "부모님 반응이 걱정되거나 누군가 계속 재촉해서 부담스러웠구나. 수익률과 순위는 실력이나 성적표가 아니며, 지금은 화면을 닫고 믿을 수 있는 어른에게 부담된다고 말해도 돼.",
       steps: ["가족 압박 지원"],
       questions: ["수익률이 뭐예요?", "내 거래 기록 보여주세요"],
     },
     comparison: {
-      text: "다른 사람의 수익이나 순위와 비교돼 속상했구나. 한 번의 결과나 성향 숫자는 네 실력이나 사람의 가치를 정하는 점수가 아니야.",
+      text: "다른 사람의 수익이나 순위와 비교돼 속상했구나. 한 번의 결과나 성향 숫자는 실력이나 사람의 가치를 정하는 점수가 아니야.",
       steps: ["비교 스트레스 지원"],
       questions: ["내 성향 결과 알려주세요", "내 거래 기록 보여주세요"],
     },
@@ -2388,12 +2388,12 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       questions: ["변동성이 뭐예요?", "내 거래 기록 보여주세요"],
     },
     impulsiveTrade: {
-      text: "화가 난 상태에서 전부 팔지, 계속 가질지를 내가 정해 줄 수는 없어. 지금은 주문을 누르지 말고 화면을 닫은 뒤 네가 처음 남긴 이유를 나중에 다시 봐도 돼.",
+      text: "화가 난 상태에서 전부 팔지, 계속 가질지를 내가 정해 줄 수는 없어. 지금은 주문을 누르지 말고 화면을 닫은 뒤 처음 남긴 이유를 나중에 다시 봐도 돼.",
       steps: ["충동 매매 중단"],
       questions: ["내 거래 기록 보여주세요", "매도는 무슨 뜻이에요?"],
     },
     ethicalDistress: {
-      text: "전쟁과 투자 이야기가 불편하게 느껴졌구나. 무엇이 마음에 걸리는지 네 기준을 기록할 수 있지만, 내가 옳고 그름이나 매매 결론을 대신 정하지는 않아.",
+      text: "전쟁과 투자 이야기가 불편하게 느껴졌구나. 무엇이 마음에 걸리는지 그 기준을 기록할 수 있지만, 내가 옳고 그름이나 매매 결론을 대신 정하지는 않아.",
       steps: ["윤리 고민 지원"],
       questions: ["투자 근거는 뭐예요?", "위험이 뭐예요?"],
     },
@@ -2443,7 +2443,7 @@ function recommendationReply(
         : ["차트가 뭐예요?", "변동성이 뭐예요?"],
     },
     timing: {
-      text: "언제 사고팔거나 계속 보유할지는 대신 정해 줄 수 없어요. 대신 네가 남긴 거래 이유와 주문 전 확인 항목은 같이 볼 수 있어요. 🐻",
+      text: "언제 사고팔거나 계속 보유할지는 대신 정해 줄 수 없어요. 대신 그동안 남긴 거래 이유와 주문 전 확인 항목은 같이 볼 수 있어요. 🐻",
       steps: ["매매 시점 차단", "본인 기록 대안"],
       questions: ["내 거래 기록 보여주세요", "주문 전에 뭘 확인해요?"],
     },
@@ -2460,12 +2460,12 @@ function recommendationReply(
       questions: ["위험이 뭐예요?", "분산투자가 뭐예요?"],
     },
     recovery: {
-      text: "손실을 만회할 종목이나 거래를 정해 줄 수는 없어요. 대신 네 거래 기록과 현재 손익의 뜻은 함께 볼 수 있어요. 🐻",
+      text: "손실을 만회할 종목이나 거래를 정해 줄 수는 없어요. 대신 거래 기록과 현재 손익의 뜻은 함께 볼 수 있어요. 🐻",
       steps: ["손실 만회 거래 차단", "본인 기록 대안"],
       questions: ["내 거래 기록 보여주세요", "평가손익이 뭐예요?"],
     },
     social: {
-      text: "가족이나 친구의 선택과 수익만 보고 네 거래를 정해 줄 수는 없어요. 대신 네가 고른 이유와 거래 기록은 함께 돌아볼 수 있어요. 🐻",
+      text: "가족이나 친구의 선택과 수익만 보고 거래를 정해 줄 수는 없어요. 대신 직접 고른 이유와 거래 기록은 함께 돌아볼 수 있어요. 🐻",
       steps: ["추종 거래 차단", "투자 근거 대안"],
       questions: ["내 거래 기록 보여주세요", "투자 근거는 뭐예요?"],
     },
@@ -3121,7 +3121,7 @@ function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
     case "coding": {
       step = "코딩 범위 안내";
       text =
-        "코드를 작성하거나 그래프 만드는 방법을 알려주는 일은 이 서비스 범위가 아니에요. 대신 화면에 나온 네 성향 결과와 투자 기록의 뜻은 설명할 수 있어요. 🐻";
+        "코드를 작성하거나 그래프 만드는 방법을 알려주는 일은 이 서비스 범위가 아니에요. 대신 화면에 나온 성향 결과와 투자 기록의 뜻은 설명할 수 있어요. 🐻";
       questions = ["내 성향 결과 알려주세요", "내 지난 시즌 기록 보여주세요"];
       break;
     }
@@ -3323,9 +3323,9 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
       } else if (includesAny(message, ["부모님화면", "부모화면"])) {
         text = "부모와 자녀 화면에 순위를 똑같이 보여 줄지는 아직 확정되지 않았어. 가족에게 보이는 항목은 상호 동의한 공개 범위 안에서만 확인해야 해.";
       } else if (includesAny(message, ["성향", "누가볼수"])) {
-        text = "성향 결과는 서로 공개에 동의한 같은 가족 구성원이 비교 화면에서 볼 수 있고, 시즌 뒤에도 아카이브에 남아. 챗봇은 네 본인 결과만 조회해.";
+        text = "성향 결과는 서로 공개에 동의한 같은 가족 구성원이 비교 화면에서 볼 수 있고, 시즌 뒤에도 아카이브에 남아. 챗봇은 본인 결과만 조회해.";
       } else {
-        text = "네 거래 종목은 친구나 다른 가족 팀에 자동으로 공개되지 않아. 같은 가족 팀에서는 서로 동의한 거래 기록만 가족 화면에서 확인할 수 있어.";
+        text = "거래 종목은 친구나 다른 가족 팀에 자동으로 공개되지 않아. 같은 가족 팀에서는 서로 동의한 거래 기록만 가족 화면에서 확인할 수 있어.";
       }
       break;
     }
@@ -3454,7 +3454,7 @@ const ARCHIVE_ABILITY_DEFINITIONS = [
   },
   {
     aliases: ["근거", "근거력", "자료확인"],
-    text: "근거는 매수 전에 뉴스·기업 정보·차트 같은 자료를 확인한 기록을 보여주는 축이에요. 점수로 너를 평가하는 기능은 아니에요.",
+    text: "근거는 매수 전에 뉴스·기업 정보·차트 같은 자료를 확인한 기록을 보여주는 축이에요. 점수로 사람을 평가하는 기능은 아니에요.",
   },
 ] as const;
 
@@ -3649,7 +3649,14 @@ function getPersonalScreenGuidance(message: string): ChatReply | null {
       "own_profile",
       "내 성향 결과는 아카이브의 성향 화면에 캐릭터와 능력치로 정리돼 있어요. 거기서 직접 보는 게 가장 정확해요.",
       ["성향 화면 안내"],
-      { uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 보기" } },
+      {
+        uiAction: {
+          type: "open_screen",
+          target: "archive",
+          archiveTab: "report",
+          label: "성향 화면 보기",
+        },
+      },
     );
   }
   if (includesAny(message, ["등수", "순위", "몇등"])) {
@@ -3667,7 +3674,16 @@ function getPersonalScreenGuidance(message: string): ChatReply | null {
       "own_archive",
       "지난 시즌 기록은 아카이브에서 주차별로 볼 수 있어요. 거기서 직접 보는 게 가장 정확해요.",
       ["시즌 기록 화면 안내"],
-      { uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 보기" } },
+      {
+        // 주차별 기록은 성향 탭 안의 카드 모아보기다. 수익률 탭이 아니다.
+        uiAction: {
+          type: "open_screen",
+          target: "archive",
+          archiveTab: "report",
+          archiveOverlay: "cards",
+          label: "주차별 기록 보기",
+        },
+      },
     );
   }
   if (includesAny(message, [...ASKS_PNL, ...ASKS_CASH, ...ASKS_HOLDINGS, "자산", "평가금액"])) {
@@ -4290,7 +4306,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
       "현재 아카이브의 체결 기록과 그때 고른 이유는 나중에 수정하거나 지울 수 없어요. 실수한 거래도 당시 기록 그대로 남아요.",
       "아카이브에서 기록 보기",
       "archive",
-      { archiveTab: "season" },
+      { archiveTab: "return" },
     );
   }
 
@@ -4326,7 +4342,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
 
   if (message.includes("친구가알려준수량대로")) {
     return serviceHowToReply(
-      "친구가 알려준 수량을 따라도 바로 체결되지는 않아요. 예상 금액과 이유를 본 뒤 마지막 주문 확인은 네가 직접 해야 해요.",
+      "친구가 알려준 수량을 따라도 바로 체결되지는 않아요. 예상 금액과 이유를 본 뒤 마지막 주문 확인은 직접 해야 해요.",
       "주문 내용 직접 확인하기",
       "order",
       { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
@@ -4343,7 +4359,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
 
   if (message.includes("매수누르면또떨어지는거")) {
     return serviceHowToReply(
-      "매수 뒤 가격 변화는 미리 알 수 없어요. 주문하려면 금액과 이유를 입력한 뒤 마지막 확인은 네가 직접 하면 돼요.",
+      "매수 뒤 가격 변화는 미리 알 수 없어요. 주문하려면 금액과 이유를 입력한 뒤 마지막 확인은 직접 하면 돼요.",
       "주문 화면에서 확인하기",
       "order",
       { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
@@ -4384,7 +4400,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
 
   if (message.includes("이주문오리온2주가맞는지")) {
     return serviceHowToReply(
-      "키웅이가 주문이 맞다고 대신 승인하지는 않아요. 확인 화면에서 회사가 오리온인지, 수량이 2주인지, 매수·매도 구분과 예상 금액이 네 의도와 같은지 직접 확인해요.",
+      "키웅이가 주문이 맞다고 대신 승인하지는 않아요. 확인 화면에서 회사가 오리온인지, 수량이 2주인지, 매수·매도 구분과 예상 금액이 처음 의도와 같은지 직접 확인해요.",
       "주문 내용 확인하기",
       "order",
       { ...stockDetails, orderStep: "confirmation" },
