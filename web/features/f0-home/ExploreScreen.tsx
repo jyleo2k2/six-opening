@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ChatContext } from "../../shared/types/chatbot";
 import { accountTotalAsset, SEED } from "../../shared/store/prototype-account.js";
 import { BottomNav } from "./BottomNav";
@@ -14,6 +14,7 @@ import {
   exploreTitle,
   sectorChips,
 } from "./lib/explore-cards";
+import { useRailDrag } from "./lib/use-rail-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
 
@@ -80,15 +81,15 @@ export function ExploreScreen({
   const { universe, quotes, sparks } = useUniverseLive();
   const [query, setQuery] = useState("");
   const [cardIndex, setCardIndex] = useState(0);
-  const railRef = useRef<HTMLDivElement>(null);
-  const draggedRef = useRef(false);
+  // 카드가 켜졌는지는 아래 `onRailScroll` 이 정한다 — 여기서는 끄는 손만 받는다.
+  const rail = useRailDrag();
 
   const filter = knownFilter(sector, universe?.sectors.map((entry) => entry.id) ?? []);
 
   // 필터·검색이 바뀌면 처음 카드부터 다시 본다 — `componentDidUpdate` 의 scrollLeft 리셋과 같다.
   useEffect(() => {
     setCardIndex(0);
-    if (railRef.current) railRef.current.scrollLeft = 0;
+    if (rail.ref.current) rail.ref.current.scrollLeft = 0;
   }, [filter, query]);
 
   // 챗봇 맥락. `app.html` 의 notifyChatContext 는 탐색을 'home' 으로 묶어 지갑 값만 실었다.
@@ -134,64 +135,6 @@ export function ExploreScreen({
       : 280;
     const index = Math.max(0, Math.min(list.length - 1, Math.round(el.scrollLeft / step)));
     if (index !== cardIndex) setCardIndex(index);
-  };
-
-  // 드래그 관성. `cardsDown` 을 그대로 옮겨 왔다 — 값의 근거는 원본 주석 참고.
-  const onRailPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    const el = event.currentTarget;
-    const startX = event.clientX;
-    const startLeft = el.scrollLeft;
-    let lastX = event.clientX;
-    let lastT = typeof performance !== "undefined" ? performance.now() : Date.now();
-    let velocity = 0;
-    draggedRef.current = false;
-    el.style.scrollSnapType = "none";
-    el.style.cursor = "grabbing";
-    const move = (ev: PointerEvent) => {
-      const now = typeof performance !== "undefined" ? performance.now() : Date.now();
-      const dt = Math.max(1, now - lastT);
-      velocity = (ev.clientX - lastX) / dt;
-      lastX = ev.clientX;
-      lastT = now;
-      if (Math.abs(ev.clientX - startX) > 6) draggedRef.current = true;
-      el.scrollLeft = startLeft - (ev.clientX - startX);
-      // 실제로 끈 뒤에만 기본 동작을 막는다. 제자리 클릭에서 막으면 카드 click 이 사라진다.
-      if (draggedRef.current) ev.preventDefault();
-    };
-    const up = () => {
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", up);
-      el.style.cursor = "grab";
-      // 관성 상한. 감쇠 0.93 기준 손을 뗀 뒤 최대 2.5장에서 멈춘다 (원본 주석).
-      let fling = -velocity * 16;
-      if (fling > 48) fling = 48;
-      if (fling < -48) fling = -48;
-      const restore = () => {
-        el.style.scrollSnapType = "x mandatory";
-      };
-      const timer = setInterval(() => {
-        if (Math.abs(fling) < 0.6) {
-          clearInterval(timer);
-          restore();
-          return;
-        }
-        el.scrollLeft += fling;
-        fling *= 0.93;
-      }, 16);
-      setTimeout(() => {
-        clearInterval(timer);
-        restore();
-      }, 1200);
-      setTimeout(() => {
-        draggedRef.current = false;
-      }, 0);
-    };
-    // setPointerCapture 를 쓰면 click 이 컨테이너로 재타깃돼 카드 진입이 죽는다.
-    // 대신 window 리스너로 컨테이너 밖 이동까지 받는다.
-    window.addEventListener("pointermove", move);
-    window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", up);
   };
 
   return (
@@ -257,7 +200,7 @@ export function ExploreScreen({
           </div>
         ) : (
           <div style={STAGE}>
-            <div onPointerDown={onRailPointerDown} onScroll={onRailScroll} ref={railRef} style={RAIL}>
+            <div onPointerDown={rail.onPointerDown} onScroll={onRailScroll} ref={rail.ref} style={RAIL}>
               {list.map((stock, index) => {
                 const card = buildExploreCard(stock, universe, index === activeIndex);
                 return (
@@ -267,7 +210,7 @@ export function ExploreScreen({
                     <div style={styleFromCss(card.auraTrend)} />
                     <div
                       onClick={() => {
-                        if (!draggedRef.current) onLeave(`/stock/${card.code}`);
+                        if (!rail.dragged()) onLeave(`/stock/${card.code}`);
                       }}
                       style={styleFromCss(card.cardStyle)}
                     >
