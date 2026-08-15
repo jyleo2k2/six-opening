@@ -43,5 +43,12 @@ export default async function Page({
   if (!profile) return <LoginGate />;
   // 옮긴 화면도 `ConnectedPrototype` 안에서 iframe 위에 얹는다. 여기서 갈라 렌더하면
   // 화면을 옮길 때마다 iframe 이 언마운트돼 `app.html` 이 처음부터 다시 뜬다.
-  return <ConnectedPrototype route={route} />;
+  // 옮긴 화면은 지갑을 직접 읽으므로 누구 계좌인지 알아야 한다. `app.html` 은 `/api/account`
+  // 를 기다렸다가 알지만, 여기서는 세션 쿠키로 이미 알고 있으니 첫 렌더부터 넘긴다.
+  return (
+    <ConnectedPrototype
+      account={profile.parent_child === "parent" ? "parent" : "child"}
+      route={route}
+    />
+  );
 }

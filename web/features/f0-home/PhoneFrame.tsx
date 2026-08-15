@@ -43,7 +43,8 @@ export function PhoneFrame({
   children,
 }: {
   statusBar?: "dark" | "light";
-  children: ReactNode;
+  /** 저장소를 읽기 전에는 프레임만 그린다 — 시드 지갑이 한 프레임 스치면 안 된다. */
+  children?: ReactNode;
 }) {
   // 아직 창을 못 쟀으면 원래 크기로 그린다.
   const scale = usePhoneScreenRect()?.scale ?? 1;
