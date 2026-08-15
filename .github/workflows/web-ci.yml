@@ -31,5 +31,10 @@ jobs:
         run: npm ci
       - name: Test
         run: npm test
+      # F10 라우팅 회귀. 단위 테스트는 개별 함수를 보고, 이쪽은 오케스트레이터
+      # 전 구간과 기존 600건 라우트 분포를 함께 본다. 트리거를 넓히는 작업의
+      # 위험은 과차단이 아니라 과소차단이라 차단 하한도 여기서 막는다.
+      - name: F10 chat regression
+        run: npx tsx ../records/f10-child-sim/run-regression.ts --legacy --max-fail 0
       - name: Build
         run: npm run build
