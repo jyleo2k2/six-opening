@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   actionFromRoute,
   pathFromRoute,
+  routeFromAppScreen,
   routeFromChatContext,
   routeFromPath,
   SCREEN_SEGMENTS,
@@ -113,6 +114,54 @@ test("종목 코드가 없는 맥락은 주소를 만들지 않는다", () => {
   assert.equal(
     routeFromChatContext({ screen: "stock", stockId: "KRX:12345" as `KRX:${string}` }),
     null,
+  );
+});
+
+// ── app.html 이 보내는 원래 화면 이름 ─────────────────────────────────────────
+// 챗봇 맥락과 달리 홈·탐색·랭킹·계좌가 구분되고 매수·매도도 갈린다.
+
+test("원래 화면 이름을 주소로 바꾼다 — 뭉뚱그리지 않는다", () => {
+  assert.deepEqual(routeFromAppScreen("home", null), { screen: "home" });
+  assert.deepEqual(routeFromAppScreen("explore", null), { screen: "explore" });
+  assert.deepEqual(routeFromAppScreen("ranking", null), { screen: "ranking" });
+  assert.deepEqual(routeFromAppScreen("portfolio", null), { screen: "portfolio" });
+  assert.deepEqual(routeFromAppScreen("archive", null), { screen: "archive" });
+  assert.deepEqual(routeFromAppScreen("detail", "005930"), { screen: "stock", code: "005930" });
+  assert.deepEqual(routeFromAppScreen("buy", "005930"), {
+    screen: "order",
+    code: "005930",
+    side: "buy",
+  });
+  assert.deepEqual(routeFromAppScreen("sell", "000660"), {
+    screen: "order",
+    code: "000660",
+    side: "sell",
+  });
+});
+
+// 차트·뉴스는 상세에서 열리는 하위 화면이라 아직 자기 주소가 없다.
+test("차트·뉴스는 종목 상세 주소를 쓴다", () => {
+  assert.deepEqual(routeFromAppScreen("chart", "005930"), { screen: "stock", code: "005930" });
+  assert.deepEqual(routeFromAppScreen("news", "005930"), { screen: "stock", code: "005930" });
+});
+
+test("종목이 필요한 화면인데 코드가 없거나 이상하면 주소를 만들지 않는다", () => {
+  assert.equal(routeFromAppScreen("detail", null), null);
+  assert.equal(routeFromAppScreen("buy", null), null);
+  assert.equal(routeFromAppScreen("sell", "12345"), null);
+  assert.equal(routeFromAppScreen("모르는화면", null), null);
+});
+
+// 뭉뚱그린 맥락과 원래 이름이 같은 결론을 내는 화면은 서로 어긋나면 안 된다.
+test("두 경로가 같은 화면에서 같은 주소를 만든다", () => {
+  assert.deepEqual(routeFromAppScreen("home", null), routeFromChatContext({ screen: "home" }));
+  assert.deepEqual(
+    routeFromAppScreen("archive", null),
+    routeFromChatContext({ screen: "archive" }),
+  );
+  assert.deepEqual(
+    routeFromAppScreen("detail", "005930"),
+    routeFromChatContext({ screen: "stock", stockId: "KRX:005930" }),
   );
 });
 
