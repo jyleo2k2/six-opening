@@ -113,6 +113,12 @@ export type FeedCard = {
   /** 체결가를 못 보는 카드는 등락률 대신 매수·매도만 적는다. */
   bigPctText: string;
   positive: boolean;
+  /**
+   * `avgText` 는 **이 거래 한 건의 주당 체결가**다. 보유 전체의 평균 매입가(평단가)가 아니다.
+   * 라벨을 카드가 직접 들고 있는 이유는 방향마다 달라서다 — 화면이 "평단가" 로 고정해 두면
+   * 매수는 총 거래금액처럼, 매도는 산 가격처럼 읽힌다.
+   */
+  avgLabel: string;
   avgText: string;
   avgColor: string;
   oneLiner: string;
@@ -194,6 +200,7 @@ export function feedCards(
             ? "매도"
             : "매수",
         positive,
+        avgLabel: sell ? "판 가격" : "산 가격",
         avgText: avg ? won(avg) : "비공개",
         avgColor: avg ? (positive ? UP : DOWN) : "#A9AEC4",
         oneLiner: reason ? reason.short : sell ? "팔았어" : "담았어",

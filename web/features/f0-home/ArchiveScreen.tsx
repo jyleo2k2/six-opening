@@ -586,7 +586,7 @@ export function ArchiveScreen({
                         <div style={{ position: "absolute", right: -2, bottom: -2, width: 56, height: 60, background: `url(${card.pose}) right bottom/contain no-repeat`, filter: "drop-shadow(0 4px 7px rgba(0,0,0,0.3))" }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0, background: "#F5F6FB", padding: "14px 15px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>평단가</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>{card.avgLabel}</div>
                         <div style={{ fontSize: 25, fontWeight: 800, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", marginTop: 4, whiteSpace: "nowrap", color: card.avgColor }}>{card.avgText}</div>
                         <div style={{ fontSize: 14, fontWeight: 700, color: "#3D4460", marginTop: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{card.oneLiner}</div>
                       </div>
