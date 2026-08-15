@@ -217,6 +217,47 @@ test("시작 지연과 조기 종료는 한국어 해결 방법을 출력한다"
   assert.match(output, /npm run dev/);
 });
 
+test("서버가 준비되면 ui 조립 감시를 켜고 서버 종료 시 함께 끈다", async () => {
+  const server = new EventEmitter();
+  const watcher = new EventEmitter();
+  const stoppedWith = [];
+  let watcherSpawns = 0;
+  setTimeout(() => server.emit("exit", 0, null), 30);
+  const code = await runDevServer("unused", 3100, {
+    error: () => {},
+    inspect: async () => "project",
+    intervalMs: 1,
+    log: () => {},
+    open: () => {},
+    spawnServer: () => server,
+    spawnWatcher: () => {
+      watcherSpawns += 1;
+      return watcher;
+    },
+    stopWatcher: (child) => stoppedWith.push(child),
+  });
+  assert.equal(code, 0);
+  assert.equal(watcherSpawns, 1);
+  assert.deepEqual(stoppedWith, [watcher]);
+});
+
+test("서버가 준비되기 전에 죽으면 ui 조립 감시를 켜지 않는다", async () => {
+  const server = new EventEmitter();
+  setTimeout(() => server.emit("exit", 1, null), 20);
+  await runDevServer("unused", 3100, {
+    error: () => {},
+    inspect: async () => "unavailable",
+    intervalMs: 1,
+    log: () => {},
+    open: () => {},
+    spawnServer: () => server,
+    spawnWatcher: () => {
+      throw new Error("watcher must not start before the server is ready");
+    },
+    startupWarningMs: 10_000,
+  });
+});
+
 test("dev.bat은 Node 런처 하나만 호출한다", () => {
   const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
   const batch = fs.readFileSync(path.join(scriptsDir, "..", "dev.bat"), "utf8");

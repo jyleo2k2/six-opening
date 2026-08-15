@@ -74,52 +74,90 @@ export type UniverseLive = {
   sparks: Record<string, number[]>;
 };
 
+type LiveSnapshot = Pick<UniverseLive, "quotes" | "sparks">;
+type LivePayload = {
+  quotes?: Record<string, { price?: number; rate?: number }>;
+  sparks?: Record<string, number[]>;
+} | null;
+
+function parseLive(data: LivePayload): LiveSnapshot | null {
+  if (!data?.quotes) return null;
+  return {
+    quotes: Object.fromEntries(
+      Object.entries(data.quotes).map(([symbol, quote]) => [
+        symbol,
+        { price: Number(quote?.price) || 0, rate: Number(quote?.rate) || 0 },
+      ]),
+    ),
+    sparks: data.sparks ?? lastLive?.sparks ?? {},
+  };
+}
+
+/**
+ * 5초 폴링 한 벌을 화면 몇 개가 오가든 같이 쓴다.
+ *
+ * 화면(구독자)마다 타이머를 두면 폴러가 겹치고, 응답이 5초를 넘는 순간 밀린 요청이
+ * 서버 큐에 계속 쌓인다. 응답 대기 중이면 그 틱은 건너뛴다(`liveRefreshTick` 의
+ * busy 가드와 같다). 마지막 값은 모듈에 남겨 화면에 되돌아오면 즉시 그린다.
+ */
+const liveListeners = new Set<(snapshot: LiveSnapshot) => void>();
+let liveTimer: ReturnType<typeof setInterval> | null = null;
+let liveBusy = false;
+let lastLive: LiveSnapshot | null = null;
+
+async function pollLive() {
+  if (liveBusy) return;
+  liveBusy = true;
+  try {
+    const response = await fetch("/api/universe/data", { cache: "no-store" });
+    const parsed = parseLive(response.ok ? ((await response.json()) as LivePayload) : null);
+    if (parsed) {
+      lastLive = parsed;
+      liveListeners.forEach((listener) => listener(parsed));
+    }
+  } catch {
+    // 네트워크 실패면 마지막 값 그대로 둔다.
+  } finally {
+    liveBusy = false;
+  }
+}
+
+function subscribeLive(listener: (snapshot: LiveSnapshot) => void) {
+  liveListeners.add(listener);
+  if (!liveTimer) {
+    pollLive();
+    liveTimer = setInterval(pollLive, 5000);
+  }
+  return () => {
+    liveListeners.delete(listener);
+    if (liveListeners.size === 0 && liveTimer) {
+      clearInterval(liveTimer);
+      liveTimer = null;
+    }
+  };
+}
+
 /**
  * 전 종목 시세. 탐색 카드 51장이 쓴다 — `app.html` 의 `liveRefreshTick` 과 같은
  * 주기(5초)·같은 경로다. 특정 종목을 데우지 않으므로 `symbol` 없이 부른다.
  */
 export function useUniverseLive(): UniverseLive {
   const [universe, setUniverse] = useState<Universe | null>(null);
-  const [quotes, setQuotes] = useState<UniverseLive["quotes"]>({});
-  const [sparks, setSparks] = useState<UniverseLive["sparks"]>({});
+  const [live, setLive] = useState<LiveSnapshot>(() => lastLive ?? { quotes: {}, sparks: {} });
 
   useEffect(() => {
     let alive = true;
     loadUniverse().then((loaded) => {
       if (alive) setUniverse(loaded);
     });
-    const load = () =>
-      fetch("/api/universe/data", { cache: "no-store" })
-        .then((r) => (r.ok ? r.json() : null))
-        .then(
-          (data: {
-            quotes?: Record<string, { price?: number; rate?: number }>;
-            sparks?: Record<string, number[]>;
-          } | null) => {
-            if (!alive || !data) return;
-            if (data.quotes) {
-              setQuotes(
-                Object.fromEntries(
-                  Object.entries(data.quotes).map(([symbol, quote]) => [
-                    symbol,
-                    { price: Number(quote?.price) || 0, rate: Number(quote?.rate) || 0 },
-                  ]),
-                ),
-              );
-            }
-            if (data.sparks) setSparks(data.sparks);
-          },
-        )
-        .catch(() => {});
-    load();
-    const timer = setInterval(load, 5000);
+    const unsubscribe = subscribeLive(setLive);
     return () => {
       alive = false;
-      clearInterval(timer);
+      unsubscribe();
     };
   }, []);
 
-  return { universe, quotes, sparks };
+  return { universe, quotes: live.quotes, sparks: live.sparks };
 }
 
 export type StockLive = {
@@ -135,7 +173,9 @@ export type StockLive = {
 
 export function useStockLive(code: string): StockLive {
   const [universe, setUniverse] = useState<Universe | null>(null);
-  const [quotes, setQuotes] = useState<Record<string, { price: number; rate: number }>>({});
+  const [quotes, setQuotes] = useState<Record<string, { price: number; rate: number }>>(
+    () => lastLive?.quotes ?? {},
+  );
   const [spark, setSpark] = useState<number[] | null>(null);
 
   useEffect(() => {
@@ -148,33 +188,33 @@ export function useStockLive(code: string): StockLive {
     };
   }, []);
 
+  // 보고 있는 종목을 먼저 데워야 해서 공유 폴러 대신 `symbol` 을 실어 따로 부른다.
+  // 대신 가드는 같다: 응답 대기 중이면 그 틱은 건너뛰어 서버에 요청이 쌓이지 않는다.
   useEffect(() => {
     let alive = true;
+    let busy = false;
     setSpark(null);
-    const load = () =>
-      fetch(`/api/universe/data?symbol=${encodeURIComponent(code)}&chart=1`, { cache: "no-store" })
-        .then((r) => (r.ok ? r.json() : null))
-        .then(
-          (data: {
-            quotes?: Record<string, { price?: number; rate?: number }>;
-            sparks?: Record<string, number[]>;
-          } | null) => {
-            if (!alive || !data) return;
-            if (data.quotes) {
-              setQuotes(
-                Object.fromEntries(
-                  Object.entries(data.quotes).map(([symbol, quote]) => [
-                    symbol,
-                    { price: Number(quote?.price) || 0, rate: Number(quote?.rate) || 0 },
-                  ]),
-                ),
-              );
-            }
-            const nextSpark = data.sparks?.[code];
-            if (nextSpark?.length) setSpark(nextSpark);
-          },
-        )
-        .catch(() => {});
+    const load = async () => {
+      if (busy) return;
+      busy = true;
+      try {
+        const response = await fetch(
+          `/api/universe/data?symbol=${encodeURIComponent(code)}&chart=1`,
+          { cache: "no-store" },
+        );
+        const data = response.ok ? ((await response.json()) as LivePayload) : null;
+        const parsed = parseLive(data);
+        if (parsed) lastLive = parsed;
+        if (!alive || !parsed) return;
+        setQuotes(parsed.quotes);
+        const nextSpark = data?.sparks?.[code];
+        if (nextSpark?.length) setSpark(nextSpark);
+      } catch {
+        // 네트워크 실패면 마지막 값 그대로 둔다.
+      } finally {
+        busy = false;
+      }
+    };
     load();
     const timer = setInterval(load, 5000);
     return () => {

@@ -20,7 +20,11 @@ const sparks: Record<string, number[]> = {};
 const chartUpdatedAt: Record<string, number> = {};
 let codes: string[] = [];
 let quoteCursor = 0;
-let refreshQueue = Promise.resolve<unknown>(undefined);
+let refreshInFlight: Promise<void> | null = null;
+let storedCloses: {
+  at: number;
+  value: Awaited<ReturnType<typeof readLatestDailyCloses>>;
+} | null = null;
 
 async function loadBase() {
   const text = await readFile(
@@ -94,16 +98,36 @@ async function refresh(preferredSymbol: string | null, includeChart: boolean) {
   );
 }
 
+/**
+ * 제공자 갱신은 응답을 막지 않는다. 이미 도는 중이면 이번 틱은 건너뛴다.
+ *
+ * 전에는 모든 요청이 직렬 큐에서 자기 refresh(~2.6초)를 기다렸다. 폴러가 둘만 돼도
+ * 유입이 배출을 넘어 큐가 영영 안 빠지고, 응답이 요청당 +2.6초씩 선형으로 늘었다.
+ */
+function kickRefresh(preferredSymbol: string | null, includeChart: boolean) {
+  if (refreshInFlight) return;
+  refreshInFlight = refresh(preferredSymbol, includeChart)
+    .catch(() => undefined)
+    .finally(() => {
+      refreshInFlight = null;
+    });
+}
+
+/** 보관 종가는 5초(폴링 주기)만 기억한다. 폴러마다 Supabase 왕복을 새로 하지 않는다. */
+async function readStoredCloses() {
+  if (!storedCloses || Date.now() - storedCloses.at > 5000) {
+    storedCloses = { at: Date.now(), value: await readLatestDailyCloses() };
+  }
+  return storedCloses.value;
+}
+
 export async function getUniverseSnapshot(
   preferredSymbol: string | null,
   includeChart: boolean,
 ) {
   await loadBase();
   const fixtures = await getQuoteFixtures();
-  const run = () => refresh(preferredSymbol, includeChart);
-  const result = refreshQueue.then(run, run);
-  refreshQueue = result.catch(() => undefined);
-  await result;
+  kickRefresh(preferredSymbol, includeChart);
   const updatedAt = new Date().toISOString();
   const fixtureQuotes = Object.fromEntries(
     Array.from(fixtures, ([symbol, fixture]) => [
@@ -126,7 +150,7 @@ export async function getUniverseSnapshot(
   let storedQuotes: Record<string, WarmQuote> = {};
   try {
     storedQuotes = Object.fromEntries(
-      Array.from(await readLatestDailyCloses(), ([symbol, candle]) => [
+      Array.from(await readStoredCloses(), ([symbol, candle]) => [
         symbol,
         {
           price: candle.close,
