@@ -1017,6 +1017,13 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "daily-chart", kind: "faq", category: "chart", termLabel: "일봉", triggers: ["일봉"], answer: "일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요. 하루의 시작값과 끝값, 높고 낮은 값을 함께 볼 수 있어요.", actionTarget: "stock", status: reviewed },
   { id: "weekly-chart", kind: "faq", category: "chart", termLabel: "주봉", triggers: ["주봉"], answer: "주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요. 여러 날의 과거 흐름을 한 묶음으로 살펴볼 수 있어요.", actionTarget: "stock", status: reviewed },
   { id: "delayed-price", kind: "faq", category: "chart", termLabel: "15분 지연 시세", triggers: ["15분 지연 시세"], answer: "15분 지연 시세는 실제 시장 가격이 화면에 약 15분 늦게 표시된다는 뜻이에요. 지금 시장에서 거래되는 가격과 다를 수 있어요.", actionTarget: "stock", status: reviewed },
+  // 이 서비스에 없는 화면(SPEC §3.3.1 "미지원 요청은 그 사실을 먼저 밝힌다").
+  // 없는 것을 물으면 어디에도 안 걸려 "저는 …도와주는 챗봇이에요" 범위 안내로 끝났고,
+  // 아이는 왜 안 되는지 모른 채 화면에서 호가창을 계속 찾는다. 대안은 실제로 있는
+  // 화면만 가리킨다 — 없는 화면을 지어내면 찾다가 또 막힌다.
+  // `매수호가`·`매도호가`를 따로 적는 이유: 낱말 `호가`만 두면 트리거 길이가 `매수`·`매도`와
+  // 같아 앞선 용어 사전이 이겨서 "매수는 주식을 사는 거래예요" 가 나갔다.
+  { id: "orderbook-unsupported", kind: "faq", triggers: ["호가창", "매수호가", "매도호가", "호가"], answer: "이 서비스는 모의투자라서 호가창은 제공하지 않아요. 종목 상세에서 15분 늦게 표시되는 지금 가격과 차트로 가격이 어떻게 움직였는지 볼 수 있어요.", actionTarget: "stock", status: reviewed },
   { id: "child-news", kind: "faq", category: "service", termLabel: "어린이 뉴스", triggers: ["어린이 뉴스", "오늘 국내 시황", "원문 보기"], answer: "어린이 뉴스는 회사나 시장에서 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 기사나 자료를 직접 확인할 수 있고, 뉴스는 매수·매도 답을 주지 않아요.", actionTarget: "stock", status: reviewed },
   { id: "season", kind: "faq", category: "service", termLabel: "시즌", triggers: ["시즌 진행", "남은 시즌", "시즌"], answer: "시즌은 가족이 같은 기간 동안 모의투자하고 기록을 쌓는 활동 기간이에요. 현재 한 시즌은 4주이고, 남은 기간은 홈의 시즌 진행 표시에서 확인할 수 있어요.", actionTarget: "home", status: reviewed },
   { id: "trade-lock", kind: "faq", category: "service", termLabel: "주문 잠금", triggers: ["학교 시간엔 매매 쉬기", "주문 잠금"], answer: "주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요.", actionTarget: "home", status: reviewed },

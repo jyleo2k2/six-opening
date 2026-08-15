@@ -103,6 +103,20 @@ for (const question of [
   assert.equal(findChatbotQuestionForm(question), "procedure", question);
 }
 
+// 이 서비스에 없는 화면은 형태와 무관하게 "없다"를 먼저 말한다.
+// `매수호가`·`매도호가`는 낱말 `호가`만으로는 용어 사전(`매수`·`매도`)에 트리거 길이가
+// 밀려 "매수는 주식을 사는 거래예요" 가 나가던 자리다.
+for (const question of [
+  "호가창이 뭐야?",
+  "호가창은 어떻게 봐요?",
+  "호가창 어디서 봐요?",
+  "호가가 뭐야?",
+  "매수호가 보여줘",
+  "매도호가 보여줘",
+]) {
+  assert.equal(findChatbotKnowledge(question)?.id, "orderbook-unsupported", question);
+}
+
 // 답변을 선언한 형태 밖으로 내보내지 않는다.
 for (const entry of CHATBOT_KNOWLEDGE) {
   if (!entry.questionForms) continue;
