@@ -1,0 +1,39 @@
+{
+  "stockId": "KRX:097950",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-1CONOMY-49931",
+    "title": "CJ제일제당, 2Q 영업익 1619억…전년比 18.4％↓",
+    "publisher": "1코노미뉴스",
+    "publishedAt": "2026-08-11T01:14:00.000Z",
+    "sourceUrl": "https://www.1conomynews.co.kr/news/articleView.html?idxno=49931",
+    "sourceUnits": [
+      { "id": "S1", "text": "올해 2분기 CJ대한통운을 제외한 연결 기준 매출 4조1950억원, 영업이익 1619억원을 기록했다." },
+      { "id": "S2", "text": "전년 동기와 비교하면 매출은 10.2% 증가했지만 영업이익은 18.4% 감소했다." },
+      { "id": "S3", "text": "당기순손실은 239억원으로 집계됐다." },
+      { "id": "S4", "text": "식품사업부문 매출은 2조8441억원으로 지난해 같은 기간보다 5.8% 증가했다." },
+      { "id": "S5", "text": "반면 영업이익은 21.3% 감소한 709억원에 그쳤다." },
+      { "id": "S6", "text": "바이오사업부문은 매출 성장 폭이 더 컸다. 매출은 20.8% 증가한 1조3509억원을 기록했다." },
+      { "id": "S7", "text": "그러나 영업이익은 15.9% 감소한 910억원으로 집계됐다." }
+    ]
+  },
+  "focusStatement": "CJ제일제당이 2026년 2분기 CJ대한통운을 제외한 연결 기준 매출 4조1950억원, 영업이익 1619억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "CJ제일제당, 2분기 매출 4조1950억원·영업이익 1619억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 10.2% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 18.4% 줄었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_decline" },
+    { "text": "식품사업 매출은 2조8441억원이에요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "food_division_revenue" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "식품사업", "easyText": "먹는 것을 만들어 파는 사업 부분", "treatment": "explained", "sourceIds": ["S4"] }
+  ]
+}

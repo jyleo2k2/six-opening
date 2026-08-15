@@ -80,6 +80,7 @@ function runShard(shard) {
     resume && existsSync(resolve(shard.output, "report.json")) ? "--resume" : "--overwrite",
   ];
   if (roleTimeoutMs) args.push("--role-timeout-ms", roleTimeoutMs);
+  if (process.argv.includes("--retry-technical-errors")) args.push("--retry-technical-errors");
 
   return new Promise((resolveRun) => {
     const child = spawn(process.execPath, args, { cwd: resolve(here, "../../../.."), stdio: ["ignore", "pipe", "pipe"] });
@@ -91,8 +92,11 @@ function runShard(shard) {
     });
     child.stderr.on("data", (chunk) => { stderr += String(chunk); });
     child.on("close", (code) => {
-      if (code !== 0) console.error(`[${shard.name}] 종료 코드 ${code}\n${stderr.trim().slice(-2000)}`);
-      resolveRun({ shard, code });
+      // 조각은 51종목을 다 갖지 못하므로 `decisionComplete` 가 false 이고, CLI 는 그때 1로 끝낸다.
+      // 조각 실행에서는 정상이다. 진짜 실패는 리포트가 아예 안 나온 경우라 그것만 알린다.
+      const wrote = existsSync(resolve(shard.output, "report.json"));
+      if (!wrote) console.error(`[${shard.name}] 리포트 없이 종료 코드 ${code}\n${stderr.trim().slice(-2000)}`);
+      resolveRun({ shard, ok: wrote });
     });
   });
 }
@@ -146,7 +150,7 @@ const shards = await writeShardInputs(collection);
 console.log(`${shards.length}개 조각으로 ${collection.candidates.length}종목을 나눠 실행합니다.`);
 
 const results = await Promise.all(shards.map(runShard));
-const failed = results.filter((result) => result.code !== 0);
+const failed = results.filter((result) => !result.ok);
 
 const merged = await mergeReports(collection, shards);
 const mergedPath = resolve(outputRoot, "report.json");
@@ -155,5 +159,5 @@ await writeFile(mergedPath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
 console.log(`\n병합 리포트: ${mergedPath}`);
 console.log(`완료 ${merged.completedCount}/51 · 통과 ${merged.readyForStorageCount} · 거부 ${merged.rejectedCount} · decisionComplete ${merged.decisionComplete}`);
 if (failed.length > 0) {
-  console.log(`비정상 종료 조각 ${failed.length}개: ${failed.map((result) => result.shard.name).join(", ")} — --resume 으로 이어서 실행하세요.`);
+  console.log(`리포트를 못 낸 조각 ${failed.length}개: ${failed.map((result) => result.shard.name).join(", ")} — --resume 으로 이어서 실행하세요.`);
 }

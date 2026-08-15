@@ -1,0 +1,39 @@
+{
+  "stockId": "KRX:009540",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-1CONOMY-49755",
+    "title": "HD한국조선해양, 2Q 영업익 1조6451억원…전년比 72.5% ↑",
+    "publisher": "1코노미뉴스",
+    "publishedAt": "2026-07-29T07:01:00.000Z",
+    "sourceUrl": "https://www.1conomynews.co.kr/news/articleView.html?idxno=49755",
+    "sourceUnits": [
+      { "id": "S1", "text": "29일 HD한국조선해양에 따르면 2026년 2분기 연결기준 매출액 8조9270억원, 영업이익 1조6451억원의 잠정실적을 기록했다." },
+      { "id": "S2", "text": "전년 동기 대비 각각 20.2%, 72.5% 증가한 수치다." },
+      { "id": "S3", "text": "조선 계열사인 HD현대중공업은 매출 6조3322억원과 영업이익 1조399억원을 기록했다." },
+      { "id": "S4", "text": "통합에 따른 시너지 효과가 본격적으로 나타나면서 전년 동기 대비 각각 52.7%, 120.6% 증가했다." },
+      { "id": "S5", "text": "HD현대삼호의 매출은 2조3714억원, 영업이익은 5341억원으로 집계됐다." },
+      { "id": "S6", "text": "선박 엔진 계열사인 HD현대마린엔진은 매출 1281억원과 영업이익 313억원을 기록했다." },
+      { "id": "S7", "text": "사업 부문별로 보면 조선 부문의 매출은 7조4510억원, 영업이익은 1조3986억원으로 나타났다." }
+    ]
+  },
+  "focusStatement": "HD한국조선해양이 2026년 2분기 연결기준 매출액 8조9270억원, 영업이익 1조6451억원의 잠정실적을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "HD한국조선해양, 2분기 매출 8조9270억원·영업이익 1조6451억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 20.2% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 72.5% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth" },
+    { "text": "조선 부문 영업이익은 1조3986억원이에요.", "sourceIds": ["S7"], "role": "business_detail", "factKey": "shipbuilding_division_profit" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "조선 부문", "easyText": "배를 만드는 쪽 사업", "treatment": "explained", "sourceIds": ["S7"] }
+  ]
+}

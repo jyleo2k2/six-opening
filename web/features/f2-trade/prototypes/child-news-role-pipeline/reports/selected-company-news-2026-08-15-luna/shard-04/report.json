@@ -1,0 +1,520 @@
+{
+  "schemaVersion": 1,
+  "runId": "selected-company-news-2026-08-15-luna",
+  "runDateKst": "2026-08-15",
+  "sourceRetrievedAt": "2026-08-15T07:07:30.443Z",
+  "sourceBasis": "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함",
+  "generatedAt": "2026-08-15T07:27:16.906Z",
+  "model": "gpt-5.6-luna",
+  "stockCount": 51,
+  "completedCount": 1,
+  "readyForStorageCount": 0,
+  "rejectedCount": 1,
+  "decisionComplete": false,
+  "cases": [
+    {
+      "stock": {
+        "stockId": "KRX:097950",
+        "symbol": "097950",
+        "name": "CJ제일제당",
+        "aliases": [
+          "CJ 제일제당",
+          "씨제이제일제당"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "searchUrl": "https://search.naver.com/search.naver?where=news&sort=1&start=1&query=CJ%EC%A0%9C%EC%9D%BC%EC%A0%9C%EB%8B%B9+%EC%8B%9D%ED%92%88",
+      "inspectedArticleUrls": [
+        "https://n.news.naver.com/mnews/article/277/0005803494",
+        "https://n.news.naver.com/mnews/article/366/0001186500",
+        "https://n.news.naver.com/mnews/article/003/0014128955",
+        "https://n.news.naver.com/mnews/article/037/0000038674",
+        "https://n.news.naver.com/mnews/article/031/0001049920"
+      ],
+      "candidateCount": 5,
+      "selectionScore": -2,
+      "selectionSignals": [
+        "종목명이 제목에 없음",
+        "기사 앞부분에서 종목이 불분명함",
+        "직접 사건 신호 없음"
+      ],
+      "inputArticle": {
+        "articleId": "NAVER-031-0001049920",
+        "runDateKst": "2026-08-15",
+        "scope": "company",
+        "title": "파리바게뜨도 가격 올린다…평균 5.0% 인상",
+        "publisher": "아이뉴스24",
+        "publishedAt": "2026-08-14T07:49:10.000Z",
+        "sourceUrl": "http://www.inews24.com/view/1995211",
+        "sourceUnits": [
+          {
+            "id": "S1",
+            "text": "1년 6개월 만에 추가 인상…\"원가 압박에 불가피\" 파리바게뜨가 오는 25일부터 순차적으로 일부 제품 가격을 인상한다고 14일 밝혔다."
+          },
+          {
+            "id": "S2",
+            "text": "인상되는 품목은 빵류 86종, 케이크&디저트 41종 등으로 평균 인상폭은 5.0%다."
+          },
+          {
+            "id": "S3",
+            "text": "이에 따라 '상미종 생식빵'이 3900원에서 4100원으로 '카스테라'가 2400원에서 2500원으로 오른다."
+          },
+          {
+            "id": "S4",
+            "text": "마이 넘버원 케이크는 3만5000원에서 3만6000원으로 인상됐다."
+          },
+          {
+            "id": "S5",
+            "text": "이번 가격 인상은 지난해 2월 이후 1년 6개월 만이다"
+          },
+          {
+            "id": "S6",
+            "text": "파리바게뜨 관계자는 \"원료비와 각종 제반 비용 상승에 따라 불가피하게 가격을 조정하게 됐다\"고 말했다."
+          },
+          {
+            "id": "S7",
+            "text": "한편, 최근 식품·외식업계에서는 원재료와 포장재 가격 상승, 고환율 등에 따른 원가 부담을 이유로 가격 인상이 이어지고 있다."
+          },
+          {
+            "id": "S8",
+            "text": "농심, 풀무원, 오뚜기, CJ제일제당 등 주요 식품기업과 뚜레쥬르, 던킨, 롯데리아, 더본코리아 등 외식기업들이 가격 인상을 단행했거나 예고한 상태다."
+          }
+        ]
+      },
+      "pipelineResult": {
+        "status": "rejected",
+        "articleId": "NAVER-031-0001049920",
+        "stage": "prefilter",
+        "reasonCodes": [
+          "NO_SELECTED_COMPANY"
+        ],
+        "reasons": [
+          "제목의 구체적인 주체인 파리바게뜨가 선정 기업 51개에 포함되어 있지 않다."
+        ],
+        "editorAttempts": 0
+      },
+      "roleAttempts": [
+        {
+          "role": "headline_screener",
+          "reasoningEffort": "max",
+          "outcome": "returned",
+          "response": {
+            "articleId": "NAVER-031-0001049920",
+            "decision": "reject",
+            "reasonCodes": [
+              "NO_SELECTED_COMPANY"
+            ],
+            "reasons": [
+              "제목의 구체적인 주체인 파리바게뜨가 선정 기업 51개에 포함되어 있지 않다."
+            ]
+          }
+        }
+      ],
+      "articleAttempts": [
+        {
+          "selectionScore": 56,
+          "selectionSignals": [
+            "종목명이 제목에 없음",
+            "기사 앞부분에서 종목이 불분명함",
+            "직접 사건 신호: 실적, 매출, 공급, 판매",
+            "여러 주체 감점: 업계"
+          ],
+          "article": {
+            "articleId": "NAVER-366-0001186500",
+            "runDateKst": "2026-08-15",
+            "scope": "company",
+            "title": "식품업계 미래 먹을거리 소재사업… 투자 늘지만 아직 수익성엔 ‘발목’",
+            "publisher": "조선비즈",
+            "publishedAt": "2026-08-14T21:02:29.000Z",
+            "sourceUrl": "https://biz.chosun.com/distribution/food/2026/08/15/K4AOQXRSN5B4RJNAKAFKQXQFBI/?utm_source=naver&utm_medium=original&utm_campaign=biz",
+            "sourceUnits": [
+              {
+                "id": "S1",
+                "text": "내수 침체 속 기능성 소재·바이오 사업 투자 확대"
+              },
+              {
+                "id": "S2",
+                "text": "“단기 실적보다 글로벌 B2B 경쟁력 확보 위한 장기 투자”"
+              },
+              {
+                "id": "S3",
+                "text": "소재사업은 완제품 식품과 달리 소비자에게 직접 판매하지 않고 식품·제약·사료업체 등에 원료를 공급하는 B2B 사업이다."
+              },
+              {
+                "id": "S4",
+                "text": "식품부문은 올해 1분기 매출 9651억원, 영업이익 412억원을 기록했다."
+              },
+              {
+                "id": "S5",
+                "text": "전년 동기 대비 매출은 3.6%, 영업이익은 11.4% 늘었다."
+              },
+              {
+                "id": "S6",
+                "text": "반면 소재부문은 매출 3796억원, 영업이익 125억원을 기록하면서 각각 11.3%, 53% 감소했다."
+              },
+              {
+                "id": "S7",
+                "text": "CJ제일제당은 올해 1분기 식품사업 매출이 3조384억원으로 전년 동기 대비 3.9% 증가했고 영업이익도 1430억원으로 4.3% 증가했다."
+              },
+              {
+                "id": "S8",
+                "text": "스페셜티, 라이신 등의 소재가 포함된 바이오부문 매출(9887억원)은 전년 동기 대비 5.7% 늘었지만 영업이익(55억원)은 92.4% 감소했다."
+              },
+              {
+                "id": "S9",
+                "text": "이에 CJ제일제당은 3분기부터 조직을 ‘라이프스타일 식품·기술 소재·핵심 소재’ 체계로 재편해 소재사업의 수익성 개선에 나섰다."
+              },
+              {
+                "id": "S10",
+                "text": "식품업계 관계자는 “내수 시장만으로는 성장에 한계가 있어 기능성 소재와 바이오 분야 투자를 확대하고 있다”며 “연구개발과 설비 투자 기간이 길고, 소재 판매를 위한 조직을 따로 구축해야 하기 때문에 단기간에 실적으로 연결되기는 어렵지만, 글로벌 B2B 시장에서 경쟁력을 확보하기 위한 장기 투자 성격이 강하다”고 했다."
+              }
+            ]
+          },
+          "pipelineResult": {
+            "status": "rejected",
+            "articleId": "NAVER-366-0001186500",
+            "stage": "selector",
+            "reasonCodes": [
+              "COMPANY_NOT_PRIMARY_SUBJECT"
+            ],
+            "reasons": [
+              "제목과 본문이 특정 기업이 아닌 식품업계 소재사업을 공동 주제로 다루며, CJ제일제당 관련 실적과 조직 재편은 업계 맥락의 일부로 제시됩니다. CJ제일제당만 떼어 단일 회사 기사로 선정할 수 없습니다."
+            ],
+            "editorAttempts": 0
+          },
+          "roleAttempts": [
+            {
+              "role": "headline_screener",
+              "reasoningEffort": "max",
+              "outcome": "returned",
+              "response": {
+                "articleId": "NAVER-366-0001186500",
+                "decision": "pass",
+                "reasonCodes": [],
+                "reasons": [
+                  "업계 묶음 제목만으로 선정 기업의 직접적인 투자·수익성 관련 사건인지 확정할 수 없어 본문을 확인한다."
+                ]
+              }
+            },
+            {
+              "role": "relevance_selector",
+              "reasoningEffort": "max",
+              "outcome": "returned",
+              "response": {
+                "articleId": "NAVER-366-0001186500",
+                "decision": "reject",
+                "kind": "ineligible",
+                "primaryStockIds": [],
+                "eventType": "none",
+                "focusStatement": "",
+                "anchorSourceId": "",
+                "includedSourceIds": [],
+                "excludedSourceIds": [
+                  "S1",
+                  "S2",
+                  "S3",
+                  "S4",
+                  "S5",
+                  "S6",
+                  "S7",
+                  "S8",
+                  "S9",
+                  "S10"
+                ],
+                "difficultTerms": [],
+                "reasonCodes": [
+                  "COMPANY_NOT_PRIMARY_SUBJECT"
+                ],
+                "reasons": [
+                  "제목과 본문이 특정 기업이 아닌 식품업계 소재사업을 공동 주제로 다루며, CJ제일제당 관련 실적과 조직 재편은 업계 맥락의 일부로 제시됩니다. CJ제일제당만 떼어 단일 회사 기사로 선정할 수 없습니다."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "selectionScore": 38,
+          "selectionSignals": [
+            "종목명이 제목에 없음",
+            "기사 앞부분에서 종목이 불분명함",
+            "직접 사건 신호: 실적, 매출, 영업이익",
+            "여러 주체 감점: 업계"
+          ],
+          "article": {
+            "articleId": "NAVER-277-0005803494",
+            "runDateKst": "2026-08-15",
+            "scope": "company",
+            "title": "고환율·중동 전쟁에 원자재 부담↑…해외로 버틴 식품업계",
+            "publisher": "아시아경제",
+            "publishedAt": "2026-08-15T02:30:00.000Z",
+            "sourceUrl": "https://view.asiae.co.kr/article/2026081511232568003",
+            "sourceUnits": [
+              {
+                "id": "S1",
+                "text": "내수 침체 여파, 해외 호실적으로 만회"
+              },
+              {
+                "id": "S2",
+                "text": "상반기 기준 삼양식품의 누적 매출은 1조4847억원, 영업이익은 3533억원으로 집계됐다."
+              },
+              {
+                "id": "S3",
+                "text": "농심도 2분기 매출액이 9561억원, 영업이익은 593억원으로 각각 전년 동기 대비 10.2%와 47.6% 증가했다."
+              },
+              {
+                "id": "S4",
+                "text": "별도 기준 매출은 7384억원, 영업이익은 321억원으로 각각 6.4%와 4.2% 늘었다."
+              },
+              {
+                "id": "S5",
+                "text": "농심 측은 수출과 해외 법인을 통한 해외사업 매출 성장과 수익성 개선이 전체 실적 상승을 견인했다고 설명했다."
+              },
+              {
+                "id": "S6",
+                "text": "연결 기준 이 기간 영업이익은 전년 동기 대비 17.9% 증가한 2980억원, 매출은 15.5% 신장한 1조8239억원으로 각각 집계됐다."
+              },
+              {
+                "id": "S7",
+                "text": "이 밖에 롯데웰푸드의 상반기 누적 매출은 2조1831억원, 영업이익은 1005억원으로 전년 동기 대비 각각 7%와 98% 증가했다."
+              },
+              {
+                "id": "S8",
+                "text": "특히 2분기 해외법인 매출이 3112억원, 영업이익 296억원으로 각각 전년 동기 대비 28%와 133% 증가하며 실적 반등을 이끌었다."
+              },
+              {
+                "id": "S9",
+                "text": "대표적으로 CJ제일제당은 미주 지역에서 만두와 햇반 판매량이 지난해 같은 기간보다 각각 31%와 49% 증가하고, 유럽과 아시아·태평양(APAC) 지역에서도 두 자릿수 신장률을 기록했으나 2분기 전체 영업이익은 전년 동기 대비 18.4% 감소한 1619억원에 그쳤다."
+              },
+              {
+                "id": "S10",
+                "text": "주력인 식품사업부문 매출이 2조8441억원으로 전년 동기 대비 5.8% 증가했으나 영업이익이 709억원으로 21.3% 감소한 영향이 컸다."
+              }
+            ]
+          },
+          "pipelineResult": {
+            "status": "rejected",
+            "articleId": "NAVER-277-0005803494",
+            "stage": "selector",
+            "reasonCodes": [
+              "COMPANY_NOT_PRIMARY_SUBJECT"
+            ],
+            "reasons": [
+              "여러 식품업체의 실적을 나란히 비교한 업계 기사로, 제공된 기업 중 하나를 단독 중심 사건의 주체로 특정할 수 없습니다."
+            ],
+            "editorAttempts": 0
+          },
+          "roleAttempts": [
+            {
+              "role": "headline_screener",
+              "reasoningEffort": "max",
+              "outcome": "returned",
+              "response": {
+                "articleId": "NAVER-277-0005803494",
+                "decision": "pass",
+                "reasonCodes": [],
+                "reasons": [
+                  "식품업계 묶음 제목으로, 선정 기업별 원자재 부담과 해외 사업 영향의 구체적 근거를 본문에서 확인할 필요가 있다."
+                ]
+              }
+            },
+            {
+              "role": "relevance_selector",
+              "reasoningEffort": "max",
+              "outcome": "returned",
+              "response": {
+                "articleId": "NAVER-277-0005803494",
+                "decision": "reject",
+                "kind": "ineligible",
+                "primaryStockIds": [],
+                "eventType": "none",
+                "focusStatement": "",
+                "anchorSourceId": "",
+                "includedSourceIds": [],
+                "excludedSourceIds": [
+                  "S1",
+                  "S2",
+                  "S3",
+                  "S4",
+                  "S5",
+                  "S6",
+                  "S7",
+                  "S8",
+                  "S9",
+                  "S10"
+                ],
+                "difficultTerms": [],
+                "reasonCodes": [
+                  "COMPANY_NOT_PRIMARY_SUBJECT"
+                ],
+                "reasons": [
+                  "여러 식품업체의 실적을 나란히 비교한 업계 기사로, 제공된 기업 중 하나를 단독 중심 사건의 주체로 특정할 수 없습니다."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "selectionScore": 82,
+          "selectionSignals": [
+            "종목명이 제목에 없음",
+            "기사 앞부분에서 종목이 확인됨",
+            "직접 사건 신호: 매출, 영업이익, 인수"
+          ],
+          "article": {
+            "articleId": "NAVER-003-0014128955",
+            "runDateKst": "2026-08-15",
+            "scope": "company",
+            "title": "CJ, 상반기 영업익 9924억 14%↓…매출 22조9793억 6%↑",
+            "publisher": "뉴시스",
+            "publishedAt": "2026-08-14T09:34:41.000Z",
+            "sourceUrl": "https://www.newsis.com/view/NISX20260814_0003750251",
+            "sourceUnits": [
+              {
+                "id": "S1",
+                "text": "2분기 매출 11조5281억 3.7%↑…영업이익 5318억 14.1%↓"
+              },
+              {
+                "id": "S2",
+                "text": "[서울=뉴시스] 김혜진 기자 = CJ제일제당과 대한제분 등 밀가루 가격 담합 의혹으로 인해 주요 제분업체들에 대한 압수수색이 진행중인 11일 서울 중구 CJ제일제당 본사 모습이 보이고 있다."
+              },
+              {
+                "id": "S3",
+                "text": "[서울=뉴시스] 이혜원 기자 = CJ그룹은 지난 상반기 연결기준 매출 약 22조9793억원, 영업이익 9924억원을 기록했다고 14일 공시했다."
+              },
+              {
+                "id": "S4",
+                "text": "매출은 전년 동기 대비 5.8% 늘어난 반면 영업이익은 13.7% 감소한 수치다."
+              },
+              {
+                "id": "S5",
+                "text": "상반기 사업군별 매출은 ▲식품·식품서비스 부문(CJ제일제당 식품부문·슈완스 등) 7조5885억원 ▲생명공학 부문(CJ제일제당 바이오부문 등) 2조7023억원 ▲물류·신유통 부문(CJ올리브영·CJ대한통운 등) 10조1309억원 ▲엔터테인먼트·미디어 부문(CJ ENM 미디어플랫폼 사업·CJ씨지브이 등) 2조4249억원 ▲기타(CJ·CJ올리브네트웍스 등) 1327억원 등이다."
+              },
+              {
+                "id": "S6",
+                "text": "지난해 상반기와 비교해 생명공학 부문의 매출이 11.9% 줄어들면서 비중 역시 2.3%p 감소한 반면 물류·신유통 부문의 매출 비중은 2.7%p 증가했다."
+              },
+              {
+                "id": "S7",
+                "text": "CJ 측은 \"국내 시장을 선도하고 있는 GSP(글로벌 전략 상품)의 저변 확대, K-스트리트 푸드 카테고리 확장 및 신규 시장 확대 본격화를 통해 K-푸드 중심의 글로벌 성장을 가속화해 나갈 계획\"이라며 \"바이오 사업은 고수익·스페셜티 품목으로의 포트폴리오 진화를 통해 안정적인 수익 창출 및 지속 성장 가능한 사업 구조 확립에 주력하고 있다\"고 했다."
+              },
+              {
+                "id": "S8",
+                "text": "한편 CJ의 2분기 매출은 11조5281억원으로 전년 동기대비 3.7% 증가한 반면, 영업이익은 5318억원으로 같은 기간 14.1% 줄었다．"
+              }
+            ]
+          },
+          "pipelineResult": {
+            "status": "rejected",
+            "articleId": "NAVER-003-0014128955",
+            "stage": "prefilter",
+            "reasonCodes": [
+              "NO_SELECTED_COMPANY"
+            ],
+            "reasons": [
+              "제목의 구체적인 주체는 선정 기업 목록에 없는 CJ이며, CJ대한통운·CJ제일제당을 직접 지칭하지 않는다."
+            ],
+            "editorAttempts": 0
+          },
+          "roleAttempts": [
+            {
+              "role": "headline_screener",
+              "reasoningEffort": "max",
+              "outcome": "returned",
+              "response": {
+                "articleId": "NAVER-003-0014128955",
+                "decision": "reject",
+                "reasonCodes": [
+                  "NO_SELECTED_COMPANY"
+                ],
+                "reasons": [
+                  "제목의 구체적인 주체는 선정 기업 목록에 없는 CJ이며, CJ대한통운·CJ제일제당을 직접 지칭하지 않는다."
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "selectionScore": -2,
+          "selectionSignals": [
+            "종목명이 제목에 없음",
+            "기사 앞부분에서 종목이 불분명함",
+            "직접 사건 신호 없음"
+          ],
+          "article": {
+            "articleId": "NAVER-031-0001049920",
+            "runDateKst": "2026-08-15",
+            "scope": "company",
+            "title": "파리바게뜨도 가격 올린다…평균 5.0% 인상",
+            "publisher": "아이뉴스24",
+            "publishedAt": "2026-08-14T07:49:10.000Z",
+            "sourceUrl": "http://www.inews24.com/view/1995211",
+            "sourceUnits": [
+              {
+                "id": "S1",
+                "text": "1년 6개월 만에 추가 인상…\"원가 압박에 불가피\" 파리바게뜨가 오는 25일부터 순차적으로 일부 제품 가격을 인상한다고 14일 밝혔다."
+              },
+              {
+                "id": "S2",
+                "text": "인상되는 품목은 빵류 86종, 케이크&디저트 41종 등으로 평균 인상폭은 5.0%다."
+              },
+              {
+                "id": "S3",
+                "text": "이에 따라 '상미종 생식빵'이 3900원에서 4100원으로 '카스테라'가 2400원에서 2500원으로 오른다."
+              },
+              {
+                "id": "S4",
+                "text": "마이 넘버원 케이크는 3만5000원에서 3만6000원으로 인상됐다."
+              },
+              {
+                "id": "S5",
+                "text": "이번 가격 인상은 지난해 2월 이후 1년 6개월 만이다"
+              },
+              {
+                "id": "S6",
+                "text": "파리바게뜨 관계자는 \"원료비와 각종 제반 비용 상승에 따라 불가피하게 가격을 조정하게 됐다\"고 말했다."
+              },
+              {
+                "id": "S7",
+                "text": "한편, 최근 식품·외식업계에서는 원재료와 포장재 가격 상승, 고환율 등에 따른 원가 부담을 이유로 가격 인상이 이어지고 있다."
+              },
+              {
+                "id": "S8",
+                "text": "농심, 풀무원, 오뚜기, CJ제일제당 등 주요 식품기업과 뚜레쥬르, 던킨, 롯데리아, 더본코리아 등 외식기업들이 가격 인상을 단행했거나 예고한 상태다."
+              }
+            ]
+          },
+          "pipelineResult": {
+            "status": "rejected",
+            "articleId": "NAVER-031-0001049920",
+            "stage": "prefilter",
+            "reasonCodes": [
+              "NO_SELECTED_COMPANY"
+            ],
+            "reasons": [
+              "제목의 구체적인 주체인 파리바게뜨가 선정 기업 51개에 포함되어 있지 않다."
+            ],
+            "editorAttempts": 0
+          },
+          "roleAttempts": [
+            {
+              "role": "headline_screener",
+              "reasoningEffort": "max",
+              "outcome": "returned",
+              "response": {
+                "articleId": "NAVER-031-0001049920",
+                "decision": "reject",
+                "reasonCodes": [
+                  "NO_SELECTED_COMPANY"
+                ],
+                "reasons": [
+                  "제목의 구체적인 주체인 파리바게뜨가 선정 기업 51개에 포함되어 있지 않다."
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
