@@ -5,6 +5,7 @@ import {
   emptyState,
   exploreList,
   hasManySectors,
+  stackOffset,
   sectorChips,
 } from "./explore-cards";
 import type { Universe } from "./use-universe";
@@ -106,26 +107,47 @@ assert.match(cardDots(5, 0, "y")[0], /width:6px;height:18px/u);
 assert.match(cardDots(5, 0)[0], /width:18px;height:6px/u);
 
 // 카드 — 상승은 빨강, 로고 없으면 섹터 이모지, 등락률로 원화 변동폭을 되짚는다.
-const up = buildExploreCard(rank, 0, universe, true, false);
+const up = buildExploreCard(rank, 0, universe, 0, false);
 assert.equal(up.lineColor, "#E8322E");
 assert.equal(up.emoji, "🔬");
 assert.equal(up.changeText, "▲ 8원");
 assert.equal(up.changePctText, "+4.00%");
 assert.equal(up.codeText, "005930 · KOSPI");
-const down = buildExploreCard(rank, 2, universe, false, false);
+const down = buildExploreCard(rank, 2, universe, 0, false);
 assert.equal(down.lineColor, "#1668DC");
-assert.match(down.slideStyle, /opacity:0\.72/u);
 const bigList = [{ ...rank[0], price: 123_456_789 }];
-const bigPrice = buildExploreCard(bigList, 0, universe, true, false);
+const bigPrice = buildExploreCard(bigList, 0, universe, 0, false);
 assert.match(bigPrice.priceStyle, /font-size:36px/u);
+
+// 입체 스택 — 중앙에서 멀어진 칸수가 눕는 양을, 방향이 회전축을 정한다.
+assert.deepEqual(stackOffset(4, 4), { signed: 0, steps: 0 });
+assert.deepEqual(stackOffset(6, 4), { signed: 2, steps: 2 });
+assert.deepEqual(stackOffset(2, 4), { signed: -2, steps: 2 });
+// 51장짜리 목록에서도 끝 카드가 뒤집히지 않게 3칸에서 자른다.
+assert.deepEqual(stackOffset(50, 0), { signed: 3, steps: 3 });
+assert.deepEqual(stackOffset(0, 50), { signed: -3, steps: 3 });
+
+// 활성 카드는 눕지 않고, 아래 카드는 윗변을 축으로 뒤로 눕는다(각도가 음수).
+assert.match(up.slideStyle, /rotateX\(-?0\.00deg\) translateZ\(-?0\.0px\) scale\(1\.000\)/u);
+assert.match(up.slideStyle, /transform-origin:50% 50%/u);
+assert.match(up.slideStyle, /opacity:1;/u);
+assert.match(down.slideStyle, /perspective\(1150px\) rotateX\(-22\.00deg\)/u);
+assert.match(down.slideStyle, /translateZ\(-92\.0px\) scale\(0\.910\)/u);
+assert.match(down.slideStyle, /transform-origin:50% 0%/u);
+assert.match(down.slideStyle, /opacity:0\.55/u);
+// 위쪽 카드는 반대 축이어야 활성 카드에서 멀어지는 쪽으로 눕는다.
+const above = buildExploreCard(rank, 0, universe, 1, false);
+assert.match(above.slideStyle, /rotateX\(11\.00deg\)/u);
+assert.match(above.slideStyle, /transform-origin:50% 100%/u);
+assert.match(above.slideStyle, /opacity:0\.82/u);
 
 // `showGroups` 를 켠 목록에서만 업종이 바뀌는 첫 카드에 구분 헤더를 세우고, 맨 첫 카드는
 // 위에 아무것도 없으니 선을 생략한다. 켤지 말지는 화면이 정렬을 보고 정한다.
 const all = exploreList(universe, live, "all", "", []);
-const allCards = all.map((_, i) => buildExploreCard(all, i, universe, false, true));
+const allCards = all.map((_, i) => buildExploreCard(all, i, universe, 0, true));
 assert.deepEqual(allCards.map((c) => c.groupShow), [true, false, true]);
 assert.deepEqual(allCards.map((c) => c.groupShowLine), [false, false, true]);
-const noGroup = buildExploreCard(all, 1, universe, false, false);
+const noGroup = buildExploreCard(all, 1, universe, 0, false);
 assert.equal(noGroup.groupShow, false);
 
 console.log("explore cards tests passed");

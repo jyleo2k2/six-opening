@@ -229,6 +229,30 @@ const DEFAULT_SECTAG: [string, string] = ["#4E5C78", "#EBEEF4"];
 /** 코스닥 상장 종목 — 나머지는 코스피(새 프로토타입과 같은 51종 판정). */
 const KOSDAQ = new Set(["035900", "041510", "122870", "263750"]);
 
+/**
+ * 카드가 중앙에서 멀어질수록 뒤로 눕는 정도. 프로토타입의 `stackDepth` 노브가 1일 때 값이다.
+ *
+ * 노브 자체는 옮기지 않았다 — 디자인 도구의 Tweaks 패널에 해당하는 것이 앱에 없고,
+ * 값을 바꿀 화면이 없는 설정은 죽은 코드다. 눕는 정도를 조절하고 싶으면 여기 숫자를 고친다.
+ */
+const STACK = Object.freeze({
+  /** 이 칸 너머는 더 눕지 않는다 — 51장짜리 목록에서 끝 카드가 뒤집히지 않게 자른다. */
+  reach: 3,
+  tiltDeg: 11,
+  depthPx: 46,
+  shrink: 0.045,
+  perspective: 1150,
+});
+
+/**
+ * 활성 카드에서 얼마나 떨어졌는지. `signed` 는 방향(아래가 +), `steps` 는 거리다.
+ * 방향은 회전축을 정하고 거리는 눕는 양을 정한다.
+ */
+export function stackOffset(index: number, activeIndex: number) {
+  const signed = Math.max(-STACK.reach, Math.min(STACK.reach, index - activeIndex));
+  return { signed, steps: Math.abs(signed) };
+}
+
 /** 검정을 `weight` 만큼 섞는다 — 밝은 유리 카드 위에서 읽히도록 색을 눌러 쓴다. */
 function mixDark(hex: string, weight: number) {
   const n = parseInt(hex.slice(1), 16);
@@ -242,12 +266,15 @@ function mixDark(hex: string, weight: number) {
  *
  * `list`·`index`는 업종이 바뀌는 첫 카드 위에 구분 헤더를 세우기 위해서다. 세울지 말지는
  * 부르는 쪽이 `showGroups`로 정한다 — 업종별로 줄을 세웠고 업종이 둘 이상일 때만이다.
+ *
+ * `activeIndex`는 지금 보고 있는 카드다. 이 카드에서 **몇 칸 떨어졌는지**로 눕는 정도가
+ * 정해지므로 "활성이냐 아니냐"만으로는 부족하다.
  */
 export function buildExploreCard(
   list: ExploreStockRow[],
   index: number,
   universe: Universe,
-  active: boolean,
+  activeIndex: number,
   showGroups: boolean,
 ) {
   const stock = list[index];
@@ -282,6 +309,7 @@ export function buildExploreCard(
   const changeWon = Math.abs(Math.round((stock.price * stock.change) / (100 + stock.change)));
 
   const groupChanged = index === 0 || list[index - 1].sector !== stock.sector;
+  const away = stackOffset(index, activeIndex);
 
   return {
     code: stock.code,
@@ -308,7 +336,15 @@ export function buildExploreCard(
     slideStyle:
       "position:relative;isolation:isolate;flex:none;scroll-snap-align:center;scroll-snap-stop:always;padding-top:" +
       (showGroups && groupChanged ? "60px" : "0") +
-      ";opacity:" + (active ? "1" : "0.72") + ";transition:opacity 300ms ease",
+      ";transform:perspective(" + STACK.perspective + "px) rotateX(" +
+      (-away.signed * STACK.tiltDeg).toFixed(2) + "deg) translateZ(" +
+      (-away.steps * STACK.depthPx).toFixed(1) + "px) scale(" +
+      (1 - away.steps * STACK.shrink).toFixed(3) + ")" +
+      // 회전축은 활성 카드 쪽 모서리다. 아래 카드는 윗변, 위 카드는 아랫변을 축으로 돌아야
+      // 활성 카드에서 **멀어지는** 쪽으로 눕는다. 반대로 주면 카드가 앞으로 쏟아진다.
+      ";transform-origin:50% " + (away.signed > 0 ? "0%" : away.signed < 0 ? "100%" : "50%") +
+      ";opacity:" + (away.steps === 0 ? "1" : away.steps === 1 ? "0.82" : "0.55") +
+      ";transition:transform 460ms cubic-bezier(.22,.61,.36,1),opacity 320ms ease",
     // 카드 몸체 — 색 없는 두꺼운 유리판. 등락색은 아래·오른쪽 엣지에서만 아주 옅게 굴절한다.
     cardStyle:
       "position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:#FCFBFF;" +
