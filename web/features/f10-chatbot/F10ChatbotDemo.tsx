@@ -727,6 +727,47 @@ export function F10ChatbotDemo({
     sheetDragRef.current = null;
   }
 
+  /**
+   * "여기까지 볼래요"는 서버 왕복 없이 시트를 닫고 원래 화면으로 돌아간다
+   * (SPEC §3.4). 마지막 말풍선의 선택지도 걷어 다시 열었을 때 이어지지 않게 한다.
+   */
+  function endGuidedFlowsAndClose() {
+    setExplainAction(null);
+    setStockExploreAction(null);
+    setSectorExploreAction(null);
+    setMessages((current) => {
+      const last = current.at(-1);
+      if (!last || last.role !== "assistant") return current;
+      const { explainTurn, stockExploreTurn, sectorExploreTurn, ...rest } = last;
+      void explainTurn;
+      void stockExploreTurn;
+      void sectorExploreTurn;
+      return [...current.slice(0, -1), rest];
+    });
+    closeChat();
+  }
+
+  function handleExplainChoice(choice: ExplainChoice) {
+    if (isLoading) return;
+    if (choice.id === "done") {
+      endGuidedFlowsAndClose();
+      return;
+    }
+    void ask(choice.label, choice.id);
+  }
+
+  function handleStockExploreChoice(
+    question: string,
+    choiceId: StockExploreChoiceId,
+  ) {
+    if (isLoading) return;
+    if (choiceId === "done") {
+      endGuidedFlowsAndClose();
+      return;
+    }
+    void ask(question, undefined, choiceId);
+  }
+
   function resetChat() {
     chatSessionVersionRef.current += 1;
     requestAbortRef.current?.abort();
@@ -1332,12 +1373,8 @@ export function F10ChatbotDemo({
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
                   }}
-                  onExplainChoice={(choice) => {
-                    if (!isLoading) void ask(choice.label, choice.id);
-                  }}
-                  onStockExploreChoice={(question, choiceId) => {
-                    if (!isLoading) void ask(question, undefined, choiceId);
-                  }}
+                  onExplainChoice={handleExplainChoice}
+                  onStockExploreChoice={handleStockExploreChoice}
                   onSectorExploreChoice={(question, choiceId) => {
                     if (!isLoading) void ask(question, undefined, undefined, choiceId);
                   }}
@@ -1352,12 +1389,8 @@ export function F10ChatbotDemo({
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
                   }}
-                  onExplainChoice={(choice) => {
-                    if (!isLoading) void ask(choice.label, choice.id);
-                  }}
-                  onStockExploreChoice={(question, choiceId) => {
-                    if (!isLoading) void ask(question, undefined, choiceId);
-                  }}
+                  onExplainChoice={handleExplainChoice}
+                  onStockExploreChoice={handleStockExploreChoice}
                   onSectorExploreChoice={(question, choiceId) => {
                     if (!isLoading) void ask(question, undefined, undefined, choiceId);
                   }}

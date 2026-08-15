@@ -282,12 +282,18 @@ export function advanceExplain(
           `${FEEDBACK.correct} ${script.detail}`,
         );
       }
+      // 오답이 반복되면 같은 질문으로 무한히 돌지 않는다 — 예시로 한 번만 다시
+      // 묻고, 또 틀리면 정답 설명을 주고 원래 흐름(followup)으로 돌아간다.
+      if ((reply.reaskCount ?? 0) >= 1) {
+        return followupExplain(script, `${FEEDBACK.giveUp} ${script.detail}`);
+      }
       return turnStep(
         script,
         "detail",
         `${FEEDBACK.example} ${script.example}`,
         script.adjust.question,
         script.adjust.choices,
+        (reply.reaskCount ?? 0) + 1,
       );
     }
     if (reply.choiceId === "yes") {

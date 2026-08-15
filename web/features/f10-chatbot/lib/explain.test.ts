@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { CHATBOT_KNOWLEDGE } from "../../../shared/data/chatbot-knowledge";
 import { gateChatOutput } from "../../../shared/llm/filter";
 import type { ExplainScript } from "../../../shared/types/chatbot";
 import {
@@ -9,7 +10,7 @@ import {
   startExplain,
   startGuidedExplain,
 } from "./explain";
-import { toPoliteKorean } from "./polite";
+import { isHaeyoKorean, toPoliteKorean } from "./polite";
 
 const per: ExplainScript = {
   id: "term:per",
@@ -94,6 +95,23 @@ const example = advanceExplain(per, {
 assert.equal(example?.kind, "turn");
 assert.equal(example?.text, toPoliteKorean(`그럼 예를 들어볼게요. ${per.example}`));
 assert.equal(example?.kind === "turn" ? example.turn.stage : null, "detail");
+// 예시 재질문 턴에는 되묻기 횟수가 실린다 — 클라이언트가 다음 응답에 돌려보낸다.
+assert.equal(example?.kind === "turn" ? example.turn.reaskCount : null, 1);
+
+// ④-1 예시 뒤에도 또 틀리면 같은 질문을 무한 반복하지 않는다 — 정답 설명을
+// 주고 followup으로 넘긴다.
+const revealed = advanceExplain(per, {
+  scriptId: "term:per",
+  stage: "detail",
+  choiceId: "yes",
+  reaskCount: 1,
+});
+assert.equal(revealed?.kind, "turn");
+assert.equal(
+  revealed?.text,
+  toPoliteKorean(`그럼 답을 같이 확인해 볼게요. ${per.detail}`),
+);
+assert.equal(revealed?.kind === "turn" ? revealed.turn.stage : null, "followup");
 
 // 후속 질문은 직접 질문 또는 명시적 종료만 허용한다.
 assert.deepEqual(
@@ -231,5 +249,100 @@ const simpler = advanceExplain(guidedScript, {
 assert.equal(simpler?.kind, "turn");
 assert.equal(simpler?.kind === "turn" ? simpler.turn.stage : null, "detail");
 assert.equal(simpler?.text.includes("헷갈린 단어"), true);
+
+// 승인 데이터 전 스크립트 검사 — 도달 가능한 모든 단계 문장이 해요체이고
+// 게이트를 통과한다. 데이터는 처음부터 해요체로 저장하며 런타임 변환(toPoliteKorean)에
+// 기대지 않는다 (SPEC §3.4).
+for (const entry of CHATBOT_KNOWLEDGE) {
+  const script = entry.explainScript;
+  if (!script || script.check.kind === "guiding") continue;
+
+  const wrongCheck = script.check.choices.find(
+    (choice) => choice.id !== script.check.answerId,
+  )!;
+  const steps = [
+    startExplain(script),
+    advanceExplain(script, {
+      scriptId: script.id,
+      stage: "brief",
+      choiceId: script.check.answerId,
+    }),
+    advanceExplain(script, {
+      scriptId: script.id,
+      stage: "brief",
+      choiceId: wrongCheck.id,
+    }),
+    advanceExplain(script, {
+      scriptId: script.id,
+      stage: "brief",
+      choiceId: "unsure",
+    }),
+  ];
+  if (script.adjust) {
+    const wrongAdjust = script.adjust.choices.find(
+      (choice) => choice.id !== script.adjust!.answerId,
+    )!;
+    steps.push(
+      advanceExplain(script, {
+        scriptId: script.id,
+        stage: "detail",
+        choiceId: script.adjust.answerId,
+      }),
+      advanceExplain(script, {
+        scriptId: script.id,
+        stage: "detail",
+        choiceId: wrongAdjust.id,
+      }),
+      advanceExplain(script, {
+        scriptId: script.id,
+        stage: "detail",
+        choiceId: wrongAdjust.id,
+        reaskCount: 1,
+      }),
+    );
+    // 조정 설명은 2문장 이내로 정답 근거를 직접 담는다 (SPEC §3.4).
+    assert.ok(
+      script.adjust.explanation.split(/[.!?]/).filter((s) => s.trim()).length <= 2,
+      `${entry.id} 조정 설명이 2문장을 넘음: ${script.adjust.explanation}`,
+    );
+  }
+
+  for (const step of steps) {
+    assert.ok(step, `${entry.id} 전이 실패`);
+    assert.equal(isHaeyoKorean(step.text), true, `${entry.id} 해요체 아님: ${step.text}`);
+    assert.equal(
+      gateChatOutput({ text: step.text, source: "fixed" }).ok,
+      true,
+      `${entry.id} 게이트 실패: ${step.text}`,
+    );
+    if (step.kind !== "turn") continue;
+    assert.equal(
+      isHaeyoKorean(step.turn.prompt),
+      true,
+      `${entry.id} 질문이 해요체 아님: ${step.turn.prompt}`,
+    );
+    assert.equal(gateChatOutput({ text: step.turn.prompt, source: "fixed" }).ok, true);
+    for (const choice of step.turn.choices) {
+      assert.equal(gateChatOutput({ text: choice.label, source: "fixed" }).ok, true);
+      assert.equal(
+        toPoliteKorean(choice.label),
+        choice.label,
+        `${entry.id} 라벨이 변환에 기댐: ${choice.label}`,
+      );
+    }
+  }
+
+  // 저장 문구 자체가 이미 해요체라 변환이 아무것도 바꾸지 않아야 한다.
+  const sentenceFields = [
+    script.brief,
+    script.check.question,
+    script.detail,
+    script.example,
+    ...(script.adjust ? [script.adjust.explanation, script.adjust.question] : []),
+  ];
+  for (const text of sentenceFields) {
+    assert.equal(toPoliteKorean(text), text, `${entry.id} 변환 의존: ${text}`);
+  }
+}
 
 console.log("explain ok");
