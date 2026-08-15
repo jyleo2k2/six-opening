@@ -12,7 +12,7 @@
       navBarStyle: 'flex:none;display:flex;align-items:center;gap:8px;padding:6px 22px 10px',
       navPillStyle: 'flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:rgba(255,255,255,0.6);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(255,255,255,0.5)',
       navHomeIcon: this.navIcon(s.screen === 'home'), navHomeLabel: this.navLabel(s.screen === 'home'),
-      navTradeIcon: this.navIcon(s.screen === 'explore' || s.screen === 'buy'), navTradeLabel: this.navLabel(s.screen === 'explore' || s.screen === 'buy'),
+      navTradeIcon: this.navIcon(s.screen === 'buy'), navTradeLabel: this.navLabel(s.screen === 'buy'),
       navArchiveIcon: this.navIcon(s.screen === 'archive'), navArchiveLabel: this.navLabel(s.screen === 'archive'),
       navRankingIcon: this.navIcon(s.screen === 'ranking'), navRankingLabel: this.navLabel(s.screen === 'ranking'),
       navAccount: this.navItem(s.screen === 'portfolio'),
@@ -31,7 +31,8 @@
       forceAutoStyle: devChip(s.forceSchool === 'auto'), forceOnStyle: devChip(s.forceSchool === 'on'), forceOffStyle: devChip(s.forceSchool === 'off'),
 
       goHome: () => this.set({ screen:'home' }),
-      goExplore: () => this.set({ screen:'explore' }),
+      // 탐색 화면은 React 로 옮겨 갔다. 문서는 그대로 두고 부모가 그 화면을 얹는다.
+      goExplore: () => this.leaveToRoute('/explore'),
       // 랭킹은 React 로 옮겨 갔다. 문서를 갈아끼우므로 화면 임시값을 넘길 표시를 남긴다.
       goRanking: () => this.leaveToRoute('/ranking'),
       // 계좌 화면은 React 로 옮겨 갔다. 문서는 그대로 두고 부모가 그 화면을 얹는다.

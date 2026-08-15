@@ -11,6 +11,7 @@ import {
 import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
 import type { WalletAccountId } from "./lib/use-wallet";
 import { DetailScreen } from "./DetailScreen";
+import { ExploreScreen } from "./ExploreScreen";
 import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
 import {
@@ -44,7 +45,12 @@ const OPEN_ROUTE_MESSAGE = "kiwoom:open-route";
  * 오기 전까지 `renderVals-compute.js` 가 아이 계정 데모로 폴백해 **남의 계좌가 잠깐 보인다.**
  * 문서를 그대로 두면 그 왕복이 앱을 처음 열 때 한 번뿐이다.
  */
-const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>(["ranking", "portfolio", "stock"]);
+const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>([
+  "ranking",
+  "portfolio",
+  "stock",
+  "explore",
+]);
 
 const isMigrated = (route: ScreenRoute | null) =>
   route !== null && MIGRATED_SCREENS.has(route.screen);
@@ -263,6 +269,14 @@ export function ConnectedPrototype({
               onChatContext={setOverlayContext}
               onLeave={leaveToPath}
               postToPrototype={postToPrototype}
+            />
+          )}
+          {overlay.screen === "explore" && (
+            <ExploreScreen
+              account={account}
+              onChatContext={setOverlayContext}
+              onLeave={leaveToPath}
+              sector={overlay.sector}
             />
           )}
         </div>
