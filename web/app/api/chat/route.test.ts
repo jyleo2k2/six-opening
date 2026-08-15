@@ -15,6 +15,8 @@ async function main() {
     request({ message: "매수 어떻게 해?", context: { screen: "home" } }),
   );
   assert.equal(faqResponse.status, 200);
+  // 답이 온 요청도 로그에서 되찾을 수 있어야 한다.
+  assert.match(faqResponse.headers.get("X-Request-Id") ?? "", /^[0-9a-f-]{36}$/u);
   const faqStream = await faqResponse.text();
   assert.equal(faqStream.includes("event: text"), true);
   assert.equal(faqStream.includes("event: action"), true);
@@ -51,6 +53,16 @@ async function main() {
     }),
   );
   assert.equal(spoofedIdentity.status, 400);
+  // 거절도 같은 머리글을 달고, 무엇 때문에 막혔는지 이름을 남긴다. 화면이 "낮잠" 한 문구로
+  // 뭉뚱그리던 실패를 서버 로그와 맞춰 보려면 이 둘이 필요하다.
+  assert.match(
+    spoofedIdentity.headers.get("X-Request-Id") ?? "",
+    /^[0-9a-f-]{36}$/u,
+  );
+  assert.deepEqual(await spoofedIdentity.json(), {
+    error: "Invalid chat payload",
+    code: "invalid_payload",
+  });
 
   console.log("chat route tests passed");
 }
