@@ -46,6 +46,7 @@ import {
   PROTOTYPE_PHONE,
   PROTOTYPE_SHEET_HEIGHT,
   type PrototypeScreenRect,
+  SHEET_BOTTOM_SAFE_PX,
   shouldDismissBottomSheet,
 } from "./lib/bottom-sheet";
 import {
@@ -1367,9 +1368,7 @@ export function F10ChatbotDemo({
               </div>
             </header>
 
-            <div
-              className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
-            >
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4 pt-4">
               {messages.length === 0 && (
                 <MessageBubble
                   message={{
@@ -1409,7 +1408,16 @@ export function F10ChatbotDemo({
               <div ref={messagesEndRef} aria-hidden="true" />
             </div>
 
-            <div className="shrink-0 border-t border-gray/40 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+            {/*
+              폰 프레임 개구부의 하단 코너는 화면 라운드보다 깊게 파여 있고 그 프레임이 이
+              오버레이 위에 한 겹 더 깔린다. 바닥에 붙이면 입력창과 보내기 버튼의 아래 모서리가
+              베젤에 덮이므로 `SHEET_BOTTOM_SAFE_PX` 만큼 띄운다. 브라우저의 안전영역
+              (`env(safe-area-inset-bottom)`)은 바깥 창의 값이라 이 목업 폰과 무관하다.
+            */}
+            <div
+              className="shrink-0 border-t border-gray/40 px-4 pt-3"
+              style={{ paddingBottom: SHEET_BOTTOM_SAFE_PX }}
+            >
               <form className="flex gap-2" onSubmit={submit}>
                 <input
                   aria-label={COPY.input}
