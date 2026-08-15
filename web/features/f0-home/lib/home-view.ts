@@ -30,9 +30,17 @@ export type HomeHolding = {
   value: string;
   pct: string;
   up: boolean;
+  /**
+   * 종목 상세로 갈 때 쓰는 코드. 실제 계좌 보유는 항상 있고, 데모 보유는 유니버스에서
+   * 이름을 찾았을 때만 붙는다(`withStockCodes`). 없으면 그 줄은 눌리지 않는다.
+   */
+  code?: string;
   /** 실제 계좌에서 낸 평가차익. 데모 보유에는 없다. */
   profit?: number;
 };
+
+/** 이름으로 코드를 찾을 때 쓰는 유니버스 종목의 최소 모양(`use-universe` 의 `UniverseStock`). */
+export type StockCodeRef = { code: string; name: string };
 
 /**
  * 인사말·아바타·목표 아이템은 저장소에 없는 값이라 여기 고정 데모로 남는다.
@@ -142,6 +150,7 @@ export function liveHoldings(
       return {
         tick: (h.stock_name || h.stock_code || "").slice(0, 2),
         name: h.stock_name || (h.stock_code as string),
+        code: h.stock_code as string,
         qty:
           (h.quantity >= 1 ? Math.round(h.quantity * 100) / 100 : h.quantity.toFixed(2)) + "주",
         value: won(h.quantity * price),
@@ -150,6 +159,22 @@ export function liveHoldings(
         profit: (price - h.avg_price) * h.quantity,
       };
     });
+}
+
+/**
+ * 데모 보유(`HOME_INFO`)에 종목코드를 붙인다. 데모 값은 화면 문구라 코드가 없는데,
+ * 코드를 여기 적어 두면 유니버스와 조용히 어긋난다 — 이름이 정확히 같은 종목을 찾아
+ * 그때만 붙이고 못 찾으면 그대로 둔다(그 줄은 상세로 갈 수 없다).
+ */
+export function withStockCodes(
+  holdings: HomeHolding[],
+  stocks: StockCodeRef[],
+): HomeHolding[] {
+  if (stocks.length === 0) return holdings;
+  return holdings.map((holding) => {
+    const found = stocks.find((stock) => stock.name === holding.name);
+    return found ? { ...holding, code: found.code } : holding;
+  });
 }
 
 export type HomeView = {
@@ -175,12 +200,13 @@ export type HomeView = {
 export function homeView(
   user: AccountUser | null,
   prices: Record<string, number>,
+  stocks: StockCodeRef[] = [],
 ): HomeView {
   const role = homeRole(user);
   const info = HOME_INFO[role ?? "child"];
   const loaded = homeLoaded(user);
   const live = liveHoldings(user, prices);
-  const holdings = loaded ? live : info.holdings;
+  const holdings = loaded ? live : withStockCodes(info.holdings, stocks);
   const profit = loaded ? live.reduce((sum, h) => sum + (h.profit ?? 0), 0) : info.profit;
   const goalCount = Math.max(0, Math.floor(profit / info.unitPrice));
   const total = holdings.reduce(

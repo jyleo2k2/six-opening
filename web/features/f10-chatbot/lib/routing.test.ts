@@ -12,7 +12,8 @@ const stockContext = {
 const orderContext = { screen: "order" as const, quantity: 10, unitPrice: 12500 };
 
 assert.equal(PROACTIVE_SCRIPTS.orderMethodConfusion.text, "뭐가 다른지 볼까요?");
-assert.equal(PROACTIVE_SCRIPTS.lossRevisit.text, "후회되나요?");
+// 관찰한 행동에만 붙는 문장이다. "후회되나요?" 는 아이가 느끼지도 않은 감정을 단정했다.
+assert.equal(PROACTIVE_SCRIPTS.lossRevisit.text, "이 회사 다시 볼까요?");
 for (const script of Object.values(PROACTIVE_SCRIPTS)) {
   assert.ok(script.text.length <= 20, `선제 말풍선 대사가 깁니다: ${script.text}`);
 }
@@ -119,6 +120,21 @@ assert.deepEqual(routeMessage("GS는 뭐 하는 회사야?", { screen: "home" })
   topic: "company",
 });
 assert.equal(routeMessage("10주면 얼마야?", orderContext).text.includes("125,000원"), true);
+// 금액으로 사면 수량이 소수로 온다(`buyMath`). 화면과 같은 소수 둘째 자리로 말하고,
+// 금액은 원 아래를 만들지 않는다 — "50,193.5원" 은 어느 화면에도 없는 값이다.
+const fractionalOrderContext = {
+  screen: "order" as const,
+  quantity: 0.39,
+  unitPrice: 128_700,
+};
+assert.equal(
+  routeMessage("예상 금액 얼마야?", fractionalOrderContext).text.includes("0.39주"),
+  true,
+);
+assert.equal(
+  routeMessage("예상 금액 얼마야?", fractionalOrderContext).text.includes("50,193원"),
+  true,
+);
 assert.equal(routeMessage("내가 지난번에 왜 골랐어?", stockContext).tool, "own_trade_records");
 // 보유 현황은 용어 사전보다 먼저 잡는다 — `수량`·`몇 주`·`평균`이 사전 트리거라
 // 그냥 두면 낱말 뜻으로 답한다 (SPEC §4 투자 기록).

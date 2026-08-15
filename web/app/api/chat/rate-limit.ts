@@ -32,3 +32,23 @@ export function isChatRateLimited(key: string, now: number = Date.now()): boolea
   hits.push(now);
   return false;
 }
+
+/**
+ * 가장 오래된 기록이 창을 빠져나갈 때까지 남은 초. 창 안에 기록이 없으면 `0`.
+ *
+ * 막혔다는 사실만 알려 주면 화면은 "조금 있다" 말고는 할 말이 없고, 아이는 언제까지
+ * 기다려야 하는지 몰라 계속 두드린다. 가장 오래된 요청이 창을 빠져나가는 순간이 곧
+ * 한 자리가 비는 시각이므로 그 값을 초로 돌려준다.
+ *
+ * 한도에 닿지 않은 키에도 남은 시간을 계산하므로, `isChatRateLimited` 가 `true` 를
+ * 준 직후에만 부른다 — 그때가 이 값이 "다시 물어봐도 되는 때"와 같아지는 유일한 시점이다.
+ */
+export function chatRateLimitRetryAfterSeconds(
+  key: string,
+  now: number = Date.now(),
+): number {
+  const oldest = (hitsByKey.get(key) ?? []).find((at) => now - at < WINDOW_MS);
+  if (oldest === undefined) return 0;
+  // 0 초를 주면 화면이 곧바로 다시 보내 또 막힌다. 최소 1 초는 기다리게 한다.
+  return Math.max(1, Math.ceil((oldest + WINDOW_MS - now) / 1_000));
+}

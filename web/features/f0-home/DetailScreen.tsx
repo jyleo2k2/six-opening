@@ -5,6 +5,7 @@ import type { ChatContext } from "../../shared/types/chatbot";
 import { accountTotalAsset, SEED } from "../../shared/store/prototype-account.js";
 import { ChartScreen } from "./ChartScreen";
 import { buildDetailChart, type DetailTrade } from "./lib/detail-chart";
+import { lastExplorePath } from "./lib/explore-memo";
 import { NewsScreen } from "./NewsScreen";
 import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
@@ -306,7 +307,8 @@ export function DetailScreen({
     ) : (
       <div style={SUB_PAGE}>
         <SubScreenHeader
-          onBack={() => onLeave("/explore")}
+          // 떠날 때 보던 목록으로 돌아간다 — 늘 `/explore` 로 보내면 고른 섹터가 풀린다.
+          onBack={() => onLeave(lastExplorePath())}
           right={
             <div onClick={toggleWatch} style={WATCH_BTN}>
               <svg height={19} style={{ display: "block" }} viewBox="0 0 21 19" width={21}>

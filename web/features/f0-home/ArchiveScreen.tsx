@@ -25,6 +25,7 @@ import {
   type WeekCard,
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
+import { sectorCards } from "./lib/archive-sectors";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
@@ -259,6 +260,10 @@ export function ArchiveScreen({
   const lanes = runners(data.family?.members ?? []);
   const me = wallet?.acc[account];
   const summary = returnSummary(me?.cash ?? 0, me?.holdings ?? [], prices);
+  const sectors = sectorCards(me?.holdings ?? [], prices);
+  // 섹터 레일은 카드 모아보기 레일과 배선을 나눠 쓸 수 없다 — 같은 훅 인스턴스를 두 레일이
+  // 쓰면 한쪽을 끌 때 다른 쪽의 스냅이 풀린다. 켜진 카드를 고르지 않는 레일이라 인자는 없다.
+  const sectorRail = useRailDrag();
   const feed = feedCards(
     data.family?.trades ?? [],
     data.family?.members ?? [],
@@ -545,6 +550,48 @@ export function ArchiveScreen({
                 </div>
               </div>
 
+              {/*
+                보유 종목 · 섹터별. 카드 하나가 한 분야이고 값은 그 분야 **합계**로 낸다.
+                끌어 넘기는 배선은 카드 모아보기와 같은 `useRailDrag` 를 쓴다 — 한 화면
+                안에서 레일마다 끌리는 느낌이 다르면 안 된다.
+                보유가 없으면 빈 레일 대신 아무것도 그리지 않는다.
+              */}
+              {sectors.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "#001E5A", letterSpacing: "-0.01em", padding: "6px 0 0" }}>
+                    보유 종목 · 섹터별
+                  </div>
+                  {/*
+                    **`touch-action` 을 두지 않는다(기본 `auto`).** 카드 모아보기 레일은
+                    `pan-x` 를 쓰지만 그건 세로로 스크롤되지 않는 자기 자리에 있어서다.
+                    이 레일은 세로로 스크롤되는 `BODY` 안에 있으므로 `pan-x` 를 걸면
+                    "세로 팬은 브라우저가 처리하지 말라"가 돼, 섹터 카드에 손가락을 얹고
+                    아래로 밀 때 피드가 따라 내려오지 않는다. `useRailDrag` 는 터치를
+                    아예 무시하고 네이티브 스크롤에 맡기므로 여기서 막으면 대신할 것이 없다.
+                  */}
+                  <div
+                    onPointerDown={sectorRail.onPointerDown}
+                    ref={sectorRail.ref}
+                    style={{ display: "flex", alignItems: "stretch", gap: 9, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "11px 2px 4px", scrollbarWidth: "none", cursor: "grab", userSelect: "none", WebkitUserSelect: "none" }}
+                  >
+                    {sectors.map((sector) => (
+                      <div
+                        key={sector.id}
+                        style={{ flex: "none", width: 108, scrollSnapAlign: "start", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", borderRadius: 20, padding: "16px 10px 17px", background: "#fff", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}
+                      >
+                        <div style={{ width: 50, height: 50, flex: "none", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 25, fontWeight: 800, color: "#6B6F85", background: "#F5F6FB" }}>
+                          {sector.emoji}
+                        </div>
+                        <div style={{ fontSize: 13.5, fontWeight: 800, color: "#001E5A", marginTop: 9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>{sector.name}</div>
+                        <div style={{ fontSize: 11.5, fontWeight: 500, color: "#A9AEC4", marginTop: 3, whiteSpace: "nowrap" }}>{sector.countText}</div>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6F85", marginTop: 6, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{sector.valueText}</div>
+                        <div style={{ fontSize: 16, fontWeight: 800, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 4, color: sector.pctColor }}>{sector.pctText}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
                 {[{ key: "all", name: "전체" }, ...family.map((f) => ({ key: f.key, name: f.name }))].map((f) => (
                   <div
@@ -586,7 +633,7 @@ export function ArchiveScreen({
                         <div style={{ position: "absolute", right: -2, bottom: -2, width: 56, height: 60, background: `url(${card.pose}) right bottom/contain no-repeat`, filter: "drop-shadow(0 4px 7px rgba(0,0,0,0.3))" }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0, background: "#F5F6FB", padding: "14px 15px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>평단가</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>{card.avgLabel}</div>
                         <div style={{ fontSize: 25, fontWeight: 800, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", marginTop: 4, whiteSpace: "nowrap", color: card.avgColor }}>{card.avgText}</div>
                         <div style={{ fontSize: 14, fontWeight: 700, color: "#3D4460", marginTop: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{card.oneLiner}</div>
                       </div>

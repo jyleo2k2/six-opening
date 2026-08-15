@@ -124,6 +124,9 @@ assert.deepEqual(feed.map((f) => f.id), ["t2", "t1"]);
 // 본인이 보는 카드는 체결가와 등락률이 보인다.
 const buy = feed[1];
 assert.equal(buy.avgText, "100,000원");
+// 값은 이 거래 한 건의 **주당** 체결가다. 2주를 20만원어치 샀어도 10만원으로 적힌다 —
+// 라벨이 "평단가" 로 고정돼 있을 때는 이 숫자가 총 거래금액으로 읽혔다.
+assert.equal(buy.avgLabel, "산 가격");
 assert.equal(buy.bigPctText, "+20.00%");
 assert.equal(buy.positive, true);
 // 이유·계획·목표가가 한 문장으로 붙는다.
@@ -135,6 +138,8 @@ assert.equal(buy.comments[0].canDelete, true);
 // 남의 카드는 체결가가 마스킹돼 등락률 대신 매도만 적는다 — 화면에서 추론하지 않는다.
 const sell = feed[0];
 assert.equal(sell.avgText, "비공개");
+// 마스킹돼도 라벨은 방향을 따른다 — 값만 가리고 무슨 가격이었는지는 숨기지 않는다.
+assert.equal(sell.avgLabel, "판 가격");
 assert.equal(sell.bigPctText, "매도");
 // 매도는 계획 변경 이유를 덧붙인다.
 assert.match(sell.text, /계획을 바꿨어 — 가격이 움직여서 불안해졌어$/u);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -15,6 +15,14 @@ export const POLICY = Object.freeze({
   rolloutAt: "2026-08-12T00:00:00+09:00",
   portStart: 3100,
   portEnd: 3199,
+  /**
+   * 이 시간을 넘긴 개발 서버는 오래됐다고 본다.
+   *
+   * worktree 마다 서버를 띄우다 보니 며칠 전 브랜치의 서버가 계속 살아 있었고, 어느 포트가
+   * 어느 코드인지 화면에 표시가 없어 "고쳤는데 그대로"·"갑자기 죽었다"가 반복됐다. 하루를
+   * 넘기면 그 서버가 보여 주는 코드는 이미 지금 브랜치가 아니다.
+   */
+  devServerStaleHours: 12,
   ownerOnlyPaths: [
     "AGENTS.md",
     "CLAUDE.md",
@@ -628,7 +636,7 @@ function commandStart(options) {
     throw error;
   }
   process.stdout.write(
-    `[git-session] 생성 완료\n브랜치: ${branch}\nworktree: ${worktree}\nclaim: ${scopes.join(", ")}\n개발 포트: ${port}\n다음: cd "${path.join(worktree, "web")}"; npm ci; npm run dev -- -p ${port}\n`,
+    `[git-session] 생성 완료\n브랜치: ${branch}\nworktree: ${worktree}\nclaim: ${scopes.join(", ")}\n개발 포트: ${port}\n다음: cd "${worktree}"; (cd web; npm ci); node scripts/git-session-manager.mjs serve\n`,
   );
 }
 
@@ -703,6 +711,96 @@ function commandHeartbeat() {
   process.stdout.write(`[git-session] heartbeat: ${managed.branch}\n`);
 }
 
+/**
+ * 이 세션의 개발 서버를 세션이 배정받은 포트로 띄우고 pid 를 등록에 남긴다.
+ *
+ * 포트를 직접 고르지 않게 하는 것이 요점이다. 사람이 포트를 고르면 어느 포트가 어느
+ * 브랜치인지 아무도 모르게 되고, 며칠 전 브랜치의 서버를 보면서 "고쳤는데 그대로"를
+ * 반복한다. 포트는 이미 세션마다 배정돼 있으니 그것만 쓴다.
+ */
+function commandServe() {
+  const context = repositoryContext();
+  const managed = validateManagedSession(context);
+  const claim = managed.claim;
+  const current = classifyDevServer(claim.dev, processAlive(claim.dev?.pid));
+  if (current.state === "running" || current.state === "stale") {
+    process.stdout.write(
+      `[git-session] 이미 떠 있습니다: ${describeDevServer(claim.port, current)}\n` +
+        `http://localhost:${claim.port} · 다시 띄우려면 stop 후 serve\n`,
+    );
+    return;
+  }
+  const web = path.join(claim.worktree, "web");
+  if (!fs.existsSync(path.join(web, "node_modules", "next", "dist", "bin", "next"))) {
+    throw new SessionError(`의존성이 없습니다. 먼저 실행하십시오: cd "${web}"; npm ci`);
+  }
+  if (current.state === "orphan") {
+    process.stdout.write("[git-session] 죽어 있던 개발 서버 기록을 지우고 다시 띄웁니다.\n");
+  }
+  const logFile = devLogPath(context, claim);
+  const out = fs.openSync(logFile, "a");
+  try {
+    // `npm run dev` 를 그대로 부르지 않고 같은 두 단계를 직접 띄운다.
+    //
+    // Windows 는 Node 가 `.cmd` 를 직접 spawn 하는 것을 막고(CVE-2024-27980 대응), 셸로
+    // 감싸면 그 `cmd.exe` 가 부모 콘솔을 함께 물어 **터미널을 닫을 때 서버도 같이 죽는다**.
+    // 실제로 그렇게 죽어서 "화면은 멀쩡한데 요청만 실패하는" 상태가 만들어졌다. node 를
+    // 직접 띄우면 셸이 끼지 않아 그 고리가 끊긴다.
+    //
+    // 두 단계는 `web/package.json` 의 `predev`·`dev` 와 짝이다. 그쪽이 바뀌면 여기도 바꾼다.
+    run(process.execPath, [path.join(web, "scripts", "ui-build.mjs"), "build"], { cwd: web });
+    const child = spawn(
+      process.execPath,
+      [
+        path.join(web, "node_modules", "next", "dist", "bin", "next"),
+        "dev",
+        "-p",
+        String(claim.port),
+      ],
+      { cwd: web, detached: true, stdio: ["ignore", out, out], windowsHide: true },
+    );
+    child.unref();
+    if (!Number.isInteger(child.pid)) {
+      throw new SessionError("개발 서버를 띄우지 못했습니다.");
+    }
+    updateDevRecord(context, claim.id, {
+      pid: child.pid,
+      port: claim.port,
+      startedAt: new Date().toISOString(),
+      log: logFile,
+    });
+    process.stdout.write(
+      `[git-session] 개발 서버 시작: ${managed.branch}\n` +
+        `주소: http://localhost:${claim.port}\npid: ${child.pid}\n로그: ${logFile}\n` +
+        `끄기: node scripts/git-session-manager.mjs stop\n`,
+    );
+  } finally {
+    fs.closeSync(out);
+  }
+}
+
+/** 이 세션의 개발 서버를 끄고 기록을 지운다. 기록만 남은 경우도 같은 명령으로 정리한다. */
+function commandStop() {
+  const context = repositoryContext();
+  const managed = validateManagedSession(context);
+  const claim = managed.claim;
+  const info = classifyDevServer(claim.dev, processAlive(claim.dev?.pid));
+  if (info.state === "off") {
+    process.stdout.write(`[git-session] 떠 있는 개발 서버가 없습니다: ${managed.branch}\n`);
+    return;
+  }
+  const stopped = info.state === "orphan" ? true : killProcessTree(info.pid);
+  if (!stopped) {
+    throw new SessionError(`개발 서버를 끄지 못했습니다: pid ${info.pid}`);
+  }
+  updateDevRecord(context, claim.id, null);
+  process.stdout.write(
+    `[git-session] 개발 서버 정리: ${managed.branch} · ${
+      info.state === "orphan" ? "기록만 삭제" : `pid ${info.pid} 종료`
+    }\n`,
+  );
+}
+
 function commandRelease() {
   const context = repositoryContext();
   const managed = validateManagedSession(context);
@@ -718,6 +816,92 @@ function commandRelease() {
     writeRegistry(context, registry);
   });
   process.stdout.write(`[git-session] release 완료: ${managed.branch}\n병합 확인 후 안전 정리 절차를 사용하십시오.\n`);
+}
+
+/**
+ * 등록된 개발 서버의 상태. 프로세스 생사는 호출자가 확인해 `alive` 로 넘긴다 —
+ * 판정만 순수하게 두어야 테스트가 진짜 서버를 띄우지 않는다.
+ *
+ * - `off`    기록이 없다. 아직 띄우지 않았거나 stop 으로 지웠다.
+ * - `orphan` 기록은 있는데 프로세스가 없다. 터미널을 닫았거나 서버가 죽었다.
+ * - `stale`  살아 있지만 오래됐다. 그 화면이 보여 주는 코드는 지금 브랜치가 아닐 수 있다.
+ * - `running` 정상.
+ */
+export function classifyDevServer(dev, alive, now = Date.now(), policy = POLICY) {
+  if (!dev || !Number.isInteger(dev.pid)) return { state: "off", pid: null, hours: null };
+  if (!alive) return { state: "orphan", pid: dev.pid, hours: null };
+  const startedAt = Date.parse(dev.startedAt ?? "");
+  const hours = Number.isFinite(startedAt) ? (now - startedAt) / 3_600_000 : null;
+  return {
+    state: hours !== null && hours >= policy.devServerStaleHours ? "stale" : "running",
+    pid: dev.pid,
+    hours,
+  };
+}
+
+/** 상태 한 줄. `status` 와 `serve`·`stop` 이 같은 말로 보고한다. */
+export function describeDevServer(port, info) {
+  if (info.state === "off") return `dev=${port} 꺼짐`;
+  const age = info.hours === null ? "" : ` · ${Math.round(info.hours)}시간째`;
+  if (info.state === "orphan") return `dev=${port} 기록만 남음(pid ${info.pid} 없음)`;
+  if (info.state === "stale") return `dev=${port} 실행 중(pid ${info.pid})${age} · 오래됨`;
+  return `dev=${port} 실행 중(pid ${info.pid})${age}`;
+}
+
+/** 신호 0 은 프로세스를 건드리지 않고 존재만 묻는다. 권한이 없으면 살아 있는 것으로 본다. */
+function processAlive(pid) {
+  if (!Number.isInteger(pid) || pid <= 0) return false;
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error.code === "EPERM";
+  }
+}
+
+/**
+ * 개발 서버는 자식 프로세스를 여럿 낳는다(next dev + turbopack 워커). 부모만 죽이면
+ * 자식이 포트를 쥔 채 남으므로 트리째 정리한다.
+ */
+function killProcessTree(pid) {
+  if (!processAlive(pid)) return true;
+  if (process.platform === "win32") {
+    run("taskkill", ["/PID", String(pid), "/T", "/F"], { allowFailure: true });
+  } else {
+    // 그룹으로 띄웠으므로 그룹째 보낸다. 그룹이 없으면 프로세스 하나만 보낸다.
+    try {
+      process.kill(-pid, "SIGTERM");
+    } catch {
+      try {
+        process.kill(pid, "SIGTERM");
+      } catch {
+        /* 이미 사라졌다 */
+      }
+    }
+  }
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    if (!processAlive(pid)) return true;
+    sleep(50);
+  }
+  return !processAlive(pid);
+}
+
+function devLogPath(context, session) {
+  const directory = path.join(context.commonGitDir, "six-opening-dev-logs");
+  fs.mkdirSync(directory, { recursive: true });
+  return path.join(directory, `${session.id.replace(/[\\/]/gu, "-")}.log`);
+}
+
+function updateDevRecord(context, claimId, dev) {
+  withRegistryLock(context, () => {
+    const registry = readRegistry(context);
+    const session = registry.sessions.find((item) => item.id === claimId && item.status === "active");
+    if (!session) throw new SessionError("활성 claim이 없습니다.");
+    if (dev) session.dev = dev;
+    else delete session.dev;
+    session.updatedAt = new Date().toISOString();
+    writeRegistry(context, registry);
+  });
 }
 
 function sessionIsLive(session) {
@@ -840,6 +1024,7 @@ function commandStatus(options) {
       live: sessionIsLive(session),
       facts,
       state: classifySession(facts),
+      devServer: classifyDevServer(session.dev, processAlive(session.dev?.pid)),
     };
   });
   const worktrees = parseWorktreePorcelain(
@@ -868,8 +1053,19 @@ function commandStatus(options) {
           ? `미병합 ${ahead}커밋`
           : "미병합 없음 · 정리 가능";
       process.stdout.write(
-        `[${session.state}] ${session.branch} — ${why} · 마지막 활동 ${quiet} · port=${session.port}\n` +
+        `[${session.state}] ${session.branch} — ${why} · 마지막 활동 ${quiet} · ${describeDevServer(session.port, session.devServer)}\n` +
           `          paths=${session.paths.join(",")}\n`,
+      );
+    }
+    // 어느 포트가 어느 브랜치인지 모르는 채로 오래된 화면을 보는 일을 막는다.
+    for (const session of sessions.filter((item) => item.devServer.state === "stale")) {
+      process.stdout.write(
+        `[주의] 개발 서버가 ${Math.round(session.devServer.hours)}시간째입니다: ${session.branch} (localhost:${session.port}) — 'stop' 후 다시 띄우십시오.\n`,
+      );
+    }
+    for (const session of sessions.filter((item) => item.devServer.state === "orphan")) {
+      process.stdout.write(
+        `[주의] 개발 서버 기록만 남았습니다: ${session.branch} (pid ${session.devServer.pid}) — 'stop' 으로 지웁니다.\n`,
       );
     }
     const done = sessions.filter((item) => item.state === "done").length;
@@ -922,12 +1118,20 @@ function commandGc(options) {
       process.stdout.write(`[gc] (예정) ${session.branch}\n`);
       continue;
     }
+    // worktree 를 지우기 전에 그 안에서 돌던 서버를 먼저 끈다. 남겨 두면 사라진 코드를
+    // 계속 서비스하면서 포트를 쥐고, 다음 세션이 그 포트를 받아 서로 다른 것을 본다.
+    const devInfo = classifyDevServer(session.dev, processAlive(session.dev?.pid));
+    const devStopped =
+      devInfo.state === "running" || devInfo.state === "stale"
+        ? killProcessTree(devInfo.pid)
+        : false;
     withRegistryLock(context, () => {
       const registry = readRegistry(context);
       const entry = registry.sessions.find((item) => item.id === session.id && item.status === "active");
       if (entry) {
         entry.status = "released";
         entry.updatedAt = new Date().toISOString();
+        delete entry.dev;
         writeRegistry(context, registry);
       }
     });
@@ -937,7 +1141,7 @@ function commandGc(options) {
     // -d 는 병합된 브랜치만 지운다. 안 지워지면 그대로 두고 알린다.
     const branchDeleted = git(["branch", "-d", session.branch], context.root, true).status === 0;
     process.stdout.write(
-      `[gc] ${session.branch} — claim 해제${removed ? " · worktree 제거" : ""}${branchDeleted ? " · 브랜치 삭제" : " · 브랜치 유지(미병합)"}\n`,
+      `[gc] ${session.branch} — claim 해제${devStopped ? ` · 개발 서버 종료(pid ${devInfo.pid})` : ""}${removed ? " · worktree 제거" : ""}${branchDeleted ? " · 브랜치 삭제" : " · 브랜치 유지(미병합)"}\n`,
     );
   }
   for (const item of kept) {
@@ -1079,7 +1283,7 @@ function commandInstallHooks() {
 }
 
 function printHelp() {
-  process.stdout.write(`병렬 Git 세션 관리자\n\n명령:\n  start --ai <codex|claude> --worker <이름> --task <한글-작업명> --path <경로>...\n  claim --ai <codex|claude> --worker <이름> --path <경로>...\n  status [--json]\n  gc [--dry-run]\n  guard [--file <경로>|--hook-input]\n  check-start\n  heartbeat\n  release\n  check-staged\n  check-push\n  check-branch --branch <브랜치>\n  check-guards\n  check-pr --event <GitHub 이벤트 JSON>\n  install-hooks\n`);
+  process.stdout.write(`병렬 Git 세션 관리자\n\n명령:\n  start --ai <codex|claude> --worker <이름> --task <한글-작업명> --path <경로>...\n  claim --ai <codex|claude> --worker <이름> --path <경로>...\n  serve\n  stop\n  status [--json]\n  gc [--dry-run]\n  guard [--file <경로>|--hook-input]\n  check-start\n  heartbeat\n  release\n  check-staged\n  check-push\n  check-branch --branch <브랜치>\n  check-guards\n  check-pr --event <GitHub 이벤트 JSON>\n  install-hooks\n`);
 }
 
 function dispatch(argv) {
@@ -1088,6 +1292,8 @@ function dispatch(argv) {
   const commands = {
     start: commandStart,
     claim: commandClaim,
+    serve: commandServe,
+    stop: commandStop,
     status: commandStatus,
     gc: commandGc,
     guard: commandGuard,

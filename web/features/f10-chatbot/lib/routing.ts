@@ -3623,7 +3623,9 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
 }
 
 function formatWon(value: number) {
-  return `${value.toLocaleString("ko-KR")}원`;
+  // 수량이 소수라 곱이 소수로 떨어질 수 있다. 화면은 주문 금액을 원 단위로만 보여 주므로
+  // 여기서도 원 아래는 말하지 않는다 — "50,193.5원" 은 어느 화면에도 없는 값이다.
+  return `${Math.round(value).toLocaleString("ko-KR")}원`;
 }
 
 function getContextReply(message: string, context: ChatContext): ChatReply | null {
@@ -5138,19 +5140,35 @@ export const PROACTIVE_SCRIPTS: Record<
   },
   lossRevisit: {
     label: "손실 실현 종목 반복 조회",
-    text: "후회되나요?",
+    // 감정을 넘겨짚지 않는다. "후회되나요?" 는 아이가 느끼지도 않은 후회를 단정해
+    // 나무라는 것처럼 읽힌다 — 손실 뒤 같은 종목을 다시 봤다는 사실에만 붙는다.
+    text: "이 회사 다시 볼까요?",
   },
 };
 
 /**
- * 말풍선 수락 직후 자동으로 던지는 후속 질문 (SPEC §7). 여기 없는 신호는 고정 발화만
- * 남기고 아이 입력을 기다린다.
+ * 말풍선을 수락하면 고정 발화와 함께 붙는 추천 질문 칩 (SPEC §7).
  *
- * **아이가 고른 문장이 아니라 우리가 대신 던지는 문장이다.** 라우터가 이걸 거절이나 범위
- * 밖으로 보내면 "살지 말지 고민돼요?" → "응!" → "대신 정해 줄 수 없어요" 가 되어, 도우려고
- * 먼저 말을 건 자리에서 아이가 거절당한다. `proactive-followup.test.ts` 가 그 방향을 막는다.
+ * 질문을 대신 던지지 않고 **아이가 고르게 한다.** 대신 던지면 신호가 짚지 못한 진짜
+ * 궁금증을 덮어 버리고, 아이는 자기가 묻지도 않은 답부터 읽는다.
+ *
+ * **여기 문장은 아이가 타이핑한 것이 아니라 우리가 내민 것이다.** 라우터가 이걸 거절이나
+ * 범위 밖으로 보내면 도우려고 먼저 말을 건 자리에서 아이가 거절당한다 — 내민 칩을 눌렀더니
+ * "대신 정해 줄 수 없어요" 가 나오는 꼴이다. `proactive-followup.test.ts` 가 막는다.
  */
-export const PROACTIVE_FOLLOWUP_QUESTION: Partial<Record<ProactiveSignal, string>> = {
-  buyHesitation: "주문 전에 뭘 확인해요?",
-  orderMethodConfusion: "시장가가 뭐예요?",
+export const PROACTIVE_SUGGESTED_QUESTIONS: Record<ProactiveSignal, readonly string[]> = {
+  buyHesitation: [
+    "주문 전에 뭘 확인해요?",
+    "매수 버튼을 누르면 어떻게 돼요?",
+    "모의투자라서 진짜 돈이 나가요?",
+  ],
+  orderMethodConfusion: ["시장가가 뭐예요?", "지정가가 뭐예요?"],
+  dwell: ["매수는 어떻게 하나요?", "차트는 어떻게 봐요?", "수익률이 무엇인가요?"],
+  // 손실 자체를 되짚지 않고 회사로 시선을 돌린다. 종목 상세에서만 뜨는 신호라 맥락에
+  // 종목이 있고, 앞의 둘은 승인 종목 사실 조회로 간다.
+  lossRevisit: [
+    "이 회사는 무슨 일을 해요?",
+    "이 회사는 어떻게 돈을 벌어요?",
+    "수익률이 무엇인가요?",
+  ],
 };

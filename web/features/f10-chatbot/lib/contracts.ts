@@ -112,6 +112,34 @@ function optionalPositiveInteger(value: unknown, maximum: number) {
   return Number(value);
 }
 
+/**
+ * 주문 수량은 정수가 아니다.
+ *
+ * 금액으로 사면 화면이 `금액 ÷ 주문가` 를 그대로 수량으로 쓴다(`f0-home/lib/order-view.ts`
+ * 의 `buyMath`). 0.39주는 그 화면에서 정상값이고 실제로 그렇게 체결된다. 정수만 받던
+ * 동안에는 금액으로 사는 화면에서 온 질문이 통째로 `400` 이 됐고, 화면은 그것을 다른
+ * 실패와 구분하지 못해 "키웅이가 잠깐 낮잠 중이에요" 로 보여 줬다.
+ *
+ * 화면이 수량을 소수 둘째 자리까지 보여 주므로(`Math.round(qty * 100) / 100`) 같은 자리에서
+ * 끊는다. 답변 문구도 같은 값을 그대로 옮겨야 화면과 챗봇이 다른 수량을 말하지 않는다.
+ */
+function optionalQuantity(value: unknown, maximum: number) {
+  if (value === undefined) return undefined;
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    value <= 0 ||
+    value > maximum
+  ) {
+    return null;
+  }
+  const rounded = Math.round(value * 100) / 100;
+  // 화면에서도 살 수 없는 양(`buyMath` 의 `tooSmall`, 0.01주 미만)은 버리되 요청은 살린다.
+  // 여기서 거절하면 "너무 적은 금액"을 띄운 화면에서 아무 질문도 못 하게 된다 — 지금
+  // 고치는 것과 똑같은 종류의 사고다.
+  return rounded > 0 ? rounded : undefined;
+}
+
 /** 잔고·보유 종목 수는 0 이 정상값이라 `optionalPositiveInteger` 를 쓸 수 없다. */
 function optionalNonNegativeInteger(value: unknown, maximum: number) {
   if (value === undefined) return undefined;
@@ -247,7 +275,7 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
 
   const stockId = optionalString(value.context.stockId, 10);
   const stockName = optionalString(value.context.stockName, MAX_LABEL_LENGTH);
-  const quantity = optionalPositiveInteger(value.context.quantity, MAX_QUANTITY);
+  const quantity = optionalQuantity(value.context.quantity, MAX_QUANTITY);
   const unitPrice = optionalPositiveInteger(
     value.context.unitPrice,
     MAX_UNIT_PRICE,

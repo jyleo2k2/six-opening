@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChatContext } from "../../shared/types/chatbot";
 import { accountTotalAsset, SEED } from "../../shared/store/prototype-account.js";
 import { BottomNav } from "./BottomNav";
@@ -11,9 +11,18 @@ import {
   cardDots,
   emptyState,
   exploreList,
-  exploreTitle,
+  hasManySectors,
   sectorChips,
+  SORT_LABEL,
+  SORT_OPTIONS,
+  type ExploreSort,
 } from "./lib/explore-cards";
+import {
+  exploreSpotFor,
+  lastExploreSort,
+  rememberExploreSort,
+  rememberExploreSpot,
+} from "./lib/explore-memo";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
@@ -47,7 +56,28 @@ const CHIPS_TOGGLE = (open: boolean) =>
     "flex:none;width:36px;height:40px;margin-right:8px;display:flex;align-items:center;justify-content:center;" +
       `cursor:pointer;transition:transform 0.2s ease;transform:rotate(${open ? "180deg" : "0deg"})`,
   );
-const TITLE_ROW = styleFromCss("flex:none;width:310px;margin:0 auto;padding:8px 0 2px");
+const SORT_BTN = styleFromCss(
+  "flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent",
+);
+// 헤더 오른쪽에 버튼이 둘이라, 왼쪽에 한 칸을 비워야 제목이 가운데에 선다.
+// 왼쪽 38+12+38+12 = 오른쪽 12+38+12+38. 정렬 버튼이 검색 버튼과 같은 38px 이어야 맞는다.
+const HEADER_SPACER = styleFromCss("flex:none;width:38px");
+// 헤더 버튼 바로 아래(59 패딩 + 6 + 38 = 103px). PAGE 가 `overflow:hidden` 이라 이 안을 벗어나지 않는다.
+const SORT_MENU = styleFromCss(
+  "position:absolute;right:16px;top:108px;z-index:2;min-width:148px;padding:6px;border-radius:16px;" +
+    "background:#FFFFFF;box-shadow:0 10px 28px rgba(30,25,60,0.18)",
+);
+const SORT_ITEM = (on: boolean) =>
+  styleFromCss(
+    "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-radius:11px;" +
+      "font-size:14px;cursor:pointer;font-weight:" +
+      (on ? "700" : "500") +
+      ";color:" +
+      (on ? "#F5327F" : "#5C6280") +
+      (on ? ";background:#FDF0F6" : ""),
+  );
+// 메뉴 밖을 누르면 닫힌다. 화면 전체를 덮되 보이지는 않는다.
+const SORT_BACKDROP = styleFromCss("position:absolute;left:0;top:0;right:0;bottom:0;z-index:1");
 const STAGE = styleFromCss(
   "position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:transparent",
 );
@@ -68,9 +98,17 @@ const GROUP_WRAP = styleFromCss(
 const GROUP_LINE = styleFromCss("position:absolute;left:0;right:0;top:0;height:1px;background:#E5E2EE");
 const GROUP_NAME = styleFromCss("font-size:22px;font-weight:800;color:#141B22;letter-spacing:-0.03em;padding-bottom:14px");
 
-/** 라우트의 섹터 구간이 아는 값이 아니면 기본(오늘 많이 오른 순)으로 되돌린다. */
+/**
+ * 라우트의 섹터 구간이 아는 값이 아니면 전체로 되돌린다.
+ *
+ * `rank` 는 챗봇의 "오늘 뭐가 많이 올랐어" 점프가 보내는 값이다(`f10-chatbot/lib/routing.ts`).
+ * 정렬이 필터 줄에서 빠져나왔으므로 목록은 전체로 보내고, 등락순 정렬은 아래 effect 가 맞춘다.
+ */
 const knownFilter = (sector: string | undefined, sectorIds: string[]) =>
-  sector && (sector === "all" || sector === "watch" || sectorIds.includes(sector)) ? sector : "rank";
+  sector && (sector === "all" || sector === "watch" || sectorIds.includes(sector)) ? sector : "all";
+
+/** 필터 → 주소. 칩과 자리 기억이 같은 문자열을 써야 돌아왔을 때 같은 목록으로 친다. */
+const explorePath = (filter: string) => (filter === "all" ? "/explore" : `/explore/${filter}`);
 
 /**
  * 종목 탐색 화면. `ui-src/screens/explore.html` 을 그대로 옮겨 왔다.
@@ -95,17 +133,53 @@ export function ExploreScreen({
   const [cardIndex, setCardIndex] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [chipsOpen, setChipsOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  // 정렬은 섹터를 옮겨도 따라간다. 화면을 떠났다 와도 마찬가지라 초기값을 기억에서 읽는다.
+  const [sort, setSort] = useState<ExploreSort>(lastExploreSort);
   // 카드가 켜졌는지는 아래 `onRailScroll` 이 정한다 — 여기서는 끄는 손만 받는다. 카드가
   // 위아래로 넘어가는 세로 레일이라 축은 'y'.
   const rail = useRailDrag(undefined, undefined, "y");
 
+  // 유니버스가 오기 전에는 섹터 id 목록이 비어 있어 무엇이든 전체로 떨어진다. 도착하면
+  // 같은 렌더에서 제 필터가 잡히고, 아래 effect 들이 그 값으로 한 번 더 돈다.
   const filter = knownFilter(sector, universe?.sectors.map((entry) => entry.id) ?? []);
+  const path = explorePath(filter);
+  const ready = universe !== null && wallet !== null;
+
+  // 챗봇의 "오늘 뭐가 많이 올랐어"(`/explore/rank`)는 목록이 아니라 정렬로 답한다.
+  useEffect(() => {
+    if (sector !== "rank") return;
+    setSort("change");
+    rememberExploreSort("change");
+  }, [sector]);
 
   // 필터·검색이 바뀌면 처음 카드부터 다시 본다 — `componentDidUpdate` 의 scrollLeft 리셋과 같다.
   useEffect(() => {
     setCardIndex(0);
     if (rail.ref.current) rail.ref.current.scrollTop = 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, query]);
+
+  // 종목을 보고 돌아온 길이면 떠날 때 자리로 되돌린다. **딱 한 번만** 한다 — 그 뒤의 필터
+  // 변경은 새 목록이라 위 리셋이 맞다. 위 effect 보다 뒤에 있어야 같은 커밋에서 리셋을 이긴다.
+  const restored = useRef(false);
+  useEffect(() => {
+    if (!ready || restored.current) return;
+    restored.current = true;
+    const spot = exploreSpotFor(path);
+    if (!spot) return;
+    setCardIndex(spot.cardIndex);
+    if (rail.ref.current) rail.ref.current.scrollTop = spot.scrollTop;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, path]);
+
+  // 보고 있는 자리를 계속 적어 둔다 — 카드·탭바·챗봇 어느 길로 나가도 최신값이 남는다.
+  // 카드가 스냅으로 한 장씩 서므로 `cardIndex` 가 바뀌는 순간이 곧 자리가 바뀌는 순간이다.
+  useEffect(() => {
+    if (!ready) return;
+    rememberExploreSpot({ path, scrollTop: rail.ref.current?.scrollTop ?? 0, cardIndex });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, path, cardIndex]);
 
   // 챗봇 맥락. `app.html` 의 notifyChatContext 는 탐색을 'home' 으로 묶어 지갑 값만 실었다.
   const walletLoaded = wallet !== null;
@@ -129,15 +203,22 @@ export function ExploreScreen({
 
   if (!universe || !wallet) return <PhoneFrame />;
 
-  const list = exploreList(universe, { quotes, sparks }, filter, query, wallet.watchlist);
+  const list = exploreList(universe, { quotes, sparks }, filter, query, wallet.watchlist, sort);
   const chips = sectorChips(universe, filter);
-  const title = exploreTitle(universe, filter, query, list.length, chipsOpen);
+  // 업종 구분 헤더는 **업종별로 줄을 세웠을 때만** 뜻이 있다. 예전에는 "전체 보기면 무조건"
+  // 이었는데, 그러면 전체를 다른 기준으로 정렬하는 순간 같은 업종이 흩어져 헤더가 곳곳에 선다.
+  const showGroups = sort === "sector" && hasManySectors(list);
   const empty = emptyState(query);
   const activeIndex = Math.min(cardIndex, Math.max(0, list.length - 1));
 
   const pickChip = (id: string) => {
     setChipsOpen(false);
-    onLeave(id === "rank" ? "/explore" : `/explore/${id}`);
+    onLeave(explorePath(id));
+  };
+  const pickSort = (next: ExploreSort) => {
+    setSortOpen(false);
+    setSort(next);
+    rememberExploreSort(next);
   };
   const toggleSearch = () => {
     setSearchOpen((open) => !open);
@@ -166,7 +247,20 @@ export function ExploreScreen({
           <div onClick={() => onLeave("/")} style={BACK}>
             ‹
           </div>
+          <div style={HEADER_SPACER} />
           <div style={TITLE}>어떤 회사를 살까요?</div>
+          <div onClick={() => setSortOpen((open) => !open)} style={SORT_BTN}>
+            {/* 정렬 아이콘 — 긴 줄과 짧은 줄로 "줄 세우기"를 보여 준다. 글자로 쓰면 폭이
+                라벨마다 달라져 헤더가 흔들린다. */}
+            <svg fill="none" height="19" viewBox="0 0 19 19" width="19">
+              <path
+                d="M3 5.5 H16 M3 9.5 H11.5 M3 13.5 H7.5"
+                stroke="#01185A"
+                strokeLinecap="round"
+                strokeWidth="2"
+              />
+            </svg>
+          </div>
           <div onClick={toggleSearch} style={SEARCH_BTN}>
             <svg fill="none" height="21" viewBox="0 0 21 21" width="21">
               <circle cx="9" cy="9" r="6.2" stroke="#01185A" strokeWidth="2" />
@@ -174,6 +268,30 @@ export function ExploreScreen({
             </svg>
           </div>
         </div>
+
+        {sortOpen && (
+          <>
+            <div onClick={() => setSortOpen(false)} style={SORT_BACKDROP} />
+            <div style={SORT_MENU}>
+              {SORT_OPTIONS.map((option) => (
+                <div key={option} onClick={() => pickSort(option)} style={SORT_ITEM(option === sort)}>
+                  <span>{SORT_LABEL[option]}</span>
+                  {option === sort && (
+                    <svg fill="none" height="13" viewBox="0 0 13 13" width="13">
+                      <path
+                        d="M2 7 L5 10 L11 3"
+                        stroke="#F5327F"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2.2"
+                      />
+                    </svg>
+                  )}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {searchOpen && (
           <div style={SEARCH_ROW}>
@@ -227,14 +345,6 @@ export function ExploreScreen({
           </div>
         </div>
 
-        {title !== "" && (
-          <div style={TITLE_ROW}>
-            <span style={styleFromCss("font-size:22px;font-weight:800;color:#141B22;letter-spacing:-0.03em;white-space:nowrap")}>
-              {title}
-            </span>
-          </div>
-        )}
-
         {list.length === 0 ? (
           <div
             style={styleFromCss(
@@ -256,7 +366,7 @@ export function ExploreScreen({
           <div style={STAGE}>
             <div onPointerDown={rail.onPointerDown} onScroll={onRailScroll} ref={rail.ref} style={RAIL}>
               {list.map((stock, index) => {
-                const card = buildExploreCard(list, index, universe, index === activeIndex, filter === "all");
+                const card = buildExploreCard(list, index, universe, index === activeIndex, showGroups);
                 return (
                   <div key={card.code} style={styleFromCss(card.slideStyle)}>
                     {card.groupShow && (
