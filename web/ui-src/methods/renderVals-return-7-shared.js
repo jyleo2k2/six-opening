@@ -6,7 +6,10 @@
       statusDark: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:block',
       statusLight: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:none',
 
-      navBarStyle: 'flex:none;display:flex;align-items:center;gap:8px;padding:6px 14px 10px',
+      // 좌우 22 는 폰 프레임에 물리지 않는 여백이다. 프레임 개구부의 하단 코너는 반경 63px 으로
+      // 화면 라운드(40px)보다 깊게 파여, 여백 14 면 알약 모서리가 개구부 경계에 2px 까지 붙는다.
+      // `RankingScreen` 의 하단바도 같은 값을 쓴다 — 화면을 오갈 때 폭이 달라지면 안 된다.
+      navBarStyle: 'flex:none;display:flex;align-items:center;gap:8px;padding:6px 22px 10px',
       navPillStyle: 'flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:rgba(255,255,255,0.6);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(255,255,255,0.5)',
       navHomeIcon: this.navIcon(s.screen === 'home'), navHomeLabel: this.navLabel(s.screen === 'home'),
       navTradeIcon: this.navIcon(s.screen === 'explore' || s.screen === 'detail' || s.screen === 'buy'), navTradeLabel: this.navLabel(s.screen === 'explore' || s.screen === 'detail' || s.screen === 'buy'),

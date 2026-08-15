@@ -28,6 +28,8 @@ body {
 
 button, input { font: inherit; }
 
+/* 폰 화면 사각형으로 잘라내는 `clip-path` 는 `ConnectedPrototype` 이 실측값으로 채운다.
+   iframe 안 프레임 이미지와 스태킹 컨텍스트가 갈려 z-index 로는 순서를 정할 수 없다. */
 .prototype-chat-overlay {
   position: fixed;
   inset: 0;
@@ -51,9 +53,7 @@ button, input { font: inherit; }
   pointer-events: auto;
 }
 
-.prototype-chat-overlay > main > button {
-  left: min(calc(50% + 140px), calc(100% - 44px));
-  bottom: 80px;
-}
+/* 플로팅 버튼 좌표는 `lib/floating-avatar.ts` 가 화면 사각형에서 계산해 인라인으로 준다.
+   여기에 좌표를 적어 두면 인라인에 밀려 죽은 규칙으로 남는다. */
 
 /* 가족 피드는 app.html 아카이브 수익률 탭이 소유한다. 오버레이 버튼은 제거됐다. */

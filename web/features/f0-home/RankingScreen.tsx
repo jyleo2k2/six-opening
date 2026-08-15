@@ -5,8 +5,9 @@ import type { ChatUiAction } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
 import { styleFromCss } from "./lib/css-style";
 import { leaveToRoute } from "./lib/leave-to-route";
+import { phoneScreenClipPath } from "./lib/phone-frame";
 import { rkPodium, rkRows, rkSeg, type RankTab } from "./lib/ranking-data";
-import { PhoneFrame } from "./PhoneFrame";
+import { PhoneFrame, usePhoneScreenRect } from "./PhoneFrame";
 
 /**
  * 랭킹 화면. `app.html` 이 그리던 것을 그대로 옮겨 왔다 (`ui-src/screens/ranking.html`).
@@ -56,7 +57,9 @@ const GROUND = styleFromCss(
 const LIST = styleFromCss(
   'flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 16px 4px;display:flex;flex-direction:column;gap:13px',
 );
-const NAV_BAR = styleFromCss('flex:none;display:flex;align-items:center;gap:8px;padding:6px 14px 10px');
+// 좌우 22 는 폰 프레임 개구부(하단 코너 반경 63px)에 물리지 않는 여백이다.
+// `ui-src/methods/renderVals-return-7-shared.js` 의 `navBarStyle` 과 같은 값이어야 한다.
+const NAV_BAR = styleFromCss('flex:none;display:flex;align-items:center;gap:8px;padding:6px 22px 10px');
 const NAV_PILL = styleFromCss(
   'flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:rgba(255,255,255,0.6);'
     + 'backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);'
@@ -67,6 +70,9 @@ export function RankingScreen() {
   const [tab, setTab] = useState<RankTab>("week");
   const podium = rkPodium(tab);
   const rows = rkRows(tab);
+  // 챗봇 오버레이는 `PhoneFrame` 밖에 있어 화면 밖으로 나갈 수 있다. 프레임과 같은 사각형으로
+  // 잘라 가둔다 — 챗봇도 같은 값을 스스로 계산하지만, 잘못 계산해도 프레임은 넘지 못한다.
+  const screenRect = usePhoneScreenRect();
 
   // 챗봇이 시킨 화면 이동은 아직 app.html 몫이다. 지시를 들고 그쪽으로 넘어간다.
   const openChatAction = (action: ChatUiAction) => leaveToRoute("/", action);
@@ -203,7 +209,10 @@ export function RankingScreen() {
           </div>
         </div>
       </PhoneFrame>
-      <div className="prototype-chat-overlay">
+      <div
+        className="prototype-chat-overlay"
+        style={{ clipPath: phoneScreenClipPath(screenRect) }}
+      >
         <F10ChatbotDemo context={CHAT_CONTEXT} onUiAction={openChatAction} />
       </div>
     </>

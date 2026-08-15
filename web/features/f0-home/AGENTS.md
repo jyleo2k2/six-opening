@@ -7,5 +7,7 @@
 - 옮겨 온 화면에서 아직 안 옮긴 화면으로 나갈 때는 `lib/leave-to-route.ts`를 쓴다. 문서가 갈아끼워지므로 그 표시가 없으면 작성 중이던 주문 초안이 사라진다.
 - **`public/ui/app.html`은 `web/ui-src`를 조립한 생성물이다. 직접 수정·커밋하지 않고 claim도 `web/ui-src` 경로로 한다.** 홈 화면을 고치려면 `web/ui-src/screens/home.html`과 관련 `methods/`를 고치고 `npm run ui:build`로 합친다.
 - iframe 메시지는 `lib/prototype-bridge.ts`에서 런타임 검증하고 `origin`과 `source`를 함께 확인한다. F10 화면 이동도 허용된 `postMessage` 계약만 사용한다.
+- **폰 화면 위에 겹치는 오버레이는 `phoneScreenClipPath`로 화면 사각형에 가둔다.** 오버레이는 iframe·`PhoneFrame` 밖에 있어 프레임 이미지와 스태킹 컨텍스트가 갈리므로 z-index로는 순서를 정할 수 없다. 좌표가 어긋나도 프레임 밖으로 나가지 않게 하는 수단은 자르기뿐이다.
+- 화면 사각형은 `ConnectedPrototype`이 iframe 안 `#kw-screen`을 `ResizeObserver`로 재고, 옮겨 온 화면은 `usePhoneScreenRect`가 잰다. 창 크기로 다시 계산하지 않는다 — 배율 갱신 순서가 어긋나면 그 값이 다음 창 크기 변경까지 남는다.
 - **가족 피드는 `ui-src` 아카이브 수익률 탭(`screens/archive.html`·`methods/buildArchive.js`)이 소유한다.** 여기에 F11 오버레이나 진입 버튼을 다시 만들지 않는다.
 - 현재 메인 프로토타입에는 전역 부모↔자녀 스위처가 연결되지 않았다.

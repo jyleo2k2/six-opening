@@ -9,11 +9,13 @@ import {
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
 import { takePendingChatAction } from "./lib/leave-to-route";
+import { phoneScreenClipPath } from "./lib/phone-frame";
 import {
   isRecord,
   parseBehaviorEvent,
   parseChatContext,
   parseScreenMessage,
+  PROTOTYPE_SCREEN_ID,
   readPrototypeScreenRect,
 } from "./lib/prototype-bridge";
 import {
@@ -62,6 +64,21 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
       window.removeEventListener("resize", remeasure);
     };
   }, []);
+
+  // `app.html` 이 자기 배율을 다시 정하는 순간은 부모에 전해지지 않는다. 창 크기 변경만 듣고
+  // 있으면 첫 측정이 빗나갔을 때 그 값이 다음 창 크기 변경까지 남아, 시트와 플로팅 버튼이
+  // 폰 프레임에서 벗어난 자리에 그려진다. 화면 요소를 직접 지켜보는 것이 유일한 해결이다.
+  const screenObserver = useRef<ResizeObserver | null>(null);
+  const watchPrototypeScreen = () => {
+    const screen = iframeRef.current?.contentDocument?.getElementById(
+      PROTOTYPE_SCREEN_ID,
+    );
+    if (!screen) return;
+    screenObserver.current?.disconnect();
+    screenObserver.current = new ResizeObserver(measureScreen);
+    screenObserver.current.observe(screen);
+  };
+  useEffect(() => () => screenObserver.current?.disconnect(), []);
 
   const openChatAction = (action: ChatUiAction) => {
     iframeRef.current?.contentWindow?.postMessage(
@@ -169,13 +186,17 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
         className="block h-full w-full border-0"
         onLoad={() => {
           measureScreen();
+          watchPrototypeScreen();
           applyFirstRoute();
         }}
         ref={iframeRef}
         src="/ui/app.html?runtime=1"
         title="키움 가족 모의투자 리그"
       />
-      <div className="prototype-chat-overlay">
+      <div
+        className="prototype-chat-overlay"
+        style={{ clipPath: phoneScreenClipPath(screenRect) }}
+      >
         <F10ChatbotDemo
           context={chatContext}
           onUiAction={openChatAction}

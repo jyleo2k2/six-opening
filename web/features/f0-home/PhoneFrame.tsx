@@ -1,9 +1,31 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import {
+  getPrototypeScreenRect,
+  type PrototypeScreenRect,
+} from "../f10-chatbot/lib/bottom-sheet";
 import { PROTOTYPE_SCREEN_ID } from "./lib/prototype-bridge";
-import { PHONE_SCREEN, PROTOTYPE_PHONE, phoneFrameScale } from "./lib/phone-frame";
+import { PHONE_SCREEN, PROTOTYPE_PHONE } from "./lib/phone-frame";
 import "./phone-frame.css";
+
+/**
+ * 프레임 안 화면이 창 어디에 놓이는지. 프레임을 그리는 쪽과 그 위에 겹치는 오버레이를
+ * 자르는 쪽이 **같은 값**을 써야 한다 — 따로 계산하면 어긋나 오버레이가 프레임 밖으로 나온다.
+ *
+ * 서버에는 창 크기가 없으므로 처음에는 `null` 이고, 마운트 뒤 창에 맞춘다.
+ */
+export function usePhoneScreenRect(): PrototypeScreenRect | null {
+  const [rect, setRect] = useState<PrototypeScreenRect | null>(null);
+  useEffect(() => {
+    const fit = () =>
+      setRect(getPrototypeScreenRect(window.innerWidth, window.innerHeight));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+  return rect;
+}
 
 const NOISE =
   "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNjAnIGhlaWdodD0nMTYwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzE2MCcgaGVpZ2h0PScxNjAnIGZpbHRlcj0ndXJsKCNuKScvPjwvc3ZnPg==";
@@ -23,14 +45,8 @@ export function PhoneFrame({
   statusBar?: "dark" | "light";
   children: ReactNode;
 }) {
-  // 서버에는 창 크기가 없다. 처음에는 원래 크기로 그리고 마운트 뒤 창에 맞춘다.
-  const [scale, setScale] = useState(1);
-  useEffect(() => {
-    const fit = () => setScale(phoneFrameScale(window.innerWidth, window.innerHeight));
-    fit();
-    window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
-  }, []);
+  // 아직 창을 못 쟀으면 원래 크기로 그린다.
+  const scale = usePhoneScreenRect()?.scale ?? 1;
 
   const screenBox = {
     position: "absolute",
