@@ -133,6 +133,16 @@ const SHEET = styleFromCss(
     "border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -14px 34px -12px rgba(20,16,50,0.28)",
 );
 const SHEET_GRAB = styleFromCss("width:42px;height:4px;border-radius:999px;background:#E1E0EC;margin:0 auto 14px");
+// 목표 가격 직접 입력 — 프로토타입 buy2 의 targetPrice 줄과 같은 값이다.
+const TARGET_ROW = styleFromCss(
+  "display:flex;align-items:center;gap:8px;height:48px;box-sizing:border-box;background:#FFFFFF;" +
+    "border-radius:16px;padding:0 14px;box-shadow:inset 0 0 0 1px #E4E6F1",
+);
+const TARGET_INPUT = styleFromCss(
+  "flex:1;min-width:0;box-sizing:border-box;border:0;outline:none;background:transparent;" +
+    "font-family:'Pretendard',sans-serif;font-size:14px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums",
+);
+const TARGET_HINT = styleFromCss("font-size:12.5px;font-weight:500;color:#9B94C4;margin-top:-4px");
 // 갖고 있지 않은 회사를 팔려 할 때 뜨는 안내 — 프로토타입의 sellBlockScrim·sellBlockCard 와 같은 값이다.
 const BLOCK_SCRIM = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:center;" +
@@ -653,7 +663,9 @@ export function OrderScreen({
         scheduled_for: isScheduled ? scheduledFor : null,
         reason_code: draft.reason,
         plan_code: draft.plan,
-        plan_target_price: draft.targetPct ? Math.round(price * (1 + draft.targetPct / 100)) : null,
+        // 원본과 같이 `null` 만 비운다 — 지금 값 그대로(0%)를 적었어도 적은 값은 남긴다.
+        plan_target_price:
+          draft.targetPct !== null ? Math.round(price * (1 + draft.targetPct / 100)) : null,
         memo: (draft.memo || "").trim() || null,
         ts: new Date().toISOString(),
       };
@@ -737,7 +749,7 @@ export function OrderScreen({
         : "얼마를 넣을지 골라보세요";
     const buyMaxHint =
       math.execPrice > 0 && me.cash > 0
-        ? `최대 ${Math.floor(me.cash / math.execPrice)}주까지 살 수 있어 · 지갑 ${won(me.cash)}`
+        ? `최대 ${Math.floor(me.cash / math.execPrice)}주까지 살 수 있어요 · 지갑 ${won(me.cash)}`
         : "";
     const orderTypeText =
       draft.orderType === "limit"
@@ -985,31 +997,34 @@ export function OrderScreen({
           ))}
         </div>
 
+        {/* 목표 가격은 원본대로 **원 단위로 직접 적는다.** 초안이 들고 있는 값은 원본과 같이
+            여전히 등락률(`targetPct`)이라 적은 값을 여기서 %로 되돌린다 — 저장 계약
+            (`plan_target_price`)은 절대값이므로 어느 쪽이든 같은 값이 남는다. */}
         {draft.plan === "plan_target" && (
-          <div style={SUMMARY}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#01185A" }}>목표 가격을 정해볼까?</div>
-            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-              {[5, 10, 20].map((pct) => (
-                <div key={pct} onClick={() => patchDraft({ targetPct: pct })} style={chipStyle(draft.targetPct === pct)}>
-                  +{pct}%
-                </div>
-              ))}
+          <>
+            <div style={TARGET_ROW}>
+              <input
+                inputMode="numeric"
+                onChange={(event) => {
+                  const typed = parseInt(event.target.value.replace(/[^0-9]/gu, ""), 10);
+                  patchDraft({ targetPct: !typed || !price ? null : ((typed - price) / price) * 100 });
+                }}
+                placeholder="목표 가격을 입력해 주세요"
+                style={TARGET_INPUT}
+                value={
+                  draft.targetPct !== null
+                    ? Math.round(price * (1 + draft.targetPct / 100)).toLocaleString("ko-KR")
+                    : ""
+                }
+              />
+              <span style={{ flex: "none", fontSize: 14, fontWeight: 600, color: "#8E93A8" }}>원</span>
             </div>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "#5C6280",
-                marginTop: 13,
-                fontVariantNumeric: "tabular-nums",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {draft.targetPct
-                ? `지금 ${price.toLocaleString("ko-KR")}원 → 목표 ${Math.round(price * (1 + draft.targetPct / 100)).toLocaleString("ko-KR")}원`
-                : "몇 퍼센트 오르면 팔지 골라봐"}
+            <div style={TARGET_HINT}>
+              {draft.targetPct !== null
+                ? `지금 ${price.toLocaleString("ko-KR")}원보다 ${draft.targetPct >= 0 ? "+" : ""}${draft.targetPct.toFixed(1)}%예요`
+                : `지금은 ${price.toLocaleString("ko-KR")}원이에요`}
             </div>
-          </div>
+          </>
         )}
 
         <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>하고 싶은 말 남겨둘래요?</div>
@@ -1460,11 +1475,15 @@ export function OrderScreen({
             <span style={{ fontSize: 19, fontWeight: 800, color: "#01185A" }}>{math.byQty ? "주" : "원"}</span>
           </div>
           <div style={{ textAlign: "center", fontSize: 14.5, fontWeight: 600, color: "#F5327F", marginTop: 10, whiteSpace: "nowrap" }}>
-            {math.qty > 0 ? `${won(math.proceeds)}을 받게 돼` : math.byQty ? "몇 주 팔지 골라봐" : "얼마어치 팔지 골라봐"}
+            {math.qty > 0
+              ? `${won(math.proceeds)}을 받게 돼요`
+              : math.byQty
+                ? "몇 주 팔지 골라보세요"
+                : "얼마어치 팔지 골라보세요"}
           </div>
           <div style={{ textAlign: "center", fontSize: 12.5, fontWeight: 500, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}>
             {math.maxQty > 0
-              ? `최대 ${Math.floor(math.maxQty * 100) / 100}주까지 팔 수 있어 · ${won(math.maxQty * math.execPrice)}`
+              ? `최대 ${Math.floor(math.maxQty * 100) / 100}주까지 팔 수 있어요 · ${won(math.maxQty * math.execPrice)}`
               : ""}
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
@@ -1854,7 +1873,7 @@ export function OrderScreen({
                   : "font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F5327F",
               )}
             >
-              {memoSaved ? "저장됐어 ✓" : "저장하기"}
+              {memoSaved ? "저장됐어요 ✓" : "저장하기"}
             </div>
           </div>
         </div>
