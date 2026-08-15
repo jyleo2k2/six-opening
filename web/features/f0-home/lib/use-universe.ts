@@ -1,0 +1,151 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+/**
+ * 옮겨 온 화면이 종목 유니버스를 읽는 길. `app.html` 과 **같은 출처**를 쓴다.
+ *
+ * 이름·설명·로고는 `/api/universe` 스크립트(`window.KW_UNIVERSE`)가 원본이고,
+ * 시세·스파크라인은 `/api/universe/data` 를 5초마다 다시 읽는다 — `app.html` 의
+ * `liveRefreshTick` 과 같은 주기·같은 경로라 화면을 오갈 때 값이 튀지 않는다.
+ */
+export type UniverseStock = {
+  code: string;
+  name: string;
+  sector: string;
+  desc: string;
+  price: number;
+  change: number;
+  spark?: number[];
+};
+
+type Universe = {
+  sectors: { id: string; name: string; emoji: string; accent: string }[];
+  stocks: UniverseStock[];
+  logos: Record<string, string>;
+};
+
+declare global {
+  interface Window {
+    KW_UNIVERSE?: Universe;
+  }
+}
+
+let universePromise: Promise<Universe | null> | null = null;
+
+/** 스크립트는 문서에 한 번만 심는다. `app.html` 이 쓰는 그 파일이다. */
+function loadUniverse(): Promise<Universe | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
+  if (window.KW_UNIVERSE) return Promise.resolve(window.KW_UNIVERSE);
+  if (!universePromise) {
+    universePromise = new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "/api/universe";
+      script.onload = () => resolve(window.KW_UNIVERSE ?? null);
+      script.onerror = () => resolve(null);
+      document.head.appendChild(script);
+    });
+  }
+  return universePromise;
+}
+
+/** `app.html` 의 `polyline()` 과 같다. 0~100 정규화 점을 SVG polyline 좌표로 편다. */
+export function sparkPolyline(points: number[] | undefined, width: number, height: number) {
+  if (!points || !points.length) return "";
+  return points
+    .map(
+      (value, index) =>
+        `${(index * (width / (points.length - 1))).toFixed(1)},${(height - (value / 100) * height).toFixed(1)}`,
+    )
+    .join(" ");
+}
+
+export type StockLive = {
+  /** 유니버스 로드 전이면 `null`. 로드 뒤에도 없는 코드면 `stock` 만 `null` 이다. */
+  loaded: boolean;
+  stock: (UniverseStock & { sectorName: string; logoUrl: string | null }) | null;
+  price: number;
+  change: number;
+  spark: number[];
+  /** 전 종목 현재가 — 총자산(수익률) 계산에 쓴다. */
+  prices: Record<string, number>;
+};
+
+export function useStockLive(code: string): StockLive {
+  const [universe, setUniverse] = useState<Universe | null>(null);
+  const [quotes, setQuotes] = useState<Record<string, { price: number; rate: number }>>({});
+  const [spark, setSpark] = useState<number[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    loadUniverse().then((loaded) => {
+      if (alive) setUniverse(loaded);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let alive = true;
+    setSpark(null);
+    const load = () =>
+      fetch(`/api/universe/data?symbol=${encodeURIComponent(code)}&chart=1`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then(
+          (data: {
+            quotes?: Record<string, { price?: number; rate?: number }>;
+            sparks?: Record<string, number[]>;
+          } | null) => {
+            if (!alive || !data) return;
+            if (data.quotes) {
+              setQuotes(
+                Object.fromEntries(
+                  Object.entries(data.quotes).map(([symbol, quote]) => [
+                    symbol,
+                    { price: Number(quote?.price) || 0, rate: Number(quote?.rate) || 0 },
+                  ]),
+                ),
+              );
+            }
+            const nextSpark = data.sparks?.[code];
+            if (nextSpark?.length) setSpark(nextSpark);
+          },
+        )
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, 5000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, [code]);
+
+  const base = universe?.stocks.find((stock) => stock.code === code) ?? null;
+  const sectorName = base
+    ? (universe?.sectors.find((sector) => sector.id === base.sector)?.name ?? "")
+    : "";
+  const logoPath = base ? universe?.logos?.[base.code] : undefined;
+  const live = quotes[code];
+
+  const prices: Record<string, number> = {};
+  for (const stock of universe?.stocks ?? []) {
+    prices[stock.code] = quotes[stock.code]?.price ?? stock.price;
+  }
+
+  return {
+    loaded: universe !== null,
+    stock: base
+      ? {
+          ...base,
+          sectorName,
+          // universe.js 의 로고 경로는 app.html 기준 상대경로다. 부모 문서에서는 /ui/ 를 붙인다.
+          logoUrl: logoPath ? `/ui/${logoPath}` : null,
+        }
+      : null,
+    price: live?.price ?? base?.price ?? 0,
+    change: live?.rate ?? base?.change ?? 0,
+    spark: spark ?? base?.spark ?? [],
+    prices,
+  };
+}

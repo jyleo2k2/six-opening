@@ -101,25 +101,9 @@
       },
 
       stockName: st ? st.name : '', stockEmoji: st && !logos[st.code] ? (sec.name || '').charAt(0) : '',
-
-      // 관심 종목 — 누르기 전 회색, 담고 나면 분홍
-      watchBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
-      watchFill: (st && (s.watchlist || []).indexOf(st.code) >= 0) ? '#F5327F' : 'none',
-      watchStroke: (st && (s.watchlist || []).indexOf(st.code) >= 0) ? '#F5327F' : '#B8BDD0',
-      toggleWatch: () => {
-        if (!st) return;
-        const cur = this.state.watchlist || [];
-        const on = cur.indexOf(st.code) >= 0;
-        this.set({ watchlist: on ? cur.filter(c => c !== st.code) : cur.concat([st.code]) });
-      },
       stockPriceText: st ? st.price.toLocaleString('ko-KR') + '원' : '',
       stockChangeText: st ? ((st.change >= 0 ? '▲ ' : '▼ ') + Math.abs(st.change).toFixed(2) + '%') : '',
-      detailChangeStyle: 'font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (st && st.change >= 0 ? up : down),
       detailChangeStyleSm: 'font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (st && st.change >= 0 ? up : down),
-      stockLineColor: st && st.change >= 0 ? up : down,
-      stockSparkBig: st ? this.polyline(st.spark, 336, 112) : '',
-      stockDescLong: st ? (st.name + this.topic(st.name) + ' ' + st.desc + '.') : '',
-      stockNews: newsItem ? newsItem.headline : (newsStatus === 'error' ? '뉴스를 불러오지 못했어. 다시 눌러 줘.' : (newsStatus === 'empty' ? '아직 검수를 통과한 새 소식이 없어.' : '검수를 통과한 새 소식을 찾고 있어.')),
       detailBadgeStyle: bigBadge(52, 18, 25) + (st && logos[st.code]
         ? ';background-color:#F4F4FA;background-image:url(' + logos[st.code] + ');background-position:center;background-size:contain;background-repeat:no-repeat'
         : ''),

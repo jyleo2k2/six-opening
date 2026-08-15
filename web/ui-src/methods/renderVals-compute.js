@@ -186,7 +186,8 @@
         changeStyle: 'position:absolute;left:28px;top:284px;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + CB + ';background:linear-gradient(180deg,rgba(255,255,255,0.10) 0%,rgba(0,0,0,0.42) 100%),' + CL + '26;box-shadow:inset 0 1px 0 rgba(255,255,255,0.30),inset 0 0 0 1.5px ' + CL + 'B3,0 0 18px -6px ' + CL,
         chartStyle: 'position:absolute;left:155px;top:212px;pointer-events:none',
 
-        pick: () => { if (this.dragged) return; this.set({ code: x.code, screen: 'detail' }); }
+        // 종목 상세는 React 로 옮겨 갔다. 주소로 넘겨 부모가 그 화면을 얹는다.
+        pick: () => { if (this.dragged) return; this.leaveToRoute('/stock/' + x.code); }
       };
     });
 
@@ -228,9 +229,6 @@
       };
     }).filter(Boolean);
 
-    const newsItem = st && s.newsByStock ? (s.newsByStock[st.code] || null) : null;
-    const newsStatus = st && s.newsStatusByStock ? (s.newsStatusByStock[st.code] || 'idle') : 'idle';
-    const detailNews = s.activeNews && s.activeNewsId === s.activeNews.newsId ? s.activeNews : null;
     const heldRow = st ? (m.holdings.filter(h => h.code === st.code)[0] || null) : null;
     const heldQty = heldRow ? heldRow.qty : 0;
     const heldAvg = heldRow ? heldRow.avg : 0;

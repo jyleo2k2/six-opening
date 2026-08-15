@@ -10,6 +10,7 @@ import {
 } from "../f10-chatbot/lib/bottom-sheet";
 import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
 import type { WalletAccountId } from "./lib/use-wallet";
+import { DetailScreen } from "./DetailScreen";
 import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
 import {
@@ -43,7 +44,7 @@ const OPEN_ROUTE_MESSAGE = "kiwoom:open-route";
  * 오기 전까지 `renderVals-compute.js` 가 아이 계정 데모로 폴백해 **남의 계좌가 잠깐 보인다.**
  * 문서를 그대로 두면 그 왕복이 앱을 처음 열 때 한 번뿐이다.
  */
-const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>(["ranking", "portfolio"]);
+const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>(["ranking", "portfolio", "stock"]);
 
 const isMigrated = (route: ScreenRoute | null) =>
   route !== null && MIGRATED_SCREENS.has(route.screen);
@@ -62,6 +63,9 @@ export function ConnectedPrototype({
   overlayRef.current = overlay;
   const chatContextRef = useRef<ChatContext>({ screen: "home" });
   const [chatContext, setChatContext] = useState<ChatContext>({ screen: "home" });
+  // 옮긴 종목 화면이 올리는 맥락. 있으면 iframe 맥락보다 우선한다 — iframe 은 뒤에서
+  // 자기 화면 맥락을 그대로 들고 있을 뿐이다.
+  const [overlayContext, setOverlayContext] = useState<ChatContext | null>(null);
   const [screenRect, setScreenRect] = useState<PrototypeScreenRect | null>(null);
 
   // 챗봇 시트는 폰 프레임 안 화면에 딱 맞아야 한다. 배율은 app.html 이 자기 뷰포트로 정하므로
@@ -105,11 +109,12 @@ export function ConnectedPrototype({
   };
   useEffect(() => () => screenObserver.current?.disconnect(), []);
 
+  const postToPrototype = (message: Record<string, unknown>) => {
+    iframeRef.current?.contentWindow?.postMessage(message, window.location.origin);
+  };
+
   const openChatAction = (action: ChatUiAction) => {
-    iframeRef.current?.contentWindow?.postMessage(
-      { type: OPEN_CHAT_ACTION_MESSAGE, action },
-      window.location.origin,
-    );
+    postToPrototype({ type: OPEN_CHAT_ACTION_MESSAGE, action });
   };
 
   // 주소 → 화면. 서버가 넘긴 첫 주소, 뒤로가기, 화면끼리의 이동이 모두 이 길을 쓴다.
@@ -251,6 +256,15 @@ export function ConnectedPrototype({
           {overlay.screen === "portfolio" && (
             <PortfolioScreen account={account} onLeave={leaveToPath} />
           )}
+          {overlay.screen === "stock" && (
+            <DetailScreen
+              account={account}
+              code={overlay.code}
+              onChatContext={setOverlayContext}
+              onLeave={leaveToPath}
+              postToPrototype={postToPrototype}
+            />
+          )}
         </div>
       )}
       <div
@@ -258,7 +272,7 @@ export function ConnectedPrototype({
         style={{ clipPath: phoneScreenClipPath(screenRect) }}
       >
         <F10ChatbotDemo
-          context={chatContext}
+          context={overlayContext ?? chatContext}
           onUiAction={openChatAction}
           screenRect={screenRect}
         />

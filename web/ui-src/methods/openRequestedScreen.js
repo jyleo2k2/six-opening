@@ -2,7 +2,36 @@
     if (!data) return;
     if (data.type === 'kiwoom:open-stock' && /^\d{6}$/.test(String(data.symbol))) {
       const stock = (this.uni().stocks || []).filter(x => x.code === data.symbol)[0];
-      if (stock) this.set({ code: stock.code, screen: 'detail' });
+      // 종목 상세는 React 로 옮겨 갔다. 주소로 넘겨 부모가 그 화면을 얹는다.
+      if (stock) this.leaveToRoute('/stock/' + stock.code);
+      return;
+    }
+    // 옮겨 간 상세 화면이 되돌려 보내는 탭 유효 열람. 매수 체결 때 `flushTabViews` 가
+    // 모아서 서버로 보내는 구조는 그대로다. 10초 판정은 보낸 쪽과 서버가 한다.
+    if (data.type === 'kiwoom:tab-view' && /^\d{6}$/.test(String(data.code)) && data.opened_at && data.closed_at) {
+      const views = this.tabViews || (this.tabViews = {});
+      (views[data.code] || (views[data.code] = [])).push({
+        opened_at: String(data.opened_at),
+        closed_at: String(data.closed_at)
+      });
+      return;
+    }
+    // 옮겨 간 상세 화면의 차트·뉴스 열람. 지갑 상태의 기록자는 이 문서 하나여야 하므로
+    // React 가 직접 저장하지 않고 여기로 보낸다 — 아카이브 열람 수가 이 메모리를 읽는다.
+    if (data.type === 'kiwoom:view-event' && /^\d{6}$/.test(String(data.code))
+      && (data.event === 'chart_detail_opened' || data.event === 'news_detail_opened')) {
+      const ev = { event: data.event, symbol: String(data.code), user_id: this.state.account === 'child' ? 'child_minji' : 'parent_mom', ts: new Date().toISOString() };
+      this.setState(s => {
+        const n = Object.assign({}, s, { events: (s.events || []).concat([ev]) });
+        this.persist(n); return n;
+      });
+      return;
+    }
+    // 옮겨 간 상세 화면의 관심(하트) 토글. 탐색의 관심 기업 필터가 이 메모리를 읽는다.
+    if (data.type === 'kiwoom:watch-toggle' && /^\d{6}$/.test(String(data.code))) {
+      const cur = this.state.watchlist || [];
+      const next = data.on ? (cur.indexOf(data.code) >= 0 ? cur : cur.concat([String(data.code)])) : cur.filter(c => c !== data.code);
+      if (next !== cur) this.set({ watchlist: next });
       return;
     }
     if (data.type !== 'kiwoom:open-chat-action' || !data.action || data.action.type !== 'open_screen') return;
@@ -41,13 +70,13 @@
           ...(stockFilters.indexOf(sectorId) >= 0 ? { sectorId } : {}),
           cardIndex:0,
         });
-      } else if (stock) this.set({ code:stock.code, screen:'detail' });
+      } else if (stock) this.leaveToRoute('/stock/' + stock.code);
       else this.set({ screen:'explore' });
     } else if (action.target === 'order') {
       if (!stock) { this.set({ screen:'explore' }); return; }
       if (action.orderSide === 'sell') {
         const holding = this.me().holdings.filter(h => h.code === stock.code)[0];
-        if (!holding) { this.set({ code:stock.code, screen:'detail' }); return; }
+        if (!holding) { this.leaveToRoute('/stock/' + stock.code); return; }
         const sameSell = this.state.screen === 'sell' && this.state.code === stock.code;
         const canOpenSellReason = sameSell && this.state.sellDraft.qty > 0;
         const canOpenSellConfirmation = canOpenSellReason && !!this.state.sellDraft.reason;
