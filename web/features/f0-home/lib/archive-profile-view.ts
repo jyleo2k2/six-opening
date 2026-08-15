@@ -1,15 +1,14 @@
-import {
-  computeAbilityScores,
-  gradeAccuracy,
-  resolveCharacter,
-} from "../../../shared/engine/archive-profile.js";
-
 /**
  * 성향 탭·카드 모아보기·가족 비교가 쓰는 값. `ui-src/methods/buildArchive.js` 의
  * 성향 절반을 그대로 옮겨 왔다.
  *
- * 계산을 화면에서 떼어 두는 이유는 브라우저 없이 확인하기 위해서다 — 오각형은 스케일이
- * 두 벌(0~10 로그인 정본 / 0~100 비로그인 폴백)이라 섞이면 모양이 조용히 거짓말을 한다.
+ * 계산을 화면에서 떼어 두는 이유는 브라우저 없이 확인하기 위해서다.
+ *
+ * **값의 원본은 신버전 엔진(`shared/engine/behavior-profile.ts`) 하나다.** 예전에는 같은
+ * 질문에 답하는 산식이 셋이었다 — 로컬 `records` 구버전(0~100), `GET /api/profile/behavior`
+ * 의 행동 신호 근사, 그리고 `season-cards` 누적 카드. 셋이 서로 다른 시점에 도착하면서
+ * 캐릭터가 `승부사 LV2 → 저격수 LV2 → 승부사 LV3` 으로 번갈아 떴다. 이제 이 파일에는
+ * 신버전 값을 화면 모양으로 펴는 코드만 있고 판정 산식은 없다.
  */
 
 export const TRAIT_LABELS = ["집중", "분산", "정확", "직관", "근거"] as const;
@@ -47,6 +46,18 @@ export const TYPES: Record<TypeKey, { name: string; pal: string[]; desc: string 
     desc: "여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.",
   },
 };
+
+/**
+ * 모든 축의 중립값. 엔진의 `NEUTRAL`(`behavior-profile.ts`)과 같은 값이어야 한다 —
+ * 표본이 없을 때 엔진이 내놓는 값과 화면이 그리는 값이 달라지면 안 된다.
+ */
+export const NEUTRAL_SCORE = 5;
+
+/** 다섯 축 모두 중립. 응답이 없거나 표본이 모자랄 때 오각형이 이 모양이다. */
+export const NEUTRAL_SCORES = TRAIT_LABELS.map(() => NEUTRAL_SCORE);
+
+/** 유형을 아직 말할 수 없을 때 쓰는 무채색. 네 캐릭터 팔레트와 섞이지 않는다. */
+const PENDING_PAL = ["#F1F2F7", "#E5E7EF", "#D4D8E5", "#5B6280"];
 
 /** 서버가 예전 이름으로 준 캐릭터를 지금 이름에 맞춘다. */
 const CHARACTER_ALIAS: Record<string, TypeKey> = { challenger: "fighter" };
@@ -90,18 +101,6 @@ export function gridRings(radius: number, cx: number, cy: number) {
   }));
 }
 
-export type TradeRecord = {
-  user_id?: string;
-  /** 엔진은 종목·이유를 필수로 본다. 화면 기록에는 늘 들어 있다. */
-  symbol: string;
-  reason_code: string;
-  order_status?: string;
-  qty?: number;
-  amount_krw?: number;
-  /** 체결 시각. 정확 채점과 주차 묶음이 쓴다. */
-  ts: string;
-};
-
 /** `season-cards` 카드의 다섯 축을 화면 순서(집중·분산·정확·직관·근거)로 편다. */
 export type AbilityCard = {
   scores: {
@@ -129,106 +128,88 @@ export type SeasonCards = {
   weeks?: { weekStart: string; count: number; card: AbilityCard }[];
 } | null;
 
-/** 종목별 보관 일봉 종가. 정확 채점이 산 뒤·판 뒤 값을 여기서 읽는다. */
-export type DailyCloses = Record<string, { date: string; close: number }[]>;
-
-/** 로컬 `kw_proto_v1` 기록으로 낸 구버전(0~100) 점수. 비로그인·응답 전 폴백이다. */
-export function localScores(
-  records: TradeRecord[],
-  sellRecords: TradeRecord[],
-  closes: DailyCloses,
-  userId: string,
-  sectorOf: (code: string) => string | null,
-) {
-  const mine = records.filter((r) => r.user_id === userId);
-  // 정확 채점 입력. 대기 주문은 체결이 아니라 빼고, 매수가는 주문금액 ÷ 주 수로 낸다.
-  const buys = records
-    .filter(
-      (r) =>
-        r.user_id === userId &&
-        r.order_status === "filled" &&
-        (r.qty ?? 0) > 0 &&
-        (r.amount_krw ?? 0) > 0,
-    )
-    .map((r) => ({ symbol: r.symbol, price: (r.amount_krw as number) / (r.qty as number), tradedAt: r.ts }));
-  const sells = sellRecords
-    .filter((r) => r.user_id === userId && r.order_status === "filled")
-    .map((r) => ({ symbol: r.symbol, tradedAt: r.ts }));
-  const grade = gradeAccuracy(buys, sells, closes);
-  const out = computeAbilityScores(mine, sectorOf, grade.accuracy);
-  return { count: out.count as number, scores: out.scores as number[], level: grade.level as number };
-}
-
 export type Profile = {
   scores: number[];
   scaleMax: number;
-  level: number;
+  /** 엔진이 정확 표본으로 정한 레벨. 표본이 모자라면 `null` 이고 화면은 레벨을 감춘다. */
+  level: number | null;
   characterKey: TypeKey | null;
   sampleCount: number;
 };
 
 /**
- * 성향 탭이 그릴 내 성향. **로그인 정본은 `season-cards` 누적 카드(0~10)** 이고,
- * 없으면 로컬 기록으로 낸 구버전(0~100)으로 폴백한다.
+ * 성향 탭이 그릴 내 성향. **원본은 `season-cards` 누적 카드(0~10) 하나다.**
+ *
+ * 응답이 없으면(비로그인·조회 실패) 축을 중립 5로 두고 유형을 비워 둔다. 예전에는 로컬
+ * `kw_proto_v1` 기록을 구버전 산식으로 다시 계산해 채웠는데, 그 값이 서버 응답보다 먼저
+ * 도착해 캐릭터가 한 번 떴다가 바뀌었다. 없는 것은 없다고 두는 편이 정직하고 조용하다.
  */
-export function myProfile(
-  season: SeasonCards,
-  fallback: { count: number; scores: number[]; level: number },
-): Profile {
+export function myProfile(season: SeasonCards): Profile {
   const cumulative = season?.cumulative;
-  if (cumulative) {
+  if (!cumulative) {
     return {
-      scores: axesFromCard(cumulative),
+      scores: NEUTRAL_SCORES,
       scaleMax: 10,
-      level: cumulative.level || 2,
-      characterKey: typeKeyOf(cumulative.character),
-      sampleCount: (cumulative.samples?.buys ?? 0) + (cumulative.samples?.sells ?? 0),
+      level: null,
+      characterKey: null,
+      sampleCount: 0,
     };
   }
   return {
-    scores: fallback.scores,
-    scaleMax: 100,
-    level: fallback.level,
-    characterKey: null,
-    sampleCount: fallback.count,
+    scores: axesFromCard(cumulative),
+    scaleMax: 10,
+    // 표본이 모자라면 엔진이 `null` 을 준다. 2로 채우면 판정된 LV2 와 구별되지 않는다.
+    level: cumulative.level ?? null,
+    characterKey: typeKeyOf(cumulative.character),
+    sampleCount: (cumulative.samples?.buys ?? 0) + (cumulative.samples?.sells ?? 0),
   };
 }
 
 export type ResolvedType = {
-  key: TypeKey;
+  /** 유형이 정해졌을 때만 있다. 캐릭터 그림 파일 이름이 이 값으로 만들어진다. */
+  key: TypeKey | null;
   name: string;
   desc: string;
   pal: string[];
   ink: string;
-  level: number;
+  level: number | null;
   title: string;
+  /** 아직 유형을 말할 수 없다. 화면은 캐릭터 그림을 그리지 않는다. */
+  pending: boolean;
 };
 
 /**
- * `overrideKey` 가 있으면 로그인 사용자의 실제 행동 데이터로 정한 캐릭터를 그대로 쓴다
- * (F9 SPEC §3.2 대체 입력). 다섯 축 막대·레벨 산식은 바뀌지 않는다.
+ * 유형을 아직 못 정한 카드. 엔진이 `character: null` 을 줄 때다 — 체결 매수가
+ * `MIN_BUYS_FOR_PROFILE` 미만이거나 보완쌍이 동점대(`TIE_BAND`)라 한쪽으로 기울지 않았다.
+ * 그 판단을 구버전 산식으로 덮지 않는다. 오각형은 중립 5 그대로 그린다.
  */
-export function resolveType(
-  scores: number[],
-  level: number | null,
-  overrideKey?: TypeKey | null,
-): ResolvedType {
-  // 엔진은 레벨을 1·2·3 으로만 받는다. 없으면(로컬 주차 재계산) 정확 점수로 되짚게 둔다.
-  const graded = level === 1 || level === 2 || level === 3 ? level : undefined;
-  const decided = overrideKey
-    ? { key: overrideKey as string, level }
-    : (resolveCharacter(scores, graded) as { key: string; level: number });
-  const key = (typeKeyOf(decided.key) ?? "sniper") as TypeKey;
+export const PENDING_TYPE: ResolvedType = {
+  key: null,
+  name: "관찰 중",
+  desc: "아직 투자 유형을 말할 만큼 기록이 쌓이지 않았어요.\n조금 더 사고팔면 여기에 나타나요.",
+  pal: PENDING_PAL,
+  ink: PENDING_PAL[3],
+  level: null,
+  title: "관찰 중",
+  pending: true,
+};
+
+/**
+ * 엔진이 정한 유형 키를 화면 값(이름·색·설명)으로 편다. **판정은 하지 않는다.**
+ * 키가 없으면 판정 보류 카드이고, 레벨이 없으면 이름만 적는다.
+ */
+export function resolveType(key: TypeKey | null, level: number | null): ResolvedType {
+  if (!key) return PENDING_TYPE;
   const meta = TYPES[key];
-  const lv = decided.level ?? 2;
   return {
     key,
     name: meta.name,
     desc: meta.desc,
     pal: meta.pal,
     ink: meta.pal[3],
-    level: lv,
-    title: `${meta.name} LV${lv}`,
+    level,
+    title: level ? `${meta.name} LV${level}` : meta.name,
+    pending: false,
   };
 }
 
@@ -254,27 +235,18 @@ export type WeekCard = {
 };
 
 /**
- * 카드 모아보기 — 한 주에 한 장. **기록이 있는 주 + 이번 주**를 오래된 순으로 낸다.
+ * 카드 모아보기 — 한 주에 한 장. **서버가 채점한 주 + 이번 주**를 오래된 순으로 낸다.
  *
- * 로그인 상태의 지난 주차는 서버가 실제로 채점한 `season-cards` 값이 로컬 재계산보다
- * 우선한다. 이번 주 카드만은 성향 탭과 같은 값을 써야 한다 — 한 화면에서 같은 주가
- * 다른 유형으로 보이면 안 된다.
+ * 주차 목록도 `season-cards` 가 원본이다. 예전에는 로컬 `records` 에만 있는 주를 구버전
+ * 산식으로 재계산해 끼워 넣어서, 같은 레일 안에 0~10 카드와 0~100 카드가 섞였다.
+ * 이번 주 카드는 성향 탭과 같은 값을 쓴다 — 한 화면에서 같은 주가 다른 유형이면 안 된다.
  */
 export function weekCards(
   season: SeasonCards,
   mine: Profile,
   myType: ResolvedType,
-  records: TradeRecord[],
-  userId: string,
-  sectorOf: (code: string) => string | null,
   now = Date.now(),
 ): WeekCard[] {
-  const myRecords = records.filter((r) => r.user_id === userId);
-  const localWeeks = new Map<number, TradeRecord[]>();
-  for (const r of myRecords) {
-    const k = mondayOf(r.ts ?? now).getTime();
-    localWeeks.set(k, [...(localWeeks.get(k) ?? []), r]);
-  }
   const thisMonday = mondayOf(now).getTime();
 
   const seasonByKey = new Map<number, { count: number; card: AbilityCard }>();
@@ -282,41 +254,19 @@ export function weekCards(
     seasonByKey.set(new Date(`${w.weekStart}T00:00:00`).getTime(), w);
   }
 
-  const keys = [...new Set([...localWeeks.keys(), ...seasonByKey.keys(), thisMonday])].sort(
-    (a, b) => a - b,
-  );
+  const keys = [...new Set([...seasonByKey.keys(), thisMonday])].sort((a, b) => a - b);
 
   return keys.map((k) => {
+    // 이번 주는 서버 주차 카드가 아직 없을 수 있다. 그때도 성향 탭 값을 그대로 쓴다.
     const isNow = k === thisMonday;
     const seasonWeek = seasonByKey.get(k);
-    let scores: number[];
-    let scaleMax: number;
-    let level: number | null;
-    let count: number;
-    let characterKey: TypeKey | null;
-
-    if (isNow) {
-      scores = mine.scores;
-      scaleMax = mine.scaleMax;
-      level = mine.level;
-      count = (localWeeks.get(thisMonday) ?? []).length;
-      characterKey = mine.characterKey;
-    } else if (seasonWeek) {
-      scores = axesFromCard(seasonWeek.card);
-      scaleMax = 10;
-      level = seasonWeek.card.level || 2;
-      count = seasonWeek.count;
-      characterKey = typeKeyOf(seasonWeek.card.character);
-    } else {
-      const raw = localWeeks.get(k) ?? [];
-      scores = computeAbilityScores(raw, sectorOf).scores as number[];
-      scaleMax = 100;
-      level = null;
-      count = raw.length;
-      characterKey = null;
-    }
-
-    const type = isNow ? myType : resolveType(scores, level, characterKey);
+    const useMine = isNow || !seasonWeek;
+    const scores = useMine ? mine.scores : axesFromCard(seasonWeek.card);
+    const count = seasonWeek?.count ?? 0;
+    const type = useMine
+      ? myType
+      : resolveType(typeKeyOf(seasonWeek.card.character), seasonWeek.card.level ?? null);
+    const scaleMax = 10;
     const monday = new Date(k);
     const sunday = new Date(k + 6 * 86400000);
     return {
