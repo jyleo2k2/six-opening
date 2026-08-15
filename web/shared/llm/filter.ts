@@ -26,11 +26,22 @@ export type ChatOutputGateResult =
   | { ok: true; text: string }
   | { ok: false; reason: "empty" | "too_long" | "too_many_sentences" | "prohibited" | "unverified_number" };
 
+/**
+ * 양쪽 방향을 함께 묻는 관용구(`오를지 내릴지`·`상승할까 하락할까`). 방향을 하나로
+ * 고르지 않으므로 전망 주장이 아니라 용어 설명이다. "주가 전망은 앞으로 주식
+ * 가격이 오를지 내릴지 예상해 보는 뜻이에요" 같은 정상 답변이 위 거리 규칙
+ * (`주가…오를`·`앞으로…오를`)에 걸려 폐기되던 오탐을 막는다. 방향을 하나만 말하는
+ * 실제 전망(`앞으로 오를 거예요`)은 이 형태가 아니므로 그대로 차단된다.
+ */
+const NEUTRAL_DIRECTION_PAIR =
+  /(?:오를|올라갈|상승할)(?:지|까)(?:아니면)?(?:내릴|내려갈|하락할)(?:지|까)|(?:내릴|내려갈|하락할)(?:지|까)(?:아니면)?(?:오를|올라갈|상승할)(?:지|까)/g;
+
 export function filterGeneratedText(text: string) {
   const normalized = text
     .normalize("NFKC")
     .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "");
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .replace(NEUTRAL_DIRECTION_PAIR, "");
   return !PROHIBITED_OUTPUT_PATTERNS.some((pattern) => pattern.test(normalized));
 }
 
