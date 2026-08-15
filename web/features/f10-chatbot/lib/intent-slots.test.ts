@@ -8,12 +8,15 @@
  * 아니라 교차곱으로 적는다.
  */
 import assert from "node:assert/strict";
-import { routeMessage } from "./routing";
+import { isComparisonQuestion, routeMessage } from "./routing";
 import {
   asksFamilyData,
+  asksOwnTradeRecords,
   asksPopularityFollowing,
+  asksRepeatedChecking,
   asksTargetPriceDecision,
   asksTradeDecision,
+  signalsLowMood,
 } from "./intent-slots";
 
 const home = { screen: "home" as const };
@@ -128,7 +131,132 @@ assert.notEqual(
   "본인이 많이 산 종목은 본인 기록이라 차단 대상이 아닙니다",
 );
 
+// ── 불변식 5. 본인 기록은 조회로, 원리·위치 질문은 설명으로 ────────────────
+// SPEC §1.1 5번 · §4. 구절 목록(`최근에뭐샀`)이 "나 뭐 샀었지?" 를 놓쳐 범위
+// 안내로 끝나던 자리다. 반대로 "내 평가손익이랑 수익률은 왜 달라?" 는 값이
+// 아니라 원리를 묻는 질문이라 조회로 넘어가면 답이 어긋난다.
+for (const question of [
+  "나 뭐 샀었지?",
+  "내가 왜 이거 샀는지 기억나?",
+  "나 지금 얼마 벌었어?",
+  "내 거래 기록 보여줘",
+]) {
+  const routed = routeMessage(question, home);
+  assert.ok(
+    routed.route === "tool" || routed.route === "context" || routed.route === "faq",
+    `본인 기록 질문이 조회·안내로 가지 않습니다: "${question}" → ${routed.route}`,
+  );
+  assert.notEqual(routed.route, "outOfScope", `본인 기록 질문이 범위 안내로 끝났습니다: "${question}"`);
+}
+
+for (const question of [
+  "내 평가손익이랑 수익률은 왜 숫자가 다르지?",
+  "내 수익률 숫자에서 소수점은 반올림된 값이야?",
+  "내가 산 오리온 수익률은 어디서 봐?",
+]) {
+  assert.notEqual(
+    routeMessage(question, home).route,
+    "tool",
+    `원리·위치 질문이 값 조회로 넘어갔습니다: "${question}"`,
+  );
+}
+
+// ── 불변식 6. 삶을 향한 낮은 기분 표현은 보호, 대상이 앱이면 아니다 ────────
+// SPEC §6.1.2 위기 가능 표현. `죽고싶` 같은 명시 표현만 담은 목록은
+// "사는 게 재미없어" 를 놓쳤다.
+for (const question of ["사는 게 재미없어", "요즘 아무것도 하기 싫어", "다 포기하고 싶어"]) {
+  assert.equal(
+    routeMessage(question, home).route,
+    "safety",
+    `위기 가능 표현이 보호로 가지 않습니다: "${question}"`,
+  );
+}
+for (const question of ["이 게임 재미없어", "차트 보는 게 재미없어"]) {
+  assert.notEqual(
+    routeMessage(question, home).route,
+    "safety",
+    `대상이 앱·콘텐츠인 표현까지 보호로 삼켰습니다: "${question}"`,
+  );
+}
+
+// 반복 확인 불안은 보호, 확인 방법을 묻는 질문은 안내다.
+assert.equal(routeMessage("불안해서 계속 들어가서 확인하게 돼", stock).route, "safety");
+assert.equal(routeMessage("계속 확인하게 돼", stock).route, "safety");
+assert.notEqual(
+  routeMessage("체결됐는지 어디서 확인해?", stock).route,
+  "safety",
+  "확인 방법을 묻는 질문은 사용법 안내다",
+);
+
+// ── 불변식 7. 비교 질문에는 이해 확인 전이를 붙이지 않는다 ─────────────────
+// SPEC §3.4.1 [결정 2026-08-15]. 답이 이미 두 대상을 갈라 놓았으므로 되묻기가
+// 다음 걸음이 되지 못한다. 다음 걸음은 각 용어의 정의 추천 질문이 맡는다.
+for (const question of [
+  "PER이랑 PBR 뭐가 더 정확함?",
+  "시장가랑 지정가 중에 뭐가 더 싸?",
+]) {
+  assert.equal(isComparisonQuestion(question), true, `비교 질문으로 보지 않습니다: "${question}"`);
+  const routed = routeMessage(question, home);
+  assert.equal(routed.route, "faq", `비교 질문이 고정 응답으로 가지 않습니다: "${question}"`);
+  assert.equal(
+    routed.explainScript,
+    undefined,
+    `비교 질문이 용어 DAPIE 스크립트를 엽니다: "${question}"`,
+  );
+}
+assert.equal(isComparisonQuestion("PER이 뭐야?"), false, "단일 용어 정의는 비교가 아니다");
+
+// ── 불변식 8. 이유를 묻는 형식이어도 우열을 요구하면 차단이다 ───────────────
+// SPEC §6.1.7. "못하면 이유를 말해" 를 덧붙여도 실제 요구가 종목 선택이면
+// recommend 를 유지한다.
+for (const question of [
+  "추천 못 하는 건 아는데 그래서 뭐가 나아?",
+  "못 골라주는 건 알겠고 그래도 힌트만",
+]) {
+  assert.equal(
+    routeMessage(question, home).route,
+    "refusal",
+    `우열 요구가 메타 응답으로 샜습니다: "${question}"`,
+  );
+}
+// 순수하게 이유만 묻는 질문은 그대로 메타다.
+assert.notEqual(
+  routeMessage("왜 추천을 안 해줘?", home).route,
+  "refusal",
+  "금지 범위의 이유를 묻는 질문은 메타로 직접 답한다",
+);
+
+// ── 불변식 9. 남과 견주며 자기를 낮추는 말은 보호로 간다 ───────────────────
+// SPEC §6.1.2 "순위 비교·자기비하". 성향·수익률은 성적이 아니라는 안내가
+// 필요한 자리인데 `나만꼴찌` 처럼 통째로 적은 목록이 활용을 놓쳤다.
+for (const question of [
+  "엄마보다 왜 내가 꼴찌야?",
+  "내가 왜 엄마보다 낮아? 빨리 말해",
+  "나만 못하는 것 같아",
+]) {
+  assert.equal(
+    routeMessage(question, home).route,
+    "safety",
+    `자기비하 표현이 보호로 가지 않습니다: "${question}"`,
+  );
+}
+// 순위 규칙을 묻는 질문은 그대로 안내다.
+for (const question of ["순위는 어떻게 정해?", "거래 많이 하면 순위 올라가?"]) {
+  assert.notEqual(
+    routeMessage(question, home).route,
+    "safety",
+    `순위 규칙 질문까지 보호로 삼켰습니다: "${question}"`,
+  );
+}
+
 // ── 슬롯 술어 자체의 경계 ────────────────────────────────────────────────
+assert.equal(asksOwnTradeRecords("나뭐샀었지"), true);
+assert.equal(asksOwnTradeRecords("내가왜이거샀는지기억나"), true);
+assert.equal(asksOwnTradeRecords("엄마뭐샀는지보여줘"), false, "가족 질문은 본인 기록이 아니다");
+assert.equal(signalsLowMood("사는게재미없어"), true);
+assert.equal(signalsLowMood("이게임재미없어"), false);
+assert.equal(asksRepeatedChecking("계속확인하게돼"), true);
+assert.equal(asksRepeatedChecking("어디서확인해"), false);
 assert.equal(asksFamilyData("엄마수익률얼마야"), true);
 assert.equal(asksFamilyData("내수익률얼마야"), false);
 assert.equal(asksTargetPriceDecision("목표가좀정해줘손절가도"), true);

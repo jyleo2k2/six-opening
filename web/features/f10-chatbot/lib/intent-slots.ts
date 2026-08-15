@@ -30,7 +30,13 @@ export const FAMILY_MEMBER_SLOT = [
   "부모",
   "보호자",
   "가족",
+  "누나",
+  "언니",
+  "오빠",
 ] as const;
+
+/** 본인 아닌 사람. 본인 기록 판정에서 빼는 데 쓴다. */
+const OTHER_PERSON_SLOT = [...FAMILY_MEMBER_SLOT, "친구", "남의", "다른사람", "애들"] as const;
 
 /** 가족의 무엇을 보려는지. `이유`·`손익`처럼 기록을 가리키는 말을 포함한다. */
 export const FAMILY_DATA_SLOT = [
@@ -223,6 +229,173 @@ export function asksPopularityFollowing(message: string): boolean {
 /** 1인칭으로 자기가 산 것을 묻는 말. 추종 요구와 가른다. */
 export function asksOwnPastTrades(message: string): boolean {
   return includesAny(message, FIRST_PERSON_SLOT) && includesAny(message, PAST_TRADE_SLOT);
+}
+
+/**
+ * 1인칭과 기록 낱말의 거리를 제한한 형태. 공백이 지워진 뒤에는 낱말 경계가
+ * 없어서 `내`·`나` 를 그냥 담으면 `안내`·`하나` 에 걸린다. 이 파일의 다른 슬롯과
+ * 달리 근접 정규식을 쓰는 이유다(`PERSONAL_DATA_QUESTION` 과 같은 idiom).
+ */
+const OWN_TRADE_RECORD_QUESTION =
+  /(?:내|제|나|저)[가-힣0-9]{0,6}(?:뭐샀|뭘샀|샀|산거|산게|산건|산종목|산주식|매수한|거래|기록|고른이유)/;
+
+/**
+ * 같은 낱말이라도 **값**이 아니라 **원리·위치**를 묻는 질문은 조회가 아니다.
+ * `routing.ts` 의 `isPersonalDataQuestion` 이 쓰는 가드와 같은 취지이며, 아래
+ * 본인 기록·손익 술어도 같은 가드를 통과해야 한다. 이게 없으면 "내 평가손익이랑
+ * 수익률은 왜 숫자가 다르지?" 같은 개념 질문이 숫자 조회로 넘어간다.
+ */
+const CONCEPT_OR_LOCATION_MARKERS = [
+  "계산",
+  "원리",
+  "기준",
+  "통계",
+  "무슨뜻",
+  "무슨의미",
+  "의미야",
+  "차이",
+  "왜",
+  "이유",
+  "다르지",
+  "다를수",
+  "반올림",
+  "소수점",
+  "오류",
+  "일부러",
+  "조작",
+  "어디",
+  "어떻게봐",
+  "보면돼",
+  "하는법",
+  "확인하는법",
+] as const;
+
+/** 자기가 남긴 기록을 되짚는 말. 위 가드의 `왜`·`이유`에서 되살린다. */
+const OWN_RECALL_MARKERS = [
+  "기억",
+  "왜샀",
+  "왜산",
+  "왜골랐",
+  "왜담았",
+  "적었",
+  "적어둔",
+  "남겼",
+  "남긴",
+  "썼는지",
+] as const;
+
+/** 값이 아니라 원리·위치를 묻는 질문인지. 되짚기 표현이 있으면 아니다. */
+function asksMechanismOrLocation(message: string): boolean {
+  if (includesAny(message, OWN_RECALL_MARKERS)) return false;
+  if (/\d+(?:\.\d+)?%/.test(message)) return true;
+  return includesAny(message, CONCEPT_OR_LOCATION_MARKERS);
+}
+
+/** 회사 사실을 묻는 형태. 본인 기록 판정이 삼키지 않게 가른다. */
+const COMPANY_FACT_MARKERS = [
+  "뭐하는회사",
+  "무슨회사",
+  "어떤회사",
+  "뭐만들",
+  "무엇을만들",
+  "어떻게돈을벌",
+  "어떻게벌",
+] as const;
+
+/**
+ * 본인의 거래 기록을 되짚는 질문(SPEC §1.1 5번). `내기록`·`최근에뭐샀` 같은
+ * 구절 목록은 "나 뭐 샀었지?"·"내가 왜 이거 샀는지 기억나?" 를 놓쳤다.
+ */
+export function asksOwnTradeRecords(message: string): boolean {
+  if (includesAny(message, OTHER_PERSON_SLOT)) return false;
+  if (includesAny(message, COMPANY_FACT_MARKERS)) return false;
+  if (asksMechanismOrLocation(message)) return false;
+  return OWN_TRADE_RECORD_QUESTION.test(message);
+}
+
+/** 견주는 상대. 자기 낮춤 표현과 곱해 비교로 인한 위축을 본다. */
+const COMPARED_TO_SLOT = [...FAMILY_MEMBER_SLOT, "친구", "애들", "남들", "다른사람", "꼴찌", "순위"] as const;
+
+/** 자기를 낮추는 말. SPEC §6.1.2 "순위 비교·자기비하". */
+const SELF_DEPRECATION_SLOT = [
+  "꼴찌",
+  "제일낮",
+  "가장낮",
+  "내가낮",
+  "나만낮",
+  // "내가 왜 엄마보다 낮아?" — 1인칭과 낮춤말 사이에 비교 대상이 낀다.
+  "보다낮",
+  "보다못",
+  "보다뒤",
+  "나만못",
+  "못하는것같",
+  "못하는거같",
+  "뒤처",
+  "밀려",
+  "졌",
+  "지고있",
+] as const;
+
+/**
+ * 남과 견주며 자기를 낮추는 말(SPEC §6.1.2). 성향·수익률은 성적이 아니라는
+ * 안내가 필요한 자리다. `나만꼴찌` 처럼 통째로 적은 목록은 "엄마보다 왜 내가
+ * 꼴찌야?"·"내가 왜 엄마보다 낮아?" 를 놓쳤다.
+ */
+export function signalsSelfDeprecation(message: string): boolean {
+  if (!includesAny(message, ["내가", "나는", "나만", "제가", "내", "나"])) return false;
+  if (!includesAny(message, COMPARED_TO_SLOT)) return false;
+  return includesAny(message, SELF_DEPRECATION_SLOT);
+}
+
+/** 삶 전반을 가리키는 말. 낮은 기분 표현과 곱해 위기 신호를 본다. */
+const LIFE_CONTEXT_SLOT = ["사는게", "살기", "인생", "요즘", "아무것도", "다포기", "그냥다"] as const;
+
+/** 낮은 기분 표현. 단독으로는 대상이 앱·게임일 수 있어 위 맥락과 곱한다. */
+const LOW_MOOD_SLOT = [
+  "재미없",
+  "재미가없",
+  "의욕없",
+  "의욕이없",
+  "하기싫",
+  "하기가싫",
+  "지쳐",
+  "지친",
+  "우울",
+  "무기력",
+  "힘이없",
+] as const;
+
+/**
+ * 위기로 이어질 수 있는 낮은 기분 표현(SPEC §6.1.2 위기 가능 표현).
+ * `죽고싶`·`다포기하고싶` 같은 명시 표현만 담은 목록은 "사는 게 재미없어"·
+ * "요즘 아무것도 하기 싫어" 를 놓쳤다. 대상이 삶일 때만 잡아 "이 게임 재미없어"
+ * 와 가른다.
+ */
+export function signalsLowMood(message: string): boolean {
+  return includesAny(message, LIFE_CONTEXT_SLOT) && includesAny(message, LOW_MOOD_SLOT);
+}
+
+const REPEAT_SLOT = ["계속", "자꾸", "매번", "하루종일", "몇번씩", "틈만나면"] as const;
+const CHECK_SLOT = ["확인", "들여다", "체크", "쳐다", "보게돼", "보게된", "들어가보"] as const;
+/** 사용법·규칙을 묻는 형태. 아래 반복 확인 판정이 삼키지 않게 가른다. */
+const HOWTO_MARKERS = ["어떻게", "어디서", "방법", "하는법", "의무", "필수", "규칙"] as const;
+
+/**
+ * 스스로 멈추지 못한다는 표현. 반복 확인이 **불안 신호인지 절차 질문인지**를
+ * 가른다. "아카이브를 매번 확인하는 게 의무야?" 는 규칙 질문이고,
+ * "계속 확인하게 돼" 는 정서 지원이 필요한 말이다.
+ */
+const INVOLUNTARY_MARKERS = ["게돼", "게된", "게되", "버리게", "멈출수없", "못참", "자꾸보"] as const;
+const WORRY_MARKERS = ["불안", "무서", "초조", "걱정", "쫄"] as const;
+
+/**
+ * 불안해서 반복해 확인하는 신호(SPEC §6.1.2 "계속 확인하게 돼").
+ * `계속들여다보` 처럼 활용까지 통째로 적은 목록은 SPEC 원문조차 놓쳤다.
+ */
+export function asksRepeatedChecking(message: string): boolean {
+  if (includesAny(message, HOWTO_MARKERS)) return false;
+  if (!includesAny(message, REPEAT_SLOT) || !includesAny(message, CHECK_SLOT)) return false;
+  return includesAny(message, INVOLUNTARY_MARKERS) || includesAny(message, WORRY_MARKERS);
 }
 
 /**

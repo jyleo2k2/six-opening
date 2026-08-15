@@ -29,6 +29,7 @@ import { classifyTermKind, type ClassifiedTermKind } from "./term-classify";
 import { looksLikeNewQuestion } from "./colloquial";
 import { isHaeyoKorean, toPoliteKorean, withoutSecondPerson } from "./polite";
 import {
+  isComparisonQuestion,
   normalizeChatInput,
   routeMessage,
   termReply,
@@ -670,13 +671,19 @@ export async function createChatOutcome(
     routed.intent === "own_records" ||
     routed.intent === "own_profile" ||
     routed.intent === "own_archive";
+  // 두 개념을 견주는 질문에는 이해 확인 전이를 붙이지 않는다(SPEC §3.4.1).
+  // 되물어서 좁혀지는 종류가 아니라 답이 이미 두 대상을 갈라 놓은 형태다 —
+  // 여기에 "이해했어요 / 더 쉽게 볼래요" 를 덧붙이면 읽을 것과 누를 것이 늘기만
+  // 한다. 다음 걸음은 답변에 붙는 추천 질문(각 용어의 정의)이 맡는다.
+  const comparisonAnswer = isComparisonQuestion(request.message);
   if (
     explainStep === null &&
     stockExploreStep === null &&
     sectorExploreStep === null &&
     !protectedRoute &&
     !directServiceHelp &&
-    !screenGuidance
+    !screenGuidance &&
+    !comparisonAnswer
   ) {
     const guided = startGuidedExplain(
       response.text,
