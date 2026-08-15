@@ -11,9 +11,12 @@ import assert from "node:assert/strict";
 import { routeMessage } from "./routing";
 import {
   asksFamilyData,
+  asksOwnTradeRecords,
   asksPopularityFollowing,
+  asksRepeatedChecking,
   asksTargetPriceDecision,
   asksTradeDecision,
+  signalsLowMood,
 } from "./intent-slots";
 
 const home = { screen: "home" as const };
@@ -128,7 +131,71 @@ assert.notEqual(
   "본인이 많이 산 종목은 본인 기록이라 차단 대상이 아닙니다",
 );
 
+// ── 불변식 5. 본인 기록은 조회로, 원리·위치 질문은 설명으로 ────────────────
+// SPEC §1.1 5번 · §4. 구절 목록(`최근에뭐샀`)이 "나 뭐 샀었지?" 를 놓쳐 범위
+// 안내로 끝나던 자리다. 반대로 "내 평가손익이랑 수익률은 왜 달라?" 는 값이
+// 아니라 원리를 묻는 질문이라 조회로 넘어가면 답이 어긋난다.
+for (const question of [
+  "나 뭐 샀었지?",
+  "내가 왜 이거 샀는지 기억나?",
+  "나 지금 얼마 벌었어?",
+  "내 거래 기록 보여줘",
+]) {
+  const routed = routeMessage(question, home);
+  assert.ok(
+    routed.route === "tool" || routed.route === "context" || routed.route === "faq",
+    `본인 기록 질문이 조회·안내로 가지 않습니다: "${question}" → ${routed.route}`,
+  );
+  assert.notEqual(routed.route, "outOfScope", `본인 기록 질문이 범위 안내로 끝났습니다: "${question}"`);
+}
+
+for (const question of [
+  "내 평가손익이랑 수익률은 왜 숫자가 다르지?",
+  "내 수익률 숫자에서 소수점은 반올림된 값이야?",
+  "내가 산 오리온 수익률은 어디서 봐?",
+]) {
+  assert.notEqual(
+    routeMessage(question, home).route,
+    "tool",
+    `원리·위치 질문이 값 조회로 넘어갔습니다: "${question}"`,
+  );
+}
+
+// ── 불변식 6. 삶을 향한 낮은 기분 표현은 보호, 대상이 앱이면 아니다 ────────
+// SPEC §6.1.2 위기 가능 표현. `죽고싶` 같은 명시 표현만 담은 목록은
+// "사는 게 재미없어" 를 놓쳤다.
+for (const question of ["사는 게 재미없어", "요즘 아무것도 하기 싫어", "다 포기하고 싶어"]) {
+  assert.equal(
+    routeMessage(question, home).route,
+    "safety",
+    `위기 가능 표현이 보호로 가지 않습니다: "${question}"`,
+  );
+}
+for (const question of ["이 게임 재미없어", "차트 보는 게 재미없어"]) {
+  assert.notEqual(
+    routeMessage(question, home).route,
+    "safety",
+    `대상이 앱·콘텐츠인 표현까지 보호로 삼켰습니다: "${question}"`,
+  );
+}
+
+// 반복 확인 불안은 보호, 확인 방법을 묻는 질문은 안내다.
+assert.equal(routeMessage("불안해서 계속 들어가서 확인하게 돼", stock).route, "safety");
+assert.equal(routeMessage("계속 확인하게 돼", stock).route, "safety");
+assert.notEqual(
+  routeMessage("체결됐는지 어디서 확인해?", stock).route,
+  "safety",
+  "확인 방법을 묻는 질문은 사용법 안내다",
+);
+
 // ── 슬롯 술어 자체의 경계 ────────────────────────────────────────────────
+assert.equal(asksOwnTradeRecords("나뭐샀었지"), true);
+assert.equal(asksOwnTradeRecords("내가왜이거샀는지기억나"), true);
+assert.equal(asksOwnTradeRecords("엄마뭐샀는지보여줘"), false, "가족 질문은 본인 기록이 아니다");
+assert.equal(signalsLowMood("사는게재미없어"), true);
+assert.equal(signalsLowMood("이게임재미없어"), false);
+assert.equal(asksRepeatedChecking("계속확인하게돼"), true);
+assert.equal(asksRepeatedChecking("어디서확인해"), false);
 assert.equal(asksFamilyData("엄마수익률얼마야"), true);
 assert.equal(asksFamilyData("내수익률얼마야"), false);
 assert.equal(asksTargetPriceDecision("목표가좀정해줘손절가도"), true);

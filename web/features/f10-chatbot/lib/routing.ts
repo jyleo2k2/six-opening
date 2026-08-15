@@ -20,8 +20,11 @@ import {
   TRADE_DECISION_PATTERNS,
   asksFamilyData,
   asksOwnPastTrades,
+  asksOwnTradeRecords,
   asksPopularityFollowing,
+  asksRepeatedChecking,
   asksTargetPriceDecision,
+  signalsLowMood,
   targetsInvestmentDecision,
 } from "./intent-slots";
 
@@ -844,6 +847,15 @@ const RANKING_RULE_QUESTION_PATTERNS = [
   "들어",
   "반영",
   "위로",
+  // "거래 많이 하면 순위 올라가?" — 순위에 무엇이 반영되는지 묻는 같은 질문이
+  // 서술어만 바뀌어 범위 안내로 떨어졌다.
+  "올라가",
+  "올라감",
+  "올라",
+  "높아지",
+  "유리",
+  "영향",
+  "좌우",
 ];
 const VISIBILITY_RULE_PATTERNS = [
   "친구한테보이",
@@ -1177,7 +1189,7 @@ const COMPANY_FACT_SECTOR_PATTERNS: Record<
   defense: ["방산기업", "방산회사", "방산사", "국방기업"],
   food: ["식품회사", "식품기업", "식품업체", "제과회사"],
   energy: ["에너지회사", "에너지기업", "전력회사", "발전회사", "발전소"],
-  entertainment: ["엔터회사", "엔터사", "엔터테인먼트회사", "연예기획사"],
+  entertainment: ["엔터회사", "엔터사", "엔터테인먼트회사", "연예기획사", "소속사", "기획사"],
   retail: ["유통회사", "유통사", "유통기업", "쇼핑몰", "판매회사"],
   finance: ["은행", "증권사", "금융회사", "금융사", "금융기업"],
   automotive: [
@@ -1341,7 +1353,7 @@ function containsPersonalAddress(message: string) {
 }
 
 function findUnsafeKind(message: string): UnsafeKind | null {
-  if (includesAny(message, CRISIS_PATTERNS)) return "crisis";
+  if (includesAny(message, CRISIS_PATTERNS) || signalsLowMood(message)) return "crisis";
   if (includesAny(message, CREDENTIAL_PATTERNS)) return "credential";
   if (
     includesAny(message, PERSONAL_IDENTIFIER_PATTERNS) ||
@@ -3589,6 +3601,13 @@ function getArchiveManagementReply(message: string): ChatReply | null {
     "매수내역",
     "거래내역",
     "체결기록",
+    // 아이는 기록이 아니라 거래 자체를 무르고 싶다고 말한다 — "잘못 산 거".
+    // 답(체결은 되돌릴 수 없고 기록에 남는다)은 같은 자리에 이미 있다.
+    "잘못산",
+    "잘못매수",
+    "실수로산",
+    "실수한거래",
+    "잘못누른",
   ]);
   const recordChange = includesAny(message, [
     "삭제",
@@ -3598,6 +3617,10 @@ function getArchiveManagementReply(message: string): ChatReply | null {
     "수정",
     "고쳐",
     "되돌",
+    "취소",
+    "무를",
+    "무르",
+    "없던일",
   ]);
   if (!archiveRecord || !recordChange) return null;
 
@@ -3732,7 +3755,7 @@ function getOwnDataReply(message: string): ChatReply | null {
 // 잡히므로 쓰지 않는다. 실제로 "수익률 마이너스면 내가 진짜 돈 잃은 거야?"
 // 라는 개념 질문이 `내`+`가진` 으로 오탐됐다.
 const PERSONAL_DATA_QUESTION =
-  /(?:내|제|나|저|우리)[가-힣0-9]{0,6}(?:수익률|수익율|잔고|현금|예수금|쓸수있는돈|남은돈|자산|손익|보유|가진회사|가진종목|기록|성향|등수|몇등|순위|시즌)|(?:지금|현재|오늘)[가-힣0-9]{0,4}(?:수익률|수익율|잔고|현금|쓸수있는돈|자산|손익|몇등)/;
+  /(?:내|제|나|저|우리)[가-힣0-9]{0,6}(?:수익률|수익율|잔고|현금|예수금|쓸수있는돈|남은돈|자산|손익|보유|가진회사|가진종목|기록|성향|등수|몇등|순위|시즌|벌었|벌고있|잃었|잃고있)|(?:지금|현재|오늘)[가-힣0-9]{0,4}(?:수익률|수익율|잔고|현금|쓸수있는돈|자산|손익|몇등|벌었|잃었)/;
 
 /**
  * 같은 낱말이라도 **값**이 아니라 **원리**를 묻는 질문은 개념 설명이 맞다.
@@ -3771,7 +3794,21 @@ function isPersonalDataQuestion(message: string) {
  * 구분되지 않는다.** 답과 질문을 함께 읽어야 판정되므로 다음 단계는
  * 의미 기반 답변 적합성 검사다 — 그때 이 자리를 다시 쓴다.
  */
-const ASKS_PNL = ["수익률", "수익율", "손익", "얼마나올랐", "얼마나내렸", "몇퍼", "몇프로"];
+const ASKS_PNL = [
+  "수익률",
+  "수익율",
+  "손익",
+  "얼마나올랐",
+  "얼마나내렸",
+  "몇퍼",
+  "몇프로",
+  // 아이는 "수익률" 대신 "얼마 벌었어?" 라고 묻는다. 같은 값을 가리키는 말이라
+  // 빠져 있으면 화면 안내까지 닿지 못하고 범위 안내로 끝난다.
+  "벌었",
+  "벌고있",
+  "잃었",
+  "잃고있",
+];
 const ASKS_CASH = ["잔고", "현금", "쓸수있는돈", "남은돈", "예수금", "돈얼마", "얼마남았"];
 const ASKS_HOLDINGS = ["보유", "가진회사", "가진종목", "몇곳", "몇개샀", "종목수"];
 
@@ -4226,6 +4263,12 @@ function isNavigationQuestion(message: string) {
     "보여",
     "이동",
     "시작",
+    // 화면 요소를 가리키며 "그거 눌러야 돼?" 라고 묻는 것도 위치·사용법 질문이다.
+    // `봐야`·`써야` 까지 넓히면 "아카이브 꼭 열어봐야 해?" 같은 **규칙** 질문을
+    // 가로채므로 누르는 동작으로만 좁힌다.
+    "눌러",
+    "눌러야",
+    "눌러도",
   ]);
 }
 
@@ -4924,7 +4967,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       tool: "own_holdings",
     });
   }
-  if (includesAny(message, RECORD_PATTERNS)) {
+  // 구절 목록(`최근에뭐샀`)은 "나 뭐 샀었지?"·"내가 왜 이거 샀는지 기억나?" 를
+  // 놓친다. 1인칭과 기록 낱말의 근접으로 함께 본다.
+  if (includesAny(message, RECORD_PATTERNS) || asksOwnTradeRecords(message)) {
     return reply("tool", "own_records", "", ["본인 투자 기록 조회"], {
       tool: "own_trade_records",
     });
@@ -5002,6 +5047,12 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       },
     });
   }
+
+  // 여기까지 온 반복 확인 표현은 어느 큐레이트 답에도 닿지 못한 것이다. SPEC
+  // §6.1.2 는 "계속 확인하게 돼" 를 정서 지원 대상으로 두므로 범위 안내로
+  // 끝내지 않는다. 앞선 큐레이트 답이 있으면 그쪽이 이미 답했으므로 여기에
+  // 오지 않는다 — 그물은 앞을 가로채지 않는다.
+  if (asksRepeatedChecking(message)) return unsafeReply("anxiety", message);
 
   if (isModelEligibleFallback(message, context)) {
     return reply(
