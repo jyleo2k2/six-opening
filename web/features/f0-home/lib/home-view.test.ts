@@ -4,6 +4,7 @@ import {
   homeRole,
   homeView,
   liveHoldings,
+  moodImg,
   popItems,
   withStockCodes,
   type AccountUser,
@@ -70,6 +71,7 @@ assert.equal(view.goalCount, Math.floor(20000 / 12000)); // 1개
 assert.equal(view.rateText, "+4.8%");
 assert.equal(view.rateColor, "#D5327A");
 assert.equal(view.profitText, "+20,000원");
+assert.equal(view.moodImg, "/ui/assets/mascot-bull.png");
 
 // 손실이면 부호와 색이 함께 바뀌고 목표 개수는 0 아래로 내려가지 않는다.
 const losing = homeView(held, { "005930": 50000, "259960": 100000 });
@@ -77,6 +79,12 @@ assert.ok(losing.rateText.startsWith("−"));
 assert.equal(losing.rateColor, "#2E6BE6");
 assert.equal(losing.goalCount, 0);
 assert.ok(losing.profitText.startsWith("−"));
+assert.equal(losing.moodImg, "/ui/assets/mascot-bull-bear-sad.png");
+
+// 수익률 부호별 홈 마스코트 — 양수는 엄지척, 보합(0)은 걱정, 음수는 울음.
+assert.equal(moodImg(4.8), "/ui/assets/mascot-bull.png");
+assert.equal(moodImg(0), "/ui/assets/mascot-bull-flat.png");
+assert.equal(moodImg(-4.8), "/ui/assets/mascot-bull-bear-sad.png");
 
 // 시세를 못 받은 종목은 평단가를 현재가로 본다 — 0원으로 그리지 않는다.
 assert.equal(liveHoldings(held, {})[0].value, "200,000원");
@@ -88,6 +96,7 @@ assert.deepEqual(empty.holdings, []);
 assert.equal(empty.goalCount, 0);
 assert.equal(empty.rateText, "+0.0%");
 assert.equal(empty.profitText, "+0원");
+assert.equal(empty.moodImg, "/ui/assets/mascot-bull-flat.png");
 
 // 소수 수량은 두 자리로 적는다.
 const frac = liveHoldings(
