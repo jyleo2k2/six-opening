@@ -865,7 +865,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "return", kind: "glossary", category: "profit", termLabel: "수익률", triggers: ["수익률", "손실률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이에요. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.return, status: reviewed },
   { id: "average-price", kind: "glossary", category: "profit", termLabel: "평균 매수가", triggers: ["평균 매수가", "평균매수가", "평균"], answer: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["average-price"], status: reviewed },
   { id: "sector", kind: "glossary", category: "basics", termLabel: "업종", triggers: ["업종", "섹터"], answer: "업종은 비슷한 일을 하는 회사들을 묶은 이름이에요. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sector, status: reviewed },
-  { id: "market-cap", kind: "glossary", category: "indicator", termLabel: "시가총액", triggers: ["시가총액"], answer: "시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기예요. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["market-cap"], status: reviewed },
+  { id: "market-cap", kind: "glossary", category: "indicator", termLabel: "시가총액", triggers: ["시가총액", "시총"], answer: "시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기예요. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["market-cap"], status: reviewed },
   { id: "revenue", kind: "glossary", category: "indicator", termLabel: "매출", triggers: ["매출"], answer: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모예요. 매출이 모두 회사의 이익은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.revenue, status: reviewed },
   { id: "operating-profit", kind: "glossary", category: "indicator", termLabel: "영업이익", triggers: ["영업이익"], answer: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요. 회사의 공개된 과거 성적을 볼 때 쓰는 말이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["operating-profit"], status: reviewed },
   { id: "dividend", kind: "glossary", category: "indicator", termLabel: "배당", triggers: ["배당"], answer: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해요. 모든 회사가 배당하는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.dividend, status: reviewed },
@@ -1130,6 +1130,41 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "bond", kind: "faq", triggers: ["채권"], answer: "채권은 돈을 빌려주고 정해진 날에 이자와 함께 돌려받기로 한 증서예요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
   { id: "fund", kind: "faq", triggers: ["펀드"], answer: "펀드는 여러 사람의 돈을 모아 전문가가 대신 굴리는 상품이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
 
+  // ── 2차 추가 [2026-08-16] ──────────────────────────────────────────────
+  // 화면에 떠 있는 글자, 어린이 뉴스가 반복해서 쓰는 말, 그 뉴스의 배경이 되는 말.
+  // 기준은 1차와 같다 — **앱 화면이나 어린이 뉴스에 실제로 나오는 낱말.**
+
+  // 앱 화면 — 종목 상세·차트·주문에 그대로 떠 있다.
+  { id: "change-rate", kind: "faq", triggers: ["등락률"], answer: "등락률은 어제 마지막 가격에 견줘 오늘 가격이 몇 퍼센트 오르거나 내렸는지 나타내요.", status: reviewed },
+  { id: "vs-yesterday", kind: "faq", triggers: ["전일대비"], answer: "전일대비는 어제 마지막 가격과 견준 차이예요. 화면에서 빨간색은 오른 것, 파란색은 내린 것을 뜻해요.", status: reviewed },
+  { id: "trading-value", kind: "faq", triggers: ["거래대금"], answer: "거래대금은 하루 동안 그 종목이 사고팔린 금액을 모두 더한 값이에요.", status: reviewed },
+  { id: "regular-session", kind: "faq", triggers: ["정규장"], answer: "정규장은 평일 오전 9시부터 오후 3시 30분까지 주식을 사고팔 수 있는 시간이에요.", status: reviewed },
+  // 장외 설명은 우리 주문 규칙(§5.1)과 같은 말을 해야 한다. 아이가 이 시간에 주문을
+  // 넣으면 실제로 다음 거래일 시가로 예약된다.
+  { id: "after-hours", kind: "faq", triggers: ["장외"], answer: "장외는 정규장 시간이 아닐 때를 말해요. 이때 넣은 시장가 주문은 다음 거래일 첫 가격으로 예약돼요.", status: reviewed },
+
+  // 어린이 뉴스가 반복해서 쓰는 말.
+  // 트리거를 `실적` 홑낱말로 두면 **`2024년 실적 알려줘` 를 가로챈다** — 그건 승인 종목
+  // 사실 Tool 의 네 주제 중 하나다(§8). `questionForms` 로는 못 막는다. 형태가 안 잡힌
+  // 입력을 정의형으로 보기 때문이다. 그래서 뜻을 묻는 꼴만 트리거로 잡는다.
+  { id: "earnings", kind: "faq", triggers: ["실적이 뭐", "실적 뜻", "실적이란", "실적은 뭐"], answer: "실적은 회사가 정해진 기간 동안 얼마를 벌고 얼마가 남았는지 정리한 결과예요.", status: reviewed },
+  { id: "treasury-stock", kind: "faq", triggers: ["자사주"], answer: "자사주는 회사가 자기 회사의 주식을 사서 가지고 있는 것을 말해요.", status: reviewed },
+  { id: "year-over-year", kind: "faq", triggers: ["전년비", "전년 대비"], answer: "전년비는 작년 같은 기간과 견줘 얼마나 늘거나 줄었는지 나타내요.", status: reviewed },
+  { id: "merger", kind: "faq", triggers: ["인수합병", "합병"], answer: "인수합병은 한 회사가 다른 회사를 사거나, 두 회사가 하나로 합치는 것이에요.", status: reviewed },
+  { id: "new-product", kind: "faq", triggers: ["신제품"], answer: "신제품은 회사가 새로 만들어 내놓은 물건이나 서비스예요.", status: reviewed },
+  { id: "recall", kind: "faq", triggers: ["리콜"], answer: "리콜은 팔았던 물건에 문제가 있어서 회사가 다시 거둬들여 고쳐 주는 것이에요.", status: reviewed },
+  { id: "bonus-issue", kind: "faq", triggers: ["무상증자"], answer: "무상증자는 회사가 주주에게 돈을 받지 않고 주식을 더 나눠 주는 것이에요.", status: reviewed },
+  { id: "rights-issue", kind: "faq", triggers: ["유상증자"], answer: "유상증자는 회사가 새 주식을 만들어 팔아서 필요한 돈을 모으는 것이에요.", status: reviewed },
+  { id: "affiliate", kind: "faq", triggers: ["계열사"], answer: "계열사는 같은 그룹에 속해 서로 이어져 있는 회사들을 말해요.", status: reviewed },
+  { id: "operating-loss", kind: "faq", triggers: ["영업손실"], answer: "영업손실은 회사가 본업으로 번 돈보다 쓴 돈이 많아서 남은 것이 마이너스인 상태예요.", status: reviewed },
+
+  // 뉴스의 배경 — 금리·환율·물가와 짝이 되는 말.
+  // `경기` 는 넣지 않는다. 축구 경기·경기 결과가 같은 낱말이라 스포츠 질문을 가로챈다.
+  { id: "export", kind: "faq", triggers: ["수출"], answer: "수출은 우리나라에서 만든 물건을 다른 나라에 파는 것이에요.", status: reviewed },
+  { id: "tariff", kind: "faq", triggers: ["관세"], answer: "관세는 다른 나라에서 들어오는 물건에 매기는 세금이에요.", status: reviewed },
+  { id: "trade", kind: "faq", triggers: ["무역"], answer: "무역은 나라와 나라 사이에 물건을 사고파는 것이에요.", status: reviewed },
+  { id: "boom-bust", kind: "faq", triggers: ["호황", "불황"], answer: "호황은 경제가 활발해서 물건이 잘 팔리는 때예요. 반대로 잘 안 팔리는 때는 불황이라고 해요.", status: reviewed },
+
   // 이 서비스가 다루지 않는 방법 — 뉴스·영상에서 듣고 와서 묻는 말이다.
   // 뜻을 알려 주되 **여기서는 하지 않는다**를 같은 답에 둔다. 하는 방법은 설명하지 않는다.
   { id: "short-selling", kind: "faq", triggers: ["공매도"], answer: "공매도는 주식을 빌려서 먼저 팔고 나중에 다시 사서 갚는 방법이에요. 이 모의투자에서는 하지 않아요.", status: reviewed },
@@ -1137,6 +1172,9 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "futures", kind: "faq", triggers: ["선물거래", "선물 거래"], answer: "선물거래는 나중 날짜의 가격을 미리 정해 두고 사고파는 방법이에요. 이 모의투자에서는 회사 주식만 다뤄요.", status: reviewed },
   { id: "derivatives", kind: "faq", triggers: ["파생상품"], answer: "파생상품은 주식이나 환율 같은 것의 값에 따라 값이 정해지는 상품이에요. 이 모의투자에서는 다루지 않아요.", status: reviewed },
   { id: "margin-trading", kind: "faq", triggers: ["신용거래"], answer: "신용거래는 증권사에서 돈을 빌려 주식을 사는 것이에요. 이 모의투자에서는 빌리지 않고 가진 가상 현금으로만 주문해요.", status: reviewed },
+  { id: "crypto-asset", kind: "faq", triggers: ["가상자산", "비트코인"], answer: "가상자산은 비트코인처럼 인터넷에서만 오가는 자산이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
+  { id: "pension", kind: "faq", triggers: ["연금"], answer: "연금은 일을 그만둔 뒤에 받을 돈을 미리 조금씩 모아 두는 것이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
+  { id: "insurance", kind: "faq", triggers: ["보험"], answer: "보험은 여럿이 조금씩 돈을 모아 두었다가 누가 사고를 당하면 도와주는 것이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
 ] satisfies readonly ChatbotKnowledgeEntry[]).map((entry) =>
   entry.kind === "faq" && DAPIE_SCREEN_TERM_IDS.has(entry.id)
     ? {
