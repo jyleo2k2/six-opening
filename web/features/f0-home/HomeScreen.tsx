@@ -4,9 +4,7 @@ import { useState } from "react";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
 import { holdingPctColor, homeView, popItems, type HomeHolding } from "./lib/home-view";
-import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { useAccount } from "./lib/use-account";
-import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { PhoneFrame } from "./PhoneFrame";
 
@@ -43,8 +41,13 @@ const MENU_LOGOUT = styleFromCss(
   "display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;" +
     "color:#D5327A;cursor:pointer;border-top:1px solid #F1F1F7",
 );
+/**
+ * 보유 종목은 이 스크롤 안에서 이어진다. 카드가 `margin-top:auto` 로 바닥에 붙어 있어
+ * 처음에는 몇 줄만 보이고, 아래로 쓸면 나머지가 따라 올라온다 — 잘린 줄이 더 있다는 표시다.
+ * 아래 여백은 마지막 줄이 하단 탭에 붙지 않게 둔다.
+ */
 const SCROLL = styleFromCss(
-  "flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px",
+  "flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 12px;display:flex;flex-direction:column;gap:12px",
 );
 const NOTIFY = styleFromCss(
   "text-align:center;border-radius:16px;padding:12px 14px;font-size:13px;font-weight:600;color:#5C6280;background:#F4F4FA;cursor:pointer",
@@ -60,12 +63,11 @@ const GOAL_IMG = styleFromCss(
   "display:block;width:228px;height:auto;margin:-6px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18))",
 );
 const HOLD_CARD = styleFromCss(
-  "background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);cursor:pointer;margin-top:auto",
+  "background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);margin-top:auto",
 );
 const HOLD_TITLE = styleFromCss(
   "font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap",
 );
-const HOLD_ALL = styleFromCss("font-size:12.5px;font-weight:700;color:#A9AEC4;white-space:nowrap");
 const EMPTY = styleFromCss(
   "text-align:center;border-radius:16px;padding:20px 13px;font-size:13.5px;font-weight:600;color:#8E93A8;line-height:1.6;" +
     "background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%)",
@@ -87,53 +89,38 @@ const ROW_QTY = styleFromCss(
 const ROW_VALUE = styleFromCss(
   "font-size:14px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap",
 );
-const SHEET_SCRIM = styleFromCss("position:absolute;inset:0;z-index:7;background:rgba(15,10,40,0.42)");
-/** 시트가 덮는 화면 비율. 쓸어내리는 거리 판정도 이 높이를 기준으로 한다. */
-const SHEET_RATIO = 0.82;
-const SHEET_HEIGHT = PROTOTYPE_PHONE.screenHeight * SHEET_RATIO;
-const SHEET = styleFromCss(
-  `position:absolute;left:0;right:0;bottom:0;height:${SHEET_RATIO * 100}%;z-index:8;background:#F5F2F8;` +
-    "border-radius:28px 28px 0 0;" +
-    "display:flex;flex-direction:column;box-shadow:0 -20px 40px -12px rgba(20,10,50,0.35);" +
-    "animation:sheetUp 0.34s cubic-bezier(0.22,1,0.36,1)",
-);
-/**
- * 쓸어내려 닫는 손잡이. 목록(`overflow-y:auto`)에는 절대 걸지 않는다 — 시트 전체로 넓히면
- * 목록을 읽으려고 아래로 미는 손짓이 드래그로 잡혀 스크롤이 죽고 시트가 닫힌다.
- * 챗봇 시트도 같은 이유로 헤더에만 걸려 있다(`F10ChatbotDemo`).
- */
-const SHEET_HANDLE = styleFromCss(
-  "flex:none;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab",
-);
-const SHEET_GRIP = styleFromCss("width:38px;height:5px;border-radius:999px;background:#D9D8E6");
-const SHEET_BACK = styleFromCss(
-  "width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;" +
-    "font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
-);
-const SHEET_ROW = styleFromCss(
-  "display:flex;align-items:center;gap:11px;border-radius:16px;padding:14px;background:#fff;box-shadow:0 4px 12px -6px rgba(35,25,80,0.12)",
-);
-const SHEET_TICK = styleFromCss(
-  "flex:none;width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;" +
-    "font-size:13px;font-weight:800;color:#5B23D6;background:#F4F4FA",
-);
+const ROW_TAP = styleFromCss("cursor:pointer");
 
 const pctStyle = (up: boolean, size: number) =>
   styleFromCss(
     `font-size:${size}px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:${holdingPctColor(up)}`,
   );
 
-function HoldingRow({ holding, sheet }: { holding: HomeHolding; sheet?: boolean }) {
+/**
+ * 한 줄을 누르면 그 종목 상세로 간다. 코드를 못 찾은 줄(유니버스에 없는 데모 보유)은
+ * 누를 수 없다 — 갈 곳 없는 손짓에 손가락 모양만 뜨는 것을 막는다.
+ */
+function HoldingRow({
+  holding,
+  onOpen,
+}: {
+  holding: HomeHolding;
+  onOpen: (code: string) => void;
+}) {
+  const code = holding.code;
   return (
-    <div style={sheet ? SHEET_ROW : ROW}>
-      <div style={sheet ? SHEET_TICK : ROW_TICK}>{holding.tick}</div>
+    <div
+      onClick={code ? () => onOpen(code) : undefined}
+      style={code ? { ...ROW, ...ROW_TAP } : ROW}
+    >
+      <div style={ROW_TICK}>{holding.tick}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={sheet ? { ...ROW_NAME, fontSize: 15 } : ROW_NAME}>{holding.name}</div>
-        <div style={sheet ? { ...ROW_QTY, fontSize: 12.5 } : ROW_QTY}>{holding.qty}</div>
+        <div style={ROW_NAME}>{holding.name}</div>
+        <div style={ROW_QTY}>{holding.qty}</div>
       </div>
       <div style={{ flex: "none", textAlign: "right" }}>
-        <div style={sheet ? { ...ROW_VALUE, fontSize: 15 } : ROW_VALUE}>{holding.value}</div>
-        <div style={pctStyle(holding.up, sheet ? 13 : 12.5)}>{holding.pct}</div>
+        <div style={ROW_VALUE}>{holding.value}</div>
+        <div style={pctStyle(holding.up, 12.5)}>{holding.pct}</div>
       </div>
     </div>
   );
@@ -141,17 +128,16 @@ function HoldingRow({ holding, sheet }: { holding: HomeHolding; sheet?: boolean 
 
 export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
   const user = useAccount();
-  const { quotes } = useUniverseLive();
+  const { quotes, universe } = useUniverseLive();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [popped, setPopped] = useState(false);
-  // 쓸어내려 닫는 배선은 `useSheetDrag` 가 갖는다 — 아카이브 카드 시트와 같은 구현이다.
-  const sheet = useSheetDrag(SHEET_HEIGHT);
 
   const prices = Object.fromEntries(
     Object.entries(quotes).map(([code, quote]) => [code, quote.price]),
   );
-  const view = homeView(user, prices);
+  // 유니버스는 데모 보유에 종목코드를 붙이는 데만 쓴다 — 실제 계좌 보유는 코드를 갖고 온다.
+  const view = homeView(user, prices, universe?.stocks ?? []);
 
   // 세션 쿠키를 지우는 유일한 화면 경로다. 지우면 `/` 가 다시 로그인 화면을 띄운다.
   const logout = () => {
@@ -257,11 +243,8 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
             )}
           </div>
 
-          <div onClick={sheet.openSheet} style={HOLD_CARD}>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-              <span style={HOLD_TITLE}>내 보유 종목</span>
-              <span style={HOLD_ALL}>전체보기</span>
-            </div>
+          <div style={HOLD_CARD}>
+            <div style={HOLD_TITLE}>내 보유 종목</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 12 }}>
               {view.noHoldings && (
                 <div style={EMPTY}>
@@ -270,55 +253,18 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
                   모의투자 탭에서 하나 골라 보자
                 </div>
               )}
-              {view.holdings.slice(0, 3).map((holding) => (
-                <HoldingRow holding={holding} key={holding.name} />
+              {view.holdings.map((holding) => (
+                <HoldingRow
+                  holding={holding}
+                  key={holding.name}
+                  onOpen={(code) => onLeave(`/stock/${code}`)}
+                />
               ))}
             </div>
           </div>
         </div>
 
         <BottomNav active="home" onLeave={onLeave} />
-
-        {sheet.open && (
-          <>
-            <div onClick={sheet.closeSheet} style={{ ...SHEET_SCRIM, ...sheet.scrimStyle }} />
-            <div style={{ ...SHEET, ...sheet.sheetStyle(String(SHEET.animation)) }}>
-              <div {...sheet.handleProps} style={SHEET_HANDLE}>
-                <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 2px" }}>
-                  <div style={SHEET_GRIP} />
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    padding: "10px 18px 8px",
-                  }}
-                >
-                  <div data-sheet-static onClick={sheet.closeSheet} style={SHEET_BACK}>
-                    ‹
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: "#01185A" }}>내 보유 종목</div>
-                </div>
-              </div>
-              <div
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  overflowX: "hidden",
-                  padding: "8px 16px 24px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 9,
-                }}
-              >
-                {view.holdings.map((holding) => (
-                  <HoldingRow holding={holding} key={holding.name} sheet />
-                ))}
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </PhoneFrame>
   );
