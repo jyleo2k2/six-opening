@@ -1,5 +1,3 @@
-const SEED = 10000000, FEE = 0.00015;
-
 const REASONS = [
   { code:'buy_news',      label:'뉴스에서 봐서',            short:'뉴스를 보고' },
   { code:'buy_chart',     label:'그래프가 좋아 보여서',      short:'그래프를 보고' },
@@ -37,12 +35,3 @@ const CTA_ON = "position:relative;border-radius:999px;padding:19px;text-align:ce
 const CTA_OFF = "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:#C6C9D8";
 // 주된 버튼 옆에 서는 보조 버튼 (홈으로 같은 것)
 const SUB_CTA = "flex:1;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;cursor:pointer;background:#EFEFF5";
-
-// 시드 2주치 거래(shared/store/family-trade-seed.ts와 동일)의 결과 잔고.
-// 김찬영: 매수 891,000 − 매도 회수 230,500 / 엄마: 매수 690,750 − 매도 회수 231,000.
-// 보유 평균단가는 시드 체결가 기준이다. 여기 값을 바꾸면 시드 파일과 함께 바꾼다.
-const seedAccounts = () => ({
-  child:  { name:'김찬영', cash: SEED - 660500, holdings: [ { code:'259960', qty:2, avg:232000 }, { code:'352820', qty:1, avg:181000 } ], pending:[] },
-  parent: { name:'엄마', cash: SEED - 459750, holdings: [ { code:'005930', qty:1, avg:240000 }, { code:'011200', qty:10, avg:21075 } ], pending:[] }
-});
-

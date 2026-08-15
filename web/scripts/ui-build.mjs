@@ -21,8 +21,6 @@ const webRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const APP_HTML = join(webRoot, "public", "ui", "app.html");
 const UI_ROOT = join(webRoot, "public", "ui");
 const UI_SRC = join(webRoot, "ui-src");
-const ENGINE_SOURCE = join(webRoot, "shared", "engine", "archive-profile.js");
-const SCHEDULED_ORDER_SOURCE = join(webRoot, "features", "f2-trade", "lib", "scheduled-orders.js");
 const UI_DIST = join(webRoot, "ui-dist");
 const MANIFEST = join(UI_SRC, "manifest.json");
 
@@ -57,13 +55,25 @@ const SC_IF_SCREEN = /^<sc-if value="\{\{ (is\w+) \}\}"/;
 const CLASS_OPEN = /^class Component extends DCLogic \{/;
 const METHOD = /^ {2}([A-Za-z_$][\w$]*)\s*\(/;
 
-// 성향 계산은 `shared/engine/archive-profile.js` 가 원본이고, 화면에는 그 복사본이 들어간다.
-// 아래 두 표식 사이가 복사 구간이다. 조립할 때마다 원본에서 다시 만들어 넣으므로,
-// 원본만 고치고 build 를 안 돌리면 verify 가 어긋난 것을 잡아낸다.
+// 브라우저와 서버·테스트가 같이 쓰는 모듈은 `shared/` 등에 원본을 두고 화면에는 복사본이
+// 들어간다. 조립할 때마다 원본에서 다시 만들어 넣으므로, 원본만 고치고 build 를 안 돌리면
+// verify 가 어긋난 것을 잡아낸다. **manifest 에 그 조각 이름이 있어야 실제로 주입된다.**
+const INJECTED_CHUNKS = {
+  "logic/archive-engine.js": {
+    marker: "archive-engine",
+    source: join(webRoot, "shared", "engine", "archive-profile.js"),
+    from: "shared/engine/archive-profile.js",
+  },
+  "logic/prototype-account.js": {
+    marker: "prototype-account",
+    source: join(webRoot, "shared", "store", "prototype-account.js"),
+    from: "shared/store/prototype-account.js",
+  },
+};
+
 const ENGINE_BEGIN = /^\/\/ >>> archive-engine/;
 const ENGINE_END = /^\/\/ <<< archive-engine/;
 const ENGINE_CHUNK = "logic/archive-engine.js";
-const SCHEDULED_ORDER_CHUNK = "logic/scheduled-orders.js";
 
 // isHome -> home, isBuy2 -> buy2
 function screenName(flag) {
@@ -219,28 +229,16 @@ function readApp() {
   return readFileSync(APP_HTML, "utf8");
 }
 
-// 엔진 원본을 화면에 넣을 형태로 바꾼다. 모듈이 아닌 <script> 안이라 export 를 떼고,
+// 원본을 화면에 넣을 형태로 바꾼다. 모듈이 아닌 <script> 안이라 export 를 떼고,
 // app.html 이 CRLF 라 줄바꿈도 맞춘다.
-function engineChunkText() {
+function injectedChunkText(chunk) {
   // BOM 이 붙은 채로 스크립트 한가운데 들어가면 문법이 깨진다. 편집기가 붙여도 여기서 뗀다.
-  const source = readFileSync(ENGINE_SOURCE, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
+  const source = readFileSync(chunk.source, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
   const body = [
-    "// >>> archive-engine — GENERATED from shared/engine/archive-profile.js",
+    `// >>> ${chunk.marker} — GENERATED from ${chunk.from}`,
     "// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.",
     source.replace(/\n+$/, ""),
-    "// <<< archive-engine",
-    "",
-  ].join("\n");
-  return body.replace(/\r?\n/g, "\r\n");
-}
-
-function scheduledOrderChunkText() {
-  const source = readFileSync(SCHEDULED_ORDER_SOURCE, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
-  const body = [
-    "// >>> scheduled-order-engine — GENERATED from features/f2-trade/lib/scheduled-orders.js",
-    "// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.",
-    source.replace(/\n+$/, ""),
-    "// <<< scheduled-order-engine",
+    `// <<< ${chunk.marker}`,
     "",
   ].join("\n");
   return body.replace(/\r?\n/g, "\r\n");
@@ -250,11 +248,9 @@ function assemble(keep = () => true) {
   const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
   return manifest.files
     .filter(keep)
-    .map((file) => file === ENGINE_CHUNK
-      ? engineChunkText()
-      : file === SCHEDULED_ORDER_CHUNK
-        ? scheduledOrderChunkText()
-        : readFileSync(join(UI_SRC, file), "utf8"))
+    .map((file) => INJECTED_CHUNKS[file]
+      ? injectedChunkText(INJECTED_CHUNKS[file])
+      : readFileSync(join(UI_SRC, file), "utf8"))
     .join("");
 }
 
