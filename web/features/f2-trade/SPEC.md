@@ -199,13 +199,13 @@ type PrototypeSellRecord = {
 | `GET /api/universe/data` | 연결 | 5초 현재가·스파크 갱신 |
 | `GET /api/quote/{symbol}/chart` | 연결 | TradingView 캔들 데이터 |
 | `GET /api/news`, `GET /api/news/{id}` | 연결 | 게시 상태 뉴스만 공개 |
-| `GET /api/account` | 부분 연결 | `dbUser`와 역할만 동기화 판단에 사용. 서버 잔액·보유를 화면 상태로 가져오지 않음 |
-| `POST /api/trade` | 조건부 연결 | 정규장 시장가와 장외 예약 시장가의 실제 체결만 best-effort 전송. 응답 실패 시 로컬 거래는 유지 |
+| `GET /api/account` | 연결 | 로그인 직후와 매매 성공 직후 `applyServerHoldings`가 서버 잔액·보유를 홈 화면 하단 보유종목 카드(`state.acc[role].holdings`)에 반영. 로그인한 역할만 덮어쓰고 반대쪽 로컬 데모 데이터는 그대로 둠 |
+| `POST /api/trade` | 조건부 연결 | 정규장 시장가와 장외 예약 시장가의 실제 체결만 best-effort 전송. 응답 실패 시 로컬 거래는 유지되고 서버 재조회는 하지 않음 |
 | `POST /api/tab-view` | 조건부 연결 | 종목별 기업정보·차트·뉴스 방문 중 10초 이상인 것만 서버가 다시 세어 매수 체결 시 최종 개수 저장 |
 | `POST /api/profile` | 연결 | 자녀·부모 로컬 상태와 시드를 합쳐 F9 엔진 JSON 계산 |
 | `/api/auth/login`, `/api/auth/switch` | 미연결 | Route Handler는 있으나 현재 사용자 화면에서 호출하지 않음 |
 
-`POST /api/trade`는 `dbUser`가 있고 메인 화면의 `account`가 서버 프로필 역할과 같을 때만 보낸다. 화면 계정 스위처가 없으므로 부모 역할 거래의 실제 서버 생산 경로는 현재 사용자 UI에 없다.
+`POST /api/trade`는 `dbUser`가 있고 메인 화면의 `account`가 서버 프로필 역할과 같을 때만 보낸다. 화면 계정 스위처가 없으므로 부모 역할 거래의 실제 서버 생산 경로는 현재 사용자 UI에 없다. 같은 조건에서 응답이 200이면 `loadDbUser()`를 다시 호출해 홈 화면 보유종목을 서버 값으로 재동기화한다.
 
 ### 7.1 서버 거래 저장 계약
 
@@ -261,7 +261,7 @@ type PrototypeSellRecord = {
 
 - 지정가 자동 체결 스케줄러가 없다.
 - 메인 화면 전역 부모↔자녀 스위처와 `/api/auth/switch`가 연결되지 않았다.
-- 로컬 거래와 Supabase 거래가 실패 시 재조정되지 않는다.
+- `POST /api/trade` 응답이 실패하면 로컬 거래와 Supabase 거래가 재조정되지 않는다(성공 시에는 `applyServerHoldings`가 재동기화한다).
 - `tutorial.js`는 파일로 존재하지만 `app.html` 또는 React 호스트에서 로드하지 않아 사용자 런타임에 노출되지 않는다.
 - F11 어댑터는 매도 기록에 `amount_krw`가 없어 시장가 매도 카드 단가를 0원으로 만들 수 있다.
 

@@ -10,6 +10,6 @@
       memo: x.memo || null,
       plan_match: typeof x.plan_match === 'boolean' ? x.plan_match : null,
       plan_changed_reason: x.plan_changed_reason || null
-    });
+    }).then(r => { if (r && r.ok) this.loadDbUser(); });
   }
 
