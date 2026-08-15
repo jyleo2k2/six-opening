@@ -2,14 +2,17 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import {
-  cancelPendingOrder,
   findConfirmedOpeningCandle,
   isRegularMarketOpen,
   migrateLegacyAccount,
   nextOpeningDate,
   reservedSellQty,
-  settleScheduledOrder,
 } from "./scheduled-orders.js";
+
+// 예약 체결·취소 규칙은 서버로 갔다(`settle_order`·`cancel_order`). 여기 남은 것은 주문을
+// 넣을 때 화면이 판단하는 시각 규칙과, 서버 주문 목록을 읽는 쪽이 쓰는 계산이다.
+// 정산 흐름은 `app/api/orders/settle.test.ts`, 목록 변환은
+// `features/f0-home/lib/pending-orders.test.ts` 가 본다.
 
 const date = (value: string) => new Date(value);
 const candle = (day: string, open: number, volume = 10) => ({
@@ -41,98 +44,10 @@ test("휴일·거래정지 봉은 건너뛰고 거래량이 확인된 첫 시가
   assert.equal(findConfirmedOpeningCandle(points, "2026-08-17", date("2026-08-18T08:59:00+09:00")), null);
 });
 
-test("금액 매수는 가격 갭과 무관하게 예약 금액 전부를 소수 수량으로 체결한다", () => {
-  const order = { id: "ord_1", kind: "next_open", side: "buy", code: "005930", requestMode: "amount", reservedAmount: 1000 };
-  const result = settleScheduledOrder({
-    account: { name: "아이", cash: 9000, holdings: [], pending: [order] },
-    records: [{ order_id: "ord_1", order_status: "scheduled", reason_code: "buy_news" }],
-    sellRecords: [], order, candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
-  });
-  assert.equal(result.account.cash, 9000);
-  assert.equal(result.account.holdings[0].qty, 1000 / 120);
-  assert.equal(result.records[0].order_status, "filled");
-  assert.equal(result.effect?.type, "filled");
-});
-
-test("수량 매수는 시가 상승으로 예약 현금을 넘으면 거절하고 전액 반환한다", () => {
-  const order = { id: "ord_2", kind: "next_open", side: "buy", code: "005930", requestMode: "qty", requestedQty: 10, reservedAmount: 1000 };
-  const result = settleScheduledOrder({
-    account: { name: "아이", cash: 9000, holdings: [], pending: [order] },
-    records: [{ order_id: "ord_2", order_status: "scheduled" }], sellRecords: [], order,
-    candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
-  });
-  assert.equal(result.account.cash, 10000);
-  assert.equal(result.account.holdings.length, 0);
-  assert.equal(result.records[0].order_status, "rejected");
-});
-
-test("매도 예약 수량은 사용 가능 수량에서 빠지고 취소해도 총 보유는 변하지 않는다", () => {
-  const order = { id: "ord_3", kind: "next_open", side: "sell", code: "005930", reservedQty: 3, reservationMode: "held" };
-  const account = { name: "아이", cash: 0, holdings: [{ code: "005930", qty: 5, avg: 80 }], pending: [order] };
-  assert.equal(reservedSellQty(account.pending, "005930"), 3);
-  assert.deepEqual(cancelPendingOrder(account, order).holdings, account.holdings);
-});
-
-test("매수 예약 취소는 맡아둔 현금을 정확히 돌려준다", () => {
-  const order = { id: "ord_buy_cancel", kind: "next_open", side: "buy", code: "005930", reservedAmount: 1234 };
-  const cancelled = cancelPendingOrder({ name: "아이", cash: 8766, holdings: [], pending: [order] }, order);
-  assert.equal(cancelled.cash, 10000);
-  assert.equal(cancelled.pending.length, 0);
-});
-
-test("매도 예약은 시가에 한 번 체결해 보유 수량과 현금을 함께 갱신한다", () => {
-  const order = { id: "ord_sell", kind: "next_open", side: "sell", code: "005930", reservedQty: 2, reservationMode: "held" };
-  const first = settleScheduledOrder({
-    account: { name: "아이", cash: 100, holdings: [{ code: "005930", qty: 5, avg: 80 }], pending: [order] },
-    records: [], sellRecords: [{ order_id: "ord_sell", order_status: "scheduled", sell_reason_code: "sell_plan_time" }],
-    order, candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
-  });
-  assert.equal(first.account.cash, 340);
-  assert.equal(first.account.holdings[0].qty, 3);
-  assert.equal(first.sellRecords[0].order_status, "filled");
-  const second = settleScheduledOrder({ account: first.account, records: first.records, sellRecords: first.sellRecords, order, candle: candle("2026-08-17", 120) });
-  assert.equal(second.account, first.account);
-  assert.equal(second.effect, null);
-});
-
-// 예약 체결은 사용자가 이유·계획을 다시 답하지 않는다. 주문 접수 때 고른 값을 그대로
-// 서버로 실어야 아카이브 카드가 비지 않는다 (F2 SPEC §7.1).
-test("예약 체결 effect 는 접수 때 고른 계획·메모를 그대로 싣는다", () => {
-  const buyOrder = { id: "ord_plan", kind: "next_open", side: "buy", code: "005930", requestMode: "amount", reservedAmount: 1000 };
-  const buy = settleScheduledOrder({
-    account: { name: "아이", cash: 9000, holdings: [], pending: [buyOrder] },
-    records: [{
-      order_id: "ord_plan", order_status: "scheduled", reason_code: "buy_news",
-      plan_code: "plan_target", plan_target_price: 1200, memo: "목표 오면 팔기",
-    }],
-    sellRecords: [], order: buyOrder, candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
-  });
-  assert.deepEqual(buy.effect?.plan, {
-    plan_code: "plan_target", plan_target_price: 1200, memo: "목표 오면 팔기",
-  });
-
-  const sellOrder = { id: "ord_plan_sell", kind: "next_open", side: "sell", code: "005930", reservedQty: 1, reservationMode: "held" };
-  const sell = settleScheduledOrder({
-    account: { name: "아이", cash: 0, holdings: [{ code: "005930", qty: 2, avg: 80 }], pending: [sellOrder] },
-    records: [],
-    sellRecords: [{
-      order_id: "ord_plan_sell", order_status: "scheduled", sell_reason_code: "sell_fear_drop",
-      plan_match: false, change_reason_code: "change_price_emotion",
-    }],
-    order: sellOrder, candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
-  });
-  assert.deepEqual(sell.effect?.plan, {
-    plan_match: false, plan_changed_reason: "change_price_emotion",
-  });
-
-  // 계획을 안 고른 옛 기록은 null 로 내려간다 — 서버가 그대로 비운다
-  const bare = settleScheduledOrder({
-    account: { name: "아이", cash: 9000, holdings: [], pending: [{ ...buyOrder, id: "ord_bare" }] },
-    records: [{ order_id: "ord_bare", order_status: "scheduled", reason_code: "buy_news" }],
-    sellRecords: [], order: { ...buyOrder, id: "ord_bare" },
-    candle: candle("2026-08-17", 120), now: date("2026-08-17T09:01:00+09:00"),
-  });
-  assert.deepEqual(bare.effect?.plan, { plan_code: null, plan_target_price: null, memo: null });
+test("매도 예약 수량은 사용 가능 수량에서 빠진다", () => {
+  const pending = [{ id: "ord_3", kind: "next_open", side: "sell", code: "005930", reservedQty: 3, reservationMode: "held" }];
+  assert.equal(reservedSellQty(pending, "005930"), 3);
+  assert.equal(reservedSellQty(pending, "000660"), 0);
 });
 
 test("구버전 지정가 매도는 한 번만 보유 수량으로 복구해 자산 증발을 막는다", () => {
@@ -140,17 +55,6 @@ test("구버전 지정가 매도는 한 번만 보유 수량으로 복구해 자
   const migrated = migrateLegacyAccount(legacy, [{ order_id: "ord_4", avg: 80 }]);
   assert.deepEqual(migrated.holdings, [{ code: "005930", qty: 2, avg: 80 }]);
   assert.deepEqual(migrateLegacyAccount(migrated, []).holdings, migrated.holdings);
-});
-
-test("이미 체결 상태인 주문은 다시 적용하지 않는다", () => {
-  const order = { id: "ord_5", kind: "next_open", side: "buy", code: "005930", reservedAmount: 1000 };
-  const account = { name: "아이", cash: 9000, holdings: [], pending: [order] };
-  const result = settleScheduledOrder({
-    account, records: [{ order_id: "ord_5", order_status: "filled" }], sellRecords: [], order,
-    candle: candle("2026-08-17", 100), now: date("2026-08-17T09:01:00+09:00"),
-  });
-  assert.equal(result.account, account);
-  assert.equal(result.effect, null);
 });
 
 test("생성된 프로토타입은 예약 엔진과 접수·체결 구분 문구를 포함하고 문법이 유효하다", () => {
@@ -162,4 +66,13 @@ test("생성된 프로토타입은 예약 엔진과 접수·체결 구분 문구
   const end = html.indexOf("</script>", body);
   assert.ok(start >= 0 && body > start && end > body);
   assert.doesNotThrow(() => new Function(html.slice(body, end)));
+});
+
+// 화면이 예약을 스스로 만들지 않는다는 것은 조립 결과로 확인한다 — 로컬 pending 을 만드는
+// 코드가 되살아나면 서버와 브라우저에 같은 주문이 둘 생긴다.
+test("생성된 프로토타입은 예약을 로컬에 만들거나 스스로 정산하지 않는다", () => {
+  const html = readFileSync("public/ui/app.html", "utf8");
+  assert.doesNotMatch(html, /settleScheduledOrder|cancelPendingOrder|processScheduledOrders\(/);
+  assert.match(html, /pendingFromServerOrders/);
+  assert.match(html, /loadOpenOrders/);
 });

@@ -102,19 +102,6 @@ function addHolding(holdings, code, qty, price, cost) {
   };
 }
 
-function removeHolding(holdings, code, qty) {
-  const index = holdings.findIndex((holding) => holding.code === code);
-  if (index < 0 || holdings[index].qty + 0.000001 < qty) return false;
-  const left = holdings[index].qty - qty;
-  if (left < 0.005) holdings.splice(index, 1);
-  else holdings[index] = { ...holdings[index], qty: left };
-  return true;
-}
-
-function replaceRecord(records, orderId, patch) {
-  return (records || []).map((record) => record.order_id === orderId ? { ...record, ...patch } : record);
-}
-
 function matchingRecord(records, orderId) {
   return (records || []).find((record) => record.order_id === orderId) || null;
 }
@@ -136,83 +123,43 @@ export function migrateLegacyAccount(account, sellRecords = []) {
   return next;
 }
 
-export function cancelPendingOrder(account, order) {
-  const next = cloneAccount(account);
-  if ((order.side || "buy") === "buy") {
-    next.cash += Number(order.reservedAmount ?? order.amount) || 0;
-  }
-  next.pending = next.pending.filter((item) => item.id !== order.id);
-  return next;
-}
 
-export function markOrderCancelled(records, orderId, at = new Date()) {
-  return replaceRecord(records, orderId, { order_status: "cancelled", cancelled_at: asDate(at).toISOString() });
-}
-
-export function settleScheduledOrder({ account, records, sellRecords, order, candle, now = new Date() }) {
-  const unchanged = { account, records, sellRecords, effect: null };
-  if (!order || order.kind !== "next_open" || !candle) return unchanged;
-  const sourceRecords = order.side === "sell" ? sellRecords : records;
-  const record = matchingRecord(sourceRecords, order.id);
-  if (!record || record.order_status !== "scheduled") return unchanged;
-  const price = Number(candle.open);
-  if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(candle.volume) || candle.volume <= 0) return unchanged;
-
-  const next = cloneAccount(account);
-  next.pending = next.pending.filter((item) => item.id !== order.id);
-  const filledAt = asDate(now).toISOString();
-
-  if (order.side === "sell") {
-    const qty = Number(order.reservedQty ?? order.qty) || 0;
-    if (qty <= 0 || !removeHolding(next.holdings, order.code, qty)) {
-      const rejected = { order_status: "rejected", rejection_reason: "insufficient_shares", rejected_at: filledAt };
-      return { account: next, records, sellRecords: replaceRecord(sellRecords, order.id, rejected), effect: { type: "rejected", side: "sell", orderId: order.id } };
-    }
-    const proceeds = price * qty;
-    next.cash += proceeds;
-    const patch = { order_status: "filled", amount_krw: proceeds, filled_at: filledAt, filled_price: price };
-    return {
-      account: next,
-      records,
-      sellRecords: replaceRecord(sellRecords, order.id, patch),
-      // plan 은 서버 저장 계약(F2 SPEC §7.1)이 요구하는 부가 필드다. 주문 접수 때 고른 값을
-      // 그대로 옮긴다 — 예약 체결은 사용자가 다시 답하지 않으므로 새로 판정하지 않는다.
-      effect: {
-        type: "filled", side: "sell", orderId: order.id, code: order.code, price, qty,
-        reason: record.sell_reason_code,
-        plan: {
-          plan_match: typeof record.plan_match === "boolean" ? record.plan_match : null,
-          plan_changed_reason: record.change_reason_code ?? null,
-        },
-      },
+/**
+ * `GET /api/orders` 의 미체결 주문을 화면이 이미 쓰는 `pending` 모양으로 바꾼다.
+ *
+ * 지정가·예약 주문은 증권사가 보관하는 지시라 브라우저에 두면 안 된다. 서버로 옮기면서
+ * **소비자는 그대로 둔다** — `reservedSellQty`·`pendingCards`·`accountTotalAsset` 이 읽는
+ * 필드 이름을 여기서 맞춰 주면 목록의 출처만 바뀐다.
+ *
+ * 매수는 현금을 잠그고(`cash`) 매도는 보유 수량을 잠근다(`held`).
+ *
+ * @param {Array<Record<string, any>>} orders
+ * @returns {Array<Record<string, any>>}
+ */
+export function pendingFromServerOrders(orders) {
+  return (Array.isArray(orders) ? orders : []).map((order) => {
+    const shared = {
+      id: order.id,
+      kind: order.orderType === "limit" ? "limit" : "next_open",
+      side: order.side,
+      code: order.symbol,
+      price: order.limitPrice ?? undefined,
+      scheduledFor: order.scheduledFor ?? undefined,
+      createdAt: order.createdAt,
     };
-  }
-
-  const reservedAmount = Number(order.reservedAmount ?? order.amount) || 0;
-  const requestedQty = Number(order.requestedQty) || 0;
-  const byQty = order.requestMode === "qty" && requestedQty > 0;
-  const cost = byQty ? requestedQty * price : reservedAmount;
-  if (reservedAmount <= 0 || (byQty && cost > reservedAmount + 0.000001)) {
-    next.cash += reservedAmount;
-    const rejected = { order_status: "rejected", rejection_reason: "opening_price_exceeds_reserved_cash", rejected_at: filledAt };
-    return { account: next, records: replaceRecord(records, order.id, rejected), sellRecords, effect: { type: "rejected", side: "buy", orderId: order.id } };
-  }
-  const qty = byQty ? requestedQty : reservedAmount / price;
-  if (byQty) next.cash += reservedAmount - cost;
-  addHolding(next.holdings, order.code, qty, price, cost);
-  const patch = { order_status: "filled", amount_krw: cost, qty: Math.round(qty * 10000) / 10000, filled_at: filledAt, filled_price: price };
-  return {
-    account: next,
-    records: replaceRecord(records, order.id, patch),
-    sellRecords,
-    effect: {
-      type: "filled", side: "buy", orderId: order.id, code: order.code, price, qty,
-      reason: record.reason_code,
-      plan: {
-        plan_code: record.plan_code ?? null,
-        plan_target_price: record.plan_target_price ?? null,
-        memo: record.memo ?? null,
-      },
-    },
-  };
+    if (order.side === "sell") {
+      const qty = order.requestedQuantity ?? 0;
+      return { ...shared, qty, reservedQty: qty, reservationMode: "held" };
+    }
+    const amount = order.reservedAmount ?? 0;
+    return {
+      ...shared,
+      amount,
+      reservedAmount: amount,
+      // 서버는 `quantity`, 화면은 `qty` 를 쓴다. 값이 어긋나면 수량 예약이 금액으로 읽힌다.
+      requestMode: order.requestMode === "quantity" ? "qty" : "amount",
+      requestedQty: order.requestedQuantity ?? null,
+      reservationMode: "cash",
+    };
+  });
 }

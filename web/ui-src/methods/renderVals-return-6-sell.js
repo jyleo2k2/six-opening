@@ -157,6 +157,7 @@
       },
 
       sellBack: () => {
+        this.setState({ orderError: null });
         if (s.sellStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'sell' });
         if (s.sellStep === 3) { this.set({ screen:'portfolio' }); return; }
         if (s.sellStep === 1) this.set({ screen:'portfolio' }); else this.setState({ sellStep: s.sellStep - 1 });
@@ -164,26 +165,12 @@
       sellNext: () => {
         if (!sellOk) return;
         if (locked && s.sellStep === 2) return;
-        if (s.sellStep === 1) { this.retroAt = Date.now(); this.setState({ sellStep: 2 }); return; }
+        if (s.sellStep === 1) { this.retroAt = Date.now(); this.setState({ sellStep: 2, orderError:null }); return; }
         this.retroMs = this.retroAt ? Date.now() - this.retroAt : 0;
         const isLimit = s.sellDraft.orderType === 'limit';
         const isScheduled = !isLimit && !marketOpen;
         const nm = this.state.acc[this.state.account];
-        const hold = nm.holdings.slice();
-        const pend = (nm.pending || []).slice();
         const orderId = 'ord_' + String(s.seq).padStart(4, '0');
-        if (!isLimit && !isScheduled) {
-          const idx = hold.map(h => h.code).indexOf(st.code);
-          if (idx >= 0) {
-            const left = hold[idx].qty - sellQty;
-            if (left < 0.005) hold.splice(idx, 1); else hold[idx] = { code: hold[idx].code, qty: left, avg: hold[idx].avg };
-          }
-        }
-        if (isLimit || isScheduled) pend.push({
-          id:orderId, kind:isLimit ? 'limit' : 'next_open', code:st.code, side:'sell', qty:sellQty,
-          reservedQty:sellQty, price:isLimit ? sellLimPrice : null, scheduledFor:isScheduled ? scheduledFor : null,
-          reservationMode:'held', createdAt:new Date().toISOString()
-        });
         const rec = {
           order_id: orderId,
           user_id: s.account === 'child' ? 'child_minji' : 'parent_mom',
@@ -201,19 +188,15 @@
           pnl_pct_at_sell: Math.round(heldPct * 10) / 10,
           held_days: heldDays, avg: heldAvg, memo: null, ts: new Date().toISOString()
         };
-        const acc2 = Object.assign({}, this.state.acc);
-        acc2[this.state.account] = {
-          name: nm.name, cash: nm.cash + ((!isLimit && !isScheduled) ? sellProceeds : 0), holdings: hold, pending: pend
+        const done = {
+          name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null,
+          scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null
         };
-        this.set({
-          acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
-          seq: s.seq + 1, sellStep: 3,
-          sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
-          sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null }
-        });
+        const soldDraft = Object.assign({}, s.sellDraft, { memo:'', memoSaved:false });
         if (isLimit || isScheduled) {
-          // 미체결 매도는 서버 주문 잔고가 원본이어야 한다. 매도는 보유에서 빼지 않고
-          // 수량만 잠그므로(reserve_order) 잠글 수량을 함께 보낸다.
+          // 미체결 매도는 서버 주문 잔고가 원본이다 — 화면은 예약을 만들지 않는다. 매도는
+          // 보유에서 빼지 않고 수량만 잠그므로(reserve_order) 잠글 수량을 함께 보낸다.
+          // 접수가 끝나야 주문이 성립하므로 완료 화면도 그때 띄운다.
           this.reserveOrder({
             side:'sell', stock_code:st.code,
             order_type: isLimit ? 'limit' : 'market',
@@ -223,9 +206,29 @@
             scheduled_for: isScheduled ? scheduledFor : null,
             reason: s.sellDraft.reason,
             plan_match: rec.plan_match, plan_changed_reason: rec.change_reason_code
+          }).then(result => {
+            if (!result || !result.order_id) { this.setState({ orderError: '주문을 넣지 못했어. 잠깐 뒤에 다시 해볼까?' }); return; }
+            this.set({
+              sellRecords: (s.sellRecords || []).concat([rec]), seq: s.seq + 1, sellStep: 3,
+              sellDraft: soldDraft, sellDone: done, orderError: null
+            });
           });
           return;
         }
+        const hold = nm.holdings.slice();
+        const idx = hold.map(h => h.code).indexOf(st.code);
+        if (idx >= 0) {
+          const left = hold[idx].qty - sellQty;
+          if (left < 0.005) hold.splice(idx, 1); else hold[idx] = { code: hold[idx].code, qty: left, avg: hold[idx].avg };
+        }
+        const acc2 = Object.assign({}, this.state.acc);
+        acc2[this.state.account] = {
+          name: nm.name, cash: nm.cash + sellProceeds, holdings: hold, pending: nm.pending || []
+        };
+        this.set({
+          acc: acc2, sellRecords: (s.sellRecords || []).concat([rec]),
+          seq: s.seq + 1, sellStep: 3, sellDraft: soldDraft, sellDone: done, orderError: null
+        });
         this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, {
           plan_match: rec.plan_match, plan_changed_reason: rec.change_reason_code
         });
@@ -235,34 +238,6 @@
         }
         this.notifyChatBehavior(behaviorEvent);
       },
-
-      hasPending: (m.pending || []).length > 0,
-      pendingCards: (m.pending || []).map(p => {
-        const x = u.stocks.filter(y => y.code === p.code)[0];
-        const side = p.side || 'buy';
-        const isNextOpen = p.kind === 'next_open';
-        const reservedAmount = Number(p.reservedAmount ?? p.amount) || 0;
-        const reservedQty = Number(p.reservedQty ?? p.qty) || 0;
-        return {
-          name: x ? x.name : p.code,
-          desc: isNextOpen
-            ? (p.scheduledFor + ' 장 시작 시가 · ' + (side === 'sell' ? reservedQty.toFixed(2) + '주 매도 예약' : won(reservedAmount) + ' 매수 예약'))
-            : ((Number(p.price) || 0).toLocaleString('ko-KR') + '원이 되면 ' + (side === 'sell' ? reservedQty.toFixed(2) + '주 매도' : won(reservedAmount) + ' 매수')),
-          cancel: () => {
-            this.setState(state => {
-              const acc3 = Object.assign({}, state.acc);
-              acc3[state.account] = cancelPendingOrder(state.acc[state.account], p);
-              const next = Object.assign({}, state, {
-                acc:acc3,
-                records: side === 'buy' ? markOrderCancelled(state.records || [], p.id, new Date()) : state.records,
-                sellRecords: side === 'sell' ? markOrderCancelled(state.sellRecords || [], p.id, new Date()) : state.sellRecords
-              });
-              this.persist(next); return next;
-            });
-            this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + p.code, side:side });
-          }
-        };
-      }),
 
       hasHoldings: holdingCards.length > 0, noHoldings: holdingCards.length === 0,
       holdingCards: holdingCards,

@@ -9,6 +9,7 @@ import {
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
 import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
+import { invalidateAccount } from "./lib/use-account";
 import type { WalletAccountId } from "./lib/use-wallet";
 import { ArchiveScreen } from "./ArchiveScreen";
 import { DetailScreen } from "./DetailScreen";
@@ -209,6 +210,9 @@ export function ConnectedPrototype({
       // app.html 안의 링크가 옮긴 화면으로 보낸다 (`leaveToRoute`).
       if (event.data.type === OPEN_ROUTE_MESSAGE) {
         const path = event.data.path;
+        // iframe 화면에서 넘어오는 길이다. 그 사이 매매나 주문 접수로 잔액이 바뀌었을 수
+        // 있으니 세션 캐시를 비운다 — 안 비우면 이미 쓴 돈이 아직 남아 보인다.
+        invalidateAccount();
         if (typeof path === "string") leaveToPath(path);
         return;
       }

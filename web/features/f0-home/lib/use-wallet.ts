@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { migrateLegacyAccount } from "../../f2-trade/lib/scheduled-orders.js";
+import {
+  migrateLegacyAccount,
+  pendingFromServerOrders,
+} from "../../f2-trade/lib/scheduled-orders.js";
 import {
   persistWallet,
   readPersistedWallet,
@@ -9,7 +12,7 @@ import {
 } from "../../../shared/store/prototype-account.js";
 import type { Account } from "./portfolio-view";
 import { applyServerAccount } from "./server-account";
-import { loadAccount } from "./use-account";
+import { invalidateAccount, loadAccount } from "./use-account";
 
 /**
  * 옮겨 온 화면이 지갑을 읽고 쓴다.
@@ -42,9 +45,29 @@ export type WalletAccountId = "child" | "parent";
  * 한 프레임 보였다 바뀐다 — 첫 렌더 전에 되살리기로 한 이유(PR #217)와 같다.
  * 계좌는 `loadAccount()` 모듈 캐시를 같이 쓴다. 저장소(`kw_proto_v1`)는 iframe 화면이
  * 사이에 쓸 수 있으므로 마운트마다 다시 읽지만, 서버 왕복은 세션당 한 번이면 된다.
+ *
+ * 미체결 주문도 같이 읽는다. `GET /api/orders` 는 만기가 지난 예약을 먼저 정산하므로,
+ * 이 조회가 곧 예약 체결 트리거다 — 화면이 따로 시가를 확인하지 않는다. 정산은 잔액을
+ * 바꾸므로 그때는 계좌 캐시를 비우고 한 번 더 읽는다.
  */
+type OpenOrders = { orders?: Record<string, unknown>[]; settled?: unknown[] };
+
+const readOpenOrders = (): Promise<OpenOrders | null> =>
+  fetch("/api/orders", { cache: "no-store" })
+    .then((response) => (response.ok ? response.json() : null))
+    .catch(() => null);
+
 export function useWallet() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [reload, setReload] = useState(0);
+  /**
+   * 주문을 취소한 뒤처럼 서버 상태가 바뀐 것을 아는 쪽에서 다시 읽게 한다.
+   * 예약은 잔액도 함께 움직이므로 계좌 캐시를 비우고 시작한다.
+   */
+  const refresh = useCallback(() => {
+    invalidateAccount();
+    setReload((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -56,14 +79,19 @@ export function useWallet() {
       watchlist: [],
     };
     const local: Wallet = { ...seeded, ...readPersistedWallet(migrateLegacyAccount) };
-    // 계좌를 못 읽어도 화면은 떠야 한다. 그때는 저장소 값 그대로다.
-    loadAccount().then((user) => {
-      if (alive) setWallet({ ...local, acc: applyServerAccount(local.acc, user) });
+    // 계좌나 주문을 못 읽어도 화면은 떠야 한다. 그때는 저장소 값 그대로다.
+    Promise.all([loadAccount(), readOpenOrders()]).then(([user, open]) => {
+      if (!alive) return;
+      const pending = open?.orders ? pendingFromServerOrders(open.orders) : null;
+      setWallet({ ...local, acc: applyServerAccount(local.acc, user, pending) });
+      // 조회가 만기 예약을 정산했으면 방금 읽은 계좌는 이미 낡았다. 한 번 더 돈다 —
+      // 두 번째에는 정산할 것이 없으므로 여기서 멈춘다.
+      if (open?.settled?.length) refresh();
     });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [reload, refresh]);
 
   const update = useCallback((change: (current: Wallet) => Partial<Wallet>) => {
     setWallet((current) => {
@@ -74,7 +102,7 @@ export function useWallet() {
     });
   }, []);
 
-  return { wallet, update };
+  return { wallet, update, refresh };
 }
 
 /**

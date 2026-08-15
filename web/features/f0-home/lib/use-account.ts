@@ -15,6 +15,15 @@ import type { ServerAccount } from "./server-account";
 let accountPromise: Promise<ServerAccount | null> | null = null;
 let cachedUser: ServerAccount | null = null;
 
+/**
+ * 다음 조회가 서버를 다시 읽게 한다. 주문 접수·취소·정산은 잔액과 잠긴 금액을 바꾸므로
+ * 세션당 한 번 읽은 값이 그대로 남으면 화면이 이미 쓴 돈을 아직 쓸 수 있다고 보인다.
+ * `cachedUser` 는 남긴다 — 그건 역할 판정용이고, 비우면 데모 화면이 다시 번쩍인다.
+ */
+export function invalidateAccount() {
+  accountPromise = null;
+}
+
 export function loadAccount(): Promise<ServerAccount | null> {
   if (!accountPromise) {
     accountPromise = fetch("/api/account", { cache: "no-store" })

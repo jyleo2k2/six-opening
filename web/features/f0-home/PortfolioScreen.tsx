@@ -2,10 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useChatBehaviorStore } from "../../shared/store/chat-behavior-store";
-import {
-  cancelPendingOrder,
-  markOrderCancelled,
-} from "../f2-trade/lib/scheduled-orders.js";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
 import { parseBehaviorEvent } from "./lib/prototype-bridge";
@@ -21,8 +17,9 @@ import { PhoneFrame } from "./PhoneFrame";
 /**
  * 계좌 화면. `ui-src/screens/portfolio.html` 을 그대로 옮겨 왔다.
  *
- * **지갑을 읽고 쓰는 첫 React 화면**이다. 예약 주문을 취소하면 `app.html` 과 같은 칸
- * (`kw_proto_v1`)에 저장하므로, 아직 안 옮긴 화면도 그 결과를 본다.
+ * **기다리는 주문의 원본은 서버다**(`/api/orders`). 취소도 서버에 보내고 목록을 다시 읽는다 —
+ * 예약이 잡아 둔 현금·수량을 푸는 것은 `cancel_order` 한 트랜잭션이라, 화면이 미리 지우면
+ * 서버가 거절했을 때 없는 주문이 사라진 것처럼 보인다.
  */
 const PAGE = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column",
@@ -119,7 +116,7 @@ export function PortfolioScreen({
   account: WalletAccountId;
   onLeave: (path: string) => void;
 }) {
-  const { wallet, update } = useWallet();
+  const { wallet, refresh } = useWallet();
   const prices = useQuotes();
   const recordEvent = useChatBehaviorStore((s) => s.recordEvent);
 
@@ -134,17 +131,11 @@ export function PortfolioScreen({
 
   const cancel = (order: (typeof pending)[number]["order"]) => {
     const side = order.side || "buy";
-    update((current) => ({
-      acc: { ...current.acc, [account]: cancelPendingOrder(current.acc[account], order) },
-      records:
-        side === "buy"
-          ? markOrderCancelled(current.records, order.id, new Date())
-          : current.records,
-      sellRecords:
-        side === "sell"
-          ? markOrderCancelled(current.sellRecords, order.id, new Date())
-          : current.sellRecords,
-    }));
+    if (order.id) {
+      fetch(`/api/orders?id=${encodeURIComponent(order.id)}`, { method: "DELETE" })
+        .catch(() => {})
+        .then(refresh);
+    }
     // 행동 신호는 `app.html` 이 보내던 것과 같은 모양으로 만든다 — 판정도 같은 함수를 쓴다.
     const behaviorEvent = parseBehaviorEvent(
       { kind: "order_confirmation_cancelled", stockId: `KRX:${order.code}`, side },

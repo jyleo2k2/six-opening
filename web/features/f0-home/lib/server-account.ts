@@ -1,5 +1,5 @@
 import type { AccountUser } from "./home-view";
-import type { Account, Holding } from "./portfolio-view";
+import type { Account, Holding, PendingOrder } from "./portfolio-view";
 
 /**
  * `/api/account` 응답으로 지갑의 **로그인한 역할** 칸을 덮는다.
@@ -22,6 +22,7 @@ export type ServerAccount = AccountUser & {
 export function applyServerAccount(
   acc: Record<string, Account>,
   user: ServerAccount | null,
+  pending?: PendingOrder[] | null,
 ): Record<string, Account> {
   const role = user?.parent_child;
   if (!user?.user_id || (role !== "child" && role !== "parent")) return acc;
@@ -50,8 +51,9 @@ export function applyServerAccount(
       name: user.name ?? prev?.name,
       cash,
       holdings,
-      // 예약 주문은 아직 로컬만 안다(기능명세 §10-7). 서버 응답에 없다고 지우면 안 된다.
-      pending: prev?.pending ?? [],
+      // 미체결 주문도 서버가 원본이다(`GET /api/orders`). 그 목록을 못 읽었을 때만 저장소
+      // 값을 남긴다 — 조회 한 번 실패했다고 예약이 사라진 것처럼 보이면 안 된다.
+      pending: pending ?? prev?.pending ?? [],
     },
   };
 }

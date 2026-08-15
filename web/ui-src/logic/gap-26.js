@@ -5,7 +5,7 @@
     screen: 'home', account: 'child',
     acc: seedAccounts(),
     code: null, buyStep: 1, showPad: false,
-    orderDone: null, sellDone: null, watchlist: [],
+    orderDone: null, sellDone: null, orderError: null, watchlist: [],
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], seq: 1,
     closes: {},
