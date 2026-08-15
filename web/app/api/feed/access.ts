@@ -1,6 +1,6 @@
 // 피드 반응(좋아요·코멘트)의 공통 접근 검증.
 // 좋아요와 코멘트가 같은 규칙을 쓰므로 한곳에 둔다.
-import { findProfileById, selectRows, type Profile } from "../supabase";
+import { findProfileById, selectFilledTrades, type Profile } from "../supabase";
 
 /** 반응을 달 수 있는 대상 체결 한 건과, 그 체결 주인의 역할. */
 export type FeedTarget = {
@@ -45,7 +45,7 @@ export async function authorizeFeedTarget(
     ? { "profiles.family_tag": `eq.${viewer.family_tag}` }
     : { user_id: `eq.${userId}` };
 
-  const rows = await selectRows<OwnerRow>("transactions", {
+  const rows = await selectFilledTrades<OwnerRow>({
     select: "id,user_id,profiles!inner(parent_child,family_tag)",
     id: `eq.${transactionId}`,
     ...scope,
@@ -88,7 +88,7 @@ export async function filterFamilyTransactionIds(
     ? { "profiles.family_tag": `eq.${viewer.family_tag}` }
     : { user_id: `eq.${viewer.id}` };
 
-  const rows = await selectRows<{ id: string }>("transactions", {
+  const rows = await selectFilledTrades<{ id: string }>({
     select: "id,profiles!inner(family_tag)",
     id: `in.(${ids.join(",")})`,
     ...scope,

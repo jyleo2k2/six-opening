@@ -36,6 +36,18 @@ export async function selectRows<T>(table: string, params: Record<string, string
   return (await (await supabaseFetch(`rest/v1/${table}?${query}`)).json()) as T[];
 }
 
+/**
+ * 체결된 거래만 읽는다.
+ *
+ * `transactions` 는 이제 체결분과 미체결 주문(pending·scheduled)과 끝난 주문(cancelled·rejected)을
+ * 함께 담는다. 거래를 세는 곳이 이 구분을 놓치면 예약 주문이 가족 피드·차트 마커·성향 계산에
+ * 진짜 거래로 새어 든다. 호출부마다 필터를 적는 대신 한 곳에서 강제한다 —
+ * 주문 자체를 다루는 곳(`api/orders`)만 `selectRows` 를 직접 쓴다.
+ */
+export function selectFilledTrades<T>(params: Record<string, string>): Promise<T[]> {
+  return selectRows<T>("transactions", { ...params, order_status: "eq.filled" });
+}
+
 export async function insertRow<T>(table: string, row: Record<string, unknown>): Promise<T> {
   const response = await supabaseFetch(`rest/v1/${table}`, {
     method: "POST",

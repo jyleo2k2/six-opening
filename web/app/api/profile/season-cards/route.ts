@@ -12,7 +12,7 @@ import type {
   ProfileSell,
   ProfileTabView,
 } from "../../../../shared/types/behavior-profile";
-import { selectRows, sessionUserId } from "../../supabase";
+import { selectFilledTrades, selectRows, sessionUserId } from "../../supabase";
 import { chartRetentionCutoff, readStoredCandles } from "../../quote/stock-candles";
 
 export const runtime = "nodejs";
@@ -104,7 +104,7 @@ const defaultDeps: SeasonCardsDeps = {
  */
 export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = defaultDeps) {
   const [transactions, stocks, holdingRows, accounts, tabViewRows] = await Promise.all([
-    selectRows<TransactionRow>("transactions", {
+    selectFilledTrades<TransactionRow>({
       select: "id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_match,created_at",
       user_id: `eq.${userId}`,
       order: "created_at.asc",

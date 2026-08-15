@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { selectRows, sessionUserId } from "../supabase";
+import { selectFilledTrades, selectRows, sessionUserId } from "../supabase";
 import type {
   HoldingSummary,
   PersonalChatDataSource,
@@ -56,7 +56,7 @@ export function createSupabasePersonalData(
 
   async function getTradeRecordSummary(): Promise<TradeRecordSummary | null> {
     if (!userId) return null;
-    const rows = await selectRows<TransactionRow>("transactions", {
+    const rows = await selectFilledTrades<TransactionRow>({
       select: "trade_reason,created_at",
       user_id: `eq.${userId}`,
       order: "created_at.desc",
