@@ -11,18 +11,28 @@
 -- 수량·평단가·매수 사유는 실제 사용자 데이터가 아니라 데모용으로 임의 구성한 값이다.
 --
 -- 이 파일은 라이브에 이미 있는 세 계정의 데이터를 고치는 마이그레이션이다. 계정 자체는
--- 저장소에 없으므로(README 참고) 새 환경에는 profiles 1·2·3 이 없고, 그대로 두면
--- `supabase db reset` 이 holdings_user_id_fkey 로 깨진다. 고칠 대상이 없으면 아무것도
--- 하지 않게 세 계정이 다 있을 때만 실행한다.
+-- 20260815033156_seed_family_profiles.sql 이 만드는데, remote 적용 시각 때문에 파일명이
+-- 이 파일보다 뒤로 밀렸다(README "순서 문제" 참고). 그래서 새 환경에서는 이 파일이
+-- 먼저 돌 때 계정이 아직 없다 — 여기서도 만든다. 라이브에는 이미 있으므로
+-- on conflict do nothing 이 전부 걸려 아무 영향이 없다.
 
 begin;
 
-do $$
-begin
-if (select count(*) from public.profiles where id in (1, 2, 3)) < 3 then
-  raise notice '찬영 가족 계정(1,2,3)이 없어 포트폴리오 시드를 건너뛴다.';
-  return;
-end if;
+insert into public.profiles (id, name, login_id, login_password, parent_child, family_tag, guardian_role)
+values
+  (1, '김찬영',   'cksdud', 'CHANGE_ME', 'child',  '찬영가족', null),
+  (2, '찬영엄마', 'mom',    'CHANGE_ME', 'parent', '찬영가족', 'mom'),
+  (3, '찬영아빠', 'dad',    'CHANGE_ME', 'parent', '찬영가족', 'dad')
+on conflict (id) do nothing;
+
+select setval(
+  pg_get_serial_sequence('public.profiles', 'id'),
+  greatest((select max(id) from public.profiles), 1)
+);
+
+insert into public.account (user_id)
+select id from public.profiles where id in (1, 2, 3)
+on conflict (user_id) do nothing;
 
 delete from public.trade_likes
   where transaction_id in (select id from public.transactions where user_id in (1, 2, 3));
@@ -62,6 +72,5 @@ insert into public.transactions
 update public.account set balance = 1035000 where user_id = 1;
 update public.account set balance = 3055000 where user_id = 2;
 update public.account set balance = 2086000 where user_id = 3;
-end $$;
 
 commit;

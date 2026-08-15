@@ -9,8 +9,8 @@
 | `20260814052538_stock_tab_views_per_stock_category_count.sql` | `stock_tab_views` 를 종목별 카운트로 개편 |
 | `20260814111455_add_profiles_guardian_role.sql` | `profiles.guardian_role`·`updated_at` 추가 |
 | `20260814150827_add_trade_plan_fields.sql` | `transactions` 에 `plan_code`·`plan_target_price`·`memo`·`plan_match`·`plan_changed_reason` 추가, `apply_trade` 인자 확장 (F2 SPEC §7.1) |
-| `20260815002039_seed_family_portfolios.sql` | 찬영 가족 3계정의 보유·매수 이력·잔액을 데모 포트폴리오로 교체. **계정이 없는 새 환경에서는 건너뛴다** |
-| `20260815033156_seed_family_profiles.sql` | 찬영 가족 3계정(`profiles`+`account`)을 저장소에서 재현 가능하게 함. 비밀번호는 자리표시자(`CHANGE_ME`) |
+| `20260815002039_seed_family_portfolios.sql` | 찬영 가족 3계정의 보유·매수 이력·잔액을 데모 포트폴리오로 교체. **계정(`profiles`+`account`)이 없으면 먼저 만든다** — 파일 순서상 `seed_family_profiles` 보다 앞이라(아래 "순서 문제" 참고) 직접 만들어야 한다 |
+| `20260815033156_seed_family_profiles.sql` | 찬영 가족 3계정(`profiles`+`account`)을 저장소에서 재현 가능하게 함(위 파일과 같은 insert, `on conflict do nothing` 이라 중복 무해). 비밀번호는 자리표시자(`CHANGE_ME`) |
 | `20260815033308_order_lifecycle_db_ownership.sql` | 주문 생애주기(체결·대기·예약·취소·거절)를 DB가 소유. `transactions`에 상태 컬럼, `account`·`holdings`에 예약 잠금 컬럼 추가. `apply_trade` 갱신, `reserve_order`·`settle_order`·`cancel_order` 신설 |
 
 베이스 파일은 **뒤의 ALTER 2건이 아직 적용되지 않은 모양**이다. 즉 `stock_tab_views` 에는
@@ -66,15 +66,21 @@ supabase migration list # local·remote 양쪽에 같은 목록이 보이는지 
 MCP 로 적용하면 그때의 UTC 시각으로 기록되므로 **적용 직후 `supabase migration list` 로 확인하고
 파일 이름을 맞추는 것**을 절차에 넣는다.
 
-### 알려진 순서 문제 — `seed_family_profiles` 가 `seed_family_portfolios` 보다 뒤로 밀렸다 [사실]
+### 순서 문제 — `seed_family_profiles` 가 `seed_family_portfolios` 보다 뒤로 밀렸다 [사실, 해소]
 
 파일을 만들 때는 프로필 시딩이 포트폴리오 시딩보다 먼저 오게 지었지만(계정이 있어야 보유를
 넣을 수 있으므로), remote 적용 시각 기준으로 파일명을 맞추다 보니 실제 순서가 바뀌었다:
 `seed_family_portfolios`(`002039`) → `seed_family_profiles`(`033156`). 라이브에는 계정이
-이미 있었으니 문제가 없었지만, **새 환경에서 `db reset` 을 돌리면 포트폴리오 시딩이 먼저 실행돼
-계정이 없어 조용히 건너뛰고, 그 다음에야 계정이 생겨서 포트폴리오 데이터는 결국 아무 데도
-들어가지 않는다.** 로그인은 되지만 보유·매수 이력이 빈 상태가 된다. 스키마는 정상이므로
-`db reset` 자체는 성공한다 — 아직 고치지 않았다.
+이미 있었으니 문제가 없었지만, 새 환경에서 `db reset` 을 돌리면 포트폴리오 시딩이 먼저 실행돼
+계정이 없어 건너뛰고, 그 다음에야 계정이 생겨서 포트폴리오 데이터는 결국 아무 데도 들어가지
+않는 문제가 있었다.
+
+파일 순서(=remote 기록)는 바꿀 수 없으므로, **`seed_family_portfolios` 자신이 세 계정을
+먼저 만들도록** 고쳤다. `seed_family_profiles` 와 같은 `insert ... on conflict (id) do
+nothing` 을 앞에 추가해 계정이 없으면 만들고 있으면 그대로 둔다. 라이브에는 이미 계정이
+있으니 이 부분은 no-op — 라이브 재실행 없이 로컬 파일만 바뀐 것과 같다. 뒤이어 도는
+`seed_family_profiles` 는 같은 insert 를 다시 시도하지만 `on conflict do nothing` 이라
+문제없다.
 
 ## 새 환경에서 도는지가 판단 기준이다
 
