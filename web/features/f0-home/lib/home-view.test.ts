@@ -56,12 +56,14 @@ assert.equal(view.goalCount, Math.floor(20000 / 12000)); // 1개
 // 수익률 = 20,000 / (240,000+180,000) * 100 = 4.8%
 assert.equal(view.rateText, "+4.8%");
 assert.equal(view.rateColor, "#D5327A");
+assert.equal(view.profitText, "+20,000원");
 
 // 손실이면 부호와 색이 함께 바뀌고 목표 개수는 0 아래로 내려가지 않는다.
 const losing = homeView(held, { "005930": 50000, "259960": 100000 });
 assert.ok(losing.rateText.startsWith("−"));
 assert.equal(losing.rateColor, "#2E6BE6");
 assert.equal(losing.goalCount, 0);
+assert.ok(losing.profitText.startsWith("−"));
 
 // 시세를 못 받은 종목은 평단가를 현재가로 본다 — 0원으로 그리지 않는다.
 assert.equal(liveHoldings(held, {})[0].value, "200,000원");
@@ -72,6 +74,7 @@ assert.equal(empty.noHoldings, true);
 assert.deepEqual(empty.holdings, []);
 assert.equal(empty.goalCount, 0);
 assert.equal(empty.rateText, "+0.0%");
+assert.equal(empty.profitText, "+0원");
 
 // 소수 수량은 두 자리로 적는다.
 const frac = liveHoldings(
