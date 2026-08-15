@@ -107,6 +107,10 @@ function allowedContextNumbers(request: ChatRequest): (string | number)[] {
   const numbers: (string | number)[] = [
     request.context.quantity,
     request.context.unitPrice,
+    // 화면이 지금 보여주는 내 지갑 값. 화면과 같은 숫자만 말할 수 있게 허용한다.
+    request.context.pnlPercent,
+    request.context.cash,
+    request.context.holdingCount,
   ].filter((value): value is number => value !== undefined);
 
   // 사용자가 같은 질문에 적은 값은 되짚어 말할 수 있어야 한다 (SPEC §6.1.5 조건 계산).

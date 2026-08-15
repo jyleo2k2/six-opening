@@ -31,6 +31,10 @@ const MAX_MESSAGE_LENGTH = 500;
 const MAX_LABEL_LENGTH = 60;
 const MAX_QUANTITY = 1_000_000;
 const MAX_UNIT_PRICE = 1_000_000_000;
+const MAX_PNL_PERCENT = 100_000;
+const MAX_CASH = 1_000_000_000_000;
+/** 화이트리스트 51종을 넘는 보유 수는 화면 값이 아니다. */
+const MAX_HOLDING_COUNT = 51;
 const MAX_EXPLAIN_ID_LENGTH = 80;
 const MAX_PREVIOUS_ANSWER_LENGTH = 800;
 const CLIENT_IDENTITY_FIELDS = [
@@ -106,6 +110,24 @@ function optionalPositiveInteger(value: unknown, maximum: number) {
     return null;
   }
   return Number(value);
+}
+
+/** 잔고·보유 종목 수는 0 이 정상값이라 `optionalPositiveInteger` 를 쓸 수 없다. */
+function optionalNonNegativeInteger(value: unknown, maximum: number) {
+  if (value === undefined) return undefined;
+  if (!Number.isSafeInteger(value) || Number(value) < 0 || Number(value) > maximum) {
+    return null;
+  }
+  return Number(value);
+}
+
+/** 수익률은 음수와 소수를 모두 허용한다. 소수 둘째 자리까지만 남긴다. */
+function optionalPercent(value: unknown, limit: number) {
+  if (value === undefined) return undefined;
+  if (typeof value !== "number" || !Number.isFinite(value) || Math.abs(value) > limit) {
+    return null;
+  }
+  return Math.round(value * 100) / 100;
 }
 
 function parseExplainReply(value: unknown): ChatExplainReply | null | undefined {
@@ -230,11 +252,21 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
     value.context.unitPrice,
     MAX_UNIT_PRICE,
   );
+  // 화면이 지금 보여주는 내 지갑 값 (SPEC §5.1). 서버 DB 대신 화면을 원본으로 쓴다.
+  const pnlPercent = optionalPercent(value.context.pnlPercent, MAX_PNL_PERCENT);
+  const cash = optionalNonNegativeInteger(value.context.cash, MAX_CASH);
+  const holdingCount = optionalNonNegativeInteger(
+    value.context.holdingCount,
+    MAX_HOLDING_COUNT,
+  );
   if (
     stockId === null ||
     stockName === null ||
     quantity === null ||
     unitPrice === null ||
+    pnlPercent === null ||
+    cash === null ||
+    holdingCount === null ||
     (stockId !== undefined && !/^KRX:\d{6}$/.test(stockId))
   ) {
     return null;
@@ -272,6 +304,10 @@ export function parseChatRequest(value: unknown): ChatRequest | null {
       ...(stockName ? { stockName } : {}),
       ...(quantity ? { quantity } : {}),
       ...(unitPrice ? { unitPrice } : {}),
+      // 0 도 정상값이라 truthy 검사를 쓰지 않는다 (현금 0원, 보유 0곳, 수익률 0%).
+      ...(pnlPercent !== undefined ? { pnlPercent } : {}),
+      ...(cash !== undefined ? { cash } : {}),
+      ...(holdingCount !== undefined ? { holdingCount } : {}),
     },
     ...(lastAnswer ? { lastAnswer } : {}),
     ...(lastTopicId ? { lastTopicId } : {}),
