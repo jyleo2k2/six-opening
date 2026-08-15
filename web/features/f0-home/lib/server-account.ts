@@ -13,7 +13,10 @@ import type { Account, Holding } from "./portfolio-view";
  */
 export type ServerAccount = AccountUser & {
   name?: string | null;
+  /** 총 현금. 미체결 주문이 잠근 몫까지 포함한다 — 주문 한도가 아니다. */
   balance?: number | null;
+  /** 주문에 쓸 수 있는 현금 = `balance` − 잠긴 현금. 화면의 `cash` 는 이 값이다. */
+  available?: number | null;
 };
 
 export function applyServerAccount(
@@ -32,8 +35,12 @@ export function applyServerAccount(
     }));
 
   const prev = acc[role];
+  // 화면의 `cash` 는 주문에 쓸 수 있는 돈이다. 총자산은 여기에 예약이 잠근 현금을 다시
+  // 더해서 낸다(`accountTotalAsset`) — 서버의 balance = available + reserved 와 같은 식이다.
+  // 예전 응답에는 available 이 없었으므로 그때는 balance 를 그대로 쓴다.
+  const server = typeof user.available === "number" ? user.available : user.balance;
   // 잔액이 숫자가 아니면 덮지 않는다. 여기서 undefined 가 들어가면 총자산이 통째로 NaN 이 된다.
-  const cash = typeof user.balance === "number" ? user.balance : prev?.cash;
+  const cash = typeof server === "number" ? server : prev?.cash;
   if (typeof cash !== "number") return acc;
 
   return {

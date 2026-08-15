@@ -26,6 +26,12 @@ export type PendingOrder = {
   reservedAmount?: number;
   reservedQty?: number;
   scheduledFor?: string;
+  // 아래는 `app.html` 이 만들던 예약 항목에 원래 있던 값이다. 서버 주문을 같은 모양으로
+  // 옮기면서(`server-orders.ts`) 타입에도 적는다 — 예약 정산이 이 셋을 읽는다.
+  requestMode?: string;
+  requestedQty?: number | null;
+  reservationMode?: string;
+  createdAt?: string;
 };
 export type Account = {
   name?: string;
