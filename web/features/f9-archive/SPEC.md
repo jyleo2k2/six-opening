@@ -1,8 +1,8 @@
 # F9 — 가족 아카이브 기능 명세
 
-> **현재 구현 단일 원본** · 2026-08-14 · 기준 브랜치 `claude/김경렬/아카이브-시즌카드`
+> **현재 구현 단일 원본** · 2026-08-15 · 기준: PR #217까지 병합된 `main`
 >
-> 현행 동작은 **`web/public/ui/app.html` 렌더링 → `buildArchive()` → `shared/engine/archive-profile.js` → 이 문서** 순으로 확인한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따른다.
+> 현행 동작은 **`web/ui-src/`(조립 결과 `app.html`) 렌더링 → `buildArchive()` → `shared/engine/archive-profile.js` → 이 문서** 순으로 확인한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따른다.
 
 ## 1. 현재 범위
 
@@ -19,7 +19,7 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 카드 상세 시트 | 카드 모아보기 | 그 주 카드 한 장 |
 | 가족 투자 성향 비교 | 성향 탭 | 구성원 오각형 겹치기 |
 
-가족 체결 마커는 F2 차트 안에 있다. 가족 거래 피드는 F11 React 오버레이와 이 화면의 수익률 탭에 있으며, 두 화면 모두 같은 가족·댓글·좋아요 API를 사용한다.
+가족 체결 마커는 F2 차트 안에 있다. 가족 거래 피드는 **이 화면의 수익률 탭 한 곳에만** 있다 — F11 React 오버레이 `FeedScreen`은 소비자가 없어 삭제됐으므로 여기에 다시 만들지 않는다.
 
 ## 2. 소유권과 실행 경로
 
@@ -32,7 +32,8 @@ F9 사용자 화면은 `app.html` 안의 `archive` 화면이며 탭은 **두 개
 | 레일 드래그 | `web/ui-src/methods/bindCardRail.js` | 카드 가로 스크롤 |
 | 종가 조회 | `web/ui-src/methods/loadDailyCloses.js` | 사고판 종목 일봉을 한 번에 받아 온다 |
 | 종가 API | `web/app/api/quote/daily-closes/route.ts` | 보관 일봉에서 `{종목: [{date, close}]}` |
-| 빌드 | `web/scripts/ui-build.mjs` | `ui-src` ↔ `app.html` 왕복과 엔진 복사 |
+| **수익률 산식** | `web/shared/engine/portfolio-return.ts` | 평가액·원금·수익률. 금액과 비율을 나눠 돌려주므로 서버가 타인에게는 `returnRate`만 넘길 수 있다(가족 달리기 트랙) |
+| 빌드 | `web/scripts/ui-build.mjs` | `ui-src` → `app.html` 조립과 엔진 복사. `app.html`은 생성물이라 직접 고치지 않는다 |
 | 원본 데이터 | `localStorage["kw_proto_v1"]` | `acc`·`records`·`sellRecords`·`events` |
 | 행동 데이터 판정 API | `web/app/api/profile/behavior/route.ts` | 로그인 세션의 `stock_tab_views`·`transactions` 집계 → 캐릭터 키 |
 | 행동 데이터 조회 | `web/ui-src/methods/loadBehaviorProfile.js` | 진입 시 위 API를 불러 `this.dbBehavior`에 저장 |

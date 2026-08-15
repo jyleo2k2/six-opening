@@ -1,6 +1,6 @@
 # F11 — 가족 거래 피드 기능 명세
 
-> **기능 단일 원본** · 2026-08-14 · 현재 `web/` 구현 기준
+> **기능 단일 원본** · 2026-08-15 · 기준: PR #217까지 병합된 `main`
 >
 > 이 문서는 희망 설계가 아니라 현재 사용자가 실제로 만나는 동작을 기록한다. 충돌 시 프론트 구현 → 백엔드 계약 → 이 문서 순으로 확인한다.
 
@@ -18,20 +18,20 @@
 
 | 위치 | 현재 책임 |
 |---|---|
-| `web/public/ui/app.html` 아카이브 `return` 탭 | 피드 카드, 구성원 필터, 코멘트·좋아요 입력 |
+| `web/ui-src/screens/archive.html`의 `return` 탭 | 피드 카드, 구성원 필터, 코멘트·좋아요 입력 |
 | `web/ui-src/methods/loadFamilyProfiles.js` | `/api/family` 조회와 `dbFamily` 보관 |
 | `web/ui-src/methods/loadArchiveFeedReactions.js` | 거래 id 일괄 반응 조회 |
 | `web/ui-src/methods/sendArchiveComment.js` · `deleteArchiveComment.js` | 코멘트 작성·본인 삭제 |
 | `web/ui-src/methods/toggleArchiveLike.js` | 좋아요 토글 |
 | `web/ui-src/methods/buildArchive.js` | 응답이 없을 때의 로컬 데모 폴백 |
-| `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 전체 체결 조회와 타인 수량·체결가 마스킹 |
+| `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 구성원별 수익률, 전체 체결 조회와 타인 수량·체결가 마스킹 |
 | `web/shared/engine/comment-filter.ts` | 서버 저장 전 코멘트 문구 게이트 |
 | `web/shared/engine/trade-markers.ts` | 차트 마커 데이터 변환 |
 | `web/app/api/trades/route.ts` | 세션 가족의 종목별 체결 조회와 타인 수량 마스킹 |
 | `web/app/api/comments/route.ts` | 서버 코멘트 조회·작성·삭제 계약 |
 | `web/app/api/likes/route.ts` | 서버 좋아요 조회·토글 계약 |
 
-F11에는 자체 React 화면이 없다. 화면 정본은 `web/public/ui/app.html`이고 `web/ui-src/`가 그 분해본이므로 양쪽을 함께 고친 뒤 `node scripts/ui-build.mjs verify`로 확인한다. 이 폴더에는 SPEC과 가드만 남는다.
+F11에는 자체 React 화면이 없다(오버레이 `FeedScreen`은 소비자가 없어 삭제됐다). **화면 원본은 `web/ui-src/`이고 `web/public/ui/app.html`은 `node scripts/ui-build.mjs build`가 만드는 생성물이라 직접 고치지 않는다** — 고쳐도 다음 조립 때 사라진다. 이 폴더에는 SPEC과 가드만 남는다.
 
 ## 3. 프론트 데이터 흐름
 
