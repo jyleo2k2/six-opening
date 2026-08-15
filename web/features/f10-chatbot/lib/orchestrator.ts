@@ -27,7 +27,7 @@ import { judgeChatOutput } from "./output-judge";
 import { rewriteFollowUp } from "./rewrite";
 import { classifyTermKind, type ClassifiedTermKind } from "./term-classify";
 import { looksLikeNewQuestion } from "./colloquial";
-import { isHaeyoKorean, toPoliteKorean } from "./polite";
+import { isHaeyoKorean, toPoliteKorean, withoutSecondPerson } from "./polite";
 import {
   normalizeChatInput,
   routeMessage,
@@ -690,7 +690,8 @@ export async function createChatOutcome(
 
   // 본문은 승인 데이터 상당수가 아직 반말 원문이라 변환을 유지한다.
   // 추천질문은 아이가 누르는 자기 말이므로 변환하지 않는다(SPEC §3.3.2).
-  response = { ...response, text: toPoliteKorean(response.text) };
+  // 어미를 해요체로 맞춰도 "네가"가 남으면 말투가 섞이므로 2인칭 대명사도 함께 지운다.
+  response = { ...response, text: withoutSecondPerson(toPoliteKorean(response.text)) };
 
   onStatus("답변을 안전하게 점검하는 중");
   // 🤖 챗봇이 말하는 것만 검사한다. 본문과 확인 질문(prompt)이 대상이고,

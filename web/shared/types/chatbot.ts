@@ -22,7 +22,12 @@ export const CHAT_ORDER_STEPS = [
 ] as const;
 export type ChatOrderStep = (typeof CHAT_ORDER_STEPS)[number];
 
-export const CHAT_ARCHIVE_TABS = ["report", "return", "compare", "season"] as const;
+/**
+ * 아카이브 화면이 실제로 가진 탭. `ui-src` 의 `openRequestedScreen` 이 모르는 값을 받으면
+ * 말없이 성향 탭으로 떨어뜨리므로, 화면에 없는 탭 이름을 계약에 남겨 두지 않는다.
+ * 주차별 카드는 탭이 아니라 성향 탭 위에 열리는 `archiveOverlay: "cards"` 다.
+ */
+export const CHAT_ARCHIVE_TABS = ["report", "return"] as const;
 export type ChatArchiveTab = (typeof CHAT_ARCHIVE_TABS)[number];
 
 export type ChatContext = {

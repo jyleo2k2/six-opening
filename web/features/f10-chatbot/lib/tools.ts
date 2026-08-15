@@ -1,6 +1,7 @@
 import { STOCKS } from "../../../shared/data/stocks";
 import { findApprovedStockEducation } from "../../../shared/data/stock-education";
 import type {
+  ChatArchiveTab,
   ChatContext,
   ChatResponse,
   ReadOnlyChatToolName,
@@ -68,13 +69,14 @@ function unavailable(
   tool: ReadOnlyChatToolName,
   text: string,
   target: "stock" | "archive" | "portfolio",
+  archiveTab?: ChatArchiveTab,
 ): ToolExecution {
   return {
     tool,
     status: "unavailable",
     response: {
       text,
-      uiAction: { type: "open_screen", target },
+      uiAction: { type: "open_screen", target, ...(archiveTab ? { archiveTab } : {}) },
     },
     evidence: [],
   };
@@ -144,6 +146,7 @@ export function createReadOnlyToolRunner(
           tool,
           "서버에 저장된 거래 기록을 찾지 못했어요. 방금 한 거래는 아카이브 화면에 먼저 보이니 거기서 확인해 주세요.",
           "archive",
+          "return",
         );
       }
       return {
@@ -151,7 +154,14 @@ export function createReadOnlyToolRunner(
         status: "ok",
         response: {
           text: `투자 기록은 ${summary.recordCount}개예요.${summary.latestReasonLabel ? ` 가장 최근에는 “${summary.latestReasonLabel}”라고 이유를 남겼어요.` : ""}`,
-          uiAction: { type: "open_screen", target: "archive" },
+          // 거래 하나하나와 그때 고른 이유는 아카이브 **수익률 탭**의 피드에 있다.
+          // 탭을 비워 보내면 화면이 성향 탭으로 폴백해 엉뚱한 곳이 열린다.
+          uiAction: {
+            type: "open_screen",
+            target: "archive",
+            archiveTab: "return",
+            label: "거래 기록 보기",
+          },
         },
         evidence: [`trade-record-count:${summary.recordCount}`],
       };

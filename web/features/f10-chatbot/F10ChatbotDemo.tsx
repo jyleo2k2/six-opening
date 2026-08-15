@@ -1329,10 +1329,6 @@ export function F10ChatbotDemo({
                 : "transition-transform duration-200 ease-out motion-reduce:transition-none"
             }`}
             role="dialog"
-            onPointerCancel={(event) => finishSheetDrag(event, true)}
-            onPointerDown={handleSheetPointerDown}
-            onPointerMove={handleSheetPointerMove}
-            onPointerUp={finishSheetDrag}
             style={{
               width: PROTOTYPE_PHONE.screenWidth,
               height: PROTOTYPE_SHEET_HEIGHT,
@@ -1341,24 +1337,35 @@ export function F10ChatbotDemo({
               willChange: "transform",
             }}
           >
-            <div
-              className="flex h-7 shrink-0 touch-none items-center justify-center"
+            {/*
+              닫기 드래그는 **헤더에서만** 받는다. 시트 전체에 걸면 대화 목록을 넘기려는
+              손짓이 시트 드래그로 잡혀(포인터 캡처 + preventDefault) 스크롤이 아예 죽고,
+              아래로 끌면 읽으려던 대화가 닫힌다. 대화가 길어질수록 못 읽는다.
+            */}
+            <header
+              className="shrink-0 touch-none"
+              onPointerCancel={(event) => finishSheetDrag(event, true)}
+              onPointerDown={handleSheetPointerDown}
+              onPointerMove={handleSheetPointerMove}
+              onPointerUp={finishSheetDrag}
             >
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-12 rounded-full bg-gray/60"
-              />
-            </div>
+              <div className="flex h-7 items-center justify-center">
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-12 rounded-full bg-gray/60"
+                />
+              </div>
 
-            <div className="flex shrink-0 justify-end border-b border-gray/40 px-5 pb-3">
-              <button
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
-                onClick={resetChat}
-                type="button"
-              >
-                {COPY.reset}
-              </button>
-            </div>
+              <div className="flex justify-end border-b border-gray/40 px-5 pb-3">
+                <button
+                  className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
+                  onClick={resetChat}
+                  type="button"
+                >
+                  {COPY.reset}
+                </button>
+              </div>
+            </header>
 
             <div
               className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
