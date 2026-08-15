@@ -8,7 +8,7 @@ import {
   getPrototypeScreenRect,
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
-import { phoneScreenClipPath } from "./lib/phone-frame";
+import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
 import { RankingScreen } from "./RankingScreen";
 import {
   isRecord,
@@ -220,6 +220,8 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
     return () => window.removeEventListener("message", receivePrototypeMessage);
   }, []);
 
+  const frame = phoneFrameRect(screenRect);
+
   return (
     <div className="h-dvh min-h-[640px] overflow-hidden bg-bg text-ink">
       <iframe
@@ -253,6 +255,27 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
           screenRect={screenRect}
         />
       </div>
+      {/*
+        폰 프레임을 맨 위에 한 겹 더 깐다. 챗봇 시트처럼 화면 위로 올라오는 것들은 iframe
+        **밖**에 있어서 프레임 이미지보다 위에 그려진다. 화면 사각형으로 자르고 있지만
+        화면 라운드(40px)보다 프레임 개구부가 깊게 파여 있어 그 틈으로 베젤 위에 비친다.
+        여기 한 겹이 있으면 무엇이 올라오든 베젤이 이긴다.
+      */}
+      {frame && (
+        <img
+          alt=""
+          src="/ui/assets/iphone-frame.png"
+          style={{
+            position: "fixed",
+            left: frame.left,
+            top: frame.top,
+            width: frame.width,
+            height: frame.height,
+            zIndex: 20,
+            pointerEvents: "none",
+          }}
+        />
+      )}
     </div>
   );
 }

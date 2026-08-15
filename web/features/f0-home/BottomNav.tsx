@@ -11,7 +11,10 @@ import { styleFromCss } from "./lib/css-style";
  */
 export type NavTab = "home" | "trade" | "archive" | "ranking";
 
-const BAR = styleFromCss("flex:none;display:flex;align-items:center;gap:8px;padding:6px 14px 10px");
+// 좌우 22 는 `ui-src` 의 `navBarStyle` 과 같은 값이다. 프레임 개구부의 하단 코너가 화면
+// 라운드보다 깊게 파여, 여백 14 면 알약 모서리가 개구부 경계에 붙는다. 두 값이 갈리면
+// 화면을 오갈 때 하단바 폭이 달라 보인다.
+const BAR = styleFromCss("flex:none;display:flex;align-items:center;gap:8px;padding:6px 22px 10px");
 const PILL = styleFromCss(
   "flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:rgba(255,255,255,0.6);" +
     "backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);" +

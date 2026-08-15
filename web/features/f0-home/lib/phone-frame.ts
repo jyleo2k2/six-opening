@@ -43,4 +43,27 @@ export function phoneScreenClipPath(screen: PrototypeScreenRect | null) {
   return `inset(${screen.top}px calc(100% - ${right}px) calc(100% - ${bottom}px) ${screen.left}px round ${radius}px)`;
 }
 
+/**
+ * 프레임 이미지를 **오버레이 위에** 한 번 더 그릴 자리.
+ *
+ * 자르기만으로는 부족하다. 화면 라운드는 40px 인데 프레임 개구부의 코너는 그보다 깊게
+ * 파여 있어, 화면 사각형에 딱 맞춰 잘라도 그 사이 틈으로 오버레이가 베젤 위에 비친다.
+ * 프레임을 맨 위에 한 겹 더 깔면 무엇이 올라오든 베젤이 항상 이긴다.
+ *
+ * 화면과 프레임은 둘 다 창 가운데 놓이므로(24+402+24=450, 23+874+23=920) 화면 사각형에서
+ * 바로 구한다 — 배율을 다시 계산하면 프레임과 화면이 어긋난다.
+ */
+export function phoneFrameRect(screen: PrototypeScreenRect | null) {
+  if (!screen) return null;
+
+  const width = PROTOTYPE_PHONE.frameWidth * screen.scale;
+  const height = PROTOTYPE_PHONE.frameHeight * screen.scale;
+  return {
+    width,
+    height,
+    left: screen.left - PHONE_SCREEN.left * screen.scale,
+    top: screen.top - PHONE_SCREEN.top * screen.scale,
+  };
+}
+
 export { PROTOTYPE_PHONE };
