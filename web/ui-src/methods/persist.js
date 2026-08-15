@@ -1,28 +1,23 @@
   persist(next){
-    // 두 덩어리로 나눠 저장한다.
-    //  - 오래 남는 것(acc·records·…): 새로고침해도 유지한다. 지금까지와 같다.
-    //  - 화면 임시값(ui): 화면이 실제 라우트로 나뉘면서 문서를 갈아끼울 때만 되살린다.
-    //    새로고침·새 탭에서는 버려 "F5 하면 처음부터" 라는 지금 동작을 지킨다 (F2 SPEC §6.2).
+    // 지갑만 저장한다. 화면 임시값은 저장하지 않는다 — 화면을 옮겨도 문서가 그대로라
+    // 메모리 상태가 살아 있다. 예전에는 문서를 갈아끼워서 백업이 필요했다.
     try {
       localStorage.setItem('kw_proto_v1', JSON.stringify({
         acc: next.acc, records: next.records, sellRecords: next.sellRecords || [],
         events: next.events || [], seq: next.seq, watchlist: next.watchlist || []
       }));
     } catch(e){}
-    try {
-      sessionStorage.setItem('kw_proto_ui_v1', JSON.stringify({
-        screen: next.screen, account: next.account, code: next.code,
-        draft: next.draft, sellDraft: next.sellDraft,
-        buyStep: next.buyStep, sellStep: next.sellStep, arcTab: next.arcTab
-      }));
-    } catch(e){}
   }
 
-  // 화면이 다른 주소로 넘어갈 때 쓴다. 문서가 갈아끼워지므로 메모리 상태가 사라지는데,
-  // 이 표시가 있어야 다음 문서가 화면 임시값을 되살린다. 표시가 없으면(F5·새 탭·직접 진입)
-  // 임시값은 버려진다.
+  // 옮겨 간 화면으로 넘어갈 때 쓴다. **문서를 갈아끼우지 않는다** — 부모가 iframe 위에
+  // 그 화면을 얹고 주소만 바꾼다. 문서를 새로 받으면 app.html 이 처음부터 다시 뜨는데,
+  // 계정을 판정하기 전까지 아이 계정 데모가 먼저 그려져 남의 계좌가 잠깐 보인다.
+  // 단독으로 연 app.html 에는 부모가 없으므로 그때만 주소를 직접 바꾼다.
   leaveToRoute(path){
-    try { sessionStorage.setItem('kw_proto_nav_v1', '1'); } catch(e){}
+    if (window.parent !== window) {
+      window.parent.postMessage({ type:'kiwoom:open-route', path:path }, window.location.origin);
+      return;
+    }
     const top = window.top || window;
     top.location.href = path;
   }

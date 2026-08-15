@@ -8,8 +8,8 @@ import {
   getPrototypeScreenRect,
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
-import { takePendingChatAction } from "./lib/leave-to-route";
 import { phoneScreenClipPath } from "./lib/phone-frame";
+import { RankingScreen } from "./RankingScreen";
 import {
   isRecord,
   parseBehaviorEvent,
@@ -31,10 +31,30 @@ const CHAT_CONTEXT_MESSAGE = "kiwoom:chat-context";
 const CHAT_BEHAVIOR_MESSAGE = "kiwoom:chat-behavior";
 const OPEN_CHAT_ACTION_MESSAGE = "kiwoom:open-chat-action";
 const SCREEN_MESSAGE = "kiwoom:screen";
+const OPEN_ROUTE_MESSAGE = "kiwoom:open-route";
+
+/**
+ * 이미 React 로 옮긴 화면. **iframe 을 살려 둔 채 그 위에 얹는다.**
+ *
+ * 예전에는 캐치올이 옮긴 화면과 이 컴포넌트 중 하나만 렌더해서, 화면을 오갈 때마다
+ * iframe 이 언마운트되고 `app.html` 이 처음부터 다시 떴다. 그러면 `/api/account` 응답이
+ * 오기 전까지 `renderVals-compute.js` 가 아이 계정 데모로 폴백해 **남의 계좌가 잠깐 보인다.**
+ * 문서를 그대로 두면 그 왕복이 앱을 처음 열 때 한 번뿐이다.
+ */
+const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>(["ranking"]);
+
+const isMigrated = (route: ScreenRoute | null) =>
+  route !== null && MIGRATED_SCREENS.has(route.screen);
 
 // 가족 피드는 app.html 아카이브 수익률 탭이 소유한다. 여기 오버레이로 겹쳐 두지 않는다.
 export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  // 옮긴 화면은 첫 렌더부터 보여 준다 — iframe 로드를 기다리면 그동안 app.html 이 비친다.
+  const [overlay, setOverlay] = useState<ScreenRoute | null>(
+    isMigrated(route ?? null) ? (route ?? null) : null,
+  );
+  const overlayRef = useRef<ScreenRoute | null>(overlay);
+  overlayRef.current = overlay;
   const chatContextRef = useRef<ChatContext>({ screen: "home" });
   const [chatContext, setChatContext] = useState<ChatContext>({ screen: "home" });
   const [screenRect, setScreenRect] = useState<PrototypeScreenRect | null>(null);
@@ -87,23 +107,34 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
     );
   };
 
-  // 주소 → 화면. 서버가 넘긴 첫 주소와 뒤로가기가 같은 길을 쓴다.
+  // 주소 → 화면. 서버가 넘긴 첫 주소, 뒤로가기, 화면끼리의 이동이 모두 이 길을 쓴다.
+  //
+  // 옮긴 화면이면 iframe 위에 얹기만 한다. 아직 안 옮긴 화면이면 오버레이를 걷고 iframe 에
+  // 지시를 보낸다 — 문서는 어느 쪽이든 그대로다.
   const openRoute = (next: ScreenRoute) => {
+    if (isMigrated(next)) {
+      setOverlay(next);
+      writePath(next);
+      return;
+    }
+    setOverlay(null);
     const action = actionFromRoute(next);
     if (action) openChatAction(action);
   };
 
+  /** 옮긴 화면이 "여기로 가자" 하고 올려 보낸다. 주소 문자열만 안다. */
+  const leaveToPath = (path: string) => {
+    const next = routeFromPath(path);
+    if (next) openRoute(next);
+  };
+
   // iframe 이 뜬 뒤에야 지시를 받을 수 있다. 첫 주소는 onLoad 에서 한 번 적용한다.
-  //
-  // 옮겨 온 화면(예: `/ranking`)에서 챗봇이 시킨 이동은 주소보다 자세하다 — 업종·주문 단계·
-  // 아카이브 탭까지 담겨 있다. 그런 지시가 넘어왔으면 주소 대신 그것을 그대로 쓴다.
   const appliedFirstRoute = useRef(false);
   const applyFirstRoute = () => {
     if (appliedFirstRoute.current) return;
     appliedFirstRoute.current = true;
-    const pending = takePendingChatAction();
-    if (pending) openChatAction(pending);
-    else if (route) openRoute(route);
+    // 옮긴 화면은 이미 얹혀 있다. iframe 에는 아무 지시도 보내지 않는다.
+    if (route && !isMigrated(route)) openRoute(route);
   };
 
   // 화면 → 주소. app.html 이 화면 전환마다 보내는 맥락으로 주소만 갈아끼운다.
@@ -119,7 +150,7 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
   };
   // 원래 화면 이름(`kiwoom:screen`)이 정확하다. 챗봇 맥락은 그 메시지를 못 받았을 때의 폴백이다.
   const syncPathFromContext = (context: ChatContext) => {
-    if (sawScreenMessage.current) return;
+    if (sawScreenMessage.current || overlayRef.current) return;
     writePath(routeFromChatContext(context));
   };
   const sawScreenMessage = useRef(false);
@@ -155,11 +186,20 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
         return;
       }
 
+      // app.html 안의 링크가 옮긴 화면으로 보낸다 (`leaveToRoute`).
+      if (event.data.type === OPEN_ROUTE_MESSAGE) {
+        const path = event.data.path;
+        if (typeof path === "string") leaveToPath(path);
+        return;
+      }
+
       if (event.data.type === SCREEN_MESSAGE) {
         const message = parseScreenMessage(event.data);
         if (message) {
           sawScreenMessage.current = true;
-          writePath(routeFromAppScreen(message.screen, message.code));
+          // 옮긴 화면을 보고 있으면 주소는 그 화면 것이다. iframe 은 뒤에서 자기 화면을
+          // 그대로 들고 있을 뿐이라, 그 이름으로 주소를 덮으면 주소와 화면이 어긋난다.
+          if (!overlayRef.current) writePath(routeFromAppScreen(message.screen, message.code));
         }
         return;
       }
@@ -193,6 +233,16 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
         src="/ui/app.html?runtime=1"
         title="키움 가족 모의투자 리그"
       />
+      {/*
+        옮긴 화면은 iframe 을 **덮기만** 한다. 감추거나 떼지 않는다 — 떼면 app.html 이
+        처음부터 다시 뜨고, `display:none` 으로 감추면 챗봇이 맞출 화면 사각형을 못 잰다.
+        챗봇 오버레이(z-index 10)보다는 아래에 둔다.
+      */}
+      {overlay?.screen === "ranking" && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 5 }}>
+          <RankingScreen onLeave={leaveToPath} />
+        </div>
+      )}
       <div
         className="prototype-chat-overlay"
         style={{ clipPath: phoneScreenClipPath(screenRect) }}

@@ -3,6 +3,7 @@ import { FAMILY_SEED_TRADES } from "./family-trade-seed";
 import {
   SEED,
   accountTotalAsset,
+  persistWallet,
   restorePrototypeState,
   seedAccounts,
 } from "./prototype-account.js";
@@ -52,41 +53,31 @@ function fakeStorage(seed: Record<string, string> = {}) {
 }
 
 /**
- * 복원은 이제 **첫 렌더 전에** 돈다. 여기가 조용히 깨지면 화면을 옮길 때마다
- * 시드 지갑이 한 프레임 보이거나(복원 실패), 새로고침해도 초기화되지 않는다(표시 무시).
+ * 복원은 **첫 렌더 전에** 돈다. 여기가 조용히 깨지면 화면을 열 때 시드 지갑이 한 프레임
+ * 보이거나(복원 실패), 저장값이 깨졌을 때 화면이 통째로 안 뜬다(예외).
+ *
+ * 화면 상태는 더 이상 넘겨받지 않는다 — 화면을 옮겨도 문서가 그대로라 메모리에 남아 있다.
  */
 function restoreTests() {
   const store = { acc: { child: { cash: 7, holdings: [], pending: [] } }, records: [{ id: "r" }], seq: 9 };
-  const ui = { screen: "archive", arcTab: "return", draft: { amount: 30000 }, code: null };
   const passThrough = (account: unknown) => account;
 
-  // 앱 안에서 넘어왔다 → 계좌도 화면 임시값도 되살린다.
-  let local = fakeStorage({ kw_proto_v1: JSON.stringify(store) });
-  let session = fakeStorage({ kw_proto_ui_v1: JSON.stringify(ui), kw_proto_nav_v1: "1" });
-  Object.assign(globalThis, { localStorage: local, sessionStorage: session });
+  Object.assign(globalThis, {
+    localStorage: fakeStorage({ kw_proto_v1: JSON.stringify(store) }),
+    sessionStorage: fakeStorage(),
+  });
   let restored = restorePrototypeState(passThrough);
   assert.equal(restored.seq, 9);
   assert.deepEqual(restored.records, [{ id: "r" }]);
-  assert.equal(restored.screen, "archive");
-  assert.deepEqual(restored.draft, { amount: 30000 });
-  // null 은 되살리지 않는다 — 초기값을 덮어 화면이 종목을 잃는다.
-  assert.ok(!("code" in restored));
-  // 표시는 한 번 쓰고 버린다.
-  assert.equal(session.box.has("kw_proto_nav_v1"), false);
-
-  // 표시가 없다(F5·새 탭) → 계좌만 남고 화면 임시값은 버린다.
-  local = fakeStorage({ kw_proto_v1: JSON.stringify(store) });
-  session = fakeStorage({ kw_proto_ui_v1: JSON.stringify(ui) });
-  Object.assign(globalThis, { localStorage: local, sessionStorage: session });
-  restored = restorePrototypeState(passThrough);
-  assert.equal(restored.seq, 9);
-  assert.ok(!("screen" in restored), "F5 하면 처음부터여야 한다 (F2 SPEC §6.2)");
-  assert.equal(session.box.has("kw_proto_ui_v1"), false);
+  assert.deepEqual(restored.acc.child.cash, 7);
+  // 화면 상태는 저장하지도 되살리지도 않는다.
+  assert.ok(!("screen" in restored));
+  assert.ok(!("draft" in restored));
 
   // 저장값이 깨졌어도 죽지 않는다. 첫 렌더 전에 도는 코드라 던지면 화면이 통째로 안 뜬다.
   Object.assign(globalThis, {
     localStorage: fakeStorage({ kw_proto_v1: "{oops" }),
-    sessionStorage: fakeStorage({ kw_proto_nav_v1: "1", kw_proto_ui_v1: "nope" }),
+    sessionStorage: fakeStorage(),
   });
   assert.deepEqual(restorePrototypeState(passThrough), {});
 
@@ -96,6 +87,13 @@ function restoreTests() {
     sessionStorage: fakeStorage(),
   });
   assert.ok(!("seq" in restorePrototypeState(passThrough)));
+
+  // 저장 → 읽기 왕복. 옮긴 화면이 예약 주문을 취소하면 app.html 도 같은 값을 본다.
+  const box = fakeStorage();
+  Object.assign(globalThis, { localStorage: box, sessionStorage: fakeStorage() });
+  persistWallet({ acc: { child: { cash: 5, holdings: [], pending: [] } }, records: [], seq: 3 });
+  assert.equal(restorePrototypeState(passThrough).acc.child.cash, 5);
+  assert.equal(restorePrototypeState(passThrough).seq, 3);
 }
 
 function main() {
