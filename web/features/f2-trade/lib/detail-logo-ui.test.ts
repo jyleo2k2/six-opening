@@ -3,8 +3,10 @@ import { existsSync, readFileSync } from "node:fs";
 
 const universeUrl = new URL("../../../public/ui/assets/universe.js", import.meta.url);
 const universeSource = readFileSync(universeUrl, "utf8");
+// 조립 결과를 읽는다. ui-src 안에서 조각을 어떻게 나누든 계약은 그대로 확인된다
+// (같은 폴더의 buy-amount-ui·news/prototype-ui 테스트와 같은 방식).
 const uiSource = readFileSync(
-  new URL("../../../ui-src/methods/renderVals-return.js", import.meta.url),
+  new URL("../../../public/ui/app.html", import.meta.url),
   "utf8",
 );
 
