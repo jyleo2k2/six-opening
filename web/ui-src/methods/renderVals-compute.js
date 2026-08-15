@@ -78,7 +78,6 @@
       : (od.qty === undefined ? '' : ((Math.round(od.qty * 100) / 100) + '주'));
     const sd = s.sellDone || {};
     const sdQty = sd.qty === undefined ? '' : ((Math.round(sd.qty * 100) / 100) + '주');
-    const rankTab = s.rankTab || 'week';
     const reason = REASONS.filter(r => r.code === s.draft.reason)[0];
     const plan = PLANS.filter(p => p.code === s.draft.plan)[0];
 

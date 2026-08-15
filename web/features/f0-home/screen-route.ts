@@ -77,12 +77,15 @@ export function pathFromRoute(route: ScreenRoute): string {
 
 /**
  * 주소를 `app.html` 이 이해하는 화면 이동 지시로 바꾼다.
- * 홈은 지시를 보내지 않는다 — 앱이 홈에서 시작하므로 보낼 필요가 없다.
+ *
+ * 홈도 지시를 보낸다. 앱이 홈에서 시작하니 필요 없어 보이지만, 옮겨 온 화면(`/ranking`)에서
+ * 돌아올 때는 화면 임시값을 되살리므로 **떠나기 전 화면**에서 시작한다. 홈을 눌렀는데
+ * 매수 화면이 뜨는 것을 막으려면 주소가 시킨 화면을 분명히 말해야 한다.
  */
 export function actionFromRoute(route: ScreenRoute): ChatUiAction | null {
   switch (route.screen) {
     case "home":
-      return null;
+      return { type: "open_screen", target: "home" };
     case "explore":
       return { type: "open_screen", target: "stock", stockView: "explore" };
     case "ranking":
