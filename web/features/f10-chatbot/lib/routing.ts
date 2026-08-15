@@ -2215,6 +2215,28 @@ function findScriptedTerm(message: string) {
     : undefined;
 }
 
+/**
+ * 승인 사전 항목에 용어 DAPIE 를 붙여도 되는 질문인지(SPEC §3.4.1).
+ *
+ * `findScriptedTerm` 과 판정이 다르다. 저쪽은 **사전이 term 9종 고정 응답을 이길지**를
+ * 정하므로 정의형으로 좁게 본다. 여기는 **정의형 퀴즈를 띄울지**를 정하므로, 뜻 설명으로
+ * 답해도 되는 형태(확인형·형태 미상)는 그대로 두고 §3.4.1 이 FAQ 단답으로 못박은
+ * 사용법·위치 질문만 막는다.
+ *
+ * 이 판정이 없어서 "차트는 어떻게 봐요?"(절차)에 "차트가 직접 보여주는 것은
+ * 무엇일까요?"(정의) 로 되물었다. 사전 스크립트를 붙이는 자리는 여기 하나뿐이다.
+ */
+function explainScriptFor(
+  entry: { explainScript?: ExplainScript } | undefined,
+  message: string,
+) {
+  if (!entry?.explainScript) return undefined;
+  if (COMPARISON_PATTERN.test(message)) return undefined;
+  const questionForm = findChatbotQuestionForm(toStandardQuestionForm(message));
+  if (questionForm === "procedure" || questionForm === "location") return undefined;
+  return entry.explainScript;
+}
+
 function findTermKind(message: string): TermKind | null {
   if (
     includesAny(message, [
@@ -4985,6 +5007,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     EARLY_SCREEN_TERM_IDS.has(earlyKnowledge.id) &&
     !findMentionedStock(message)
   ) {
+    // 아래 본 경로와 같은 게이트를 쓴다. 이 분기가 먼저 return 하므로, 여기에만
+    // 게이트가 없으면 화면 용어 4종은 절차·위치 질문에도 정의형 퀴즈를 열었다.
+    const earlyExplainScript = explainScriptFor(earlyKnowledge, message);
     return reply(
       "faq",
       "service_help",
@@ -4994,9 +5019,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
         ...(earlyKnowledge.actionTarget
           ? { uiAction: { type: "open_screen", target: earlyKnowledge.actionTarget } }
           : {}),
-        ...(earlyKnowledge.explainScript
-          ? { explainScript: earlyKnowledge.explainScript }
-          : {}),
+        ...(earlyExplainScript ? { explainScript: earlyExplainScript } : {}),
       },
     );
   }
@@ -5090,11 +5113,13 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const explicitCompanyFactReply = getExplicitCompanyFactReply(message, context);
   if (explicitCompanyFactReply) return explicitCompanyFactReply;
 
-  // `findChatbotKnowledge` 는 항목마다 고른 트리거로 매칭하므로 정확도가 높다
-  // (실측 term 98%). 여기에는 정의 형태 게이트를 걸지 않는다 — 게이트는 낱말
-  // 조합으로 넓게 잡는 `findTermKind` 쪽 오답만 막는 게 목적이다.
+  // `findChatbotKnowledge` 는 항목마다 고른 트리거로 매칭하므로 답변 본문은 여기서 낸다
+  // (실측 term 98%). 다만 정의형 퀴즈를 붙일지는 `explainScriptFor` 가 정한다 —
+  // 예전에는 `knowledge.explainScript` 를 형태와 무관하게 그대로 붙여서
+  // "차트는 어떻게 봐요?" 에 "차트가 직접 보여주는 것은 무엇일까요?" 로 되물었다.
   const knowledge = findApprovedKnowledge(message);
   if (knowledge) {
+    const knowledgeExplainScript = explainScriptFor(knowledge, message);
     return reply(
       "faq",
       knowledge.kind === "glossary" ? "financial_concept" : "service_help",
@@ -5104,7 +5129,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
         ...(knowledge.actionTarget
           ? { uiAction: { type: "open_screen", target: knowledge.actionTarget } }
           : {}),
-        ...(knowledge.explainScript ? { explainScript: knowledge.explainScript } : {}),
+        ...(knowledgeExplainScript ? { explainScript: knowledgeExplainScript } : {}),
       },
     );
   }

@@ -75,4 +75,38 @@ for (const [question, questionForm] of [
   assert.equal(findChatbotQuestionForm(question), questionForm, question);
 }
 
+// 차트도 매수와 같은 짝을 갖는다 — 뜻은 chart, 보는 방법은 chart-read.
+// 짝이 없어서 "차트는 어떻게 봐요?" 에 차트의 **정의**가 나가던 자리다.
+const chartQuestionForms = [
+  ["차트가 뭐야?", "definition", "chart"],
+  ["차트는 어떻게 봐요?", "procedure", "chart-read"],
+  ["차트 보는 법 알려줘", "procedure", "chart-read"],
+  ["차트 어디서 봐요?", "location", "chart-read"],
+] as const;
+for (const [question, questionForm, knowledgeId] of chartQuestionForms) {
+  assert.equal(findChatbotQuestionForm(question), questionForm, question);
+  assert.equal(findChatbotKnowledge(question)?.id, knowledgeId, question);
+}
+
+// 형태가 잡히지 않은 입력(낱말만 던진 것)은 정의형으로 본다. 예전에는 형태가 null 이면
+// `questionForms` 선언을 통째로 무시해서, 선언이 있어도 아무 질문에나 답할 수 있었다.
+assert.equal(findChatbotQuestionForm("차트"), null);
+assert.equal(findChatbotKnowledge("차트")?.id, "chart");
+
+// 절차 표현은 `어떻게`·`하는법` 만이 아니다. 여기서 놓치면 형태가 null 이 되고,
+// null 은 위 정의형 폴백을 타서 절차 질문이 정의 답으로 샌다.
+for (const question of [
+  "차트 보는 법 알려줘",
+  "차트 읽는 법 알려줘",
+  "차트 보려면요",
+]) {
+  assert.equal(findChatbotQuestionForm(question), "procedure", question);
+}
+
+// 답변을 선언한 형태 밖으로 내보내지 않는다.
+for (const entry of CHATBOT_KNOWLEDGE) {
+  if (!entry.questionForms) continue;
+  assert.ok(entry.questionForms.length > 0, `${entry.id} 의 questionForms 가 비었다`);
+}
+
 console.log("chatbot knowledge tests passed");
