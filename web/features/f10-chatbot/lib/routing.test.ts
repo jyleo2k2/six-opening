@@ -389,13 +389,13 @@ const termQuestionsByStep = {
     "빨간 숫자 보면 도망가야 돼?",
     "이 차트 위로 가는 거 맞아?",
     "차트 빨간색이 왜 이렇게 많아",
-    "에스엠 얘기할 때 다들 주가라는데 주가가 뭐야?",
+    // "주가가 뭐야?"·"1일 봉 데이터는 뭘 뜻해?"는 이제 승인 용어 사전이 되물어 가며 답한다.
+    // 아래 "뜻만 묻는 질문은 사전이 답한다" 블록에서 따로 검사한다.
     "stock 화면 그래프 선은 회사의 역사책 같은 거야?",
     "현재가와 등락률은 어떤 시점을 기준으로 표시되나요?",
-    "주가 차트의 1일 봉 데이터는 뭘 뜻해?",
   ],
   "수익률·손익 개념 안내": [
-    "손실률 -12%는 정확히 무슨 뜻이야?",
+    // "손실률 …무슨 뜻이야?"는 수익률 용어 사전이 맡는다(아래 OPENS_DAPIE).
     "이 주식이 3% 오르면 20만원 넣었을 때 얼마 늘어?",
     "수익률 마이너스면 내가 진짜 돈 잃은 거야?",
   ],
@@ -410,11 +410,9 @@ const termQuestionsByStep = {
   ],
   "주문 방식·매매 용어 안내": [
     "시장가랑 지정가 중에 어느 쪽이 더 싼 방식이야?",
-    "손절이라는 말은 꼭 손해 보고 파는 뜻이야?",
   ],
   "회사·산업 금융 개념 안내": [
     "은행의 이자수익이랑 주가 상승은 어떻게 달라?",
-    "은행금융 섹터에서 예대마진이 뭐야?",
     "칩과 메모리는 같은 의미인가요, 아니면 구분해야 하나요?",
     "증권사가 정확히 뭐 하는 곳이야?",
     "IPO가 증권사 일이랑 어떻게 연결돼?",
@@ -436,7 +434,6 @@ const termQuestionsByStep = {
     "상관관계가 높다는 걸 투자 행동으로 설명하면 뭐야?",
   ],
   "근거 태그 안내": [
-    "근거 태그라는 항목은 어떤 자료를 선택하라는 뜻인가요?",
   ],
   "분산·레버리지 개념 안내": [
     "분산투자가 수익을 일부러 나누는 거야?",
@@ -445,8 +442,10 @@ const termQuestionsByStep = {
 } as const;
 
 const curatedTermQuestions = Object.values(termQuestionsByStep).flat();
-assert.equal(curatedTermQuestions.length, 47);
-assert.equal(new Set(curatedTermQuestions).size, 47);
+// 47 -> 41: 뜻만 묻는 여섯 건(주가·1일 봉·손실률·손절·근거 태그·예대마진)은 사전이 맡는다.
+// 아래 OPENS_DAPIE 블록이 그 다섯 건을 따로 검사한다.
+assert.equal(curatedTermQuestions.length, 41);
+assert.equal(new Set(curatedTermQuestions).size, 41);
 for (const [expectedStep, questions] of Object.entries(termQuestionsByStep)) {
   for (const question of questions) {
     const routed = routeMessage(question, stockContext);
@@ -490,7 +489,7 @@ const termNaturalVariants = [
   ["PER이랑 PBR 뭐가 더 정확함", "가치평가 지표 안내"],
   ["시장가 지정가 뭐가 항상 더 싸", "주문 방식·매매 용어 안내"],
   ["지정가 주문 바로 안 잡힐 수도 있어?", "용어 사전 확인"],
-  ["손절이 무슨 뜻", "주문 방식·매매 용어 안내"],
+  // "손절이 무슨 뜻"은 승인 용어 사전이 맡는다(아래 OPENS_DAPIE).
   ["예대마진 쉽게 말해줘", "회사·산업 금융 개념 안내"],
   ["칩이랑 메모리 같은 말임?", "회사·산업 금융 개념 안내"],
   ["뉴스 뜨면 주가 즉시 오름?", "가격 인과관계 안내"],
@@ -2026,6 +2025,42 @@ for (const question of suggestedQuestions) {
   const answered =
     routed.route !== "fallback" && !(routed.route === "outOfScope" && routed.intent === "safety");
   assert.ok(answered, `추천질문을 눌러도 답을 못 받음: ${question} -> ${routed.route}/${routed.intent}`);
+}
+
+// ── 뜻만 묻는 질문은 사전이 답하고 DAPIE 를 연다 (SPEC §3.4) ────────────────
+// 되물어 가며 설명할 수 있는 용어는 term 9종 고정 응답보다 사전이 우선한다.
+const OPENS_DAPIE: Array<[string, string]> = [
+  ["주가가 뭐야?", "term:stock-price"],
+  ["에스엠 얘기할 때 다들 주가라는데 주가가 뭐야?", "term:stock-price"],
+  ["손절이 뭐야?", "term:stop-loss"],
+  ["예대마진", "term:net-interest-margin"],
+  ["근거 태그가 뭐야?", "term:reason-tag"],
+  ["손실률 -12%는 정확히 무슨 뜻이야?", "term:return"],
+  ["은행금융 섹터에서 예대마진이 뭐야?", "term:net-interest-margin"],
+  ["손절이라는 말은 꼭 손해 보고 파는 뜻이야?", "term:stop-loss"],
+  ["손절이 무슨 뜻", "term:stop-loss"],
+];
+for (const [question, scriptId] of OPENS_DAPIE) {
+  const routed = routeMessage(question, { screen: "home" });
+  assert.equal(routed.explainScript?.id, scriptId, `사전이 DAPIE 를 열지 않음: ${question}`);
+}
+
+// 반대로 한 용어의 DAPIE 로 답할 수 없는 질문은 고정 응답이 맡는다. 여기가 열리면
+// "PBR 이 저평가냐"는 물음에 PBR 정의 퀴즈가 나가 되묻기만 하고 오해를 못 잡는다.
+const KEEPS_FIXED_ANSWER = [
+  "PBR이 1보다 낮으면 무조건 저평가야?", // 단정 교정
+  "시장가랑 지정가 중에 어느 쪽이 더 싼 방식이야?", // 두 개념 비교
+  "성향 5축은 점수를 평균 내서 만든 거야?", // 산식 교정
+  "이 주식이 3% 오르면 20만원 넣었을 때 얼마 늘어?", // 수치 계산
+  "이 숫자 빨간색이면 좋은거야?", // 화면 해석
+];
+for (const question of KEEPS_FIXED_ANSWER) {
+  const routed = routeMessage(question, { screen: "home" });
+  assert.equal(
+    routed.explainScript,
+    undefined,
+    `용어 DAPIE 로 답할 수 없는 질문인데 되묻기가 열림: ${question} -> ${routed.explainScript?.id}`,
+  );
 }
 
 console.log("routing tests passed");

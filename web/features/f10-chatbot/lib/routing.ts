@@ -1918,6 +1918,35 @@ function findCompanyFactKind(message: string): CompanyFactKind | null {
   return null;
 }
 
+/**
+ * 두 개념을 견주는 표현. 정의형처럼 보여도 한 용어의 DAPIE 로는 답할 수 없다.
+ * "뭐가 항상 더 싸"처럼 사이에 말이 끼므로 낱말 목록이 아니라 정규식으로 본다.
+ */
+const COMPARISON_PATTERN =
+  /(?:뭐가|무엇이|어느게|어떤게|어느쪽|어느것)(?:[가-힣]{0,6})?더|중에어느|다른점|차이가뭐/;
+
+/**
+ * 뜻만 묻는 질문이고 사전에 DAPIE 스크립트가 있으면 그 스크립트를 돌려준다.
+ *
+ * term 9종 고정 응답(`findTermKind`)은 사전에 없는 개념을 메우는 그물이라, 되물어 가며
+ * 설명할 수 있는 쪽이 있으면 양보한다. 다만 SPEC §3.4대로 **용어 설명일 때만** 양보한다 —
+ * 두 개념 비교("시장가랑 지정가 중 어느 쪽이"), 단정 교정("PBR이 1보다 낮으면 무조건
+ * 저평가야?"), 수치 계산은 한 용어의 DAPIE 로 답할 수 없어 고정 응답이 맡아야 한다.
+ */
+function findScriptedTerm(message: string) {
+  const entry = findChatbotKnowledge(message);
+  if (!entry?.explainScript) return undefined;
+  // "PER이랑 PBR 뭐가 더 정확함"은 "뭐" 때문에 정의형으로 보이지만 두 개념 비교다.
+  // 한 용어의 DAPIE 로 답할 수 없으므로 고정 응답에 맡긴다.
+  if (COMPARISON_PATTERN.test(message)) return undefined;
+  if (findChatbotQuestionForm(message) === "definition") return entry.explainScript;
+  // "예대마진"처럼 낱말만 던진 입력은 형태가 안 잡힌다. 트리거와 통째로 같을 때만 받는다.
+  const normalized = normalizeChatInput(message);
+  return entry.triggers.some((trigger) => normalizeChatInput(trigger) === normalized)
+    ? entry.explainScript
+    : undefined;
+}
+
 function findTermKind(message: string): TermKind | null {
   if (
     includesAny(message, [
@@ -4460,7 +4489,12 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // 먼저 태운 뒤에 고른다 — 도구가 있으면 도구가 이긴다.
   const personalData = isPersonalDataQuestion(message);
 
-  const termKind = personalData ? null : findTermKind(message);
+  // "주가가 뭐야?"처럼 **뜻만 묻는** 질문이고 사전에 DAPIE 스크립트가 있으면 사전이 답한다.
+  // term 9종 고정 응답은 사전에 없는 개념을 메우는 그물이라, 되물어 가며 설명할 수 있는
+  // 쪽이 있으면 양보한다. 정의형으로 좁히는 이유는 SPEC §3.4다 — 두 개념 비교, 단정 교정,
+  // 수치 계산은 한 용어의 DAPIE 로 답할 수 없어 고정 응답이 맡아야 한다.
+  const scriptedTerm = personalData ? undefined : findScriptedTerm(message);
+  const termKind = personalData || scriptedTerm ? null : findTermKind(message);
   const termTakesPriorityOverCompany =
     termKind === "causality" ||
     (termKind === "industryConcept" &&
@@ -4469,7 +4503,13 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   if (termKind && termTakesPriorityOverCompany) return termReply(termKind, message);
 
   const companyFactKind = findCompanyFactKind(message);
-  const sectorFactReply = termKind ? null : getSectorFactReply(message);
+  // "은행금융 섹터에서 예대마진이 뭐야?"는 섹터 소개가 아니라 예대마진의 뜻을 묻는
+  // 질문이라 사전이 우선이다. 다만 "반도체 섹터는 뭐 하는 곳이야?"처럼 섹터 자체를
+  // 물으면 `업종` 용어 정의가 아니라 섹터 설명이 나가야 한다.
+  const sectorFactReply =
+    termKind || (scriptedTerm && scriptedTerm.id !== "term:sector")
+      ? null
+      : getSectorFactReply(message);
   if (sectorFactReply) return sectorFactReply;
   if (companyFactKind) return companyFactReply(companyFactKind, message, context);
 

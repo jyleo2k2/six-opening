@@ -630,6 +630,107 @@ const CHART_EXPLAIN_SCRIPTS: Record<string, ExplainScript> = {
   "weekly-chart": termScript("weekly-chart", { brief: "주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요.", check: { question: "주봉 한 개는 어느 기간을 나타낼까요?", choices: [{ id: "week", label: "한 주" }, { id: "day", label: "하루" }, { id: "minutes", label: "몇 분" }], answerId: "week" }, adjust: { explanation: "주봉의 '주'는 한 주를 뜻해요. 그래서 주봉은 한 주의 가격 움직임을 막대 하나로 묶어서 봐요.", question: "주봉은 무엇을 한 묶음으로 볼까요?", choices: [{ id: "week", label: "한 주" }, { id: "hour", label: "한 시간" }], answerId: "week" }, detail: "한 주의 가격 움직임을 한 막대에 담아요. 더 긴 과거 흐름을 살펴볼 때 써요.", example: "한 주 동안의 기록을 한 칸에 모아 보는 달력과 비슷해요." }),
 };
 
+/**
+ * 아이 질문 시뮬레이션 600건에서 사전이 못 잡던 단일 용어들 (2026-08-15 보강).
+ * 규칙·계산·비교를 묻는 복합 질문은 SPEC §3.4대로 고정 응답이 맡고, 여기에는
+ * "그 말이 무슨 뜻이야?"로 답할 수 있는 것만 넣는다.
+ */
+const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
+  "stock-price": termScript("stock-price", {
+    brief: "주가는 주식 한 주에 붙은 지금 가격이에요.",
+    check: {
+      question: "주가는 무엇의 가격일까요?",
+      choices: [
+        { id: "one-share", label: "주식 한 주" },
+        { id: "building", label: "회사 건물" },
+        { id: "product", label: "회사가 파는 물건" },
+      ],
+      answerId: "one-share",
+    },
+    adjust: {
+      explanation: "주가는 회사 전체 값이 아니라 주식 한 주에 붙은 값이에요.",
+      question: "그럼 주가는 한 주에 붙는 값일까요?",
+      choices: [
+        { id: "yes", label: "한 주에 붙어요" },
+        { id: "no", label: "회사 전체 값이에요" },
+      ],
+      answerId: "yes",
+    },
+    detail: "주가는 사고팔려는 사람들의 주문이 만나 정해져요. 그래서 하루에도 여러 번 바뀌어요.",
+    example: "문구점에서 같은 공책 값이 날마다 달라진다고 생각해 봐요. 주가도 그날의 거래에 따라 달라져요.",
+  }),
+  "stop-loss": termScript("stop-loss", {
+    brief: "손절은 손해를 더 키우지 않으려고 파는 것을 부르는 말이에요.",
+    check: {
+      question: "손절은 어떤 상황을 부르는 말일까요?",
+      choices: [
+        { id: "cut", label: "손해를 줄이려고 파는 것" },
+        { id: "profit", label: "이익이 나서 파는 것" },
+        { id: "hold", label: "그대로 갖고 있는 것" },
+      ],
+      answerId: "cut",
+    },
+    adjust: {
+      explanation: "손절은 산 값보다 값이 내려갔을 때 파는 쪽을 가리키는 말이에요.",
+      question: "그럼 손절은 값이 내려갔을 때 쓰는 말일까요?",
+      choices: [
+        { id: "yes", label: "내려갔을 때예요" },
+        { id: "no", label: "올랐을 때예요" },
+      ],
+      answerId: "yes",
+    },
+    detail: "언제 파는지는 사람마다 다르고 정해진 답이 없어요. 저는 파는 때를 정해 줄 수 없어요.",
+    example: "놀이에서 더 지기 전에 판을 접는 것과 비슷해요. 다만 언제 접을지는 스스로 정해요.",
+  }),
+  "net-interest-margin": termScript("net-interest-margin", {
+    brief: "예대마진은 은행이 받은 이자와 준 이자의 차이예요.",
+    check: {
+      question: "예대마진은 무엇의 차이일까요?",
+      choices: [
+        { id: "interest", label: "받은 이자와 준 이자" },
+        { id: "staff", label: "직원 수와 지점 수" },
+        { id: "amount", label: "예금과 대출의 크기" },
+      ],
+      answerId: "interest",
+    },
+    adjust: {
+      explanation: "은행은 맡아 준 돈에 이자를 주고, 빌려준 돈에서 이자를 받아요. 그 두 이자의 차이가 예대마진이에요.",
+      question: "그럼 예대마진은 이자끼리의 차이일까요?",
+      choices: [
+        { id: "yes", label: "이자끼리의 차이예요" },
+        { id: "no", label: "돈의 크기 차이예요" },
+      ],
+      answerId: "yes",
+    },
+    detail: "예대마진은 은행이 돈을 버는 방법 가운데 하나예요. 수익 구성은 은행마다 달라요.",
+    example: "연필을 빌리며 사탕 하나를 주고, 다른 친구에게 빌려주며 사탕 둘을 받으면 그 차이가 남는 몫이에요.",
+  }),
+  "reason-tag": termScript("reason-tag", {
+    brief: "투자 근거는 그 회사를 고른 이유를 골라 두는 기록이에요.",
+    check: {
+      question: "투자 근거는 무엇을 남기는 걸까요?",
+      // 오답 보기에도 금지표현 규칙이 걸린다. "오를 가능성"은 예측 패턴이라 쓸 수 없다.
+      choices: [
+        { id: "why", label: "고른 이유" },
+        { id: "name", label: "회사 이름" },
+        { id: "date", label: "산 날짜" },
+      ],
+      answerId: "why",
+    },
+    adjust: {
+      explanation: "투자 근거는 정답을 맞히는 칸이 아니라 그때 생각을 적어 두는 칸이에요.",
+      question: "그럼 투자 근거는 점수를 매기는 걸까요?",
+      choices: [
+        { id: "no", label: "점수가 아니에요" },
+        { id: "yes", label: "점수를 매겨요" },
+      ],
+      answerId: "no",
+    },
+    detail: "뉴스·차트·회사 이해처럼 지금 이유에 가까운 것을 고르면 돼요. 나중에 아카이브에서 그때 생각을 다시 볼 수 있어요.",
+    example: "일기에 왜 그렇게 했는지 한 줄 적어 두는 것과 비슷해요. 나중에 읽으면 그때 마음이 보여요.",
+  }),
+};
+
 const DAPIE_SCREEN_TERM_IDS = new Set([
   "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character", "season-record",
 ]);
@@ -643,6 +744,9 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "order", kind: "glossary", category: "order", termLabel: "주문", triggers: ["주문"], answer: "주문은 주식을 사고팔겠다고 거래소에 알리는 과정이에요. 주문을 넣었다고 바로 거래가 끝나는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.order, status: reviewed },
   { id: "execution", kind: "glossary", category: "order", termLabel: "체결", triggers: ["체결"], answer: "체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태예요. 체결된 뒤에 보유 수량이 바뀌어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.execution, status: reviewed },
   { id: "current-price", kind: "glossary", category: "chart", termLabel: "현재가", triggers: ["현재가", "지금 가격"], answer: "현재가는 지금 화면에 표시된 최근 거래 가격이에요. 시간이 지나면 달라질 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["current-price"], status: reviewed },
+  // "주가" 한 낱말은 "주가 차트", "주가가 내려가면"처럼 아무 문장에나 들어가 다른 용어를
+  // 가로챈다. 뜻을 묻는 표현으로 좁힌다.
+  { id: "stock-price", kind: "glossary", category: "chart", termLabel: "주가", triggers: ["주가가 뭐", "주가 뜻", "주가라는 말", "주가가 무엇"], answer: "주가는 주식 한 주에 붙은 지금 가격이에요. 사고팔려는 주문이 만나 정해지고 하루에도 여러 번 바뀌어요.", explainScript: ADDED_TERM_SCRIPTS["stock-price"], status: reviewed },
   { id: "market-order", kind: "glossary", category: "order", termLabel: "시장가", triggers: ["시장가", "지금 가격에 바로"], answer: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이에요. 주문을 넣는 순간의 가격과 조금 달라질 수 있어요.",
     explainScript: {
         id: "term:market-order",
@@ -758,13 +862,14 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "친구와 카드를 바꾸고 나서 적어 둔 결과표와 비슷해요. 바꾼 뒤에는 숫자가 그대로 남아요.",
       },
     status: reviewed },
-  { id: "return", kind: "glossary", category: "profit", termLabel: "수익률", triggers: ["수익률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이에요. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.return, status: reviewed },
+  { id: "return", kind: "glossary", category: "profit", termLabel: "수익률", triggers: ["수익률", "손실률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이에요. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.return, status: reviewed },
   { id: "average-price", kind: "glossary", category: "profit", termLabel: "평균 매수가", triggers: ["평균 매수가", "평균매수가", "평균"], answer: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["average-price"], status: reviewed },
   { id: "sector", kind: "glossary", category: "basics", termLabel: "업종", triggers: ["업종", "섹터"], answer: "업종은 비슷한 일을 하는 회사들을 묶은 이름이에요. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sector, status: reviewed },
   { id: "market-cap", kind: "glossary", category: "indicator", termLabel: "시가총액", triggers: ["시가총액"], answer: "시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기예요. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["market-cap"], status: reviewed },
   { id: "revenue", kind: "glossary", category: "indicator", termLabel: "매출", triggers: ["매출"], answer: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모예요. 매출이 모두 회사의 이익은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.revenue, status: reviewed },
   { id: "operating-profit", kind: "glossary", category: "indicator", termLabel: "영업이익", triggers: ["영업이익"], answer: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요. 회사의 공개된 과거 성적을 볼 때 쓰는 말이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["operating-profit"], status: reviewed },
   { id: "dividend", kind: "glossary", category: "indicator", termLabel: "배당", triggers: ["배당"], answer: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해요. 모든 회사가 배당하는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.dividend, status: reviewed },
+  { id: "net-interest-margin", kind: "glossary", category: "indicator", termLabel: "예대마진", triggers: ["예대마진"], answer: "예대마진은 은행이 빌려주고 받은 이자와, 맡아 주고 준 이자의 차이예요. 은행이 돈을 버는 방법 가운데 하나예요.", explainScript: ADDED_TERM_SCRIPTS["net-interest-margin"], status: reviewed },
   {
     id: "per",
     kind: "glossary",
@@ -885,6 +990,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "chart", kind: "glossary", category: "chart", termLabel: "차트", triggers: ["차트"], answer: "차트는 과거 가격 변화를 그림으로 보여줘요. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.chart, status: reviewed },
   { id: "volume", kind: "glossary", category: "indicator", termLabel: "거래량", triggers: ["거래량"], answer: "거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자예요. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volume, status: reviewed },
   { id: "volatility", kind: "glossary", category: "risk", termLabel: "변동성", triggers: ["변동성"], answer: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해요. 가격은 늘 움직일 수 있다는 점을 기억하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volatility, status: reviewed },
+  { id: "stop-loss", kind: "glossary", category: "risk", termLabel: "손절", triggers: ["손절"], answer: "손절은 손해를 더 키우지 않으려고 파는 것을 부르는 말이에요. 언제 파는지는 사람마다 다르고 제가 정해 줄 수는 없어요.", explainScript: ADDED_TERM_SCRIPTS["stop-loss"], status: reviewed },
   { id: "risk", kind: "glossary", category: "risk", termLabel: "위험", triggers: ["위험"], answer: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.risk, status: reviewed },
   { id: "mock-investing", kind: "faq", category: "service", termLabel: "모의투자", triggers: ["모의투자"], answer: "모의투자는 실제 돈 대신 가상 돈으로 주식 거래를 연습하는 활동이에요. 실제 주식을 가지거나 실제 돈이 출금되지는 않아요.", actionTarget: "home", status: reviewed },
   { id: "total-assets", kind: "faq", category: "profit", termLabel: "전체 자산", triggers: ["내 지갑 전체", "전체 자산", "지금 내 돈 전부"], answer: "전체 자산은 쓸 수 있는 가상 현금과 가진 주식의 현재 값어치, 기다리는 주문에 맡겨 둔 금액을 합친 값이에요. 가격이 움직이면 달라질 수 있어요.", actionTarget: "home", status: reviewed },
@@ -915,7 +1021,11 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "profile-status", kind: "faq", category: "profile", termLabel: "관찰 초기", triggers: ["관찰 초기", "별 판정 중", "5거래일"], answer: "관찰 초기에는 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족해요. 별 판정 중은 거래 뒤 5거래일이 지나지 않아 정확력 등급을 아직 계산하지 못한 상태예요.", actionTarget: "archive", status: reviewed },
   { id: "profile-character", kind: "faq", category: "profile", termLabel: "성향 캐릭터", triggers: ["저격수", "전략가", "승부사", "탐험가", "성향 캐릭터"], answer: "성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
   { id: "season-record", kind: "faq", category: "profile", termLabel: "시즌 기록", triggers: ["시즌 기록이 뭐야", "기록 카드"], answer: "시즌 기록은 이번 시즌의 매수·매도·메모·상세 열람 건수를 모아 보여줘요. 기록 카드는 시즌이 끝난 뒤 받는 요약이며, 현재는 4주차까지 잠겨 있어요.", actionTarget: "archive", status: reviewed },
-  { id: "reason", kind: "faq", triggers: ["투자 근거", "고른 이유", "기록"], answer: "기록에서는 고른 이유를 남길 수 있어요. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거예요.", status: reviewed },
+  // "기록"은 "기록 어디서 봄?" 같은 위치 질문까지 잡으므로 DAPIE 를 붙이지 않는다.
+  // 용어 뜻을 묻는 "투자 근거"·"근거 태그"는 아래 reason-tag 가 맡는다. 더 긴 트리거가
+  // 먼저 매칭되므로 둘이 섞이지 않는다 (SPEC §3.4 — DAPIE 는 용어 설명에만 연다).
+  { id: "reason", kind: "faq", triggers: ["기록"], answer: "기록에서는 고른 이유를 남길 수 있어요. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거예요.", status: reviewed },
+  { id: "reason-tag", kind: "glossary", category: "service", termLabel: "투자 근거", triggers: ["투자 근거", "고른 이유", "근거 태그"], answer: "투자 근거는 그 회사를 고른 이유를 골라 두는 기록이에요. 정답을 맞히는 시험이 아니라 나중에 생각을 돌아보기 위한 거예요.", explainScript: ADDED_TERM_SCRIPTS["reason-tag"], status: reviewed },
   { id: "archive", kind: "faq", triggers: ["아카이브"], answer: "아카이브에서는 남긴 거래와 생각을 다시 볼 수 있어요. 점수표가 아니라 투자 스타일을 관찰하는 기록이에요.", actionTarget: "archive", status: reviewed },
   { id: "stock-search", kind: "faq", triggers: ["종목 검색", "회사 찾기", "종목 찾기"], answer: "종목 화면의 검색창에 회사 이름을 입력하거나 업종 칩을 눌러 찾아볼 수 있어요. 이 서비스가 제공하는 종목 안에서만 검색돼요.", actionTarget: "stock", status: reviewed },
   { id: "buy-flow", kind: "faq", triggers: ["매수 어떻게", "사는 방법", "매수 방법", "매수"], questionForms: ["procedure"], answer: "종목 상세에서 매수를 누르고 수량과 예상 금액을 확인해요. 고른 이유·예상 보유기간을 기록한 뒤 주문 확인을 누르면 돼요.", actionTarget: "order", status: reviewed },

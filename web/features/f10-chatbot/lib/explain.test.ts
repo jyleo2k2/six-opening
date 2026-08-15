@@ -6,6 +6,7 @@ import {
   advanceExplain,
   findCommonExplainScript,
   reaskExplain,
+  relatedTermChoices,
   resolveTextReply,
   startExplain,
   startGuidedExplain,
@@ -336,5 +337,64 @@ for (const entry of CHATBOT_KNOWLEDGE) {
     assert.equal(toPoliteKorean(text), text, `${entry.id} 변환 의존: ${text}`);
   }
 }
+
+// ── 비슷한 용어 추천 카드 (SPEC §3.4.1) ────────────────────────────────────
+// 세 번 틀린 뒤 대화가 끊기지 않도록, followup 에 같은 범주의 다음 용어를 카드로 낸다.
+const scripted = CHATBOT_KNOWLEDGE.filter((entry) => entry.explainScript && entry.category);
+assert.ok(scripted.length >= 55, `범주가 붙은 용어가 너무 적다: ${scripted.length}`);
+
+for (const entry of scripted) {
+  const cards = relatedTermChoices(entry.explainScript!.id, 2);
+  assert.ok(cards.length > 0, `${entry.id} 에 추천 카드가 없다`);
+  for (const card of cards) {
+    assert.notEqual(card.id, entry.explainScript!.id, `${entry.id} 가 자기를 추천한다`);
+    const target = CHATBOT_KNOWLEDGE.find((other) => other.explainScript?.id === card.id);
+    assert.equal(target?.category, entry.category, `${entry.id} 추천이 다른 범주다: ${card.id}`);
+    // 카드도 화면에 나가는 문구라 출력 게이트를 통과해야 한다. "목표 가격 볼래요"가
+    // 금지표현 `목표가` 에 걸렸던 적이 있다.
+    assert.equal(
+      gateChatOutput({ text: card.label, source: "fixed" }).ok,
+      true,
+      `${entry.id} 추천 카드가 게이트에 막힘: ${card.label}`,
+    );
+  }
+}
+
+// followup 선택지에 카드가 실리고, 카드를 고르면 그 용어 설명이 시작된다.
+const perScript = CHATBOT_KNOWLEDGE.find((entry) => entry.id === "per")!.explainScript!;
+const followup = advanceExplain(perScript, {
+  scriptId: perScript.id,
+  stage: "detail",
+  choiceId: perScript.adjust!.choices.find((c) => c.id !== perScript.adjust!.answerId)!.id,
+  reaskCount: 1,
+});
+assert.equal(followup?.kind, "turn");
+const followupCards =
+  followup?.kind === "turn" ? followup.turn.choices.filter((c) => c.id.startsWith("term:")) : [];
+assert.ok(followupCards.length >= 1, "오답 뒤 followup 에 추천 카드가 없다");
+
+const picked = advanceExplain(perScript, {
+  scriptId: perScript.id,
+  stage: "followup",
+  choiceId: followupCards[0].id,
+});
+assert.equal(picked?.kind, "turn", "추천 카드를 골라도 설명이 시작되지 않는다");
+assert.equal(picked?.kind === "turn" ? picked.turn.scriptId : null, followupCards[0].id);
+assert.equal(picked?.kind === "turn" ? picked.turn.stage : null, "brief");
+
+// 등록되지 않은 카드로 위조한 전이는 거부한다.
+assert.equal(
+  advanceExplain(perScript, { scriptId: perScript.id, stage: "followup", choiceId: "term:season" }),
+  null,
+  "다른 범주 용어로 위조한 전이가 통과했다",
+);
+
+// "다른 것도 물어볼래요"가 대화를 끊지 않고 카드를 더 펼친다.
+const asked = advanceExplain(perScript, {
+  scriptId: perScript.id,
+  stage: "followup",
+  choiceId: "ask",
+});
+assert.equal(asked?.kind, "turn", "'다른 것도 물어볼래요'가 여전히 대화를 끊는다");
 
 console.log("explain ok");
