@@ -1,3 +1,4 @@
+import { searchAliasesFor } from "../../../shared/data/stocks";
 import type { Universe, UniverseLive } from "./use-universe";
 
 /**
@@ -9,6 +10,41 @@ import type { Universe, UniverseLive } from "./use-universe";
  */
 const UP = "#E8322E";
 const DOWN = "#1668DC";
+
+const CHOSUNG = [
+  "ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ",
+  "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ",
+];
+const CHOSUNG_SET = new Set(CHOSUNG);
+const HANGUL_BASE = 0xac00;
+const HANGUL_LAST = 0xd7a3;
+
+/** 완성형 한글 한 글자를 초성으로 줄인다. 한글이 아니면 그대로 둔다. */
+function toChosung(char: string): string {
+  const code = char.charCodeAt(0);
+  if (code < HANGUL_BASE || code > HANGUL_LAST) return char;
+  return CHOSUNG[Math.floor((code - HANGUL_BASE) / (21 * 28))];
+}
+
+function chosungString(text: string): string {
+  return [...text].map(toChosung).join("");
+}
+
+/** "ㅅㅅㅈㅈ" 처럼 자음만 쳤으면 초성 검색으로 본다. */
+function isChosungQuery(query: string): boolean {
+  return [...query].every((char) => CHOSUNG_SET.has(char));
+}
+
+/**
+ * 종목명·별칭(`shared/data/stocks`의 `searchAliases`) 어느 하나에 검색어가 들어 있으면
+ * 맞는다 — "YG"로 와이지엔터테인먼트를 찾는 식이다. 자음만 쳤으면 이름을 초성으로 줄여
+ * 견준다 — "ㅅㅅㅈㅈ"로 삼성전자를 찾는 식이다.
+ */
+function matchesQuery(name: string, code: string, query: string): boolean {
+  if (isChosungQuery(query)) return chosungString(name).includes(query);
+  const candidates = [name, ...searchAliasesFor(code)];
+  return candidates.some((candidate) => candidate.toLowerCase().includes(query));
+}
 
 export type ExploreFilter = string; // 'rank' | 'watch' | 유니버스 섹터 id
 
@@ -42,7 +78,7 @@ export function exploreList(
   const q = query.trim().toLowerCase();
   if (q) {
     return merged
-      .filter((stock) => stock.name.toLowerCase().includes(q))
+      .filter((stock) => matchesQuery(stock.name, stock.code, q))
       .sort((a, b) => b.change - a.change);
   }
   if (filter === "all") {

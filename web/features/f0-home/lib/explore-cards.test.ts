@@ -32,6 +32,12 @@ assert.deepEqual(exploreList(universe, live, "watch", "", ["036570"]).map((s) =>
 // 검색이 섹터·관심 선택보다 앞선다.
 assert.deepEqual(exploreList(universe, live, "game", "삼성", ["036570"]).map((s) => s.code), ["005930"]);
 
+// 별칭도 이름처럼 찾는다 — `shared/data/stocks`의 searchAliases를 그대로 쓴다(엔씨소프트 = "NC").
+assert.deepEqual(exploreList(universe, live, "game", "nc", []).map((s) => s.code), ["036570"]);
+
+// 자음만 쳐도(초성) 찾는다 — 삼성전자 = ㅅㅅㅈㅈ.
+assert.deepEqual(exploreList(universe, live, "semi", "ㅅㅅㅈㅈ", []).map((s) => s.code), ["005930"]);
+
 // 전체 — 업종끼리 묶여 구분 헤더를 세울 수 있다.
 assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), [
   "259960",

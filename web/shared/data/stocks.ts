@@ -25,7 +25,7 @@ export const STOCKS: readonly StockEducation[] = [
   { id: "KRX:000120", symbol: "000120", name: "CJ대한통운", searchAliases: ["CJ 대한통운", "씨제이대한통운"], sector: "logistics", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
   { id: "KRX:011200", symbol: "011200", name: "HMM", searchAliases: ["에이치엠엠"], sector: "logistics", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
   { id: "KRX:086280", symbol: "086280", name: "현대글로비스", searchAliases: ["Hyundai Glovis"], sector: "logistics", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
-  { id: "KRX:005930", symbol: "005930", name: "삼성전자", searchAliases: ["삼성 전자", "Samsung Electronics"], sector: "semiconductor", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
+  { id: "KRX:005930", symbol: "005930", name: "삼성전자", searchAliases: ["삼성 전자", "Samsung Electronics", "삼전"], sector: "semiconductor", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
   { id: "KRX:000660", symbol: "000660", name: "SK하이닉스", searchAliases: ["SK 하이닉스", "SK hynix", "에스케이하이닉스"], sector: "semiconductor", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
   { id: "KRX:066570", symbol: "066570", name: "LG전자", searchAliases: ["LG 전자", "LG Electronics", "엘지전자"], sector: "semiconductor", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
   { id: "KRX:064350", symbol: "064350", name: "현대로템", searchAliases: ["Hyundai Rotem"], sector: "defense", market: "KOSPI", companySummary: pendingDescription, offerings: pendingDetails, everydayTouchpoints: pendingDetails, status: draft },
@@ -76,4 +76,11 @@ export function findStock(query: string) {
   return STOCKS.find((stock) =>
     [stock.name, ...stock.searchAliases].some((name) => name.replaceAll(" ", "").toLowerCase() === normalized),
   );
+}
+
+const aliasesBySymbol = new Map(STOCKS.map((stock) => [stock.symbol, stock.searchAliases]));
+
+/** 종목코드(KRX symbol) 기준 별칭 목록. 화면 탐색 검색이 이 데이터를 재사용한다. */
+export function searchAliasesFor(symbol: string): readonly string[] {
+  return aliasesBySymbol.get(symbol) ?? [];
 }
