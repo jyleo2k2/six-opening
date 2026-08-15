@@ -62,6 +62,9 @@ const ITEM_LINE = styleFromCss(
 const GOAL_IMG = styleFromCss(
   "display:block;width:228px;height:auto;margin:-6px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18))",
 );
+const MOOD_IMG = styleFromCss(
+  "display:block;width:76px;height:auto;margin:6px auto 0;filter:drop-shadow(0 10px 16px rgba(35,25,80,0.16))",
+);
 const HOLD_CARD = styleFromCss(
   "background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);margin-top:auto",
 );
@@ -215,6 +218,7 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
                 {view.rateText}
               </span>
             </div>
+            <img alt="" src={view.moodImg} style={MOOD_IMG} width={76} />
           </div>
 
           <div onClick={popGoal} style={{ position: "relative", cursor: "pointer" }}>
