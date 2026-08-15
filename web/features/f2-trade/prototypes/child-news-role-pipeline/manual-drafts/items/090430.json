@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:090430",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-TTLNEWS-3130225",
+    "title": "아모레퍼시픽, 2분기 매출 1조2543억·영업익 1228억…전년比 14.6%·53.3%↑",
+    "publisher": "퍼블릭뉴스통신",
+    "publishedAt": "2026-07-30T06:10:00.000Z",
+    "sourceUrl": "http://www.ttlnews.com/news/articleView.html?idxno=3130225",
+    "sourceUnits": [
+      { "id": "S1", "text": "아모레퍼시픽 그룹은 2026년 2분기 연결 기준으로 매출액 1조 2543억원, 영업이익 1228억원을 올렸다." },
+      { "id": "S2", "text": "이는 2025년 동기 대비 매출은 14.6%, 영업이익은 53.3% 늘어난 수치다." },
+      { "id": "S3", "text": "올 2분기 동안 아모레퍼시픽의 국내 사업은 10%의 영업이익률을 나타냈고, 해외 사업 부문 역시 두 자릿수 영업이익률을 기록하며 수익성 개선을 이끌었다." },
+      { "id": "S4", "text": "그룹의 핵심 계열사인 아모레퍼시픽은 전년 대비 매출이 17%, 영업이익이 59% 늘어나며 전체 실적 상승을 주도했다." },
+      { "id": "S5", "text": "국내 사업 매출은 10%, 영업이익은 48% 증가해 안정적인 실적 기반을 다졌다." },
+      { "id": "S6", "text": "해외 사업은 매출이 28% 증가하고 영업이익은 99% 늘어났다." }
+    ]
+  },
+  "focusStatement": "아모레퍼시픽 그룹이 2026년 2분기 연결 기준 매출액 1조 2543억원, 영업이익 1228억원을 올렸다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "아모레퍼시픽, 2분기 매출 1조2543억원·영업이익 1228억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 14.6% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 53.3% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth" },
+    { "text": "외국에서 판 돈이 28% 늘었어요.", "sourceIds": ["S6"], "role": "business_detail", "factKey": "overseas_revenue_growth" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

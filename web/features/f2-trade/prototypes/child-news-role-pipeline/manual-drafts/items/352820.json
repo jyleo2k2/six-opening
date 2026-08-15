@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:352820",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-HERALD-10824352",
+    "title": "하이브, 2분기 매출 1조·영업이익 1천억 돌파…\"사상 최대 분기 실적\"",
+    "publisher": "헤럴드경제",
+    "publishedAt": "2026-07-29T04:54:59.000Z",
+    "sourceUrl": "https://biz.heraldcorp.com/article/10824352",
+    "sourceUnits": [
+      { "id": "S1", "text": "하이브가 2분기 매출 1조 4500억, 영업이익 1709억을 각각 돌파하며 사상 최대의 분기 실적을 달성했다." },
+      { "id": "S2", "text": "하이브는 2026년 2분기 매출액이 1조 4500억 원, 영업이익이 1709억 원이라고 28일 밝혔다." },
+      { "id": "S3", "text": "분기 기준 매출액이 1조 원을, 분기 영업이익이 1천억을 넘어선 것은 모두 최초다." },
+      { "id": "S4", "text": "공연 부문 6477억 원, 음반·음원 3268억 원을 각각 기록했다." },
+      { "id": "S5", "text": "MD(기획 상품) 및 라이선싱도 공연과 동반 상승효과를 내 3106억 원에 이르렀다." },
+      { "id": "S6", "text": "전년 동기와 비교했을 때 매출이 2배 이상 성장한 데 이어, 두 자릿수(11.8%) 영업이익률까지 달성해 내실도 다졌다는 게 하이브의 설명이다." }
+    ]
+  },
+  "focusStatement": "하이브가 2026년 2분기 매출액 1조 4500억 원, 영업이익 1709억 원을 기록해 분기 기준 처음으로 매출 1조 원을 넘겼다고 밝혔다.",
+  "anchorSourceId": "S2",
+  "headline": { "text": "하이브, 2분기 매출 1조4500억원으로 처음 1조원 넘어", "sourceIds": ["S2", "S3"] },
+  "body": [
+    { "text": "영업이익은 1709억원이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "공연으로 6477억원을 벌었어요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "concert_revenue" },
+    { "text": "음반과 음원은 3268억원이에요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "music_revenue" }
+  ],
+  "priceConnection": {
+    "text": "공연과 음반으로 번 돈은 회사의 사업 성과와 연결돼요.",
+    "sourceIds": ["S2", "S4"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "음원", "easyText": "인터넷에서 듣고 내려받는 노래 파일", "treatment": "explained", "sourceIds": ["S4"] }
+  ]
+}

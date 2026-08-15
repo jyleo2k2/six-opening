@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:316140",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-ZDNET-20260724162130",
+    "title": "우리금융, 2026년 상반기 순익 1조6090억…전년比 3.5% 증가",
+    "publisher": "ZDNet Korea",
+    "publishedAt": "2026-07-24T07:45:00.000Z",
+    "sourceUrl": "https://zdnet.co.kr/view/?no=20260724162130",
+    "sourceUnits": [
+      { "id": "S1", "text": "상반기 당기순익은 1조6090억원으로 전년 대비 3.5% 증가했다고 밝혔다." },
+      { "id": "S2", "text": "2분기 순이익은 1조46억원으로 1조원 이상으로 회복, 실적 턴어라운드를 달성했다" },
+      { "id": "S3", "text": "상반기 순영업이익은 5조7227억원으로 역대 최고치를 달성했다." },
+      { "id": "S4", "text": "이자이익은 4조6597억원으로 전년 동기 대비 3% 이상 증가했으며, 비이자이익은 1조630억원으로 전년 동기 대비 20% 늘었다." },
+      { "id": "S5", "text": "우리은행의 상반기 당기순이익은 1조3730억원으로 전년 대비 13.5% 감소했다." }
+    ]
+  },
+  "focusStatement": "우리금융지주가 2026년 2분기 순이익 1조46억원, 상반기 당기순이익 1조6090억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S2",
+  "headline": { "text": "우리금융, 2분기 순이익 1조46억원으로 1조원대 회복", "sourceIds": ["S2"] },
+  "body": [
+    { "text": "상반기 순이익은 1조6090억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "half_year_net_income" },
+    { "text": "지난해보다 3.5% 늘었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "net_income_growth" },
+    { "text": "이자이익은 4조6597억원이에요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "interest_income" }
+  ],
+  "priceConnection": {
+    "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "순이익", "easyText": "세금까지 다 내고 최종적으로 남은 돈", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "이자이익", "easyText": "돈을 빌려주고 받은 이자로 번 돈", "treatment": "explained", "sourceIds": ["S4"] }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:039490",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-DT-12075586",
+    "title": "키움증권, 2분기 순이익 6806억원…전년 대비 119.4% 증가",
+    "publisher": "디지털타임스",
+    "publishedAt": "2026-07-29T23:16:00.000Z",
+    "sourceUrl": "https://www.dt.co.kr/article/12075586",
+    "sourceUnits": [
+      { "id": "S1", "text": "키움증권은 올해 2분기 연결 기준 영업이익이 7889억원으로 전년 동기 4083억원보다 93.2% 증가했다고 30일 밝혔다." },
+      { "id": "S2", "text": "당기순이익은 6806억원으로 같은 기간 3101억원보다 119.4% 늘었다." },
+      { "id": "S3", "text": "별도 기준 영업이익은 6910억원으로 전년 동기 대비 85.0% 증가했다." },
+      { "id": "S4", "text": "자본총계는 6조8909억원으로 전년 동기 5조4386억원보다 26.7% 증가했다." },
+      { "id": "S5", "text": "2분기 주식 수수료 수익은 4519억원으로 전년 동기 1624억원보다 178.3% 증가했다." },
+      { "id": "S6", "text": "2분기 운용손익과 배당·분배금은 2492억원으로 전년 동기 1216억원보다 104.9% 늘었다." }
+    ]
+  },
+  "focusStatement": "키움증권이 2026년 2분기 연결 기준 영업이익 7889억원, 당기순이익 6806억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S2",
+  "headline": { "text": "키움증권, 2분기 순이익 6806억원으로 119.4% 증가", "sourceIds": ["S2"] },
+  "body": [
+    { "text": "영업이익은 7889억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "주식 수수료로 4519억원을 벌었어요.", "sourceIds": ["S5"], "role": "business_detail", "factKey": "brokerage_fee_revenue" },
+    { "text": "수수료 수익이 178.3% 늘었어요.", "sourceIds": ["S5"], "role": "business_detail", "factKey": "fee_revenue_growth" }
+  ],
+  "priceConnection": {
+    "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "순이익", "easyText": "세금까지 다 내고 최종적으로 남은 돈", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "수수료", "easyText": "주식을 사고팔 때 회사에 내는 이용료", "treatment": "explained", "sourceIds": ["S5"] }
+  ]
+}

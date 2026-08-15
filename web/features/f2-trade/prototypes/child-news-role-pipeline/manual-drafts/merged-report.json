@@ -4,12 +4,12 @@
   "runDateKst": "2026-08-15",
   "sourceRetrievedAt": "2026-08-15T07:31:13.537Z",
   "sourceBasis": "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함",
-  "generatedAt": "2026-08-15T11:21:29.085Z",
+  "generatedAt": "2026-08-15T11:49:48.830Z",
   "model": "gpt-5.6-luna",
   "stockCount": 51,
   "completedCount": 51,
-  "readyForStorageCount": 36,
-  "rejectedCount": 15,
+  "readyForStorageCount": 50,
+  "rejectedCount": 1,
   "decisionComplete": true,
   "cases": [
     {
@@ -4573,15 +4573,166 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-030-0003457600",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY"
-        ],
-        "reasons": [
-          "제목의 구체적인 주체인 플래티어가 선정된 51개 기업에 포함되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ZDNET-20260805155239",
+          "title": "넷마블, 2분기 매출 7492억·영업익 801억…하반기 신작 3종 출격",
+          "publisher": "ZDNet Korea",
+          "publishedAt": "2026-08-05T06:52:00.000Z",
+          "sourceUrl": "https://zdnet.co.kr/view/?no=20260805155239",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "넷마블은 2026년 2분기 연결기준 매출 7492억원, 영업이익 801억원을 기록했다고 5일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "전년 동기 대비 매출은 4.4% 늘었으나 영업이익은 20.8% 감소했다."
+            },
+            {
+              "id": "S3",
+              "text": "전 분기와 비교하면 매출은 15.0%, 영업이익은 50.8% 상승하며 완연한 실적 개선을 이뤄냈다."
+            },
+            {
+              "id": "S4",
+              "text": "상각전 영업이익(EBITDA)은 1120억원, 당기순이익은 2039억원으로 집계됐다."
+            },
+            {
+              "id": "S5",
+              "text": "이에 따른 올해 상반기 누적 매출은 1조 4009억원, 누적 영업이익은 1332억원이다."
+            },
+            {
+              "id": "S6",
+              "text": "2분기 해외 매출은 5808억원으로 전체 매출의 78%를 차지하며 전 분기 대비 13.4% 상승했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ZDNET-20260805155239",
+          "primaryStockIds": [
+            "KRX:251270"
+          ],
+          "focusStatement": "넷마블이 2026년 2분기 연결기준 매출 7492억원, 영업이익 801억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-ZDNET-20260805155239",
+          "headline": {
+            "text": "넷마블, 2분기 매출 7492억원·영업이익 801억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "넷마블, 2분기 매출 7492억원·영업이익 801억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 지난해보다 4.4% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "영업이익은 20.8% 줄었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_decline"
+            },
+            {
+              "text": "매출의 78%를 외국에서 벌었어요.",
+              "sourceIds": [
+                "S6"
+              ],
+              "role": "business_detail",
+              "factKey": "overseas_revenue_share"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ZDNET-20260805155239",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:251270"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "넷마블이 2026년 2분기 연결기준 매출 7492억원, 영업이익 801억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -14508,240 +14659,146 @@
       "pipelineResult": {
         "status": "ready_for_storage",
         "article": {
-          "articleId": "NAVER-081-0003670641",
-          "runDateKst": "2026-08-15",
-          "scope": "company",
-          "title": "‘로봇·엔비디아’ 부스터에 LG전자 소액주주 100만명 돌파…구광모 LG회장 보수 48억",
-          "publisher": "서울신문",
-          "publishedAt": "2026-08-14T08:39:08.000Z",
-          "sourceUrl": "https://www.seoul.co.kr/news/economy/industry/2026/08/14/20260814500241?wlog_tag3=naver",
+          "articleId": "MANUAL-INTHENEWS-89983",
+          "title": "[2026 2분기 실적] LG전자, 매출·영업익 모두 역대 2분기 최대 기록",
+          "publisher": "인더뉴스",
+          "publishedAt": "2026-07-30T06:07:27.000Z",
+          "sourceUrl": "https://www.inthenews.co.kr/news/article.html?no=89983",
           "sourceUnits": [
             {
               "id": "S1",
-              "text": "LG전자 소액주주 100만명 첫 돌파"
+              "text": "LG전자는 올해 2분기 영업이익이 전년 동기 대비 147% 증가한 1조5791억원을 기록했다고 30일 공시했습니다."
             },
             {
               "id": "S2",
-              "text": "6월 장중 주가 43만 8000원까지 상승"
+              "text": "매출액은 23조8265억원으로 전년 동기 대비 14.9% 증가했습니다."
             },
             {
               "id": "S3",
-              "text": "반도체·구리 가격 상승에 원재료 매입비 1조↑"
+              "text": "2분기 B2B 매출은 6조5000억원으로 전년 동기 대비 5% 늘었습니다."
             },
             {
               "id": "S4",
-              "text": "구광모 회장 상반기 보수 48억원 수령"
+              "text": "생활가전을 담당하는 HS 사업본부는 매출 7조757억원, 영업이익 6859억원을 기록했습니다."
             },
             {
               "id": "S5",
-              "text": "로봇과 인공지능(AI) 신사업을 확장하며 기대를 모았던 LG전자의 소액주주 수가 올해 상반기 처음으로 100만명을 돌파했다."
+              "text": "TV를 담당하는 MS 사업본부는 매출 5조1146억원, 영업이익 2194억원을 기록했습니다."
             },
             {
               "id": "S6",
-              "text": "14일 LG전자 반기보고서에 따르면 올해 6월 말 기준 소액주주 수는 122만 7359명으로 지난해 말(51만 1135명)보다 약 71만 6000명 증가했다."
-            },
-            {
-              "id": "S7",
-              "text": "소액주주가 보유한 지분은 전체 발행주식의 58.43%다."
-            },
-            {
-              "id": "S8",
-              "text": "올해 초 8만~9만원대에 머물던 LG전자 주가는 실적 개선과 피지컬 AI·로보틱스 등 미래 사업 확대 기대감에 힘입어 상승세를 탔다."
-            },
-            {
-              "id": "S9",
-              "text": "한편 반도체와 구리 등 주요 원자재 가격 상승 여파로 LG전자의 올해 상반기 원재료 매입액은 지난해보다 1조원 이상 늘어났다."
-            },
-            {
-              "id": "S10",
-              "text": "LG전자에서는 지난해 말 퇴임한 조주완 전 최고경영자(CEO)가 급여 5억 1000만원, 상여 6억 7300만원, 퇴직소득 41억 200만원을 포함해 총 52억 8500만원을 받았다."
+              "text": "전장 사업을 담당하는 VS 사업본부는 매출 3조259억원, 영업이익 1912억원을 기록했습니다."
             }
-          ]
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
         },
         "selection": {
-          "articleId": "NAVER-081-0003670641",
+          "articleId": "MANUAL-INTHENEWS-89983",
           "primaryStockIds": [
             "KRX:066570"
           ],
-          "focusStatement": "LG전자의 소액주주 수가 올해 상반기 처음 100만명을 넘어 6월 말 122만7359명으로 집계됐고, 소액주주 보유 지분은 전체 발행주식의 58.43%였다.",
-          "anchorSourceId": "S6",
+          "focusStatement": "LG전자가 2026년 2분기 매출액 23조8265억원, 영업이익 1조5791억원을 기록해 역대 2분기 최대 실적을 냈다고 공시했다.",
+          "anchorSourceId": "S1",
           "includedSourceIds": [
-            "S5",
-            "S6",
-            "S7"
-          ],
-          "excludedSourceIds": [
             "S1",
             "S2",
             "S3",
             "S4",
-            "S8",
-            "S9",
-            "S10"
+            "S5",
+            "S6"
           ],
+          "excludedSourceIds": [],
           "difficultTerms": [
-            {
-              "term": "인공지능(AI)",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "신사업",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "소액주주",
-              "sourceIds": [
-                "S5",
-                "S6",
-                "S7"
-              ]
-            },
-            {
-              "term": "반기보고서",
-              "sourceIds": [
-                "S6"
-              ]
-            },
-            {
-              "term": "지분",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "발행주식",
-              "sourceIds": [
-                "S7"
-              ]
-            }
+            "매출",
+            "영업이익"
           ],
           "reasonCodes": [],
-          "reasons": [
-            "반기보고서에서 LG전자의 소액주주 수와 보유 지분 비율이 크게 변한 사실이 확인돼 소유구조 관련 사건으로 판단했다."
-          ],
+          "reasons": [],
           "decision": "accept",
           "kind": "company",
-          "eventType": "merger_or_ownership"
+          "eventType": "earnings"
         },
         "draft": {
-          "articleId": "NAVER-081-0003670641",
+          "articleId": "MANUAL-INTHENEWS-89983",
           "headline": {
-            "text": "LG전자, 올해 상반기 소액주주 수 100만명 첫 돌파",
+            "text": "LG전자, 2분기 매출 23조8265억원·영업이익 1조5791억원",
             "sourceIds": [
-              "S5",
-              "S6"
+              "S1",
+              "S2"
             ]
           },
           "homeSummary": {
-            "text": "LG전자, 올해 상반기 소액주주 수 100만명 첫 돌파",
+            "text": "LG전자, 2분기 매출 23조8265억원·영업이익 1조5791억원",
             "sourceIds": [
-              "S5",
-              "S6"
+              "S1",
+              "S2"
             ]
           },
           "body": [
             {
-              "text": "LG전자 반기보고서상 6월 말 소액주주는 122만 7359명이에요",
+              "text": "영업이익이 지난해보다 147% 늘었어요.",
               "sourceIds": [
-                "S6"
+                "S1"
               ],
               "role": "key_detail",
-              "factKey": "june_shareholder_count"
+              "factKey": "operating_profit_growth"
             },
             {
-              "text": "소액주주 지분은 발행주식의 58.43%예요.",
+              "text": "냉장고·세탁기로 7조757억원을 벌었어요.",
               "sourceIds": [
-                "S7"
+                "S4"
               ],
               "role": "business_detail",
-              "factKey": "minority_share_ratio"
+              "factKey": "home_appliance_revenue"
             },
             {
-              "text": "소액주주가 지난해 말보다 약 71만 6000명 늘었어요.",
+              "text": "TV로는 5조1146억원을 벌었어요.",
               "sourceIds": [
-                "S6"
+                "S5"
               ],
-              "role": "context",
-              "factKey": "shareholder_count_increase"
+              "role": "business_detail",
+              "factKey": "tv_revenue"
             }
           ],
           "priceConnection": {
-            "text": "소액주주 수와 지분은 누가 회사 주식을 얼마나 갖는지 보여주는 정보예요.",
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
             "sourceIds": [
-              "S6",
-              "S7"
+              "S1",
+              "S2"
             ],
-            "kind": "ownership_and_credit",
+            "kind": "business_performance",
             "basis": "event_education"
           },
           "termTreatments": [
             {
-              "term": "인공지능(AI)",
-              "easyText": "사람처럼 배우고 판단하는 컴퓨터 기술",
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
               "treatment": "explained",
               "sourceIds": [
-                "S5"
+                "S2"
               ]
             },
             {
-              "term": "신사업",
-              "easyText": "회사가 새로 시작하거나 키우는 사업",
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
               "treatment": "explained",
               "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "소액주주",
-              "easyText": "회사 주식을 적게 가진 사람",
-              "treatment": "explained",
-              "sourceIds": [
-                "S5",
-                "S6",
-                "S7"
-              ]
-            },
-            {
-              "term": "반기보고서",
-              "easyText": "회사의 반년 사업 내용을 담은 보고서",
-              "treatment": "explained",
-              "sourceIds": [
-                "S6"
-              ]
-            },
-            {
-              "term": "지분",
-              "easyText": "회사 전체 주식 중 가진 몫",
-              "treatment": "explained",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "발행주식",
-              "easyText": "회사가 만들어 내놓은 주식 전체",
-              "treatment": "explained",
-              "sourceIds": [
-                "S7"
+                "S1"
               ]
             }
           ]
         },
         "review": {
-          "articleId": "NAVER-081-0003670641",
+          "articleId": "MANUAL-INTHENEWS-89983",
           "independentKind": "company",
           "primaryStockIds": [
             "KRX:066570"
           ],
-          "eventType": "merger_or_ownership",
-          "focusStatement": "LG전자 소액주주 수가 올해 상반기 처음 100만명을 넘어 6월 말 122만7359명으로 집계됐다.",
+          "eventType": "earnings",
+          "focusStatement": "LG전자가 2026년 2분기 매출액 23조8265억원, 영업이익 1조5791억원을 기록해 역대 2분기 최대 실적을 냈다고 공시했다.",
           "anchorSourceIds": [
-            "S5",
-            "S6"
+            "S1"
           ],
           "checks": {
             "allowedScope": true,
@@ -14762,7 +14819,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 2
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {
@@ -16907,19 +16964,177 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-469-0000947936",
-        "stage": "selector",
-        "reasonCodes": [
-          "ROUTINE_OR_PROMOTIONAL",
-          "NO_DIRECT_MATERIALITY",
-          "COMPANY_NOT_PRIMARY_SUBJECT"
-        ],
-        "reasons": [
-          "주된 새 사건은 현대로템과 KAI의 항공무장 사업협력 MOU 체결이지만, 금액·구속력 있는 의무·수주가 확인되지 않는다.",
-          "한화의 KAI 지분 확보는 배경으로 제시되고, 민영화·인수전은 업계 해석과 후보 거론 수준이다.",
-          "여러 회사와 서로 다른 사건을 함께 다뤄 한 회사의 허용된 직접 사건으로 분리할 수 없다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ETODAY-2607167",
+          "title": "현대로템, 2분기 영업익 2324억…수주잔고 첫 30조 돌파 [종합]",
+          "publisher": "이투데이",
+          "publishedAt": "2026-07-24T05:27:00.000Z",
+          "sourceUrl": "https://www.etoday.co.kr/news/view/2607167",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "현대로템은 24일 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했다고 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "지난해 같은 기간보다 매출은 13.3% 증가했지만 영업이익은 9.7% 감소했다."
+            },
+            {
+              "id": "S3",
+              "text": "상반기 누적 매출은 3조635억원으로 전년 동기 대비 18.1% 늘었다."
+            },
+            {
+              "id": "S4",
+              "text": "2분기 말 기준 수주잔고는 30조4046억원으로 집계됐다."
+            },
+            {
+              "id": "S5",
+              "text": "창사 이후 처음으로 30조원을 넘어선 최대 규모다."
+            },
+            {
+              "id": "S6",
+              "text": "사업 부문별 수주잔고는 AD&RH(Aero·Defense·Robot·Hydrogen) 부문이 9조8197억원, 철도(Rail System) 부문이 19조8670억원이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ETODAY-2607167",
+          "primaryStockIds": [
+            "KRX:064350"
+          ],
+          "focusStatement": "현대로템이 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했고 수주잔고가 창사 이후 처음으로 30조원을 넘었다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "수주잔고",
+            "매출",
+            "영업이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-ETODAY-2607167",
+          "headline": {
+            "text": "현대로템, 수주잔고 30조원 넘어 창사 이후 최대",
+            "sourceIds": [
+              "S4",
+              "S5"
+            ]
+          },
+          "homeSummary": {
+            "text": "현대로템, 수주잔고 30조원 넘어 창사 이후 최대",
+            "sourceIds": [
+              "S4",
+              "S5"
+            ]
+          },
+          "body": [
+            {
+              "text": "2분기 매출은 1조6060억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue"
+            },
+            {
+              "text": "영업이익은 2324억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit"
+            },
+            {
+              "text": "철도에서 받은 주문이 19조8670억원이에요.",
+              "sourceIds": [
+                "S6"
+              ],
+              "role": "business_detail",
+              "factKey": "rail_backlog"
+            }
+          ],
+          "priceConnection": {
+            "text": "수주잔고는 앞으로 만들어야 할 일감이 얼마나 쌓였는지를 보여줘요.",
+            "sourceIds": [
+              "S4",
+              "S5"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "수주잔고",
+              "easyText": "주문을 받아 두고 아직 만들지 않은 일감",
+              "treatment": "explained",
+              "sourceIds": [
+                "S4"
+              ]
+            },
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ETODAY-2607167",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:064350"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "현대로템이 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했고 수주잔고가 창사 이후 처음으로 30조원을 넘었다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -18563,17 +18778,161 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-011-0004649275",
-        "stage": "selector",
-        "reasonCodes": [
-          "COMPANY_NOT_PRIMARY_SUBJECT",
-          "ROUTINE_OR_PROMOTIONAL"
-        ],
-        "reasons": [
-          "기사의 중심은 유니버스에 없는 케이피항공산업의 성장 사례이며, 대한항공과 LIG넥스원은 지원·컨소시엄 참여 맥락으로 제시됩니다.",
-          "대한항공의 새로운 실적·계약·규제·자본 등 허용된 직접 사건이 확인되지 않으며, 제시된 계약·상장·매출 수치는 케이피항공산업의 과거 사실입니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-CBCNEWS-595323",
+          "title": "[속보] LIG디펜스앤에어로스페이스, 2분기 매출 1조1101억원…영업이익 1057억원 기록",
+          "publisher": "CBC뉴스",
+          "publishedAt": "2026-08-06T05:28:00.000Z",
+          "sourceUrl": "https://www.cbci.co.kr/news/articleView.html?idxno=595323",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "2분기 매출은 1조1101억원으로 전 분기(1조1679억원) 대비 4.9% 감소했지만, 전년 동기(9454억원) 대비 17.4% 증가했다."
+            },
+            {
+              "id": "S2",
+              "text": "같은 기간 영업이익은 1057억원으로 전 분기(1711억원) 대비 38.2% 감소했으나, 전년 동기(816억원)와 비교하면 29.5% 증가했다."
+            },
+            {
+              "id": "S3",
+              "text": "당기순이익은 782억원으로 전 분기보다 42.3%, 전년 동기보다 24.5% 감소했다."
+            },
+            {
+              "id": "S4",
+              "text": "상반기 누적 기준으로는 매출 2조2780억원, 영업이익 2768억원을 기록했다."
+            },
+            {
+              "id": "S5",
+              "text": "회사 측은 2026년 2분기 말 기준 수주잔액이 24조5700억원이라고 밝혔다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-CBCNEWS-595323",
+          "primaryStockIds": [
+            "KRX:079550"
+          ],
+          "focusStatement": "LIG디펜스앤에어로스페이스(옛 LIG넥스원)가 2026년 2분기 매출 1조1101억원, 영업이익 1057억원을 기록했고 수주잔액이 24조5700억원이라고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-CBCNEWS-595323",
+          "headline": {
+            "text": "LIG디펜스앤에어로스페이스, 2분기 매출 1조1101억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "LIG디펜스앤에어로스페이스, 2분기 매출 1조1101억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "영업이익은 1057억원이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit"
+            },
+            {
+              "text": "지난해보다 매출이 17.4% 늘었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "받아 둔 주문이 24조5700억원이에요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "business_detail",
+              "factKey": "order_backlog"
+            }
+          ],
+          "priceConnection": {
+            "text": "받아 둔 주문은 앞으로 만들 일감이 얼마나 쌓였는지를 보여줘요.",
+            "sourceIds": [
+              "S1",
+              "S5"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-CBCNEWS-595323",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:079550"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "LIG디펜스앤에어로스페이스(옛 LIG넥스원)가 2026년 2분기 매출 1조1101억원, 영업이익 1057억원을 기록했고 수주잔액이 24조5700억원이라고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -38460,17 +38819,170 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-011-0004640089",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY",
-          "NOT_TODAYS_MARKET"
-        ],
-        "reasons": [
-          "제목의 주체가 한·몽 CEPA와 국가 간 교역이며 선정 기업이 아니다.",
-          "기사 발행일이 2026년 7월 9일로 기준일 2026년 8월 15일의 당일 시장 뉴스가 아니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-DIGITALTODAY-688294",
+          "title": "포스코인터내셔널, 2026년 2분기 당기순이익 2473억원…전년동기대비 173.3% 급증",
+          "publisher": "디지털투데이",
+          "publishedAt": "2026-07-30T02:32:00.000Z",
+          "sourceUrl": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=688294",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "2026년 2분기(4월 1일부터 6월 30일까지) 당해실적 기준 연결 매출액은 9조6232억원으로 전년동기 8조1288억원 대비 18.4% 증가했다."
+            },
+            {
+              "id": "S2",
+              "text": "영업이익은 4290억원으로 전년동기 3381억원 대비 26.9% 늘었다."
+            },
+            {
+              "id": "S3",
+              "text": "당기순이익은 2473억원으로 전년동기 905억원 대비 173.3% 급증했다."
+            },
+            {
+              "id": "S4",
+              "text": "지배기업소유주지분순이익은 2384억원으로 전년동기 898억원 대비 165.5% 증가했다."
+            },
+            {
+              "id": "S5",
+              "text": "2026년 상반기(1월 1일부터 6월 30일까지) 누계실적은 매출액 18조336억원, 영업이익 7865억원, 당기순이익 5246억원이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-DIGITALTODAY-688294",
+          "primaryStockIds": [
+            "KRX:047050"
+          ],
+          "focusStatement": "포스코인터내셔널이 2026년 2분기 연결 매출액 9조6232억원, 영업이익 4290억원, 당기순이익 2473억원을 기록했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "순이익",
+            "매출",
+            "영업이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-DIGITALTODAY-688294",
+          "headline": {
+            "text": "포스코인터내셔널, 2분기 순이익 2473억원으로 173.3% 증가",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "homeSummary": {
+            "text": "포스코인터내셔널, 2분기 순이익 2473억원으로 173.3% 증가",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 9조6232억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue"
+            },
+            {
+              "text": "영업이익은 4290억원이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit"
+            },
+            {
+              "text": "상반기 매출은 18조336억원이에요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "context",
+              "factKey": "half_year_revenue"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "순이익",
+              "easyText": "세금까지 다 내고 최종적으로 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            },
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-DIGITALTODAY-688294",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:047050"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "포스코인터내셔널이 2026년 2분기 연결 매출액 9조6232억원, 영업이익 4290억원, 당기순이익 2473억원을 기록했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -39876,15 +40388,177 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-293-0000088983",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY"
-        ],
-        "reasons": [
-          "제목의 구체적인 주체인 컴투스홀딩스가 선정 51개 기업에 포함되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-HERALD-10824352",
+          "title": "하이브, 2분기 매출 1조·영업이익 1천억 돌파…\"사상 최대 분기 실적\"",
+          "publisher": "헤럴드경제",
+          "publishedAt": "2026-07-29T04:54:59.000Z",
+          "sourceUrl": "https://biz.heraldcorp.com/article/10824352",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "하이브가 2분기 매출 1조 4500억, 영업이익 1709억을 각각 돌파하며 사상 최대의 분기 실적을 달성했다."
+            },
+            {
+              "id": "S2",
+              "text": "하이브는 2026년 2분기 매출액이 1조 4500억 원, 영업이익이 1709억 원이라고 28일 밝혔다."
+            },
+            {
+              "id": "S3",
+              "text": "분기 기준 매출액이 1조 원을, 분기 영업이익이 1천억을 넘어선 것은 모두 최초다."
+            },
+            {
+              "id": "S4",
+              "text": "공연 부문 6477억 원, 음반·음원 3268억 원을 각각 기록했다."
+            },
+            {
+              "id": "S5",
+              "text": "MD(기획 상품) 및 라이선싱도 공연과 동반 상승효과를 내 3106억 원에 이르렀다."
+            },
+            {
+              "id": "S6",
+              "text": "전년 동기와 비교했을 때 매출이 2배 이상 성장한 데 이어, 두 자릿수(11.8%) 영업이익률까지 달성해 내실도 다졌다는 게 하이브의 설명이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-HERALD-10824352",
+          "primaryStockIds": [
+            "KRX:352820"
+          ],
+          "focusStatement": "하이브가 2026년 2분기 매출액 1조 4500억 원, 영업이익 1709억 원을 기록해 분기 기준 처음으로 매출 1조 원을 넘겼다고 밝혔다.",
+          "anchorSourceId": "S2",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "음원"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-HERALD-10824352",
+          "headline": {
+            "text": "하이브, 2분기 매출 1조4500억원으로 처음 1조원 넘어",
+            "sourceIds": [
+              "S2",
+              "S3"
+            ]
+          },
+          "homeSummary": {
+            "text": "하이브, 2분기 매출 1조4500억원으로 처음 1조원 넘어",
+            "sourceIds": [
+              "S2",
+              "S3"
+            ]
+          },
+          "body": [
+            {
+              "text": "영업이익은 1709억원이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit"
+            },
+            {
+              "text": "공연으로 6477억원을 벌었어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "concert_revenue"
+            },
+            {
+              "text": "음반과 음원은 3268억원이에요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "music_revenue"
+            }
+          ],
+          "priceConnection": {
+            "text": "공연과 음반으로 번 돈은 회사의 사업 성과와 연결돼요.",
+            "sourceIds": [
+              "S2",
+              "S4"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "음원",
+              "easyText": "인터넷에서 듣고 내려받는 노래 파일",
+              "treatment": "explained",
+              "sourceIds": [
+                "S4"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-HERALD-10824352",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:352820"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "하이브가 2026년 2분기 매출액 1조 4500억 원, 영업이익 1709억 원을 기록해 분기 기준 처음으로 매출 1조 원을 넘겼다고 밝혔다.",
+          "anchorSourceIds": [
+            "S2"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -51515,15 +52189,175 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-469-0000948142",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY"
-        ],
-        "reasons": [
-          "제목의 구체적인 주체인 두산과 박정원은 선정 기업 목록에 포함되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260811000650",
+          "title": "신세계, 2분기 영업익 1671억원…전년 比 121.9%↑",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-08-11T05:17:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260811000650",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "신세계는 올해 2분기 연결 기준 총매출 3조1414억원, 영업이익 1671억원을 기록해 전년 동기 대비 각각 8.5%, 121.9% 증가했다고 11일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "상반기 누계 총매출은 6조3558억원으로 전년 동기 대비 10.1% 증가했고, 영업이익은 3650억원으로 75.7% 늘었다."
+            },
+            {
+              "id": "S3",
+              "text": "백화점 사업은 2분기 총매출 2조170억원, 영업이익 1088억원을 기록했다."
+            },
+            {
+              "id": "S4",
+              "text": "신세계인터내셔날의 2분기 매출은 2916억원으로 15.1% 증가했고 영업이익은 70억원으로 흑자 전환했다."
+            },
+            {
+              "id": "S5",
+              "text": "신세계디에프는 2분기 매출 5426억원으로 10.3% 감소했지만 영업이익은 333억원으로 흑자 전환했다."
+            },
+            {
+              "id": "S6",
+              "text": "신세계센트럴은 2분기 매출 1087억원, 영업이익 149억원을 기록해 전년 동기 대비 각각 12.8%, 52.0% 증가했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260811000650",
+          "primaryStockIds": [
+            "KRX:004170"
+          ],
+          "focusStatement": "신세계가 2026년 2분기 연결 기준 총매출 3조1414억원, 영업이익 1671억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "총매출",
+            "영업이익",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260811000650",
+          "headline": {
+            "text": "신세계, 2분기 영업이익 1671억원으로 121.9% 증가",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "신세계, 2분기 영업이익 1671억원으로 121.9% 증가",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "총매출은 3조1414억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "total_revenue"
+            },
+            {
+              "text": "백화점에서만 2조170억원을 팔았어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "department_store_revenue"
+            },
+            {
+              "text": "상반기 영업이익은 3650억원이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "context",
+              "factKey": "half_year_operating_profit"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "총매출",
+              "easyText": "가게에서 팔린 물건값을 모두 더한 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260811000650",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:004170"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "신세계가 2026년 2분기 연결 기준 총매출 3조1414억원, 영업이익 1671억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -52266,15 +53100,172 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-648-0000049681",
-        "stage": "selector",
-        "reasonCodes": [
-          "COMPANY_NOT_PRIMARY_SUBJECT"
-        ],
-        "reasons": [
-          "BGF리테일과 GS리테일을 공동 주인공으로 다루며 두 회사의 2분기 실적을 나란히 제시한 기사입니다. 제공된 유니버스에는 BGF리테일만 있어 공동 주인공 전체를 primaryStockIds에 지정할 수 없으므로 단일 회사 기사로 통과시킬 수 없습니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260806000889",
+          "title": "BGF리테일, 2분기 영업익 849억원…전년 比 22.3%↑",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-08-06T06:18:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260806000889",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "BGF리테일은 올해 2분기 매출액이 2조4268억원으로 전년 동기 대비 6.0% 증가했다고 6일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "영업이익은 849억원으로 22.3% 늘었다."
+            },
+            {
+              "id": "S3",
+              "text": "올해 상반기 누적 매출액은 4조5472억원으로 전년 동기 대비 5.6% 증가했다."
+            },
+            {
+              "id": "S4",
+              "text": "영업이익은 1230억원으로 33.7% 늘었다."
+            },
+            {
+              "id": "S5",
+              "text": "동일점 매출 성장세가 확대되며 실적 개선을 이끌었다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260806000889",
+          "primaryStockIds": [
+            "KRX:282330"
+          ],
+          "focusStatement": "BGF리테일이 2026년 2분기 매출액 2조4268억원, 영업이익 849억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260806000889",
+          "headline": {
+            "text": "BGF리테일, 2분기 매출 2조4268억원·영업이익 849억원",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "BGF리테일, 2분기 매출 2조4268억원·영업이익 849억원",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 지난해보다 6.0% 늘었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "영업이익은 22.3% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_growth"
+            },
+            {
+              "text": "상반기 매출은 4조5472억원이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "half_year_revenue"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260806000889",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:282330"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "BGF리테일이 2026년 2분기 매출액 2조4268억원, 영업이익 849억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -54288,15 +55279,172 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-421-0009115252",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY"
-        ],
-        "reasons": [
-          "제목의 구체적인 주체인 '카뱅'이 선정 51개 기업에 포함되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ENEWSTODAY-2451811",
+          "title": "KB금융, 상반기 순익 3조8846억원 '사상 최대'",
+          "publisher": "이뉴스투데이",
+          "publishedAt": "2026-07-23T06:22:00.000Z",
+          "sourceUrl": "http://www.enewstoday.co.kr/news/articleView.html?idxno=2451811",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "KB금융그룹이 올해 2분기 당기순이익으로 1조9922억원을 거뒀다고 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "상반기 당기순이익은 3조8846억원으로 사상 최대 실적을 기록했다."
+            },
+            {
+              "id": "S3",
+              "text": "KB금융의 상반기 당기순이익은 전년 동기 대비 13.1% 증가한 3조8846억원, ROE는 14.09%를 기록했다."
+            },
+            {
+              "id": "S4",
+              "text": "2분기 당기순이익은 은행과 비은행의 균형 잡힌 포트폴리오와 고른 성장으로 1조 9,922억원을 기록했다."
+            },
+            {
+              "id": "S5",
+              "text": "다변화된 포트폴리오를 기반으로 은행, 증권, 보험 등 핵심 계열사들이 시장 환경 변화에 대응하여 상호 보완적인 실적을 이어온 가운데, 비은행 계열사의 상반기 그룹 내 실적 기여도가 44%까지 상승했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ENEWSTODAY-2451811",
+          "primaryStockIds": [
+            "KRX:105560"
+          ],
+          "focusStatement": "KB금융이 2026년 2분기 당기순이익 1조9922억원, 상반기 3조8846억원으로 사상 최대 실적을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "순이익",
+            "상반기",
+            "계열사"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-ENEWSTODAY-2451811",
+          "headline": {
+            "text": "KB금융, 2분기 순이익 1조9922억원·상반기 사상 최대",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "KB금융, 2분기 순이익 1조9922억원·상반기 사상 최대",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "상반기 순이익은 3조8846억원이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "half_year_net_income"
+            },
+            {
+              "text": "지난해보다 13.1% 늘었어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "net_income_growth"
+            },
+            {
+              "text": "계열사 기여도가 44%까지 올랐어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "business_detail",
+              "factKey": "non_bank_contribution"
+            }
+          ],
+          "priceConnection": {
+            "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "순이익",
+              "easyText": "세금까지 다 내고 최종적으로 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "계열사",
+              "easyText": "같은 그룹에 속한 형제 회사들",
+              "treatment": "explained",
+              "sourceIds": [
+                "S5"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ENEWSTODAY-2451811",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:105560"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "KB금융이 2026년 2분기 당기순이익 1조9922억원, 상반기 3조8846억원으로 사상 최대 실적을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -54822,15 +55970,175 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-056-0012237974",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY"
-        ],
-        "reasons": [
-          "제목의 구체적인 대상인 메가박스와 콘텐트리중앙은 선정 기업 목록에 포함되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-DT-12075586",
+          "title": "키움증권, 2분기 순이익 6806억원…전년 대비 119.4% 증가",
+          "publisher": "디지털타임스",
+          "publishedAt": "2026-07-29T23:16:00.000Z",
+          "sourceUrl": "https://www.dt.co.kr/article/12075586",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "키움증권은 올해 2분기 연결 기준 영업이익이 7889억원으로 전년 동기 4083억원보다 93.2% 증가했다고 30일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "당기순이익은 6806억원으로 같은 기간 3101억원보다 119.4% 늘었다."
+            },
+            {
+              "id": "S3",
+              "text": "별도 기준 영업이익은 6910억원으로 전년 동기 대비 85.0% 증가했다."
+            },
+            {
+              "id": "S4",
+              "text": "자본총계는 6조8909억원으로 전년 동기 5조4386억원보다 26.7% 증가했다."
+            },
+            {
+              "id": "S5",
+              "text": "2분기 주식 수수료 수익은 4519억원으로 전년 동기 1624억원보다 178.3% 증가했다."
+            },
+            {
+              "id": "S6",
+              "text": "2분기 운용손익과 배당·분배금은 2492억원으로 전년 동기 1216억원보다 104.9% 늘었다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-DT-12075586",
+          "primaryStockIds": [
+            "KRX:039490"
+          ],
+          "focusStatement": "키움증권이 2026년 2분기 연결 기준 영업이익 7889억원, 당기순이익 6806억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S2",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "순이익",
+            "영업이익",
+            "수수료"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-DT-12075586",
+          "headline": {
+            "text": "키움증권, 2분기 순이익 6806억원으로 119.4% 증가",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "키움증권, 2분기 순이익 6806억원으로 119.4% 증가",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "영업이익은 7889억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit"
+            },
+            {
+              "text": "주식 수수료로 4519억원을 벌었어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "business_detail",
+              "factKey": "brokerage_fee_revenue"
+            },
+            {
+              "text": "수수료 수익이 178.3% 늘었어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "business_detail",
+              "factKey": "fee_revenue_growth"
+            }
+          ],
+          "priceConnection": {
+            "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "순이익",
+              "easyText": "세금까지 다 내고 최종적으로 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "수수료",
+              "easyText": "주식을 사고팔 때 회사에 내는 이용료",
+              "treatment": "explained",
+              "sourceIds": [
+                "S5"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-DT-12075586",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:039490"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "키움증권이 2026년 2분기 연결 기준 영업이익 7889억원, 당기순이익 6806억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S2"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -56367,15 +57675,157 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-001-0016252564",
-        "stage": "selector",
-        "reasonCodes": [
-          "OUTSIDE_ALLOWED_SCOPE"
-        ],
-        "reasons": [
-          "기사의 중심 내용은 금융회사 최고경영자의 보수 공개이며, 허용된 회사 사건 유형인 실적·판매·계약·자본·규제·소송·운영 위험에 해당하지 않습니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-1CONOMY-49701",
+          "title": "하나금융, 2Q 순이익 1조1928억원…'기업가치 제고 2.0' 발표",
+          "publisher": "1코노미뉴스",
+          "publishedAt": "2026-07-24T07:57:00.000Z",
+          "sourceUrl": "https://www.1conomynews.co.kr/news/articleView.html?idxno=49701",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "2026년 2분기 연결 기준 잠정 당기순이익은 1조1928억원으로, 전년 동기보다 1.7% 증가했다."
+            },
+            {
+              "id": "S2",
+              "text": "계열사별로는 하나은행이 2분기 1조169억원의 순이익을 기록했다."
+            },
+            {
+              "id": "S3",
+              "text": "하나증권은 전년 동기보다 약 439% 급증한 1698억원의 순이익을 거뒀다."
+            },
+            {
+              "id": "S4",
+              "text": "하나카드의 순이익은 684억원으로 전년 동기보다 약 23% 증가했다."
+            },
+            {
+              "id": "S5",
+              "text": "하나캐피탈은 509억원의 순이익을 내 전년 동기 166억원 순손실에서 흑자로 전환했다."
+            },
+            {
+              "id": "S6",
+              "text": "하나생명은 전년 동기보다 약 223.8% 증가한 68억원을 기록했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-1CONOMY-49701",
+          "primaryStockIds": [
+            "KRX:086790"
+          ],
+          "focusStatement": "하나금융지주가 2026년 2분기 연결 기준 잠정 당기순이익 1조1928억원을 기록해 전년 동기보다 1.7% 증가했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "순이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-1CONOMY-49701",
+          "headline": {
+            "text": "하나금융, 2분기 순이익 1조1928억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "하나금융, 2분기 순이익 1조1928억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "지난해 같은 기간보다 1.7% 늘었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "net_income_growth"
+            },
+            {
+              "text": "하나은행이 1조169억원을 벌었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "bank_net_income"
+            },
+            {
+              "text": "하나증권은 1698억원을 벌었어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "securities_net_income"
+            }
+          ],
+          "priceConnection": {
+            "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "순이익",
+              "easyText": "세금까지 다 내고 최종적으로 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-1CONOMY-49701",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:086790"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "하나금융지주가 2026년 2분기 연결 기준 잠정 당기순이익 1조1928억원을 기록해 전년 동기보다 1.7% 증가했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -56825,15 +58275,170 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-030-0003456908",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY"
-        ],
-        "reasons": [
-          "제목의 구체적인 주체인 베스핀글로벌이 선정된 51개 기업에 포함되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ZDNET-20260724162130",
+          "title": "우리금융, 2026년 상반기 순익 1조6090억…전년比 3.5% 증가",
+          "publisher": "ZDNet Korea",
+          "publishedAt": "2026-07-24T07:45:00.000Z",
+          "sourceUrl": "https://zdnet.co.kr/view/?no=20260724162130",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "상반기 당기순익은 1조6090억원으로 전년 대비 3.5% 증가했다고 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "2분기 순이익은 1조46억원으로 1조원 이상으로 회복, 실적 턴어라운드를 달성했다"
+            },
+            {
+              "id": "S3",
+              "text": "상반기 순영업이익은 5조7227억원으로 역대 최고치를 달성했다."
+            },
+            {
+              "id": "S4",
+              "text": "이자이익은 4조6597억원으로 전년 동기 대비 3% 이상 증가했으며, 비이자이익은 1조630억원으로 전년 동기 대비 20% 늘었다."
+            },
+            {
+              "id": "S5",
+              "text": "우리은행의 상반기 당기순이익은 1조3730억원으로 전년 대비 13.5% 감소했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ZDNET-20260724162130",
+          "primaryStockIds": [
+            "KRX:316140"
+          ],
+          "focusStatement": "우리금융지주가 2026년 2분기 순이익 1조46억원, 상반기 당기순이익 1조6090억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S2",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "순이익",
+            "상반기",
+            "이자이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-ZDNET-20260724162130",
+          "headline": {
+            "text": "우리금융, 2분기 순이익 1조46억원으로 1조원대 회복",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "우리금융, 2분기 순이익 1조46억원으로 1조원대 회복",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "상반기 순이익은 1조6090억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "half_year_net_income"
+            },
+            {
+              "text": "지난해보다 3.5% 늘었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "net_income_growth"
+            },
+            {
+              "text": "이자이익은 4조6597억원이에요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "interest_income"
+            }
+          ],
+          "priceConnection": {
+            "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "순이익",
+              "easyText": "세금까지 다 내고 최종적으로 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "이자이익",
+              "easyText": "돈을 빌려주고 받은 이자로 번 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S4"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ZDNET-20260724162130",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:316140"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "우리금융지주가 2026년 2분기 순이익 1조46억원, 상반기 당기순이익 1조6090억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S2"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -66916,411 +68521,150 @@
       "pipelineResult": {
         "status": "ready_for_storage",
         "article": {
-          "articleId": "NAVER-079-0004178965",
-          "runDateKst": "2026-08-15",
-          "scope": "company",
-          "title": "HD현대중공업 노조, 결국 파업 준비 수순…중노위 조정 신청",
-          "publisher": "노컷뉴스",
-          "publishedAt": "2026-08-14T07:35:14.000Z",
-          "sourceUrl": "https://www.nocutnews.co.kr/news/6563265?utm_source=naver&utm_medium=article&utm_campaign=20260814043431",
+          "articleId": "MANUAL-DIGITALTODAY-662456",
+          "title": "HD현대중공업, KSS해운과 5048억원 규모 VLGC 3척 계약 체결",
+          "publisher": "디지털투데이",
+          "publishedAt": "2026-05-04T05:32:00.000Z",
+          "sourceUrl": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=662456",
           "sourceUnits": [
             {
               "id": "S1",
-              "text": "노조 8월 25~27일 파업 찬반 투표 예정 \"조선업 호황…기본급 상여금 대폭 인상을\""
+              "text": "종합 조선 기업 HD현대중공업(329180)이 5월 4일 공시를 통해 KSS해운과의 VLGC 3척 건조 계약 체결을 발표했다."
             },
             {
               "id": "S2",
-              "text": "HD현대중공업 노동조합이 올해 임금·단체협약 교섭 난항으로 파업 준비 수순에 들어갔다."
+              "text": "계약금액은 5048억원이며, 이는 최근 결산 기준 매출액 17조5806억원 대비 2.87%에 해당한다."
             },
             {
               "id": "S3",
-              "text": "금속노조 현대중공업지부(이하 노조)는 14일 중앙노동위원회에 노동 쟁의 조정을 신청했다."
+              "text": "계약은 2026년 4월 30일 시작되어 2029년 8월 31일에 종료될 예정이다."
             },
             {
               "id": "S4",
-              "text": "중앙노동위원회가 노사 입장 차가 크다고 판단해 '조정 중지' 결정을 내리고, 파업 찬반 투표에서 과반 찬성이 나오면 노조는 합법적인 파업권을 확보하게 된다."
+              "text": "주요 계약 조건으로는 계약금 및 선급금이 있으며, 대금은 공사진척에 따라 지급된다."
             },
             {
               "id": "S5",
-              "text": "노조는 25일부터 27일까지 조합원을 대상으로 파업 찬반 투표를 진행할 예정이다."
-            },
-            {
-              "id": "S6",
-              "text": "앞서 HD현대중공업 노사는 6월 상견례 이후 15차례 교섭을 진행했으나 이견을 좁히지 못했다."
-            },
-            {
-              "id": "S7",
-              "text": "월 기본급 14만 9600원 인상과 상여금 100% 인상을 요구안으로 제시했다."
-            },
-            {
-              "id": "S8",
-              "text": "또 영업이익의 30% 성과 공유와 휴가비 등을 통상임금 산입도 요구하고 있다."
-            },
-            {
-              "id": "S9",
-              "text": "각종 비리와 부당대우, 사건사고와 미담 등 모든 얘깃거리를 알려주세요."
-            },
-            {
-              "id": "S10",
-              "text": "사이트 : https://url.kr/b71afn"
+              "text": "HD현대중공업은 2019년 6월 3일 코스피 시장에 상장된 선박 및 보트 건조업체다."
             }
-          ]
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
         },
         "selection": {
-          "articleId": "NAVER-079-0004178965",
+          "articleId": "MANUAL-DIGITALTODAY-662456",
           "primaryStockIds": [
             "KRX:329180"
           ],
-          "focusStatement": "HD현대중공업 노동조합이 임금·단체협약 교섭 난항으로 중앙노동위원회에 노동 쟁의 조정을 신청했고, 25일부터 27일까지 파업 찬반 투표를 진행할 예정이다.",
-          "anchorSourceId": "S3",
+          "focusStatement": "HD현대중공업이 KSS해운과 5048억원 규모의 VLGC 3척 건조 계약을 체결했다고 공시했다.",
+          "anchorSourceId": "S1",
           "includedSourceIds": [
+            "S1",
             "S2",
             "S3",
             "S4",
-            "S5",
-            "S6",
-            "S7",
-            "S8"
+            "S5"
           ],
-          "excludedSourceIds": [
-            "S1",
-            "S9",
-            "S10"
-          ],
+          "excludedSourceIds": [],
           "difficultTerms": [
-            {
-              "term": "노동조합",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "임금·단체협약",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "교섭",
-              "sourceIds": [
-                "S2",
-                "S6"
-              ]
-            },
-            {
-              "term": "중앙노동위원회",
-              "sourceIds": [
-                "S3",
-                "S4"
-              ]
-            },
-            {
-              "term": "노동 쟁의 조정",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "조정 중지",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "노사",
-              "sourceIds": [
-                "S4",
-                "S6"
-              ]
-            },
-            {
-              "term": "파업 찬반 투표",
-              "sourceIds": [
-                "S4",
-                "S5"
-              ]
-            },
-            {
-              "term": "과반 찬성",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "합법적인 파업권",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "조합원",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "상견례",
-              "sourceIds": [
-                "S6"
-              ]
-            },
-            {
-              "term": "기본급",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "상여금",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "요구안",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "영업이익",
-              "sourceIds": [
-                "S8"
-              ]
-            },
-            {
-              "term": "성과 공유",
-              "sourceIds": [
-                "S8"
-              ]
-            },
-            {
-              "term": "통상임금 산입",
-              "sourceIds": [
-                "S8"
-              ]
-            }
+            "계약",
+            "가스 운반선",
+            "매출"
           ],
           "reasonCodes": [],
-          "reasons": [
-            "HD현대중공업 노조의 공식 조정 신청과 예정된 파업 찬반 투표는 회사의 노사관계와 운영에 직접 관련된 중대한 사건이다."
-          ],
+          "reasons": [],
           "decision": "accept",
           "kind": "company",
-          "eventType": "material_operational_risk"
+          "eventType": "binding_contract"
         },
         "draft": {
-          "articleId": "NAVER-079-0004178965",
+          "articleId": "MANUAL-DIGITALTODAY-662456",
           "headline": {
-            "text": "HD현대중공업 노조, 중앙노동위원회에 노동 쟁의 조정 신청",
+            "text": "HD현대중공업, 5048억원 규모 가스 운반선 3척 계약",
             "sourceIds": [
-              "S3"
+              "S1",
+              "S2"
             ]
           },
           "homeSummary": {
-            "text": "HD현대중공업 노조, 중앙노동위원회에 노동 쟁의 조정 신청",
+            "text": "HD현대중공업, 5048억원 규모 가스 운반선 3척 계약",
             "sourceIds": [
-              "S3"
+              "S1",
+              "S2"
             ]
           },
           "body": [
             {
-              "text": "노동 쟁의 조정 신청일은 14일이에요.",
+              "text": "KSS해운에서 주문을 받았어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "customer"
+            },
+            {
+              "text": "2029년 8월까지 만들어 주기로 했어요.",
               "sourceIds": [
                 "S3"
               ],
-              "role": "key_detail",
-              "factKey": "application_date"
-            },
-            {
-              "text": "25~27일 파업 찬반 투표가 예정됐어요.",
-              "sourceIds": [
-                "S5"
-              ],
               "role": "business_detail",
-              "factKey": "strike_vote_dates"
+              "factKey": "delivery_deadline"
             },
             {
-              "text": "6월 상견례 뒤 15차례 교섭했지만 의견 차이를 못 좁혔어요.",
+              "text": "지난해 매출의 2.87%에 해당해요.",
               "sourceIds": [
-                "S6"
+                "S2"
               ],
               "role": "context",
-              "factKey": "negotiation_count"
+              "factKey": "revenue_share"
             }
           ],
           "priceConnection": {
-            "text": "파업 여부는 회사 운영의 지속성과 연결될 수 있어요.",
+            "text": "계약을 따내면 앞으로 만들 일감이 그만큼 늘어나요.",
             "sourceIds": [
-              "S3",
-              "S5"
+              "S1",
+              "S2"
             ],
-            "kind": "operational_continuity",
+            "kind": "contracted_business",
             "basis": "event_education"
           },
           "termTreatments": [
             {
-              "term": "노동조합",
-              "easyText": "일하는 사람들이 근무 조건을 함께 의논하는 모임",
+              "term": "계약",
+              "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "가스 운반선",
+              "easyText": "액체로 만든 가스를 실어 나르는 배",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
               "treatment": "explained",
               "sourceIds": [
                 "S2"
-              ]
-            },
-            {
-              "term": "임금·단체협약",
-              "easyText": "월급과 일터 규칙을 함께 정한 약속",
-              "treatment": "explained",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "교섭",
-              "easyText": "회사와 일하는 사람들이 조건을 의논하는 일",
-              "treatment": "explained",
-              "sourceIds": [
-                "S2",
-                "S6"
-              ]
-            },
-            {
-              "term": "중앙노동위원회",
-              "easyText": "일터에서 생긴 다툼을 다루는 기관",
-              "treatment": "explained",
-              "sourceIds": [
-                "S3",
-                "S4"
-              ]
-            },
-            {
-              "term": "노동 쟁의 조정",
-              "easyText": "일터 다툼을 풀 방법을 찾는 절차",
-              "treatment": "explained",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "조정 중지",
-              "easyText": "다툼을 풀려는 절차를 멈추는 결정",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "노사",
-              "easyText": "회사와 일하는 사람들",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4",
-                "S6"
-              ]
-            },
-            {
-              "term": "파업 찬반 투표",
-              "easyText": "파업을 할지 말지 묻는 투표",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4",
-                "S5"
-              ]
-            },
-            {
-              "term": "과반 찬성",
-              "easyText": "절반보다 많은 사람이 찬성하는 것",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "합법적인 파업권",
-              "easyText": "법에 맞게 일을 멈출 수 있는 권리",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "조합원",
-              "easyText": "일하는 사람들 모임에 가입한 사람",
-              "treatment": "explained",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "상견례",
-              "easyText": "교섭을 시작하며 서로 인사하는 자리",
-              "treatment": "explained",
-              "sourceIds": [
-                "S6"
-              ]
-            },
-            {
-              "term": "기본급",
-              "easyText": "월급의 기본이 되는 금액",
-              "treatment": "explained",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "상여금",
-              "easyText": "월급과 따로 받는 보너스",
-              "treatment": "explained",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "요구안",
-              "easyText": "상대에게 이루어 달라고 내놓은 내용",
-              "treatment": "explained",
-              "sourceIds": [
-                "S7"
-              ]
-            },
-            {
-              "term": "영업이익",
-              "easyText": "사업으로 번 돈에서 운영 비용을 뺀 금액",
-              "treatment": "explained",
-              "sourceIds": [
-                "S8"
-              ]
-            },
-            {
-              "term": "성과 공유",
-              "easyText": "일의 결과로 얻은 것을 함께 나누는 것",
-              "treatment": "explained",
-              "sourceIds": [
-                "S8"
-              ]
-            },
-            {
-              "term": "통상임금 산입",
-              "easyText": "평소 받는 임금에 어떤 돈을 넣어 계산하는 것",
-              "treatment": "explained",
-              "sourceIds": [
-                "S8"
               ]
             }
           ]
         },
         "review": {
-          "articleId": "NAVER-079-0004178965",
+          "articleId": "MANUAL-DIGITALTODAY-662456",
           "independentKind": "company",
           "primaryStockIds": [
             "KRX:329180"
           ],
-          "eventType": "material_operational_risk",
-          "focusStatement": "HD현대중공업 노동조합이 14일 중앙노동위원회에 노동 쟁의 조정을 신청했고, 25~27일 파업 찬반 투표를 진행할 예정이다.",
+          "eventType": "binding_contract",
+          "focusStatement": "HD현대중공업이 KSS해운과 5048억원 규모의 VLGC 3척 건조 계약을 체결했다고 공시했다.",
           "anchorSourceIds": [
-            "S2",
-            "S3",
-            "S5"
+            "S1"
           ],
           "checks": {
             "allowedScope": true,
@@ -67341,7 +68685,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 1
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {
@@ -72755,15 +74099,161 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-082-0001393865",
-        "stage": "selector",
-        "reasonCodes": [
-          "ROUTINE_OR_PROMOTIONAL"
-        ],
-        "reasons": [
-          "KAIST와 연구센터를 개소하고 미래 기술 협력을 추진한 내용으로, 허용된 실적·판매·생산·구속력 있는 계약·규제·소송 등 직접 사건이 확인되지 않습니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-INTHENEWS-89740",
+          "title": "[2026 2분기 실적] 삼성중공업, 생산 확대 효과에 2분기 수익성 개선 지속",
+          "publisher": "인더뉴스",
+          "publishedAt": "2026-07-24T07:07:15.000Z",
+          "sourceUrl": "https://www.inthenews.co.kr/news/article.html?no=89740",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "삼성중공업은 2026년 2분기 잠정 매출액 3조2307억원, 영업이익 3250억원을 기록했다고 24일 공시했습니다."
+            },
+            {
+              "id": "S2",
+              "text": "지난해 같은 기간과 비교해 매출은 20%, 영업이익은 59% 증가했습니다."
+            },
+            {
+              "id": "S3",
+              "text": "상반기 누적 매출은 6조1330억원, 영업이익은 5981억원으로 집계됐습니다."
+            },
+            {
+              "id": "S4",
+              "text": "전년 동기 매출 5조1733억원, 영업이익 3279억원과 비교하면 각각 19%, 82% 증가한 규모입니다."
+            },
+            {
+              "id": "S5",
+              "text": "삼성중공업의 올해 1월부터 7월까지 누적 신규 수주는 100억달러입니다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-INTHENEWS-89740",
+          "primaryStockIds": [
+            "KRX:010140"
+          ],
+          "focusStatement": "삼성중공업이 2026년 2분기 잠정 매출액 3조2307억원, 영업이익 3250억원을 기록했다고 공시했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-INTHENEWS-89740",
+          "headline": {
+            "text": "삼성중공업, 2분기 매출 3조2307억원·영업이익 3250억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "삼성중공업, 2분기 매출 3조2307억원·영업이익 3250억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 지난해보다 20% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "영업이익은 59% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_growth"
+            },
+            {
+              "text": "새로 받은 주문이 100억달러예요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "business_detail",
+              "factKey": "new_orders"
+            }
+          ],
+          "priceConnection": {
+            "text": "새로 받은 주문은 앞으로 할 일이 얼마나 쌓였는지를 보여줘요.",
+            "sourceIds": [
+              "S1",
+              "S5"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-INTHENEWS-89740",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:010140"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "삼성중공업이 2026년 2분기 잠정 매출액 3조2307억원, 영업이익 3250억원을 기록했다고 공시했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -75484,15 +76974,165 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-011-0004651913",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NO_SELECTED_COMPANY"
-        ],
-        "reasons": [
-          "제목의 구체적인 주체인 티웨이항공은 선정 기업 목록에 포함되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ASIAE-2026081317185786293",
+          "title": "아시아나 2분기 영업손실 2951억원…화물기 사업 매각 영향",
+          "publisher": "아시아경제",
+          "publishedAt": "2026-08-13T08:18:00.000Z",
+          "sourceUrl": "https://www.asiae.co.kr/article/2026081317185786293",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "아시아나항공은 올해 2분기 매출액 1조5470억원과 영업손실 2951억원을 기록했다고 13일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "매출은 화물기 사업 매각 영향으로 전년 동기 대비 1286억원 줄었다."
+            },
+            {
+              "id": "S3",
+              "text": "여객사업 매출은 1조2809억원을 기록해 전년 대비 1633억원(15%) 증가했다."
+            },
+            {
+              "id": "S4",
+              "text": "화물사업 매출은 작년 8월 화물기 사업부 매각 영향으로 전년 대비 2565억원 감소한 1147억원을 기록했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ASIAE-2026081317185786293",
+          "primaryStockIds": [
+            "KRX:020560"
+          ],
+          "focusStatement": "아시아나항공이 2026년 2분기 매출액 1조5470억원과 영업손실 2951억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "영업손실",
+            "매출",
+            "여객"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-ASIAE-2026081317185786293",
+          "headline": {
+            "text": "아시아나항공, 2분기 매출 1조5470억원·영업손실 2951억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "아시아나항공, 2분기 매출 1조5470억원·영업손실 2951억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "손님을 태워 1조2809억원을 벌었어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "passenger_revenue"
+            },
+            {
+              "text": "여객 매출은 15% 늘었어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "passenger_revenue_growth"
+            },
+            {
+              "text": "화물 사업을 판 뒤 매출이 줄었어요.",
+              "sourceIds": [
+                "S2",
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "cargo_divestiture_effect"
+            }
+          ],
+          "priceConnection": {
+            "text": "영업손실은 번 돈보다 쓴 돈이 많았다는 뜻이에요.",
+            "sourceIds": [
+              "S1"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "영업손실",
+              "easyText": "번 돈보다 쓴 돈이 많아서 밑진 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "여객",
+              "easyText": "비행기를 타는 손님",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ASIAE-2026081317185786293",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:020560"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "아시아나항공이 2026년 2분기 매출액 1조5470억원과 영업손실 2951억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -80339,15 +81979,166 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-024-0000107504",
-        "stage": "selector",
-        "reasonCodes": [
-          "COMPANY_NOT_PRIMARY_SUBJECT"
-        ],
-        "reasons": [
-          "선정 기업이 제목이나 기사 앞부분의 주체로 확인되지 않습니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-TTLNEWS-3130225",
+          "title": "아모레퍼시픽, 2분기 매출 1조2543억·영업익 1228억…전년比 14.6%·53.3%↑",
+          "publisher": "퍼블릭뉴스통신",
+          "publishedAt": "2026-07-30T06:10:00.000Z",
+          "sourceUrl": "http://www.ttlnews.com/news/articleView.html?idxno=3130225",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "아모레퍼시픽 그룹은 2026년 2분기 연결 기준으로 매출액 1조 2543억원, 영업이익 1228억원을 올렸다."
+            },
+            {
+              "id": "S2",
+              "text": "이는 2025년 동기 대비 매출은 14.6%, 영업이익은 53.3% 늘어난 수치다."
+            },
+            {
+              "id": "S3",
+              "text": "올 2분기 동안 아모레퍼시픽의 국내 사업은 10%의 영업이익률을 나타냈고, 해외 사업 부문 역시 두 자릿수 영업이익률을 기록하며 수익성 개선을 이끌었다."
+            },
+            {
+              "id": "S4",
+              "text": "그룹의 핵심 계열사인 아모레퍼시픽은 전년 대비 매출이 17%, 영업이익이 59% 늘어나며 전체 실적 상승을 주도했다."
+            },
+            {
+              "id": "S5",
+              "text": "국내 사업 매출은 10%, 영업이익은 48% 증가해 안정적인 실적 기반을 다졌다."
+            },
+            {
+              "id": "S6",
+              "text": "해외 사업은 매출이 28% 증가하고 영업이익은 99% 늘어났다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-TTLNEWS-3130225",
+          "primaryStockIds": [
+            "KRX:090430"
+          ],
+          "focusStatement": "아모레퍼시픽 그룹이 2026년 2분기 연결 기준 매출액 1조 2543억원, 영업이익 1228억원을 올렸다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-TTLNEWS-3130225",
+          "headline": {
+            "text": "아모레퍼시픽, 2분기 매출 1조2543억원·영업이익 1228억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "아모레퍼시픽, 2분기 매출 1조2543억원·영업이익 1228억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 지난해보다 14.6% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "영업이익은 53.3% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_growth"
+            },
+            {
+              "text": "외국에서 판 돈이 28% 늘었어요.",
+              "sourceIds": [
+                "S6"
+              ],
+              "role": "business_detail",
+              "factKey": "overseas_revenue_growth"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-TTLNEWS-3130225",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:090430"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "아모레퍼시픽 그룹이 2026년 2분기 연결 기준 매출액 1조 2543억원, 영업이익 1228억원을 올렸다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [

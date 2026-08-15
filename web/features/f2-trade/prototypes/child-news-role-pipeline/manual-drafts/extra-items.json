@@ -1,0 +1,182 @@
+{
+  "runId": "selected-company-news-2026-08-15-deep-with-manual",
+  "cases": [
+    {
+      "stock": {
+        "stockId": "KRX:000270",
+        "symbol": "000270",
+        "name": "기아",
+        "aliases": [
+          "KIA"
+        ],
+        "sector": "automotive",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-GENEWS-20260730-KIA",
+          "title": "기아, 멕시코 6억 4900만 달러 투입… 첫 현지 전기차 'EV3' 생산",
+          "publisher": "글로벌이코노믹",
+          "publishedAt": "2026-07-29T23:11:00.000Z",
+          "sourceUrl": "https://www.g-enews.com/article/Global-Biz/2026/07/2026073008091879910c8c1c064d_1",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "기아(KIA)가 멕시코 누에보레온주 페스케리아 공장에 총 6억 4,900만 달러(약 9,380억 원)를 투입해 브랜드의 멕시코 첫 전기차 생산 라인과 대규모 폐수 재활용 시설을 구축한다."
+            },
+            {
+              "id": "S2",
+              "text": "이번 대규모 투자를 통해 지금까지 한국에서만 전량 조립되어 온 기아의 전공간 전기차 모델 'EV3'가 멕시코 페스케리아 공장에서 생산된다."
+            },
+            {
+              "id": "S3",
+              "text": "첫 신차 양산 개시일은 오는 2026년 8월 4일로 확정되었다."
+            },
+            {
+              "id": "S4",
+              "text": "기아는 EV3 생산 초기 멕시코 현지 부품 구성 비율을 약 27%로 확보한 뒤 프로젝트 진행에 맞춰 점진적으로 확대할 계획이다."
+            },
+            {
+              "id": "S5",
+              "text": "고용 측면에서는 2026년 1단계 사업에서 500명의 직접 일자리를 창출하고, 2027년부터 2030년 사이 1,500명의 인력을 추가로 채용해 생산 인프라를 대폭 늘린다."
+            },
+            {
+              "id": "S6",
+              "text": "페스케리아 산업단지 내에 2메가와트(MW) 규모의 태양광 발전 단지를 먼저 조성한 후 2030년까지 8MW 규모로 대폭 확장한다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-GENEWS-20260730-KIA",
+          "primaryStockIds": [
+            "KRX:000270"
+          ],
+          "focusStatement": "기아가 멕시코 페스케리아 공장에 6억 4,900만 달러를 투입해 전기차 EV3를 현지에서 생산하기로 했고 양산 개시일은 2026년 8월 4일이다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "전기차",
+            "공장"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-GENEWS-20260730-KIA",
+          "headline": {
+            "text": "기아, 멕시코 공장에서 전기차 EV3를 처음 만든다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "기아, 멕시코 공장에서 전기차 EV3를 처음 만든다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "8월 4일부터 만들기 시작해요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "production_start_date"
+            },
+            {
+              "text": "공장에 9380억원을 들여요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "investment_amount"
+            },
+            {
+              "text": "그동안 EV3는 한국에서만 만들었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "context",
+              "factKey": "previous_production_base"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 공장에서 만들기 시작하면 팔 수 있는 양이 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "전기차",
+              "easyText": "기름 대신 전기로 달리는 자동차",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "공장",
+              "easyText": "물건을 많이 만들어 내는 큰 건물",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-GENEWS-20260730-KIA",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:000270"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "기아가 멕시코 페스케리아 공장에 6억 4,900만 달러를 투입해 전기차 EV3를 현지에서 생산하기로 했고 양산 개시일은 2026년 8월 4일이다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
+      }
+    }
+  ]
+}

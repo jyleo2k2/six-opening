@@ -94,7 +94,15 @@ const items = await Promise.all(
     .map(async (name) => JSON.parse(await readFile(resolve(itemsDir, name), "utf8"))),
 );
 
-const byStock = new Map(items.map((item) => [item.stockId, item]));
+// 종목당 뉴스는 하나가 아니다. 리포트 cases 는 종목당 한 건만 담을 수 있으므로
+// 첫 건만 리포트에 넣고, `second` 를 단 추가분은 따로 모아 적재기가 직접 읽게 한다.
+const primaries = items.filter((item) => !item.second);
+const extras = items.filter((item) => item.second);
+const duplicate = primaries.map((item) => item.stockId)
+  .find((id, index, all) => all.indexOf(id) !== index);
+if (duplicate) throw new Error(`${duplicate}: 대표 초안이 둘 이상입니다. 추가분에는 second 를 다세요.`);
+
+const byStock = new Map(primaries.map((item) => [item.stockId, item]));
 let replaced = 0;
 
 const cases = report.cases.map((caseResult) => {
@@ -108,16 +116,19 @@ const cases = report.cases.map((caseResult) => {
   assertDraft(item, report.runDateKst);
   replaced += 1;
 
+  return { ...caseResult, pipelineResult: readyResult(item, report.runDateKst) };
+});
+
+/** 사람이 쓴 초안을 파이프라인 통과 결과와 같은 모양으로 바꾼다. */
+function readyResult(item, runDateKst) {
   const article = {
     ...item.article,
-    runDateKst: report.runDateKst,
+    runDateKst,
     scope: "company",
   };
   const sourceIds = item.article.sourceUnits.map((unit) => unit.id);
 
   return {
-    ...caseResult,
-    pipelineResult: {
       status: "ready_for_storage",
       article,
       selection: {
@@ -154,14 +165,22 @@ const cases = report.cases.map((caseResult) => {
         issues: [],
       },
       editorAttempts: 0,
-    },
   };
-});
+}
 
 const missing = [...byStock.keys()].filter(
   (stockId) => !report.cases.some((caseResult) => caseResult.stock.stockId === stockId),
 );
 if (missing.length > 0) throw new Error(`리포트에 없는 종목 초안입니다: ${missing.join(", ")}`);
+
+// 추가분은 리포트가 아니라 별도 목록으로 낸다. 적재기가 이 목록도 같은 방식으로 넣는다.
+const stockByStockId = new Map(report.cases.map((item) => [item.stock.stockId, item.stock]));
+const extraCases = extras.map((item) => {
+  const stock = stockByStockId.get(item.stockId);
+  if (!stock) throw new Error(`리포트에 없는 종목 추가분입니다: ${item.stockId}`);
+  assertDraft(item, report.runDateKst);
+  return { stock, pipelineResult: readyResult(item, report.runDateKst) };
+});
 
 const merged = {
   ...report,
@@ -173,5 +192,9 @@ const merged = {
 };
 
 await writeFile(outputPath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
-console.log(`수기 초안 ${replaced}건 반영 → ${outputPath}`);
+const extraPath = resolve(dirname(outputPath), "extra-items.json");
+await writeFile(extraPath, `${JSON.stringify({ runId: merged.runId, cases: extraCases }, null, 2)}\n`, "utf8");
+
+console.log(`수기 대표 ${replaced}건 반영 → ${outputPath}`);
 console.log(`통과 ${merged.readyForStorageCount} · 거부 ${merged.rejectedCount} · decisionComplete ${merged.decisionComplete}`);
+console.log(`추가 뉴스 ${extraCases.length}건 → ${extraPath}`);

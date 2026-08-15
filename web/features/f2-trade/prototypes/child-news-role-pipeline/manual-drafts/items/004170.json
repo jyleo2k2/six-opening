@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:004170",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260811000650",
+    "title": "신세계, 2분기 영업익 1671억원…전년 比 121.9%↑",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-08-11T05:17:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260811000650",
+    "sourceUnits": [
+      { "id": "S1", "text": "신세계는 올해 2분기 연결 기준 총매출 3조1414억원, 영업이익 1671억원을 기록해 전년 동기 대비 각각 8.5%, 121.9% 증가했다고 11일 밝혔다." },
+      { "id": "S2", "text": "상반기 누계 총매출은 6조3558억원으로 전년 동기 대비 10.1% 증가했고, 영업이익은 3650억원으로 75.7% 늘었다." },
+      { "id": "S3", "text": "백화점 사업은 2분기 총매출 2조170억원, 영업이익 1088억원을 기록했다." },
+      { "id": "S4", "text": "신세계인터내셔날의 2분기 매출은 2916억원으로 15.1% 증가했고 영업이익은 70억원으로 흑자 전환했다." },
+      { "id": "S5", "text": "신세계디에프는 2분기 매출 5426억원으로 10.3% 감소했지만 영업이익은 333억원으로 흑자 전환했다." },
+      { "id": "S6", "text": "신세계센트럴은 2분기 매출 1087억원, 영업이익 149억원을 기록해 전년 동기 대비 각각 12.8%, 52.0% 증가했다." }
+    ]
+  },
+  "focusStatement": "신세계가 2026년 2분기 연결 기준 총매출 3조1414억원, 영업이익 1671억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "신세계, 2분기 영업이익 1671억원으로 121.9% 증가", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "총매출은 3조1414억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "total_revenue" },
+    { "text": "백화점에서만 2조170억원을 팔았어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "department_store_revenue" },
+    { "text": "상반기 영업이익은 3650억원이에요.", "sourceIds": ["S2"], "role": "context", "factKey": "half_year_operating_profit" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "총매출", "easyText": "가게에서 팔린 물건값을 모두 더한 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

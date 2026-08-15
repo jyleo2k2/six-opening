@@ -52,6 +52,27 @@ async function main() {
   assert.equal((await loadPublishedNewsForStock("KRX:015760", companySelect))?.newsId, 3);
   assert.equal(companyQueries.length, 1);
   assert.equal(companyQueries[0].stock_codes, "cs.{015760}");
+  // 최신 하나만 뽑던 때와 달리 후보를 여러 건 받아 그 중에서 고른다.
+  assert.equal(companyQueries[0].limit, "10");
+
+  // 같은 종목에 여러 건이 쌓이면 최신 것만 고정으로 나오지 않는다.
+  const poolRows = [
+    { ...companyRow, news_id: 7, article_id: 8 },
+    { ...companyRow, news_id: 3, article_id: 4 },
+    { ...companyRow, news_id: 5, article_id: 6 },
+  ];
+  const poolSelect: SelectNewsRows = async () => poolRows;
+  for (const [index, expected] of [[0, 7], [1, 3], [2, 5]] as const) {
+    assert.equal(
+      (await loadPublishedNewsForStock("KRX:015760", poolSelect, () => index))?.newsId,
+      expected,
+    );
+  }
+  // 고르는 함수가 범위를 벗어나도 빈손으로 끝나지 않는다.
+  assert.equal(
+    (await loadPublishedNewsForStock("KRX:015760", poolSelect, () => 99))?.newsId,
+    7,
+  );
 
   let emptyCall = 0;
   const emptySelect: SelectNewsRows = async (params) => {
