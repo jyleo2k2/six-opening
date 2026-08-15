@@ -9,8 +9,7 @@
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], seq: 1,
     closes: {},
-    sellStep: 1, arcTab: 'report', sellPick: 'all',
-    arcLikes: {}, arcCmts: {}, arcCmtOpen: {}, arcCmtDraft: {},
+    sellStep: 1, sellPick: 'all',
     sellDraft: { sellBy:'qty', qty:0, amountInput:0, orderType:'market', limitPct:0, reason:null, change:null, memo:'', memoSaved:false },
     schoolLock: true, forceSchool: 'auto',
     reasonOrder: [0,1,2,3,4,5]

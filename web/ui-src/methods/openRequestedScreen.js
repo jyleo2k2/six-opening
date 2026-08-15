@@ -49,15 +49,10 @@
       // 계좌 화면은 여기 없다. 주소로 넘겨 React 화면이 그리게 한다.
       this.leaveToRoute('/portfolio');
     } else if (action.target === 'archive') {
-      const archiveTabs = ['report', 'return'];
-      this.set({
-        screen:'archive',
-        arcTab: archiveTabs.indexOf(action.archiveTab) >= 0 ? action.archiveTab : 'report',
-        cardsOpen: action.archiveOverlay === 'cards',
-        cardSheet: null,
-        famOpen: false,
-      });
-      this.loadDailyCloses();
+      // 아카이브 화면은 여기 없다. 탭·카드 모아보기까지 주소로 넘겨 React 화면이 그리게 한다.
+      const view = action.archiveOverlay === 'cards' ? 'cards'
+        : action.archiveTab === 'return' ? 'return' : '';
+      this.leaveToRoute(view ? '/archive/' + view : '/archive');
     } else if (action.target === 'stock') {
       // 탐색 화면도 React 로 옮겨 갔다. 섹터 필터는 주소 구간(`/explore/{섹터}`)으로 넘긴다.
       const stockFilters = ['rank', 'watch'].concat((this.uni().sectors || []).map(x => x.id));

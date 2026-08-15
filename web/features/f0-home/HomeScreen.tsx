@@ -1,20 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useState } from "react";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
 import { holdingPctColor, homeView, popItems, type HomeHolding } from "./lib/home-view";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
-import {
-  advanceSheetDrag,
-  beginSheetDrag,
-  shouldDismissSheet,
-  SHEET_CLOSE_MS,
-  type SheetDrag,
-} from "./lib/sheet-drag";
 import { useAccount } from "./lib/use-account";
+import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
-import { PhoneFrame, usePhoneScreenRect } from "./PhoneFrame";
+import { PhoneFrame } from "./PhoneFrame";
 
 /**
  * 홈 화면. `ui-src/screens/home.html` 을 그대로 옮겨 왔다.
@@ -148,23 +142,11 @@ function HoldingRow({ holding, sheet }: { holding: HomeHolding; sheet?: boolean 
 export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
   const user = useAccount();
   const { quotes } = useUniverseLive();
-  const scale = usePhoneScreenRect()?.scale ?? 1;
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [popped, setPopped] = useState(false);
-  // 시트를 민 거리와 그 이유. 손을 대는 순간 올라오는 연출을 끄고(`grabbed`) 손을 뗀 뒤
-  // 미끄러지는 동안(`closing`)에는 다시 잡히지 않는다.
-  const [sheetOffset, setSheetOffset] = useState(0);
-  const [sheetGrabbed, setSheetGrabbed] = useState(false);
-  const [sheetDragging, setSheetDragging] = useState(false);
-  const [sheetClosing, setSheetClosing] = useState(false);
-  const sheetDrag = useRef<SheetDrag | null>(null);
-  const sheetCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => () => {
-    if (sheetCloseTimer.current) clearTimeout(sheetCloseTimer.current);
-  }, []);
+  // 쓸어내려 닫는 배선은 `useSheetDrag` 가 갖는다 — 아카이브 카드 시트와 같은 구현이다.
+  const sheet = useSheetDrag(SHEET_HEIGHT);
 
   const prices = Object.fromEntries(
     Object.entries(quotes).map(([code, quote]) => [code, quote.price]),
@@ -181,82 +163,6 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
   const popGoal = () => {
     setPopped(true);
     setTimeout(() => setPopped(false), 1500);
-  };
-
-  const openSheet = () => {
-    if (sheetCloseTimer.current) clearTimeout(sheetCloseTimer.current);
-    sheetDrag.current = null;
-    setSheetOffset(0);
-    setSheetGrabbed(false);
-    setSheetDragging(false);
-    setSheetClosing(false);
-    setExpanded(true);
-  };
-
-  /**
-   * 닫는 길은 이 하나뿐이다 — 쓸어내리기·`‹`·배경 탭이 모두 같은 미끄러짐을 쓴다.
-   * 시트를 아래로 밀어 두고 그만큼 기다렸다가 지운다. `transitionend` 를 기다리지 않는 건
-   * 손가락이 이미 바닥까지 내려온 경우 옮길 거리가 없어 그 사건이 오지 않기 때문이다.
-   */
-  const closeSheet = () => {
-    if (sheetClosing) return;
-    sheetDrag.current = null;
-    setSheetDragging(false);
-    setSheetClosing(true);
-    setSheetOffset(SHEET_HEIGHT);
-    sheetCloseTimer.current = setTimeout(() => {
-      setExpanded(false);
-      setSheetClosing(false);
-      setSheetGrabbed(false);
-      setSheetOffset(0);
-    }, SHEET_CLOSE_MS);
-  };
-
-  const grabSheet = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!event.isPrimary || event.button !== 0 || sheetClosing) return;
-    // `‹` 처럼 눌러야 하는 것 위에서는 시작하지 않는다. 여기서 포인터를 잡으면 click 이
-    // 손잡이로 재타깃돼 버튼이 죽는다.
-    if (event.target instanceof HTMLElement && event.target.closest("[data-sheet-static]")) return;
-
-    event.currentTarget.setPointerCapture(event.pointerId);
-    sheetDrag.current = beginSheetDrag(event.pointerId, event.clientY, event.timeStamp);
-    setSheetGrabbed(true);
-    setSheetDragging(true);
-  };
-
-  const moveSheet = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = sheetDrag.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-
-    event.preventDefault();
-    const next = advanceSheetDrag(drag, event.clientY, event.timeStamp, {
-      scale,
-      sheetHeight: SHEET_HEIGHT,
-    });
-    sheetDrag.current = next;
-    setSheetOffset(next.offsetY);
-  };
-
-  const releaseSheet = (event: ReactPointerEvent<HTMLDivElement>, cancelled = false) => {
-    const drag = sheetDrag.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    // 손을 떼는 순간의 좌표도 한 번 더 넣는다 — 마지막 몇 ms 가 튕김의 대부분이다.
-    const last = advanceSheetDrag(drag, event.clientY, event.timeStamp, {
-      scale,
-      sheetHeight: SHEET_HEIGHT,
-    });
-    sheetDrag.current = null;
-    setSheetDragging(false);
-
-    if (!cancelled && shouldDismissSheet(last, SHEET_HEIGHT)) {
-      closeSheet();
-      return;
-    }
-    setSheetOffset(0);
   };
 
   return (
@@ -348,7 +254,7 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
             )}
           </div>
 
-          <div onClick={openSheet} style={HOLD_CARD}>
+          <div onClick={sheet.openSheet} style={HOLD_CARD}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
               <span style={HOLD_TITLE}>내 보유 종목</span>
               <span style={HOLD_ALL}>전체보기</span>
@@ -370,36 +276,11 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
 
         <BottomNav active="home" onLeave={onLeave} />
 
-        {expanded && (
+        {sheet.open && (
           <>
-            <div
-              onClick={closeSheet}
-              style={{
-                ...SHEET_SCRIM,
-                // 시트를 내리는 만큼 배경도 같이 밝아진다 — 손가락에 붙어 있다는 표시다.
-                opacity: sheetClosing ? 0 : 1 - Math.min(0.7, sheetOffset / SHEET_HEIGHT),
-                transition: sheetDragging ? "none" : `opacity ${SHEET_CLOSE_MS}ms ease`,
-              }}
-            />
-            <div
-              style={{
-                ...SHEET,
-                // 손을 댄 뒤에는 올라오는 연출을 끈다. 켜 둔 채로 두면 되돌아갈 때마다
-                // `sheetUp` 이 다시 재생돼 시트가 바닥에서 새로 올라온다.
-                animation: sheetGrabbed ? "none" : SHEET.animation,
-                transform: sheetOffset ? `translateY(${sheetOffset}px)` : undefined,
-                transition: sheetDragging
-                  ? "none"
-                  : `transform ${SHEET_CLOSE_MS}ms cubic-bezier(0.22,1,0.36,1)`,
-              }}
-            >
-              <div
-                onPointerCancel={(event) => releaseSheet(event, true)}
-                onPointerDown={grabSheet}
-                onPointerMove={moveSheet}
-                onPointerUp={releaseSheet}
-                style={SHEET_HANDLE}
-              >
+            <div onClick={sheet.closeSheet} style={{ ...SHEET_SCRIM, ...sheet.scrimStyle }} />
+            <div style={{ ...SHEET, ...sheet.sheetStyle(String(SHEET.animation)) }}>
+              <div {...sheet.handleProps} style={SHEET_HANDLE}>
                 <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 2px" }}>
                   <div style={SHEET_GRIP} />
                 </div>
@@ -411,7 +292,7 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
                     padding: "10px 18px 8px",
                   }}
                 >
-                  <div data-sheet-static onClick={closeSheet} style={SHEET_BACK}>
+                  <div data-sheet-static onClick={sheet.closeSheet} style={SHEET_BACK}>
                     ‹
                   </div>
                   <div style={{ fontSize: 16, fontWeight: 800, color: "#01185A" }}>내 보유 종목</div>

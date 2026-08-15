@@ -69,6 +69,11 @@ const INJECTED_CHUNKS = {
     source: join(webRoot, "shared", "store", "prototype-account.js"),
     from: "shared/store/prototype-account.js",
   },
+  "logic/trade-copy.js": {
+    marker: "trade-copy",
+    source: join(webRoot, "shared", "data", "trade-copy.js"),
+    from: "shared/data/trade-copy.js",
+  },
 };
 
 const ENGINE_BEGIN = /^\/\/ >>> archive-engine/;

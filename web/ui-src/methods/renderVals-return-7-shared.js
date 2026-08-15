@@ -38,7 +38,8 @@
       goRanking: () => this.leaveToRoute('/ranking'),
       // 계좌 화면은 React 로 옮겨 갔다. 문서는 그대로 두고 부모가 그 화면을 얹는다.
       goPortfolio: () => this.leaveToRoute('/portfolio'),
-      goArchive: () => { this.set({ screen:'archive' }); this.loadDailyCloses(); },
+      // 아카이브도 React 로 옮겨 갔다. 문서는 그대로 두고 부모가 그 화면을 얹는다.
+      goArchive: () => this.leaveToRoute('/archive'),
       resetAll: () => {
         const fresh = seedAccounts();
         this.set({ acc: fresh, records: [], events: [], sellRecords: [], seq: 1, draft: this.blankDraft() , watchlist: [] });

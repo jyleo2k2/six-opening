@@ -1,32 +1,5 @@
-const REASONS = [
-  { code:'buy_news',      label:'뉴스에서 봐서',            short:'뉴스를 보고' },
-  { code:'buy_chart',     label:'그래프가 좋아 보여서',      short:'그래프를 보고' },
-  { code:'buy_familiar',  label:'내가 아는 회사라서',        short:'내가 아는 회사라서' },
-  { code:'buy_ranking',   label:'인기 순위에서 봐서',        short:'인기 순위를 보고' },
-  { code:'buy_social',    label:'친구·가족이 말해줘서',      short:'친구·가족 말을 듣고' },
-  { code:'buy_intuition', label:'그냥 느낌이 좋아서',        short:'느낌이 좋아서' }
-];
-const PLANS = [
-  { code:'plan_short',  label:'이번 주만',                    short:'이번 주만' },
-  { code:'plan_season', label:'시즌 끝까지',                  short:'시즌 끝까지' },
-  { code:'plan_target', label:'내가 정한 목표 가격이 되면',   short:'목표 가격이 되면' },
-  { code:'plan_none',   label:'아직 모르겠어',                short:'아직 모르겠지만' }
-];
-const SELL_REASONS = [
-  { code:'sell_target_hit', label:'목표한 만큼 와서',        short:'목표한 만큼 와서' },
-  { code:'sell_plan_time',  label:'정한 날짜가 돼서',        short:'정한 날짜가 돼서' },
-  { code:'sell_rebalance',  label:'더 좋아 보이는 회사를 찾아서', short:'더 좋아 보이는 회사를 찾아서' },
-  { code:'sell_fear_drop',  label:'더 떨어질까 봐',          short:'더 떨어질까 봐' },
-  { code:'sell_anxiety',    label:'그냥 불안해서',           short:'그냥 불안해서' },
-  { code:'sell_liquidity',  label:'다른 데 쓸 돈이 필요해서', short:'다른 데 쓸 돈이 필요해서' }
-];
-const CHANGES = [
-  { code:'change_new_info',       label:'새로운 소식을 알게 됐어' },
-  { code:'change_view_shift',     label:'회사에 대한 생각이 바뀌었어' },
-  { code:'change_price_emotion',  label:'가격이 움직여서 불안해졌어' },
-  { code:'change_alternative',    label:'다른 회사가 더 좋아 보였어' },
-  { code:'change_plan_revision',  label:'처음 계획이 나와 맞지 않았어' }
-];
+// REASONS·PLANS·SELL_REASONS·CHANGES 는 `shared/data/trade-copy.js` 가 원본이고
+// 조립기가 `logic/trade-copy.js` 조각으로 넣는다. 여기 다시 적지 않는다.
 const SHORT_TERM_DAYS = 7;
 
 const won = n => Math.round(n).toLocaleString('ko-KR') + '원';
