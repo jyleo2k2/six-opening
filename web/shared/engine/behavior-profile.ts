@@ -26,7 +26,6 @@ import type {
   ProfileTabView,
   WeekCard,
 } from "../types/behavior-profile";
-import type { Trade } from "../types/trade";
 
 // ── 상수 ────────────────────────────────────────────────────────────────────
 // 전부 [가정] 이다. 실사용 분포를 보기 전까지는 여기 값만 바꿔 조정한다.
@@ -52,13 +51,6 @@ export const TIE_BAND = 1;
 /** 정확 레벨 경계 — 기존 적중 비율 1/3·2/3 을 0~10 으로 옮긴 값 */
 export const ACCURACY_LEVEL_3_SCORE = 20 / 3;
 export const ACCURACY_LEVEL_2_SCORE = 10 / 3;
-
-/** app.html 이벤트명 → 3탭. 기업정보 탭(info_detail_opened)은 화면 출시 전에 미리 등록해 둔다. */
-export const TAB_BY_EVENT: Record<string, EvidenceTab> = {
-  news_detail_opened: "news",
-  info_detail_opened: "info",
-  chart_detail_opened: "chart",
-};
 
 // ── 스케일 ──────────────────────────────────────────────────────────────────
 
@@ -525,132 +517,4 @@ export function computeBehaviorProfile(input: BehaviorProfileInput): BehaviorPro
     reasonDistribution,
     actionAlignment: judgedSells.length ? Math.round((matched / judgedSells.length) * 100) / 100 : 0,
   };
-}
-
-// ── app.html(kw_proto_v1) 원본 → 엔진 입력 매핑 ──────────────────────────────
-
-const USER_ID_BY_ACCOUNT = { child: "child_minji", parent: "parent_mom" } as const;
-export type PrototypeAccount = keyof typeof USER_ID_BY_ACCOUNT;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const asRecords = (value: unknown): Record<string, unknown>[] =>
-  Array.isArray(value) ? value.filter(isRecord) : [];
-
-const num = (value: unknown): number => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const str = (value: unknown): string => (typeof value === "string" ? value : "");
-
-/**
- * `localStorage["kw_proto_v1"]` JSON을 계정 하나의 엔진 입력으로 바꾼다.
- * 시세·섹터·캔들은 서버가 따로 주입한다 — 여기서는 기록만 옮긴다.
- */
-export function parsePrototypeProfileInput(
-  raw: unknown,
-  account: PrototypeAccount,
-): Pick<BehaviorProfileInput, "buys" | "sells" | "tabViews" | "holdings" | "cash"> {
-  const state = isRecord(raw) ? raw : {};
-  const userId = USER_ID_BY_ACCOUNT[account];
-
-  const buys: ProfileBuy[] = [];
-  for (const record of asRecords(state.records)) {
-    if (record.user_id !== userId) continue;
-    // 지정가 대기 주문은 체결이 아니므로 표본에서 뺀다
-    if (record.order_status !== "filled") continue;
-    const quantity = num(record.qty);
-    const amount = num(record.amount_krw);
-    if (quantity <= 0 || amount <= 0) continue;
-    buys.push({
-      id: str(record.order_id) || `buy_${buys.length}`,
-      symbol: str(record.symbol),
-      price: amount / quantity,
-      quantity,
-      reason: str(record.reason_code) || null,
-      tradedAt: str(record.ts),
-    });
-  }
-
-  const sells: ProfileSell[] = [];
-  for (const record of asRecords(state.sellRecords)) {
-    if (record.user_id !== userId) continue;
-    if (record.order_status !== "filled") continue;
-    const quantity = num(record.qty);
-    if (quantity <= 0) continue;
-    // 화면은 매도 체결가를 남기지 않는다. 평균단가와 매도 시점 손익률로 되짚고,
-    // 둘 중 하나라도 없으면 null 로 두어 매도일 종가 근사에 맡긴다.
-    const average = num(record.avg);
-    const pnlPct = record.pnl_pct_at_sell;
-    sells.push({
-      id: str(record.order_id) || `sell_${sells.length}`,
-      symbol: str(record.symbol),
-      quantity,
-      price:
-        average > 0 && typeof pnlPct === "number"
-          ? Math.round(average * (1 + pnlPct / 100))
-          : null,
-      tradedAt: str(record.ts),
-      planMatch: typeof record.plan_match === "boolean" ? record.plan_match : null,
-    });
-  }
-
-  const tabViews: ProfileTabView[] = [];
-  for (const event of asRecords(state.events)) {
-    if (event.user_id !== userId) continue;
-    const tab = TAB_BY_EVENT[str(event.event)];
-    if (!tab) continue;
-    tabViews.push({
-      tab,
-      symbol: str(event.symbol),
-      viewedAt: str(event.ts),
-      dwellMs: num(event.dwell_ms),
-    });
-  }
-
-  const accounts = isRecord(state.acc) ? state.acc : {};
-  const accountState = isRecord(accounts[account])
-    ? (accounts[account] as Record<string, unknown>)
-    : {};
-  const holdings: ProfileHolding[] = asRecords(accountState.holdings).map((holding) => ({
-    symbol: str(holding.code),
-    quantity: num(holding.qty),
-    averagePrice: num(holding.avg),
-  }));
-
-  return { buys, sells, tabViews, holdings, cash: num(accountState.cash) };
-}
-
-/** F11 시드(`Trade[]`)를 엔진 표본으로 바꾼다. 시드와 라이브 기록을 한 표본으로 합칠 때 쓴다. */
-export function profileEntriesFromTrades(
-  trades: Trade[],
-  member: Trade["member"],
-): { buys: ProfileBuy[]; sells: ProfileSell[] } {
-  const buys: ProfileBuy[] = [];
-  const sells: ProfileSell[] = [];
-  for (const trade of trades) {
-    if (trade.member !== member) continue;
-    if (trade.side === "buy") {
-      buys.push({
-        id: trade.id,
-        symbol: trade.symbol,
-        price: trade.price,
-        quantity: trade.quantity,
-        reason: trade.reason,
-        tradedAt: trade.tradedAt,
-      });
-    } else {
-      sells.push({
-        id: trade.id,
-        symbol: trade.symbol,
-        quantity: trade.quantity,
-        price: trade.price,
-        tradedAt: trade.tradedAt,
-        planMatch: null,
-      });
-    }
-  }
-  return { buys, sells };
 }
