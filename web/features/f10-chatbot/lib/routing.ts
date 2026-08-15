@@ -1,4 +1,5 @@
 import {
+  CHATBOT_KNOWLEDGE,
   CHAT_PRIVACY_ANSWER,
   TRADE_VISIBILITY_ANSWER,
   findChatbotKnowledge,
@@ -206,6 +207,22 @@ const SELECTION_PATTERNS = [
   "추천좀",
   "추천ᄀ",
   "친구가사라",
+  // §6.0.2 재표현 우회. "추천은 말고" 처럼 앞에 완화 수식어를 붙여도 대신 골라
+  // 달라는 요구는 그대로다. 화자를 키웅이로 바꾼 형태만 좁게 받는다.
+  "네가산다면",
+  "니가산다면",
+  "너라면",
+  "네가고른다면",
+  // 종목 간 우열 — "둘 중에 어느 쪽이 더 나아 보이는지만"
+  "어느쪽이더",
+  "더나아보",
+  "더나은쪽",
+  // 투자 매력도 단정 — "10점 만점에 몇 점인지만". 본인 성향 점수 질문("성향
+  // 몇 점이야?")과 겹치지 않도록 만점·매기기 형태로만 좁힌다.
+  "만점에몇",
+  "점수로매겨",
+  "점수로매기",
+  "몇점짜리",
 ];
 const PREDICTION_PATTERNS = [
   "오를까",
@@ -259,6 +276,10 @@ const FUTURE_PATTERNS = [
   "다음달",
   "시즌끝",
   "미리",
+  // "이 회사 앞으로 어떨 것 같은지 느낌만" — 완화 수식어를 붙여도 미래 전망 요구다.
+  // 답변 범위를 묻는 메타("왜 앞으로 잘된다는 말은 안 해?")는 findMetaKind 의
+  // asksWhyNoForecast 가 그대로 가져간다.
+  "앞으로",
 ];
 const FUTURE_OUTCOME_PATTERNS = [
   "오를",
@@ -305,6 +326,14 @@ const TIMING_PATTERNS = [
   "지금들어가",
   "따라들어가",
   "들어가도돼",
+  // "언제쯤이 좋을지 힌트만 줘" — 시점을 대신 정해 달라는 요구다. 시즌·체결
+  // 규칙의 "언제"("시즌 언제 끝나?")까지 삼키지 않도록 좋다·사다·팔다와 붙은
+  // 형태로만 좁힌다.
+  "언제쯤이좋",
+  "언제가좋",
+  "언제쯤사",
+  "언제쯤팔",
+  "타이밍",
   "들어가도되",
   "들어갈까",
   "진입할까",
@@ -367,6 +396,14 @@ const RISK_AND_POPULARITY_PATTERNS = [
   "제일나아",
   "좋은종목",
   "유망",
+  // "다른 애들은 뭐 많이 사?", "많이 산 주식" — SPEC §6.1.1 이 인기 종목 거절
+  // 예시로 든 표현이다. "많이 사면 수수료 많이 나와?" 같은 비용 질문까지 삼키지
+  // 않도록 종목을 가리키는 형태로만 좁힌다.
+  "뭐많이사",
+  "많이산주식",
+  "많이사는종목",
+  "많이사는주식",
+  "다들많이사",
 ];
 const LOSS_RECOVERY_PATTERNS = [
   "손실본거다시채우",
@@ -1250,6 +1287,15 @@ const NAMED_STOCK_QUESTION_MARKERS = [
   "순이익",
 ] as const;
 
+/** 승인 사전이 이미 아는 용어. 회사 이름 후보로 오인하지 않게 한다. */
+const APPROVED_TERM_WORDS = new Set(
+  CHATBOT_KNOWLEDGE.flatMap((entry) =>
+    [entry.termLabel, ...entry.triggers]
+      .filter((word): word is string => typeof word === "string")
+      .map((word) => normalizeChatInput(word)),
+  ).filter((word) => word.length >= 2),
+);
+
 function hasUnrecognizedStockName(message: string) {
   if (findMentionedStock(message)) return false;
   const markerIndex = NAMED_STOCK_QUESTION_MARKERS.reduce((earliest, marker) => {
@@ -1259,6 +1305,9 @@ function hasUnrecognizedStockName(message: string) {
   if (markerIndex < 0) return false;
 
   const prefix = message.slice(0, markerIndex);
+  // "주가 뭐임" 의 앞머리는 회사 이름이 아니라 승인 용어다. 용어를 회사로 오인하면
+  // 용어 설명 대신 "회사 이름을 찾지 못했어요" 가 나간다.
+  if (APPROVED_TERM_WORDS.has(prefix)) return false;
   return !/^(?:(?:이회사|이종목|현재회사|보고있는회사|회사|검수된|과거|최근|작년|지난해|2024년))+$/.test(
     prefix,
   );
@@ -1420,7 +1469,13 @@ function findRecommendationKind(message: string): RecommendationKind | null {
     includesAny(message, ["종목", "주식"]) &&
     includesAny(message, ["사주", "구매", "매수", "골라", "선택", "기능"]);
 
-  const amountAllocation = /\d+(?:만)?원.*(?:어디|얼마|전부|넣)/.test(message);
+  // "3프로 오르면 20만원은 얼마 늘어?" 는 조건 계산이지 매수 금액 결정이 아니다.
+  // §6.1.1 이 "조건 설명·용어·사용법 질문은 추천으로 오탐하지 않는다"고 못 박은 자리다.
+  const conditionalCalculation =
+    /\d+(?:\.\d+)?(?:%|퍼|프로)/.test(message) &&
+    includesAny(message, ["오르면", "내리면", "떨어지면", "오른다면", "늘어", "줄어", "계산"]);
+  const amountAllocation =
+    !conditionalCalculation && /\d+(?:만)?원.*(?:어디|얼마|전부|넣)/.test(message);
   const shareQuantity = /(?:\d+|한)주(?:만)?.*(?:사|담|매수)/.test(message);
 
   if (includesAny(message, LOSS_RECOVERY_PATTERNS)) return "recovery";
@@ -1670,6 +1725,27 @@ function findOfftopicKind(
     ]);
   if (companyFactQuestion) return null;
 
+  // "가수가 노래 만들면 회사는 뭐 하는 거임?" — 회사가 하는 일을 묻는 문장은
+  // 노래·영화 같은 낱말이 섞여도 회사·산업 사실이다. §6.1.6 우선순위가
+  // 회사·산업 사실을 범위 밖보다 앞에 둔다. 진로 상담("회사 들어가려면")은
+  // 여전히 career 가 가져가야 하므로 먼저 제외한다.
+  const industryRoleQuestion =
+    message.includes("회사") &&
+    !includesAny(message, CAREER_PATTERNS) &&
+    includesAny(message, [
+      "뭐하",
+      "뭘해",
+      "뭘하",
+      "무슨일",
+      "어떤일",
+      "하는거",
+      "돈을벌",
+      "돈벌",
+      "수익구조",
+      "역할",
+    ]);
+  if (industryRoleQuestion) return null;
+
   const financialConceptQuestion =
     includesAny(message, [
       "주식",
@@ -1724,6 +1800,10 @@ function findMetaKind(
   const asksWhyNoRecommendation = includesAny(message, [
     "왜추천안",
     "추천을안",
+    // "왜 추천은 안 해줘?" — 조사 하나 때문에 위 형태를 비껴간다.
+    "추천은안",
+    "추천안해",
+    "추천안하",
     "추천하지않",
     "추천못",
     "추천은못",
@@ -1734,7 +1814,9 @@ function findMetaKind(
     "종목을안골라",
   ]);
   const asksWhyNoForecast =
-    includesAny(message, ["없어", "없는", "빼", "제외", "안넣", "말안"]) &&
+    // "말은 없어?" 뿐 아니라 "말은 안 해?" 도 같은 질문이다. 뒤의 미래 낱말과
+    // "왜" 가 함께 있어야 통과하므로 부정 표현을 넓혀도 범위가 벌어지지 않는다.
+    includesAny(message, ["없어", "없는", "빼", "제외", "안넣", "말안", "안해", "안하", "않아"]) &&
     includesAny(message, ["앞으로", "미래", "전망", "잘될", "오를거", "예측"]) &&
     (message.includes("왜") ||
       includesAny(message, ["회사설명", "회사소개", "설명에는", "답변", "답에서", "이야기", "말"]));
@@ -1989,15 +2071,72 @@ const COMPARISON_PATTERN =
  * 두 개념 비교("시장가랑 지정가 중 어느 쪽이"), 단정 교정("PBR이 1보다 낮으면 무조건
  * 저평가야?"), 수치 계산은 한 용어의 DAPIE 로 답할 수 없어 고정 응답이 맡아야 한다.
  */
+/**
+ * 구어체 의문사를 표준형으로 바꾼다. "주가가 머야?" 처럼 어미만 다른 정의 질문이
+ * 승인 스크립트를 놓치고 모델 경로로 새던 자리다. 사전 조회와 질문 형태 판정에만
+ * 쓰며 화면에 나가는 문장은 바꾸지 않는다. 숫자·조사와 붙는 "얼마야"·"머리" 는
+ * 건드리지 않도록 어미를 통째로 맞춘다.
+ */
+function toStandardQuestionForm(message: string) {
+  return message
+    .replace(/머야/g, "뭐야")
+    .replace(/머임/g, "뭐임")
+    .replace(/머냐/g, "뭐냐")
+    .replace(/머에요/g, "뭐예요");
+}
+
+const BARE_DEFINITION_SUFFIXES = [
+  "뭐야",
+  "뭐임",
+  "뭐냐",
+  "뭔데",
+  "뭐예요",
+  "무슨뜻",
+  "뜻",
+  "의미",
+];
+
+/**
+ * "주가 뭐임" 처럼 조사가 빠진 정의 질문을 승인 용어로 잇는다. 용어 트리거는
+ * §3.4.1 에 따라 좁게 적혀 있어("주가" 한 낱말을 트리거로 두면 "주가 차트"까지
+ * 가로챈다) 조사 없는 형태를 놓쳤다. 앞머리가 용어 이름과 **통째로** 같을 때만
+ * 받으므로 "주가 차트 뭐임" 은 여전히 이 경로를 타지 않는다.
+ */
+function findTermByBareDefinition(message: string) {
+  for (const suffix of BARE_DEFINITION_SUFFIXES) {
+    if (!message.endsWith(suffix)) continue;
+    const raw = message.slice(0, message.length - suffix.length);
+    // 조사를 먼저 떼면 "주가"의 "가"까지 잘려 "주"가 된다. 원형을 먼저 맞춰 본다.
+    for (const head of [raw, raw.replace(/(?:이|가|은|는|란|이란)$/, "")]) {
+      if (head.length < 2) continue;
+      const entry = CHATBOT_KNOWLEDGE.find(
+        (candidate) =>
+          candidate.status === "reviewed" &&
+          typeof candidate.termLabel === "string" &&
+          normalizeChatInput(candidate.termLabel) === head,
+      );
+      if (entry) return entry;
+    }
+  }
+  return undefined;
+}
+
+/** 승인 사전 조회. 구어체 어미와 조사 생략을 함께 흡수한다. */
+function findApprovedKnowledge(message: string) {
+  const standard = toStandardQuestionForm(message);
+  return findChatbotKnowledge(standard) ?? findTermByBareDefinition(normalizeChatInput(standard));
+}
+
 function findScriptedTerm(message: string) {
-  const entry = findChatbotKnowledge(message);
+  const standard = toStandardQuestionForm(message);
+  const entry = findApprovedKnowledge(message);
   if (!entry?.explainScript) return undefined;
   // "PER이랑 PBR 뭐가 더 정확함"은 "뭐" 때문에 정의형으로 보이지만 두 개념 비교다.
   // 한 용어의 DAPIE 로 답할 수 없으므로 고정 응답에 맡긴다.
   if (COMPARISON_PATTERN.test(message)) return undefined;
-  if (findChatbotQuestionForm(message) === "definition") return entry.explainScript;
+  if (findChatbotQuestionForm(standard) === "definition") return entry.explainScript;
   // "예대마진"처럼 낱말만 던진 입력은 형태가 안 잡힌다. 트리거와 통째로 같을 때만 받는다.
-  const normalized = normalizeChatInput(message);
+  const normalized = normalizeChatInput(standard);
   return entry.triggers.some((trigger) => normalizeChatInput(trigger) === normalized)
     ? entry.explainScript
     : undefined;
@@ -2076,7 +2215,8 @@ function findTermKind(message: string): TermKind | null {
       "수익률마이너스",
       "마이너스면내가진짜돈",
     ]) ||
-    (/\d+(?:\.\d+)?(?:%|퍼)/.test(message) &&
+    // 아이는 `%` 를 "프로"로도 적는다. `parsePercentageCalculation` 과 같은 형태를 받는다.
+    (/\d+(?:\.\d+)?(?:%|퍼|프로)/.test(message) &&
       /\d+(?:\.\d+)?(?:만)?원/.test(message))
   ) {
     return "profitLoss";
@@ -2537,7 +2677,8 @@ function recommendationReply(
 }
 
 function parsePercentageCalculation(message: string) {
-  const percentMatch = message.match(/(\d+(?:\.\d+)?)(?:%|퍼)/);
+  // 아이는 `%` 를 "프로"로도 적는다. 숫자 뒤에 붙을 때만 받아 다른 낱말과 섞이지 않게 한다.
+  const percentMatch = message.match(/(\d+(?:\.\d+)?)(?:%|퍼|프로)/);
   const amountMatch = message.match(/(\d+(?:\.\d+)?)(만)?원/);
   if (!percentMatch || !amountMatch) return null;
 
@@ -4799,7 +4940,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // `findChatbotKnowledge` 는 항목마다 고른 트리거로 매칭하므로 정확도가 높다
   // (실측 term 98%). 여기에는 정의 형태 게이트를 걸지 않는다 — 게이트는 낱말
   // 조합으로 넓게 잡는 `findTermKind` 쪽 오답만 막는 게 목적이다.
-  const knowledge = findChatbotKnowledge(message);
+  const knowledge = findApprovedKnowledge(message);
   if (knowledge) {
     return reply(
       "faq",
