@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ConnectedPrototype } from "../../features/f0-home/ConnectedPrototype";
-import { RankingScreen } from "../../features/f0-home/RankingScreen";
 import { routeFromPath } from "../../features/f0-home/screen-route";
 import { loadDevelopmentEnvironment } from "../api/dev-env";
 import { findProfileById, SESSION_COOKIE } from "../api/supabase";
@@ -42,6 +41,7 @@ export default async function Page({
   const profile = await currentProfile();
   // 로그인 전에는 어느 주소로 들어와도 로그인 화면이다. 로그인하면 그 주소의 화면으로 간다.
   if (!profile) return <LoginGate />;
-  if (route.screen === "ranking") return <RankingScreen />;
+  // 옮긴 화면도 `ConnectedPrototype` 안에서 iframe 위에 얹는다. 여기서 갈라 렌더하면
+  // 화면을 옮길 때마다 iframe 이 언마운트돼 `app.html` 이 처음부터 다시 뜬다.
   return <ConnectedPrototype route={route} />;
 }

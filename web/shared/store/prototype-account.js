@@ -58,26 +58,16 @@ export function seedAccounts() {
 }
 
 /**
- * 저장된 상태를 읽어 초기 상태에 덮을 조각으로 준다.
+ * 저장된 **지갑**만 읽는다. 부수효과가 없어 아무 화면에서나 불러도 된다.
  *
- * **첫 렌더 전에** 불러야 한다. 예전에는 `componentDidMount` 에서 되살렸는데, 화면이 실제
- * 라우트로 나뉘면서 화면을 옮길 때마다 문서가 새로 뜨게 됐다. 그래서 시드 지갑과 홈 화면이
- * 한 프레임 먼저 그려졌다가 바뀌는 게 **이동할 때마다** 눈에 띈다.
- *
- * 화면 임시값은 앱 안에서 넘어온 경우에만 되살린다(`leaveToRoute` 가 남긴 표시).
- * 표시를 바로 지워 새로고침·새 탭에서는 처음부터 시작한다 (F2 SPEC §6.2).
- *
- * 계좌 이관(`migrateAccount`)은 주문 엔진 몫이라 받아서 쓴다 — 이 파일은 import 를 못 쓴다.
- *
- * 저장소 키는 상수로 빼지 않고 리터럴로 둔다 — `features/f0-home/lib/screen-state-handoff.test.ts`
- * 가 조립된 `app.html` 안에서 이 문자열들을 직접 찾아 계약이 조용히 깨지는 것을 막는다.
+ * 저장소에서 읽기만 하고 아무것도 지우지 않는다.
  *
  * @param {(account: any, sellRecords: any[]) => any} migrateAccount
  * @returns {Record<string, any>}
  */
-export function restorePrototypeState(migrateAccount) {
+export function readPersistedWallet(migrateAccount) {
   /** @type {Record<string, any>} */
-  const restored = {};
+  const wallet = {};
   try {
     const saved = JSON.parse(localStorage.getItem('kw_proto_v1') || "null");
     if (saved && saved.acc) {
@@ -86,30 +76,55 @@ export function restorePrototypeState(migrateAccount) {
       Object.keys(saved.acc).forEach((key) => {
         acc[key] = migrateAccount(saved.acc[key], saved.sellRecords || []);
       });
-      restored.acc = acc;
-      restored.records = saved.records || [];
-      restored.sellRecords = saved.sellRecords || [];
-      restored.events = saved.events || [];
-      restored.watchlist = saved.watchlist || [];
-      if (saved.seq !== undefined && saved.seq !== null) restored.seq = saved.seq;
+      wallet.acc = acc;
+      wallet.records = saved.records || [];
+      wallet.sellRecords = saved.sellRecords || [];
+      wallet.events = saved.events || [];
+      wallet.watchlist = saved.watchlist || [];
+      if (saved.seq !== undefined && saved.seq !== null) wallet.seq = saved.seq;
     }
   } catch (e) {}
+  return wallet;
+}
+
+/**
+ * 지갑을 저장한다. `app.html` 의 `persist()` 가 쓰는 것과 **같은 칸**이라, 옮겨 온 화면에서
+ * 예약 주문을 취소하면 아직 옮기지 않은 화면도 그 결과를 본다.
+ *
+ * 화면 상태는 저장하지 않는다 — 화면을 옮겨도 문서가 그대로라 메모리에 남아 있다.
+ *
+ * @param {Record<string, any>} wallet
+ */
+export function persistWallet(wallet) {
   try {
-    const cameFromApp = sessionStorage.getItem('kw_proto_nav_v1') === '1';
-    sessionStorage.removeItem('kw_proto_nav_v1');
-    if (cameFromApp) {
-      const ui = JSON.parse(sessionStorage.getItem('kw_proto_ui_v1') || "null");
-      if (ui && typeof ui === "object") {
-        // 이 목록 자체도 위 테스트가 리터럴로 찾는다 — 오래 남는 값이 섞이지 않았는지 본다.
-        ['screen','account','code','draft','sellDraft','buyStep','sellStep','arcTab'].forEach((k) => {
-          if (ui[k] !== undefined && ui[k] !== null) restored[k] = ui[k];
-        });
-      }
-    } else {
-      sessionStorage.removeItem('kw_proto_ui_v1');
-    }
+    localStorage.setItem('kw_proto_v1', JSON.stringify({
+      acc: wallet.acc,
+      records: wallet.records || [],
+      sellRecords: wallet.sellRecords || [],
+      events: wallet.events || [],
+      seq: wallet.seq,
+      watchlist: wallet.watchlist || [],
+    }));
   } catch (e) {}
-  return restored;
+}
+
+/**
+ * 저장된 상태를 읽어 초기 상태에 덮을 조각으로 준다.
+ *
+ * **첫 렌더 전에** 불러야 한다. 예전에는 `componentDidMount` 에서 되살렸는데, 그러면 시드
+ * 지갑이 한 프레임 먼저 그려졌다가 바뀐다.
+ *
+ * 화면 임시값은 더 이상 저장하지도 되살리지도 않는다 — 화면을 옮겨도 문서가 그대로라
+ * 메모리 상태가 살아 있다. "F5 하면 처음부터"(F2 SPEC §6.2)는 진짜 새로고침에만 걸리는데,
+ * 그때는 이 함수가 지갑만 되살리므로 화면은 홈에서 시작한다.
+ *
+ * 계좌 이관(`migrateAccount`)은 주문 엔진 몫이라 받아서 쓴다 — 이 파일은 import 를 못 쓴다.
+ *
+ * @param {(account: any, sellRecords: any[]) => any} migrateAccount
+ * @returns {Record<string, any>}
+ */
+export function restorePrototypeState(migrateAccount) {
+  return readPersistedWallet(migrateAccount);
 }
 
 /**
