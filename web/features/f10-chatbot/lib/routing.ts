@@ -5036,3 +5036,16 @@ export const PROACTIVE_SCRIPTS: Record<
     text: "후회되나요?",
   },
 };
+
+/**
+ * 말풍선 수락 직후 자동으로 던지는 후속 질문 (SPEC §7). 여기 없는 신호는 고정 발화만
+ * 남기고 아이 입력을 기다린다.
+ *
+ * **아이가 고른 문장이 아니라 우리가 대신 던지는 문장이다.** 라우터가 이걸 거절이나 범위
+ * 밖으로 보내면 "살지 말지 고민돼요?" → "응!" → "대신 정해 줄 수 없어요" 가 되어, 도우려고
+ * 먼저 말을 건 자리에서 아이가 거절당한다. `proactive-followup.test.ts` 가 그 방향을 막는다.
+ */
+export const PROACTIVE_FOLLOWUP_QUESTION: Partial<Record<ProactiveSignal, string>> = {
+  buyHesitation: "주문 전에 뭘 확인해요?",
+  orderMethodConfusion: "시장가가 뭐예요?",
+};
