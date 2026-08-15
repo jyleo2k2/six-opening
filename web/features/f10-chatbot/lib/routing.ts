@@ -23,6 +23,7 @@ import {
   asksOwnTradeRecords,
   asksPopularityFollowing,
   asksRepeatedChecking,
+  signalsSelfDeprecation,
   asksTargetPriceDecision,
   signalsLowMood,
   targetsInvestmentDecision,
@@ -1436,6 +1437,7 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 
   const comparisonDistress =
     includesAny(message, COMPARISON_DISTRESS_PATTERNS) ||
+    signalsSelfDeprecation(message) ||
     (message.includes("나만") &&
       includesAny(message, ["못", "뒤처", "꼴찌", "떨어", "바보"])) ||
     (includesAny(message, ["친구", "친구들", "애들"]) &&

@@ -226,6 +226,29 @@ assert.notEqual(
   "금지 범위의 이유를 묻는 질문은 메타로 직접 답한다",
 );
 
+// ── 불변식 9. 남과 견주며 자기를 낮추는 말은 보호로 간다 ───────────────────
+// SPEC §6.1.2 "순위 비교·자기비하". 성향·수익률은 성적이 아니라는 안내가
+// 필요한 자리인데 `나만꼴찌` 처럼 통째로 적은 목록이 활용을 놓쳤다.
+for (const question of [
+  "엄마보다 왜 내가 꼴찌야?",
+  "내가 왜 엄마보다 낮아? 빨리 말해",
+  "나만 못하는 것 같아",
+]) {
+  assert.equal(
+    routeMessage(question, home).route,
+    "safety",
+    `자기비하 표현이 보호로 가지 않습니다: "${question}"`,
+  );
+}
+// 순위 규칙을 묻는 질문은 그대로 안내다.
+for (const question of ["순위는 어떻게 정해?", "거래 많이 하면 순위 올라가?"]) {
+  assert.notEqual(
+    routeMessage(question, home).route,
+    "safety",
+    `순위 규칙 질문까지 보호로 삼켰습니다: "${question}"`,
+  );
+}
+
 // ── 슬롯 술어 자체의 경계 ────────────────────────────────────────────────
 assert.equal(asksOwnTradeRecords("나뭐샀었지"), true);
 assert.equal(asksOwnTradeRecords("내가왜이거샀는지기억나"), true);

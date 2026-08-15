@@ -313,6 +313,40 @@ export function asksOwnTradeRecords(message: string): boolean {
   return OWN_TRADE_RECORD_QUESTION.test(message);
 }
 
+/** 견주는 상대. 자기 낮춤 표현과 곱해 비교로 인한 위축을 본다. */
+const COMPARED_TO_SLOT = [...FAMILY_MEMBER_SLOT, "친구", "애들", "남들", "다른사람", "꼴찌", "순위"] as const;
+
+/** 자기를 낮추는 말. SPEC §6.1.2 "순위 비교·자기비하". */
+const SELF_DEPRECATION_SLOT = [
+  "꼴찌",
+  "제일낮",
+  "가장낮",
+  "내가낮",
+  "나만낮",
+  // "내가 왜 엄마보다 낮아?" — 1인칭과 낮춤말 사이에 비교 대상이 낀다.
+  "보다낮",
+  "보다못",
+  "보다뒤",
+  "나만못",
+  "못하는것같",
+  "못하는거같",
+  "뒤처",
+  "밀려",
+  "졌",
+  "지고있",
+] as const;
+
+/**
+ * 남과 견주며 자기를 낮추는 말(SPEC §6.1.2). 성향·수익률은 성적이 아니라는
+ * 안내가 필요한 자리다. `나만꼴찌` 처럼 통째로 적은 목록은 "엄마보다 왜 내가
+ * 꼴찌야?"·"내가 왜 엄마보다 낮아?" 를 놓쳤다.
+ */
+export function signalsSelfDeprecation(message: string): boolean {
+  if (!includesAny(message, ["내가", "나는", "나만", "제가", "내", "나"])) return false;
+  if (!includesAny(message, COMPARED_TO_SLOT)) return false;
+  return includesAny(message, SELF_DEPRECATION_SLOT);
+}
+
 /** 삶 전반을 가리키는 말. 낮은 기분 표현과 곱해 위기 신호를 본다. */
 const LIFE_CONTEXT_SLOT = ["사는게", "살기", "인생", "요즘", "아무것도", "다포기", "그냥다"] as const;
 
