@@ -94,7 +94,7 @@ test("원문 근거는 기사 순서를 유지하며 최대 10개만 고른다",
   assert.deepEqual(sourceIndexes, [...sourceIndexes].sort((left, right) => left - right));
 });
 
-test("폴백 후보는 최신 날짜부터 고르고 같은 날짜는 2건까지만 둔다", () => {
+test("폴백 후보는 최신 날짜부터 고르고 같은 날짜는 3건까지만 둔다", () => {
   const articles = [
     ...Array.from({ length: 4 }, (_, index) => ({ day: "2026-08-14", index })),
     ...Array.from({ length: 4 }, (_, index) => ({ day: "2026-08-13", index: index + 4 })),
@@ -117,14 +117,31 @@ test("폴백 후보는 최신 날짜부터 고르고 같은 날짜는 2건까지
     [stock],
     "2026-08-14",
   );
-  assert.equal(selected.length, 8);
+  // 하루 4건씩 5일 = 20건 입력. 하루 상한 3건이 먼저 걸려 15건이 남는다.
+  assert.equal(selected.length, 15);
   assert.deepEqual(
     selected.map((item) => item.publishedDayKst),
     [
-      "2026-08-14", "2026-08-14",
-      "2026-08-13", "2026-08-13",
-      "2026-08-12", "2026-08-12",
-      "2026-08-11", "2026-08-11",
+      "2026-08-14", "2026-08-14", "2026-08-14",
+      "2026-08-13", "2026-08-13", "2026-08-13",
+      "2026-08-12", "2026-08-12", "2026-08-12",
+      "2026-08-11", "2026-08-11", "2026-08-11",
+      "2026-08-10", "2026-08-10", "2026-08-10",
     ],
   );
+});
+
+test("종목당 후보는 24건에서 끊는다", () => {
+  const articles = Array.from({ length: 40 }, (_, index) => ({
+    articleId: `NAVER-001-${String(index).padStart(10, "0")}`,
+    title: `삼성전자, ${index + 1}번째 실적 발표`,
+    publisher: "테스트경제",
+    // 하루 상한(3건)이 아니라 종목당 상한(24건)이 걸리도록 날짜를 모두 다르게 둔다.
+    publishedAt: `2026-0${index < 20 ? 8 : 7}-${String((index % 20) + 10).padStart(2, "0")}T01:00:00.000Z`,
+    sourceUrl: `https://news.example.com/${index}`,
+    naverUrl: `https://n.news.naver.com/mnews/article/001/${String(index).padStart(10, "0")}`,
+    bodySegments: ["삼성전자는 매출과 영업이익을 발표했다."],
+  }));
+
+  assert.equal(selectPipelineArticleCandidates(articles, stock, [stock], "2026-08-29").length, 24);
 });

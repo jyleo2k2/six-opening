@@ -2,10 +2,14 @@ import type { StockEducation } from "../../../../shared/data/stocks";
 import type { NewsSourceArticle, NewsSourceUnit } from "./contracts";
 
 const NAVER_SEARCH_ENDPOINT = "https://search.naver.com/search.naver";
-const SEARCH_STARTS = [1, 11, 21] as const;
-const MAX_ARTICLE_CANDIDATES = 24;
-const MAX_PIPELINE_CANDIDATES = 8;
-const MAX_PIPELINE_CANDIDATES_PER_DAY = 2;
+// 후보가 마르면 그 종목은 서비스 카드가 아예 없다. 최신성보다 존재가 중요하다는
+// 2026-08-15 결정에 따라 검색 면과 종목당 후보 상한을 함께 올린다. 파이프라인은
+// 최신 기사부터 검사하고 첫 통과에서 멈추므로, 상한을 올려도 통과 기사가 과거로
+// 밀리는 건 앞선 후보가 전부 거부됐을 때뿐이다.
+const SEARCH_STARTS = [1, 11, 21, 31, 41, 51] as const;
+const MAX_ARTICLE_CANDIDATES = 48;
+const MAX_PIPELINE_CANDIDATES = 24;
+const MAX_PIPELINE_CANDIDATES_PER_DAY = 3;
 const MAX_SOURCE_UNITS = 10;
 const REQUEST_TIMEOUT_MS = 20_000;
 
