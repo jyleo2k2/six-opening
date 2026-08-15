@@ -19,10 +19,15 @@ export type UniverseStock = {
   spark?: number[];
 };
 
-type Universe = {
-  sectors: { id: string; name: string; emoji: string; accent: string }[];
+export type UniverseSector = { id: string; name: string; emoji: string; accent: string };
+/** 게임형 카드의 브랜드 표기 — 로고에서 뽑은 색과 카테고리 라벨. */
+export type UniverseBrand = { cat?: string; color?: string; dark?: boolean };
+
+export type Universe = {
+  sectors: UniverseSector[];
   stocks: UniverseStock[];
   logos: Record<string, string>;
+  brands?: Record<string, UniverseBrand>;
 };
 
 declare global {
@@ -58,6 +63,63 @@ export function sparkPolyline(points: number[] | undefined, width: number, heigh
         `${(index * (width / (points.length - 1))).toFixed(1)},${(height - (value / 100) * height).toFixed(1)}`,
     )
     .join(" ");
+}
+
+export type UniverseLive = {
+  /** 유니버스 로드 전이면 `null`. */
+  universe: Universe | null;
+  /** 종목코드 → 현재가·등락률. 로드 전이거나 아직 못 받은 코드는 픽스처 값을 쓴다. */
+  quotes: Record<string, { price: number; rate: number }>;
+  /** 종목코드 → 0~100 정규화 스파크라인. */
+  sparks: Record<string, number[]>;
+};
+
+/**
+ * 전 종목 시세. 탐색 카드 51장이 쓴다 — `app.html` 의 `liveRefreshTick` 과 같은
+ * 주기(5초)·같은 경로다. 특정 종목을 데우지 않으므로 `symbol` 없이 부른다.
+ */
+export function useUniverseLive(): UniverseLive {
+  const [universe, setUniverse] = useState<Universe | null>(null);
+  const [quotes, setQuotes] = useState<UniverseLive["quotes"]>({});
+  const [sparks, setSparks] = useState<UniverseLive["sparks"]>({});
+
+  useEffect(() => {
+    let alive = true;
+    loadUniverse().then((loaded) => {
+      if (alive) setUniverse(loaded);
+    });
+    const load = () =>
+      fetch("/api/universe/data", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then(
+          (data: {
+            quotes?: Record<string, { price?: number; rate?: number }>;
+            sparks?: Record<string, number[]>;
+          } | null) => {
+            if (!alive || !data) return;
+            if (data.quotes) {
+              setQuotes(
+                Object.fromEntries(
+                  Object.entries(data.quotes).map(([symbol, quote]) => [
+                    symbol,
+                    { price: Number(quote?.price) || 0, rate: Number(quote?.rate) || 0 },
+                  ]),
+                ),
+              );
+            }
+            if (data.sparks) setSparks(data.sparks);
+          },
+        )
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, 5000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, []);
+
+  return { universe, quotes, sparks };
 }
 
 export type StockLive = {

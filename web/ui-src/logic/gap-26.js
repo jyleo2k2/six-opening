@@ -4,8 +4,8 @@
   state = Object.assign({
     screen: 'home', account: 'child',
     acc: seedAccounts(),
-    sectorId: 'rank', code: null, buyStep: 1, showPad: false, cardIndex: 0,
-    orderDone: null, sellDone: null, watchlist: [], stockQuery: '',
+    code: null, buyStep: 1, showPad: false,
+    orderDone: null, sellDone: null, watchlist: [],
     draft: this.blankDraft(),
     records: [], events: [], sellRecords: [], seq: 1,
     closes: {},

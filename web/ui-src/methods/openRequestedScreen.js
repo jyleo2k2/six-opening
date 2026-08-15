@@ -58,6 +58,7 @@
       });
       this.loadDailyCloses();
     } else if (action.target === 'stock') {
+      // 탐색 화면도 React 로 옮겨 갔다. 섹터 필터는 주소 구간(`/explore/{섹터}`)으로 넘긴다.
       const stockFilters = ['rank', 'watch'].concat((this.uni().sectors || []).map(x => x.id));
       const chatSectorToPrototypeSector = {
         game: 'game', logistics: 'logi', semiconductor: 'semi', defense: 'defense', food: 'food', energy: 'energy',
@@ -65,15 +66,11 @@
       };
       const sectorId = chatSectorToPrototypeSector[action.sectorId] || action.sectorId;
       if (action.stockView === 'explore' || stockFilters.indexOf(sectorId) >= 0) {
-        this.set({
-          screen:'explore',
-          ...(stockFilters.indexOf(sectorId) >= 0 ? { sectorId } : {}),
-          cardIndex:0,
-        });
+        this.leaveToRoute(stockFilters.indexOf(sectorId) >= 0 && sectorId !== 'rank' ? '/explore/' + sectorId : '/explore');
       } else if (stock) this.leaveToRoute('/stock/' + stock.code);
-      else this.set({ screen:'explore' });
+      else this.leaveToRoute('/explore');
     } else if (action.target === 'order') {
-      if (!stock) { this.set({ screen:'explore' }); return; }
+      if (!stock) { this.leaveToRoute('/explore'); return; }
       if (action.orderSide === 'sell') {
         const holding = this.me().holdings.filter(h => h.code === stock.code)[0];
         if (!holding) { this.leaveToRoute('/stock/' + stock.code); return; }

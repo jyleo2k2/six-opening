@@ -4,7 +4,6 @@
     const prevState = this.prevState;
     this.prevState = this.state;
     if (prevState === this.state) return;
-    if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
     const orderContextChanged = prevState && ['buy', 'sell'].indexOf(this.state.screen) >= 0 && (
       prevState.draft.amount !== this.state.draft.amount ||
