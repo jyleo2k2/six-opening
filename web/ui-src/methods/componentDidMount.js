@@ -3,35 +3,10 @@
     this.loadBehaviorProfile();
     this.loadSeasonCards();
     this.loadFamilyProfiles();
-    let saved = null;
-    try { saved = JSON.parse(localStorage.getItem('kw_proto_v1') || 'null'); } catch(e){}
+    // 매수 이유 버튼 순서는 세션마다 섞는다 (F3 SPEC).
     const order = [0,1,2,3,4,5];
     for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = order[i]; order[i] = order[j]; order[j] = t; }
-    let restored = null;
-    if (saved && saved.acc) {
-      const migratedAcc = {};
-      Object.keys(saved.acc).forEach(key => { migratedAcc[key] = migrateLegacyAccount(saved.acc[key], saved.sellRecords || []); });
-      restored = { acc:migratedAcc, records:saved.records || [], sellRecords:saved.sellRecords || [], events:saved.events || [], seq:saved.seq, watchlist:saved.watchlist || [] };
-    }
-    // 화면 임시값은 **다른 주소에서 넘어온 경우에만** 되살린다(leaveToRoute 가 남긴 표시).
-    // 표시를 바로 지워 새로고침·새 탭에서는 처음부터 시작한다 (F2 SPEC §6.2).
-    let restoredUi = null;
-    try {
-      const cameFromApp = sessionStorage.getItem('kw_proto_nav_v1') === '1';
-      sessionStorage.removeItem('kw_proto_nav_v1');
-      if (cameFromApp) {
-        const ui = JSON.parse(sessionStorage.getItem('kw_proto_ui_v1') || 'null');
-        if (ui && typeof ui === 'object') {
-          restoredUi = {};
-          ['screen','account','code','draft','sellDraft','buyStep','sellStep','arcTab'].forEach(k => {
-            if (ui[k] !== undefined && ui[k] !== null) restoredUi[k] = ui[k];
-          });
-        }
-      } else {
-        sessionStorage.removeItem('kw_proto_ui_v1');
-      }
-    } catch(e){}
-    this.setState(s => Object.assign({}, s, restored || {}, restoredUi || {}, { reasonOrder: order }), () => { this.notifyChatContext(); this.processScheduledOrders(); });
+    this.setState({ reasonOrder: order }, () => { this.notifyChatContext(); this.processScheduledOrders(); });
     this.liveRefreshTimer = null;
     this.liveRefreshBusy = false;
     this.liveRefreshTick = () => {

@@ -22,6 +22,7 @@
     "screens/archive.html",
     "template/shell-20.html",
     "template/script-open.html",
+    "logic/prototype-account.js",
     "logic/constants.js",
     "logic/archive-engine.js",
     "logic/constants-tail.js",
