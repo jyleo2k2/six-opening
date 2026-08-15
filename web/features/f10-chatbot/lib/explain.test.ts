@@ -70,7 +70,7 @@ const wrong = advanceExplain(per, {
   choiceId: "cheap",
 });
 assert.equal(wrong?.kind, "turn");
-assert.equal(wrong?.text, toPoliteKorean(`음, 그건 아니에요. ${per.adjust?.explanation}`));
+assert.equal(wrong?.text, toPoliteKorean(`그렇게 생각할 수 있어요. ${per.adjust?.explanation}`));
 assert.deepEqual(
   wrong?.kind === "turn" ? wrong.turn.choices : null,
   per.adjust?.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
@@ -191,7 +191,7 @@ const unsureAtBrief = advanceExplain(per, {
 assert.equal(unsureAtBrief?.kind, "turn");
 assert.equal(
   unsureAtBrief?.text,
-  toPoliteKorean(`괜찮아요, 같이 한 조각씩 볼게요. ${per.adjust?.explanation}`),
+  toPoliteKorean(`괜찮아요, 같이 찾아봐요. ${per.adjust?.explanation}`),
 );
 assert.equal(unsureAtBrief?.kind === "turn" ? unsureAtBrief.turn.stage : null, "detail");
 assert.equal(gateChatOutput({ text: unsureAtBrief!.text, source: "fixed" }).ok, true);
