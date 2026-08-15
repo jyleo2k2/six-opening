@@ -28,10 +28,15 @@
       this.loadDailyCloses();
     } else if (action.target === 'stock') {
       const stockFilters = ['rank', 'watch'].concat((this.uni().sectors || []).map(x => x.id));
-      if (action.stockView === 'explore' || stockFilters.indexOf(action.sectorId) >= 0) {
+      const chatSectorToPrototypeSector = {
+        game: 'game', logistics: 'logi', semiconductor: 'semi', defense: 'defense', food: 'food', energy: 'energy',
+        entertainment: 'enter', retail: 'retail', finance: 'bank', automotive: 'auto', shipbuilding: 'ship', airline: 'air', cosmetics: 'beauty',
+      };
+      const sectorId = chatSectorToPrototypeSector[action.sectorId] || action.sectorId;
+      if (action.stockView === 'explore' || stockFilters.indexOf(sectorId) >= 0) {
         this.set({
           screen:'explore',
-          ...(stockFilters.indexOf(action.sectorId) >= 0 ? { sectorId: action.sectorId } : {}),
+          ...(stockFilters.indexOf(sectorId) >= 0 ? { sectorId } : {}),
           cardIndex:0,
         });
       } else if (stock) this.set({ code:stock.code, screen:'detail' });
