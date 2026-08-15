@@ -46,6 +46,7 @@ import {
   PROTOTYPE_PHONE,
   PROTOTYPE_SHEET_HEIGHT,
   type PrototypeScreenRect,
+  SHEET_BOTTOM_SAFE_PX,
   shouldDismissBottomSheet,
 } from "./lib/bottom-sheet";
 import {
@@ -63,7 +64,7 @@ import {
   isOverDismissTarget,
   pickNextAvatarIndex,
 } from "./lib/floating-avatar";
-import { PROACTIVE_SCRIPTS } from "./lib/routing";
+import { PROACTIVE_FOLLOWUP_QUESTION, PROACTIVE_SCRIPTS } from "./lib/routing";
 
 type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
@@ -173,6 +174,16 @@ const COPY = {
   openArchive: "아카이브에서 보기",
   reset: "초기화",
 } as const;
+
+/**
+ * 답변 아래 붙는 선택지·추천 질문 칩.
+ *
+ * 답변 말풍선이 `bg-bg` 채움이라 칩도 같은 채움이면 **읽을 것과 누를 것이 구분되지 않는다.**
+ * 디자인 토큰에는 회색이 한 단계뿐이라 색을 더 만들 수 없으므로, 같은 말풍선의 화면 이동
+ * 버튼처럼 흰 채움 + 남색 테두리로 성격을 가른다. 글씨는 답변 본문과 같은 `text-sm` 이다.
+ */
+const CHOICE_CHIP_CLASS =
+  "rounded-full border border-navy/20 bg-white px-3 py-2 text-sm font-medium text-navy";
 
 const GREETING_SUGGESTED_QUESTIONS: string[] = [
   "매수는 어떻게 하나요?",
@@ -289,7 +300,7 @@ function MessageBubble({
         </p>
         {!userMessage && uiAction && (
           <button
-            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
+            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy"
             disabled={actionsDisabled}
             onClick={() => onAction(uiAction)}
             type="button"
@@ -301,7 +312,7 @@ function MessageBubble({
           <div className="mt-2 flex flex-wrap gap-2">
             {message.suggestedQuestions?.map((question) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                className={CHOICE_CHIP_CLASS}
                 disabled={actionsDisabled}
                 key={question}
                 onClick={() => onQuestion(question)}
@@ -314,10 +325,10 @@ function MessageBubble({
         )}
         {!userMessage && message.explainTurn && (
           <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-xs text-ink/70">{message.explainTurn.prompt}</p>
+            <p className="w-full text-sm text-ink/70">{message.explainTurn.prompt}</p>
             {message.explainTurn.choices.map((choice) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy"
+                className={CHOICE_CHIP_CLASS}
                 disabled={actionsDisabled}
                 key={choice.id}
                 onClick={() => onExplainChoice(choice)}
@@ -330,12 +341,12 @@ function MessageBubble({
         )}
         {!userMessage && message.stockExploreTurn && (
           <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-xs text-ink/70">
+            <p className="w-full text-sm text-ink/70">
               {message.stockExploreTurn.prompt}
             </p>
             {message.stockExploreTurn.choices.map((choice) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy disabled:opacity-50"
+                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
                 disabled={actionsDisabled}
                 key={choice.id}
                 onClick={() => onStockExploreChoice(choice.label, choice.id)}
@@ -348,10 +359,10 @@ function MessageBubble({
         )}
         {!userMessage && message.sectorExploreTurn && (
           <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-xs text-ink/70">{message.sectorExploreTurn.prompt}</p>
+            <p className="w-full text-sm text-ink/70">{message.sectorExploreTurn.prompt}</p>
             {message.sectorExploreTurn.choices.map((choice) => (
               <button
-                className="rounded-full bg-bg px-3 py-2 text-xs font-medium text-navy disabled:opacity-50"
+                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
                 disabled={actionsDisabled}
                 key={choice.id}
                 onClick={() => onSectorExploreChoice(choice.label, choice.id)}
@@ -446,7 +457,7 @@ export function F10ChatbotDemo({
     useState<StockExploreActionPayload | null>(null);
   const [sectorExploreAction, setSectorExploreAction] =
     useState<SectorExploreActionPayload | null>(null);
-  const messagesRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const requestAbortRef = useRef<AbortController | null>(null);
   const chatSessionVersionRef = useRef(0);
   const sheetDragRef = useRef<SheetDragState | null>(null);
@@ -588,8 +599,10 @@ export function F10ChatbotDemo({
   }, [chatContext.stockId, recordBehaviorEvent, screen]);
 
   useEffect(() => {
-    const element = messagesRef.current;
-    if (element) element.scrollTop = element.scrollHeight;
+    const frame = window.requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ block: "end" });
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [isOpen, messages]);
 
   // 선제 도움 말풍선은 플로팅 버튼의 같은 중심 좌표를 앵커로 쓴다 (F10 SPEC §7).
@@ -638,7 +651,8 @@ export function F10ChatbotDemo({
     ]);
     acceptActiveSignal();
     openChat();
-    if (signal === "orderMethodConfusion") void ask("시장가가 뭐예요?");
+    const followUp = PROACTIVE_FOLLOWUP_QUESTION[signal];
+    if (followUp) void ask(followUp);
   }
 
   function dismissProactiveHelp() {
@@ -1327,10 +1341,6 @@ export function F10ChatbotDemo({
                 : "transition-transform duration-200 ease-out motion-reduce:transition-none"
             }`}
             role="dialog"
-            onPointerCancel={(event) => finishSheetDrag(event, true)}
-            onPointerDown={handleSheetPointerDown}
-            onPointerMove={handleSheetPointerMove}
-            onPointerUp={finishSheetDrag}
             style={{
               width: PROTOTYPE_PHONE.screenWidth,
               height: PROTOTYPE_SHEET_HEIGHT,
@@ -1339,29 +1349,37 @@ export function F10ChatbotDemo({
               willChange: "transform",
             }}
           >
-            <div
-              className="flex h-7 shrink-0 touch-none items-center justify-center"
+            {/*
+              닫기 드래그는 **헤더에서만** 받는다. 시트 전체에 걸면 대화 목록을 넘기려는
+              손짓이 시트 드래그로 잡혀(포인터 캡처 + preventDefault) 스크롤이 아예 죽고,
+              아래로 끌면 읽으려던 대화가 닫힌다. 대화가 길어질수록 못 읽는다.
+            */}
+            <header
+              className="shrink-0 touch-none"
+              onPointerCancel={(event) => finishSheetDrag(event, true)}
+              onPointerDown={handleSheetPointerDown}
+              onPointerMove={handleSheetPointerMove}
+              onPointerUp={finishSheetDrag}
             >
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-12 rounded-full bg-gray/60"
-              />
-            </div>
+              <div className="flex h-7 items-center justify-center">
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-12 rounded-full bg-gray/60"
+                />
+              </div>
 
-            <div className="flex shrink-0 justify-end border-b border-gray/40 px-5 pb-3">
-              <button
-                className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
-                onClick={resetChat}
-                type="button"
-              >
-                {COPY.reset}
-              </button>
-            </div>
+              <div className="flex justify-end border-b border-gray/40 px-5 pb-3">
+                <button
+                  className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
+                  onClick={resetChat}
+                  type="button"
+                >
+                  {COPY.reset}
+                </button>
+              </div>
+            </header>
 
-            <div
-              ref={messagesRef}
-              className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4"
-            >
+            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4 pt-4">
               {messages.length === 0 && (
                 <MessageBubble
                   message={{
@@ -1398,9 +1416,19 @@ export function F10ChatbotDemo({
                 />
               ))}
               {isLoading && <ResponsePreparation status={status} />}
+              <div ref={messagesEndRef} aria-hidden="true" />
             </div>
 
-            <div className="shrink-0 border-t border-gray/40 px-4 py-3">
+            {/*
+              폰 프레임 개구부의 하단 코너는 화면 라운드보다 깊게 파여 있고 그 프레임이 이
+              오버레이 위에 한 겹 더 깔린다. 바닥에 붙이면 입력창과 보내기 버튼의 아래 모서리가
+              베젤에 덮이므로 `SHEET_BOTTOM_SAFE_PX` 만큼 띄운다. 브라우저의 안전영역
+              (`env(safe-area-inset-bottom)`)은 바깥 창의 값이라 이 목업 폰과 무관하다.
+            */}
+            <div
+              className="shrink-0 border-t border-gray/40 px-4 pt-3"
+              style={{ paddingBottom: SHEET_BOTTOM_SAFE_PX }}
+            >
               <form className="flex gap-2" onSubmit={submit}>
                 <input
                   aria-label={COPY.input}

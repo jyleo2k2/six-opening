@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import heroBull from "./front UI/assets/hero-bull.png";
-import mascotBear from "./front UI/assets/mascot-bear.png";
 import { CARD, CTA_OFF, CTA_ON, FIELD, backBtnStyle } from "./LoginGate";
 
 type Kind = "parent" | "child";
@@ -806,7 +805,7 @@ function ChildWaitStep({ nickname, guardian }: { nickname: string; guardian: Gua
     <>
       <div style={{ textAlign: "center", padding: "14px 0 4px" }}>
         <img
-          src={mascotBear.src}
+          src="/ui/assets/mascot-bear.png"
           width={118}
           alt="키웅이"
           style={{ display: "block", margin: "0 auto", filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.2))" }}

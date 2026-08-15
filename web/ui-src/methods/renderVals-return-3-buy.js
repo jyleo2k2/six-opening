@@ -124,30 +124,11 @@
       buyNext: () => {
         if (!nextOk) return;
         if (locked && s.buyStep === 2) return;
-        if (s.buyStep < 2) { this.setState({ buyStep: s.buyStep + 1, showPad:false }); return; }
+        if (s.buyStep < 2) { this.setState({ buyStep: s.buyStep + 1, showPad:false, orderError:null }); return; }
         const isLimit = s.draft.orderType === 'limit';
         const isScheduled = !isLimit && !marketOpen;
         const nm = this.state.acc[this.state.account];
-        const hold = nm.holdings.slice();
-        const pend = (nm.pending || []).slice();
         const orderId = 'ord_' + String(s.seq).padStart(4, '0');
-        if (isLimit) {
-          pend.push({ id:orderId, kind:'limit', side:'buy', code:st.code, amount:amount, reservedAmount:amount, price:limPrice, reservationMode:'cash' });
-        } else if (isScheduled) {
-          pend.push({
-            id:orderId, kind:'next_open', side:'buy', code:st.code, amount:amount,
-            reservedAmount:amount, requestMode:byQty ? 'qty' : 'amount', requestedQty:byQty ? qty : null,
-            scheduledFor:scheduledFor, reservationMode:'cash', createdAt:new Date().toISOString()
-          });
-        } else {
-          const idx = hold.map(h => h.code).indexOf(st.code);
-          if (idx >= 0) {
-            const h = hold[idx], nq = h.qty + qty;
-            hold[idx] = { code: h.code, qty: nq, avg: (h.avg * h.qty + amount) / nq };
-          } else {
-            hold.push({ code: st.code, qty: qty, avg: price });
-          }
-        }
         const rec = {
           order_id: orderId,
           user_id: s.account === 'child' ? 'child_minji' : 'parent_mom',
@@ -161,24 +142,57 @@
           plan_target_price: s.draft.targetPct ? Math.round(price * (1 + s.draft.targetPct/100)) : null,
           memo: (s.draft.memo || '').trim() || null, ts: new Date().toISOString()
         };
-        const acc2 = Object.assign({}, this.state.acc);
-        acc2[this.state.account] = { name: nm.name, cash: nm.cash - grand, holdings: hold, pending: pend };
         // 축하 화면은 주문 직후 값으로 고정한다 (뒤에서 시세가 움직여도 문구가 바뀌지 않게)
+        const done = {
+          name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null,
+          scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null,
+          requestMode:byQty ? 'qty' : 'amount'
+        };
+        if (isLimit || isScheduled) {
+          // 미체결 주문은 서버 주문 잔고가 원본이다 — 화면은 예약을 만들지 않고 현금도 직접
+          // 빼지 않는다. reserve_order 가 한 트랜잭션에서 잠그고, 그 결과는 /api/account 의
+          // 주문가능금액으로 돌아온다. 접수가 끝나야 주문이 성립하므로 축하 화면도 그때 띄운다.
+          this.reserveOrder({
+            side:'buy', stock_code:st.code,
+            order_type: isLimit ? 'limit' : 'market',
+            limit_price: isLimit ? limPrice : null,
+            reserved_amount: amount,
+            request_mode: byQty ? 'quantity' : 'amount',
+            requested_quantity: byQty ? qty : null,
+            scheduled_for: isScheduled ? scheduledFor : null,
+            reason: s.draft.reason,
+            plan_code: rec.plan_code, plan_target_price: rec.plan_target_price, memo: rec.memo
+          }).then(result => {
+            if (!result || !result.order_id) { this.setState({ orderError: '주문을 넣지 못했어. 잠깐 뒤에 다시 해볼까?' }); return; }
+            this.set({ records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3, orderDone: done, orderError: null });
+          });
+          return;
+        }
+        const hold = nm.holdings.slice();
+        const idx = hold.map(h => h.code).indexOf(st.code);
+        if (idx >= 0) {
+          const h = hold[idx], nq = h.qty + qty;
+          hold[idx] = { code: h.code, qty: nq, avg: (h.avg * h.qty + amount) / nq };
+        } else {
+          hold.push({ code: st.code, qty: qty, avg: price });
+        }
+        const acc2 = Object.assign({}, this.state.acc);
+        acc2[this.state.account] = { name: nm.name, cash: nm.cash - grand, holdings: hold, pending: nm.pending || [] };
         // 체결이 났으니 성향 스냅샷을 비워 다음 아카이브 진입에서 다시 계산하게 둔다
         this.set({
           acc: acc2, records: s.records.concat([rec]), seq: s.seq + 1, buyStep: 3,
-          orderDone: { name: st.name, qty: qty, amount: amount, limit: isLimit ? limPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null, requestMode:byQty ? 'qty' : 'amount' }
+          orderDone: done, orderError: null
         });
-        if (!isLimit && !isScheduled) {
-          this.saveTrade('buy', st.code, price, qty, s.draft.reason, {
-            plan_code: rec.plan_code, plan_target_price: rec.plan_target_price, memo: rec.memo
-          });
-          this.flushTabViews(st.code);
-          this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
-        }
+        this.saveTrade('buy', st.code, price, qty, s.draft.reason, {
+          plan_code: rec.plan_code, plan_target_price: rec.plan_target_price, memo: rec.memo
+        });
+        this.flushTabViews(st.code);
+        this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
       },
       buyBack: () => {
+        this.setState({ orderError: null });
         if (s.buyStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
-        if (s.buyStep === 3) { this.set({ screen:'portfolio' }); return; }
-        if (s.buyStep === 1) this.set({ screen:'detail' }); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
+        // 계좌·종목 상세는 React 로 옮겨 갔다. 주소로 넘겨 부모가 그 화면을 얹는다.
+        if (s.buyStep === 3) { this.leaveToRoute('/portfolio'); return; }
+        if (s.buyStep === 1) this.leaveToRoute('/stock/' + s.code); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
       },

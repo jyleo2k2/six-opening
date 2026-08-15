@@ -22,7 +22,12 @@ export const CHAT_ORDER_STEPS = [
 ] as const;
 export type ChatOrderStep = (typeof CHAT_ORDER_STEPS)[number];
 
-export const CHAT_ARCHIVE_TABS = ["report", "return", "compare", "season"] as const;
+/**
+ * 아카이브 화면이 실제로 가진 탭. `ui-src` 의 `openRequestedScreen` 이 모르는 값을 받으면
+ * 말없이 성향 탭으로 떨어뜨리므로, 화면에 없는 탭 이름을 계약에 남겨 두지 않는다.
+ * 주차별 카드는 탭이 아니라 성향 탭 위에 열리는 `archiveOverlay: "cards"` 다.
+ */
+export const CHAT_ARCHIVE_TABS = ["report", "return"] as const;
 export type ChatArchiveTab = (typeof CHAT_ARCHIVE_TABS)[number];
 
 export type ChatContext = {
@@ -100,6 +105,23 @@ export const EXPLAIN_STAGES = ["brief", "detail", "example", "followup"] as cons
 export type ExplainStage = (typeof EXPLAIN_STAGES)[number];
 
 export type ExplainChoice = { id: string; label: string };
+
+/**
+ * 용어를 묶는 범주. 설명이 끝난 뒤 "비슷한 걸 더 볼래요?" 추천 카드를 고를 때 쓴다.
+ * LLM 없이 같은 범주에서 아직 안 본 용어를 고르므로 추천이 결정적이다.
+ */
+export const TERM_CATEGORIES = [
+  "basics", // 주식·주주·종목·업종처럼 가장 먼저 만나는 개념
+  "order", // 매수·매도·주문·체결·수량처럼 주문 화면에서 쓰는 말
+  "profit", // 수익률·평가손익·평균 매수가처럼 내 돈이 얼마인지 보는 말
+  "indicator", // PER·PBR·매출·배당처럼 회사를 재는 숫자
+  "chart", // 차트·봉·현재가처럼 그래프를 읽는 말
+  "risk", // 위험·변동성·분산투자처럼 잃을 수 있음을 다루는 말
+  "service", // 시즌·랭킹·주문 잠금처럼 이 서비스의 규칙
+  "profile", // 성향 축·캐릭터·시즌 기록처럼 아카이브에서 보는 말
+] as const;
+
+export type TermCategory = (typeof TERM_CATEGORIES)[number];
 
 /** 사전 저작·검수된 정적 데이터. 런타임 생성 금지. */
 export type ExplainScript = {

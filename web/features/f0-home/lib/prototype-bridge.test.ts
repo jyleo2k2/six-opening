@@ -361,13 +361,14 @@ test("chat sector IDs resolve to prototype filter IDs", () => {
     cosmetics: "beauty",
   };
 
+  // 탐색 화면이 React 로 옮겨 가서, 매핑된 섹터는 상태가 아니라 주소 구간으로 넘어간다.
   for (const [chatSectorId, prototypeSectorId] of Object.entries(expected)) {
-    const updates: Array<Record<string, unknown>> = [];
+    const leaves: string[] = [];
     openRequestedScreen.call(
       {
         uni: () => ({ sectors: Object.values(expected).map((id) => ({ id })) }),
         stock: () => null,
-        set: (update: Record<string, unknown>) => updates.push(update),
+        leaveToRoute: (path: string) => leaves.push(path),
       },
       {
         type: "kiwoom:open-chat-action",
@@ -379,10 +380,23 @@ test("chat sector IDs resolve to prototype filter IDs", () => {
         },
       },
     );
-    assert.deepEqual(updates, [
-      { screen: "explore", sectorId: prototypeSectorId, cardIndex: 0 },
-    ]);
+    assert.deepEqual(leaves, [`/explore/${prototypeSectorId}`]);
   }
+
+  // 섹터 없는 탐색 열기와 기본 보기(rank)는 구간 없는 `/explore` 다.
+  const plainLeaves: string[] = [];
+  openRequestedScreen.call(
+    {
+      uni: () => ({ sectors: Object.values(expected).map((id) => ({ id })) }),
+      stock: () => null,
+      leaveToRoute: (path: string) => plainLeaves.push(path),
+    },
+    {
+      type: "kiwoom:open-chat-action",
+      action: { type: "open_screen", target: "stock", stockView: "explore" },
+    },
+  );
+  assert.deepEqual(plainLeaves, ["/explore"]);
 });
 
 test("iframe 안 좌표에 iframe 위치를 더해 부모 좌표로 옮긴다", () => {

@@ -1,6 +1,7 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { config } from "dotenv";
+import { controlRepositoryRoot } from "../../shared/repo-root";
 
 /**
  * 개발용 `.env.kiwoom.local` 을 늦게 읽는다. `app/api/quote/kiwoom.ts` 와 같은 방식이다.
@@ -17,16 +18,13 @@ import { config } from "dotenv";
  */
 let loaded = false;
 
-/** worktree 에서는 `.git` 이 파일이고 그 안의 gitdir 로 본체를 찾는다. */
 function repositoryRoots(): string[] {
   const cwd = process.cwd();
   // `next dev` 는 web/ 에서 돈다. 저장소 루트는 그 위다.
   const roots = [cwd, path.resolve(cwd, "..")];
   for (const root of [...roots]) {
-    const gitPath = path.resolve(root, ".git");
-    if (!existsSync(gitPath) || !statSync(gitPath).isFile()) continue;
-    const gitdir = /gitdir:\s*(.+)/.exec(readFileSync(gitPath, "utf8"))?.[1]?.trim();
-    if (gitdir) roots.push(path.resolve(root, gitdir, "..", "..", ".."));
+    const controlRoot = controlRepositoryRoot(root);
+    if (controlRoot) roots.push(controlRoot);
   }
   return Array.from(new Set(roots));
 }

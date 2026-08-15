@@ -20,6 +20,8 @@ test("주소를 화면으로 읽는다", () => {
   assert.deepEqual(routeFromPath("/ranking"), { screen: "ranking" });
   assert.deepEqual(routeFromPath("/portfolio"), { screen: "portfolio" });
   assert.deepEqual(routeFromPath("/explore"), { screen: "explore" });
+  assert.deepEqual(routeFromPath("/explore/game"), { screen: "explore", sector: "game" });
+  assert.deepEqual(routeFromPath("/explore/watch"), { screen: "explore", sector: "watch" });
   assert.deepEqual(routeFromPath("/stock/005930"), { screen: "stock", code: "005930" });
   assert.deepEqual(routeFromPath("/buy/005930"), { screen: "order", code: "005930", side: "buy" });
   assert.deepEqual(routeFromPath("/sell/000660"), { screen: "order", code: "000660", side: "sell" });
@@ -40,12 +42,16 @@ test("모르는 경로와 잘못된 종목 코드는 null 이다", () => {
   assert.equal(routeFromPath("/stock/005930/extra"), null);
   assert.equal(routeFromPath("/buy"), null);
   assert.equal(routeFromPath("/archive/report"), null);
+  // 탐색 섹터는 소문자 영문만. 형식이 아니면 주소가 아니다.
+  assert.equal(routeFromPath("/explore/GAME"), null);
+  assert.equal(routeFromPath("/explore/game/extra"), null);
 });
 
 test("화면을 주소로 되돌린다 — 왕복이 같아야 한다", () => {
   const routes = [
     { screen: "home" },
     { screen: "explore" },
+    { screen: "explore", sector: "game" },
     { screen: "ranking" },
     { screen: "portfolio" },
     { screen: "archive" },

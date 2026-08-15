@@ -1,4 +1,5 @@
 import {
+  CHATBOT_KNOWLEDGE,
   CHAT_PRIVACY_ANSWER,
   TRADE_VISIBILITY_ANSWER,
   findChatbotKnowledge,
@@ -15,6 +16,18 @@ import type {
   StockFactTopic,
 } from "../../../shared/types/chatbot";
 import { toPoliteKorean } from "./polite";
+import {
+  TRADE_DECISION_PATTERNS,
+  asksFamilyData,
+  asksOwnPastTrades,
+  asksOwnTradeRecords,
+  asksPopularityFollowing,
+  asksRepeatedChecking,
+  signalsSelfDeprecation,
+  asksTargetPriceDecision,
+  signalsLowMood,
+  targetsInvestmentDecision,
+} from "./intent-slots";
 
 export type { ChatContext, ProactiveSignal } from "../../../shared/types/chatbot";
 
@@ -206,6 +219,22 @@ const SELECTION_PATTERNS = [
   "추천좀",
   "추천ᄀ",
   "친구가사라",
+  // §6.0.2 재표현 우회. "추천은 말고" 처럼 앞에 완화 수식어를 붙여도 대신 골라
+  // 달라는 요구는 그대로다. 화자를 키웅이로 바꾼 형태만 좁게 받는다.
+  "네가산다면",
+  "니가산다면",
+  "너라면",
+  "네가고른다면",
+  // 종목 간 우열 — "둘 중에 어느 쪽이 더 나아 보이는지만"
+  "어느쪽이더",
+  "더나아보",
+  "더나은쪽",
+  // 투자 매력도 단정 — "10점 만점에 몇 점인지만". 본인 성향 점수 질문("성향
+  // 몇 점이야?")과 겹치지 않도록 만점·매기기 형태로만 좁힌다.
+  "만점에몇",
+  "점수로매겨",
+  "점수로매기",
+  "몇점짜리",
 ];
 const PREDICTION_PATTERNS = [
   "오를까",
@@ -259,6 +288,10 @@ const FUTURE_PATTERNS = [
   "다음달",
   "시즌끝",
   "미리",
+  // "이 회사 앞으로 어떨 것 같은지 느낌만" — 완화 수식어를 붙여도 미래 전망 요구다.
+  // 답변 범위를 묻는 메타("왜 앞으로 잘된다는 말은 안 해?")는 findMetaKind 의
+  // asksWhyNoForecast 가 그대로 가져간다.
+  "앞으로",
 ];
 const FUTURE_OUTCOME_PATTERNS = [
   "오를",
@@ -305,6 +338,14 @@ const TIMING_PATTERNS = [
   "지금들어가",
   "따라들어가",
   "들어가도돼",
+  // "언제쯤이 좋을지 힌트만 줘" — 시점을 대신 정해 달라는 요구다. 시즌·체결
+  // 규칙의 "언제"("시즌 언제 끝나?")까지 삼키지 않도록 좋다·사다·팔다와 붙은
+  // 형태로만 좁힌다.
+  "언제쯤이좋",
+  "언제가좋",
+  "언제쯤사",
+  "언제쯤팔",
+  "타이밍",
   "들어가도되",
   "들어갈까",
   "진입할까",
@@ -338,7 +379,11 @@ const SIZING_PATTERNS = [
   "얼마넣",
   "돈전부어느",
 ];
-const RISK_AND_POPULARITY_PATTERNS = [
+/**
+ * 손해 없는·안전한·더 좋은 종목을 골라 달라는 요구. 1인칭이 붙어도 요구가
+ * 달라지지 않으므로("내가 안 망할 종목") 언제나 차단한다.
+ */
+const SAFETY_SEEKING_PATTERNS = [
   "안망",
   "손해안보",
   "손해보지않",
@@ -350,14 +395,6 @@ const RISK_AND_POPULARITY_PATTERNS = [
   "덜무서",
   "덜신경",
   "안정적인종목",
-  "제일인기",
-  "가장인기",
-  "인기많은",
-  "인기있는",
-  "많이산종목",
-  "많이담은",
-  "제일많이사",
-  "다들산",
   "제일많이오를",
   "가장많이오를",
   "제일크게오를",
@@ -367,6 +404,29 @@ const RISK_AND_POPULARITY_PATTERNS = [
   "제일나아",
   "좋은종목",
   "유망",
+];
+
+/**
+ * 남들이 많이 산 것을 따라 사려는 요구(SPEC §6.1.1). 위 안전 요구와 달리
+ * **1인칭이 붙으면 뜻이 뒤집힌다** — "내가 제일 많이 산 종목 뭐야?" 는 추종이
+ * 아니라 본인 기록 조회다. 그래서 두 목록을 나눠 둔다.
+ * "많이 사면 수수료 많이 나와?" 같은 비용 질문까지 삼키지 않도록 종목을
+ * 가리키는 형태로만 좁힌다.
+ */
+const POPULARITY_FOLLOWING_PATTERNS = [
+  "제일인기",
+  "가장인기",
+  "인기많은",
+  "인기있는",
+  "많이산종목",
+  "많이담은",
+  "제일많이사",
+  "다들산",
+  "뭐많이사",
+  "많이산주식",
+  "많이사는종목",
+  "많이사는주식",
+  "다들많이사",
 ];
 const LOSS_RECOVERY_PATTERNS = [
   "손실본거다시채우",
@@ -515,6 +575,9 @@ const FAMILY_DATA_ACCESS_PATTERNS = [
   "똑같이",
 ];
 const PROXY_ACTION_PATTERNS = [
+  "\uCE5C\uAD6C\uD3F0\uC73C\uB85C\uC8FC\uBB38",
+  "\uCE5C\uAD6C\uD3F0\uC73C\uB85C\uB9E4\uC218",
+  "\uCE5C\uAD6C\uD3F0\uC73C\uB85C\uB9E4\uB3C4",
   "친구폰으로내주문",
   "친구가내계정으로주문",
   "대신주문",
@@ -785,6 +848,15 @@ const RANKING_RULE_QUESTION_PATTERNS = [
   "들어",
   "반영",
   "위로",
+  // "거래 많이 하면 순위 올라가?" — 순위에 무엇이 반영되는지 묻는 같은 질문이
+  // 서술어만 바뀌어 범위 안내로 떨어졌다.
+  "올라가",
+  "올라감",
+  "올라",
+  "높아지",
+  "유리",
+  "영향",
+  "좌우",
 ];
 const VISIBILITY_RULE_PATTERNS = [
   "친구한테보이",
@@ -840,6 +912,8 @@ const SOCIAL_RULE_PATTERNS = [
   "가족추천",
 ];
 const SOCIAL_RULE_QUESTION_PATTERNS = [
+  "\uBC18\uCE59",
+  "\uBB38\uC81C\uB3FC",
   "리그규칙",
   "규칙위반",
   "위반처리",
@@ -1116,7 +1190,7 @@ const COMPANY_FACT_SECTOR_PATTERNS: Record<
   defense: ["방산기업", "방산회사", "방산사", "국방기업"],
   food: ["식품회사", "식품기업", "식품업체", "제과회사"],
   energy: ["에너지회사", "에너지기업", "전력회사", "발전회사", "발전소"],
-  entertainment: ["엔터회사", "엔터사", "엔터테인먼트회사", "연예기획사"],
+  entertainment: ["엔터회사", "엔터사", "엔터테인먼트회사", "연예기획사", "소속사", "기획사"],
   retail: ["유통회사", "유통사", "유통기업", "쇼핑몰", "판매회사"],
   finance: ["은행", "증권사", "금융회사", "금융사", "금융기업"],
   automotive: [
@@ -1245,6 +1319,15 @@ const NAMED_STOCK_QUESTION_MARKERS = [
   "순이익",
 ] as const;
 
+/** 승인 사전이 이미 아는 용어. 회사 이름 후보로 오인하지 않게 한다. */
+const APPROVED_TERM_WORDS = new Set(
+  CHATBOT_KNOWLEDGE.flatMap((entry) =>
+    [entry.termLabel, ...entry.triggers]
+      .filter((word): word is string => typeof word === "string")
+      .map((word) => normalizeChatInput(word)),
+  ).filter((word) => word.length >= 2),
+);
+
 function hasUnrecognizedStockName(message: string) {
   if (findMentionedStock(message)) return false;
   const markerIndex = NAMED_STOCK_QUESTION_MARKERS.reduce((earliest, marker) => {
@@ -1254,6 +1337,9 @@ function hasUnrecognizedStockName(message: string) {
   if (markerIndex < 0) return false;
 
   const prefix = message.slice(0, markerIndex);
+  // "주가 뭐임" 의 앞머리는 회사 이름이 아니라 승인 용어다. 용어를 회사로 오인하면
+  // 용어 설명 대신 "회사 이름을 찾지 못했어요" 가 나간다.
+  if (APPROVED_TERM_WORDS.has(prefix)) return false;
   return !/^(?:(?:이회사|이종목|현재회사|보고있는회사|회사|검수된|과거|최근|작년|지난해|2024년))+$/.test(
     prefix,
   );
@@ -1268,7 +1354,7 @@ function containsPersonalAddress(message: string) {
 }
 
 function findUnsafeKind(message: string): UnsafeKind | null {
-  if (includesAny(message, CRISIS_PATTERNS)) return "crisis";
+  if (includesAny(message, CRISIS_PATTERNS) || signalsLowMood(message)) return "crisis";
   if (includesAny(message, CREDENTIAL_PATTERNS)) return "credential";
   if (
     includesAny(message, PERSONAL_IDENTIFIER_PATTERNS) ||
@@ -1285,12 +1371,11 @@ function findUnsafeKind(message: string): UnsafeKind | null {
   const familyHoldingRequest =
     includesAny(message, FAMILY_MEMBER_PATTERNS) &&
     includesAny(message, HOLDING_PATTERNS);
+  // 가족어 × 데이터어 × 조회요구의 곱으로 본다(`intent-slots`). 구절 목록으로
+  // 두면 "엄마 수익률 얼마야?"(조회 동사 없음)·"엄마가 왜 샀는지 이유 보여줘"
+  // (`거래이유`만 있고 `이유`가 없음)처럼 칸이 빠진 자리로 그대로 샌다.
   const familyDataRequest =
-    !familyComparisonHelp &&
-    ((includesAny(message, FAMILY_MEMBER_PATTERNS) &&
-      includesAny(message, FAMILY_DATA_PATTERNS) &&
-      includesAny(message, FAMILY_DATA_ACCESS_PATTERNS)) ||
-      familyHoldingRequest);
+    !familyComparisonHelp && (asksFamilyData(message) || familyHoldingRequest);
   const ownDataSharing =
     (message.includes("내성향") &&
       message.includes("친구") &&
@@ -1352,6 +1437,7 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 
   const comparisonDistress =
     includesAny(message, COMPARISON_DISTRESS_PATTERNS) ||
+    signalsSelfDeprecation(message) ||
     (message.includes("나만") &&
       includesAny(message, ["못", "뒤처", "꼴찌", "떨어", "바보"])) ||
     (includesAny(message, ["친구", "친구들", "애들"]) &&
@@ -1373,6 +1459,12 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 }
 
 function findRecommendationKind(message: string): RecommendationKind | null {
+  if (
+    includesAny(message, ["\uC81C\uC77C\uC88B\uC544\uD558\uB294\uC8FC\uC2DD", "\uCD5C\uC560\uC8FC\uC2DD", "\uB108\uB77C\uBA74\uC88B\uC544\uD560\uC8FC\uC2DD"])
+  ) {
+    return "selection";
+  }
+
   const asksForSelectionCriteria =
     includesAny(message, ["종목고를때", "주식고를때", "회사고를때", "투자기준"]) &&
     !includesAny(message, [
@@ -1389,27 +1481,43 @@ function findRecommendationKind(message: string): RecommendationKind | null {
 
   const selection =
     includesAny(message, SELECTION_PATTERNS) ||
+    includesAny(message, TRADE_DECISION_PATTERNS) ||
     includesAny(message, [
       "뭐가제일좋",
       "뭐가가장좋",
       "제일좋은종목",
       "가장좋은종목",
     ]);
+  // 목표가·손절가는 `intent-slots` 가 어간과 요구 동사를 떨어뜨려 본다.
+  // 인접만 보던 정규식은 "목표가 좀 정해줘" 의 `좀` 한 글자에 무너졌다.
   const prediction =
     includesAny(message, PREDICTION_PATTERNS) ||
-    /(?:목표가|손절가)(?:를|가)?(?:알려|정해|찍|얼마)/.test(message) ||
+    asksTargetPriceDecision(message) ||
     (includesAny(message, FUTURE_PATTERNS) &&
       (includesAny(message, FUTURE_OUTCOME_PATTERNS) ||
         includesAny(message, VAGUE_FORECAST_PATTERNS)));
   const timing = includesAny(message, TIMING_PATTERNS);
-  const risk = includesAny(message, RISK_AND_POPULARITY_PATTERNS);
+  // `제일많이사` 같은 구절은 "제일 많이 **산** 거"의 활용을 놓친다. 인기어와
+  // 이미 산 것을 가리키는 말의 곱으로 함께 본다(SPEC §6.1.1 "많이 산 주식").
+  // 1인칭이 붙은 같은 표현은 본인 기록 조회이므로 추종 요구에서 빼낸다.
+  const risk =
+    includesAny(message, SAFETY_SEEKING_PATTERNS) ||
+    ((includesAny(message, POPULARITY_FOLLOWING_PATTERNS) ||
+      asksPopularityFollowing(message)) &&
+      !asksOwnPastTrades(message));
   const automaticBestReturnSelection =
     includesAny(message, ["자동", "앱이"]) &&
     includesAny(message, ["제일수익", "최고수익", "수익좋은"]) &&
     includesAny(message, ["종목", "주식"]) &&
     includesAny(message, ["사주", "구매", "매수", "골라", "선택", "기능"]);
 
-  const amountAllocation = /\d+(?:만)?원.*(?:어디|얼마|전부|넣)/.test(message);
+  // "3프로 오르면 20만원은 얼마 늘어?" 는 조건 계산이지 매수 금액 결정이 아니다.
+  // §6.1.1 이 "조건 설명·용어·사용법 질문은 추천으로 오탐하지 않는다"고 못 박은 자리다.
+  const conditionalCalculation =
+    /\d+(?:\.\d+)?(?:%|퍼|프로)/.test(message) &&
+    includesAny(message, ["오르면", "내리면", "떨어지면", "오른다면", "늘어", "줄어", "계산"]);
+  const amountAllocation =
+    !conditionalCalculation && /\d+(?:만)?원.*(?:어디|얼마|전부|넣)/.test(message);
   const shareQuantity = /(?:\d+|한)주(?:만)?.*(?:사|담|매수)/.test(message);
 
   if (includesAny(message, LOSS_RECOVERY_PATTERNS)) return "recovery";
@@ -1443,6 +1551,47 @@ function findRecommendationKind(message: string): RecommendationKind | null {
   return null;
 }
 
+/**
+ * §6.1.3 가상 지갑 규칙. `VIRTUAL_MONEY_RULE_PATTERNS` 는 "투자금도합쳐" 처럼
+ * 거의 정확일치인 긴 구절만 담고 있어서 SPEC 이 예시로 든 "팀이면 돈이 합쳐져?"
+ * 조차 놓쳤다. 답변 문구는 이미 있는데 바깥 게이트를 못 넘어 범위 안내로
+ * 떨어지던 자리다. 주제어와 문맥 단서를 조합해 표현이 달라도 같은 취지면 같은
+ * 안내로 보낸다.
+ */
+function matchesVirtualMoneyRule(message: string) {
+  if (includesAny(message, VIRTUAL_MONEY_RULE_PATTERNS)) return true;
+
+  // 주문 가능 금액("얼마까지 살 수 있어?")은 limit 이 답한다. virtualMoney 가
+  // limit 보다 먼저 판정되므로 여기서 먼저 비켜 준다.
+  if (includesAny(message, ["한도", "까지살", "까지넣", "까지주문"])) return false;
+
+  const moneyWord = includesAny(message, [
+    "돈",
+    "투자금",
+    "지갑",
+    "자산",
+    "머니",
+    "현금",
+    "시드",
+  ]);
+
+  // 가족 팀이면 지갑을 합치는지 — "팀이면 돈이 합쳐져?"
+  // 수익률·점수를 합치느냐는 순위 질문이므로 돈을 가리키는 낱말을 함께 요구한다.
+  if (moneyWord && includesAny(message, ["합쳐", "합치", "같이쓰", "한지갑", "공동"])) {
+    return true;
+  }
+
+  // 시작 시드 금액 — "얼마 갖고 시작해?", "가상 머니 얼마 줘?"
+  if (message.includes("얼마")) {
+    if (includesAny(message, ["시작", "처음"])) return true;
+    if (includesAny(message, ["가상머니", "가상돈", "가상자산", "모투머니", "모의투자머니"])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function findRuleKind(message: string, context: ChatContext): RuleKind | null {
   const visibilityRule =
     (includesAny(message, VISIBILITY_RULE_PATTERNS) ||
@@ -1463,7 +1612,7 @@ function findRuleKind(message: string, context: ChatContext): RuleKind | null {
     ]);
   if (visibilityRule) return "visibility";
 
-  if (includesAny(message, VIRTUAL_MONEY_RULE_PATTERNS)) return "virtualMoney";
+  if (matchesVirtualMoneyRule(message)) return "virtualMoney";
 
   const participationRule =
     includesAny(message, PARTICIPATION_RULE_PATTERNS) ||
@@ -1501,10 +1650,14 @@ function findRuleKind(message: string, context: ChatContext): RuleKind | null {
     includesAny(message, PREDICTION_PATTERNS) ||
     includesAny(message, TIMING_PATTERNS) ||
     includesAny(message, SIZING_PATTERNS);
+  // 동점·동률은 그 자체로 순위 규칙을 묻는 낱말이라 질문형 패턴을 따로 요구하지
+  // 않는다. 요구하면 "동점이면 누가 이기는 거야?" 처럼 어미만 다른 문장이 범위
+  // 안내로 떨어진다 — SPEC 이 예시로 든 "동점이면 어떻게 해?" 만 통과하던 자리다.
+  const standaloneRankingTopic = includesAny(message, ["동점", "동률"]);
   const rankingRule =
     styleScoringRule ||
     (includesAny(message, RANKING_RULE_PATTERNS) &&
-      includesAny(message, RANKING_RULE_QUESTION_PATTERNS) &&
+      (standaloneRankingTopic || includesAny(message, RANKING_RULE_QUESTION_PATTERNS)) &&
       !explicitRankingRecommendation);
   if (rankingRule) return "ranking";
 
@@ -1530,6 +1683,10 @@ function findOfftopicKind(
   message: string,
   recommendationKind: RecommendationKind | null,
 ): OfftopicKind | null {
+  // SPEC §6.1.4: 비금융 대상을 고르는 요청은 범위 밖, 실제 투자 판단을 요구하면
+  // 추천 차단이 우선이다. 그 갈림을 `targetsInvestmentDecision` 한 곳에 둔다 —
+  // 여기 목록에 `사도돼`·`사도되`만 있어 "…지금 사도 됨?"이 영상 콘텐츠 거절로
+  // 새던 자리다.
   const explicitInvestmentDecision =
     recommendationKind !== null &&
     ((findMentionedStock(message) !== undefined &&
@@ -1538,33 +1695,7 @@ function findOfftopicKind(
         ...VIDEO_SOCIAL_PATTERNS,
         ...ENTERTAINMENT_PATTERNS,
       ])) ||
-      includesAny(message, [
-      "종목",
-      "주식",
-      "주가",
-      "매수",
-      "매도",
-      "보유",
-      "방산주",
-      "게임주",
-      "유통주",
-      "자동차주",
-      "사도돼",
-      "사도되",
-      "사야",
-      "뭐살",
-      "뭘살",
-      "팔아",
-      "팔까",
-      "들고",
-      "손절",
-      "목표가",
-      "투자할",
-      "가진돈",
-      "돈전부",
-      "넣을래",
-        "어디에넣",
-      ]));
+      targetsInvestmentDecision(message));
   if (explicitInvestmentDecision) return null;
 
   const companyFactQuestion =
@@ -1613,6 +1744,27 @@ function findOfftopicKind(
       "매출",
     ]);
   if (companyFactQuestion) return null;
+
+  // "가수가 노래 만들면 회사는 뭐 하는 거임?" — 회사가 하는 일을 묻는 문장은
+  // 노래·영화 같은 낱말이 섞여도 회사·산업 사실이다. §6.1.6 우선순위가
+  // 회사·산업 사실을 범위 밖보다 앞에 둔다. 진로 상담("회사 들어가려면")은
+  // 여전히 career 가 가져가야 하므로 먼저 제외한다.
+  const industryRoleQuestion =
+    message.includes("회사") &&
+    !includesAny(message, CAREER_PATTERNS) &&
+    includesAny(message, [
+      "뭐하",
+      "뭘해",
+      "뭘하",
+      "무슨일",
+      "어떤일",
+      "하는거",
+      "돈을벌",
+      "돈벌",
+      "수익구조",
+      "역할",
+    ]);
+  if (industryRoleQuestion) return null;
 
   const financialConceptQuestion =
     includesAny(message, [
@@ -1668,6 +1820,10 @@ function findMetaKind(
   const asksWhyNoRecommendation = includesAny(message, [
     "왜추천안",
     "추천을안",
+    // "왜 추천은 안 해줘?" — 조사 하나 때문에 위 형태를 비껴간다.
+    "추천은안",
+    "추천안해",
+    "추천안하",
     "추천하지않",
     "추천못",
     "추천은못",
@@ -1676,9 +1832,29 @@ function findMetaKind(
     "왜안골",
     "못고른다고",
     "종목을안골라",
-  ]);
+  ]) &&
+    // "추천 못 하는 건 아는데 그래서 뭐가 나아?" 는 이유를 묻는 형식을 빌렸을 뿐
+    // 실제로는 우열 판단을 요구한다. SPEC §6.1.7 이 "실제 종목 선택·가격 방향을
+    // 요구한 뒤 못하면 이유를 말하라고 덧붙인 문장은 recommend 를 유지한다"고
+    // 못 박은 자리다.
+    !includesAny(message, [
+      "그래서뭐가",
+      "그래도뭐가",
+      "뭐가나아",
+      "뭐가낫",
+      "뭐가좋",
+      "어느게나아",
+      "어느쪽이나아",
+      "그래서뭘",
+      "그래서어떤",
+      "힌트",
+      "골라줘",
+      "정해줘",
+    ]);
   const asksWhyNoForecast =
-    includesAny(message, ["없어", "없는", "빼", "제외", "안넣", "말안"]) &&
+    // "말은 없어?" 뿐 아니라 "말은 안 해?" 도 같은 질문이다. 뒤의 미래 낱말과
+    // "왜" 가 함께 있어야 통과하므로 부정 표현을 넓혀도 범위가 벌어지지 않는다.
+    includesAny(message, ["없어", "없는", "빼", "제외", "안넣", "말안", "안해", "안하", "않아"]) &&
     includesAny(message, ["앞으로", "미래", "전망", "잘될", "오를거", "예측"]) &&
     (message.includes("왜") ||
       includesAny(message, ["회사설명", "회사소개", "설명에는", "답변", "답에서", "이야기", "말"]));
@@ -1723,7 +1899,9 @@ function findMetaKind(
       "강제로계속",
       "계속시키",
       "그만두고싶",
-      "그만하고싶으면",
+      // "그만하고 싶은데" 처럼 어미가 달라도 같은 말이다. 아래 두 번째 조건이
+      // 화자·맥락을 함께 요구하므로 넓혀도 범위가 벌어지지 않는다.
+      "그만하고싶",
       "그냥닫아도돼",
       "그냥닫아도되",
       "대화그만",
@@ -1734,7 +1912,12 @@ function findMetaKind(
       "챗봇끄",
       "멈출수",
     ]) &&
-    (hasMetaActor || message.includes("대화") || message.includes("그냥닫아"));
+    // "그만두고 싶으면 계속 시켜?" 처럼 화자를 생략해도, 계속하게 만드는지를
+    // 묻는 말 자체가 챗봇에게 던지는 질문이다(SPEC §6.1.7 사용자 선택권).
+    (hasMetaActor ||
+      message.includes("대화") ||
+      message.includes("그냥닫아") ||
+      includesAny(message, ["계속시켜", "계속시킬", "계속하게", "강제"]));
   if (asksAboutAutonomy) return "autonomy";
 
   const asksAboutRealtime =
@@ -1786,7 +1969,11 @@ function findMetaKind(
       "찬성해",
       "반대하는",
     ]) &&
-    (hasMetaActor || message.includes("편향"));
+    // 아이는 화자를 생략하고 "엄마 편이야?" 라고만 묻는다. 편 드는 대상이
+    // 문장에 있으면 그 자체가 챗봇에게 던지는 질문이라 화자 조건을 대신한다.
+    (hasMetaActor ||
+      message.includes("편향") ||
+      includesAny(message, [...FAMILY_MEMBER_PATTERNS, "친구", "회사", "누구", "어느"]));
   if (asksAboutNeutrality) return "neutrality";
 
   const asksAboutSystem =
@@ -1918,6 +2105,101 @@ function findCompanyFactKind(message: string): CompanyFactKind | null {
   return null;
 }
 
+/**
+ * 두 개념을 견주는 표현. 정의형처럼 보여도 한 용어의 DAPIE 로는 답할 수 없다.
+ * "뭐가 항상 더 싸"처럼 사이에 말이 끼므로 낱말 목록이 아니라 정규식으로 본다.
+ */
+const COMPARISON_PATTERN =
+  /(?:뭐가|무엇이|어느게|어떤게|어느쪽|어느것)(?:[가-힣]{0,6})?더|중에어느|다른점|차이가뭐/;
+
+/**
+ * 두 개념을 견주는 질문인지. 용어 DAPIE 를 여는 판정(`findScriptedTerm`)뿐 아니라
+ * 답변 뒤에 공통 유도 질문을 붙일지도 이 값으로 정한다 — 비교 답변은 되물어서
+ * 좁혀지는 종류가 아니라 이해 확인 전이가 오히려 방해다(SPEC §3.4.1).
+ */
+export function isComparisonQuestion(input: string) {
+  return COMPARISON_PATTERN.test(normalizeChatInput(input));
+}
+
+/**
+ * 뜻만 묻는 질문이고 사전에 DAPIE 스크립트가 있으면 그 스크립트를 돌려준다.
+ *
+ * term 9종 고정 응답(`findTermKind`)은 사전에 없는 개념을 메우는 그물이라, 되물어 가며
+ * 설명할 수 있는 쪽이 있으면 양보한다. 다만 SPEC §3.4대로 **용어 설명일 때만** 양보한다 —
+ * 두 개념 비교("시장가랑 지정가 중 어느 쪽이"), 단정 교정("PBR이 1보다 낮으면 무조건
+ * 저평가야?"), 수치 계산은 한 용어의 DAPIE 로 답할 수 없어 고정 응답이 맡아야 한다.
+ */
+/**
+ * 구어체 의문사를 표준형으로 바꾼다. "주가가 머야?" 처럼 어미만 다른 정의 질문이
+ * 승인 스크립트를 놓치고 모델 경로로 새던 자리다. 사전 조회와 질문 형태 판정에만
+ * 쓰며 화면에 나가는 문장은 바꾸지 않는다. 숫자·조사와 붙는 "얼마야"·"머리" 는
+ * 건드리지 않도록 어미를 통째로 맞춘다.
+ */
+function toStandardQuestionForm(message: string) {
+  return message
+    .replace(/머야/g, "뭐야")
+    .replace(/머임/g, "뭐임")
+    .replace(/머냐/g, "뭐냐")
+    .replace(/머에요/g, "뭐예요");
+}
+
+const BARE_DEFINITION_SUFFIXES = [
+  "뭐야",
+  "뭐임",
+  "뭐냐",
+  "뭔데",
+  "뭐예요",
+  "무슨뜻",
+  "뜻",
+  "의미",
+];
+
+/**
+ * "주가 뭐임" 처럼 조사가 빠진 정의 질문을 승인 용어로 잇는다. 용어 트리거는
+ * §3.4.1 에 따라 좁게 적혀 있어("주가" 한 낱말을 트리거로 두면 "주가 차트"까지
+ * 가로챈다) 조사 없는 형태를 놓쳤다. 앞머리가 용어 이름과 **통째로** 같을 때만
+ * 받으므로 "주가 차트 뭐임" 은 여전히 이 경로를 타지 않는다.
+ */
+function findTermByBareDefinition(message: string) {
+  for (const suffix of BARE_DEFINITION_SUFFIXES) {
+    if (!message.endsWith(suffix)) continue;
+    const raw = message.slice(0, message.length - suffix.length);
+    // 조사를 먼저 떼면 "주가"의 "가"까지 잘려 "주"가 된다. 원형을 먼저 맞춰 본다.
+    for (const head of [raw, raw.replace(/(?:이|가|은|는|란|이란)$/, "")]) {
+      if (head.length < 2) continue;
+      const entry = CHATBOT_KNOWLEDGE.find(
+        (candidate) =>
+          candidate.status === "reviewed" &&
+          typeof candidate.termLabel === "string" &&
+          normalizeChatInput(candidate.termLabel) === head,
+      );
+      if (entry) return entry;
+    }
+  }
+  return undefined;
+}
+
+/** 승인 사전 조회. 구어체 어미와 조사 생략을 함께 흡수한다. */
+function findApprovedKnowledge(message: string) {
+  const standard = toStandardQuestionForm(message);
+  return findChatbotKnowledge(standard) ?? findTermByBareDefinition(normalizeChatInput(standard));
+}
+
+function findScriptedTerm(message: string) {
+  const standard = toStandardQuestionForm(message);
+  const entry = findApprovedKnowledge(message);
+  if (!entry?.explainScript) return undefined;
+  // "PER이랑 PBR 뭐가 더 정확함"은 "뭐" 때문에 정의형으로 보이지만 두 개념 비교다.
+  // 한 용어의 DAPIE 로 답할 수 없으므로 고정 응답에 맡긴다.
+  if (COMPARISON_PATTERN.test(message)) return undefined;
+  if (findChatbotQuestionForm(standard) === "definition") return entry.explainScript;
+  // "예대마진"처럼 낱말만 던진 입력은 형태가 안 잡힌다. 트리거와 통째로 같을 때만 받는다.
+  const normalized = normalizeChatInput(standard);
+  return entry.triggers.some((trigger) => normalizeChatInput(trigger) === normalized)
+    ? entry.explainScript
+    : undefined;
+}
+
 function findTermKind(message: string): TermKind | null {
   if (
     includesAny(message, [
@@ -1985,13 +2267,24 @@ function findTermKind(message: string): TermKind | null {
     return "profileStatistics";
   }
 
+  // 손실이 정말 사라진 돈인지 묻는 말. `마이너스면내가진짜돈` 처럼 통째로 적은
+  // 구절은 "마이너스면 진짜 잃은 거야?"·"-12% 확정됐는데 내 돈 진짜 없어지는
+  // 거야?" 를 놓쳤다. 손실을 가리키는 말 × 정말인지 되묻는 말 × 사라짐을
+  // 가리키는 말의 곱으로 본다(SPEC §6.1.5 평가손익·실현손익 구분).
+  const asksIfLossIsReal =
+    includesAny(message, ["마이너스", "손실", "손해", "-"]) &&
+    includesAny(message, ["진짜", "정말", "실제로", "완전"]) &&
+    includesAny(message, ["잃", "없어지", "날아가", "사라지", "까먹"]);
+
   if (
+    asksIfLossIsReal ||
     includesAny(message, [
       "손실률",
       "수익률마이너스",
       "마이너스면내가진짜돈",
     ]) ||
-    (/\d+(?:\.\d+)?(?:%|퍼)/.test(message) &&
+    // 아이는 `%` 를 "프로"로도 적는다. `parsePercentageCalculation` 과 같은 형태를 받는다.
+    (/\d+(?:\.\d+)?(?:%|퍼|프로)/.test(message) &&
       /\d+(?:\.\d+)?(?:만)?원/.test(message))
   ) {
     return "profitLoss";
@@ -2265,7 +2558,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       "손익 기록의 공개 범위는 가족 화면에서 확인할 수 있어. 이 채팅의 질문 원문은 엄마에게 대신 보내지 않아.";
   } else if (message.includes("친구") && includesAny(message, ["공개", "보여", "보임"])) {
     familyDataText =
-      "네 성향 결과를 친구에게 자동으로 공개하지 않아. 공개 범위가 궁금하면 가족 비교 화면의 안내를 확인해 줘.";
+      "성향 결과를 친구에게 자동으로 공개하지 않아. 공개 범위가 궁금하면 가족 비교 화면의 안내를 확인해 줘.";
   } else if (message.includes("누가더잘")) {
     familyDataText =
       "나는 부모님의 성향 데이터를 가져오거나 누가 더 잘하는지 점수를 매기지 않아. 성향은 실력이나 성적이 아니라 투자 스타일을 돌아보는 기록이야.";
@@ -2299,7 +2592,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
     { text: string; steps: readonly string[]; questions: string[] }
   > = {
     crisis: {
-      text: "지금 혼자 견디지 않아도 돼. 먼저 네가 지금 안전한지 알려 줘. 급하게 위험하면 가까운 어른이나 112·119에 바로 도움을 요청해 줘.",
+      text: "지금 혼자 견디지 않아도 돼. 먼저 지금 안전한지 알려 줘. 급하게 위험하면 가까운 어른이나 112·119에 바로 도움을 요청해 줘.",
       steps: ["안전 확인"],
       questions: ["지금은 안전해요", "도움이 필요해요"],
     },
@@ -2319,7 +2612,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       questions: familyDataQuestions,
     },
     proxyAction: {
-      text: "나는 다른 사람 대신 주문하거나 주문 버튼을 누를 수 없어. 로그인 정보를 나누지 말고 네 화면에서 주문 내용을 직접 확인해 줘.",
+      text: "나는 다른 사람 대신 주문하거나 주문 버튼을 누를 수 없어. 로그인 정보를 나누지 말고 이 화면에서 주문 내용을 직접 확인해 줘.",
       steps: ["대리 행동 차단"],
       questions: ["매수는 어떻게 하나요?", "주문 전에 뭘 확인해요?"],
     },
@@ -2333,12 +2626,12 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
           : ["키웅이는 무엇을 도와주나요?", "PER이 뭐예요?"],
     },
     familyPressure: {
-      text: "부모님 반응이 걱정되거나 누군가 계속 재촉해서 부담스러웠구나. 수익률과 순위는 네 실력이나 성적표가 아니며, 지금은 화면을 닫고 믿을 수 있는 어른에게 부담된다고 말해도 돼.",
+      text: "부모님 반응이 걱정되거나 누군가 계속 재촉해서 부담스러웠구나. 수익률과 순위는 실력이나 성적표가 아니며, 지금은 화면을 닫고 믿을 수 있는 어른에게 부담된다고 말해도 돼.",
       steps: ["가족 압박 지원"],
       questions: ["수익률이 뭐예요?", "내 거래 기록 보여주세요"],
     },
     comparison: {
-      text: "다른 사람의 수익이나 순위와 비교돼 속상했구나. 한 번의 결과나 성향 숫자는 네 실력이나 사람의 가치를 정하는 점수가 아니야.",
+      text: "다른 사람의 수익이나 순위와 비교돼 속상했구나. 한 번의 결과나 성향 숫자는 실력이나 사람의 가치를 정하는 점수가 아니야.",
       steps: ["비교 스트레스 지원"],
       questions: ["내 성향 결과 알려주세요", "내 거래 기록 보여주세요"],
     },
@@ -2348,12 +2641,12 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       questions: ["변동성이 뭐예요?", "내 거래 기록 보여주세요"],
     },
     impulsiveTrade: {
-      text: "화가 난 상태에서 전부 팔지, 계속 가질지를 내가 정해 줄 수는 없어. 지금은 주문을 누르지 말고 화면을 닫은 뒤 네가 처음 남긴 이유를 나중에 다시 봐도 돼.",
+      text: "화가 난 상태에서 전부 팔지, 계속 가질지를 내가 정해 줄 수는 없어. 지금은 주문을 누르지 말고 화면을 닫은 뒤 처음 남긴 이유를 나중에 다시 봐도 돼.",
       steps: ["충동 매매 중단"],
       questions: ["내 거래 기록 보여주세요", "매도는 무슨 뜻이에요?"],
     },
     ethicalDistress: {
-      text: "전쟁과 투자 이야기가 불편하게 느껴졌구나. 무엇이 마음에 걸리는지 네 기준을 기록할 수 있지만, 내가 옳고 그름이나 매매 결론을 대신 정하지는 않아.",
+      text: "전쟁과 투자 이야기가 불편하게 느껴졌구나. 무엇이 마음에 걸리는지 그 기준을 기록할 수 있지만, 내가 옳고 그름이나 매매 결론을 대신 정하지는 않아.",
       steps: ["윤리 고민 지원"],
       questions: ["투자 근거는 뭐예요?", "위험이 뭐예요?"],
     },
@@ -2403,7 +2696,7 @@ function recommendationReply(
         : ["차트가 뭐예요?", "변동성이 뭐예요?"],
     },
     timing: {
-      text: "언제 사고팔거나 계속 보유할지는 대신 정해 줄 수 없어요. 대신 네가 남긴 거래 이유와 주문 전 확인 항목은 같이 볼 수 있어요. 🐻",
+      text: "언제 사고팔거나 계속 보유할지는 대신 정해 줄 수 없어요. 대신 그동안 남긴 거래 이유와 주문 전 확인 항목은 같이 볼 수 있어요. 🐻",
       steps: ["매매 시점 차단", "본인 기록 대안"],
       questions: ["내 거래 기록 보여주세요", "주문 전에 뭘 확인해요?"],
     },
@@ -2420,12 +2713,12 @@ function recommendationReply(
       questions: ["위험이 뭐예요?", "분산투자가 뭐예요?"],
     },
     recovery: {
-      text: "손실을 만회할 종목이나 거래를 정해 줄 수는 없어요. 대신 네 거래 기록과 현재 손익의 뜻은 함께 볼 수 있어요. 🐻",
+      text: "손실을 만회할 종목이나 거래를 정해 줄 수는 없어요. 대신 거래 기록과 현재 손익의 뜻은 함께 볼 수 있어요. 🐻",
       steps: ["손실 만회 거래 차단", "본인 기록 대안"],
       questions: ["내 거래 기록 보여주세요", "평가손익이 뭐예요?"],
     },
     social: {
-      text: "가족이나 친구의 선택과 수익만 보고 네 거래를 정해 줄 수는 없어요. 대신 네가 고른 이유와 거래 기록은 함께 돌아볼 수 있어요. 🐻",
+      text: "가족이나 친구의 선택과 수익만 보고 거래를 정해 줄 수는 없어요. 대신 직접 고른 이유와 거래 기록은 함께 돌아볼 수 있어요. 🐻",
       steps: ["추종 거래 차단", "투자 근거 대안"],
       questions: ["내 거래 기록 보여주세요", "투자 근거는 뭐예요?"],
     },
@@ -2452,7 +2745,8 @@ function recommendationReply(
 }
 
 function parsePercentageCalculation(message: string) {
-  const percentMatch = message.match(/(\d+(?:\.\d+)?)(?:%|퍼)/);
+  // 아이는 `%` 를 "프로"로도 적는다. 숫자 뒤에 붙을 때만 받아 다른 낱말과 섞이지 않게 한다.
+  const percentMatch = message.match(/(\d+(?:\.\d+)?)(?:%|퍼|프로)/);
   const amountMatch = message.match(/(\d+(?:\.\d+)?)(만)?원/);
   if (!percentMatch || !amountMatch) return null;
 
@@ -2508,6 +2802,10 @@ export function termReply(kind: TermKind, message: string): ChatReply {
           : calculation.amount + calculation.change;
         const direction = decreases ? "줄어든" : "오른";
         text = `${formatWon(calculation.amount)}의 ${calculation.percent}%는 ${formatWon(calculation.change)}이에요. ${calculation.percent}% ${direction} 상황이라면 거래 비용을 빼기 전 금액은 ${formatWon(total)}이에요.`;
+      } else if (includesAny(message, ["확정", "팔았", "팔아버", "매도했", "정리했"])) {
+        // 이미 판 뒤에 묻는 말이라 "아직 팔지 않았다면" 으로 시작하면 답이 어긋난다.
+        text =
+          "이미 판 거래라면 그 결과는 실현손익으로 남아요. 여기 돈은 연습용 모의투자금이라 실제 지갑에서 빠져나가지는 않고, 남은 모의투자금이 그만큼 줄어든 것으로 보여요.";
       } else if (message.includes("손실률")) {
         text =
           "손실률 -12%는 기준 금액보다 가치가 12% 줄어든 상태라는 뜻이에요. 아직 보유 중이면 평가손익이고, 팔아 거래가 끝났다면 실현손익으로 남아요.";
@@ -3081,7 +3379,7 @@ function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
     case "coding": {
       step = "코딩 범위 안내";
       text =
-        "코드를 작성하거나 그래프 만드는 방법을 알려주는 일은 이 서비스 범위가 아니에요. 대신 화면에 나온 네 성향 결과와 투자 기록의 뜻은 설명할 수 있어요. 🐻";
+        "코드를 작성하거나 그래프 만드는 방법을 알려주는 일은 이 서비스 범위가 아니에요. 대신 화면에 나온 성향 결과와 투자 기록의 뜻은 설명할 수 있어요. 🐻";
       questions = ["내 성향 결과 알려주세요", "내 지난 시즌 기록 보여주세요"];
       break;
     }
@@ -3283,9 +3581,9 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
       } else if (includesAny(message, ["부모님화면", "부모화면"])) {
         text = "부모와 자녀 화면에 순위를 똑같이 보여 줄지는 아직 확정되지 않았어. 가족에게 보이는 항목은 상호 동의한 공개 범위 안에서만 확인해야 해.";
       } else if (includesAny(message, ["성향", "누가볼수"])) {
-        text = "성향 결과는 서로 공개에 동의한 같은 가족 구성원이 비교 화면에서 볼 수 있고, 시즌 뒤에도 아카이브에 남아. 챗봇은 네 본인 결과만 조회해.";
+        text = "성향 결과는 서로 공개에 동의한 같은 가족 구성원이 비교 화면에서 볼 수 있고, 시즌 뒤에도 아카이브에 남아. 챗봇은 본인 결과만 조회해.";
       } else {
-        text = "네 거래 종목은 친구나 다른 가족 팀에 자동으로 공개되지 않아. 같은 가족 팀에서는 서로 동의한 거래 기록만 가족 화면에서 확인할 수 있어.";
+        text = "거래 종목은 친구나 다른 가족 팀에 자동으로 공개되지 않아. 같은 가족 팀에서는 서로 동의한 거래 기록만 가족 화면에서 확인할 수 있어.";
       }
       break;
     }
@@ -3357,6 +3655,13 @@ function getArchiveManagementReply(message: string): ChatReply | null {
     "매수내역",
     "거래내역",
     "체결기록",
+    // 아이는 기록이 아니라 거래 자체를 무르고 싶다고 말한다 — "잘못 산 거".
+    // 답(체결은 되돌릴 수 없고 기록에 남는다)은 같은 자리에 이미 있다.
+    "잘못산",
+    "잘못매수",
+    "실수로산",
+    "실수한거래",
+    "잘못누른",
   ]);
   const recordChange = includesAny(message, [
     "삭제",
@@ -3366,6 +3671,10 @@ function getArchiveManagementReply(message: string): ChatReply | null {
     "수정",
     "고쳐",
     "되돌",
+    "취소",
+    "무를",
+    "무르",
+    "없던일",
   ]);
   if (!archiveRecord || !recordChange) return null;
 
@@ -3414,7 +3723,7 @@ const ARCHIVE_ABILITY_DEFINITIONS = [
   },
   {
     aliases: ["근거", "근거력", "자료확인"],
-    text: "근거는 매수 전에 뉴스·기업 정보·차트 같은 자료를 확인한 기록을 보여주는 축이에요. 점수로 너를 평가하는 기능은 아니에요.",
+    text: "근거는 매수 전에 뉴스·기업 정보·차트 같은 자료를 확인한 기록을 보여주는 축이에요. 점수로 사람을 평가하는 기능은 아니에요.",
   },
 ] as const;
 
@@ -3500,7 +3809,7 @@ function getOwnDataReply(message: string): ChatReply | null {
 // 잡히므로 쓰지 않는다. 실제로 "수익률 마이너스면 내가 진짜 돈 잃은 거야?"
 // 라는 개념 질문이 `내`+`가진` 으로 오탐됐다.
 const PERSONAL_DATA_QUESTION =
-  /(?:내|제|나|저|우리)[가-힣0-9]{0,6}(?:수익률|수익율|잔고|현금|예수금|쓸수있는돈|남은돈|자산|손익|보유|가진회사|가진종목|기록|성향|등수|몇등|순위|시즌)|(?:지금|현재|오늘)[가-힣0-9]{0,4}(?:수익률|수익율|잔고|현금|쓸수있는돈|자산|손익|몇등)/;
+  /(?:내|제|나|저|우리)[가-힣0-9]{0,6}(?:수익률|수익율|잔고|현금|예수금|쓸수있는돈|남은돈|자산|손익|보유|가진회사|가진종목|기록|성향|등수|몇등|순위|시즌|벌었|벌고있|잃었|잃고있)|(?:지금|현재|오늘)[가-힣0-9]{0,4}(?:수익률|수익율|잔고|현금|쓸수있는돈|자산|손익|몇등|벌었|잃었)/;
 
 /**
  * 같은 낱말이라도 **값**이 아니라 **원리**를 묻는 질문은 개념 설명이 맞다.
@@ -3539,7 +3848,21 @@ function isPersonalDataQuestion(message: string) {
  * 구분되지 않는다.** 답과 질문을 함께 읽어야 판정되므로 다음 단계는
  * 의미 기반 답변 적합성 검사다 — 그때 이 자리를 다시 쓴다.
  */
-const ASKS_PNL = ["수익률", "수익율", "손익", "얼마나올랐", "얼마나내렸", "몇퍼", "몇프로"];
+const ASKS_PNL = [
+  "수익률",
+  "수익율",
+  "손익",
+  "얼마나올랐",
+  "얼마나내렸",
+  "몇퍼",
+  "몇프로",
+  // 아이는 "수익률" 대신 "얼마 벌었어?" 라고 묻는다. 같은 값을 가리키는 말이라
+  // 빠져 있으면 화면 안내까지 닿지 못하고 범위 안내로 끝난다.
+  "벌었",
+  "벌고있",
+  "잃었",
+  "잃고있",
+];
 const ASKS_CASH = ["잔고", "현금", "쓸수있는돈", "남은돈", "예수금", "돈얼마", "얼마남았"];
 const ASKS_HOLDINGS = ["보유", "가진회사", "가진종목", "몇곳", "몇개샀", "종목수"];
 
@@ -3609,7 +3932,14 @@ function getPersonalScreenGuidance(message: string): ChatReply | null {
       "own_profile",
       "내 성향 결과는 아카이브의 성향 화면에 캐릭터와 능력치로 정리돼 있어요. 거기서 직접 보는 게 가장 정확해요.",
       ["성향 화면 안내"],
-      { uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 보기" } },
+      {
+        uiAction: {
+          type: "open_screen",
+          target: "archive",
+          archiveTab: "report",
+          label: "성향 화면 보기",
+        },
+      },
     );
   }
   if (includesAny(message, ["등수", "순위", "몇등"])) {
@@ -3627,7 +3957,16 @@ function getPersonalScreenGuidance(message: string): ChatReply | null {
       "own_archive",
       "지난 시즌 기록은 아카이브에서 주차별로 볼 수 있어요. 거기서 직접 보는 게 가장 정확해요.",
       ["시즌 기록 화면 안내"],
-      { uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 보기" } },
+      {
+        // 주차별 기록은 성향 탭 안의 카드 모아보기다. 수익률 탭이 아니다.
+        uiAction: {
+          type: "open_screen",
+          target: "archive",
+          archiveTab: "report",
+          archiveOverlay: "cards",
+          label: "주차별 기록 보기",
+        },
+      },
     );
   }
   if (includesAny(message, [...ASKS_PNL, ...ASKS_CASH, ...ASKS_HOLDINGS, "자산", "평가금액"])) {
@@ -3639,6 +3978,165 @@ function getPersonalScreenGuidance(message: string): ChatReply | null {
       { uiAction: { type: "open_screen", target: "portfolio", label: "내 자산에서 보기" } },
     );
   }
+  return null;
+}
+
+/**
+ * A term alone does not decide the answer.  Keep the small set of question
+ * acts that change either the explanation or the next screen ahead of the
+ * glossary, so variants such as "why diversify?" do not become "what is
+ * diversification?".
+ */
+function getQuestionActReply(message: string, context: ChatContext): ChatReply | null {
+  const questionForm = findChatbotQuestionForm(message);
+  const asksLocation = questionForm === "location" || includesAny(message, ["\uC5B4\uB514\uC11C\uBD10", "\uC5B4\uB514\uC11C\uBCF4"]);
+
+  if (questionForm === "definition" && includesAny(message, ["\uC190\uC775", "\uC190\uD574\uC640\uC774\uC775"])) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uC190\uC775\uC740 \uC0AC\uACE0\uD314\uBA74\uC11C \uC5BB\uC740 \uC774\uC775\uACFC \uC190\uD574\uB97C \uD569\uCCD0 \uBCF4\uB294 \uB9D0\uC774\uC5D0\uC694. \uB0B4 \uACC4\uC88C\uC5D0\uC11C\uB294 \uC9C0\uAE08 \uAE30\uB85D\uC744 \uD1B5\uD574 \uD655\uC778\uD560 \uC218 \uC788\uC5B4\uC694.",
+      ["\uC190\uC775\uC758 \uB73B \uD655\uC778"],
+    );
+  }
+
+  if (
+    questionForm === "reason" &&
+    includesAny(message, ["\uBD84\uC0B0\uD22C\uC790", "\uB098\uB220\uC0AC", "\uB098\uB220\uB450"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uBD84\uC0B0\uD22C\uC790\uB97C \uD558\uB294 \uC774\uC720\uB294 \uD55C \uD68C\uC0AC\uC5D0\uB9CC \uC548 \uC88B\uC740 \uC77C\uC774 \uC0DD\uACA8\uB3C4 \uC601\uD5A5\uC744 \uD55C\uCABD\uC5D0\uB9CC \uBC1B\uC9C0 \uC54A\uAE30 \uC704\uD574\uC11C\uC608\uC694. \uC5EC\uB7EC \uC885\uBAA9\uC5D0 \uB098\uB220 \uB450\uBA74 \uD55C \uC885\uBAA9\uC758 \uC6C0\uC9C1\uC784\uC5D0\uB9CC \uC758\uC874\uD558\uB294 \uC815\uB3C4\uB97C \uC904\uC77C \uC218 \uC788\uC5B4\uC694. \uB2E4\uB9CC \uC218\uC775\uC744 \uBCF4\uC7A5\uD558\uB294 \uBC29\uBC95\uC740 \uC544\uB2C8\uC5D0\uC694.",
+      ["\uBD84\uC0B0\uD22C\uC790\uC758 \uC774\uC720 \uD655\uC778"],
+    );
+  }
+
+  if (
+    includesAny(message, ["per"]) &&
+    includesAny(message, ["\uB0AE\uC73C\uBA74", "\uB0AE\uC740"]) &&
+    includesAny(message, ["\uC88B\uC740\uD68C\uC0AC", "\uC88B\uC740\uAC70", "\uC88B\uC544"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "PER\uC774 \uB0AE\uB2E4\uACE0 \uBB34\uC870\uAC74 \uC88B\uC740 \uD68C\uC0AC\uB77C\uB294 \uB73B\uC740 \uC544\uB2C8\uC5D0\uC694. \uD68C\uC0AC\uC758 \uC774\uC775\uACFC \uC8FC\uAC00\uB97C \uBE44\uAD50\uD558\uB294 \uC22B\uC790\uC778\uB370, \uD68C\uC0AC\uC758 \uC0C1\uD669\uACFC \uB2E4\uB978 \uC815\uBCF4\uB3C4 \uD568\uAED8 \uBCF4\uC544\uC57C \uD574\uC694.",
+      ["PER\uC740 \uD55C \uC815\uBCF4\uB85C\uB9CC \uD655\uC778"],
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC6D4\uB4DC", "\uCE94\uB4E4"]) &&
+    includesAny(message, ["\uBE68\uAC15", "\uD30C\uB791", "\uC0C9"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uCE94\uB4E4\uC758 \uC0C9\uC740 \uC815\uD55C \uAE30\uAC04\uC758 \uC2DC\uC791\uAC00\uC640 \uB05D\uAC12\uC758 \uC704\uCE58\uB97C \uBCF4\uC5EC \uC8FC\uB294 \uD45C\uC2DC\uC608\uC694. \uC774 \uC11C\uBE44\uC2A4\uC5D0\uC11C\uB294 \uBE68\uAC15\uC740 \uB05D\uAC12\uC774 \uC2DC\uC791\uAC00\uBCF4\uB2E4 \uB192\uC740 \uACBD\uC6B0, \uD30C\uB791\uC740 \uB0AE\uC740 \uACBD\uC6B0\uC608\uC694. \uB2E4\uC74C \uAC00\uACA9\uC744 \uB9DE\uD788\uB294 \uC0C9\uC740 \uC544\uB2C8\uC5D0\uC694.",
+      ["\uCE94\uB4E4 \uC0C9\uC758 \uB73B \uD655\uC778"],
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC8FC\uC2DD\uAC00\uACA9", "\uC8FC\uAC00"]) &&
+    includesAny(message, ["\uB204\uAC00\uC815\uD574", "\uB204\uAC00\uC815\uD568", "\uC5B4\uB5BB\uAC8C\uC815\uD574"])
+  ) {
+    return reply(
+      "faq",
+      "financial_concept",
+      "\uC8FC\uC2DD \uAC00\uACA9\uC740 \uD55C \uC0AC\uB78C\uC774 \uC815\uD558\uB294 \uAC83\uC774 \uC544\uB2C8\uB77C, \uC0AC\uACE0 \uC2F6\uC740 \uC0AC\uB78C\uACFC \uD314\uACE0 \uC2F6\uC740 \uC0AC\uB78C\uC758 \uC8FC\uBB38\uC774 \uB9CC\uB098\uBA74\uC11C \uC815\uD574\uC838\uC694. \uD68C\uC0AC\uC758 \uC0C1\uD669\uACFC \uC0AC\uB78C\uB4E4\uC758 \uAE30\uB300\uAC00 \uD568\uAED8 \uC601\uD5A5\uC744 \uC918\uC694.",
+      ["\uC8FC\uAC00\uAC00 \uC815\uD574\uC9C0\uB294 \uBC29\uC2DD \uD655\uC778"],
+    );
+  }
+
+  if (asksLocation && includesAny(message, ["\uB0B4\uAC00\uAC00\uC9C4\uAC70", "\uB0B4\uAC00\uAC16\uACE0", "\uB0B4\uC8FC\uC2DD"])) {
+    return serviceHowToReply(
+      "\uB0B4\uAC00 \uAC00\uC9C4 \uC8FC\uC2DD\uACFC \uAE30\uB2E4\uB9AC\uB294 \uC8FC\uBB38\uC740 \uB0B4 \uACC4\uC88C \uD654\uBA74\uC5D0\uC11C \uBCFC \uC218 \uC788\uC5B4\uC694.",
+      "\uB0B4 \uACC4\uC88C \uBCF4\uAE30",
+      "portfolio",
+    );
+  }
+
+  if (asksLocation && includesAny(message, ["\uB274\uC2A4", "\uAE30\uC0AC"])) {
+    return serviceHowToReply(
+      "\uC885\uBAA9 \uC0C1\uC138 \uD654\uBA74\uC758 \uB274\uC2A4 \uD0ED\uC5D0\uC11C \uD574\uB2F9 \uD68C\uC0AC\uC640 \uAD00\uB828\uB41C \uAE30\uC0AC\uB97C \uBCFC \uC218 \uC788\uC5B4\uC694.",
+      "\uC885\uBAA9 \uB274\uC2A4 \uBCF4\uAE30",
+      "stock",
+      { stockView: "explore" },
+    );
+  }
+
+  if (
+    includesAny(message, ["\uCC28\uD2B8"]) &&
+    includesAny(message, ["\uD06C\uAC8C", "\uD06C\uAC8C\uBCF4", "\uB113\uAC8C"])
+  ) {
+    return serviceHowToReply(
+      "\uC885\uBAA9 \uC0C1\uC138 \uD654\uBA74\uC5D0\uC11C \uCC28\uD2B8\uB97C \uD06C\uAC8C \uBCF4\uACE0, \uAE30\uAC04\uC744 \uBC14\uAFE8 \uAC00\uBA70 \uC9C0\uB098\uAC04 \uAC00\uACA9 \uC6C0\uC9C1\uC784\uC744 \uD655\uC778\uD560 \uC218 \uC788\uC5B4\uC694.",
+      "\uC885\uBAA9 \uC0C1\uC138\uC5D0\uC11C \uCC28\uD2B8 \uBCF4\uAE30",
+      "stock",
+      context.stockId ? { stockId: context.stockId } : {},
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC8FC\uBB38\uCDE8\uC18C", "\uC8FC\uBB38\uC744\uCDE8\uC18C"]) &&
+    (asksLocation || questionForm === "procedure")
+  ) {
+    return serviceHowToReply(
+      "\uAE30\uB2E4\uB9AC\uB294 \uC8FC\uBB38\uC740 \uB0B4 \uACC4\uC88C\uC5D0\uC11C \uCDE8\uC18C\uD560 \uC218 \uC788\uC5B4\uC694. \uC774\uBBF8 \uCCB4\uACB0\uB41C \uC8FC\uBB38\uC740 \uCDE8\uC18C\uB418\uC9C0 \uC54A\uC544\uC694.",
+      "\uAE30\uB2E4\uB9AC\uB294 \uC8FC\uBB38 \uBCF4\uAE30",
+      "portfolio",
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC8FC\uBB38\uBC84\uD2BC", "\uB9E4\uC218\uBC84\uD2BC"]) &&
+    includesAny(message, ["\uC548\uB20C\uB7EC", "\uC548\uB428", "\uC548\uB3FC", "\uACE0\uC7A5"])
+  ) {
+    return serviceHowToReply(
+      "\uC8FC\uBB38 \uBC84\uD2BC\uC774 \uC548 \uB20C\uB9AC\uBA74 \uC885\uBAA9\uC774\uB098 \uC218\uB7C9, \uC8FC\uBB38 \uB0B4\uC6A9\uC744 \uBA3C\uC800 \uD655\uC778\uD574 \uC8FC\uC138\uC694. \uC774 \uC11C\uBE44\uC2A4\uC5D0\uC11C\uB294 \uD559\uAD50 \uC2DC\uAC04 \uB4F1 \uB9E4\uB9E4 \uC81C\uD55C \uC2DC\uAC04\uC5D0\uB3C4 \uC8FC\uBB38\uC774 \uC7A0\uC2DC \uB9C9\uD790 \uC218 \uC788\uC5B4\uC694.",
+      "\uC8FC\uBB38 \uD654\uBA74 \uD655\uC778\uD558\uAE30",
+      "order",
+      { ...(context.stockId ? { stockId: context.stockId } : {}), orderSide: "buy", orderStep: "confirmation" },
+    );
+  }
+
+  if (
+    includesAny(message, ["\uC800\uBC88\uC5D0", "\uC608\uC804\uC5D0"]) &&
+    includesAny(message, ["\uC65C\uC0C0", "\uC65C\uC0C0\uB2E4", "\uC0B0\uC774\uC720"])
+  ) {
+    return reply("tool", "own_records", "", ["\uB0B4 \uB9E4\uC218 \uC774\uC720 \uAE30\uB85D \uC870\uD68C"], { tool: "own_trade_records" });
+  }
+
+  if (
+    includesAny(message, ["\uBA87\uBC88\uD314", "\uBA87\uBC88\uB9E4\uB3C4", "\uD310\uD69F\uC218"]) &&
+    includesAny(message, ["\uB0B4", "\uB098"])
+  ) {
+    return reply("tool", "own_records", "", ["\uB0B4 \uB9E4\uB3C4 \uAE30\uB85D \uC870\uD68C"], { tool: "own_trade_records" });
+  }
+
+  if (
+    includesAny(message, ["\uB0B4\uC131\uD5A5", "\uC131\uD5A5\uACB0\uACFC"]) &&
+    includesAny(message, ["\uCE5C\uAD6C\uB4E4", "\uCE5C\uAD6C\uB3C4"]) &&
+    includesAny(message, ["\uBCFC\uC218\uC788", "\uBCF4\uC5EC"])
+  ) {
+    return reply(
+      "faq",
+      "service_help",
+      "\uC131\uD5A5 \uACB0\uACFC\uB294 \uBCF8\uC778\uACFC \uBD80\uBAA8\uB2D8\uC774 \uBCFC \uC218 \uC788\uB294 \uAE30\uB85D\uC774\uC5D0\uC694. \uCE5C\uAD6C\uB4E4\uC5D0\uAC8C \uACF5\uAC1C\uB418\uC9C0 \uC54A\uC544\uC694.",
+      ["\uC131\uD5A5 \uACF5\uAC1C \uBC94\uC704 \uD655\uC778"],
+    );
+  }
+
+  if (includesAny(message, ["\uACC4\uC18D\uAC00\uACA9\uD655\uC778", "\uAC00\uACA9\uACC4\uC18D\uD655\uC778"]) && includesAny(message, ["\uBD88\uC548", "\uBD88\uC548\uD574"])) {
+    return reply(
+      "safety",
+      "safety",
+      "\uACC4\uC18D \uD655\uC778\uD558\uB2E4 \uBCF4\uBA74 \uB9C8\uC74C\uC774 \uB354 \uBD88\uC548\uD574\uC9C8 \uC218 \uC788\uC5B4\uC694. \uC9C0\uAE08\uC740 \uC7A0\uAE50 \uAC00\uACA9 \uD654\uBA74\uC5D0\uC11C \uB5A8\uC5B4\uC838 \uC26C\uC5B4\uB3C4 \uAD1C\uCC2E\uC544\uC694. \uBD88\uC548\uD55C \uB9C8\uC74C\uC774 \uACC4\uC18D\uB418\uBA74 \uBD80\uBAA8\uB2D8\uC774\uB098 \uBBFF\uC744 \uC218 \uC788\uB294 \uC5B4\uB978\uC5D0\uAC8C \uC774\uC57C\uAE30\uD574 \uC8FC\uC138\uC694.",
+      ["\uC7A0\uC2DC \uAC00\uACA9 \uD654\uBA74\uC5D0\uC11C \uC26C\uAE30"],
+    );
+  }
+
   return null;
 }
 
@@ -3819,6 +4317,12 @@ function isNavigationQuestion(message: string) {
     "보여",
     "이동",
     "시작",
+    // 화면 요소를 가리키며 "그거 눌러야 돼?" 라고 묻는 것도 위치·사용법 질문이다.
+    // `봐야`·`써야` 까지 넓히면 "아카이브 꼭 열어봐야 해?" 같은 **규칙** 질문을
+    // 가로채므로 누르는 동작으로만 좁힌다.
+    "눌러",
+    "눌러야",
+    "눌러도",
   ]);
 }
 
@@ -4091,7 +4595,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
       "현재 아카이브의 체결 기록과 그때 고른 이유는 나중에 수정하거나 지울 수 없어요. 실수한 거래도 당시 기록 그대로 남아요.",
       "아카이브에서 기록 보기",
       "archive",
-      { archiveTab: "season" },
+      { archiveTab: "return" },
     );
   }
 
@@ -4127,7 +4631,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
 
   if (message.includes("친구가알려준수량대로")) {
     return serviceHowToReply(
-      "친구가 알려준 수량을 따라도 바로 체결되지는 않아요. 예상 금액과 이유를 본 뒤 마지막 주문 확인은 네가 직접 해야 해요.",
+      "친구가 알려준 수량을 따라도 바로 체결되지는 않아요. 예상 금액과 이유를 본 뒤 마지막 주문 확인은 직접 해야 해요.",
       "주문 내용 직접 확인하기",
       "order",
       { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
@@ -4144,7 +4648,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
 
   if (message.includes("매수누르면또떨어지는거")) {
     return serviceHowToReply(
-      "매수 뒤 가격 변화는 미리 알 수 없어요. 주문하려면 금액과 이유를 입력한 뒤 마지막 확인은 네가 직접 하면 돼요.",
+      "매수 뒤 가격 변화는 미리 알 수 없어요. 주문하려면 금액과 이유를 입력한 뒤 마지막 확인은 직접 하면 돼요.",
       "주문 화면에서 확인하기",
       "order",
       { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
@@ -4185,7 +4689,7 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
 
   if (message.includes("이주문오리온2주가맞는지")) {
     return serviceHowToReply(
-      "키웅이가 주문이 맞다고 대신 승인하지는 않아요. 확인 화면에서 회사가 오리온인지, 수량이 2주인지, 매수·매도 구분과 예상 금액이 네 의도와 같은지 직접 확인해요.",
+      "키웅이가 주문이 맞다고 대신 승인하지는 않아요. 확인 화면에서 회사가 오리온인지, 수량이 2주인지, 매수·매도 구분과 예상 금액이 처음 의도와 같은지 직접 확인해요.",
       "주문 내용 확인하기",
       "order",
       { ...stockDetails, orderStep: "confirmation" },
@@ -4374,16 +4878,19 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const privacyReply = getPrivacyReply(message);
   if (privacyReply) return privacyReply;
 
-  const explicitServiceReply = getChildFriendlyIntentReply(message, context);
-  if (explicitServiceReply?.intent === "service_help" && !findRecommendationKind(message)) {
-    return explicitServiceReply;
-  }
-
   // SPEC §6.1.2 의 입력 안전 우선순위대로 보호 판정을 사용법 FAQ 앞에 둔다.
   // 뒤에 두면 "다 포기하고 싶어 매수 버튼 누르면 끝이야?" 처럼 위기 표현에
   // 서비스 낱말이 섞였을 때 큐레이트 FAQ 가 먼저 잡아 보호 응답이 사라진다.
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);
+
+  const questionActReply = getQuestionActReply(message, context);
+  if (questionActReply) return questionActReply;
+
+  const explicitServiceReply = getChildFriendlyIntentReply(message, context);
+  if (explicitServiceReply?.intent === "service_help" && !findRecommendationKind(message)) {
+    return explicitServiceReply;
+  }
 
   // 안전 판정 뒤. 화면이 실어 보낸 내 지갑 값은 사전·FAQ보다 먼저 답한다 —
   // "나 쓸 수 있는 돈 얼마 남았어?" 에 잔고 대신 용어 설명이 나가는 걸 막는
@@ -4406,6 +4913,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const curatedServiceHowToReply = getCuratedServiceHowToReply(message, context);
   if (curatedServiceHowToReply) return curatedServiceHowToReply;
 
+  const ruleKind = findRuleKind(message, context);
+  if (ruleKind) return ruleReply(ruleKind, message);
+
   if (includesAny(message, HARMFUL_PATTERNS)) {
     return reply(
       "safety",
@@ -4415,19 +4925,23 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     );
   }
 
-  const ruleKind = findRuleKind(message, context);
-  if (ruleKind) return ruleReply(ruleKind, message);
-
   const archiveManagementReply = getArchiveManagementReply(message);
   if (archiveManagementReply) return archiveManagementReply;
 
   const archiveAbilityReply = getArchiveAbilityReply(message, context);
   if (archiveAbilityReply) return archiveAbilityReply;
 
+  // SPEC §6.1.5 의 예외 — 복합 금융 개념이 추천·예측보다 앞서지만, "실제 선택·
+  // 시점·가격 판단을 요구하면 recommend 가 우선한다". 그 판정을 용어 경로보다
+  // 먼저 확정해 둔다. 아래 용어 분기들이 이 값을 보고 비켜난다.
+  const recommendationKind = findRecommendationKind(message);
+
   // 안전·개인정보·규칙 안내 뒤에는 승인된 화면 용어를 먼저 설명한다.
   // "목표 가격"처럼 매매 요청과 같은 단어를 쓰더라도, 단순 용어 질문은
   // 추천·예측 거절로 보내지 않고 화면의 실제 뜻을 알려 준다.
-  const earlyKnowledge = findChatbotKnowledge(message);
+  // 다만 대신 정해 달라는 요구는 용어 질문이 아니다 — "목표가 좀 정해줘"가
+  // `목표 가격` 설명으로 새던 자리다.
+  const earlyKnowledge = recommendationKind ? undefined : findChatbotKnowledge(message);
   if (
     earlyKnowledge &&
     EARLY_SCREEN_TERM_IDS.has(earlyKnowledge.id) &&
@@ -4449,7 +4963,6 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     );
   }
 
-  const recommendationKind = findRecommendationKind(message);
   const metaKind = findMetaKind(message, recommendationKind);
   if (metaKind) return metaReply(metaKind, message);
 
@@ -4460,7 +4973,16 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // 먼저 태운 뒤에 고른다 — 도구가 있으면 도구가 이긴다.
   const personalData = isPersonalDataQuestion(message);
 
-  const termKind = personalData ? null : findTermKind(message);
+  // "주가가 뭐야?"처럼 **뜻만 묻는** 질문이고 사전에 DAPIE 스크립트가 있으면 사전이 답한다.
+  // term 9종 고정 응답은 사전에 없는 개념을 메우는 그물이라, 되물어 가며 설명할 수 있는
+  // 쪽이 있으면 양보한다. 정의형으로 좁히는 이유는 SPEC §3.4다 — 두 개념 비교, 단정 교정,
+  // 수치 계산은 한 용어의 DAPIE 로 답할 수 없어 고정 응답이 맡아야 한다.
+  // 대신 골라·정해 달라는 요구에는 용어 DAPIE 를 열지 않는다. `findTermKind` 는
+  // 이미 결정 요구를 스스로 걸러 내지만(`asksForDecision`), 사전 스크립트에는 그
+  // 가드가 없어 "목표가 좀 정해줘 손절가도" 가 손절 설명으로 새 나갔다.
+  const scriptedTerm =
+    personalData || recommendationKind ? undefined : findScriptedTerm(message);
+  const termKind = personalData || scriptedTerm ? null : findTermKind(message);
   const termTakesPriorityOverCompany =
     termKind === "causality" ||
     (termKind === "industryConcept" &&
@@ -4469,7 +4991,13 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   if (termKind && termTakesPriorityOverCompany) return termReply(termKind, message);
 
   const companyFactKind = findCompanyFactKind(message);
-  const sectorFactReply = termKind ? null : getSectorFactReply(message);
+  // "은행금융 섹터에서 예대마진이 뭐야?"는 섹터 소개가 아니라 예대마진의 뜻을 묻는
+  // 질문이라 사전이 우선이다. 다만 "반도체 섹터는 뭐 하는 곳이야?"처럼 섹터 자체를
+  // 물으면 `업종` 용어 정의가 아니라 섹터 설명이 나가야 한다.
+  const sectorFactReply =
+    termKind || (scriptedTerm && scriptedTerm.id !== "term:sector")
+      ? null
+      : getSectorFactReply(message);
   if (sectorFactReply) return sectorFactReply;
   if (companyFactKind) return companyFactReply(companyFactKind, message, context);
 
@@ -4493,7 +5021,9 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       tool: "own_holdings",
     });
   }
-  if (includesAny(message, RECORD_PATTERNS)) {
+  // 구절 목록(`최근에뭐샀`)은 "나 뭐 샀었지?"·"내가 왜 이거 샀는지 기억나?" 를
+  // 놓친다. 1인칭과 기록 낱말의 근접으로 함께 본다.
+  if (includesAny(message, RECORD_PATTERNS) || asksOwnTradeRecords(message)) {
     return reply("tool", "own_records", "", ["본인 투자 기록 조회"], {
       tool: "own_trade_records",
     });
@@ -4525,7 +5055,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // `findChatbotKnowledge` 는 항목마다 고른 트리거로 매칭하므로 정확도가 높다
   // (실측 term 98%). 여기에는 정의 형태 게이트를 걸지 않는다 — 게이트는 낱말
   // 조합으로 넓게 잡는 `findTermKind` 쪽 오답만 막는 게 목적이다.
-  const knowledge = findChatbotKnowledge(message);
+  const knowledge = findApprovedKnowledge(message);
   if (knowledge) {
     return reply(
       "faq",
@@ -4572,6 +5102,12 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     });
   }
 
+  // 여기까지 온 반복 확인 표현은 어느 큐레이트 답에도 닿지 못한 것이다. SPEC
+  // §6.1.2 는 "계속 확인하게 돼" 를 정서 지원 대상으로 두므로 범위 안내로
+  // 끝내지 않는다. 앞선 큐레이트 답이 있으면 그쪽이 이미 답했으므로 여기에
+  // 오지 않는다 — 그물은 앞을 가로채지 않는다.
+  if (asksRepeatedChecking(message)) return unsafeReply("anxiety", message);
+
   if (isModelEligibleFallback(message, context)) {
     return reply(
       "fallback",
@@ -4604,4 +5140,17 @@ export const PROACTIVE_SCRIPTS: Record<
     label: "손실 실현 종목 반복 조회",
     text: "후회되나요?",
   },
+};
+
+/**
+ * 말풍선 수락 직후 자동으로 던지는 후속 질문 (SPEC §7). 여기 없는 신호는 고정 발화만
+ * 남기고 아이 입력을 기다린다.
+ *
+ * **아이가 고른 문장이 아니라 우리가 대신 던지는 문장이다.** 라우터가 이걸 거절이나 범위
+ * 밖으로 보내면 "살지 말지 고민돼요?" → "응!" → "대신 정해 줄 수 없어요" 가 되어, 도우려고
+ * 먼저 말을 건 자리에서 아이가 거절당한다. `proactive-followup.test.ts` 가 그 방향을 막는다.
+ */
+export const PROACTIVE_FOLLOWUP_QUESTION: Partial<Record<ProactiveSignal, string>> = {
+  buyHesitation: "주문 전에 뭘 확인해요?",
+  orderMethodConfusion: "시장가가 뭐예요?",
 };

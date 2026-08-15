@@ -1,13 +1,12 @@
   notifyChatContext(){
     if (window.parent === window) return;
     const screen = this.state.screen;
+    // 상세·차트·뉴스는 React 로 옮겨 가 여기 화면 목록에 없다. 그 맥락은 옮긴 화면이 직접 올린다.
     const chatScreen = screen === 'archive'
       ? 'archive'
-      : ['detail', 'chart', 'news'].indexOf(screen) >= 0
-        ? 'stock'
-        : ['buy', 'sell'].indexOf(screen) >= 0
-          ? 'order'
-          : 'home';
+      : ['buy', 'sell'].indexOf(screen) >= 0
+        ? 'order'
+        : 'home';
     const stock = this.stock();
     const context = { screen: chatScreen };
     if (stock && (chatScreen === 'stock' || chatScreen === 'order')) {

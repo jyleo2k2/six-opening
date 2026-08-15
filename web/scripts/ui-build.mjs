@@ -21,8 +21,6 @@ const webRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const APP_HTML = join(webRoot, "public", "ui", "app.html");
 const UI_ROOT = join(webRoot, "public", "ui");
 const UI_SRC = join(webRoot, "ui-src");
-const ENGINE_SOURCE = join(webRoot, "shared", "engine", "archive-profile.js");
-const SCHEDULED_ORDER_SOURCE = join(webRoot, "features", "f2-trade", "lib", "scheduled-orders.js");
 const UI_DIST = join(webRoot, "ui-dist");
 const MANIFEST = join(UI_SRC, "manifest.json");
 
@@ -57,13 +55,37 @@ const SC_IF_SCREEN = /^<sc-if value="\{\{ (is\w+) \}\}"/;
 const CLASS_OPEN = /^class Component extends DCLogic \{/;
 const METHOD = /^ {2}([A-Za-z_$][\w$]*)\s*\(/;
 
-// 성향 계산은 `shared/engine/archive-profile.js` 가 원본이고, 화면에는 그 복사본이 들어간다.
-// 아래 두 표식 사이가 복사 구간이다. 조립할 때마다 원본에서 다시 만들어 넣으므로,
-// 원본만 고치고 build 를 안 돌리면 verify 가 어긋난 것을 잡아낸다.
+// 브라우저와 서버·테스트가 같이 쓰는 모듈은 `shared/` 등에 원본을 두고 화면에는 복사본이
+// 들어간다. 조립할 때마다 원본에서 다시 만들어 넣으므로, 원본만 고치고 build 를 안 돌리면
+// verify 가 어긋난 것을 잡아낸다. **manifest 에 그 조각 이름이 있어야 실제로 주입된다.**
+const INJECTED_CHUNKS = {
+  "logic/archive-engine.js": {
+    marker: "archive-engine",
+    source: join(webRoot, "shared", "engine", "archive-profile.js"),
+    from: "shared/engine/archive-profile.js",
+  },
+  "logic/prototype-account.js": {
+    marker: "prototype-account",
+    source: join(webRoot, "shared", "store", "prototype-account.js"),
+    from: "shared/store/prototype-account.js",
+  },
+  "logic/trade-copy.js": {
+    marker: "trade-copy",
+    source: join(webRoot, "shared", "data", "trade-copy.js"),
+    from: "shared/data/trade-copy.js",
+  },
+  // 이 조각은 `GENERATED` 머리말만 달고 ui-src 에 손으로 복사돼 있었다. 원본을 고쳐도
+  // 화면에는 반영되지 않아 머리말이 거짓말을 하던 자리다 — 실제 주입으로 바꾼다.
+  "logic/constants-tail.js": {
+    marker: "scheduled-order-engine",
+    source: join(webRoot, "features", "f2-trade", "lib", "scheduled-orders.js"),
+    from: "features/f2-trade/lib/scheduled-orders.js",
+  },
+};
+
 const ENGINE_BEGIN = /^\/\/ >>> archive-engine/;
 const ENGINE_END = /^\/\/ <<< archive-engine/;
 const ENGINE_CHUNK = "logic/archive-engine.js";
-const SCHEDULED_ORDER_CHUNK = "logic/scheduled-orders.js";
 
 // isHome -> home, isBuy2 -> buy2
 function screenName(flag) {
@@ -219,28 +241,16 @@ function readApp() {
   return readFileSync(APP_HTML, "utf8");
 }
 
-// 엔진 원본을 화면에 넣을 형태로 바꾼다. 모듈이 아닌 <script> 안이라 export 를 떼고,
+// 원본을 화면에 넣을 형태로 바꾼다. 모듈이 아닌 <script> 안이라 export 를 떼고,
 // app.html 이 CRLF 라 줄바꿈도 맞춘다.
-function engineChunkText() {
+function injectedChunkText(chunk) {
   // BOM 이 붙은 채로 스크립트 한가운데 들어가면 문법이 깨진다. 편집기가 붙여도 여기서 뗀다.
-  const source = readFileSync(ENGINE_SOURCE, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
+  const source = readFileSync(chunk.source, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
   const body = [
-    "// >>> archive-engine — GENERATED from shared/engine/archive-profile.js",
+    `// >>> ${chunk.marker} — GENERATED from ${chunk.from}`,
     "// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.",
     source.replace(/\n+$/, ""),
-    "// <<< archive-engine",
-    "",
-  ].join("\n");
-  return body.replace(/\r?\n/g, "\r\n");
-}
-
-function scheduledOrderChunkText() {
-  const source = readFileSync(SCHEDULED_ORDER_SOURCE, "utf8").replace(/^﻿/, "").replace(/^export /gm, "");
-  const body = [
-    "// >>> scheduled-order-engine — GENERATED from features/f2-trade/lib/scheduled-orders.js",
-    "// 여기를 고치지 말고 원본을 고친 뒤 `node scripts/ui-build.mjs build` 를 돌린다.",
-    source.replace(/\n+$/, ""),
-    "// <<< scheduled-order-engine",
+    `// <<< ${chunk.marker}`,
     "",
   ].join("\n");
   return body.replace(/\r?\n/g, "\r\n");
@@ -250,12 +260,48 @@ function assemble(keep = () => true) {
   const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
   return manifest.files
     .filter(keep)
-    .map((file) => file === ENGINE_CHUNK
-      ? engineChunkText()
-      : file === SCHEDULED_ORDER_CHUNK
-        ? scheduledOrderChunkText()
-        : readFileSync(join(UI_SRC, file), "utf8"))
+    .map((file) => INJECTED_CHUNKS[file]
+      ? injectedChunkText(INJECTED_CHUNKS[file])
+      : readFileSync(join(UI_SRC, file), "utf8"))
     .join("");
+}
+
+// ── 조립 무결성 ─────────────────────────────────────────────────────────
+// 합친 결과가 스스로 온전한지 본다. `this.foo()` 를 부르는데 `foo` 가 어디에도 없으면
+// 브라우저는 **첫 렌더에서 죽는다**. 그런데 `npm test` 도 `next build` 도 app.html 을
+// 실행하지 않아 아무도 못 잡는다. 실제로 아카이브를 React 로 옮기며 `buildArchive` 를
+// 지우고 호출부를 남긴 적이 있고(PR #238), `renderVals()` 가 화면 분기 밖 공통 경로라
+// 매수·매도가 통째로 죽은 채 병합됐다.
+//
+// 클래스가 상속으로 받는 것과 런타임에 붙이는 것(`this.tick = () => {}`)은 정의로 본다.
+
+/** DCLogic·React 에서 물려받아 이 파일에는 정의가 없는 것들. */
+const INHERITED_METHODS = new Set(["setState", "forceUpdate", "render"]);
+
+function danglingMethodRefs(text) {
+  const defined = new Set(INHERITED_METHODS);
+  // 클래스 본문의 메서드는 두 칸 들여쓰기로 시작한다.
+  for (const m of text.matchAll(/^ {2}([A-Za-z_$][\w$]*)\s*\(/gm)) defined.add(m[1]);
+  // 런타임 대입도 정의다. `==` 비교와 섞이지 않게 뒤에 `=` 가 또 오는 건 뺀다.
+  for (const m of text.matchAll(/this\.([A-Za-z_$][\w$]*)\s*=[^=]/g)) defined.add(m[1]);
+
+  const missing = new Set();
+  for (const m of text.matchAll(/this\.([A-Za-z_$][\w$]*)\s*\(/g)) {
+    if (!defined.has(m[1])) missing.add(m[1]);
+  }
+  return [...missing].sort();
+}
+
+/** 깨진 참조가 있으면 조립을 실패시킨다. 반쯤 죽은 app.html 을 내보내지 않는다. */
+function assertNoDanglingRefs(text) {
+  const missing = danglingMethodRefs(text);
+  if (missing.length === 0) return;
+  console.error(
+    `조립 거부: 정의가 없는 메서드를 부른다 — ${missing.join(", ")}\n` +
+      "  이 상태로 만들면 app.html 이 첫 렌더에서 죽는다. 부르는 쪽을 지우거나\n" +
+      "  manifest 에서 빠진 methods 조각을 되돌린다.",
+  );
+  process.exit(1);
 }
 
 // ── 내보내기 ────────────────────────────────────────────────────────────
@@ -393,10 +439,14 @@ if (command === "split") {
   const methods = parts.filter((p) => p.file.startsWith("methods/")).length;
   console.log(`split: 조각 ${parts.length}개 (화면 ${screens} · 메서드 ${methods}) -> web/ui-src/`);
 } else if (command === "build") {
-  writeFileSync(APP_HTML, assemble());
+  const text = assemble();
+  assertNoDanglingRefs(text);
+  writeFileSync(APP_HTML, text);
   console.log("build: web/public/ui/app.html 을 다시 만들었다");
 } else if (command === "verify") {
-  const built = Buffer.from(assemble(), "utf8");
+  const text = assemble();
+  assertNoDanglingRefs(text);
+  const built = Buffer.from(text, "utf8");
   const current = readFileSync(APP_HTML);
   if (built.equals(current)) {
     console.log(`verify: 바이트 동일 (${current.length} bytes)`);

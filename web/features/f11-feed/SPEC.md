@@ -1,12 +1,12 @@
 # F11 — 가족 거래 피드 기능 명세
 
-> **기능 단일 원본** · 2026-08-14 · 현재 `web/` 구현 기준
+> **기능 단일 원본** · 2026-08-15 · 기준: 아카이브 화면 React 이관 이후
 >
 > 이 문서는 희망 설계가 아니라 현재 사용자가 실제로 만나는 동작을 기록한다. 충돌 시 프론트 구현 → 백엔드 계약 → 이 문서 순으로 확인한다.
 
 ## 1. 현재 사용자 경험
 
-- 가족 기록은 별도 라우트도 React 오버레이도 아니다. `app.html` 아카이브 화면의 **수익률(`return`) 탭**이 피드를 소유한다.
+- 가족 기록은 별도 라우트가 아니다. `ArchiveScreen` 의 **수익률 탭**(`/archive/return`)이 피드를 소유한다.
 - `GET /api/family`가 로그인 세션과 같은 `family_tag`의 구성원과 Supabase 체결을 최신순으로 제공한다.
 - `전체`와 실제 구성원 이름 필터로 자녀·부모 각각의 거래를 볼 수 있다. 필터는 로그인 사용자를 바꾸지 않는다.
 - 자신의 카드에는 수량과 주당 체결가를 표시하고, 다른 가족 카드에는 서버 응답 단계부터 둘 다 `null`로 숨긴다.
@@ -18,26 +18,23 @@
 
 | 위치 | 현재 책임 |
 |---|---|
-| `web/public/ui/app.html` 아카이브 `return` 탭 | 피드 카드, 구성원 필터, 코멘트·좋아요 입력 |
-| `web/ui-src/methods/loadFamilyProfiles.js` | `/api/family` 조회와 `dbFamily` 보관 |
-| `web/ui-src/methods/loadArchiveFeedReactions.js` | 거래 id 일괄 반응 조회 |
-| `web/ui-src/methods/sendArchiveComment.js` · `deleteArchiveComment.js` | 코멘트 작성·본인 삭제 |
-| `web/ui-src/methods/toggleArchiveLike.js` | 좋아요 토글 |
-| `web/ui-src/methods/buildArchive.js` | 응답이 없을 때의 로컬 데모 폴백 |
-| `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 전체 체결 조회와 타인 수량·체결가 마스킹 |
+| `web/features/f0-home/ArchiveScreen.tsx` 수익률 탭 | 피드 카드, 구성원 필터, 코멘트·좋아요 입력 |
+| `web/features/f0-home/lib/archive-feed.ts` | 카드 값 계산 — 마스킹된 체결가를 화면에서 되살리지 않는다 |
+| `web/features/f0-home/lib/use-archive-data.ts` | `/api/family` 조회, 거래 id 일괄 반응 조회, 좋아요 토글·코멘트 작성·본인 삭제 |
+| `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 구성원별 수익률, 전체 체결 조회와 타인 수량·체결가 마스킹 |
 | `web/shared/engine/comment-filter.ts` | 서버 저장 전 코멘트 문구 게이트 |
 | `web/shared/engine/trade-markers.ts` | 차트 마커 데이터 변환 |
 | `web/app/api/trades/route.ts` | 세션 가족의 종목별 체결 조회와 타인 수량 마스킹 |
 | `web/app/api/comments/route.ts` | 서버 코멘트 조회·작성·삭제 계약 |
 | `web/app/api/likes/route.ts` | 서버 좋아요 조회·토글 계약 |
 
-F11에는 자체 React 화면이 없다. 화면 정본은 `web/public/ui/app.html`이고 `web/ui-src/`가 그 분해본이므로 양쪽을 함께 고친 뒤 `node scripts/ui-build.mjs verify`로 확인한다. 이 폴더에는 SPEC과 가드만 남는다.
+F11에는 자체 화면이 없다(오버레이 `FeedScreen`은 소비자가 없어 삭제됐다). 피드는 `ArchiveScreen` 수익률 탭 **한 곳**이 그리고, 이 폴더에는 SPEC과 가드만 남는다.
 
 ## 3. 프론트 데이터 흐름
 
 ### 3.1 가족 거래
 
-`app.html`의 `componentDidMount`가 앱 부팅 시 `loadFamilyProfiles()`로 `/api/family`를 한 번 호출한다(아카이브 탭 진입 시점이 아니다). 응답은 `dbFamily`에 보관하고 수익률 탭이 그때 표시한다. 서버는 클라이언트가 넘긴 가족값을 받지 않고 세션 사용자의 `family_tag`로 범위를 정한다. 태그가 없으면 본인만 반환한다.
+`useArchiveData()` 가 아카이브 진입 시 `/api/family` 를 한 번 호출하고, 응답의 체결 id 로 댓글·좋아요를 이어서 일괄 조회한다. 서버는 클라이언트가 넘긴 가족값을 받지 않고 세션 사용자의 `family_tag`로 범위를 정한다. 태그가 없으면 본인만 반환한다.
 
 | Supabase / 서버 응답 | `FamilyTrade` 변환 |
 |---|---|
@@ -109,8 +106,8 @@ type FeedComment = {
 | 코멘트 배치 조회·작성·본인 삭제 | `/api/comments` 구현 | 아카이브 수익률 탭에서 사용 |
 | 좋아요 배치 조회·토글 | `/api/likes` 구현 | 아카이브 수익률 탭에서 사용 |
 | 가족 범위 검사 | 가족·거래·반응 API에서 구현 | 세션 `family_tag` 기준 응답만 사용 |
-| 로그인·로그아웃 | `/api/auth/login` POST·DELETE 구현 | `LoginGate`·`app.html` 메뉴가 호출. 계정 전환은 이 둘로만 한다 |
-| 계정 전환 API | `/api/auth/switch` 구현 | **호출하지 않음.** 전용 스위처를 만들지 않기로 확정돼 미사용 경로다 (`docs/기능명세.md` §4.2) |
+| 로그인·로그아웃 | `/api/auth/login` POST·DELETE 구현 | `LoginGate`·`HomeScreen` 메뉴가 호출. 계정 전환은 이 둘로만 한다 |
+| 계정 전환 API | 없음 | 전용 스위처를 만들지 않기로 확정돼 `/api/auth/switch` 는 PR #221 에서 삭제했다. 전환은 로그아웃 후 재로그인이다 (`docs/기능명세.md` §4.2) |
 
 거래·구성원·코멘트·좋아요는 모두 DB가 원본이다.
 
@@ -130,5 +127,5 @@ type FeedComment = {
 - 코멘트 작성자의 실제 이름이 보이고 본인 코멘트만 삭제할 수 있다.
 - 좋아요 개수와 본인 선택 상태가 새로 열어도 유지된다.
 - 차트 마커는 서버 거래만 표시하고 타인 수량을 노출하지 않는다.
-- `app.html`과 `ui-src`를 함께 고쳤고 `node scripts/ui-build.mjs verify`가 통과한다.
+- 피드 값 계산이 `lib/archive-feed.ts` 에 있고 그 테스트가 통과한다.
 - `web`의 테스트와 빌드가 통과한다.

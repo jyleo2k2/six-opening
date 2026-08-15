@@ -25,3 +25,35 @@
   width: 0;
   height: 0;
 }
+
+/* 홈의 목표 아이템이 튀어오르는 연출과 보유 시트가 올라오는 연출.
+   `ui-src/template/shell-0.html` 에서 같은 이름·같은 값으로 옮겼다. */
+@keyframes popItem {
+  0% { opacity: 0; transform: translateY(0) scale(0.3); }
+  20% { opacity: 1; transform: translateY(-14px) scale(1.05); }
+  80% { opacity: 1; transform: translateY(-55px) scale(1); }
+  100% { opacity: 0; transform: translateY(-115px) scale(0.85); }
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 매수 완료 축하 연출. 마크업(`OrderScreen` 3단계)은 처음부터 이 이름들을 불렀지만
+   정의가 저장소 어디에도 없어 연출이 조용히 죽어 있었다 — 여기서 복원한다.
+   가로 흔들림은 요소가 `--kwx` 로 넘긴다. 이동량 620px 는 폰 화면 높이보다 커서
+   끝까지 올라가고(떨어지고), 넘친 부분은 overflow:hidden 이 자른다. */
+@keyframes kwPop {
+  from { opacity: 0; transform: scale(0.4) translateY(18px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes kwRise {
+  0% { opacity: 0; transform: translate(0, 0); }
+  12% { opacity: 1; }
+  100% { opacity: 1; transform: translate(var(--kwx, 0px), -620px); }
+}
+@keyframes kwFall {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg); }
+  10% { opacity: 1; }
+  100% { opacity: 1; transform: translate(var(--kwx, 0px), 620px) rotate(320deg); }
+}

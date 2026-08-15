@@ -4,7 +4,6 @@
     const prevState = this.prevState;
     this.prevState = this.state;
     if (prevState === this.state) return;
-    if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
     const orderContextChanged = prevState && ['buy', 'sell'].indexOf(this.state.screen) >= 0 && (
       prevState.draft.amount !== this.state.draft.amount ||
@@ -17,15 +16,6 @@
     }
     if ((!prevState || prevState.screen !== this.state.screen || prevState.code !== this.state.code) && this.liveRefreshTick) {
       this.liveRefreshTick();
-    }
-    if (this.state.screen === 'detail' && this.state.code && (!prevState || prevState.screen !== 'detail' || prevState.code !== this.state.code)) {
-      this.loadNews(this.state.code);
-    }
-    if (this.state.screen === 'archive' && (!prevState || prevState.screen !== 'archive')) {
-      this.loadArchiveFeedReactions();
-    }
-    if (prevState && (prevState.screen !== this.state.screen || prevState.code !== this.state.code)) {
-      this.trackTabView(prevState.screen, prevState.code, this.state.screen, this.state.code);
     }
   }
 

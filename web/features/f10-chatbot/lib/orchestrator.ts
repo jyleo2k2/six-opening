@@ -27,8 +27,9 @@ import { judgeChatOutput } from "./output-judge";
 import { rewriteFollowUp } from "./rewrite";
 import { classifyTermKind, type ClassifiedTermKind } from "./term-classify";
 import { looksLikeNewQuestion } from "./colloquial";
-import { isHaeyoKorean, toPoliteKorean } from "./polite";
+import { isHaeyoKorean, toPoliteKorean, withoutSecondPerson } from "./polite";
 import {
+  isComparisonQuestion,
   normalizeChatInput,
   routeMessage,
   termReply,
@@ -227,6 +228,16 @@ function isGenericOutOfScope(routed: ReturnType<typeof routeMessage>): boolean {
   return routed.route === "outOfScope" && routed.steps[0] === "허용 목적 미판정 범위 안내";
 }
 
+const CAUSALITY_ANSWER_PREFIX = "기름값이나에너지가격과관련회사주가가꼭같은방향으로움직이는것은아니에요";
+
+function isOppositeCausalityFollowUp(message: string, lastAnswer: string) {
+  const normalizedMessage = normalizeChatInput(message);
+  return (
+    ["반대면", "그럼반대면", "반대는", "그럼반대는"].includes(normalizedMessage) &&
+    normalizeChatInput(lastAnswer).includes(CAUSALITY_ANSWER_PREFIX)
+  );
+}
+
 function resolveStockExploreStep(
   request: ChatRequest,
   routed: ReturnType<typeof routeMessage>,
@@ -316,6 +327,18 @@ async function resolveFollowUp(
     firstPass.steps[0] === "미등록 종목명 대체 차단";
   if (!unresolved || !request.lastAnswer) {
     return { routed: firstPass, modelMessage: request.message };
+  }
+
+  if (isOppositeCausalityFollowUp(request.message, request.lastAnswer)) {
+    const causality = termReply("causality", "에너지가격이내려가면");
+    return {
+      routed: {
+        ...causality,
+        text:
+          "에너지 가격이 내려가도 관련 회사 주가가 꼭 반대로 움직인다고 볼 수는 없어요. 비용이 줄어드는 점 말고 판매 가격, 환율과 시장 기대도 함께 봐야 해요.",
+      },
+      modelMessage: request.message,
+    };
   }
 
   onStatus("무엇을 묻는지 확인하는 중");
@@ -648,13 +671,19 @@ export async function createChatOutcome(
     routed.intent === "own_records" ||
     routed.intent === "own_profile" ||
     routed.intent === "own_archive";
+  // 두 개념을 견주는 질문에는 이해 확인 전이를 붙이지 않는다(SPEC §3.4.1).
+  // 되물어서 좁혀지는 종류가 아니라 답이 이미 두 대상을 갈라 놓은 형태다 —
+  // 여기에 "이해했어요 / 더 쉽게 볼래요" 를 덧붙이면 읽을 것과 누를 것이 늘기만
+  // 한다. 다음 걸음은 답변에 붙는 추천 질문(각 용어의 정의)이 맡는다.
+  const comparisonAnswer = isComparisonQuestion(request.message);
   if (
     explainStep === null &&
     stockExploreStep === null &&
     sectorExploreStep === null &&
     !protectedRoute &&
     !directServiceHelp &&
-    !screenGuidance
+    !screenGuidance &&
+    !comparisonAnswer
   ) {
     const guided = startGuidedExplain(
       response.text,
@@ -668,7 +697,8 @@ export async function createChatOutcome(
 
   // 본문은 승인 데이터 상당수가 아직 반말 원문이라 변환을 유지한다.
   // 추천질문은 아이가 누르는 자기 말이므로 변환하지 않는다(SPEC §3.3.2).
-  response = { ...response, text: toPoliteKorean(response.text) };
+  // 어미를 해요체로 맞춰도 "네가"가 남으면 말투가 섞이므로 2인칭 대명사도 함께 지운다.
+  response = { ...response, text: withoutSecondPerson(toPoliteKorean(response.text)) };
 
   onStatus("답변을 안전하게 점검하는 중");
   // 🤖 챗봇이 말하는 것만 검사한다. 본문과 확인 질문(prompt)이 대상이고,
