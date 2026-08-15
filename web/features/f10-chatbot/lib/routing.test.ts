@@ -2063,4 +2063,38 @@ for (const question of KEEPS_FIXED_ANSWER) {
   );
 }
 
+// Screenshot regressions are grouped by question act, not a single literal.
+const QUESTION_ACT_GOLDENS = [
+  ["\uBD84\uC0B0\uD22C\uC790\uB294 \uC65C \uD558\uB294 \uAC70\uC57C?", "faq", "financial_concept", undefined, "\uC774\uC720"],
+  ["\uC5EC\uB7EC \uC885\uBAA9\uC5D0 \uB098\uB220 \uC0AC\uB294 \uC774\uC720\uAC00 \uBB50\uC57C?", "faq", "financial_concept", undefined, "\uC601\uD5A5"],
+  ["PER \uB0AE\uC73C\uBA74 \uC88B\uC740 \uD68C\uC0AC\uC57C?", "faq", "financial_concept", undefined, "\uBB34\uC870\uAC74"],
+  ["\uCE94\uB4E4 \uB9C9\uB300\uB294 \uC65C \uBE68\uAC15\uC774\uACE0 \uD30C\uB791\uC774\uC57C?", "faq", "financial_concept", undefined, "\uC2DC\uC791\uAC00"],
+  ["\uC8FC\uC2DD \uAC00\uACA9\uC740 \uB204\uAC00 \uC815\uD574?", "faq", "financial_concept", undefined, "\uC8FC\uBB38"],
+  ["\uB0B4\uAC00 \uAC00\uC9C4 \uAC70 \uC5B4\uB514\uC11C \uBD10?", "faq", "service_help", "portfolio", "\uB0B4 \uACC4\uC88C"],
+  ["\uB274\uC2A4\uB294 \uC5B4\uB514\uC11C \uBD10?", "faq", "service_help", "stock", "\uB274\uC2A4"],
+  ["\uC8FC\uBB38 \uCDE8\uC18C\uD558\uB824\uBA74 \uC5B4\uB514 \uB20C\uB7EC?", "faq", "service_help", "portfolio", "\uCDE8\uC18C"],
+  ["\uC8FC\uBB38 \uBC84\uD2BC\uC774 \uC548 \uB20C\uB7EC", "faq", "service_help", "order", "\uD655\uC778"],
+  ["\uB0B4\uAC00 \uC800\uBC88\uC5D0 \uC65C \uC0C0\uB2E4\uACE0 \uD588\uC5B4?", "tool", "own_records", undefined, ""],
+  ["\uB098 \uBA87 \uBC88 \uD314\uC558\uC5B4?", "tool", "own_records", undefined, ""],
+  ["\uB0B4 \uC131\uD5A5 \uCE5C\uAD6C\uB4E4\uB3C4 \uBCFC \uC218 \uC788\uC5B4?", "faq", "service_help", undefined, "\uACF5\uAC1C\uB418\uC9C0"],
+  ["\uACC4\uC18D \uAC00\uACA9 \uD655\uC778\uD558\uAC8C \uB3FC\uC11C \uBD88\uC548\uD574", "safety", "safety", undefined, "\uC26C\uC5B4"],
+] as const;
+for (const [question, route, intent, target, expectedText] of QUESTION_ACT_GOLDENS) {
+  const routed = routeMessage(question, { screen: "home" });
+  assert.equal(routed.route, route, "question-act route mismatch: " + question);
+  assert.equal(routed.intent, intent, "question-act intent mismatch: " + question);
+  assert.equal(routed.uiAction?.target, target, "question-act screen mismatch: " + question);
+  if (expectedText) assert.equal(routed.text.includes(expectedText), true, "question-act answer mismatch: " + question);
+}
+
+for (const question of [
+  "\uCE5C\uAD6C\uAC00 \uCD94\uCC9C\uD55C \uAC70 \uC0AC\uBA74 \uBC18\uCE59\uC774\uC57C?",
+  "\uCE5C\uAD6C \uD3F0\uC73C\uB85C \uC8FC\uBB38\uD574\uB3C4 \uB3FC?",
+  "\uCD94\uCC9C\uC740 \uC544\uB2C8\uACE0 \uB108\uAC00 \uC81C\uC77C \uC88B\uC544\uD558\uB294 \uC8FC\uC2DD \uBB50\uC57C?",
+] as const) {
+  const routed = routeMessage(question, { screen: "home" });
+  assert.ok(["safety", "refusal", "faq"].includes(routed.route), "safety priority mismatch: " + question);
+  assert.notEqual(routed.intent, "financial_concept", "glossary captured protected question: " + question);
+}
+
 console.log("routing tests passed");
