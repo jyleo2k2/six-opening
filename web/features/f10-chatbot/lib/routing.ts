@@ -1899,7 +1899,9 @@ function findMetaKind(
       "강제로계속",
       "계속시키",
       "그만두고싶",
-      "그만하고싶으면",
+      // "그만하고 싶은데" 처럼 어미가 달라도 같은 말이다. 아래 두 번째 조건이
+      // 화자·맥락을 함께 요구하므로 넓혀도 범위가 벌어지지 않는다.
+      "그만하고싶",
       "그냥닫아도돼",
       "그냥닫아도되",
       "대화그만",
@@ -1910,7 +1912,12 @@ function findMetaKind(
       "챗봇끄",
       "멈출수",
     ]) &&
-    (hasMetaActor || message.includes("대화") || message.includes("그냥닫아"));
+    // "그만두고 싶으면 계속 시켜?" 처럼 화자를 생략해도, 계속하게 만드는지를
+    // 묻는 말 자체가 챗봇에게 던지는 질문이다(SPEC §6.1.7 사용자 선택권).
+    (hasMetaActor ||
+      message.includes("대화") ||
+      message.includes("그냥닫아") ||
+      includesAny(message, ["계속시켜", "계속시킬", "계속하게", "강제"]));
   if (asksAboutAutonomy) return "autonomy";
 
   const asksAboutRealtime =
@@ -1962,7 +1969,11 @@ function findMetaKind(
       "찬성해",
       "반대하는",
     ]) &&
-    (hasMetaActor || message.includes("편향"));
+    // 아이는 화자를 생략하고 "엄마 편이야?" 라고만 묻는다. 편 드는 대상이
+    // 문장에 있으면 그 자체가 챗봇에게 던지는 질문이라 화자 조건을 대신한다.
+    (hasMetaActor ||
+      message.includes("편향") ||
+      includesAny(message, [...FAMILY_MEMBER_PATTERNS, "친구", "회사", "누구", "어느"]));
   if (asksAboutNeutrality) return "neutrality";
 
   const asksAboutSystem =
@@ -2256,7 +2267,17 @@ function findTermKind(message: string): TermKind | null {
     return "profileStatistics";
   }
 
+  // 손실이 정말 사라진 돈인지 묻는 말. `마이너스면내가진짜돈` 처럼 통째로 적은
+  // 구절은 "마이너스면 진짜 잃은 거야?"·"-12% 확정됐는데 내 돈 진짜 없어지는
+  // 거야?" 를 놓쳤다. 손실을 가리키는 말 × 정말인지 되묻는 말 × 사라짐을
+  // 가리키는 말의 곱으로 본다(SPEC §6.1.5 평가손익·실현손익 구분).
+  const asksIfLossIsReal =
+    includesAny(message, ["마이너스", "손실", "손해", "-"]) &&
+    includesAny(message, ["진짜", "정말", "실제로", "완전"]) &&
+    includesAny(message, ["잃", "없어지", "날아가", "사라지", "까먹"]);
+
   if (
+    asksIfLossIsReal ||
     includesAny(message, [
       "손실률",
       "수익률마이너스",
@@ -2781,6 +2802,10 @@ export function termReply(kind: TermKind, message: string): ChatReply {
           : calculation.amount + calculation.change;
         const direction = decreases ? "줄어든" : "오른";
         text = `${formatWon(calculation.amount)}의 ${calculation.percent}%는 ${formatWon(calculation.change)}이에요. ${calculation.percent}% ${direction} 상황이라면 거래 비용을 빼기 전 금액은 ${formatWon(total)}이에요.`;
+      } else if (includesAny(message, ["확정", "팔았", "팔아버", "매도했", "정리했"])) {
+        // 이미 판 뒤에 묻는 말이라 "아직 팔지 않았다면" 으로 시작하면 답이 어긋난다.
+        text =
+          "이미 판 거래라면 그 결과는 실현손익으로 남아요. 여기 돈은 연습용 모의투자금이라 실제 지갑에서 빠져나가지는 않고, 남은 모의투자금이 그만큼 줄어든 것으로 보여요.";
       } else if (message.includes("손실률")) {
         text =
           "손실률 -12%는 기준 금액보다 가치가 12% 줄어든 상태라는 뜻이에요. 아직 보유 중이면 평가손익이고, 팔아 거래가 끝났다면 실현손익으로 남아요.";
