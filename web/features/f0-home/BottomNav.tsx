@@ -11,56 +11,59 @@ import { styleFromCss } from "./lib/css-style";
  */
 export type NavTab = "home" | "trade" | "archive" | "ranking";
 
-// 좌우 22 는 `ui-src` 의 `navBarStyle` 과 같은 값이다. 프레임 개구부의 하단 코너가 화면
-// 라운드보다 깊게 파여, 여백 14 면 알약 모서리가 개구부 경계에 붙는다. 두 값이 갈리면
-// 화면을 오갈 때 하단바 폭이 달라 보인다.
-const BAR = styleFromCss("flex:none;display:flex;align-items:center;gap:8px;padding:6px 22px 10px");
-const PILL = styleFromCss(
-  "flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:rgba(255,255,255,0.6);" +
-    "backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);" +
-    "box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(255,255,255,0.5)",
+// 프로토타입의 `navStyle`·`navItemX`·`navLabelX` 와 같은 값이다.
+//
+// 예전에는 `ui-src` 의 `navBarStyle` 을 따라 흰 유리 알약이었는데, **새 프로토타입에는
+// 유리 알약이 없다** — `backdrop-filter` 가 원본에 한 번도 안 나온다. 연보라 둥근 바
+// 하나로 바뀌었고 그 변경이 안 옮겨져 있었다. 하단바는 모든 화면에 걸리므로 여기만
+// 옛 디자인으로 남아 있으면 화면마다 어긋난다.
+const BAR = styleFromCss(
+  "flex:none;display:flex;align-items:flex-start;margin:0 12px 12px;border-radius:26px;" +
+    "background:#EDE9FB;box-shadow:inset 0 1px 0 rgba(255,255,255,0.9)",
 );
-const TAB = styleFromCss("flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer");
-
-const iconColor = (on: boolean) => (on ? "#5B23D6" : "#B7BACB");
-// `line-height:normal` 은 `app.html` 과 맞추려고 명시한다. 전역 CSS 가 body 에 1.5 를 깔아 두어
-// 그냥 두면 11px 라벨이 16.5px 줄높이를 상속받는다. 그 3.4px 이 탭·알약·바 높이로 그대로
-// 올라가 하단바가 바닥 기준으로 위로 자라고, 옮겨 온 화면만 하단바가 커 보인다.
-const labelStyle = (on: boolean) =>
+const TAB = (on: boolean) =>
   styleFromCss(
-    "font-size:11px;line-height:normal;font-weight:" +
-      (on ? "800" : "600") +
-      ";color:" +
-      (on ? "#01185A" : "#A9AEC4"),
+    "flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 0 9px;cursor:pointer;color:" +
+      (on ? "#F5327F" : "#9B94C4"),
   );
 
-const TABS: { id: NavTab; label: string; path: string; icon: (color: string) => React.ReactNode }[] = [
+// `line-height:normal` 만 원본에 없는 값이다. 전역 CSS 가 body 에 1.5 를 깔아 두어 그냥 두면
+// 12px 라벨이 18px 줄높이를 상속받고, 그 6px 이 탭·바 높이로 그대로 올라간다. 원본 문서에는
+// 그 전역이 없으므로 여기서 되돌려야 같은 높이가 된다.
+const labelStyle = styleFromCss(
+  "font-size:12px;line-height:normal;letter-spacing:-0.02em;white-space:nowrap;font-weight:",
+);
+const label = (on: boolean) => ({ ...labelStyle, fontWeight: on ? 700 : 600 });
+
+// 아이콘도 원본의 것이다. 선 색은 항목이 정하고(`currentColor`) 굵기는 모양마다 다르다.
+const TABS: { id: NavTab; label: string; path: string; icon: React.ReactNode }[] = [
   {
     id: "home",
     label: "홈",
     path: "/",
-    icon: () => <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />,
+    icon: (
+      <path
+        d="M4 10.4 L12 4 L20 10.4 V19 a1 1 0 0 1 -1 1 H5 a1 1 0 0 1 -1 -1 Z"
+        strokeLinejoin="round"
+        strokeWidth="1.9"
+      />
+    ),
   },
   {
     id: "trade",
     label: "모의투자",
     path: "/explore",
-    icon: (color) => (
-      <>
-        <path d="M3 17l5-5 4 4 8-9" />
-        <circle cx="20" cy="7" fill={color} r="1.5" stroke="none" />
-      </>
-    ),
+    icon: <path d="M4 16.5 L9.5 10.5 L13.5 14 L20 6.5" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.9" />,
   },
   {
     id: "archive",
     label: "아카이브",
     path: "/archive",
-    icon: () => (
+    icon: (
       <>
-        <rect height="3" rx="1" width="16" x="4" y="15" />
-        <rect height="3" rx="1" width="14" x="5" y="11" />
-        <rect height="3" rx="1" width="12" x="6" y="7" />
+        <rect height="4" rx="1.4" strokeWidth="1.8" width="15" x="4.5" y="5" />
+        <rect height="4" rx="1.4" strokeWidth="1.8" width="15" x="4.5" y="11" />
+        <path d="M6.5 18.5 H17.5" strokeLinecap="round" strokeWidth="1.8" />
       </>
     ),
   },
@@ -68,14 +71,12 @@ const TABS: { id: NavTab; label: string; path: string; icon: (color: string) => 
     id: "ranking",
     label: "랭킹",
     path: "/ranking",
-    icon: () => (
+    icon: (
       <>
-        <path d="M8 4h8v4a4 4 0 0 1-8 0z" />
-        <path d="M8 5H5a3 3 0 0 0 3 5" />
-        <path d="M16 5h3a3 3 0 0 1-3 5" />
-        <path d="M12 13v3" />
-        <path d="M9 20h6" />
-        <path d="M9 20a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" />
+        <path d="M7 4.5 H17 V10 a5 5 0 0 1 -10 0 Z" strokeLinejoin="round" strokeWidth="1.8" />
+        <path d="M7 6 H4.6 a0.6 0.6 0 0 0 -0.6 0.6 C4 8.6 5.4 10 7.2 10.2" strokeLinecap="round" strokeWidth="1.7" />
+        <path d="M17 6 h2.4 a0.6 0.6 0 0 1 0.6 0.6 C20 8.6 18.6 10 16.8 10.2" strokeLinecap="round" strokeWidth="1.7" />
+        <path d="M12 15 V18 M8.8 19.5 H15.2" strokeLinecap="round" strokeWidth="1.8" />
       </>
     ),
   },
@@ -100,36 +101,31 @@ export function BottomNav({
 }) {
   return (
     <div style={BAR}>
-      <div style={PILL}>
-        {TABS.map((tab) => {
-          const on = tab.id === active;
-          const color = iconColor(on);
-          return (
-            <div
-              key={tab.id}
-              onClick={() => {
-                if (!on || !atTabRoot) onLeave(tab.path);
-              }}
-              style={TAB}
+      {TABS.map((tab) => {
+        const on = tab.id === active;
+        return (
+          <div
+            key={tab.id}
+            onClick={() => {
+              if (!on || !atTabRoot) onLeave(tab.path);
+            }}
+            style={TAB(on)}
+          >
+            <svg
+              aria-hidden="true"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              style={{ display: "block" }}
+              viewBox="0 0 24 24"
+              width="24"
             >
-              <svg
-                aria-hidden="true"
-                fill="none"
-                height="23"
-                stroke={color}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                width="23"
-              >
-                {tab.icon(color)}
-              </svg>
-              <span style={labelStyle(on)}>{tab.label}</span>
-            </div>
-          );
-        })}
-      </div>
+              {tab.icon}
+            </svg>
+            <div style={label(on)}>{tab.label}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
