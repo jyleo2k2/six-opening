@@ -6,7 +6,7 @@
 - **옮겨 온 화면도 iframe을 끄지 않고 그 위에 얹는다.** 갈라 렌더하면 화면을 오갈 때마다 `app.html`이 처음부터 다시 떠서 `/api/account` 응답 전까지 남의 계좌가 잠깐 보인다.
 - **아직 안 옮긴 화면(주문·아카이브) 본문은 `web/ui-src`가 소유한다.** 그 화면을 이 폴더에 복제하지 않는다.
 - 폰 프레임은 `PhoneFrame`, 하단 탭은 `BottomNav`, 그 기하는 `lib/phone-frame.ts`가 소유한다. 배율은 챗봇이 시트를 맞출 때 쓰는 `getPrototypeScreenRect`와 같은 값이어야 한다.
-- **화면 계산은 `lib/`의 순수 함수에 두고 컴포넌트는 붙이기만 한다.** `ranking-data`·`portfolio-view`·`explore-cards`·`home-view`·`stock-news`가 그것이고 각각 테스트를 함께 둔다 — 브라우저 없이 확인할 수 있어야 한다.
+- **화면 계산은 `lib/`의 순수 함수에 두고 컴포넌트는 붙이기만 한다.** `ranking-data`·`portfolio-view`·`explore-cards`·`home-view`·`stock-news`가 그것이고 각각 테스트를 함께 둔다 — 브라우저 없이 확인할 수 있어야 한다. 손짓 계산도 같다: 바텀 시트를 쓸어내려 닫는 거리·속도는 `lib/sheet-drag.ts`가 정하고, 닫히는 문턱은 챗봇 시트와 같은 `f10-chatbot/lib/bottom-sheet`의 규칙을 쓴다 — 한 폰 안에서 시트마다 닫히는 느낌이 다르면 안 된다.
 - 지갑(`kw_proto_v1`)은 `lib/use-wallet.ts`, 서버 계좌(`/api/account`)는 `lib/use-account.ts`, 시세·유니버스는 `lib/use-universe.ts`로만 읽는다. **홈은 지갑이 아니라 서버 계좌를 본다** — 로그인한 사람의 실제 보유가 원본이다.
 - 옮겨 온 화면끼리의 이동은 `onLeave(path)`로 올려 `ConnectedPrototype`이 처리한다. 컴포넌트가 직접 주소를 바꾸지 않는다. `app.html` 쪽에서 나올 때는 `ui-src`의 `leaveToRoute(path)`가 `kiwoom:open-route` 메시지를 보낸다 — 문서가 갈아끼워지므로 그 표시가 없으면 작성 중이던 주문 초안이 사라진다.
 - **`public/ui/app.html`은 `web/ui-src`를 조립한 생성물이다. 직접 수정·커밋하지 않고 claim도 `web/ui-src` 경로로 한다.** 남은 화면을 고치려면 해당 `screens/*.html`과 관련 `methods/`를 고치고 `npm run ui:build`로 합친다.
