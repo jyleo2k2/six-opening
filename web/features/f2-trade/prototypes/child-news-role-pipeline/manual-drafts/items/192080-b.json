@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:192080",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 신작 게임 출시와 다운로드.",
+  "article": {
+    "articleId": "MANUAL-DEALSITE-162742",
+    "title": "더블유게임즈, 소셜카지노 넘어 AI게임사 변신 시험대",
+    "publisher": "딜사이트",
+    "publishedAt": "2026-06-03T00:30:16.000Z",
+    "sourceUrl": "https://dealsite.co.kr/articles/162742",
+    "sourceUnits": [
+      { "id": "S1", "text": "보유 라인업 55종 가운데 40여 종을 올해 출시했으며, 캐주얼 게임 누적 다운로드는 4월 말 기준 5710만 건을 넘어섰다." },
+      { "id": "S2", "text": "1분기 캐주얼 부문 매출은 247억원으로 전년 동기 107억원의 두 배를 넘어섰다." },
+      { "id": "S3", "text": "지난해 인수한 퍼즐 캐주얼 스튜디오 '팍시게임즈'에서 나온다." },
+      { "id": "S4", "text": "여전히 매출의 75.7%(1551억원)는 본업인 소셜카지노에서 나온다." }
+    ]
+  },
+  "focusStatement": "더블유게임즈가 보유 라인업 55종 가운데 40여 종을 올해 출시했고 캐주얼 게임 누적 다운로드가 5710만 건을 넘었다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "더블유게임즈, 올해 새 게임 40여 개를 냈다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "다운로드가 5710만 건을 넘었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "cumulative_downloads" },
+    { "text": "캐주얼 게임 매출이 두 배가 됐어요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "casual_revenue_growth" },
+    { "text": "지난해 사들인 회사에서 만들어요.", "sourceIds": ["S3"], "role": "context", "factKey": "acquired_studio" }
+  ],
+  "priceConnection": {
+    "text": "게임을 많이 내려받을수록 회사가 벌 기회도 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "다운로드", "easyText": "인터넷에서 내 기기로 내려받는 것", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

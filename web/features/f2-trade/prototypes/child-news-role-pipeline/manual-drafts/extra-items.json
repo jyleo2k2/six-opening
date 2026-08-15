@@ -675,6 +675,167 @@
     },
     {
       "stock": {
+        "stockId": "KRX:004170",
+        "symbol": "004170",
+        "name": "신세계",
+        "aliases": [
+          "Shinsegae"
+        ],
+        "sector": "retail",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-HANKOOKILBO-A2026072915300001004",
+          "title": "신세계 강남 연 매출 4조 시대 성큼… 세계 3대 백화점 노리는 비결은",
+          "publisher": "한국일보",
+          "publishedAt": "2026-08-02T19:30:00.000Z",
+          "sourceUrl": "https://www.hankookilbo.com/news/article/A2026072915300001004",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "강남점은 2023년 국내 단일 점포 최초로 연 매출 3조 원을 돌파한 데 이어 2024년(약 3조2,000억 원)과 지난해(약 3조6,700억 원)까지 3년 연속 3조 원을 넘었다."
+            },
+            {
+              "id": "S2",
+              "text": "3조 원 달성 시기는 12월 20일(2023년)→11월 28일(2024년)→11월 7일(2025년)로 매년 단축됐다."
+            },
+            {
+              "id": "S3",
+              "text": "이외 연 매출이 3조 원 이상인 곳은 롯데백화점 잠실점(지난해 약 3조3,000억 원)뿐이다."
+            },
+            {
+              "id": "S4",
+              "text": "신세계 강남점은 올해 매출 4조 원을 노리고 있다."
+            },
+            {
+              "id": "S5",
+              "text": "연 매출 4조 원대인 일본의 이세탄백화점, 영국 해러즈백화점과 어깨를 나란히 하는 글로벌 톱3 등극이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-HANKOOKILBO-A2026072915300001004",
+          "primaryStockIds": [
+            "KRX:004170"
+          ],
+          "focusStatement": "신세계백화점 강남점이 3년 연속 연 매출 3조 원을 넘겼고 올해 4조 원을 목표로 하고 있다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-HANKOOKILBO-A2026072915300001004",
+          "headline": {
+            "text": "신세계 강남점, 3년 연속 매출 3조원을 넘겼다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "신세계 강남점, 3년 연속 매출 3조원을 넘겼다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "지난해에는 약 3조6700억원이었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "last_year_revenue"
+            },
+            {
+              "text": "3조원을 채우는 날이 해마다 빨라졌어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "faster_milestone"
+            },
+            {
+              "text": "국내에서 3조원 넘는 곳은 두 곳뿐이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "domestic_peers"
+            }
+          ],
+          "priceConnection": {
+            "text": "한 가게에서 많이 팔수록 회사가 버는 돈도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-HANKOOKILBO-A2026072915300001004",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:004170"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "신세계백화점 강남점이 3년 연속 연 매출 3조 원을 넘겼고 올해 4조 원을 목표로 하고 있다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
         "stockId": "KRX:004370",
         "symbol": "004370",
         "name": "농심",
@@ -813,6 +974,332 @@
           ],
           "eventType": "sales_or_production",
           "focusStatement": "농심이 부산 녹산에 짓는 수출 전용 라면공장이 2026년 하반기 완공되면 연 5억 개를 생산할 수 있다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:005380",
+        "symbol": "005380",
+        "name": "현대차",
+        "aliases": [
+          "현대 자동차",
+          "현대차",
+          "Hyundai Motor"
+        ],
+        "sector": "automotive",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-MT-2026071416364587365",
+          "title": "아틀라스가 자동차판 바꾼다…현대차가 노리는 '두 마리 토끼'",
+          "publisher": "머니투데이",
+          "publishedAt": "2026-07-14T09:00:00.000Z",
+          "sourceUrl": "https://www.mt.co.kr/industry/2026/07/14/2026071416364587365",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "현대차그룹은 아틀라스를 미국 조지아주 현대차·기아 공장에 우선 투입할 예정이다."
+            },
+            {
+              "id": "S2",
+              "text": "현대차그룹은 지난 5월 해외 기관투자가 기업설명회에서 현대차·기아 자동차 생산라인에 아틀라스를 2만5000대 이상 투입할 계획이라고 밝힌 바 있다."
+            },
+            {
+              "id": "S3",
+              "text": "아틀라스의 실제 가격은 양산이 시작되는 2028년 전후에 확정될 전망이다."
+            },
+            {
+              "id": "S4",
+              "text": "재코우스키 CPTO가 아틀라스의 ROI를 2년으로 제시하며 강조한 '비용 효율성'은 글로벌 자동차 업계 최대 화두 중 하나다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-MT-2026071416364587365",
+          "primaryStockIds": [
+            "KRX:005380"
+          ],
+          "focusStatement": "현대차그룹이 사람 모양 로봇 아틀라스를 미국 조지아주 공장에 먼저 투입하고 생산라인에 2만5000대 이상 넣을 계획이다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "로봇",
+            "공장"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-MT-2026071416364587365",
+          "headline": {
+            "text": "현대차, 사람 모양 로봇을 공장에 넣는다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "현대차, 사람 모양 로봇을 공장에 넣는다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "로봇 이름은 아틀라스예요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "robot_name"
+            },
+            {
+              "text": "2만5000대 넘게 넣을 계획이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "planned_units"
+            },
+            {
+              "text": "미국 조지아주 공장부터 시작해요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_detail",
+              "factKey": "first_site"
+            }
+          ],
+          "priceConnection": {
+            "text": "공장에서 일하는 방법이 바뀌면 만드는 비용도 달라져요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "로봇",
+              "easyText": "사람 대신 일하도록 만든 기계",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "공장",
+              "easyText": "물건을 많이 만들어 내는 큰 건물",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-MT-2026071416364587365",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:005380"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "현대차그룹이 사람 모양 로봇 아틀라스를 미국 조지아주 공장에 먼저 투입하고 생산라인에 2만5000대 이상 넣을 계획이다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:005930",
+        "symbol": "005930",
+        "name": "삼성전자",
+        "aliases": [
+          "삼성 전자",
+          "Samsung Electronics"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-MT-2026070808210313284",
+          "title": "삼성전자, 갤럭시 Z8 시리즈 영국 런던서 22일 선보인다",
+          "publisher": "머니투데이",
+          "publishedAt": "2026-07-07T23:37:00.000Z",
+          "sourceUrl": "https://www.mt.co.kr/amp/tech/2026/07/08/2026070808210313284",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "삼성전자가 오는 22일(한국시간), 영국 런던에서 '갤럭시 언팩 2026(Galaxy Unpacked July 2026)'을 개최한다고 8일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "이번에는 차세대 폴더블 스마트폰 '갤럭시 Z8' 시리즈를 선보인다."
+            },
+            {
+              "id": "S3",
+              "text": "갤럭시 언팩 2026은 한국시간으로 22일 오후 10시(현지시간 7월 22일 오후 2시)에 삼성닷컴과 삼성전자 뉴스룸, 삼성전자 유튜브 채널을 통해 온라인으로 생중계될 예정이다."
+            },
+            {
+              "id": "S4",
+              "text": "삼성전자는 이번에 선보일 폴더블 라인업 재편을 공식화했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-MT-2026070808210313284",
+          "primaryStockIds": [
+            "KRX:005930"
+          ],
+          "focusStatement": "삼성전자가 영국 런던에서 갤럭시 언팩 2026을 열고 차세대 폴더블 스마트폰 갤럭시 Z8 시리즈를 공개한다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "시리즈"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-MT-2026070808210313284",
+          "headline": {
+            "text": "삼성전자, 런던에서 새 접는 휴대폰을 공개한다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "삼성전자, 런던에서 새 접는 휴대폰을 공개한다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "이름은 갤럭시 Z8 시리즈예요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "product_name"
+            },
+            {
+              "text": "7월 22일에 보여줬어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "event_date"
+            },
+            {
+              "text": "인터넷으로도 생중계했어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "live_stream"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 제품이 잘 팔리면 회사가 버는 돈도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "시리즈",
+              "easyText": "같은 이름으로 여러 개를 묶어 낸 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-MT-2026070808210313284",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:005930"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "삼성전자가 영국 런던에서 갤럭시 언팩 2026을 열고 차세대 폴더블 스마트폰 갤럭시 Z8 시리즈를 공개한다.",
           "anchorSourceIds": [
             "S1"
           ],
@@ -1854,6 +2341,173 @@
     },
     {
       "stock": {
+        "stockId": "KRX:015760",
+        "symbol": "015760",
+        "name": "한국전력",
+        "aliases": [
+          "한전",
+          "KEPCO"
+        ],
+        "sector": "energy",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ASIAE-2026042908482075579",
+          "title": "한전, 美PSEG와 765kV 송전망 기술협력…김동철 \"전력시장 진출 지속 확대\"",
+          "publisher": "아시아경제",
+          "publishedAt": "2026-04-29T00:38:00.000Z",
+          "sourceUrl": "https://www.asiae.co.kr/article/economic-general/2026042908482075579",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "한전은 28일 서울 양재동 한전 아트센터에서 미국 에너지기업 PSEG와 765kV 초고압 송전망 사업 협력을 위한 계약을 체결했다고 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "이번 계약은 한전이 보유한 765kV급 초고압 송전망의 설계·조달·시공(EPC) 역량과 안정적인 계통 운영능력을 국제적으로 입증한 중요한 성과로 평가된다"
+            },
+            {
+              "id": "S3",
+              "text": "한전은 이번 협력을 계기로 단순 기술 자문을 넘어 사업개발 및 수행 전반에 보다 적극적으로 참여할 계획이다."
+            },
+            {
+              "id": "S4",
+              "text": "한전은 국내 기자재 기업들과 함께 '팀 코리아' 체계를 구축해 미국 765kV 송전망 시장 진출을 추진할 예정이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ASIAE-2026042908482075579",
+          "primaryStockIds": [
+            "KRX:015760"
+          ],
+          "focusStatement": "한국전력이 미국 에너지기업 PSEG와 765kV 초고압 송전망 사업 협력 계약을 체결했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "계약",
+            "송전망"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "binding_contract"
+        },
+        "draft": {
+          "articleId": "MANUAL-ASIAE-2026042908482075579",
+          "headline": {
+            "text": "한국전력, 미국 회사와 송전망 협력 계약을 맺었다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "한국전력, 미국 회사와 송전망 협력 계약을 맺었다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "상대는 미국 에너지 회사 PSEG예요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "partner"
+            },
+            {
+              "text": "전기를 멀리 보내는 시설을 다뤄요.",
+              "sourceIds": [
+                "S1",
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "transmission_scope"
+            },
+            {
+              "text": "국내 회사들과 함께 미국에 나가요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "team_korea"
+            }
+          ],
+          "priceConnection": {
+            "text": "해외에서 계약을 따내면 새로 벌 수 있는 일이 생겨요.",
+            "sourceIds": [
+              "S1",
+              "S4"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "계약",
+              "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "송전망",
+              "easyText": "발전소에서 만든 전기를 멀리 보내는 길",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ASIAE-2026042908482075579",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:015760"
+          ],
+          "eventType": "binding_contract",
+          "focusStatement": "한국전력이 미국 에너지기업 PSEG와 765kV 초고압 송전망 사업 협력 계약을 체결했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
         "stockId": "KRX:021240",
         "symbol": "021240",
         "name": "코웨이",
@@ -1990,6 +2644,181 @@
           "focusStatement": "코웨이가 말레이시아에서 벽걸이형 에어컨과 세탁건조기 판매량 1위를 기록하며 해외 사업을 키우고 있다.",
           "anchorSourceIds": [
             "S2"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:035900",
+        "symbol": "035900",
+        "name": "JYP Ent.",
+        "aliases": [
+          "JYP",
+          "JYP엔터",
+          "JYP Ent",
+          "제이와이피",
+          "제이와이피엔터",
+          "제이와이피엔터테인먼트"
+        ],
+        "sector": "entertainment",
+        "market": "KOSDAQ"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ENPNOW-109064",
+          "title": "'8월 대형 컴백 베일 벗는다'…스트레이키즈 \"THIS & THAT으로 새 기록 세운다\"",
+          "publisher": "EPN엔피나우",
+          "publishedAt": "2026-07-09T11:00:00.000Z",
+          "sourceUrl": "https://www.enpnow.com/news/articleView.html?idxno=109064",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "스트레이키즈는 8월 7일 'THIS & THAT'을 발매한다."
+            },
+            {
+              "id": "S2",
+              "text": "25일부터 26일, 29일, 8월 1일부터 2일까지 총 5회에 걸쳐 KSPO DOME에서 서울 월드투어 공연이 예정됐다."
+            },
+            {
+              "id": "S3",
+              "text": "8월 1일은 공식 팬클럽 창단 8주년이 되는 날로, 스트레이키즈는 컴백과 함께 서울 콘서트 등 다채로운 이벤트로 팬들과 특별한 시간을 마련할 계획이다."
+            },
+            {
+              "id": "S4",
+              "text": "9월에는 글로벌 음악 페스티벌 '록 인 리오' 무대에 출연한다."
+            },
+            {
+              "id": "S5",
+              "text": "스트레이키즈의 미니 앨범 'THIS & THAT'은 8월 7일 오후 1시 공식 발매된다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ENPNOW-109064",
+          "primaryStockIds": [
+            "KRX:035900"
+          ],
+          "focusStatement": "JYP 소속 스트레이키즈가 8월 7일 미니 앨범 'THIS & THAT'을 내고 서울에서 월드투어 공연 5회를 연다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "앨범",
+            "공연"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-ENPNOW-109064",
+          "headline": {
+            "text": "JYP 스트레이키즈, 8월 7일 새 앨범을 냈다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "JYP 스트레이키즈, 8월 7일 새 앨범을 냈다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "서울에서 공연을 5번 해요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "seoul_concert_count"
+            },
+            {
+              "text": "팬클럽이 만들어진 지 8년이 됐어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "fanclub_anniversary"
+            },
+            {
+              "text": "9월에는 외국 음악 축제에도 나가요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "festival_appearance"
+            }
+          ],
+          "priceConnection": {
+            "text": "앨범과 공연으로 번 돈은 회사의 사업 성과와 이어져요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "앨범",
+              "easyText": "노래 여러 곡을 하나로 묶어 낸 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "공연",
+              "easyText": "무대에서 노래하고 춤추는 것을 보여 주는 일",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ENPNOW-109064",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:035900"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "JYP 소속 스트레이키즈가 8월 7일 미니 앨범 'THIS & THAT'을 내고 서울에서 월드투어 공연 5회를 연다.",
+          "anchorSourceIds": [
+            "S1"
           ],
           "checks": {
             "allowedScope": true,
@@ -2173,6 +3002,168 @@
     },
     {
       "stock": {
+        "stockId": "KRX:039490",
+        "symbol": "039490",
+        "name": "키움증권",
+        "aliases": [
+          "Kiwoom",
+          "키움",
+          "키움 증권",
+          "영웅문",
+          "Kiwoom Securities"
+        ],
+        "sector": "finance",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NSPNA-815522",
+          "title": "키움증권, MTS 커뮤니티에 AI 기능 도입…정보·모니터링 강화",
+          "publisher": "NSP통신",
+          "publishedAt": "2026-06-05T02:20:00.000Z",
+          "sourceUrl": "https://www.nspna.com/news/?mode=view&newsid=815522",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "키움증권 커뮤니티는 모바일트레이딩시스템(MTS) 내 실시간 채팅형 서비스다."
+            },
+            {
+              "id": "S2",
+              "text": "서비스 내 정보 제공 역량 제고를 위해서는 AI 기반 뉴스·공시 정보 요약 및 해당 이슈에 대한 긍·부정 투표 시스템이 도입됐다."
+            },
+            {
+              "id": "S3",
+              "text": "건전한 투자환경 조성을 위해서는 AI 기반 모더레이션 시스템과 전문 인력을 결합한 2중 모니터링 운영체계를 마련했다."
+            },
+            {
+              "id": "S4",
+              "text": "키움증권은 해당 서비스가 출시 약 4개월 만에 이용자 수 150만명을 넘어섰다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NSPNA-815522",
+          "primaryStockIds": [
+            "KRX:039490"
+          ],
+          "focusStatement": "키움증권이 모바일 앱 안 채팅 서비스에 AI 기반 뉴스 요약과 모니터링 기능을 도입했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "인공지능"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-NSPNA-815522",
+          "headline": {
+            "text": "키움증권, 앱 채팅에 인공지능 기능을 넣었다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "키움증권, 앱 채팅에 인공지능 기능을 넣었다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "인공지능이 뉴스를 짧게 요약해 줘요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "ai_summary"
+            },
+            {
+              "text": "이용자가 150만명을 넘었어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "key_detail",
+              "factKey": "user_count"
+            },
+            {
+              "text": "나쁜 글은 두 단계로 걸러내요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "moderation"
+            }
+          ],
+          "priceConnection": {
+            "text": "쓰는 사람이 늘면 회사가 돈을 벌 기회도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S4"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "인공지능",
+              "easyText": "사람처럼 생각하고 답하도록 만든 컴퓨터 기술",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NSPNA-815522",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:039490"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "키움증권이 모바일 앱 안 채팅 서비스에 AI 기반 뉴스 요약과 모니터링 기능을 도입했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
         "stockId": "KRX:047050",
         "symbol": "047050",
         "name": "포스코인터내셔널",
@@ -2313,6 +3304,321 @@
           ],
           "eventType": "sales_or_production",
           "focusStatement": "포스코인터내셔널이 북미·동남아 천연가스 생산자산 인수를 추진하며 올해 투자 규모를 2조2000억원으로 늘렸다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:047810",
+        "symbol": "047810",
+        "name": "한국항공우주",
+        "aliases": [
+          "KAI",
+          "한국 항공 우주",
+          "카이"
+        ],
+        "sector": "defense",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260514001318",
+          "title": "[르포] KF-21, 사천에서 뜨다…\"연 40대 생산·수출 1000대까지 노린다\"",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-05-14T09:28:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260514001318",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "현재 월 3대 수준인 생산 능력은 추가 투자 시 연 30~40대까지 끌어올려 향후 KF-21 수출 물량까지 뒷받침할 수 있다"
+            },
+            {
+              "id": "S2",
+              "text": "KAI와 방사청은 내년과 2028년에 각각 20대씩을 넘겨 KF-5E/F '제공호'와 F-5E/F 등 F-5 계열 3세대 전투기 50여대를 순차적으로 대체한다는 계획이다."
+            },
+            {
+              "id": "S3",
+              "text": "양산 1호기는 이미 공군 시험비행에 들어갔고, 올 하반기부터 공군 정식 인도가 시작된다."
+            },
+            {
+              "id": "S4",
+              "text": "현재 각국과 협의 중인 KF-21 잠재 수출 물량은 '200대+알파' 수준"
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260514001318",
+          "primaryStockIds": [
+            "KRX:047810"
+          ],
+          "focusStatement": "한국항공우주가 사천에서 KF-21 전투기를 월 3대 수준으로 만들고 있으며 올 하반기부터 공군에 정식 인도를 시작한다.",
+          "anchorSourceId": "S3",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "시험비행"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260514001318",
+          "headline": {
+            "text": "한국항공우주, 올 하반기부터 전투기를 공군에 넘긴다",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "homeSummary": {
+            "text": "한국항공우주, 올 하반기부터 전투기를 공군에 넘긴다",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "body": [
+            {
+              "text": "1호기는 이미 시험비행을 했어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "first_unit_test"
+            },
+            {
+              "text": "지금은 한 달에 3대씩 만들어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_detail",
+              "factKey": "monthly_output"
+            },
+            {
+              "text": "내년과 2028년에 20대씩 넘겨요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "context",
+              "factKey": "delivery_schedule"
+            }
+          ],
+          "priceConnection": {
+            "text": "만들어 넘기기 시작하면 그때부터 돈이 들어와요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "시험비행",
+              "easyText": "제대로 나는지 미리 날려 보는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260514001318",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:047810"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "한국항공우주가 사천에서 KF-21 전투기를 월 3대 수준으로 만들고 있으며 올 하반기부터 공군에 정식 인도를 시작한다.",
+          "anchorSourceIds": [
+            "S3"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:051900",
+        "symbol": "051900",
+        "name": "LG생활건강",
+        "aliases": [
+          "LG 생활건강",
+          "엘지생활건강"
+        ],
+        "sector": "cosmetics",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-MT-2026060210075012442",
+          "title": "LG생활건강, 닥터그루트 북미 공략 본격화… 세포라 핵심 매장 선론칭",
+          "publisher": "머니투데이",
+          "publishedAt": "2026-06-02T01:09:00.000Z",
+          "sourceUrl": "https://www.mt.co.kr/living/2026/06/02/2026060210075012442",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "닥터그루트는 최근 미국 세포라 핵심 매장 90여 곳에 전용 진열 공간인 '헤어타워'를 설치하고 대표 제품인 SRS 라인 제품을 선보였다."
+            },
+            {
+              "id": "S2",
+              "text": "오는 8월 미국 전역 400여 개 세포라 매장 정식 입점을 앞두고 시장 반응과 판매 데이터를 사전에 확보하기 위한 전략이다."
+            },
+            {
+              "id": "S3",
+              "text": "매장에서는 샴푸와 컨디셔너, 롤온 세럼 등 SRS 라인 핵심 제품을 직접 체험할 수 있도록 구성해 소비자 접점을 확대했다."
+            },
+            {
+              "id": "S4",
+              "text": "닥터그루트는 현재 아마존과 틱톡숍 등 북미 주요 유통 채널에서 성장세를 이어가고 있으며, 올해 1분기에는 전년 동기 대비 세 자릿수 매출 성장률을 기록했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-MT-2026060210075012442",
+          "primaryStockIds": [
+            "KRX:051900"
+          ],
+          "focusStatement": "LG생활건강의 닥터그루트가 미국 세포라 핵심 매장 90여 곳에 먼저 들어가고 8월 전역 400여 개 매장 정식 입점을 앞두고 있다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "세포라"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-MT-2026060210075012442",
+          "headline": {
+            "text": "LG생활건강 샴푸, 미국 세포라 90곳에 들어갔다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "LG생활건강 샴푸, 미국 세포라 90곳에 들어갔다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "8월에는 400곳으로 늘어나요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "expansion_plan"
+            },
+            {
+              "text": "샴푸와 컨디셔너를 팔아요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "product_lineup"
+            },
+            {
+              "text": "전용 진열대도 따로 놓았어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "context",
+              "factKey": "dedicated_display"
+            }
+          ],
+          "priceConnection": {
+            "text": "파는 가게가 늘면 물건을 살 사람도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "세포라",
+              "easyText": "화장품을 여러 브랜드 모아 파는 큰 가게",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-MT-2026060210075012442",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:051900"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "LG생활건강의 닥터그루트가 미국 세포라 핵심 매장 90여 곳에 먼저 들어가고 8월 전역 400여 개 매장 정식 입점을 앞두고 있다.",
           "anchorSourceIds": [
             "S1"
           ],
@@ -2669,6 +3975,322 @@
     },
     {
       "stock": {
+        "stockId": "KRX:078930",
+        "symbol": "078930",
+        "name": "GS",
+        "aliases": [
+          "지에스"
+        ],
+        "sector": "energy",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSQUEST-271610",
+          "title": "\"GS칼텍스가 번 '역대급 현금', GS의 '15조 AI 데이터센터' 실탄 됐다\"",
+          "publisher": "뉴스퀘스트",
+          "publishedAt": "2026-08-12T05:05:00.000Z",
+          "sourceUrl": "https://www.newsquest.co.kr/news/articleView.html?idxno=271610",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "GS는 동해 지역에 1.2GW 규모의 데이터센터 건설을 추진 중이며, 현재 인허가 절차와 함께 잠재 테넌트들과 계약 협의를 진행하고 있다."
+            },
+            {
+              "id": "S2",
+              "text": "총 투자비는 15조원으로, 이 중 11~12조원은 차입금으로 조달하고, 나머지 3~4조원 중에 절반 이상의 지분 확보를 목표로 하고 있다."
+            },
+            {
+              "id": "S3",
+              "text": "GS의 최종적인 Equity 투입은 1조5000억~2조원 수준이 될 전망이다."
+            },
+            {
+              "id": "S4",
+              "text": "AI 데이터센터(DC) 투자도 본격 추진된다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSQUEST-271610",
+          "primaryStockIds": [
+            "KRX:078930"
+          ],
+          "focusStatement": "GS가 동해 지역에 1.2GW 규모의 AI 데이터센터 건설을 추진하고 있으며 총 투자비는 15조원이다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "데이터센터"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSQUEST-271610",
+          "headline": {
+            "text": "GS, 동해에 15조원짜리 데이터센터를 짓는다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "GS, 동해에 15조원짜리 데이터센터를 짓는다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "크기는 1.2기가와트예요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "capacity"
+            },
+            {
+              "text": "지금은 허가를 받는 중이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_detail",
+              "factKey": "permit_stage"
+            },
+            {
+              "text": "인공지능에 쓰려고 짓는 거예요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "ai_purpose"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 시설을 지으면 회사가 할 수 있는 사업이 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "production_capacity",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "데이터센터",
+              "easyText": "컴퓨터를 잔뜩 모아 두고 돌리는 큰 건물",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSQUEST-271610",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:078930"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "GS가 동해 지역에 1.2GW 규모의 AI 데이터센터 건설을 추진하고 있으며 총 투자비는 15조원이다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:079550",
+        "symbol": "079550",
+        "name": "LIG넥스원",
+        "aliases": [
+          "LIG 넥스원",
+          "LIG Nex1",
+          "엘아이지넥스원"
+        ],
+        "sector": "defense",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-THEGURU-104036",
+          "title": "[단독] LIG D&A, '3.7조' 천궁-Ⅱ 이라크 수출 무산 위기 반박…\"계약 선급금 이미 지급\"",
+          "publisher": "THE GURU",
+          "publishedAt": "2026-07-07T00:48:08.000Z",
+          "sourceUrl": "https://www.theguru.co.kr/news/article.html?no=104036",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "LIG D&A는 지난 2024년 9월 이라크 국방부와 약 3조7000억원 규모 천궁-II 공급 계약을 체결했다."
+            },
+            {
+              "id": "S2",
+              "text": "8개 포대 규모를 인도하기로 하며 현지 정부와 협력을 이어오고 있다."
+            },
+            {
+              "id": "S3",
+              "text": "LIG D&A는 7일 '이라크 수출 사업은 정상적으로 진행되고 있다'며 '계약에 따른 선급금은 정상적으로 지급됐으며, 사업 진행에 따라 후속 절차를 밟아나갈 예정이다'라고 밝혔다."
+            },
+            {
+              "id": "S4",
+              "text": "LIG D&A는 이라크를 비롯해 아랍에미리트(UAE)와 사우디아라비아에 천궁-II를 총 12조6000억원 규모로 수출했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-THEGURU-104036",
+          "primaryStockIds": [
+            "KRX:079550"
+          ],
+          "focusStatement": "LIG디펜스앤에어로스페이스가 이라크와 맺은 약 3조7000억원 규모 천궁-II 공급 계약이 정상 진행 중이며 선급금도 지급됐다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "계약"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "binding_contract"
+        },
+        "draft": {
+          "articleId": "MANUAL-THEGURU-104036",
+          "headline": {
+            "text": "LIG디펜스, 이라크와 3조7000억원 계약을 이어간다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "LIG디펜스, 이라크와 3조7000억원 계약을 이어간다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "8개 묶음을 만들어 보내기로 했어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "battery_count"
+            },
+            {
+              "text": "먼저 받는 돈도 이미 들어왔어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "advance_payment"
+            },
+            {
+              "text": "중동 세 나라에 12조6000억원어치 팔았어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "middle_east_total"
+            }
+          ],
+          "priceConnection": {
+            "text": "계약이 그대로 진행되면 약속한 돈이 순서대로 들어와요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "계약",
+              "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-THEGURU-104036",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:079550"
+          ],
+          "eventType": "binding_contract",
+          "focusStatement": "LIG디펜스앤에어로스페이스가 이라크와 맺은 약 3조7000억원 규모 천궁-II 공급 계약이 정상 진행 중이며 선급금도 지급됐다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
         "stockId": "KRX:086790",
         "symbol": "086790",
         "name": "하나금융지주",
@@ -2808,6 +4430,163 @@
           ],
           "eventType": "capital_or_dividend",
           "focusStatement": "하나금융이 상반기 총 4000억원 규모의 자사주 매입·소각을 추진하고 1분기 주당배당금을 1145원으로 늘렸다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:090430",
+        "symbol": "090430",
+        "name": "아모레퍼시픽",
+        "aliases": [
+          "아모레 퍼시픽",
+          "Amorepacific"
+        ],
+        "sector": "cosmetics",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-HANKYUNG-202603035209g",
+          "title": "아모레퍼시픽 아이오페, '세포라' 입점…\"북미 공략 가속\"",
+          "publisher": "한국경제",
+          "publishedAt": "2026-03-03T01:54:00.000Z",
+          "sourceUrl": "https://www.hankyung.com/article/202603035209g",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "아이오페는 이달부터 세포라 온·오프라인 채널에 입점해 고기능성 피부 설루션(솔루션)을 제안하는 '클리니컬 그레이드' 스킨케어 제품을 선보인다."
+            },
+            {
+              "id": "S2",
+              "text": "주력 판매 제품은 'XMD 스템3 클리니컬 리커버리 세럼', '레티놀 레티젝션 세럼' 등이다."
+            },
+            {
+              "id": "S3",
+              "text": "인체적용시험을 통해 모공 축소, 탄력·주름 개선 등의 효과를 확인했다고 회사 측은 설명했다."
+            },
+            {
+              "id": "S4",
+              "text": "아모레퍼시픽은 이번 입점을 계기로 북미 시장에서 기술력 중심의 고효능 안티에이징 브랜드로 자리매김해 관련 시장을 공략할 계획이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-HANKYUNG-202603035209g",
+          "primaryStockIds": [
+            "KRX:090430"
+          ],
+          "focusStatement": "아모레퍼시픽의 아이오페가 세포라 온·오프라인 채널에 입점해 북미 시장에 공식 진출한다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "세포라"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-HANKYUNG-202603035209g",
+          "headline": {
+            "text": "아모레퍼시픽 아이오페, 미국 세포라에서 판다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "아모레퍼시픽 아이오페, 미국 세포라에서 판다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "온라인과 매장 둘 다에서 팔아요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "sales_channels"
+            },
+            {
+              "text": "피부에 바르는 세럼이 주력이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "main_products"
+            },
+            {
+              "text": "북미 시장을 더 공략하려는 거예요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "market_goal"
+            }
+          ],
+          "priceConnection": {
+            "text": "파는 가게가 늘면 물건을 살 사람도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S4"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "세포라",
+              "easyText": "화장품을 여러 브랜드 모아 파는 큰 가게",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-HANKYUNG-202603035209g",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:090430"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "아모레퍼시픽의 아이오페가 세포라 온·오프라인 채널에 입점해 북미 시장에 공식 진출한다.",
           "anchorSourceIds": [
             "S1"
           ],
@@ -3143,6 +4922,331 @@
           ],
           "eventType": "capital_or_dividend",
           "focusStatement": "KB금융지주가 이사회에서 7000억원 규모 자사주 매입·소각을 결의했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:122870",
+        "symbol": "122870",
+        "name": "와이지엔터테인먼트",
+        "aliases": [
+          "YG",
+          "YG엔터",
+          "와이지",
+          "와이지엔터"
+        ],
+        "sector": "entertainment",
+        "market": "KOSDAQ"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ETNEWS-20260626000026",
+          "title": "글로벌 '춤판' 드디어 시작…베이비몬스터, 서울콘 D-DAY",
+          "publisher": "전자신문",
+          "publishedAt": "2026-06-26T00:04:00.000Z",
+          "sourceUrl": "https://www.etnews.com/20260626000026",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "베이비몬스터가 6월 26일부터 28일까지 서울 잠실실내체육관에서 '2026-27 BABYMONSTER WORLD TOUR [춤 (CHOOM)] IN SEOUL'을 개최하고 두 번째 월드투어의 포문을 연다."
+            },
+            {
+              "id": "S2",
+              "text": "현재까지 공개된 일정만 18개 도시·29회 공연으로, 첫 번째 월드투어 'HELLO MONSTERS'보다 규모를 확장했다."
+            },
+            {
+              "id": "S3",
+              "text": "이번 투어는 아시아, 북미, 오세아니아, 유럽, 남미 등 5개 대륙을 아우른다."
+            },
+            {
+              "id": "S4",
+              "text": "특히 미니 3집 [춤 (CHOOM)] 수록곡과 투어 전용 무대가 준비돼 기대를 모은다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ETNEWS-20260626000026",
+          "primaryStockIds": [
+            "KRX:122870"
+          ],
+          "focusStatement": "와이지엔터테인먼트 소속 베이비몬스터가 서울 공연을 시작으로 18개 도시 29회 규모의 두 번째 월드투어에 들어갔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "월드투어",
+            "대륙"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-ETNEWS-20260626000026",
+          "headline": {
+            "text": "와이지엔터 베이비몬스터, 두 번째 월드투어를 시작했다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "와이지엔터 베이비몬스터, 두 번째 월드투어를 시작했다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "6월 26일 서울에서 시작했어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "tour_start"
+            },
+            {
+              "text": "18개 도시에서 29번 공연해요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "tour_scale"
+            },
+            {
+              "text": "다섯 개 대륙을 돌아요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "continents"
+            }
+          ],
+          "priceConnection": {
+            "text": "공연을 많이 하면 표를 판 돈도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "월드투어",
+              "easyText": "여러 나라를 돌아다니며 하는 공연",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "대륙",
+              "easyText": "아시아·유럽처럼 아주 큰 땅덩어리",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ETNEWS-20260626000026",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:122870"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "와이지엔터테인먼트 소속 베이비몬스터가 서울 공연을 시작으로 18개 도시 29회 규모의 두 번째 월드투어에 들어갔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 1
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:192080",
+        "symbol": "192080",
+        "name": "더블유게임즈",
+        "aliases": [
+          "DoubleGame",
+          "더블유게임"
+        ],
+        "sector": "game",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-DEALSITE-162742",
+          "title": "더블유게임즈, 소셜카지노 넘어 AI게임사 변신 시험대",
+          "publisher": "딜사이트",
+          "publishedAt": "2026-06-03T00:30:16.000Z",
+          "sourceUrl": "https://dealsite.co.kr/articles/162742",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "보유 라인업 55종 가운데 40여 종을 올해 출시했으며, 캐주얼 게임 누적 다운로드는 4월 말 기준 5710만 건을 넘어섰다."
+            },
+            {
+              "id": "S2",
+              "text": "1분기 캐주얼 부문 매출은 247억원으로 전년 동기 107억원의 두 배를 넘어섰다."
+            },
+            {
+              "id": "S3",
+              "text": "지난해 인수한 퍼즐 캐주얼 스튜디오 '팍시게임즈'에서 나온다."
+            },
+            {
+              "id": "S4",
+              "text": "여전히 매출의 75.7%(1551억원)는 본업인 소셜카지노에서 나온다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-DEALSITE-162742",
+          "primaryStockIds": [
+            "KRX:192080"
+          ],
+          "focusStatement": "더블유게임즈가 보유 라인업 55종 가운데 40여 종을 올해 출시했고 캐주얼 게임 누적 다운로드가 5710만 건을 넘었다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "다운로드"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-DEALSITE-162742",
+          "headline": {
+            "text": "더블유게임즈, 올해 새 게임 40여 개를 냈다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "더블유게임즈, 올해 새 게임 40여 개를 냈다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "다운로드가 5710만 건을 넘었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "cumulative_downloads"
+            },
+            {
+              "text": "캐주얼 게임 매출이 두 배가 됐어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "casual_revenue_growth"
+            },
+            {
+              "text": "지난해 사들인 회사에서 만들어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "acquired_studio"
+            }
+          ],
+          "priceConnection": {
+            "text": "게임을 많이 내려받을수록 회사가 벌 기회도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "다운로드",
+              "easyText": "인터넷에서 내 기기로 내려받는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-DEALSITE-162742",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:192080"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "더블유게임즈가 보유 라인업 55종 가운데 40여 종을 올해 출시했고 캐주얼 게임 누적 다운로드가 5710만 건을 넘었다.",
           "anchorSourceIds": [
             "S1"
           ],

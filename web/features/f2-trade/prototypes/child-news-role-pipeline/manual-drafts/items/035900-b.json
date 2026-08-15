@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:035900",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 소속 그룹 새 앨범과 투어.",
+  "article": {
+    "articleId": "MANUAL-ENPNOW-109064",
+    "title": "'8월 대형 컴백 베일 벗는다'…스트레이키즈 \"THIS & THAT으로 새 기록 세운다\"",
+    "publisher": "EPN엔피나우",
+    "publishedAt": "2026-07-09T11:00:00.000Z",
+    "sourceUrl": "https://www.enpnow.com/news/articleView.html?idxno=109064",
+    "sourceUnits": [
+      { "id": "S1", "text": "스트레이키즈는 8월 7일 'THIS & THAT'을 발매한다." },
+      { "id": "S2", "text": "25일부터 26일, 29일, 8월 1일부터 2일까지 총 5회에 걸쳐 KSPO DOME에서 서울 월드투어 공연이 예정됐다." },
+      { "id": "S3", "text": "8월 1일은 공식 팬클럽 창단 8주년이 되는 날로, 스트레이키즈는 컴백과 함께 서울 콘서트 등 다채로운 이벤트로 팬들과 특별한 시간을 마련할 계획이다." },
+      { "id": "S4", "text": "9월에는 글로벌 음악 페스티벌 '록 인 리오' 무대에 출연한다." },
+      { "id": "S5", "text": "스트레이키즈의 미니 앨범 'THIS & THAT'은 8월 7일 오후 1시 공식 발매된다." }
+    ]
+  },
+  "focusStatement": "JYP 소속 스트레이키즈가 8월 7일 미니 앨범 'THIS & THAT'을 내고 서울에서 월드투어 공연 5회를 연다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "JYP 스트레이키즈, 8월 7일 새 앨범을 냈다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "서울에서 공연을 5번 해요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "seoul_concert_count" },
+    { "text": "팬클럽이 만들어진 지 8년이 됐어요.", "sourceIds": ["S3"], "role": "context", "factKey": "fanclub_anniversary" },
+    { "text": "9월에는 외국 음악 축제에도 나가요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "festival_appearance" }
+  ],
+  "priceConnection": {
+    "text": "앨범과 공연으로 번 돈은 회사의 사업 성과와 이어져요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "앨범", "easyText": "노래 여러 곡을 하나로 묶어 낸 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "공연", "easyText": "무대에서 노래하고 춤추는 것을 보여 주는 일", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

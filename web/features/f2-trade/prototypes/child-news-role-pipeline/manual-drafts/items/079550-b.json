@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:079550",
+  "eventType": "binding_contract",
+  "second": "실적 말고 다른 사건. 해외 수출 계약 진행 상황.",
+  "article": {
+    "articleId": "MANUAL-THEGURU-104036",
+    "title": "[단독] LIG D&A, '3.7조' 천궁-Ⅱ 이라크 수출 무산 위기 반박…\"계약 선급금 이미 지급\"",
+    "publisher": "THE GURU",
+    "publishedAt": "2026-07-07T00:48:08.000Z",
+    "sourceUrl": "https://www.theguru.co.kr/news/article.html?no=104036",
+    "sourceUnits": [
+      { "id": "S1", "text": "LIG D&A는 지난 2024년 9월 이라크 국방부와 약 3조7000억원 규모 천궁-II 공급 계약을 체결했다." },
+      { "id": "S2", "text": "8개 포대 규모를 인도하기로 하며 현지 정부와 협력을 이어오고 있다." },
+      { "id": "S3", "text": "LIG D&A는 7일 '이라크 수출 사업은 정상적으로 진행되고 있다'며 '계약에 따른 선급금은 정상적으로 지급됐으며, 사업 진행에 따라 후속 절차를 밟아나갈 예정이다'라고 밝혔다." },
+      { "id": "S4", "text": "LIG D&A는 이라크를 비롯해 아랍에미리트(UAE)와 사우디아라비아에 천궁-II를 총 12조6000억원 규모로 수출했다." }
+    ]
+  },
+  "focusStatement": "LIG디펜스앤에어로스페이스가 이라크와 맺은 약 3조7000억원 규모 천궁-II 공급 계약이 정상 진행 중이며 선급금도 지급됐다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "LIG디펜스, 이라크와 3조7000억원 계약을 이어간다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "8개 묶음을 만들어 보내기로 했어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "battery_count" },
+    { "text": "먼저 받는 돈도 이미 들어왔어요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "advance_payment" },
+    { "text": "중동 세 나라에 12조6000억원어치 팔았어요.", "sourceIds": ["S4"], "role": "context", "factKey": "middle_east_total" }
+  ],
+  "priceConnection": {
+    "text": "계약이 그대로 진행되면 약속한 돈이 순서대로 들어와요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "계약", "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}
