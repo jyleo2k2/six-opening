@@ -19,12 +19,12 @@ function main() {
   assert.equal(rkRows("season")[0].rank, 4);
   assert.ok(rkRows("season").some((r) => r.name === "우리 가족"));
 
-  // '우리 가족' 행만 분홍으로 강조하고 계단 배지를 단다.
+  // '우리 가족' 행만 분홍 알약으로 강조하고 계단 배지를 단다.
   const me = rows.find((r) => r.name === "우리 가족");
   assert.ok(me);
-  assert.match(me.rowStyle, /#F5327F/u);
+  assert.match(me.rowStyle, /#FFF3F8/u);
   assert.equal(me.step, "▲ 2계단");
-  assert.doesNotMatch(rows[1].rowStyle, /#F5327F/u);
+  assert.doesNotMatch(rows[1].rowStyle, /#FFF3F8/u);
 
   // 등락색: 오르면 빨강, 내리면 파랑. 강조 행은 흰 글씨라 예외다.
   const down = rows.find((r) => r.pct.startsWith("-"));
@@ -43,9 +43,15 @@ function main() {
     if (family.img) assert.match(family.img, /^\/ui\/assets\//u);
   }
 
-  // 고른 탭만 흰 알약이 된다.
-  assert.match(rkSeg(true), /background:#FFFFFF/u);
-  assert.doesNotMatch(rkSeg(false), /background:#FFFFFF/u);
+  // 고른 탭만 진한 남색으로 뒤집힌다 — 토글 배경 자체가 흰색이라서다.
+  assert.match(rkSeg(true), /background:#1E3A6E/u);
+  assert.doesNotMatch(rkSeg(false), /background:#1E3A6E/u);
+
+  // 학교별 탭은 학교가 행 주인이고, 3위까지는 시상대에 있어 순위표에 없다.
+  assert.deepEqual(rkPodium("school").map((p) => p.name), ["한빛초등학교", "푸른솔초등학교", "해든초등학교"]);
+  const schoolRows = rkRows("school");
+  assert.equal(schoolRows.length, RK_LEAGUES.school.length - 3);
+  assert.ok(schoolRows.some((r) => r.name === "나래초등학교" && r.step === "▲ 1계단"));
 
   console.log("ranking data tests passed");
 }
