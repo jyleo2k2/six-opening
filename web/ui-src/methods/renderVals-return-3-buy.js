@@ -179,6 +179,7 @@
       },
       buyBack: () => {
         if (s.buyStep === 2 && st) this.notifyChatBehavior({ kind:'order_confirmation_cancelled', stockId:'KRX:' + st.code, side:'buy' });
-        if (s.buyStep === 3) { this.set({ screen:'portfolio' }); return; }
-        if (s.buyStep === 1) this.set({ screen:'detail' }); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
+        // 계좌·종목 상세는 React 로 옮겨 갔다. 주소로 넘겨 부모가 그 화면을 얹는다.
+        if (s.buyStep === 3) { this.leaveToRoute('/portfolio'); return; }
+        if (s.buyStep === 1) this.leaveToRoute('/stock/' + s.code); else this.setState({ buyStep: s.buyStep - 1, showPad:false });
       },
