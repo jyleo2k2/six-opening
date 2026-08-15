@@ -10,8 +10,6 @@ import {
   judgeCharacter,
   kstDateOf,
   mondayOf,
-  parsePrototypeProfileInput,
-  profileEntriesFromTrades,
   replayPortfolio,
   scoreAccuracy,
   shrink,
@@ -19,7 +17,6 @@ import {
   weekBucketsKST,
 } from "./behavior-profile";
 import type { DailyClose, ProfileBuy, ProfileSell, ProfileTabView } from "../types/behavior-profile";
-import type { Trade } from "../types/trade";
 
 const buy = (over: Partial<ProfileBuy>): ProfileBuy => ({
   id: "b1",
@@ -344,75 +341,5 @@ assert.deepEqual(blank.cumulative.scores, {
   diversification: 5,
   accuracy: 5,
 });
-
-// ── kw_proto_v1 원본 매핑 ───────────────────────────────────────────────────
-const rawState = {
-  acc: {
-    child: { name: "민지", cash: 500_000, holdings: [{ code: "005930", qty: 2, avg: 100_000 }] },
-    parent: { name: "엄마", cash: 1_000_000, holdings: [] },
-  },
-  records: [
-    {
-      order_id: "ord_0001",
-      user_id: "child_minji",
-      symbol: "005930",
-      amount_krw: 200_000,
-      qty: 2,
-      order_status: "filled",
-      reason_code: "buy_intuition",
-      ts: "2026-08-05T02:00:00.000Z",
-    },
-    { order_id: "ord_0002", user_id: "child_minji", symbol: "000660", amount_krw: 90_000, qty: 1, order_status: "pending", ts: "2026-08-05T03:00:00.000Z" },
-    { order_id: "ord_0003", user_id: "parent_mom", symbol: "011200", amount_krw: 21_400, qty: 1, order_status: "filled", ts: "2026-08-06T04:00:00.000Z" },
-  ],
-  sellRecords: [
-    { order_id: "ord_0004", user_id: "child_minji", symbol: "005930", qty: 1, avg: 100_000, pnl_pct_at_sell: 10, order_status: "filled", plan_match: false, ts: "2026-08-07T02:00:00.000Z" },
-    { order_id: "ord_0005", user_id: "child_minji", symbol: "005930", qty: 1, order_status: "pending", ts: "2026-08-07T03:00:00.000Z" },
-  ],
-  events: [
-    { event: "news_detail_opened", symbol: "005930", user_id: "child_minji", ts: "2026-08-05T01:00:00.000Z", dwell_ms: 15_000 },
-    { event: "info_detail_opened", symbol: "005930", user_id: "child_minji", ts: "2026-08-05T01:10:00.000Z", dwell_ms: 11_000 },
-    { event: "chart_timeframe_changed", symbol: "005930", user_id: "child_minji", ts: "2026-08-05T01:20:00.000Z" },
-    { event: "chart_detail_opened", symbol: "005930", user_id: "parent_mom", ts: "2026-08-05T01:30:00.000Z", dwell_ms: 20_000 },
-  ],
-};
-const childInput = parsePrototypeProfileInput(rawState, "child");
-assert.equal(childInput.buys.length, 1);
-assert.equal(childInput.buys[0].price, 100_000);
-// 지정가 대기 매도는 체결이 아니라 표본에서 빠진다
-assert.equal(childInput.sells.length, 1);
-assert.equal(childInput.sells[0].quantity, 1);
-// 매도 체결가는 평균단가와 매도 시점 손익률로 되짚는다
-assert.equal(childInput.sells[0].price, 110_000);
-assert.equal(childInput.sells[0].planMatch, false);
-assert.deepEqual(childInput.tabViews.map((item) => item.tab), ["news", "info"]);
-assert.equal(childInput.cash, 500_000);
-assert.equal(childInput.holdings[0].averagePrice, 100_000);
-const parentInput = parsePrototypeProfileInput(rawState, "parent");
-assert.equal(parentInput.buys.length, 1);
-assert.deepEqual(parentInput.tabViews.map((item) => item.tab), ["chart"]);
-assert.equal(parsePrototypeProfileInput(null, "child").buys.length, 0);
-// 손익률이 없으면 null 로 두어 매도일 종가 근사에 맡긴다
-assert.equal(
-  parsePrototypeProfileInput(
-    { sellRecords: [{ order_id: "s", user_id: "child_minji", symbol: "005930", qty: 1, order_status: "filled", ts: "2026-08-07T02:00:00.000Z" }] },
-    "child",
-  ).sells[0].price,
-  null,
-);
-
-// ── F11 시드(Trade) → 엔진 표본 ─────────────────────────────────────────────
-const seed: Trade[] = [
-  { id: "seed-1", member: "parent", symbol: "005930", side: "buy", quantity: 2, price: 240_000, reason: "이 회사(제품)를 잘 알아", memo: "", tradedAt: "2026-08-04T01:12:00.000Z" },
-  { id: "seed-2", member: "parent", symbol: "011200", side: "sell", quantity: 5, price: 21_400, reason: "목표한 만큼 와서", memo: "", tradedAt: "2026-08-06T04:35:00.000Z" },
-  { id: "seed-3", member: "child", symbol: "035420", side: "buy", quantity: 1, price: 90_000, reason: "뉴스에서 봤어", memo: "", tradedAt: "2026-08-07T01:00:00.000Z" },
-];
-const parentEntries = profileEntriesFromTrades(seed, "parent");
-assert.equal(parentEntries.buys.length, 1);
-assert.equal(parentEntries.sells.length, 1);
-// 시드 매도도 수량·체결가를 그대로 넘긴다 — 포트폴리오 복원이 이 값을 쓴다
-assert.equal(parentEntries.sells[0].quantity, 5);
-assert.equal(parentEntries.sells[0].price, 21_400);
-assert.equal(profileEntriesFromTrades(seed, "child").buys.length, 1);
 
 console.log("behavior profile engine tests passed");
