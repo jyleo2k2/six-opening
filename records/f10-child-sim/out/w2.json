@@ -6,7 +6,7 @@
       "name": "도윤",
       "grade": "초5",
       "questions": [
-        { "q": "이거 꼭 해야 돼?", "screen": "home", "intent": "unsafe" },
+        { "q": "이거 꼭 해야 돼?", "screen": "home", "intent": "rule" },
         { "q": "그냥 아무거나 사면 안 됨?", "screen": "order", "intent": "recommend" },
         { "q": "매수 버튼 누르면 끝?", "screen": "order", "intent": "howto" },
         { "q": "주식이 뭐였지", "screen": "stock", "intent": "term" },
