@@ -10,6 +10,8 @@
 | `20260814111455_add_profiles_guardian_role.sql` | `profiles.guardian_role`·`updated_at` 추가 |
 | `20260814150827_add_trade_plan_fields.sql` | `transactions` 에 `plan_code`·`plan_target_price`·`memo`·`plan_match`·`plan_changed_reason` 추가, `apply_trade` 인자 확장 (F2 SPEC §7.1) |
 | `20260815002039_seed_family_portfolios.sql` | 찬영 가족 3계정의 보유·매수 이력·잔액을 데모 포트폴리오로 교체. **계정이 없는 새 환경에서는 건너뛴다** |
+| `20260815033156_seed_family_profiles.sql` | 찬영 가족 3계정(`profiles`+`account`)을 저장소에서 재현 가능하게 함. 비밀번호는 자리표시자(`CHANGE_ME`) |
+| `20260815033308_order_lifecycle_db_ownership.sql` | 주문 생애주기(체결·대기·예약·취소·거절)를 DB가 소유. `transactions`에 상태 컬럼, `account`·`holdings`에 예약 잠금 컬럼 추가. `apply_trade` 갱신, `reserve_order`·`settle_order`·`cancel_order` 신설 |
 
 베이스 파일은 **뒤의 ALTER 2건이 아직 적용되지 않은 모양**이다. 즉 `stock_tab_views` 에는
 `duration_seconds`·`opened_at`·`closed_at` 만 있고 `stock_id`·`created_at` 은 없으며,
@@ -46,7 +48,7 @@ supabase migration list # local·remote 양쪽에 같은 목록이 보이는지 
 
 ## 라이브 이력 정리 — 2026-08-15 기준 [사실]
 
-저장소 파일 9개가 모두 라이브 `supabase_migrations.schema_migrations` 의 같은 버전과 1:1 로
+저장소 파일 11개가 모두 라이브 `supabase_migrations.schema_migrations` 의 같은 버전과 1:1 로
 맞는다. `supabase db push` 는 이제 올릴 것이 없다.
 
 정리하면서 한 일은 다음과 같다.
@@ -57,11 +59,22 @@ supabase migration list # local·remote 양쪽에 같은 목록이 보이는지 
 | `add_profiles_guardian_role` 의 타임스탬프가 저장소 `20260814190000`, remote `20260814111455` 로 달랐다 | 저장소 파일 이름을 remote 기록인 `20260814111455_...` 로 바꿨다 |
 | `add_trade_plan_fields` 가 저장소 `20260814210000`, remote `20260814150827` 로 달랐다 | 저장소 파일 이름을 `20260814150827_...` 로 바꿨다 |
 | `seed_family_portfolios` 가 저장소 `20260815120000`, remote `20260815002039` 로 달랐다 | 저장소 파일 이름을 `20260815002039_...` 로 바꿨다 |
+| `seed_family_profiles`·`order_lifecycle_db_ownership` 을 MCP 로 처음 적용 — 저장소는 `20260815001000`·`20260815131000` 로 만들었지만 remote 는 적용 시각인 `20260815033156`·`20260815033308` 로 기록했다 | 저장소 파일 이름을 remote 기록에 맞춰 바꿨다 |
 
 **파일 이름의 타임스탬프는 remote 기록과 같아야 한다.** 다르면 다음 `db push` 가 이미 적용된
-마이그레이션을 다시 올리려다 `already exists` 로 깨진다. 같은 어긋남이 세 번 반복됐다 — 대시보드나
+마이그레이션을 다시 올리려다 `already exists` 로 깨진다. 같은 어긋남이 네 번 반복됐다 — 대시보드나
 MCP 로 적용하면 그때의 UTC 시각으로 기록되므로 **적용 직후 `supabase migration list` 로 확인하고
 파일 이름을 맞추는 것**을 절차에 넣는다.
+
+### 알려진 순서 문제 — `seed_family_profiles` 가 `seed_family_portfolios` 보다 뒤로 밀렸다 [사실]
+
+파일을 만들 때는 프로필 시딩이 포트폴리오 시딩보다 먼저 오게 지었지만(계정이 있어야 보유를
+넣을 수 있으므로), remote 적용 시각 기준으로 파일명을 맞추다 보니 실제 순서가 바뀌었다:
+`seed_family_portfolios`(`002039`) → `seed_family_profiles`(`033156`). 라이브에는 계정이
+이미 있었으니 문제가 없었지만, **새 환경에서 `db reset` 을 돌리면 포트폴리오 시딩이 먼저 실행돼
+계정이 없어 조용히 건너뛰고, 그 다음에야 계정이 생겨서 포트폴리오 데이터는 결국 아무 데도
+들어가지 않는다.** 로그인은 되지만 보유·매수 이력이 빈 상태가 된다. 스키마는 정상이므로
+`db reset` 자체는 성공한다 — 아직 고치지 않았다.
 
 ## 새 환경에서 도는지가 판단 기준이다
 
@@ -103,7 +116,7 @@ supabase migration list            # local·remote 양쪽에 표시되는지 확
 ## 새 환경 검증
 
 ```bash
-supabase db reset   # 마이그레이션 9건 + seed.sql 이 순서대로 성공해야 한다
+supabase db reset   # 마이그레이션 11건 + seed.sql 이 순서대로 성공해야 한다
 ```
 
 Docker 를 쓸 수 없는 환경이면 빈 PostgreSQL 에 직접 넣어 확인한다. `supabase db reset` 이
@@ -130,7 +143,8 @@ create function auth.uid() returns uuid language sql stable as $$ select null::u
 - `stocks` 51행은 스키마가 아니라 참조 데이터지만 베이스에 넣었다. 이 표가 비면 `apply_trade`,
   `holdings`, `stock_candles`, `news_article_stocks` 가 붙을 곳이 없고 `seed.sql` 의 뉴스 주체
   연결이 끊겨 `NEWS_PUBLICATION_PRIMARY_SUBJECT_REQUIRED` 로 실패한다.
-- `profiles` 행(가족 계정)과 `stock_candles` 행은 아직 저장소에 없다. 새 환경에서 로그인하려면
-  계정을 직접 넣어야 하고, 캔들은 `web` 의 `npm run seed:candles` 로 채운다.
+- `profiles` 행(가족 계정)은 `20260815033156_seed_family_profiles.sql` 이 넣지만 비밀번호는
+  자리표시자 `CHANGE_ME` 다. 새 환경에서 로그인하려면 콘솔에서 실제 비밀번호로 바꿔야 한다.
+  `stock_candles` 행은 아직 저장소에 없다. `web` 의 `npm run seed:candles` 로 채운다.
 - 앱 서버는 서비스 키로 붙어 RLS 를 우회한다. RLS 정책은 anon·authenticated 열람 경계일 뿐
   현재 화면 동작의 근거가 아니다.
