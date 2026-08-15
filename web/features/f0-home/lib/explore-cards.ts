@@ -10,20 +10,6 @@ import type { Universe, UniverseLive } from "./use-universe";
 const UP = "#E8322E";
 const DOWN = "#1668DC";
 
-/** 흰색을 `weight` 만큼 섞는다 — 어두운 카드 위 글자용 밝은 톤을 만든다. */
-export function mixWhite(hex: string, weight: number) {
-  const n = parseInt(hex.slice(1), 16);
-  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) =>
-    Math.round(v + (255 - v) * weight),
-  );
-  return "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
-}
-
-const rgbOf = (hex: string) => {
-  const n = parseInt(hex.slice(1), 16);
-  return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
-};
-
 export type ExploreFilter = string; // 'rank' | 'watch' | 유니버스 섹터 id
 
 export type ExploreStockRow = {
@@ -59,7 +45,11 @@ export function exploreList(
       .filter((stock) => stock.name.toLowerCase().includes(q))
       .sort((a, b) => b.change - a.change);
   }
-  if (filter === "all") return merged;
+  if (filter === "all") {
+    // 업종끼리 묶어 카드 사이에 업종 구분 헤더를 세울 수 있게 한다(프로토타입 전체 보기).
+    const order = universe.sectors.map((sector) => sector.id);
+    return [...merged].sort((a, b) => order.indexOf(a.sector) - order.indexOf(b.sector));
+  }
   if (filter === "rank") return [...merged].sort((a, b) => b.change - a.change);
   if (filter === "watch") return merged.filter((stock) => watchlist.includes(stock.code));
   return merged.filter((stock) => stock.sector === filter);
@@ -143,12 +133,47 @@ export function cardDots(total: number, activeIndex: number, axis: "x" | "y" = "
 
 export type ExploreCard = ReturnType<typeof buildExploreCard>;
 
-/** 카드 한 장의 그리기 값 전부. 스타일 문자열은 `app.html` 과 같은 값이다. */
+/** 업종 태그 — 글자색과 옅은 배경 한 쌍. 새 프로토타입 값 그대로다. */
+const SECTAG: Record<string, [string, string]> = {
+  semi: ["#2F6BE0", "#E6EEFD"],
+  game: ["#6D3FD4", "#F0EAFE"],
+  food: ["#C4571F", "#FDEDE2"],
+  auto: ["#1F7A5F", "#E3F4EE"],
+  enter: ["#C42A6D", "#FCE7F0"],
+  beauty: ["#A93E9B", "#F7E9F6"],
+  air: ["#1E8FCC", "#E4F3FC"],
+  ship: ["#106E7E", "#DEF0F2"],
+  defense: ["#4E5C78", "#EBEEF4"],
+  energy: ["#A07207", "#FBF1DC"],
+  retail: ["#7A5230", "#F2EBE2"],
+  logi: ["#5C6B3D", "#EFF2E6"],
+  bank: ["#2A3B6E", "#E8EAF2"],
+};
+const DEFAULT_SECTAG: [string, string] = ["#4E5C78", "#EBEEF4"];
+/** 코스닥 상장 종목 — 나머지는 코스피(새 프로토타입과 같은 51종 판정). */
+const KOSDAQ = new Set(["035900", "041510", "122870", "263750"]);
+
+/** 검정을 `weight` 만큼 섞는다 — 밝은 유리 카드 위에서 읽히도록 색을 눌러 쓴다. */
+function mixDark(hex: string, weight: number) {
+  const n = parseInt(hex.slice(1), 16);
+  const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => Math.round(v * (1 - weight)));
+  return "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
+}
+
+/**
+ * 카드 한 장의 그리기 값 전부. 스타일 문자열은 새 claude.ai/design 프로토타입과 같은 값이다
+ * (밝은 유리 카드 — 어둡고 빛나는 수집 카드 디자인은 지난 라운드 것이라 걷어냈다).
+ *
+ * `list`·`index`는 "전체" 보기에서 업종이 바뀌는 첫 카드 위에 구분 헤더를 세우기 위해서다.
+ */
 export function buildExploreCard(
-  stock: ExploreStockRow,
+  list: ExploreStockRow[],
+  index: number,
   universe: Universe,
   active: boolean,
+  isAll: boolean,
 ) {
+  const stock = list[index];
   const sector = universe.sectors.find((entry) => entry.id === stock.sector) ?? {
     id: "",
     name: "",
@@ -157,39 +182,35 @@ export function buildExploreCard(
   };
   // universe.js 의 로고 경로는 app.html 기준 상대경로다. 부모 문서에서는 /ui/ 를 붙인다.
   const logo = universe.logos?.[stock.code] ? `/ui/${universe.logos[stock.code]}` : "";
-  const brand = universe.brands?.[stock.code] ?? {};
-  const B = brand.color || sector.accent; // 브랜드 색
-  const BL = mixWhite(B, 0.45); // 어두운 배경 위 글자용
+  const SA = sector.accent; // 업종 색 — 로고 뒤 은은한 배경
   const CL = stock.change >= 0 ? UP : DOWN; // 등락색 (상승 빨강 / 하락 파랑)
-  // 후광은 등락색 한 계열로만 간다 — 안쪽은 밝게 타고 바깥은 같은 색의 옅은 톤으로 사라진다
-  const CN = mixWhite(CL, 0.3); // 네온 심지
-  const CM = mixWhite(CL, 0.42); // 중간 번짐
-  const CF = mixWhite(CL, 0.6); // 바깥 안개
+  const CD = mixDark(CL, 0.24); // 등락 배지 글자
+  const ST = SECTAG[stock.sector] ?? DEFAULT_SECTAG;
 
-  // 차트 — 우하단 넓은 영역. 값과 방향은 실제 시세 그대로.
+  // 차트 — 카드 하단 전체 폭. 값과 방향은 실제 시세 그대로.
   const sp = stock.spark;
-  const W = 127;
+  const W = 310;
   const H = 104;
-  const PL = 5;
-  const PR = 15;
-  const PY = 12;
+  const PL = 0;
+  const PR = 18;
+  const PY = 16;
   const N = Math.max(2, sp.length);
   const pts = sp.map((v, i) => [PL + i * ((W - PL - PR) / (N - 1)), H - PY - (v / 100) * (H - PY * 2)]);
   const xy = pts.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1));
   const last = pts[pts.length - 1] || [W - PR, H / 2];
   const priceText = stock.price.toLocaleString("ko-KR");
-  // 자릿수가 늘어도 차트와 부딪히지 않게 크기만 단계적으로 줄인다
-  const priceFont = priceText.length >= 9 ? 24 : priceText.length === 8 ? 26 : priceText.length === 7 ? 28 : 30;
+  // 자릿수가 늘어도 카드 폭에 맞게 크기만 단계적으로 줄인다
+  const priceFont = priceText.length >= 9 ? 36 : priceText.length === 8 ? 39 : 42;
+  // 등락률만으로 원화 변동폭을 되짚는다: price = prevClose * (1 + change/100)
+  const changeWon = Math.abs(Math.round((stock.price * stock.change) / (100 + stock.change)));
 
-  const BI = mixWhite(B, 0.66); // 설명용 아이스 톤
-  const CB = mixWhite(CL, 0.42); // 어두운 글래스 배지 위 등락 글자
+  const groupChanged = index === 0 || list[index - 1].sector !== stock.sector;
 
   return {
     code: stock.code,
     name: stock.name,
-    desc: stock.desc,
     emoji: sector.emoji,
-    category: brand.cat || sector.name,
+    category: sector.name,
     logo,
     hasLogo: !!logo,
     sparkLine: xy.join(" "),
@@ -199,76 +220,57 @@ export function buildExploreCard(
     lineColor: CL,
     gradId: "ar" + stock.code,
     priceText,
-    changeText: (stock.change >= 0 ? "▲ " : "▼ ") + Math.abs(stock.change).toFixed(2) + "%",
-    brand: B,
-    // 카드 바깥 래퍼 — 카드는 손대지 않고 뒤쪽에만 후광 레이어를 깐다
+    changeText: (stock.change >= 0 ? "▲ " : "▼ ") + changeWon.toLocaleString("ko-KR") + "원",
+    changePctText: (stock.change >= 0 ? "+" : "") + stock.change.toFixed(2) + "%",
+    // "전체" 보기에서 업종이 바뀌는 첫 카드에만 구분 헤더를 세운다. 맨 첫 카드는 위에
+    // 아무것도 없으니 구분선은 생략한다.
+    groupShow: isAll && groupChanged,
+    groupShowLine: isAll && groupChanged && index !== 0,
+    groupName: sector.name,
     // scroll-snap-stop:always — 네이티브 플링이 스냅 지점을 건너뛰지 못하게 막는다.
     slideStyle:
-      "position:relative;isolation:isolate;flex:none;scroll-snap-align:center;scroll-snap-stop:always;opacity:" +
-      (active ? "1" : "0.72") +
-      ";transition:opacity 300ms ease",
-    // 주 후광 — 등락색 한 계열로만. 바깥으로 갈수록 같은 색의 옅은 톤이 되어 흰 배경에 사라진다.
-    auraMain:
-      "position:absolute;z-index:-2;left:50%;top:50%;width:162%;height:152%;transform:translate(-50%,-50%);pointer-events:none;filter:blur(46px);opacity:" +
-      (active ? "1" : "0") +
-      ";transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(" +
-      rgbOf(CL) + ",0.30) 0%,rgba(" + rgbOf(CL) + ",0.22) 20%,rgba(" + rgbOf(CM) + ",0.15) 38%,rgba(" +
-      rgbOf(CM) + ",0.09) 52%,rgba(" + rgbOf(CF) + ",0.05) 66%,rgba(" + rgbOf(CF) + ",0.02) 78%,rgba(" +
-      rgbOf(CF) + ",0) 88%)",
-    // 좁은 반사광 — 네온관의 블룸. 가장자리에서 밝게 타고 여러 단계로 번져 흰 배경에 녹아든다.
-    auraNeon:
-      "position:absolute;z-index:-1;left:-14px;top:-14px;right:-14px;bottom:-14px;border-radius:48px;pointer-events:none;filter:blur(9px);opacity:" +
-      (active ? "1" : "0") +
-      ";transition:opacity 300ms ease;background:radial-gradient(ellipse at 50% 46%,rgba(" +
-      rgbOf(CN) + ",0.34) 0%,rgba(" + rgbOf(CL) + ",0.20) 44%,rgba(" + rgbOf(CL) + ",0.08) 66%,rgba(" +
-      rgbOf(CL) + ",0) 82%);box-shadow:0 0 9px rgba(" + rgbOf(CN) + ",0.60),0 0 22px rgba(" +
-      rgbOf(CL) + ",0.38),0 0 46px rgba(" + rgbOf(CL) + ",0.22),0 0 84px rgba(" + rgbOf(CL) + ",0.11)",
-    // 차트 쪽을 조금 더 밝게 — 빛이 한쪽으로 치우쳐 자연스럽게 보이도록
-    auraTrend:
-      "position:absolute;z-index:-1;right:-10%;bottom:2%;width:56%;height:46%;pointer-events:none;filter:blur(26px);opacity:" +
-      (active ? "1" : "0") +
-      ";transition:opacity 300ms ease;background:radial-gradient(ellipse at center,rgba(" +
-      rgbOf(CN) + ",0.18) 0%,rgba(" + rgbOf(CL) + ",0.10) 38%,rgba(" + rgbOf(CM) + ",0.04) 60%,rgba(" +
-      rgbOf(CM) + ",0) 80%)",
-
-    // 카드 몸체 — 좌상단 브랜드 광원, 중앙은 깊게, 우하단은 검정에 가깝게
+      "position:relative;isolation:isolate;flex:none;scroll-snap-align:center;scroll-snap-stop:always;padding-top:" +
+      (isAll && groupChanged ? "60px" : "0") +
+      ";opacity:" + (active ? "1" : "0.72") + ";transition:opacity 300ms ease",
+    // 카드 몸체 — 색 없는 두꺼운 유리판. 등락색은 아래·오른쪽 엣지에서만 아주 옅게 굴절한다.
     cardStyle:
-      "position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:radial-gradient(78% 56% at 17% 3%," +
-      B + "5E 0%,rgba(12,18,38,0) 66%),radial-gradient(62% 48% at 97% 97%,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0) 72%),linear-gradient(146deg,#101B39 0%,#0A1024 46%,#05070E 100%);box-shadow:0 26px 50px -20px rgba(52,42,98,0.40),0 0 40px -14px " +
-      CL + "B3",
-    sheenStyle:
-      "position:absolute;left:-20%;top:-20%;right:-20%;bottom:-20%;pointer-events:none;background:linear-gradient(122deg,rgba(255,255,255,0) 34%,rgba(255,255,255,0.075) 50%,rgba(255,255,255,0) 63%)",
-    // 격자는 차트 주변에서만 아주 옅게
-    gridStyle:
-      "position:absolute;left:150px;top:212px;width:140px;height:112px;pointer-events:none;opacity:0.4;background-image:linear-gradient(" +
-      B + "26 1px,transparent 1px),linear-gradient(90deg," + B +
-      "26 1px,transparent 1px);background-size:22px 22px;-webkit-mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%);mask-image:radial-gradient(75% 75% at 60% 60%,#000 0%,rgba(0,0,0,0) 78%)",
-
-    // 로고 — 배경판 없이 표면 위에 뜬 오브젝트. 흰 반사광 + 브랜드 림라이트 + 짧고 정교한 그림자.
+      "position:relative;overflow:hidden;flex:none;width:310px;height:340px;border-radius:34px;cursor:pointer;scroll-snap-align:center;background:#FCFBFF;" +
+      "box-shadow:0 0 0 1.2px rgba(255,255,255,0.85),0 2px 5px rgba(104,96,150,0.10),0 14px 30px -6px rgba(104,96,150,0.16)," +
+      "0 28px 56px -18px rgba(104,96,150,0.13),inset 1.5px 1.5px 0 rgba(255,255,255,0.95),inset -1px -1px 0 rgba(104,96,150,0.10)," +
+      "inset -1px 0 0 " + CL + "3D,inset 0 -1px 0 " + CL + "42,inset 0 -18px 26px -22px " + CL + "26",
+    // 상단 표면광 — 로고 자리는 비껴간다
+    glintStyle:
+      "position:absolute;left:0;right:0;top:0;height:14%;pointer-events:none;" +
+      "background:linear-gradient(180deg,rgba(255,255,255,0.22) 0%,rgba(255,255,255,0.05) 60%,rgba(255,255,255,0) 100%);" +
+      "-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 116px,#000 150px);" +
+      "mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 116px,#000 150px)",
+    // 로고 뒤에만 업종색 — 카드 전체가 아니라 이 자리에서만 색이 돈다
     artStyle:
-      "position:absolute;left:28px;top:26px;width:88px;height:88px;display:flex;align-items:center;justify-content:center;background:" +
-      (logo ? "url(" + logo + ") center/contain no-repeat" : "none") +
-      ";filter:drop-shadow(0 0 1.5px rgba(255,255,255," + (brand.dark ? "0.85" : "0.55") +
-      ")) drop-shadow(0 0 9px " + B + "AA) drop-shadow(0 5px 5px " + B + "59) drop-shadow(0 7px 8px rgba(0,0,0,0.8))",
-
+      "position:absolute;left:28px;top:24px;width:88px;height:88px;display:flex;align-items:center;justify-content:center;background:" +
+      (logo ? "url(" + logo + ") center/84px 84px no-repeat," : "") +
+      "radial-gradient(circle at 50% 52%," + SA + "2E 0%," + SA + "14 46%," + SA + "00 72%)",
+    // 업종 태그 — 카드 우상단
     catStyle:
-      "position:absolute;left:136px;top:60px;font-size:11.5px;font-weight:800;letter-spacing:0.3em;color:" +
-      BL + ";white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 0 10px " + B,
-    catBarStyle: "position:absolute;left:136px;top:84px;pointer-events:none",
+      "position:absolute;right:22px;top:22px;display:inline-flex;align-items:center;height:28px;padding:0 13px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap;color:" +
+      ST[0] + ";background:" + ST[1],
+    // 종목명과 코드는 로고 옆에
     nameStyle:
-      "position:absolute;left:28px;top:134px;right:28px;font-size:30px;font-weight:800;color:#F4F7FF;letter-spacing:-0.035em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 10px rgba(0,0,0,0.6),0 0 14px " +
-      B + "33",
-    descStyle:
-      "position:absolute;left:28px;top:188px;right:28px;font-size:14px;font-weight:600;color:" +
-      BI + ";line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
+      "position:absolute;left:130px;right:26px;top:24px;height:88px;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;min-width:0;padding-bottom:6px",
+    nameTextStyle:
+      "font-size:" + (stock.name.length >= 10 ? 17 : stock.name.length >= 8 ? 19 : 22) +
+      "px;font-weight:800;color:#141B3D;letter-spacing:-0.045em;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
+    codeStyle:
+      "font-size:12.5px;font-weight:400;color:#9096AE;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums",
+    codeText: stock.code + " · " + (KOSDAQ.has(stock.code) ? "KOSDAQ" : "KOSPI"),
+    wonStyle: "margin-left:4px;font-size:15px;font-weight:600;color:#9096AE;letter-spacing:0",
     priceStyle:
-      "position:absolute;left:28px;top:" + (270 - priceFont) + "px;font-size:" + priceFont +
-      "px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.035em;line-height:1;text-shadow:0 3px 14px rgba(0,0,0,0.75)",
-    // 등락 배지 — 어두운 반투명 글래스 캡슐. 버튼이 아니라 능력치 표시.
+      "position:absolute;left:28px;top:" + (176 - priceFont) + "px;display:flex;align-items:baseline;font-size:" + priceFont +
+      "px;font-weight:800;color:#0D1330;font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-0.035em;line-height:1",
+    // 등락 배지 — 밝은 유리 캡슐
     changeStyle:
-      "position:absolute;left:28px;top:284px;display:inline-flex;align-items:center;justify-content:center;height:32px;padding:0 16px;border-radius:999px;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:" +
-      CB + ";background:linear-gradient(180deg,rgba(255,255,255,0.10) 0%,rgba(0,0,0,0.42) 100%)," +
-      CL + "26;box-shadow:inset 0 1px 0 rgba(255,255,255,0.30),inset 0 0 0 1.5px " + CL + "B3,0 0 18px -6px " + CL,
-    chartStyle: "position:absolute;left:155px;top:212px;pointer-events:none",
+      "position:absolute;left:28px;top:196px;display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 13px;border-radius:999px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:" +
+      CD + ";background:" + CL + "1A;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px " + CL + "38,inset 0 1px 0 rgba(255,255,255,0.6)",
+    changePctStyle: "margin-left:7px;padding-left:8px;font-size:13px;font-weight:700;border-left:1px solid " + CL + "38",
+    chartStyle: "position:absolute;left:0;bottom:0;pointer-events:none",
   };
 }

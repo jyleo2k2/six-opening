@@ -32,11 +32,11 @@ assert.deepEqual(exploreList(universe, live, "watch", "", ["036570"]).map((s) =>
 // 검색이 섹터·관심 선택보다 앞선다.
 assert.deepEqual(exploreList(universe, live, "game", "삼성", ["036570"]).map((s) => s.code), ["005930"]);
 
-// 전체 — 정렬하지 않은 원래 순서.
+// 전체 — 업종끼리 묶여 구분 헤더를 세울 수 있다.
 assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), [
   "259960",
-  "005930",
   "036570",
+  "005930",
 ]);
 
 // 제목.
@@ -60,15 +60,26 @@ assert.equal(cardDots(51, 25).length, 9);
 assert.match(cardDots(5, 0, "y")[0], /width:6px;height:18px/u);
 assert.match(cardDots(5, 0)[0], /width:18px;height:6px/u);
 
-// 카드 — 상승은 빨강, 로고 없으면 섹터 이모지, 가격 자릿수에 따라 글자 크기가 준다.
-const up = buildExploreCard(rank[0], universe, true);
+// 카드 — 상승은 빨강, 로고 없으면 섹터 이모지, 등락률로 원화 변동폭을 되짚는다.
+const up = buildExploreCard(rank, 0, universe, true, false);
 assert.equal(up.lineColor, "#E8322E");
 assert.equal(up.emoji, "🔬");
-assert.match(up.changeText, /^▲ 4\.00%$/u);
-const down = buildExploreCard(rank[2], universe, false);
+assert.equal(up.changeText, "▲ 8원");
+assert.equal(up.changePctText, "+4.00%");
+assert.equal(up.codeText, "005930 · KOSPI");
+const down = buildExploreCard(rank, 2, universe, false, false);
 assert.equal(down.lineColor, "#1668DC");
 assert.match(down.slideStyle, /opacity:0\.72/u);
-const bigPrice = buildExploreCard({ ...rank[0], price: 123_456_789 }, universe, true);
-assert.match(bigPrice.priceStyle, /font-size:24px/u);
+const bigList = [{ ...rank[0], price: 123_456_789 }];
+const bigPrice = buildExploreCard(bigList, 0, universe, true, false);
+assert.match(bigPrice.priceStyle, /font-size:36px/u);
+
+// "전체" 보기에서만 업종이 바뀌는 첫 카드에 구분 헤더를 세우고, 맨 첫 카드는 선을 생략한다.
+const all = exploreList(universe, live, "all", "", []);
+const allCards = all.map((_, i) => buildExploreCard(all, i, universe, false, true));
+assert.deepEqual(allCards.map((c) => c.groupShow), [true, false, true]);
+assert.deepEqual(allCards.map((c) => c.groupShowLine), [false, false, true]);
+const noGroup = buildExploreCard(all, 1, universe, false, false);
+assert.equal(noGroup.groupShow, false);
 
 console.log("explore cards tests passed");
