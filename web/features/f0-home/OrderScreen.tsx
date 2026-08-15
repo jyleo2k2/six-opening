@@ -244,6 +244,11 @@ export function OrderScreen({
     requestMode?: "qty" | "amount";
     badge?: boolean;
   } | null>(null);
+  /**
+   * 접수 왕복이 도는 동안 참이다. 서버 확정을 기다리게 되면서 **버튼이 한 박자 늦게**
+   * 반응하므로, 표시가 없으면 안 눌린 줄 알고 한 번 더 눌러 주문이 두 번 들어간다.
+   */
+  const [submitting, setSubmitting] = useState(false);
   const [memoSaved, setMemoSaved] = useState(false);
   // 대기 목록 시트. `ui-src` 의 orderSheet 상태와 같다 — 매수·매도 어느 쪽에서든 연다.
   const [orderSheet, setOrderSheet] = useState(false);
@@ -314,18 +319,27 @@ export function OrderScreen({
     if (event) recordEvent(event);
   };
 
-  // 즉시 체결의 서버 저장. best-effort 다 — 실패해도 화면 지갑은 그대로 간다(`saveTrade` 와 같다).
-  const postTrade = (body: Record<string, unknown>) => {
-    if (!syncable) return;
-    fetch("/api/trade", {
+  /**
+   * 즉시 체결. **접수가 곧 주문이다** — 예약(`postReserve`)과 같은 규칙으로 맞췄다.
+   *
+   * 예전에는 던지고 잊었다(best-effort). 그러면 화면에는 체결로 보이는데 DB 에는 없고,
+   * 다음에 `/api/account` 가 지갑을 덮는 순간 **방금 산 주식이 사라진다.** 서버는 이미
+   * 옳았다 — `apply_trade` 가 잔액·보유·기록을 한 트랜잭션에서 처리하고 실패하면 아무것도
+   * 남기지 않는다. 기다리지 않은 쪽이 화면이었다.
+   *
+   * `syncable` 이 아니면 보내지 않고 거절한다. 이 화면은 `/api/account` 응답으로 지갑을
+   * 세운 뒤에야 그려지므로(`if (!wallet) return <PhoneFrame/>`), 주문 버튼을 누를 수 있는
+   * 시점에 `syncable` 이 거짓이면 응답을 기다리는 중이 아니라 **저장할 수 없는 계정**이다.
+   */
+  const postTrade = (body: Record<string, unknown>): Promise<boolean> => {
+    if (!syncable) return Promise.resolve(false);
+    return fetch("/api/trade", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
-      .then((response) => {
-        if (response.ok) refresh();
-      })
-      .catch(() => {});
+      .then((response) => response.ok)
+      .catch(() => false);
   };
   // 예약 접수. **접수가 곧 주문이다** — null 이면 주문은 없던 일이고 거절 문구를 보여 준다.
   const postReserve = (body: Record<string, unknown>): Promise<{ order_id?: string } | null> => {
@@ -509,8 +523,18 @@ export function OrderScreen({
   const stepFooter = (ok: boolean, label: string, onNext: () => void) =>
     step < 3 ? (
       <div style={{ flex: "none", padding: "8px 16px 10px" }}>
-        <div onClick={onNext} style={ok && !(locked && step === 2) ? CTA_ON : CTA_OFF}>
-          <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" }}>{label}</span>
+        {/*
+          접수를 기다리는 동안 라벨을 바꾸고 버튼을 끈다. 서버 확정을 기다리게 되면서
+          버튼이 한 박자 늦게 반응하는데, 표시가 없으면 안 눌린 줄 알고 한 번 더 눌러
+          같은 주문이 두 번 들어간다.
+        */}
+        <div
+          onClick={onNext}
+          style={ok && !(locked && step === 2) && !submitting ? CTA_ON : CTA_OFF}
+        >
+          <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" }}>
+            {submitting ? "주문 넣는 중…" : label}
+          </span>
         </div>
       </div>
     ) : (
@@ -559,7 +583,7 @@ export function OrderScreen({
     };
 
     const placeBuy = () => {
-      if (!nextOk || (locked && step === 2)) return;
+      if (!nextOk || (locked && step === 2) || submitting) return;
       if (step < 2) {
         setStep(step + 1);
         setShowPad(false);
@@ -587,6 +611,7 @@ export function OrderScreen({
       if (isLimit || isScheduled) {
         // 미체결 주문은 서버 주문 잔고가 원본이다 — 화면은 예약을 만들지 않고 현금도 직접
         // 빼지 않는다. 접수가 끝나야 주문이 성립하므로 완료 화면도 그때 띄운다.
+        setSubmitting(true);
         postReserve({
           side: "buy",
           stock_code: code,
@@ -601,6 +626,7 @@ export function OrderScreen({
           plan_target_price: rec.plan_target_price,
           memo: rec.memo,
         }).then((result) => {
+          setSubmitting(false);
           if (!result?.order_id) {
             setOrderError(ORDER_REJECTED);
             return;
@@ -611,7 +637,9 @@ export function OrderScreen({
         });
         return;
       }
-      finishBuy(rec, true);
+      // 즉시 체결도 서버가 확정한 뒤에 지갑을 바꾼다. 로컬을 먼저 바꾸면 저장에 실패한
+      // 체결이 화면에만 남고, 다음 `/api/account` 가 그것을 지운다.
+      setSubmitting(true);
       postTrade({
         side: "buy",
         stock_code: code,
@@ -621,10 +649,20 @@ export function OrderScreen({
         plan_code: rec.plan_code,
         plan_target_price: rec.plan_target_price,
         memo: rec.memo,
+      }).then((saved) => {
+        setSubmitting(false);
+        if (!saved) {
+          setOrderError(ORDER_REJECTED);
+          return;
+        }
+        finishBuy(rec, true);
+        // 상세·차트·뉴스에서 쌓인 유효 열람을 이 매수와 묶어 보낸다 (`app.html` 과 같은 시점).
+        // 거절된 주문에는 붙이지 않는다 — 버퍼는 다음 체결까지 남는다.
+        flushTabViews(code, syncable);
+        notifyBehavior({ kind: "trade_filled", stockId: `KRX:${code}`, side: "buy" });
+        // 서버가 잔액의 원본이다. 완료 화면을 띄운 뒤 뒤에서 맞춘다 — 기다리지 않는다.
+        refresh();
       });
-      // 상세·차트·뉴스에서 쌓인 유효 열람을 이 매수와 묶어 보낸다 (`app.html` 과 같은 시점).
-      flushTabViews(code, syncable);
-      notifyBehavior({ kind: "trade_filled", stockId: `KRX:${code}`, side: "buy" });
     };
 
     const goBack = () => {
@@ -1162,7 +1200,7 @@ export function OrderScreen({
     };
 
     const placeSell = () => {
-      if (!sellOk || (locked && step === 2)) return;
+      if (!sellOk || (locked && step === 2) || submitting) return;
       if (step === 1) {
         retroAtRef.current = Date.now();
         setOrderError(null);
@@ -1195,6 +1233,7 @@ export function OrderScreen({
       };
       if (isLimit || isScheduled) {
         // 미체결 매도도 서버가 원본이다. 매도는 보유에서 빼지 않고 수량만 잠근다.
+        setSubmitting(true);
         postReserve({
           side: "sell",
           stock_code: code,
@@ -1207,6 +1246,7 @@ export function OrderScreen({
           plan_match: rec.plan_match,
           plan_changed_reason: rec.change_reason_code,
         }).then((result) => {
+          setSubmitting(false);
           if (!result?.order_id) {
             setOrderError(ORDER_REJECTED);
             return;
@@ -1216,7 +1256,8 @@ export function OrderScreen({
         });
         return;
       }
-      finishSell(rec, true);
+      // 매수와 같다 — 서버가 확정한 뒤에 보유를 뺀다.
+      setSubmitting(true);
       postTrade({
         side: "sell",
         stock_code: code,
@@ -1225,12 +1266,20 @@ export function OrderScreen({
         reason: sellDraft.reason,
         plan_match: rec.plan_match,
         plan_changed_reason: rec.change_reason_code,
+      }).then((saved) => {
+        setSubmitting(false);
+        if (!saved) {
+          setOrderError(ORDER_REJECTED);
+          return;
+        }
+        finishSell(rec, true);
+        const behavior: Record<string, unknown> = { kind: "trade_filled", stockId: `KRX:${code}`, side: "sell" };
+        if (held && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
+          behavior.realizedPnlPct = ((price - heldAvg) / heldAvg) * 100;
+        }
+        notifyBehavior(behavior);
+        refresh();
       });
-      const behavior: Record<string, unknown> = { kind: "trade_filled", stockId: `KRX:${code}`, side: "sell" };
-      if (held && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
-        behavior.realizedPnlPct = ((price - heldAvg) / heldAvg) * 100;
-      }
-      notifyBehavior(behavior);
     };
 
     const goBack = () => {
