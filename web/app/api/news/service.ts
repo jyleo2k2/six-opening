@@ -15,6 +15,7 @@ const NEWS_COLUMNS = [
   "source_published_at",
   "source_url",
   "published_at",
+  "term_treatments",
 ].join(",");
 
 export type SelectNewsRows = (params: Record<string, string>) => Promise<unknown[]>;

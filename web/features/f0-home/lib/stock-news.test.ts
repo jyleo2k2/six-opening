@@ -29,6 +29,15 @@ assert.equal(
 assert.equal(validNewsItem({ ...good, sourceUrl: "javascript:alert(1)" }, "005930"), false);
 assert.equal(validNewsItem(null, "005930"), false);
 
+// 용어 풀이는 있어도 없어도 통과하고, 모양이 깨졌을 때만 버린다.
+assert.equal(
+  validNewsItem({ ...good, termTreatments: [{ term: "반도체", easyText: "기기 속 부품" }] }, "005930"),
+  true,
+);
+assert.equal(validNewsItem({ ...good, termTreatments: [] }, "005930"), true);
+assert.equal(validNewsItem({ ...good, termTreatments: [{ term: "반도체" }] }, "005930"), false);
+assert.equal(validNewsItem({ ...good, termTreatments: "배열이 아니다" }, "005930"), false);
+
 // KST 날짜 표기.
 assert.equal(formatNewsDate("2026-08-14T20:00:00.000Z"), "2026. 08. 15.");
 assert.equal(formatNewsDate("not-a-date"), "");
