@@ -13,7 +13,7 @@ import {
 import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import { parseBehaviorEvent } from "./lib/prototype-bridge";
-import { won } from "./lib/portfolio-view";
+import { pendingCards, won } from "./lib/portfolio-view";
 import { flushTabViews } from "./lib/tab-views";
 import {
   applyBuyFill,
@@ -111,6 +111,42 @@ const SUMMARY_ROW = styleFromCss(
 const SUMMARY_VALUE = styleFromCss(
   "font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap",
 );
+// 2단계 "주문 정보" 남색 카드 — `ui-src` 의 새 디자인(PR #252)과 같은 값이다.
+const DARK_SUMMARY = styleFromCss(
+  "background:linear-gradient(180deg,#2A4478 0%,#132C63 42%,#001E5A 100%);border-radius:20px;padding:15px 17px;margin-top:2px;" +
+    "box-shadow:0 6px 18px -8px rgba(0,30,90,0.4),inset 0 1px 0 rgba(255,255,255,0.22)",
+);
+const DARK_ROW = styleFromCss(
+  "display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:rgba(255,255,255,0.62)",
+);
+const DARK_VALUE = styleFromCss(
+  "font-weight:700;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap",
+);
+// 구매·판매·대기 탭과 대기 목록 시트 — `renderVals-compute.js` 의 sheetTab·sheetStyle 과 같은 값이다.
+const TAB_ROW = styleFromCss("flex:none;display:flex;gap:4px;background:#EFEEF6;border-radius:999px;padding:4px");
+const SHEET_SCRIM = styleFromCss(
+  "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(18,14,40,0.34);z-index:40",
+);
+const SHEET = styleFromCss(
+  "position:absolute;left:0;right:0;bottom:0;z-index:41;max-height:70%;overflow-y:auto;background:#FFFFFF;" +
+    "border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -14px 34px -12px rgba(20,16,50,0.28)",
+);
+const SHEET_GRAB = styleFromCss("width:42px;height:4px;border-radius:999px;background:#E1E0EC;margin:0 auto 14px");
+const SHEET_ROW = styleFromCss(
+  "display:flex;align-items:center;gap:11px;background:#F4F4FA;border-radius:18px;padding:12px 14px;box-shadow:inset 0 0 0 1px #E4E6F1",
+);
+const SHEET_CANCEL = styleFromCss(
+  "flex:none;font-size:13px;font-weight:600;color:#8E93A8;padding:9px 13px;border-radius:999px;cursor:pointer;" +
+    "background:#FFFFFF;box-shadow:0 4px 9px -4px rgba(35,25,80,0.2)",
+);
+
+function sheetTabStyle(on: boolean) {
+  return styleFromCss(
+    "flex:1;display:flex;align-items:center;justify-content:center;height:38px;border-radius:999px;font-size:14px;" +
+      `font-weight:${on ? 800 : 600};cursor:pointer;color:${on ? "#D5327A" : "#8E93A8"};background:${on ? "#FFFFFF" : "transparent"}` +
+      (on ? ";box-shadow:0 2px 6px -2px rgba(35,25,80,0.22)" : ""),
+  );
+}
 const MEMO_INPUT = styleFromCss(
   "width:100%;box-sizing:border-box;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;" +
     "font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1",
@@ -119,8 +155,11 @@ const DONE_BOX = styleFromCss(
   "width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;box-shadow:inset 0 0 0 1px #E4E6F1",
 );
 const MASCOT_BUBBLE = styleFromCss(
-  "flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;" +
-    "box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)",
+  "flex:1;background:#EDE9FB;border-radius:18px;border-bottom-left-radius:5px;padding:10px 14px;" +
+    "box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.06)",
+);
+const MASCOT_IMG = styleFromCss(
+  "display:block;flex:none;margin:0 -3px -4px -3px;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))",
 );
 
 function chipStyle(on: boolean) {
@@ -202,8 +241,11 @@ export function OrderScreen({
     scheduled: boolean;
     scheduledFor: string | null;
     requestMode?: "qty" | "amount";
+    badge?: boolean;
   } | null>(null);
   const [memoSaved, setMemoSaved] = useState(false);
+  // 대기 목록 시트. `ui-src` 의 orderSheet 상태와 같다 — 매수·매도 어느 쪽에서든 연다.
+  const [orderSheet, setOrderSheet] = useState(false);
   const retroAtRef = useRef(0);
   const retroMsRef = useRef(0);
   const flowIdRef = useRef(`${side}_${Date.now().toString(36)}`);
@@ -305,6 +347,11 @@ export function OrderScreen({
           : ""),
     );
   const changeUp = live.change >= 0;
+  // 전일 대비 원화 등락폭 — 현재가와 등락률에서 되짚어 계산한다(프로토타입과 같은 식).
+  const rawDiff = (price * live.change) / (100 + live.change);
+  const wonDiffText = `${changeUp ? "+" : "-"}${Math.round(
+    Math.abs(Number.isFinite(rawDiff) ? rawDiff : 0),
+  ).toLocaleString("ko-KR")}원`;
   const miniCard = (
     <div
       style={styleFromCss(
@@ -329,20 +376,135 @@ export function OrderScreen({
           {price.toLocaleString("ko-KR")}원
         </div>
       </div>
-      <span
-        style={styleFromCss(
-          "font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:" +
-            (changeUp ? UP : DOWN),
-        )}
-      >
-        {`${changeUp ? "▲ " : "▼ "}${Math.abs(live.change).toFixed(2)}%`}
-      </span>
+      <div style={{ flex: "none", display: "flex", alignItems: "baseline", gap: 6 }}>
+        <span
+          style={styleFromCss(
+            "font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:" +
+              (changeUp ? UP : DOWN),
+          )}
+        >
+          {`${changeUp ? "▲ " : "▼ "}${Math.abs(live.change).toFixed(2)}%`}
+        </span>
+        {/* 등락률 옆 원화 등락폭. `ui-src` 사본은 %를 두 번 보여주지만 김경렬 프로토타입
+            (`design-system/prototype`)의 원안은 원화 + % 짝이다 — 원안을 따른다. */}
+        <span
+          style={styleFromCss(
+            "font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:7px;" +
+              `border-left:1px solid ${changeUp ? UP : DOWN}59;color:` +
+              (changeUp ? UP : DOWN),
+          )}
+        >
+          {wonDiffText}
+        </span>
+      </div>
     </div>
   );
   const orderErrorCard = orderError && (
     <div style={WARN}>
       <span style={WARN_TEXT}>{orderError}</span>
     </div>
+  );
+
+  // ── 구매·판매·대기 탭과 대기 목록 시트 — `ui-src` 의 새 디자인(PR #252)을 옮겨 왔다 ──
+  const sellableQty = Math.max(
+    0,
+    (me.holdings.find((h) => h.code === code)?.qty ?? 0) - reservedSellQty(me.pending || [], code),
+  );
+  const pickTabBuy = () => {
+    if (locked) return;
+    if (side !== "buy") {
+      onLeave(`/buy/${code}`);
+      return;
+    }
+    // 이미 구매 화면이면 초안을 처음으로 되돌린다 — `ui-src` 의 pickTabBuy 와 같다.
+    setDraft(blankBuyDraft());
+    setStep(1);
+    setShowPad(false);
+    setOrderSheet(false);
+  };
+  const pickTabSell = () => {
+    // 팔 수 있는 수량이 없으면 아무것도 하지 않는다 — `ui-src` 의 goToSell 과 같은 문턱.
+    if (locked || sellableQty < 0.01) return;
+    if (side !== "sell") {
+      onLeave(`/sell/${code}`);
+      return;
+    }
+    setSellDraftState(blankSellDraft(sellableQty));
+    setSellPick("all");
+    setSellQtyStr("");
+    setStep(1);
+    setShowPad(false);
+    setOrderSheet(false);
+  };
+  // 1단계에서만 탭을 보여 준다 — 이후 단계에서는 흐름을 방해한다.
+  const flowTabs = step === 1 && (
+    <div style={TAB_ROW}>
+      <div onClick={pickTabBuy} style={sheetTabStyle(side === "buy")}>
+        구매
+      </div>
+      <div onClick={pickTabSell} style={sheetTabStyle(side === "sell")}>
+        판매
+      </div>
+      <div onClick={() => setOrderSheet(true)} style={sheetTabStyle(false)}>
+        대기
+      </div>
+    </div>
+  );
+  const pending = pendingCards(me);
+  const cancelPending = (order: (typeof pending)[number]["order"]) => {
+    // `PortfolioScreen` 의 취소와 같은 흐름 — 서버 주문을 지우고 계좌·주문 목록을 다시 읽는다.
+    if (order.id) {
+      fetch(`/api/orders?id=${encodeURIComponent(order.id)}`, { method: "DELETE" })
+        .catch(() => {})
+        .then(refresh);
+    }
+    notifyBehavior({
+      kind: "order_confirmation_cancelled",
+      stockId: `KRX:${order.code}`,
+      side: order.side || "buy",
+    });
+  };
+  const waitSheet = orderSheet && (
+    <>
+      <div onClick={() => setOrderSheet(false)} style={SHEET_SCRIM} />
+      <div style={SHEET}>
+        <div style={SHEET_GRAB} />
+        <div style={{ fontSize: 15, fontWeight: 800, color: "#01185A", letterSpacing: "-0.01em", marginBottom: 10 }}>
+          기다리는 주문
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+          {pending.map((p, index) => (
+            <div key={p.order.id ?? index} style={SHEET_ROW}>
+              <div
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: "#01185A",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {p.name}
+              </div>
+              <div style={{ flex: 2, minWidth: 0, fontSize: 12.5, fontWeight: 500, color: "#8E93A8", fontVariantNumeric: "tabular-nums" }}>
+                {p.desc}
+              </div>
+              <div onClick={() => cancelPending(p.order)} style={SHEET_CANCEL}>
+                취소
+              </div>
+            </div>
+          ))}
+          {pending.length === 0 && (
+            <div style={{ fontSize: 14, fontWeight: 500, color: "#8E93A8", lineHeight: 1.6, padding: "10px 2px 6px" }}>
+              아직 기다리는 주문이 없어요.
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
   const stepFooter = (ok: boolean, label: string, onNext: () => void) =>
     step < 3 ? (
@@ -532,7 +694,7 @@ export function OrderScreen({
         </div>
 
         <div style={CARD}>
-          <div style={CARD_TITLE}>얼마나 살까?</div>
+          <div style={CARD_TITLE}>얼마나 살까요?</div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <div
               onClick={() => {
@@ -654,7 +816,7 @@ export function OrderScreen({
 
         {draft.orderType === "limit" && (
           <div style={CARD}>
-            <div style={CARD_TITLE}>얼마가 되면 살까?</div>
+            <div style={CARD_TITLE}>얼마가 되면 살까요?</div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 3, margin: "14px 0 2px" }}>
               <span
                 style={{
@@ -683,7 +845,7 @@ export function OrderScreen({
               ))}
             </div>
             <div style={NOTE_ROW}>
-              <span style={NOTE_TEXT}>이 값이 될 때까지 기다렸다가 살게. 기다리는 동안 그 돈은 잠깐 맡아둘게.</span>
+              <span style={NOTE_TEXT}>이 값이 될 때까지 기다렸다가 살게요. 기다리는 동안 그 돈은 잠깐 맡아둘게요.</span>
             </div>
           </div>
         )}
@@ -698,23 +860,18 @@ export function OrderScreen({
 
     const step2 = (
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-          <img
-            alt="키웅이"
-            src="/ui/assets/mascot-bear.png"
-            style={{ display: "block", flex: "none", filter: "drop-shadow(0 6px 10px rgba(35,25,80,0.16))" }}
-            width={62}
-          />
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
+          <img alt="키웅이" src="/ui/assets/mascot-bear.png" style={MASCOT_IMG} width={72} />
           <div style={MASCOT_BUBBLE}>
-            <div style={{ fontSize: 16.5, fontWeight: 800, color: "#01185A", lineHeight: 1.5 }}>
-              왜 이 회사가 좋아 보였어?
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#01185A", lineHeight: 1.4 }}>
+              왜 이 회사가 좋아 보였나요?
             </div>
-            <div style={{ fontSize: 13.5, fontWeight: 500, color: "#8E93A8", marginTop: 5 }}>
-              정답은 없어, 솔직한 게 최고야!
+            <div style={{ fontSize: 12, fontWeight: 500, color: "#9B94C4", marginTop: 3 }}>
+              정답은 없어요, 솔직한 게 최고예요!
             </div>
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {reasonOrder.map((index) => {
             const reason = REASONS[index];
             return (
@@ -729,8 +886,8 @@ export function OrderScreen({
           })}
         </div>
 
-        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 6 }}>언제까지 가질 생각이야?</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>언제까지 가질 생각인가요?</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {PLANS.map((plan) => (
             <div
               key={plan.code}
@@ -771,13 +928,11 @@ export function OrderScreen({
           </div>
         )}
 
-        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 6 }}>
-          하고 싶은 말 남겨둘래? <span style={{ fontSize: 13, fontWeight: 500, color: "#A9AEC4" }}>(안 써도 괜찮아)</span>
-        </div>
+        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>하고 싶은 말 남겨둘래요?</div>
         <input
           maxLength={50}
           onChange={(e) => patchDraft({ memo: e.target.value.slice(0, 50) })}
-          placeholder="예: 월드투어 시작한대"
+          placeholder="예: 월드투어 시작한대요"
           style={MEMO_INPUT}
           value={draft.memo}
         />
@@ -794,19 +949,20 @@ export function OrderScreen({
           {draft.memo.length} / 50
         </div>
 
-        <div style={SUMMARY}>
-          <div style={SUMMARY_ROW}>
+        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>주문 정보</div>
+        <div style={DARK_SUMMARY}>
+          <div style={DARK_ROW}>
             <span>{stock.name}</span>
-            <span style={SUMMARY_VALUE}>{math.qty.toFixed(2)}주</span>
+            <span style={DARK_VALUE}>{math.qty.toFixed(2)}주</span>
           </div>
-          <div style={SUMMARY_ROW}>
+          <div style={DARK_ROW}>
             <span>사는 방법</span>
-            <span style={{ fontWeight: 700, color: "#01185A", whiteSpace: "nowrap" }}>{orderTypeText}</span>
+            <span style={{ fontWeight: 700, color: "#FFFFFF", whiteSpace: "nowrap" }}>{orderTypeText}</span>
           </div>
-          <div style={{ height: 1, background: "#EFEFF5", margin: "9px 0" }} />
+          <div style={{ height: 1, background: "rgba(255,255,255,0.18)", margin: "9px 0" }} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: "#01185A" }}>주문 금액</span>
-            <span style={{ fontSize: 18, fontWeight: 800, color: "#01185A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF" }}>주문 금액</span>
+            <span style={{ fontSize: 18, fontWeight: 800, color: "#FFFFFF", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
               {won(math.amount)}
             </span>
           </div>
@@ -872,7 +1028,7 @@ export function OrderScreen({
               animation: "kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both",
               filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))",
             }}
-            width={132}
+            width={128}
           />
           <div style={{ fontSize: 14, fontWeight: 700, color: "#F5327F", letterSpacing: "0.08em", marginTop: 14 }}>
             {done.limit ? "기다리는 주문에 넣었어" : done.scheduled ? "다음 장 주문을 맡아뒀어" : "주문 완료!"}
@@ -936,7 +1092,7 @@ export function OrderScreen({
           <div onClick={goBack} style={BACK}>
             {step === 2 ? "‹" : "✕"}
           </div>
-          <div style={TITLE}>사기(매수)</div>
+          <div style={TITLE}>살래(매수)</div>
           <div style={STEP_PILL}>
             <span style={{ color: "#F5327F" }}>{step}</span> / 3
           </div>
@@ -944,11 +1100,13 @@ export function OrderScreen({
         <ProgressBars step={step} />
         <div style={SCROLL}>
           {miniCard}
+          {flowTabs}
           {step === 1 && step1}
           {step === 2 && step2}
           {step === 3 && step3}
         </div>
         {stepFooter(nextOk, step === 2 ? "주문하기" : "다음", placeBuy)}
+        {waitSheet}
       </div>
     );
   };
@@ -995,6 +1153,9 @@ export function OrderScreen({
         limit: sellDraft.orderType === "limit" ? math.limPrice : null,
         scheduled: !fill && sellDraft.orderType !== "limit",
         scheduledFor: !fill && sellDraft.orderType !== "limit" ? scheduledFor : null,
+        // 완료 화면에서도 배지를 다시 보여준다(PR #252) — 기록이 추가되면 isFirstSell 이
+        // 뒤집히므로 판정은 지금 잡아 둔다.
+        badge: showJudge && planMatch === true,
       });
       patchSell({ memo: "" });
       setMemoSaved(false);
@@ -1172,7 +1333,7 @@ export function OrderScreen({
         </div>
 
         <div style={CARD}>
-          <div style={CARD_TITLE}>얼마나 팔까?</div>
+          <div style={CARD_TITLE}>얼마나 팔까요?</div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <div
               onClick={() => {
@@ -1246,7 +1407,7 @@ export function OrderScreen({
 
         {sellDraft.orderType === "limit" && (
           <div style={CARD}>
-            <div style={CARD_TITLE}>얼마가 되면 팔까?</div>
+            <div style={CARD_TITLE}>얼마가 되면 팔까요?</div>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 3, margin: "14px 0 2px" }}>
               <span style={{ fontSize: 30, fontWeight: 800, color: "#F5327F", fontVariantNumeric: "tabular-nums", lineHeight: 1, whiteSpace: "nowrap" }}>
                 {math.limPrice.toLocaleString("ko-KR")}
@@ -1264,7 +1425,7 @@ export function OrderScreen({
               ))}
             </div>
             <div style={NOTE_ROW}>
-              <span style={NOTE_TEXT}>이 값이 될 때까지 기다렸다가 팔게. 기다리는 동안 그 주식은 잠깐 맡아둘게.</span>
+              <span style={NOTE_TEXT}>이 값이 될 때까지 기다렸다가 팔게요. 기다리는 동안 그 주식은 잠깐 맡아둘게요.</span>
             </div>
           </div>
         )}
@@ -1293,16 +1454,14 @@ export function OrderScreen({
 
     const step2 = (
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-          <img
-            alt="키웅이"
-            src="/ui/assets/mascot-bear.png"
-            style={{ display: "block", flex: "none", filter: "drop-shadow(0 6px 10px rgba(35,25,80,0.16))" }}
-            width={62}
-          />
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
+          <img alt="키웅이" src="/ui/assets/mascot-bear.png" style={MASCOT_IMG} width={72} />
           <div style={MASCOT_BUBBLE}>
-            <div style={{ fontSize: 16.5, fontWeight: 800, color: "#01185A", lineHeight: 1.5 }}>
-              잠깐! 사던 날의 너는 이렇게 생각했어.
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#01185A", lineHeight: 1.4 }}>
+              잠깐! 사던 날에는 이렇게 생각했어요.
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: "#9B94C4", marginTop: 3 }}>
+              그때 마음과 지금 마음을 견줘 봐요
             </div>
           </div>
         </div>
@@ -1373,8 +1532,8 @@ export function OrderScreen({
           </div>
         </div>
 
-        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 6 }}>왜 팔고 싶어?</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>왜 팔고 싶나요?</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
           {sellReasonOrder.map((index) => {
             const reason = SELL_REASONS[index];
             return (
@@ -1392,13 +1551,13 @@ export function OrderScreen({
         {showJudge && planMatch === true && (
           <div
             style={styleFromCss(
-              "display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:22px;padding:16px 18px;box-shadow:0 2px 10px rgba(120,90,20,0.07)",
+              "display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:20px;padding:15px 17px;box-shadow:0 1px 3px rgba(120,90,20,0.08)",
             )}
           >
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "#01185A" }}>계획 실천 배지</div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: "#8A6B1F", marginTop: 5, lineHeight: 1.55 }}>
-                처음 세운 생각을 기억하고 실천했네! 아카이브에 모아둘게.
+              <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A" }}>계획 실천 배지</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#8A6B1F", marginTop: 4, lineHeight: 1.5 }}>
+                처음 세운 생각을 기억하고 실천했네요! 아카이브에 모아둘게요.
               </div>
             </div>
           </div>
@@ -1406,13 +1565,12 @@ export function OrderScreen({
 
         {showJudge && planMatch === false && (
           <>
-            <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 6, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9, lineHeight: 1.4 }}>
               {buyRec
                 ? `처음에는 ${choiceOf(PLANS, buyRec.plan_code)?.short ?? ""} 가지려고 했었네. 무엇이 달라졌어?`
                 : "무엇이 달라졌어?"}
             </div>
-            <div style={{ fontSize: 13.5, fontWeight: 500, color: "#8E93A8", marginTop: -6 }}>계획이 바뀌는 건 괜찮아!</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
               {CHANGES.map((change) => (
                 <div
                   key={change.code}
@@ -1426,21 +1584,21 @@ export function OrderScreen({
           </>
         )}
 
-        <div style={SUMMARY}>
-          <div style={SUMMARY_ROW}>
+        <div style={DARK_SUMMARY}>
+          <div style={DARK_ROW}>
             <span>{stock.name}</span>
-            <span style={SUMMARY_VALUE}>{math.qty.toFixed(2)}주</span>
+            <span style={DARK_VALUE}>{math.qty.toFixed(2)}주</span>
           </div>
-          <div style={SUMMARY_ROW}>
+          <div style={DARK_ROW}>
             <span>파는 방법</span>
-            <span style={{ fontWeight: 700, color: "#01185A", whiteSpace: "nowrap" }}>
+            <span style={{ fontWeight: 700, color: "#FFFFFF", whiteSpace: "nowrap" }}>
               {sellDraft.orderType === "limit" ? `${math.limPrice.toLocaleString("ko-KR")}원이 되면` : "지금 가격에 바로"}
             </span>
           </div>
-          <div style={{ height: 1, background: "#EFEFF5", margin: "9px 0" }} />
+          <div style={{ height: 1, background: "rgba(255,255,255,0.18)", margin: "9px 0" }} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: "#01185A" }}>받게 되는 돈</span>
-            <span style={{ fontSize: 18, fontWeight: 800, color: "#01185A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#FFFFFF" }}>받게 되는 돈</span>
+            <span style={{ fontSize: 18, fontWeight: 800, color: "#FFFFFF", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
               {won(math.proceeds)}
             </span>
           </div>
@@ -1470,7 +1628,7 @@ export function OrderScreen({
           alt="키웅이"
           src="/ui/assets/mascot-bear.png"
           style={{ display: "block", filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))" }}
-          width={132}
+          width={150}
         />
         <div style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", letterSpacing: "0.08em", marginTop: 14 }}>
           {done.limit ? "기다리는 주문에 넣었어" : done.scheduled ? "다음 장 주문을 맡아뒀어" : "매도 완료"}
@@ -1490,6 +1648,19 @@ export function OrderScreen({
               : "왜 팔았는지까지 남겨뒀어.\n아카이브에서 산 날과 판 날을 같이 볼 수 있어."}
         </div>
 
+        {done.badge && (
+          <div
+            style={styleFromCss(
+              "display:flex;align-items:center;gap:11px;background:#FFF8E4;border-radius:20px;padding:13px 16px;margin-top:16px;" +
+                "width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)",
+            )}
+          >
+            <span style={{ fontSize: 14.5, fontWeight: 700, color: "#8A6B1F", lineHeight: 1.5 }}>
+              계획 실천 배지를 받았어요!
+            </span>
+          </div>
+        )}
+
         <div style={{ ...DONE_BOX, marginTop: 20 }}>
           <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>
             <span>{done.name}</span>
@@ -1507,7 +1678,7 @@ export function OrderScreen({
 
         <div style={{ width: "100%", marginTop: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: "#5C6280" }}>
-            하고 싶은 말이 있으면 남겨둬 <span style={{ color: "#A9AEC4", fontWeight: 500 }}>(나중에 다시 보여줄게)</span>
+            하고 싶은 말이 있으면 남겨주세요 <span style={{ color: "#A9AEC4", fontWeight: 500 }}>(나중에 다시 보여줄게요)</span>
           </div>
           <input
             maxLength={50}
@@ -1515,7 +1686,7 @@ export function OrderScreen({
               patchSell({ memo: e.target.value.slice(0, 50) });
               setMemoSaved(false);
             }}
-            placeholder="예: 목표까지 와서 팔았어"
+            placeholder="예: 목표까지 와서 팔았어요"
             style={{ ...MEMO_INPUT, marginTop: 9 }}
             value={sellDraft.memo}
           />
@@ -1544,18 +1715,20 @@ export function OrderScreen({
           <div onClick={goBack} style={BACK}>
             {step === 2 ? "‹" : "✕"}
           </div>
-          <div style={TITLE}>팔기(매도)</div>
+          <div style={TITLE}>팔래(매도)</div>
           <div style={STEP_PILL}>
             <span style={{ color: "#F5327F" }}>{step}</span> / 3
           </div>
         </div>
         <ProgressBars step={step} />
         <div style={SCROLL}>
+          {flowTabs}
           {step === 1 && step1}
           {step === 2 && step2}
           {step === 3 && step3}
         </div>
         {stepFooter(sellOk, step === 2 ? "팔기" : "다음", placeSell)}
+        {waitSheet}
       </div>
     );
   };
