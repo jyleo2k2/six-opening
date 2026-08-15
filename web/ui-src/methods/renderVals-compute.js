@@ -3,8 +3,8 @@
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
     // 홈 화면 — 로그인 계정(dbUser)에 따라 아빠/엄마/아이 홈을 통째로 다르게 그린다.
-    // 디자인 시안(front UI 로그인·가입 v2)의 "계정별 홈 화면 3개" 데모 그대로이며, 아직 실제 보유
-    // 종목·수익과는 연동하지 않은 고정 데모 데이터다.
+    // 인사말·아바타·목표 아이템은 저장소에 없는 값이라 여기 고정 데모로 남는다.
+    // 보유 종목과 수익은 아래에서 실제 계좌 값으로 갈아 끼운다.
     const HOME_INFO = {
       mom: {
         season: '보호자 계정', greeting: '찬영 어머님, 어서 오세요', avatarImg: 'assets/profile-mom.png',
@@ -41,9 +41,31 @@
     const dbRole = this.dbUser ? (this.dbUser.parent_child === 'child' ? 'child' : this.dbUser.guardian_role) : null;
     // dbUser 를 아직 못 불러왔을 때는 빈 화면 대신 아이 계정 데모로 보여준다.
     const home = HOME_INFO[dbRole] || HOME_INFO.child;
-    const goalCount = Math.max(0, Math.floor(home.profit / home.unitPrice));
-    const homeHoldingsTotal = home.holdings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
-    const homeRate = homeHoldingsTotal ? (home.profit / homeHoldingsTotal * 100) : 0;
+    // 보유 종목·수익은 로그인 역할의 실제 계좌에서 만든다. applyServerHoldings() 가
+    // GET /api/account 응답을 이미 acc[역할] 에 넣어 뒀으므로 여기서는 읽기만 한다.
+    // 유니버스에 없는 종목은 이름·현재가를 못 구해 카드를 만들 수 없으니 건너뛴다.
+    const homeAcc = this.dbUser ? s.acc[this.dbUser.parent_child] : null;
+    const homeRawHoldings = (homeAcc && homeAcc.holdings) || [];
+    const liveHoldings = homeRawHoldings.map(h => {
+      const hst = u.stocks.filter(v => v.code === h.code)[0];
+      if (!hst) return null;
+      const value = hst.price * h.qty, cost = h.avg * h.qty;
+      const pc = h.avg > 0 ? (hst.price - h.avg) / h.avg * 100 : 0;
+      return {
+        tick: hst.name.slice(0, 2), name: hst.name,
+        qty: (h.qty >= 1 ? (Math.round(h.qty * 100) / 100) : h.qty.toFixed(2)) + '주',
+        value: won(value), pct: (pc >= 0 ? '+' : '−') + Math.abs(pc).toFixed(1) + '%',
+        up: pc >= 0, profit: value - cost
+      };
+    }).filter(Boolean);
+    // 계좌를 읽기 전에는 데모가 보인다(첫 렌더에 빈 카드가 깜빡이지 않게 한다).
+    // 읽은 뒤에는 보유가 없어도 데모로 되돌아가지 않고 빈 상태를 보여 준다.
+    const homeLoaded = Boolean(homeAcc);
+    const homeHoldings = homeLoaded ? liveHoldings : home.holdings;
+    const homeProfit = homeLoaded ? liveHoldings.reduce((sum, h) => sum + h.profit, 0) : home.profit;
+    const goalCount = Math.max(0, Math.floor(homeProfit / home.unitPrice));
+    const homeHoldingsTotal = homeHoldings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
+    const homeRate = homeHoldingsTotal ? (homeProfit / homeHoldingsTotal * 100) : 0;
     const homeHoldingStyle = (h) => Object.assign({}, h, {
       pctStyle: 'font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:' + (h.up ? '#D5327A' : '#2E6BE6')
     });
