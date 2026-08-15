@@ -5,6 +5,7 @@ import type {
   ExplainTurn,
   ResolvedExplainReply,
 } from "../../../shared/types/chatbot";
+import { CHATBOT_KNOWLEDGE } from "../../../shared/data/chatbot-knowledge";
 import {
   looksLikeNewQuestion,
   matchColloquialIntent,
@@ -32,6 +33,35 @@ const FOLLOWUP_CHOICES: readonly ExplainChoice[] = [
   { id: "done", label: "여기까지 볼래요" },
 ];
 const UNSURE_CHOICE: ExplainChoice = { id: "unsure", label: "잘 모르겠어요" };
+
+/**
+ * 설명이 끝난 자리에 붙이는 비슷한 용어 추천 (SPEC §3.4.1).
+ *
+ * 세 번 틀린 뒤 "다른 것도 물어볼래요"만 있으면 아이가 직접 타이핑해야 해서 대화가 끊긴다.
+ * 같은 범주에서 아직 안 본 용어를 카드로 내면 다음 걸음을 고르기만 하면 된다.
+ *
+ * 추천은 `category`가 같은 승인 용어에서만 고르므로 LLM을 부르지 않고 결정적이다.
+ * 카드는 `suggestedQuestions`(자유 문장)가 아니라 선택지라, 문구가 라우터를 다시 타지 않고
+ * 서버가 등록된 스크립트 id 로 대조한다.
+ */
+const RELATED_CARD_LIMIT = 2;
+const RELATED_CARD_LIMIT_ON_ASK = 3;
+const RELATED_PREFIX = "term:";
+
+export function relatedTermChoices(scriptId: string, limit: number): ExplainChoice[] {
+  const current = CHATBOT_KNOWLEDGE.find((entry) => entry.explainScript?.id === scriptId);
+  if (!current?.category) return [];
+  const family = CHATBOT_KNOWLEDGE.filter(
+    (entry) => entry.category === current.category && entry.termLabel && entry.explainScript,
+  );
+  const at = family.findIndex((entry) => entry.id === current.id);
+  if (at < 0) return [];
+  // 앞에서 자르면 PER 에 늘 "시가총액"이 붙는다. 자기 바로 뒤부터 순환해 이웃한 말을 먼저 준다.
+  return Array.from({ length: Math.min(limit, family.length - 1) }, (_, step) => {
+    const entry = family[(at + step + 1) % family.length];
+    return { id: entry.explainScript!.id, label: `${entry.termLabel} 볼래요` };
+  });
+}
 
 /** 같은 단계에서 이 횟수만큼 되물은 뒤에는 더 안 묻고 정답을 바로 알려준다. */
 export const MAX_REASK_COUNT = 2;
@@ -106,7 +136,9 @@ function stageChoices(script: ExplainScript, stage: ExplainReply["stage"]) {
       ? script.check.choices
       : [...script.check.choices, UNSURE_CHOICE];
   }
-  if (stage === "followup") return FOLLOWUP_CHOICES;
+  if (stage === "followup") {
+    return [...relatedTermChoices(script.id, RELATED_CARD_LIMIT), ...FOLLOWUP_CHOICES];
+  }
   return script.check.kind === "guiding"
     ? GUIDED_DETAIL_CHOICES
     : script.adjust?.choices ?? CONFIRM_CHOICES;
@@ -145,7 +177,7 @@ function followupExplain(script: ExplainScript, text: string): ExplainStep {
     "followup",
     text,
     FOLLOWUP_PROMPT,
-    FOLLOWUP_CHOICES,
+    stageChoices(script, "followup"),
   );
 }
 
@@ -201,6 +233,16 @@ export function advanceExplain(
   reply: ResolvedExplainReply,
 ): ExplainStep | null {
   if (reply.scriptId !== script.id) return null;
+
+  // 추천 카드를 고르면 그 용어 설명을 처음부터 시작한다. 등록된 스크립트 id 일 때만 받는다.
+  if (reply.choiceId?.startsWith(RELATED_PREFIX)) {
+    const allowed = relatedTermChoices(script.id, RELATED_CARD_LIMIT_ON_ASK);
+    if (!allowed.some((choice) => choice.id === reply.choiceId)) return null;
+    const next = CHATBOT_KNOWLEDGE.find(
+      (entry) => entry.explainScript?.id === reply.choiceId,
+    )?.explainScript;
+    return next ? startExplain(next) : null;
+  }
 
   if (reply.stage === "brief") {
     if (
@@ -311,9 +353,17 @@ export function advanceExplain(
     if (!FOLLOWUP_CHOICES.some((choice) => choice.id === reply.choiceId)) {
       return null;
     }
-    return reply.choiceId === "ask"
-      ? { kind: "end", text: "좋아요, 다음에 궁금한 걸 그대로 적어 주세요." }
-      : { kind: "end", text: "좋아요, 궁금한 게 생기면 다시 불러 주세요." };
+    if (reply.choiceId !== "ask") {
+      return { kind: "end", text: "좋아요, 궁금한 게 생기면 다시 불러 주세요." };
+    }
+    // "다른 것도 물어볼래요"에서 대화를 끊지 않는다. 비슷한 용어를 더 펼쳐 고르게 한다.
+    const related = relatedTermChoices(script.id, RELATED_CARD_LIMIT_ON_ASK);
+    return related.length
+      ? turnStep(script, "followup", "비슷한 말도 같이 볼 수 있어요.", "무엇이 궁금해요?", [
+          ...related,
+          { id: "done", label: "여기까지 볼래요" },
+        ])
+      : { kind: "end", text: "좋아요, 다음에 궁금한 걸 그대로 적어 주세요." };
   }
 
   return null;

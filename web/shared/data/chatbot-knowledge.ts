@@ -1,4 +1,4 @@
-import type { ExplainScript } from "../types/chatbot";
+import type { ExplainScript, TermCategory } from "../types/chatbot";
 
 export type ChatbotKnowledgeKind = "glossary" | "faq";
 
@@ -14,6 +14,10 @@ export type ChatbotQuestionForm =
 export type ChatbotKnowledgeEntry = {
   id: string;
   kind: ChatbotKnowledgeKind;
+  /** 설명이 끝난 뒤 비슷한 용어를 추천할 때 쓰는 묶음. DAPIE 스크립트가 있는 용어만 갖는다. */
+  category?: TermCategory;
+  /** 추천 카드 버튼에 쓰는 짧은 이름. 트리거가 문장인 용어도 있어 따로 둔다. */
+  termLabel?: string;
   triggers: readonly string[];
   questionForms?: readonly ChatbotQuestionForm[];
   answer: string;
@@ -631,15 +635,15 @@ const DAPIE_SCREEN_TERM_IDS = new Set([
 ]);
 
 export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
-  { id: "stock", kind: "glossary", triggers: ["주식"], answer: "주식은 회사의 작은 조각이라고 생각하면 돼요. 주식을 가진 사람은 그 회사의 주주가 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.stock, status: reviewed },
-  { id: "shareholder", kind: "glossary", triggers: ["주주"], answer: "주주는 회사의 주식을 가진 사람이에요. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.shareholder, status: reviewed },
-  { id: "stock-item", kind: "glossary", triggers: ["종목"], answer: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해요. 여기서는 각 회사의 주식이 하나의 종목이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["stock-item"], status: reviewed },
-  { id: "buy", kind: "glossary", triggers: ["매수", "주식 사기"], questionForms: ["definition"], answer: "매수는 주식을 사는 거래예요. 주문 전에 수량과 예상 금액, 그리고 고른 이유를 확인하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.buy, status: reviewed },
-  { id: "sell", kind: "glossary", triggers: ["매도", "팔기"], answer: "매도는 가지고 있던 주식을 파는 거래예요. 팔고 나면 그 거래의 결과가 실현손익으로 기록돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sell, status: reviewed },
-  { id: "order", kind: "glossary", triggers: ["주문"], answer: "주문은 주식을 사고팔겠다고 거래소에 알리는 과정이에요. 주문을 넣었다고 바로 거래가 끝나는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.order, status: reviewed },
-  { id: "execution", kind: "glossary", triggers: ["체결"], answer: "체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태예요. 체결된 뒤에 보유 수량이 바뀌어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.execution, status: reviewed },
-  { id: "current-price", kind: "glossary", triggers: ["현재가", "지금 가격"], answer: "현재가는 지금 화면에 표시된 최근 거래 가격이에요. 시간이 지나면 달라질 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["current-price"], status: reviewed },
-  { id: "market-order", kind: "glossary", triggers: ["시장가", "지금 가격에 바로"], answer: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이에요. 주문을 넣는 순간의 가격과 조금 달라질 수 있어요.",
+  { id: "stock", kind: "glossary", category: "basics", termLabel: "주식", triggers: ["주식"], answer: "주식은 회사의 작은 조각이라고 생각하면 돼요. 주식을 가진 사람은 그 회사의 주주가 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.stock, status: reviewed },
+  { id: "shareholder", kind: "glossary", category: "basics", termLabel: "주주", triggers: ["주주"], answer: "주주는 회사의 주식을 가진 사람이에요. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.shareholder, status: reviewed },
+  { id: "stock-item", kind: "glossary", category: "basics", termLabel: "종목", triggers: ["종목"], answer: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해요. 여기서는 각 회사의 주식이 하나의 종목이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["stock-item"], status: reviewed },
+  { id: "buy", kind: "glossary", category: "order", termLabel: "매수", triggers: ["매수", "주식 사기"], questionForms: ["definition"], answer: "매수는 주식을 사는 거래예요. 주문 전에 수량과 예상 금액, 그리고 고른 이유를 확인하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.buy, status: reviewed },
+  { id: "sell", kind: "glossary", category: "order", termLabel: "매도", triggers: ["매도", "팔기"], answer: "매도는 가지고 있던 주식을 파는 거래예요. 팔고 나면 그 거래의 결과가 실현손익으로 기록돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sell, status: reviewed },
+  { id: "order", kind: "glossary", category: "order", termLabel: "주문", triggers: ["주문"], answer: "주문은 주식을 사고팔겠다고 거래소에 알리는 과정이에요. 주문을 넣었다고 바로 거래가 끝나는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.order, status: reviewed },
+  { id: "execution", kind: "glossary", category: "order", termLabel: "체결", triggers: ["체결"], answer: "체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태예요. 체결된 뒤에 보유 수량이 바뀌어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.execution, status: reviewed },
+  { id: "current-price", kind: "glossary", category: "chart", termLabel: "현재가", triggers: ["현재가", "지금 가격"], answer: "현재가는 지금 화면에 표시된 최근 거래 가격이에요. 시간이 지나면 달라질 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["current-price"], status: reviewed },
+  { id: "market-order", kind: "glossary", category: "order", termLabel: "시장가", triggers: ["시장가", "지금 가격에 바로"], answer: "시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이에요. 주문을 넣는 순간의 가격과 조금 달라질 수 있어요.",
     explainScript: {
         id: "term:market-order",
         brief: "시장가는 지금 시장에 나와 있는 값으로 바로 주문하는 방법이에요.",
@@ -667,7 +671,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "가게에 붙은 값표를 그대로 보고 고르는 것과 비슷해요. 값을 깎지 않는 대신 기다리지 않아도 돼요.",
       },
     status: reviewed },
-  { id: "limit-order", kind: "glossary", triggers: ["지정가", "내가 정한 가격에"], answer: "지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이에요. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어요.",
+  { id: "limit-order", kind: "glossary", category: "order", termLabel: "지정가", triggers: ["지정가", "내가 정한 가격에"], answer: "지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이에요. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어요.",
     explainScript: {
         id: "term:limit-order",
         brief: "지정가는 내가 정한 값에만 주문이 되도록 하는 방법이에요.",
@@ -695,10 +699,10 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "친구에게 이만큼이면 바꾸겠다고 미리 말해 두는 것과 비슷해요. 친구가 동의해야 바꿀 수 있어요.",
       },
     status: reviewed },
-  { id: "quantity", kind: "glossary", triggers: ["수량", "몇 주", "주 수"], answer: "수량은 사고팔 주식의 개수예요. 한 주 가격과 곱하면 대략의 거래 금액을 확인할 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.quantity, status: reviewed },
-  { id: "estimated-amount", kind: "glossary", triggers: ["예상 금액", "주문 금액"], answer: "예상 금액은 주문 수량과 가격으로 계산한 돈이에요. 주문을 확정하기 전 최종 금액을 다시 확인해 주세요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["estimated-amount"], status: reviewed },
-  { id: "evaluation-amount", kind: "glossary", triggers: ["평가금액", "지금 값어치"], answer: "평가금액은 지금 가지고 있는 주식이 현재 가격으로 얼마인지 보여주는 금액이에요. 아직 팔지 않았다면 가격에 따라 바뀔 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["evaluation-amount"], status: reviewed },
-  { id: "unrealized-profit", kind: "glossary", triggers: ["평가손익", "번 돈"], answer: "평가손익은 아직 가진 주식의 값이 산 뒤보다 얼마나 달라졌는지 보여줘요. 아직 팔지 않은 변화라서 계속 바뀔 수 있어요.",
+  { id: "quantity", kind: "glossary", category: "order", termLabel: "수량", triggers: ["수량", "몇 주", "주 수"], answer: "수량은 사고팔 주식의 개수예요. 한 주 가격과 곱하면 대략의 거래 금액을 확인할 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.quantity, status: reviewed },
+  { id: "estimated-amount", kind: "glossary", category: "order", termLabel: "예상 금액", triggers: ["예상 금액", "주문 금액"], answer: "예상 금액은 주문 수량과 가격으로 계산한 돈이에요. 주문을 확정하기 전 최종 금액을 다시 확인해 주세요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["estimated-amount"], status: reviewed },
+  { id: "evaluation-amount", kind: "glossary", category: "profit", termLabel: "평가금액", triggers: ["평가금액", "지금 값어치"], answer: "평가금액은 지금 가지고 있는 주식이 현재 가격으로 얼마인지 보여주는 금액이에요. 아직 팔지 않았다면 가격에 따라 바뀔 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["evaluation-amount"], status: reviewed },
+  { id: "unrealized-profit", kind: "glossary", category: "profit", termLabel: "평가손익", triggers: ["평가손익", "번 돈"], answer: "평가손익은 아직 가진 주식의 값이 산 뒤보다 얼마나 달라졌는지 보여줘요. 아직 팔지 않은 변화라서 계속 바뀔 수 있어요.",
     explainScript: {
         id: "term:unrealized-profit",
         brief: "평가손익은 아직 팔지 않은 주식의 값이 얼마나 달라졌는지 보여줘요.",
@@ -726,7 +730,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "서랍에 넣어 둔 카드의 요즘 값을 적어 둔 쪽지와 비슷해요. 아직 바꾸지 않았으니 숫자는 계속 달라져요.",
       },
     status: reviewed },
-  { id: "realized-profit", kind: "glossary", triggers: ["실현손익"], answer: "실현손익은 주식을 팔아 거래가 끝난 뒤 기록되는 결과예요. 평가손익과 달리 이미 끝난 거래의 기록이에요.",
+  { id: "realized-profit", kind: "glossary", category: "profit", termLabel: "실현손익", triggers: ["실현손익"], answer: "실현손익은 주식을 팔아 거래가 끝난 뒤 기록되는 결과예요. 평가손익과 달리 이미 끝난 거래의 기록이에요.",
     explainScript: {
         id: "term:realized-profit",
         brief: "실현손익은 주식을 팔아서 거래가 끝난 뒤에 남는 결과예요.",
@@ -754,16 +758,17 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "친구와 카드를 바꾸고 나서 적어 둔 결과표와 비슷해요. 바꾼 뒤에는 숫자가 그대로 남아요.",
       },
     status: reviewed },
-  { id: "return", kind: "glossary", triggers: ["수익률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이에요. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.return, status: reviewed },
-  { id: "average-price", kind: "glossary", triggers: ["평균 매수가", "평균매수가", "평균"], answer: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["average-price"], status: reviewed },
-  { id: "sector", kind: "glossary", triggers: ["업종", "섹터"], answer: "업종은 비슷한 일을 하는 회사들을 묶은 이름이에요. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sector, status: reviewed },
-  { id: "market-cap", kind: "glossary", triggers: ["시가총액"], answer: "시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기예요. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["market-cap"], status: reviewed },
-  { id: "revenue", kind: "glossary", triggers: ["매출"], answer: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모예요. 매출이 모두 회사의 이익은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.revenue, status: reviewed },
-  { id: "operating-profit", kind: "glossary", triggers: ["영업이익"], answer: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요. 회사의 공개된 과거 성적을 볼 때 쓰는 말이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["operating-profit"], status: reviewed },
-  { id: "dividend", kind: "glossary", triggers: ["배당"], answer: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해요. 모든 회사가 배당하는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.dividend, status: reviewed },
+  { id: "return", kind: "glossary", category: "profit", termLabel: "수익률", triggers: ["수익률"], answer: "수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이에요. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.return, status: reviewed },
+  { id: "average-price", kind: "glossary", category: "profit", termLabel: "평균 매수가", triggers: ["평균 매수가", "평균매수가", "평균"], answer: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["average-price"], status: reviewed },
+  { id: "sector", kind: "glossary", category: "basics", termLabel: "업종", triggers: ["업종", "섹터"], answer: "업종은 비슷한 일을 하는 회사들을 묶은 이름이에요. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sector, status: reviewed },
+  { id: "market-cap", kind: "glossary", category: "indicator", termLabel: "시가총액", triggers: ["시가총액"], answer: "시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기예요. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["market-cap"], status: reviewed },
+  { id: "revenue", kind: "glossary", category: "indicator", termLabel: "매출", triggers: ["매출"], answer: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모예요. 매출이 모두 회사의 이익은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.revenue, status: reviewed },
+  { id: "operating-profit", kind: "glossary", category: "indicator", termLabel: "영업이익", triggers: ["영업이익"], answer: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요. 회사의 공개된 과거 성적을 볼 때 쓰는 말이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["operating-profit"], status: reviewed },
+  { id: "dividend", kind: "glossary", category: "indicator", termLabel: "배당", triggers: ["배당"], answer: "배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해요. 모든 회사가 배당하는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.dividend, status: reviewed },
   {
     id: "per",
     kind: "glossary",
+    category: "indicator", termLabel: "PER",
     triggers: ["per", "퍼", "주가수익비율", "비싼지", "싼지", "비싼회사"],
     answer: "PER은 회사가 번 이익과 주가를 비교해 보는 숫자예요. 같은 업종 회사끼리 함께 보면 이해하기 쉬워요.",
     explainScript: {
@@ -791,7 +796,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
     },
     status: reviewed,
   },
-  { id: "pbr", kind: "glossary", triggers: ["pbr", "주가순자산비율"], answer: "PBR은 회사가 가진 자산과 주가를 비교해 보는 숫자예요. 이 숫자 하나만으로 좋고 나쁜 회사를 정할 수는 없어요.",
+  { id: "pbr", kind: "glossary", category: "indicator", termLabel: "PBR", triggers: ["pbr", "주가순자산비율"], answer: "PBR은 회사가 가진 자산과 주가를 비교해 보는 숫자예요. 이 숫자 하나만으로 좋고 나쁜 회사를 정할 수는 없어요.",
     explainScript: {
         id: "term:pbr",
         brief: "PBR은 회사 값이 회사가 가진 재산에 비해 높은지 보는 숫자예요.",
@@ -819,7 +824,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "가진 물건이 똑같은 가게가 두 곳 있다고 해 봐요. 한 곳이 세 배 비싸면 그 가게의 PBR이 더 커요.",
       },
     status: reviewed },
-  { id: "eps", kind: "glossary", triggers: ["eps", "주당순이익"], answer: "EPS는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자예요. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자예요.",
+  { id: "eps", kind: "glossary", category: "indicator", termLabel: "EPS", triggers: ["eps", "주당순이익"], answer: "EPS는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자예요. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자예요.",
     explainScript: {
         id: "term:eps",
         brief: "EPS는 회사가 번 돈을 주식 한 조각 몫으로 나눈 값이에요.",
@@ -847,9 +852,9 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "피자 한 판을 여덟 조각으로 나누면 한 조각 몫이 정해져요. EPS도 번 돈을 조각 수로 나눈 몫이에요.",
       },
     status: reviewed },
-  { id: "etf", kind: "glossary", triggers: ["etf"], answer: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이에요. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.etf, status: reviewed },
-  { id: "index", kind: "glossary", triggers: ["지수"], answer: "지수는 여러 주식의 가격 움직임을 한눈에 보기 위해 만든 숫자예요. 시장 전체나 특정 업종의 흐름을 살펴볼 때 써요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.index, status: reviewed },
-  { id: "diversification", kind: "glossary", triggers: ["분산투자", "분산 투자"], answer: "분산투자는 한 곳에만 담지 않고 여러 곳에 나누어 보는 방법이에요. 결과를 보장하지는 않지만 한 종목에만 의존하는 정도는 줄일 수 있어요.",
+  { id: "etf", kind: "glossary", category: "basics", termLabel: "ETF", triggers: ["etf"], answer: "ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이에요. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.etf, status: reviewed },
+  { id: "index", kind: "glossary", category: "basics", termLabel: "지수", triggers: ["지수"], answer: "지수는 여러 주식의 가격 움직임을 한눈에 보기 위해 만든 숫자예요. 시장 전체나 특정 업종의 흐름을 살펴볼 때 써요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.index, status: reviewed },
+  { id: "diversification", kind: "glossary", category: "risk", termLabel: "분산투자", triggers: ["분산투자", "분산 투자"], answer: "분산투자는 한 곳에만 담지 않고 여러 곳에 나누어 보는 방법이에요. 결과를 보장하지는 않지만 한 종목에만 의존하는 정도는 줄일 수 있어요.",
     explainScript: {
         id: "term:diversification",
         brief: "분산투자는 한 곳에 몰아 두지 않고 여러 곳에 나눠 두는 방법이에요.",
@@ -877,37 +882,39 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "달걀을 한 바구니에 다 담지 않는 것과 같아요. 바구니 하나를 떨어뜨려도 남은 달걀은 무사해요.",
       },
     status: reviewed },
-  { id: "chart", kind: "glossary", triggers: ["차트"], answer: "차트는 과거 가격 변화를 그림으로 보여줘요. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.chart, status: reviewed },
-  { id: "volume", kind: "glossary", triggers: ["거래량"], answer: "거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자예요. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volume, status: reviewed },
-  { id: "volatility", kind: "glossary", triggers: ["변동성"], answer: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해요. 가격은 늘 움직일 수 있다는 점을 기억하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volatility, status: reviewed },
-  { id: "risk", kind: "glossary", triggers: ["위험"], answer: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.risk, status: reviewed },
-  { id: "mock-investing", kind: "faq", triggers: ["모의투자"], answer: "모의투자는 실제 돈 대신 가상 돈으로 주식 거래를 연습하는 활동이에요. 실제 주식을 가지거나 실제 돈이 출금되지는 않아요.", actionTarget: "home", status: reviewed },
-  { id: "total-assets", kind: "faq", triggers: ["내 지갑 전체", "전체 자산", "지금 내 돈 전부"], answer: "전체 자산은 쓸 수 있는 가상 현금과 가진 주식의 현재 값어치, 기다리는 주문에 맡겨 둔 금액을 합친 값이에요. 가격이 움직이면 달라질 수 있어요.", actionTarget: "home", status: reviewed },
-  { id: "available-cash", kind: "faq", triggers: ["쓸 수 있는 돈", "남은 지갑", "현금"], answer: "쓸 수 있는 돈은 지금 새 주문에 사용할 수 있는 가상 돈이에요. 기다리는 주문에 맡겨 둔 돈은 취소되기 전까지 여기서 빠져 있어요.", actionTarget: "home", status: reviewed },
-  { id: "holdings", kind: "faq", triggers: ["가진 회사", "보유 종목"], answer: "가진 회사는 지금 내 계좌에 주식을 가지고 있는 회사를 뜻해요. 아직 체결되지 않은 기다리는 주문은 보유 종목이 아니에요.", actionTarget: "home", status: reviewed },
-  { id: "pending-order", kind: "faq", triggers: ["기다리는 주문"], answer: "기다리는 주문은 아직 체결되지 않은 지정가 주문이에요. 매수 주문의 금액이나 매도 주문의 수량은 체결되거나 취소될 때까지 잠시 예약돼요.", actionTarget: "home", status: reviewed },
-  { id: "order-cancel", kind: "faq", triggers: ["주문 취소", "주문취소"], answer: "기다리는 주문을 취소하면 예약된 가상 돈이나 주식은 돌아와요. 이미 체결된 주문은 취소할 수 없어요.", actionTarget: "order", status: reviewed },
-  { id: "sell-proceeds", kind: "faq", triggers: ["받게 되는 돈"], answer: "받게 되는 돈은 팔 수량과 예상 체결 가격을 곱해 계산한 금액이에요. 현재 데모는 세금과 수수료를 따로 계산하지 않아요.", actionTarget: "order", status: reviewed },
-  { id: "goal-price", kind: "faq", triggers: ["목표 가격"], answer: "이 값은 나중에 확인하려고 사용자가 스스로 적어 둔 가격이에요. 지정가 주문이나 자동 매도 예약과는 달라요.", actionTarget: "order", status: reviewed },
-  { id: "holding-period", kind: "faq", triggers: ["예상 보유기간", "보유 기간", "언제까지 가질 생각"], answer: "보유 기간은 주식을 얼마나 오래 가지고 있을지 생각해 본 기간이에요. 꼭 지켜야 하는 약속이나 자동 매도 조건은 아니에요.", actionTarget: "order", status: reviewed },
-  { id: "buy-day-record", kind: "faq", triggers: ["사던 날의 나"], answer: "사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간, 처음 정한 가격을 다시 보여주는 화면이에요. 지금 생각과 어떻게 달라졌는지 돌아보게 도와줘요.", actionTarget: "order", status: reviewed },
-  { id: "plan-badge", kind: "faq", triggers: ["계획 실천 배지"], answer: "계획 실천 배지는 처음 남긴 매도 계획과 맞게 팔았을 때 받는 기록용 배지예요. 수익이나 투자 실력을 평가하는 상은 아니에요.", actionTarget: "archive", status: reviewed },
-  { id: "line-chart", kind: "faq", triggers: ["선차트"], answer: "선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요. 과거 가격의 흐름을 보는 그림이지 다음 가격을 알려 주지는 않아요.", actionTarget: "stock", status: reviewed },
-  { id: "candle-chart", kind: "faq", triggers: ["캔들차트", "캔들"], answer: "캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요. 막대 하나가 담는 시간은 분봉·일봉·주봉으로 따로 고를 수 있어요.", actionTarget: "stock", status: reviewed },
-  { id: "minute-chart", kind: "faq", triggers: ["분봉"], answer: "분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요. 짧은 시간 단위로 과거 가격을 살펴볼 때 써요.", actionTarget: "stock", status: reviewed },
-  { id: "daily-chart", kind: "faq", triggers: ["일봉"], answer: "일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요. 하루의 시작값과 끝값, 높고 낮은 값을 함께 볼 수 있어요.", actionTarget: "stock", status: reviewed },
-  { id: "weekly-chart", kind: "faq", triggers: ["주봉"], answer: "주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요. 여러 날의 과거 흐름을 한 묶음으로 살펴볼 수 있어요.", actionTarget: "stock", status: reviewed },
-  { id: "delayed-price", kind: "faq", triggers: ["15분 지연 시세"], answer: "15분 지연 시세는 실제 시장 가격이 화면에 약 15분 늦게 표시된다는 뜻이에요. 지금 시장에서 거래되는 가격과 다를 수 있어요.", actionTarget: "stock", status: reviewed },
-  { id: "child-news", kind: "faq", triggers: ["어린이 뉴스", "오늘 국내 시황", "원문 보기"], answer: "어린이 뉴스는 회사나 시장에서 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 기사나 자료를 직접 확인할 수 있고, 뉴스는 매수·매도 답을 주지 않아요.", actionTarget: "stock", status: reviewed },
-  { id: "season", kind: "faq", triggers: ["시즌 진행", "남은 시즌", "시즌"], answer: "시즌은 가족이 같은 기간 동안 모의투자하고 기록을 쌓는 활동 기간이에요. 현재 한 시즌은 4주이고, 남은 기간은 홈의 시즌 진행 표시에서 확인할 수 있어요.", actionTarget: "home", status: reviewed },
-  { id: "trade-lock", kind: "faq", triggers: ["학교 시간엔 매매 쉬기", "주문 잠금"], answer: "주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요.", actionTarget: "home", status: reviewed },
-  { id: "ranking", kind: "faq", triggers: ["랭킹", "이번 주", "시즌 전체"], answer: "랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요.", actionTarget: "home", status: reviewed },
-  { id: "family-feed", kind: "faq", triggers: ["가족 기록", "거래 가격", "차트에서 이 지점 보기"], answer: "가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요.", status: reviewed },
-  { id: "profile-abilities", kind: "faq", triggers: ["정확력", "근거력", "집중력", "분산력", "직관력"], answer: "근거력·직관력은 매수 전 자료를 살펴본 기록을, 집중력·분산력은 보유 섹터와 현금 비중을, 정확력은 거래 뒤 5거래일의 가격 방향을 바탕으로 보여줘요. 어느 방향이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
-  { id: "profile-definition", kind: "faq", triggers: ["성향이 뭐", "성향 뜻", "능력치 오각형"], answer: "성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.", actionTarget: "archive", status: reviewed },
-  { id: "profile-status", kind: "faq", triggers: ["관찰 초기", "별 판정 중", "5거래일"], answer: "관찰 초기에는 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족해요. 별 판정 중은 거래 뒤 5거래일이 지나지 않아 정확력 등급을 아직 계산하지 못한 상태예요.", actionTarget: "archive", status: reviewed },
-  { id: "profile-character", kind: "faq", triggers: ["저격수", "전략가", "승부사", "탐험가", "성향 캐릭터"], answer: "성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
-  { id: "season-record", kind: "faq", triggers: ["시즌 기록이 뭐야", "기록 카드"], answer: "시즌 기록은 이번 시즌의 매수·매도·메모·상세 열람 건수를 모아 보여줘요. 기록 카드는 시즌이 끝난 뒤 받는 요약이며, 현재는 4주차까지 잠겨 있어요.", actionTarget: "archive", status: reviewed },
+  { id: "chart", kind: "glossary", category: "chart", termLabel: "차트", triggers: ["차트"], answer: "차트는 과거 가격 변화를 그림으로 보여줘요. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.chart, status: reviewed },
+  { id: "volume", kind: "glossary", category: "indicator", termLabel: "거래량", triggers: ["거래량"], answer: "거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자예요. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volume, status: reviewed },
+  { id: "volatility", kind: "glossary", category: "risk", termLabel: "변동성", triggers: ["변동성"], answer: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해요. 가격은 늘 움직일 수 있다는 점을 기억하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volatility, status: reviewed },
+  { id: "risk", kind: "glossary", category: "risk", termLabel: "위험", triggers: ["위험"], answer: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.risk, status: reviewed },
+  { id: "mock-investing", kind: "faq", category: "service", termLabel: "모의투자", triggers: ["모의투자"], answer: "모의투자는 실제 돈 대신 가상 돈으로 주식 거래를 연습하는 활동이에요. 실제 주식을 가지거나 실제 돈이 출금되지는 않아요.", actionTarget: "home", status: reviewed },
+  { id: "total-assets", kind: "faq", category: "profit", termLabel: "전체 자산", triggers: ["내 지갑 전체", "전체 자산", "지금 내 돈 전부"], answer: "전체 자산은 쓸 수 있는 가상 현금과 가진 주식의 현재 값어치, 기다리는 주문에 맡겨 둔 금액을 합친 값이에요. 가격이 움직이면 달라질 수 있어요.", actionTarget: "home", status: reviewed },
+  { id: "available-cash", kind: "faq", category: "profit", termLabel: "쓸 수 있는 돈", triggers: ["쓸 수 있는 돈", "남은 지갑", "현금"], answer: "쓸 수 있는 돈은 지금 새 주문에 사용할 수 있는 가상 돈이에요. 기다리는 주문에 맡겨 둔 돈은 취소되기 전까지 여기서 빠져 있어요.", actionTarget: "home", status: reviewed },
+  { id: "holdings", kind: "faq", category: "profit", termLabel: "보유 종목", triggers: ["가진 회사", "보유 종목"], answer: "가진 회사는 지금 내 계좌에 주식을 가지고 있는 회사를 뜻해요. 아직 체결되지 않은 기다리는 주문은 보유 종목이 아니에요.", actionTarget: "home", status: reviewed },
+  { id: "pending-order", kind: "faq", category: "order", termLabel: "기다리는 주문", triggers: ["기다리는 주문"], answer: "기다리는 주문은 아직 체결되지 않은 지정가 주문이에요. 매수 주문의 금액이나 매도 주문의 수량은 체결되거나 취소될 때까지 잠시 예약돼요.", actionTarget: "home", status: reviewed },
+  { id: "order-cancel", kind: "faq", category: "order", termLabel: "주문 취소", triggers: ["주문 취소", "주문취소"], answer: "기다리는 주문을 취소하면 예약된 가상 돈이나 주식은 돌아와요. 이미 체결된 주문은 취소할 수 없어요.", actionTarget: "order", status: reviewed },
+  { id: "sell-proceeds", kind: "faq", category: "order", termLabel: "받게 되는 돈", triggers: ["받게 되는 돈"], answer: "받게 되는 돈은 팔 수량과 예상 체결 가격을 곱해 계산한 금액이에요. 현재 데모는 세금과 수수료를 따로 계산하지 않아요.", actionTarget: "order", status: reviewed },
+  // termLabel 에 "목표 가격"을 쓰면 추천 카드가 금지표현 필터의 `목표가` 패턴에 걸린다.
+  // 필터는 안전 하한선이라 그대로 두고, 뜻이 같은 다른 이름을 쓴다.
+  { id: "goal-price", kind: "faq", category: "service", termLabel: "내가 적어 둔 가격", triggers: ["목표 가격"], answer: "이 값은 나중에 확인하려고 사용자가 스스로 적어 둔 가격이에요. 지정가 주문이나 자동 매도 예약과는 달라요.", actionTarget: "order", status: reviewed },
+  { id: "holding-period", kind: "faq", category: "service", termLabel: "예상 보유기간", triggers: ["예상 보유기간", "보유 기간", "언제까지 가질 생각"], answer: "보유 기간은 주식을 얼마나 오래 가지고 있을지 생각해 본 기간이에요. 꼭 지켜야 하는 약속이나 자동 매도 조건은 아니에요.", actionTarget: "order", status: reviewed },
+  { id: "buy-day-record", kind: "faq", category: "service", termLabel: "사던 날의 나", triggers: ["사던 날의 나"], answer: "사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간, 처음 정한 가격을 다시 보여주는 화면이에요. 지금 생각과 어떻게 달라졌는지 돌아보게 도와줘요.", actionTarget: "order", status: reviewed },
+  { id: "plan-badge", kind: "faq", category: "service", termLabel: "계획 실천 배지", triggers: ["계획 실천 배지"], answer: "계획 실천 배지는 처음 남긴 매도 계획과 맞게 팔았을 때 받는 기록용 배지예요. 수익이나 투자 실력을 평가하는 상은 아니에요.", actionTarget: "archive", status: reviewed },
+  { id: "line-chart", kind: "faq", category: "chart", termLabel: "선차트", triggers: ["선차트"], answer: "선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요. 과거 가격의 흐름을 보는 그림이지 다음 가격을 알려 주지는 않아요.", actionTarget: "stock", status: reviewed },
+  { id: "candle-chart", kind: "faq", category: "chart", termLabel: "캔들차트", triggers: ["캔들차트", "캔들"], answer: "캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요. 막대 하나가 담는 시간은 분봉·일봉·주봉으로 따로 고를 수 있어요.", actionTarget: "stock", status: reviewed },
+  { id: "minute-chart", kind: "faq", category: "chart", termLabel: "분봉", triggers: ["분봉"], answer: "분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요. 짧은 시간 단위로 과거 가격을 살펴볼 때 써요.", actionTarget: "stock", status: reviewed },
+  { id: "daily-chart", kind: "faq", category: "chart", termLabel: "일봉", triggers: ["일봉"], answer: "일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요. 하루의 시작값과 끝값, 높고 낮은 값을 함께 볼 수 있어요.", actionTarget: "stock", status: reviewed },
+  { id: "weekly-chart", kind: "faq", category: "chart", termLabel: "주봉", triggers: ["주봉"], answer: "주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요. 여러 날의 과거 흐름을 한 묶음으로 살펴볼 수 있어요.", actionTarget: "stock", status: reviewed },
+  { id: "delayed-price", kind: "faq", category: "chart", termLabel: "15분 지연 시세", triggers: ["15분 지연 시세"], answer: "15분 지연 시세는 실제 시장 가격이 화면에 약 15분 늦게 표시된다는 뜻이에요. 지금 시장에서 거래되는 가격과 다를 수 있어요.", actionTarget: "stock", status: reviewed },
+  { id: "child-news", kind: "faq", category: "service", termLabel: "어린이 뉴스", triggers: ["어린이 뉴스", "오늘 국내 시황", "원문 보기"], answer: "어린이 뉴스는 회사나 시장에서 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 기사나 자료를 직접 확인할 수 있고, 뉴스는 매수·매도 답을 주지 않아요.", actionTarget: "stock", status: reviewed },
+  { id: "season", kind: "faq", category: "service", termLabel: "시즌", triggers: ["시즌 진행", "남은 시즌", "시즌"], answer: "시즌은 가족이 같은 기간 동안 모의투자하고 기록을 쌓는 활동 기간이에요. 현재 한 시즌은 4주이고, 남은 기간은 홈의 시즌 진행 표시에서 확인할 수 있어요.", actionTarget: "home", status: reviewed },
+  { id: "trade-lock", kind: "faq", category: "service", termLabel: "주문 잠금", triggers: ["학교 시간엔 매매 쉬기", "주문 잠금"], answer: "주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요.", actionTarget: "home", status: reviewed },
+  { id: "ranking", kind: "faq", category: "service", termLabel: "랭킹", triggers: ["랭킹", "이번 주", "시즌 전체"], answer: "랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요.", actionTarget: "home", status: reviewed },
+  { id: "family-feed", kind: "faq", category: "service", termLabel: "가족 기록", triggers: ["가족 기록", "거래 가격", "차트에서 이 지점 보기"], answer: "가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요.", status: reviewed },
+  { id: "profile-abilities", kind: "faq", category: "profile", termLabel: "성향 축", triggers: ["정확력", "근거력", "집중력", "분산력", "직관력"], answer: "근거력·직관력은 매수 전 자료를 살펴본 기록을, 집중력·분산력은 보유 섹터와 현금 비중을, 정확력은 거래 뒤 5거래일의 가격 방향을 바탕으로 보여줘요. 어느 방향이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
+  { id: "profile-definition", kind: "faq", category: "profile", termLabel: "성향", triggers: ["성향이 뭐", "성향 뜻", "능력치 오각형"], answer: "성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.", actionTarget: "archive", status: reviewed },
+  { id: "profile-status", kind: "faq", category: "profile", termLabel: "관찰 초기", triggers: ["관찰 초기", "별 판정 중", "5거래일"], answer: "관찰 초기에는 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족해요. 별 판정 중은 거래 뒤 5거래일이 지나지 않아 정확력 등급을 아직 계산하지 못한 상태예요.", actionTarget: "archive", status: reviewed },
+  { id: "profile-character", kind: "faq", category: "profile", termLabel: "성향 캐릭터", triggers: ["저격수", "전략가", "승부사", "탐험가", "성향 캐릭터"], answer: "성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
+  { id: "season-record", kind: "faq", category: "profile", termLabel: "시즌 기록", triggers: ["시즌 기록이 뭐야", "기록 카드"], answer: "시즌 기록은 이번 시즌의 매수·매도·메모·상세 열람 건수를 모아 보여줘요. 기록 카드는 시즌이 끝난 뒤 받는 요약이며, 현재는 4주차까지 잠겨 있어요.", actionTarget: "archive", status: reviewed },
   { id: "reason", kind: "faq", triggers: ["투자 근거", "고른 이유", "기록"], answer: "기록에서는 고른 이유를 남길 수 있어요. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거예요.", status: reviewed },
   { id: "archive", kind: "faq", triggers: ["아카이브"], answer: "아카이브에서는 남긴 거래와 생각을 다시 볼 수 있어요. 점수표가 아니라 투자 스타일을 관찰하는 기록이에요.", actionTarget: "archive", status: reviewed },
   { id: "stock-search", kind: "faq", triggers: ["종목 검색", "회사 찾기", "종목 찾기"], answer: "종목 화면의 검색창에 회사 이름을 입력하거나 업종 칩을 눌러 찾아볼 수 있어요. 이 서비스가 제공하는 종목 안에서만 검색돼요.", actionTarget: "stock", status: reviewed },
