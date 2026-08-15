@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { isHaeyoKorean, toPoliteKorean } from "./polite";
+import { CHATBOT_KNOWLEDGE } from "../../../shared/data/chatbot-knowledge";
 import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput } from "../../../shared/llm/filter";
 import { normalizeChatInput, PROACTIVE_SCRIPTS, routeMessage } from "./routing";
@@ -2150,6 +2151,54 @@ for (const question of KEEPS_FIXED_ANSWER) {
     `용어 DAPIE 로 답할 수 없는 질문인데 되묻기가 열림: ${question} -> ${routed.explainScript?.id}`,
   );
 }
+
+// ── 사용법·위치 질문에는 정의형 되묻기를 열지 않는다 (SPEC §3.4.1) ──────────
+//
+// "차트는 어떻게 봐요?"(절차)에 "주가 차트가 직접 보여주는 것은 무엇일까요?"(정의)로
+// 되묻던 자리다. 원인은 낱말 하나가 아니라 **사전 항목의 스크립트를 질문 형태와
+// 무관하게 붙이던 경로**였고, 그때 승인 사전의 스크립트 보유 용어 63종 중 58종이
+// 같은 증상을 냈다. 그래서 전수로 검사한다 — 한 용어만 고치면 다음 용어에서 또 난다.
+const NON_DEFINITION_QUESTION_SUFFIXES = [
+  " 어떻게 봐요?",
+  " 보는 법 알려줘",
+  " 어디서 봐요?",
+];
+let nonDefinitionChecked = 0;
+for (const entry of CHATBOT_KNOWLEDGE) {
+  if (entry.status !== "reviewed" || !entry.termLabel || !entry.explainScript) continue;
+  for (const suffix of NON_DEFINITION_QUESTION_SUFFIXES) {
+    const howToQuestion: string = `${entry.termLabel}${suffix}`;
+    const routed = routeMessage(howToQuestion, { screen: "home" });
+    assert.equal(
+      routed.explainScript,
+      undefined,
+      `사용법·위치 질문에 정의형 되묻기가 열림: ${howToQuestion} -> ${routed.explainScript?.check.question}`,
+    );
+    nonDefinitionChecked += 1;
+  }
+}
+assert.ok(
+  nonDefinitionChecked >= 150,
+  `전수 검사가 용어를 거의 못 돌았어 (${nonDefinitionChecked}건) — 사전 구조가 바뀌었는지 본다`,
+);
+
+// 반대 방향. 형태 게이트를 너무 조여 뜻 질문까지 막으면 되묻기가 통째로 사라진다.
+for (const question of ["차트가 뭐야?", "거래량이 뭐야?", "주식이 뭐야?"]) {
+  assert.notEqual(
+    routeMessage(question, { screen: "home" }).explainScript,
+    undefined,
+    `뜻을 묻는 질문인데 사전 되묻기가 닫혔어: ${question}`,
+  );
+}
+
+// 화면 조작을 묻는 절차 질문에는 **절차 답**이 나가야 한다. 되묻기만 막고 답을
+// 정의 그대로 두면 "How 를 물었는데 What 을 답한다"는 원래 증상이 남는다.
+const chartHowTo = routeMessage("차트는 어떻게 봐요?", stockContext);
+assert.equal(chartHowTo.intent, "service_help", "차트 보는 법이 용어 설명으로 샜어");
+assert.ok(
+  chartHowTo.text.includes("선차트") && chartHowTo.text.includes("종목 상세"),
+  `차트 보는 법이 화면 조작을 알려주지 않아: ${chartHowTo.text}`,
+);
 
 // Screenshot regressions are grouped by question act, not a single literal.
 const QUESTION_ACT_GOLDENS = [

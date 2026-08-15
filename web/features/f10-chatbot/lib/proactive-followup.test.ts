@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { findChatbotQuestionForm } from "../../../shared/data/chatbot-knowledge";
 import type { ProactiveSignal } from "../../../shared/types/chatbot";
 import { createChatOutcome } from "./orchestrator";
 import { PROACTIVE_SCRIPTS, PROACTIVE_SUGGESTED_QUESTIONS } from "./routing";
@@ -76,6 +77,23 @@ async function main() {
           `${where} 이 승인 답변이 아니다 (source=${outcome.source})`,
         );
         assert.ok(outcome.response.text.length > 0, `${where} 의 답변이 비어 있다`);
+
+        // 우리가 내민 칩은 형태까지 우리가 고른 문장이다. 그 형태에 답할 지식이
+        // 없으면 사전이 가진 아무 답이나 나간다 — `dwell` 의 "차트는 어떻게 봐요?"
+        // 가 차트의 **뜻**을 답하고 "차트가 직접 보여주는 것은 무엇일까요?" 로
+        // 되묻던 자리다. 절차·위치를 물어 놓고 용어 정의 퀴즈를 띄우지 않는다.
+        // 공통 유도 전이(`flow:guided`)는 정의를 묻지 않으므로 여기서 막지 않는다.
+        const questionForm = findChatbotQuestionForm(question);
+        const explainTurn =
+          outcome.action && "kind" in outcome.action && outcome.action.kind === "explain"
+            ? outcome.action.turn
+            : undefined;
+        if (questionForm === "procedure" || questionForm === "location") {
+          assert.ok(
+            !explainTurn?.scriptId.startsWith("term:"),
+            `${where} 는 ${questionForm} 질문인데 용어 정의 되묻기가 붙었다: ${explainTurn?.prompt}`,
+          );
+        }
         checked += 1;
       }
     }

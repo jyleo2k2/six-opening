@@ -987,7 +987,9 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           "달걀을 한 바구니에 다 담지 않는 것과 같아요. 바구니 하나를 떨어뜨려도 남은 달걀은 무사해요.",
       },
     status: reviewed },
-  { id: "chart", kind: "glossary", category: "chart", termLabel: "차트", triggers: ["차트"], answer: "차트는 과거 가격 변화를 그림으로 보여줘요. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.chart, status: reviewed },
+  // "차트는 어떻게 봐요?"(절차)에 이 정의 항목이 답하고 정의형 DAPIE 퀴즈까지 열던 자리다.
+  // 뜻을 묻는 질문만 맡고, 보는 방법은 아래 chart-read 가 맡는다 (SPEC §3.4.1).
+  { id: "chart", kind: "glossary", category: "chart", termLabel: "차트", triggers: ["차트"], questionForms: ["definition"], answer: "차트는 과거 가격 변화를 그림으로 보여줘요. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.chart, status: reviewed },
   { id: "volume", kind: "glossary", category: "indicator", termLabel: "거래량", triggers: ["거래량"], answer: "거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자예요. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volume, status: reviewed },
   { id: "volatility", kind: "glossary", category: "risk", termLabel: "변동성", triggers: ["변동성"], answer: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해요. 가격은 늘 움직일 수 있다는 점을 기억하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.volatility, status: reviewed },
   { id: "stop-loss", kind: "glossary", category: "risk", termLabel: "손절", triggers: ["손절"], answer: "손절은 손해를 더 키우지 않으려고 파는 것을 부르는 말이에요. 언제 파는지는 사람마다 다르고 제가 정해 줄 수는 없어요.", explainScript: ADDED_TERM_SCRIPTS["stop-loss"], status: reviewed },
@@ -1005,6 +1007,10 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "holding-period", kind: "faq", category: "service", termLabel: "예상 보유기간", triggers: ["예상 보유기간", "보유 기간", "언제까지 가질 생각"], answer: "보유 기간은 주식을 얼마나 오래 가지고 있을지 생각해 본 기간이에요. 꼭 지켜야 하는 약속이나 자동 매도 조건은 아니에요.", actionTarget: "order", status: reviewed },
   { id: "buy-day-record", kind: "faq", category: "service", termLabel: "사던 날의 나", triggers: ["사던 날의 나"], answer: "사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간, 처음 정한 가격을 다시 보여주는 화면이에요. 지금 생각과 어떻게 달라졌는지 돌아보게 도와줘요.", actionTarget: "order", status: reviewed },
   { id: "plan-badge", kind: "faq", category: "service", termLabel: "계획 실천 배지", triggers: ["계획 실천 배지"], answer: "계획 실천 배지는 처음 남긴 매도 계획과 맞게 팔았을 때 받는 기록용 배지예요. 수익이나 투자 실력을 평가하는 상은 아니에요.", actionTarget: "archive", status: reviewed },
+  // 차트를 **보는 방법**. 뜻을 묻는 chart 와 짝을 이루며, 트리거에 낱말 `차트`를 함께 두고
+  // 형태로 갈라진다 — 매수(정의)와 buy-flow(절차)가 나뉘는 방식과 같다.
+  // 답은 실제 차트 화면(기간 분·일·주 드롭다운, 선차트·캔들차트 토글)만 가리킨다.
+  { id: "chart-read", kind: "faq", triggers: ["차트 보는 법", "차트 읽는 법", "차트 어떻게", "차트"], questionForms: ["procedure", "location"], answer: "종목 상세에서 차트를 열면 위에 지금 가격이, 아래에 기간을 고르는 버튼과 선차트·캔들차트 버튼이 있어요. 분·일·주 중 하나를 고르면 막대나 선 하나가 담는 시간이 바뀌고, 가로는 시간 세로는 가격이라 오른쪽으로 갈수록 최근 기록이에요. 지나간 기록을 보는 화면이라 다음 가격을 알려 주지는 않아요.", actionTarget: "stock", status: reviewed },
   { id: "line-chart", kind: "faq", category: "chart", termLabel: "선차트", triggers: ["선차트"], answer: "선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요. 과거 가격의 흐름을 보는 그림이지 다음 가격을 알려 주지는 않아요.", actionTarget: "stock", status: reviewed },
   { id: "candle-chart", kind: "faq", category: "chart", termLabel: "캔들차트", triggers: ["캔들차트", "캔들"], answer: "캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요. 막대 하나가 담는 시간은 분봉·일봉·주봉으로 따로 고를 수 있어요.", actionTarget: "stock", status: reviewed },
   { id: "minute-chart", kind: "faq", category: "chart", termLabel: "분봉", triggers: ["분봉"], answer: "분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요. 짧은 시간 단위로 과거 가격을 살펴볼 때 써요.", actionTarget: "stock", status: reviewed },
@@ -1067,7 +1073,15 @@ export function findChatbotQuestionForm(query: string): ChatbotQuestionForm | nu
   if (["\uC65C", "\uC774\uC720", "\uAE4C\uB2ED"].some((word) => normalized.includes(word))) return "reason";
   if (["뭐", "무엇", "무슨뜻", "뜻", "의미"].some((word) => normalized.includes(word))) return "definition";
   if (["어디", "어느화면", "어떤버튼"].some((word) => normalized.includes(word))) return "location";
-  if (["어떻게", "어케", "방법", "순서", "하는법"].some((word) => normalized.includes(word))) return "procedure";
+  // "차트 보는 법 알려줘"는 `어떻게`·`하는법` 어디에도 걸리지 않아 형태가 null 로 떨어졌고,
+  // null 은 아래 조회에서 형태 필터를 통째로 비활성화한다 — 절차 질문이 정의 답으로 새던 자리다.
+  if (
+    ["어떻게", "어케", "방법", "순서", "하는법", "보는법", "읽는법", "보려면", "읽으려면"].some(
+      (word) => normalized.includes(word),
+    )
+  ) {
+    return "procedure";
+  }
   if (["왜", "이유", "까닭"].some((word) => normalized.includes(word))) return "reason";
   if (["언제", "몇시", "며칠", "몇일"].some((word) => normalized.includes(word))) return "time";
   if (["얼마", "몇개", "몇주", "몇원", "수량"].some((word) => normalized.includes(word))) return "quantity";
@@ -1075,16 +1089,26 @@ export function findChatbotQuestionForm(query: string): ChatbotQuestionForm | nu
   return null;
 }
 
+/**
+ * 형태를 선언한 항목은 **그 형태의 질문에만** 답한다.
+ *
+ * 형태가 잡히지 않은 입력(`예대마진` 처럼 낱말만 던진 것)은 정의형으로 본다.
+ * 예전에는 `questionForm === null` 이면 필터를 통째로 건너뛰어, 선언이 있어도
+ * 형태를 못 읽은 질문에는 아무 항목이나 답할 수 있었다.
+ */
+function answersQuestionForm(
+  entry: ChatbotKnowledgeEntry,
+  questionForm: ChatbotQuestionForm | null,
+) {
+  if (!entry.questionForms) return true;
+  return entry.questionForms.includes(questionForm ?? "definition");
+}
+
 export function findChatbotKnowledge(query: string) {
   const normalized = normalize(query);
   const questionForm = findChatbotQuestionForm(query);
   return CHATBOT_KNOWLEDGE.filter((entry) => entry.status === "reviewed")
-    .filter(
-      (entry) =>
-        !entry.questionForms ||
-        questionForm === null ||
-        entry.questionForms.includes(questionForm),
-    )
+    .filter((entry) => answersQuestionForm(entry, questionForm))
     .map((entry) => ({
       entry,
       matchLength: Math.max(
