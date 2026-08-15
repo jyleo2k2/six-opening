@@ -23,9 +23,15 @@ const PILL = styleFromCss(
 const TAB = styleFromCss("flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer");
 
 const iconColor = (on: boolean) => (on ? "#5B23D6" : "#B7BACB");
+// `line-height:normal` 은 `app.html` 과 맞추려고 명시한다. 전역 CSS 가 body 에 1.5 를 깔아 두어
+// 그냥 두면 11px 라벨이 16.5px 줄높이를 상속받는다. 그 3.4px 이 탭·알약·바 높이로 그대로
+// 올라가 하단바가 바닥 기준으로 위로 자라고, 옮겨 온 화면만 하단바가 커 보인다.
 const labelStyle = (on: boolean) =>
   styleFromCss(
-    "font-size:11px;font-weight:" + (on ? "800" : "600") + ";color:" + (on ? "#01185A" : "#A9AEC4"),
+    "font-size:11px;line-height:normal;font-weight:" +
+      (on ? "800" : "600") +
+      ";color:" +
+      (on ? "#01185A" : "#A9AEC4"),
   );
 
 const TABS: { id: NavTab; label: string; path: string; icon: (color: string) => React.ReactNode }[] = [
