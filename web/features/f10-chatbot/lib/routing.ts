@@ -3623,7 +3623,9 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
 }
 
 function formatWon(value: number) {
-  return `${value.toLocaleString("ko-KR")}원`;
+  // 수량이 소수라 곱이 소수로 떨어질 수 있다. 화면은 주문 금액을 원 단위로만 보여 주므로
+  // 여기서도 원 아래는 말하지 않는다 — "50,193.5원" 은 어느 화면에도 없는 값이다.
+  return `${Math.round(value).toLocaleString("ko-KR")}원`;
 }
 
 function getContextReply(message: string, context: ChatContext): ChatReply | null {
