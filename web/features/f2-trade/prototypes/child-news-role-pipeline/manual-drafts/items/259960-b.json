@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:259960",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 신작 게임 판매량.",
+  "article": {
+    "articleId": "MANUAL-MT-2026052109544094417",
+    "title": "크래프톤 '서브노티카 2', 출시 5일 만에 400만장 돌파…스팀 동접 46만명",
+    "publisher": "머니투데이",
+    "publishedAt": "2026-05-21T00:56:00.000Z",
+    "sourceUrl": "https://www.mt.co.kr/tech/2026/05/21/2026052109544094417",
+    "sourceUnits": [
+      { "id": "S1", "text": "크래프톤의 기대작 '서브노티카 2'가 출시 5일 만에 글로벌 판매 400만장을 돌파했다." },
+      { "id": "S2", "text": "출시와 동시에 판매 100만장을 기록한 데 이어, 12시간 만에 200만장을 돌파했다." },
+      { "id": "S3", "text": "스팀 기준 최고 동시접속자 수는 46만7000명을 기록했다." },
+      { "id": "S4", "text": "일평균 활성 이용자 수는 130만명에 달했다." },
+      { "id": "S5", "text": "누적 플레이 시간은 2857만시간으로 집계됐다." },
+      { "id": "S6", "text": "시리즈 최초로 최대 4인 협동(Co-op) 모드도 도입했다." }
+    ]
+  },
+  "focusStatement": "크래프톤의 '서브노티카 2'가 출시 5일 만에 글로벌 판매 400만장을 돌파했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "크래프톤 새 게임, 5일 만에 400만 장 팔렸다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "나온 첫날에만 100만 장 팔렸어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "first_day_sales" },
+    { "text": "한때 46만7000명이 함께 접속했어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "peak_concurrent_users" },
+    { "text": "친구 4명이 같이 하는 기능이 처음 생겼어요.", "sourceIds": ["S6"], "role": "context", "factKey": "coop_mode" }
+  ],
+  "priceConnection": {
+    "text": "게임이 많이 팔리면 회사가 버는 돈도 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "동시접속", "easyText": "같은 시간에 함께 게임에 들어와 있는 것", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

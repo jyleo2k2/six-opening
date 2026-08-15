@@ -177,6 +177,518 @@
         },
         "editorAttempts": 0
       }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:000660",
+        "symbol": "000660",
+        "name": "SK하이닉스",
+        "aliases": [
+          "SK 하이닉스",
+          "SK hynix",
+          "에스케이하이닉스"
+        ],
+        "sector": "semiconductor",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-NEWSPIM-20260729000469",
+          "title": "SK하이닉스, HBM4 양산 본격화…10여개 고객과 장기공급계약",
+          "publisher": "뉴스핌",
+          "publishedAt": "2026-07-29T01:53:00.000Z",
+          "sourceUrl": "https://www.newspim.com/news/view/20260729000469",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "SK하이닉스는 주요 고객사를 대상으로 올해 2분기부터 HBM4 양산 공급을 시작했다."
+            },
+            {
+              "id": "S2",
+              "text": "현재까지 핵심 고객을 포함한 11개 고객사와 장기공급계약(LTA)을 마무리했다."
+            },
+            {
+              "id": "S3",
+              "text": "계약 기간은 통상 5년을 기본으로 하되 고객과 제품 특성에 따라 달라질 수 있다."
+            },
+            {
+              "id": "S4",
+              "text": "HBM4의 양산 수율과 품질은 이미 성숙 단계에 진입한 HBM3E에 근접한 수준까지 올라왔다."
+            },
+            {
+              "id": "S5",
+              "text": "SK하이닉스는 HBM4E의 주요 고객사 대상 샘플 공급을 완료했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-NEWSPIM-20260729000469",
+          "primaryStockIds": [
+            "KRX:000660"
+          ],
+          "focusStatement": "SK하이닉스가 2분기부터 HBM4 양산 공급을 시작했고 핵심 고객을 포함한 11개 고객사와 장기공급계약을 마무리했다.",
+          "anchorSourceId": "S2",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "계약",
+            "HBM4"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "binding_contract"
+        },
+        "draft": {
+          "articleId": "MANUAL-NEWSPIM-20260729000469",
+          "headline": {
+            "text": "SK하이닉스, 11개 회사와 오래 팔기로 계약했다",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "SK하이닉스, 11개 회사와 오래 팔기로 계약했다",
+            "sourceIds": [
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "계약 기간은 보통 5년이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "contract_duration"
+            },
+            {
+              "text": "2분기부터 HBM4를 만들어 보내요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_detail",
+              "factKey": "hbm4_shipment_start"
+            },
+            {
+              "text": "다음 제품 HBM4E도 견본을 보냈어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "context",
+              "factKey": "hbm4e_sample"
+            }
+          ],
+          "priceConnection": {
+            "text": "오래 팔기로 약속하면 앞으로 들어올 일감이 정해져요.",
+            "sourceIds": [
+              "S2",
+              "S3"
+            ],
+            "kind": "contracted_business",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "계약",
+              "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "HBM4",
+              "easyText": "인공지능 컴퓨터에 쓰는 아주 빠른 기억 부품",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-NEWSPIM-20260729000469",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:000660"
+          ],
+          "eventType": "binding_contract",
+          "focusStatement": "SK하이닉스가 2분기부터 HBM4 양산 공급을 시작했고 핵심 고객을 포함한 11개 고객사와 장기공급계약을 마무리했다.",
+          "anchorSourceIds": [
+            "S2"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:097950",
+        "symbol": "097950",
+        "name": "CJ제일제당",
+        "aliases": [
+          "CJ 제일제당",
+          "씨제이제일제당"
+        ],
+        "sector": "food",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-EZYECONOMY-238537",
+          "title": "'IP 제품' 판매 700만개…CJ제일제당, 브랜드 IP 확장으로 해외 진출 나선다",
+          "publisher": "이지경제",
+          "publishedAt": "2026-08-10T06:58:00.000Z",
+          "sourceUrl": "https://www.ezyeconomy.com/news/articleView.html?idxno=238537",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "올해 3월부터 선보인 브랜드 IP 활용 제품은 누적 약 700만개, 판매액 약 150억원을 기록했다."
+            },
+            {
+              "id": "S2",
+              "text": "비비고 김의 풍미를 활용한 '김 나쵸'와 '김 팝콘', 다시다의 맛을 접목한 스낵 등이 대표적이다."
+            },
+            {
+              "id": "S3",
+              "text": "이달 말까지 편의점에서 판매하는 브랜드 IP 활용 제품도 기존 13종에서 16종으로 늘릴 예정이다."
+            },
+            {
+              "id": "S4",
+              "text": "지난 4일에는 '햇반 라이스크림' 3종을 출시했으며, 이달 중 '햇반 라이스라떼'와 '맛밤 밀크티라떼'도 선보인다."
+            },
+            {
+              "id": "S5",
+              "text": "CJ제일제당은 국내에서 판매 반응을 확인한 제품을 해외로 확대할 계획이다."
+            },
+            {
+              "id": "S6",
+              "text": "특히 '김 나쵸'와 '김 팝콘'의 미국 시장 진출을 추진하고 다른 브랜드 IP 제품의 해외 진출도 순차적으로 검토할 방침이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-EZYECONOMY-238537",
+          "primaryStockIds": [
+            "KRX:097950"
+          ],
+          "focusStatement": "CJ제일제당이 올해 3월부터 선보인 브랜드 IP 활용 제품이 누적 약 700만개, 판매액 약 150억원을 기록했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "판매액",
+            "편의점"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-EZYECONOMY-238537",
+          "headline": {
+            "text": "CJ제일제당, 김 나쵸·햇반 아이스크림 700만개 팔렸다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "homeSummary": {
+            "text": "CJ제일제당, 김 나쵸·햇반 아이스크림 700만개 팔렸다",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ]
+          },
+          "body": [
+            {
+              "text": "판매액은 약 150억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "sales_amount"
+            },
+            {
+              "text": "3월부터 판 것을 모두 더한 숫자예요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "context",
+              "factKey": "counting_period"
+            },
+            {
+              "text": "편의점 제품을 16종으로 늘려요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "product_lineup_expansion"
+            }
+          ],
+          "priceConnection": {
+            "text": "새 제품이 잘 팔리면 회사가 버는 돈도 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "판매액",
+              "easyText": "물건을 팔아서 받은 돈을 모두 더한 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "편의점",
+              "easyText": "밤늦게까지 문을 여는 작은 가게",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-EZYECONOMY-238537",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:097950"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "CJ제일제당이 올해 3월부터 선보인 브랜드 IP 활용 제품이 누적 약 700만개, 판매액 약 150억원을 기록했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
+      }
+    },
+    {
+      "stock": {
+        "stockId": "KRX:282330",
+        "symbol": "282330",
+        "name": "BGF리테일",
+        "aliases": [
+          "BGF 리테일",
+          "비지에프리테일"
+        ],
+        "sector": "retail",
+        "market": "KOSPI"
+      },
+      "pipelineResult": {
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-GENEWS-20260414-CU",
+          "title": "[편의점 글로벌 진출현황] CU 800호점 눈앞·GS25 700호점 돌파…해외 확장 '박차'",
+          "publisher": "글로벌이코노믹",
+          "publishedAt": "2026-04-14T06:33:00.000Z",
+          "sourceUrl": "https://www.g-enews.com/article/Distribution/2026/04/202604141526584931056c162803_1",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "BGF리테일이 운영하는 CU는 3월 말 기준 몽골 556점, 말레이시아 176점, 카자흐스탄 56점, 미국 하와이 2점 등 총 790점을 운영 중이다."
+            },
+            {
+              "id": "S2",
+              "text": "CU는 해외에서 △차별화 △현지화 △콜라보 3가지 콘셉트로 현지 고객에게 매력을 선보이고 있다."
+            },
+            {
+              "id": "S3",
+              "text": "2018년 진출한 몽골에서는 수도인 울란바토르를 넘어 몽골 제2의 도시인 다르항(Darkhan) 등에도 다수의 점포를 개점하면서 몽골 전역으로 출점 범위를 확대하고 있다."
+            },
+            {
+              "id": "S4",
+              "text": "CU는 현지 출점 속도를 감안할 때 1~2개월 내 해외 800호점 돌파가 가능할 것으로 보고 있다."
+            },
+            {
+              "id": "S5",
+              "text": "앞서 2028년까지 해외 진출 국가를 5개 이상으로 늘리고, 점포 수를 최대 1200개까지 확대하겠다는 목표도 제시한 바 있다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-GENEWS-20260414-CU",
+          "primaryStockIds": [
+            "KRX:282330"
+          ],
+          "focusStatement": "BGF리테일이 운영하는 CU가 3월 말 기준 몽골·말레이시아·카자흐스탄·미국 하와이에서 해외 점포 790곳을 운영 중이다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "편의점"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "sales_or_production"
+        },
+        "draft": {
+          "articleId": "MANUAL-GENEWS-20260414-CU",
+          "headline": {
+            "text": "BGF리테일 CU, 외국에서 편의점 790곳을 운영한다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "BGF리테일 CU, 외국에서 편의점 790곳을 운영한다",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "몽골에 556곳으로 가장 많아요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "mongolia_stores"
+            },
+            {
+              "text": "말레이시아에는 176곳이 있어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "business_detail",
+              "factKey": "malaysia_stores"
+            },
+            {
+              "text": "몽골에는 2018년에 처음 갔어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "mongolia_entry_year"
+            }
+          ],
+          "priceConnection": {
+            "text": "가게 수가 늘면 물건을 팔 수 있는 곳도 함께 늘어나요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "recurring_sales",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "편의점",
+              "easyText": "밤늦게까지 문을 여는 작은 가게",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-GENEWS-20260414-CU",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:282330"
+          ],
+          "eventType": "sales_or_production",
+          "focusStatement": "BGF리테일이 운영하는 CU가 3월 말 기준 몽골·말레이시아·카자흐스탄·미국 하와이에서 해외 점포 790곳을 운영 중이다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
+      }
     }
   ]
 }

@@ -23,6 +23,8 @@ function option(name, fallback) {
   return index >= 0 ? process.argv[index + 1] : fallback;
 }
 
+const MAX_ARTICLE_AGE_MONTHS = 6;
+
 const CHECK_NAMES = [
   "allowedScope", "primarySubject", "directMateriality", "sourceFidelity", "focusAlignment",
   "conciseThreeLineSummary", "noIrrelevantDetail", "attributionAndTiming", "allTermsEasy",
@@ -45,6 +47,17 @@ function assertDraft(item, runDateKst) {
 
   if (item.article.runDateKst && item.article.runDateKst !== runDateKst) {
     throw new Error(`${where}: runDateKst 가 리포트와 다릅니다.`);
+  }
+  // 화면 제목이 "요즘 무슨 일이 있었어?" 다. 실적은 분기마다 나오지만 공장·계약 같은
+  // 사건은 드물어서, 그냥 두면 두 번째 뉴스가 몇 해 전 기사로 밀린다. 6개월로 끊는다.
+  const oldest = new Date(runDateKst);
+  oldest.setMonth(oldest.getMonth() - MAX_ARTICLE_AGE_MONTHS);
+  const published = new Date(item.article.publishedAt);
+  if (!Number.isFinite(published.getTime())) throw new Error(`${where}: publishedAt 을 읽을 수 없습니다.`);
+  if (published < oldest) {
+    throw new Error(
+      `${where}: 기사가 ${MAX_ARTICLE_AGE_MONTHS}개월보다 오래됐습니다(${item.article.publishedAt.slice(0, 10)} < ${oldest.toISOString().slice(0, 10)}).`,
+    );
   }
   if (item.headline.text.length > 60) throw new Error(`${where}: 제목이 60자를 넘습니다.`);
   checkIds(item.headline.sourceIds, "headline");

@@ -1,38 +1,38 @@
 {
   "stockId": "KRX:097950",
   "eventType": "sales_or_production",
-  "second": "실적 말고 다른 사건. 해외 공장 신설. 기사는 2024-11 이지만 '2026년 하반기부터 생산'이 지금 시점의 사실이다.",
+  "second": "실적 말고 다른 사건. 신제품 판매량.",
   "article": {
-    "articleId": "MANUAL-ETODAY-2421953",
-    "title": "\"만두 1위 굳히기\"…CJ제일제당, 미국·헝가리에 비비고 공장 세운다 [종합]",
-    "publisher": "이투데이",
-    "publishedAt": "2024-11-21T20:30:00.000Z",
-    "sourceUrl": "https://www.etoday.co.kr/news/view/2421953",
+    "articleId": "MANUAL-EZYECONOMY-238537",
+    "title": "'IP 제품' 판매 700만개…CJ제일제당, 브랜드 IP 확장으로 해외 진출 나선다",
+    "publisher": "이지경제",
+    "publishedAt": "2026-08-10T06:58:00.000Z",
+    "sourceUrl": "https://www.ezyeconomy.com/news/articleView.html?idxno=238537",
     "sourceUnits": [
-      { "id": "S1", "text": "약 7000억 원이 투입되는 이번 신공장 건설을 통해 축구장 80개 넓이(57만5000㎡) 부지 내에 공장과 폐수처리 시설, 물류센터까지 만든다는 계획이다." },
-      { "id": "S2", "text": "공장 완공 목표 시점은 2027년으로, 향후 '미국 중부 생산거점'으로 활용될 전망이다." },
-      { "id": "S3", "text": "수폴스 생산기지는 CJ제일제당의 미국 내 21번째 공장이다." },
-      { "id": "S4", "text": "최근 헝가리 투자청(HIPA)과 헝가리 부다페스트 근교 두나버르사니(Dunavarsany) 지역에 축구장 16개 크기(11만 5000㎡)의 부지를 확보, 1만4000㎡(약 4200평) 규모의 최첨단 자동화 생산라인을 갖춘 공장 착공에 돌입했다." },
-      { "id": "S5", "text": "계획대로 진행될 경우 2026년 하반기부터 비비고 만두를 생산할 수 있을 것으로 전망된다." },
-      { "id": "S6", "text": "CJ제일제당이 유럽에 자체 생산공장을 짓는 것은 이번이 처음이다." }
+      { "id": "S1", "text": "올해 3월부터 선보인 브랜드 IP 활용 제품은 누적 약 700만개, 판매액 약 150억원을 기록했다." },
+      { "id": "S2", "text": "비비고 김의 풍미를 활용한 '김 나쵸'와 '김 팝콘', 다시다의 맛을 접목한 스낵 등이 대표적이다." },
+      { "id": "S3", "text": "이달 말까지 편의점에서 판매하는 브랜드 IP 활용 제품도 기존 13종에서 16종으로 늘릴 예정이다." },
+      { "id": "S4", "text": "지난 4일에는 '햇반 라이스크림' 3종을 출시했으며, 이달 중 '햇반 라이스라떼'와 '맛밤 밀크티라떼'도 선보인다." },
+      { "id": "S5", "text": "CJ제일제당은 국내에서 판매 반응을 확인한 제품을 해외로 확대할 계획이다." },
+      { "id": "S6", "text": "특히 '김 나쵸'와 '김 팝콘'의 미국 시장 진출을 추진하고 다른 브랜드 IP 제품의 해외 진출도 순차적으로 검토할 방침이다." }
     ]
   },
-  "focusStatement": "CJ제일제당이 미국 사우스다코타에 축구장 80개 넓이의 비비고 공장을 짓고, 헝가리 공장에서는 2026년 하반기부터 비비고 만두를 생산한다.",
+  "focusStatement": "CJ제일제당이 올해 3월부터 선보인 브랜드 IP 활용 제품이 누적 약 700만개, 판매액 약 150억원을 기록했다.",
   "anchorSourceId": "S1",
-  "headline": { "text": "CJ제일제당, 축구장 80개 넓이 만두 공장을 미국에 짓는다", "sourceIds": ["S1"] },
+  "headline": { "text": "CJ제일제당, 김 나쵸·햇반 아이스크림 700만개 팔렸다", "sourceIds": ["S1", "S2"] },
   "body": [
-    { "text": "공장을 짓는 데 7000억원을 써요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "investment_amount" },
-    { "text": "헝가리 공장은 올해 하반기부터 만들어요.", "sourceIds": ["S5"], "role": "business_detail", "factKey": "hungary_production_start" },
-    { "text": "유럽에 직접 공장을 짓는 건 처음이에요.", "sourceIds": ["S6"], "role": "context", "factKey": "first_europe_plant" }
+    { "text": "판매액은 약 150억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "sales_amount" },
+    { "text": "3월부터 판 것을 모두 더한 숫자예요.", "sourceIds": ["S1"], "role": "context", "factKey": "counting_period" },
+    { "text": "편의점 제품을 16종으로 늘려요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "product_lineup_expansion" }
   ],
   "priceConnection": {
-    "text": "공장이 늘면 한 번에 만들 수 있는 양도 늘어나요.",
-    "sourceIds": ["S1", "S5"],
-    "kind": "production_capacity",
+    "text": "새 제품이 잘 팔리면 회사가 버는 돈도 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "recurring_sales",
     "basis": "event_education"
   },
   "termTreatments": [
-    { "term": "공장", "easyText": "물건을 많이 만들어 내는 큰 건물", "treatment": "explained", "sourceIds": ["S1"] },
-    { "term": "하반기", "easyText": "한 해를 둘로 나눈 뒤쪽 여섯 달", "treatment": "explained", "sourceIds": ["S5"] }
+    { "term": "판매액", "easyText": "물건을 팔아서 받은 돈을 모두 더한 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "편의점", "easyText": "밤늦게까지 문을 여는 작은 가게", "treatment": "explained", "sourceIds": ["S3"] }
   ]
 }
