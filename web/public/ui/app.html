@@ -2784,7 +2784,9 @@ class Component extends DCLogic {
     const CHAR_ALIAS = { challenger: 'fighter' };
     const typeKeyOf = character => character ? (CHAR_ALIAS[character] || character) : null;
     const axesFromCard = card => [card.scores.focus, card.scores.diversification, card.scores.accuracy, card.scores.intuition, card.scores.evidence];
-    const fmtScore = (v, scaleMax) => scaleMax === 10 ? (Math.round(v * 10) / 10).toFixed(1) : String(Math.round(v));
+    // 화면에 찍는 숫자는 두 스케일 모두 정수다. 오각형 좌표·막대 폭은 아래에서
+    // 반올림 전 원값으로 score / scaleMax 비율을 내므로 모양은 그대로 부드럽다.
+    const fmtScore = v => String(Math.round(v));
 
     const season = this.dbSeasonCards;
     const cumCard = season && season.cumulative;
@@ -2809,7 +2811,7 @@ class Component extends DCLogic {
       const a = (-90 + i * 72) * Math.PI / 180;
       const lx = (CX + R * 1.32 * Math.cos(a)) / 160 * 100, ly = (CY + R * 1.32 * Math.sin(a)) / 160 * 100;
       return {
-        label: TLBL[i], score: fmtScore(score, mine.scaleMax), desc: m.desc,
+        label: TLBL[i], score: fmtScore(score), desc: m.desc,
         ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
         dotR: sel ? 4.2 : 2.6, dotFill: sel ? '#FFFFFF' : mInk,
         select: e => { if (e && e.stopPropagation) e.stopPropagation(); this.set({ traitPick: sel ? null : i }); },
@@ -2886,7 +2888,7 @@ class Component extends DCLogic {
         const outer = ptAt(i, 1, R, CX, CY), dot = ptAt(i, ratio, R, CX, CY);
         const lx = (CX + R * 1.32 * Math.cos(a)) / 160 * 100, ly = (CY + R * 1.32 * Math.sin(a)) / 160 * 100;
         return {
-          label: TLBL[i], score: fmtScore(sc, c.scaleMax), ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
+          label: TLBL[i], score: fmtScore(sc), ax: outer[0], ay: outer[1], dx: dot[0], dy: dot[1],
           labelStyle: 'position:absolute;left:' + lx.toFixed(1) + '%;top:' + ly.toFixed(1) + '%;transform:translate(-50%,-50%);white-space:nowrap;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:999px;color:' + ink + ';background:rgba(255,255,255,0.8);box-shadow:0 1px 2px ' + rgba(ink, 0.14)
         };
       });
@@ -2928,7 +2930,7 @@ class Component extends DCLogic {
       titleStyle: 'font-size:24px;font-weight:900;color:' + sInk + ';letter-spacing:-0.01em;line-height:1.1;text-shadow:0 1px 0 rgba(255,255,255,0.5)',
       closeStyle: 'flex:none;white-space:nowrap;font-size:14px;font-weight:700;color:' + rgba(sInk, 0.6) + ';cursor:pointer;padding:6px 4px',
       rows: sw.scores.map((sc, k) => ({
-        label: TLBL[k], score: fmtScore(sc, sw.scaleMax), note: TMETA[k].desc,
+        label: TLBL[k], score: fmtScore(sc), note: TMETA[k].desc,
         labelStyle: 'flex:1;min-width:0;font-size:16px;font-weight:800;color:' + sInk,
         scoreStyle: 'font-size:18px;font-weight:900;color:' + sInk + ';font-variant-numeric:tabular-nums',
         trackStyle: 'height:9px;border-radius:999px;background:' + rgba(sInk, 0.1) + ';box-shadow:inset 0 1px 2px ' + rgba(sInk, 0.2) + ';overflow:hidden;margin-top:8px',
