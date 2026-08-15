@@ -2,75 +2,8 @@
     const s = this.state, m = this.me(), st = this.stock(), u = this.uni();
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
-    // 홈 화면 — 로그인 계정(dbUser)에 따라 아빠/엄마/아이 홈을 통째로 다르게 그린다.
-    // 인사말·아바타·목표 아이템은 저장소에 없는 값이라 여기 고정 데모로 남는다.
-    // 보유 종목과 수익은 아래에서 실제 계좌 값으로 갈아 끼운다.
-    const HOME_INFO = {
-      mom: {
-        season: '보호자 계정', greeting: '찬영 어머님, 어서 오세요', avatarImg: 'assets/profile-mom.png',
-        day: '28일째', goal: '샤넬 코코 마드모아젤', brand: '샤넬', unit: '향수',
-        img: 'assets/item-mom.png', goalImg: 'assets/goal-mom.png', unitPrice: 210000, profit: 211000,
-        holdings: [
-          { tick: '삼성', name: '삼성전자', qty: '4주', value: '318,000원', pct: '+2.4%', up: true },
-          { tick: 'LG', name: 'LG생활건강', qty: '1주', value: '412,000원', pct: '+5.1%', up: true },
-          { tick: '아모', name: '아모레퍼시픽', qty: '2주', value: '246,000원', pct: '-1.2%', up: false }
-        ]
-      },
-      dad: {
-        season: '보호자 계정', greeting: '찬영 아버님, 어서 오세요', avatarImg: 'assets/profile-dad.png',
-        day: '28일째', goal: '나이키 에어조던 1', brand: '나이키', unit: '신발',
-        img: 'assets/item-dad.png', goalImg: 'assets/goal-dad.png', unitPrice: 219000, profit: 452000,
-        holdings: [
-          { tick: '현대', name: '현대차', qty: '2주', value: '486,000원', pct: '+3.8%', up: true },
-          { tick: 'NAV', name: 'NAVER', qty: '1주', value: '198,000원', pct: '-0.6%', up: false },
-          { tick: '카카', name: '카카오', qty: '5주', value: '215,000원', pct: '+1.9%', up: true },
-          { tick: 'SK', name: 'SK하이닉스', qty: '1주', value: '178,000원', pct: '+6.2%', up: true }
-        ]
-      },
-      child: {
-        season: '아이 계정', greeting: '찬영아, 어서 와요!', avatarImg: 'assets/profile-child.png',
-        day: '14일째', goal: '왁뿌볼 모으기', brand: '', unit: '왁뿌볼',
-        img: 'assets/item-child.png', goalImg: 'assets/goal-child.png', unitPrice: 12000, profit: 428600,
-        holdings: [
-          { tick: '삼성', name: '삼성전자', qty: '3주', value: '238,500원', pct: '+4.3%', up: true },
-          { tick: '롯데', name: '롯데웰푸드', qty: '2주', value: '124,000원', pct: '+2.1%', up: true },
-          { tick: '오리', name: '오리온', qty: '1주', value: '96,500원', pct: '-0.8%', up: false }
-        ]
-      }
-    };
-    const dbRole = this.dbUser ? (this.dbUser.parent_child === 'child' ? 'child' : this.dbUser.guardian_role) : null;
-    // dbUser 를 아직 못 불러왔을 때는 빈 화면 대신 아이 계정 데모로 보여준다.
-    const home = HOME_INFO[dbRole] || HOME_INFO.child;
-    // 로그인 사용자의 실제 Supabase 보유종목이 있으면 그 값을 쓰고, 아직 못 불러왔으면 위 데모로 대신한다.
-    // 평가금액·수익률은 buildArchive() 의 수익률 탭과 같은 계산(현재가·평단가 기준)이다.
-    const homeLoaded = Boolean(dbRole && this.dbUser && Array.isArray(this.dbUser.holdings));
-    const liveHoldings = homeLoaded
-      ? this.dbUser.holdings.filter(h => h.stock_code).map(h => {
-          const x = u.stocks.filter(y => y.code === h.stock_code)[0];
-          const price = x ? x.price : h.avg_price;
-          const pc = h.avg_price > 0 ? (price - h.avg_price) / h.avg_price * 100 : 0;
-          return {
-            tick: (h.stock_name || h.stock_code || '').slice(0, 2),
-            name: h.stock_name || h.stock_code,
-            qty: (h.quantity >= 1 ? (Math.round(h.quantity * 100) / 100) : h.quantity.toFixed(2)) + '주',
-            value: won(h.quantity * price),
-            pct: (pc >= 0 ? '+' : '−') + Math.abs(pc).toFixed(1) + '%',
-            up: pc >= 0,
-            profit: (price - h.avg_price) * h.quantity
-          };
-        })
-      : [];
-    // 계좌를 읽은 뒤에는 보유가 없어도 데모로 되돌아가지 않고 빈 상태를 보여 준다.
-    const holdings = homeLoaded ? liveHoldings : home.holdings;
-    // 수익도 실제 보유에서 낸다. 데모 상수(home.profit)를 실제 평가금액으로 나누면
-    // 목표 개수와 수익률이 근거 없는 숫자가 된다.
-    const homeProfit = homeLoaded ? liveHoldings.reduce((sum, h) => sum + h.profit, 0) : home.profit;
-    const goalCount = Math.max(0, Math.floor(homeProfit / home.unitPrice));
-    const homeHoldingsTotal = holdings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
-    const homeRate = homeHoldingsTotal ? (homeProfit / homeHoldingsTotal * 100) : 0;
-    const homeHoldingStyle = (h) => Object.assign({}, h, {
-      pctStyle: 'font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:' + (h.up ? '#D5327A' : '#2E6BE6')
-    });
+    // 홈 화면은 React(`HomeScreen`)로 옮겨 갔다. 역할별 인사말·목표·보유 계산은
+    // `features/f0-home/lib/home-view.ts` 가 소유한다.
     // 주문 직후 값 — 매수 3단계 축하 화면과 매도 3단계 완료 화면이 이걸로 문구를 만든다
     const od = s.orderDone || {};
     const odQty = od.scheduled && od.requestMode === 'amount'

@@ -25,3 +25,16 @@
   width: 0;
   height: 0;
 }
+
+/* 홈의 목표 아이템이 튀어오르는 연출과 보유 시트가 올라오는 연출.
+   `ui-src/template/shell-0.html` 에서 같은 이름·같은 값으로 옮겼다. */
+@keyframes popItem {
+  0% { opacity: 0; transform: translateY(0) scale(0.3); }
+  20% { opacity: 1; transform: translateY(-14px) scale(1.05); }
+  80% { opacity: 1; transform: translateY(-55px) scale(1); }
+  100% { opacity: 0; transform: translateY(-115px) scale(0.85); }
+}
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
