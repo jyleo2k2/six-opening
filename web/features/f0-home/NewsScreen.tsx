@@ -126,7 +126,7 @@ export function NewsScreen({
               "flex:1;font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.65;text-wrap:pretty",
             )}
           >
-            이건 이 회사가 좋다 나쁘다는 이야기가 아니야. 무슨 일이 있었는지만 알려주는 거야.
+            이건 이 회사가 좋다 나쁘다는 이야기가 아니에요. 무슨 일이 있었는지만 알려주는 거예요.
           </div>
         </div>
       </div>

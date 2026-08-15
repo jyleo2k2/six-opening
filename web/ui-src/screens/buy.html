@@ -2,7 +2,7 @@
 <div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
 <div style="flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px">
 <div onClick="{{ buyBack }}" style="{{ backBtnStyle }}">{{ buyBackGlyph }}</div>
-<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">사기(매수)</div>
+<div style="flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em">살래(매수)</div>
 <div style="{{ stepPillStyle }}"><span style="color:#F5327F">{{ buyStepNo }}</span> / 3</div>
 </div>
 <div style="flex:none;display:flex;gap:5px;padding:0 20px 12px">
@@ -14,7 +14,16 @@
 <div style="flex:none;background:#FFFFFF;border-radius:22px;padding:12px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
 <div style="{{ miniBadgeStyle }}">{{ stockEmoji }}</div>
 <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:800;color:#01185A;white-space:nowrap">{{ stockName }}</div><div style="font-size:12.5px;font-weight:500;color:#8E93A8;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap">{{ stockPriceText }}</div></div>
+<div style="flex:none;display:flex;align-items:baseline;gap:6px">
 <span style="{{ detailChangeStyleSm }}">{{ stockChangeText }}</span>
+<span style="{{ detailDiffStyleSm }}">{{ detailDiffText }}</span>
+</div>
+</div>
+
+<div style="{{ buyTabRowStyle }}">
+<div onClick="{{ pickTabBuy }}" style="{{ flowTabBuyStyle }}">구매</div>
+<div onClick="{{ pickTabSell }}" style="{{ flowTabSellStyle }}">판매</div>
+<div onClick="{{ openWaitSheet }}" style="{{ flowTabWaitStyle }}">대기</div>
 </div>
 
 <sc-if value="{{ isBuy1 }}" hint-placeholder-val="{{ true }}">
@@ -25,7 +34,7 @@
 </div>
 
 <div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="font-size:16px;font-weight:800;color:#01185A">얼마나 살까?</div>
+<div style="font-size:16px;font-weight:800;color:#01185A">얼마나 살까요?</div>
 <div style="display:flex;gap:6px;margin-top:12px">
 <div onClick="{{ pickByAmount }}" style="{{ byAmountStyle }}">금액으로</div>
 <div onClick="{{ pickByQty }}" style="{{ byQtyStyle }}">주 수로</div>
@@ -65,7 +74,7 @@
 
 <sc-if value="{{ showLimit }}" hint-placeholder-val="{{ false }}">
 <div style="background:#FFFFFF;border-radius:26px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="font-size:16px;font-weight:800;color:#01185A">얼마가 되면 살까?</div>
+<div style="font-size:16px;font-weight:800;color:#01185A">얼마가 되면 살까요?</div>
 <div style="display:flex;align-items:baseline;justify-content:center;gap:3px;margin:14px 0 2px">
 <span style="font-size:30px;font-weight:800;color:#F5327F;font-variant-numeric:tabular-nums;line-height:1;white-space:nowrap">{{ limitPriceText }}</span>
 <span style="font-size:18px;font-weight:800;color:#F5327F">원</span>
@@ -78,7 +87,7 @@
 <div onClick="{{ lim0 }}" style="{{ limChip0 }}">지금값</div>
 </div>
 <div style="display:flex;align-items:flex-start;gap:9px;background:#ECEDF7;border-radius:16px;padding:12px 14px;margin-top:14px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 살게. 기다리는 동안 그 돈은 잠깐 맡아둘게.</span>
+<span style="font-size:13.5px;font-weight:500;color:#5C6280;line-height:1.6">이 값이 될 때까지 기다렸다가 살게요. 기다리는 동안 그 돈은 잠깐 맡아둘게요.</span>
 </div>
 </div>
 </sc-if>
@@ -93,14 +102,14 @@
 
 <sc-if value="{{ isBuy2 }}" hint-placeholder-val="{{ false }}">
 <div id="tut-buy2" style="display:flex;flex-direction:column;gap:12px">
-<div style="display:flex;align-items:flex-start;gap:10px">
-<img src="assets/mascot-bear.png" width="62" alt="키웅이" style="display:block;flex:none;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
-<div style="flex:1;background:#FFFFFF;border-radius:20px;border-bottom-left-radius:5px;padding:13px 15px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.08)">
-<div style="font-size:16.5px;font-weight:800;color:#01185A;line-height:1.5;text-wrap:pretty">왜 이 회사가 좋아 보였어?</div>
-<div style="font-size:13.5px;font-weight:500;color:#8E93A8;margin-top:5px">정답은 없어, 솔직한 게 최고야!</div>
+<div style="display:flex;align-items:flex-end;gap:10px">
+<img src="assets/mascot-bear.png" width="72" alt="키웅이" style="display:block;flex:none;margin:0 -3px -4px -3px;filter:drop-shadow(0 6px 10px rgba(35,25,80,0.16))">
+<div style="flex:1;background:#EDE9FB;border-radius:18px;border-bottom-left-radius:5px;padding:10px 14px;box-shadow:0 2px 10px rgba(30,25,60,0.05),inset 0 0 0 1px rgba(1,24,90,0.06)">
+<div style="font-size:16px;font-weight:800;color:#01185A;line-height:1.4;text-wrap:pretty">왜 이 회사가 좋아 보였나요?</div>
+<div style="font-size:12px;font-weight:500;color:#9B94C4;margin-top:3px">정답은 없어요, 솔직한 게 최고예요!</div>
 </div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
 <sc-for list="{{ reasonBtns }}" as="r" hint-placeholder-count="6">
 <div onClick="{{ r.pick }}" style="{{ r.style }}">
 <div style="font-size:14.5px;font-weight:600;color:#01185A;line-height:1.45">{{ r.label }}</div>
@@ -108,8 +117,8 @@
 </sc-for>
 </div>
 
-<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">언제까지 가질 생각이야?</div>
-<div style="display:flex;flex-direction:column;gap:9px">
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:9px">언제까지 가질 생각인가요?</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
 <sc-for list="{{ planBtns }}" as="p" hint-placeholder-count="4">
 <div onClick="{{ p.pick }}" style="{{ p.style }}"><span style="font-size:15.5px;font-weight:600;color:#01185A">{{ p.label }}</span></div>
 </sc-for>
@@ -127,15 +136,16 @@
 </div>
 </sc-if>
 
-<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:6px">하고 싶은 말 남겨둘래? <span style="font-size:13px;font-weight:500;color:#A9AEC4">(안 써도 괜찮아)</span></div>
-<input value="{{ buyMemo }}" onInput="{{ buyMemoInput }}" maxlength="50" placeholder="예: 월드투어 시작한대" style="width:100%;box-sizing:border-box;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:9px">하고 싶은 말 남겨둘래요?</div>
+<input value="{{ buyMemo }}" onInput="{{ buyMemoInput }}" maxlength="50" placeholder="예: 월드투어 시작한대요" style="width:100%;box-sizing:border-box;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1">
 <div style="text-align:right;font-size:12.5px;font-weight:500;color:#A9AEC4;font-variant-numeric:tabular-nums;margin-top:-4px">{{ buyMemoCount }} / 50</div>
 
-<div style="background:#FFFFFF;border-radius:20px;padding:15px 17px;margin-top:2px;box-shadow:0 1px 3px rgba(30,25,60,0.06)">
-<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>{{ stockName }}</span><span style="font-weight:700;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ qtyText }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:#8E93A8"><span>사는 방법</span><span style="font-weight:700;color:#01185A;white-space:nowrap">{{ orderTypeText }}</span></div>
-<div style="height:1px;background:#EFEFF5;margin:9px 0"></div>
-<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#01185A">주문 금액</span><span style="font-size:18px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
+<div style="font-size:15.5px;font-weight:800;color:#01185A;margin-top:9px">주문 정보</div>
+<div style="background:linear-gradient(180deg,#2A4478 0%,#132C63 42%,#001E5A 100%);border-radius:20px;padding:15px 17px;margin-top:2px;box-shadow:0 6px 18px -8px rgba(0,30,90,0.4),inset 0 1px 0 rgba(255,255,255,0.22)">
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:rgba(255,255,255,0.62)"><span>{{ stockName }}</span><span style="font-weight:700;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap">{{ qtyText }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:14px;font-weight:500;color:rgba(255,255,255,0.62)"><span>사는 방법</span><span style="font-weight:700;color:#FFFFFF;white-space:nowrap">{{ orderTypeText }}</span></div>
+<div style="height:1px;background:rgba(255,255,255,0.18);margin:9px 0"></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:15px;font-weight:700;color:#FFFFFF">주문 금액</span><span style="font-size:18px;font-weight:800;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap">{{ amountWon }}</span></div>
 </div>
 </div>
 </sc-if>
@@ -152,9 +162,9 @@
 </div>
 
 <div style="position:relative;display:flex;flex-direction:column;align-items:center;width:100%">
-<img src="assets/mascot-bear.png" width="132" alt="키웅이" style="display:block;animation:kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.18))">
+<img src="assets/mascot-bear.png" width="128" alt="키웅이" style="display:block;animation:kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both;filter:drop-shadow(0 12px 20px rgba(35,25,80,0.18))">
 <div style="font-size:14px;font-weight:700;color:#F5327F;letter-spacing:0.08em;margin-top:14px">{{ doneKicker }}</div>
-<div style="font-size:26px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;text-wrap:pretty">{{ doneHeadline }}</div>
+<div style="font-size:26px;font-weight:800;color:#01185A;margin-top:6px;text-align:center;letter-spacing:-0.01em;line-height:1.4;white-space:pre-line;text-wrap:pretty">{{ doneHeadline }}</div>
 <div style="font-size:15px;font-weight:600;color:#5C6280;margin-top:12px;text-align:center;line-height:1.6;white-space:pre-line;text-wrap:pretty">{{ donePraise }}</div>
 
 <div style="width:100%;background:#F4F4FA;border-radius:20px;padding:15px 17px;margin-top:22px;box-shadow:inset 0 0 0 1px #E4E6F1">
@@ -180,4 +190,21 @@
 </div>
 </sc-if>
 </div>
+<sc-if value="{{ orderSheetOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeOrderSheet }}" style="{{ sheetScrimStyle }}"></div>
+<div style="{{ sheetStyle }}">
+<div style="{{ sheetGrabStyle }}"></div>
+<div style="font-size:15px;font-weight:800;color:#01185A;letter-spacing:-0.01em;margin-bottom:10px">기다리는 주문</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ pendingCards }}" as="p" hint-placeholder-count="1">
+<div style="display:flex;align-items:center;gap:11px;background:#F4F4FA;border-radius:18px;padding:12px 14px;box-shadow:inset 0 0 0 1px #E4E6F1">
+<div style="flex:1;min-width:0;font-size:13.5px;font-weight:600;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+<div style="flex:2;min-width:0;font-size:12.5px;font-weight:500;color:#8E93A8;font-variant-numeric:tabular-nums;text-wrap:pretty">{{ p.desc }}</div>
+<div onClick="{{ p.cancel }}" style="flex:none;font-size:13px;font-weight:600;color:#8E93A8;padding:9px 13px;border-radius:999px;cursor:pointer;background:#FFFFFF;box-shadow:0 4px 9px -4px rgba(35,25,80,0.2)">취소</div>
+</div>
+</sc-for>
+<div style="{{ sheetEmptyStyle }}">아직 기다리는 주문이 없어요.</div>
+</div>
+</div>
+</sc-if>
 </sc-if>

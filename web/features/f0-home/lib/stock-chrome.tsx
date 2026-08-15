@@ -66,12 +66,12 @@ export function BuyCtaFooter({ locked, onStartBuy }: { locked: boolean; onStartB
     <div style={FOOTER}>
       {locked && (
         <div style={LOCK}>
-          <span style={LOCK_TEXT}>지금은 학교에서 공부할 시간! 매매는 하교하고 하자</span>
+          <span style={LOCK_TEXT}>지금은 학교에서 공부할 시간! 매매는 하교하고 해요</span>
         </div>
       )}
       <div onClick={onStartBuy} style={locked ? CTA_OFF : CTA_ON}>
         <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" } as CSSProperties}>
-          사볼래! (매수)
+          주문하기
         </span>
       </div>
     </div>

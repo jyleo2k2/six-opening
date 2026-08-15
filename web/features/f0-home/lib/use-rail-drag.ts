@@ -16,10 +16,12 @@ const FLING_FRAME_MS = 16;
 const FLING_MAX_MS = 1_200;
 
 /**
- * 가로 카드 레일을 마우스로 끌어 넘기는 배선.
+ * 카드 레일을 마우스로 끌어 넘기는 배선. 가로(기본)·세로 모두 이 하나로 배선한다.
  *
  * 계산은 `rail-drag.ts` 가 갖고 여기는 포인터 이벤트와 관성 타이머에 붙이기만 한다 —
- * 레일을 쓰는 화면마다 이 배선을 다시 쓰면 끌리는 느낌이 조용히 갈린다.
+ * 레일을 쓰는 화면마다 이 배선을 다시 쓰면 끌리는 느낌이 조용히 갈린다. 계산 함수
+ * 자체는 좌표 하나짜리 스칼라 연산이라 축과 무관하다 — `axis:'y'` 를 주면 같은 공식에
+ * `clientY`·`scrollTop` 을 대신 흘려보낸다.
  *
  * 쓰는 쪽은 레일에 `onPointerDown` 과 `onScroll` 을 붙이고, 카드의 `onClick` 은
  * `dragged()` 로 감싼다. 끌고 난 직후의 click 을 삼키지 않으면 카드가 열린다.
@@ -32,6 +34,7 @@ const FLING_MAX_MS = 1_200;
 export function useRailDrag(
   onActiveChange?: (index: number) => void,
   activeIndex?: number | null,
+  axis: "x" | "y" = "x",
 ) {
   const rail = useRef<HTMLDivElement>(null);
   const drag = useRef<RailDrag | null>(null);
@@ -39,11 +42,19 @@ export function useRailDrag(
   /** 손을 뗀 뒤 click 한 번을 삼키기 위해 남기는 표시. */
   const dragged = useRef(false);
 
+  const snapType = axis === "y" ? "y mandatory" : "x mandatory";
+  const scrollPos = (el: HTMLDivElement) => (axis === "y" ? el.scrollTop : el.scrollLeft);
+  const setScrollPos = (el: HTMLDivElement, value: number) => {
+    if (axis === "y") el.scrollTop = value;
+    else el.scrollLeft = value;
+  };
+  const clientPos = (ev: { clientX: number; clientY: number }) => (axis === "y" ? ev.clientY : ev.clientX);
+
   const stopFling = () => {
     if (timer.current) clearInterval(timer.current);
     timer.current = null;
     // 끄는 동안 꺼 둔 스냅을 되돌린다. 켠 채로 끌면 스냅이 매 프레임 제자리로 되돌린다.
-    if (rail.current) rail.current.style.scrollSnapType = "x mandatory";
+    if (rail.current) rail.current.style.scrollSnapType = snapType;
   };
 
   useEffect(() => stopFling, []);
@@ -53,7 +64,7 @@ export function useRailDrag(
     if (event.pointerType === "touch" || !event.isPrimary || event.button !== 0) return;
     const el = event.currentTarget;
     stopFling();
-    drag.current = beginRailDrag(event.clientX, el.scrollLeft, event.timeStamp);
+    drag.current = beginRailDrag(clientPos(event), scrollPos(el), event.timeStamp);
     dragged.current = false;
     el.style.scrollSnapType = "none";
     el.style.cursor = "grabbing";
@@ -61,10 +72,10 @@ export function useRailDrag(
     const move = (ev: PointerEvent) => {
       const current = drag.current;
       if (!current) return;
-      const next = advanceRailDrag(current, ev.clientX, ev.timeStamp);
+      const next = advanceRailDrag(current, clientPos(ev), ev.timeStamp);
       drag.current = next;
       dragged.current = next.dragged;
-      el.scrollLeft = next.scrollLeft;
+      setScrollPos(el, next.scrollLeft);
       // 실제로 끈 뒤에만 기본 동작을 막는다. 제자리 클릭에서 막으면 카드 click 이 사라진다.
       if (next.dragged) ev.preventDefault();
     };
@@ -85,7 +96,7 @@ export function useRailDrag(
             stopFling();
             return;
           }
-          el.scrollLeft += fling;
+          setScrollPos(el, scrollPos(el) + fling);
         }, FLING_FRAME_MS);
       } else {
         stopFling();
@@ -113,12 +124,19 @@ export function useRailDrag(
   const onScroll = (event: React.UIEvent<HTMLDivElement>) => {
     if (!onActiveChange) return;
     const el = event.currentTarget;
-    const cards = Array.from(el.children).map((node) => ({
-      left: (node as HTMLElement).offsetLeft,
-      width: (node as HTMLElement).offsetWidth,
-    }));
+    const cards =
+      axis === "y"
+        ? Array.from(el.children).map((node) => ({
+            left: (node as HTMLElement).offsetTop,
+            width: (node as HTMLElement).offsetHeight,
+          }))
+        : Array.from(el.children).map((node) => ({
+            left: (node as HTMLElement).offsetLeft,
+            width: (node as HTMLElement).offsetWidth,
+          }));
     if (cards.length === 0) return;
-    const index = nearestCardByCenter(cards, el.scrollLeft + el.clientWidth / 2);
+    const mid = axis === "y" ? el.scrollTop + el.clientHeight / 2 : el.scrollLeft + el.clientWidth / 2;
+    const index = nearestCardByCenter(cards, mid);
     if (index === activeIndex) return;
     onActiveChange(index);
   };

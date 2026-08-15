@@ -5,6 +5,9 @@
       stockPriceText: st ? st.price.toLocaleString('ko-KR') + '원' : '',
       stockChangeText: st ? ((st.change >= 0 ? '▲ ' : '▼ ') + Math.abs(st.change).toFixed(2) + '%') : '',
       detailChangeStyleSm: 'font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:' + (st && st.change >= 0 ? up : down),
+      // 매수·매도 미니 카드의 등락률 옆 원화 등락폭. `DetailScreen` 의 detailDiffText 와 같은 값이다.
+      detailDiffText: st ? ((st.change >= 0 ? '+' : '') + st.change.toFixed(2) + '%') : '',
+      detailDiffStyleSm: 'font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:7px;border-left:1px solid ' + (st && st.change >= 0 ? up : down) + '59;color:' + (st && st.change >= 0 ? up : down),
       detailBadgeStyle: bigBadge(52, 18, 25) + (st && logos[st.code]
         ? ';background-color:#F4F4FA;background-image:url(' + logos[st.code] + ');background-position:center;background-size:contain;background-repeat:no-repeat'
         : ''),

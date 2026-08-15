@@ -59,6 +59,7 @@ export function exploreList(
       .filter((stock) => stock.name.toLowerCase().includes(q))
       .sort((a, b) => b.change - a.change);
   }
+  if (filter === "all") return merged;
   if (filter === "rank") return [...merged].sort((a, b) => b.change - a.change);
   if (filter === "watch") return merged.filter((stock) => watchlist.includes(stock.code));
   return merged.filter((stock) => stock.sector === filter);
@@ -66,6 +67,7 @@ export function exploreList(
 
 export function sectorChips(universe: Universe, filter: ExploreFilter) {
   return [
+    { id: "all", name: "전체", emoji: "" },
     { id: "rank", name: "오늘 많이 오른 순", emoji: "" },
     { id: "watch", name: "관심 기업", emoji: "" },
     ...universe.sectors,
@@ -83,15 +85,18 @@ export function sectorChips(universe: Universe, filter: ExploreFilter) {
   }));
 }
 
+/** 칩을 펼친 동안은 칩 줄이 이미 무슨 목록인지 말해주므로 제목을 비운다. */
 export function exploreTitle(
   universe: Universe,
   filter: ExploreFilter,
   query: string,
   listLength: number,
+  chipsOpen = false,
 ) {
   const q = query.trim();
-  if (q) return `"${q}" 검색 결과 ${listLength}곳`;
-  if (filter === "rank") return "";
+  if (chipsOpen) return "";
+  if (q) return `"${q}" 검색 결과`;
+  if (filter === "all" || filter === "rank") return "";
   if (filter === "watch") return `관심 기업 ${listLength}곳`;
   const sector = universe.sectors.find((entry) => entry.id === filter);
   const count = universe.stocks.filter((stock) => stock.sector === filter).length;
@@ -101,17 +106,20 @@ export function exploreTitle(
 export function emptyState(query: string) {
   return query.trim()
     ? {
-        title: "찾는 회사가 없어",
-        hint: '이름 일부만 넣어도 찾아줄게. 예를 들면 "삼성"',
+        title: "찾는 회사가 없어요",
+        hint: '이름 일부만 넣어도 찾아줄게요. 예를 들면 "삼성"',
       }
     : {
-        title: "아직 관심 기업이 없어",
-        hint: "회사를 눌러서 들어간 다음, 오른쪽 위 하트를 누르면 여기에 모여.",
+        title: "아직 관심 기업이 없어요",
+        hint: "회사를 눌러서 들어간 다음, 오른쪽 위 하트를 누르면 여기에 모여요.",
       };
 }
 
-/** 종목이 많으면 도트가 화면을 넘친다. 현재 위치 주변만 창처럼 보여주고 양끝은 작게 흘린다. */
-export function cardDots(total: number, activeIndex: number) {
+/**
+ * 종목이 많으면 도트가 화면을 넘친다. 현재 위치 주변만 창처럼 보여주고 양끝은 작게 흘린다.
+ * `axis:'y'` 면 카드가 위아래로 넘어가는 세로 레일이라 도트도 세로로 세운다(폭↔높이를 바꾼다).
+ */
+export function cardDots(total: number, activeIndex: number, axis: "x" | "y" = "x") {
   const MAX = 9;
   const start =
     total <= MAX ? 0 : Math.min(Math.max(0, activeIndex - Math.floor(MAX / 2)), total - MAX);
@@ -121,9 +129,12 @@ export function cardDots(total: number, activeIndex: number) {
     const on = i === activeIndex;
     const fadeL = total > MAX && k === 0 && start > 0;
     const fadeR = total > MAX && k === shown - 1 && start + shown < total;
-    const w = on ? 18 : fadeL || fadeR ? 4 : 6;
+    const main = on ? 18 : fadeL || fadeR ? 4 : 6;
+    const cross = on ? 6 : main === 4 ? 4 : 6;
+    const [w, h] = axis === "y" ? [cross, main] : [main, cross];
+    const transitionProp = axis === "y" ? "height" : "width";
     return (
-      `width:${w}px;height:${on ? 6 : w === 4 ? 4 : 6}px;border-radius:999px;transition:width .18s ease;background:` +
+      `width:${w}px;height:${h}px;border-radius:999px;transition:${transitionProp} .18s ease;background:` +
       (on ? "#FF3D8D" : fadeL || fadeR ? "#E3DFEE" : "#D6D0E5") +
       (on ? ";box-shadow:0 0 9px rgba(255,61,141,0.42)" : "")
     );
