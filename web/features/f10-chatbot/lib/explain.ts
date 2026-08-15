@@ -83,12 +83,14 @@ function turnStep(
 ): ExplainStep {
   return {
     kind: "turn",
+    // 🤖 본문은 승인 데이터에 아직 반말 원문이 남아 있어 변환을 유지한다.
+    // 🤖 prompt 와 🧒 선택지 라벨은 데이터가 이미 최종 형태라 손대지 않는다(SPEC §3.3.2).
     text: toPoliteKorean(text),
     turn: {
       scriptId: script.id,
       stage,
-      prompt: toPoliteKorean(prompt),
-      choices: choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
+      prompt,
+      choices,
       ...(reaskCount ? { reaskCount } : {}),
     },
   };

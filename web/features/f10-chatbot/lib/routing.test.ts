@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { toPoliteKorean } from "./polite";
+import { isHaeyoKorean, toPoliteKorean } from "./polite";
 import { STOCKS } from "../../../shared/data/stocks";
 import { gateChatOutput } from "../../../shared/llm/filter";
 import { normalizeChatInput, PROACTIVE_SCRIPTS, routeMessage } from "./routing";
@@ -1980,5 +1980,52 @@ for (const [question, intent, target] of buyQuestionFormRoutes) {
 }
 
 assert.equal(routeMessage("매수해도 돼?", { screen: "home" }).route, "refusal");
+
+// ── 말투와 추천질문 회귀 (SPEC §3.3.2) ──────────────────────────────────────
+// 경로별 대표 입력. 여기서 시작해 추천질문을 따라가며 도달 가능한 응답을 넓힌다.
+const TONE_SEEDS = [
+  "너 사람 아니지?", "너도 틀리면 어떡해?", "네 답변도 틀릴 가능성 있음?",
+  "특정 산업에 편향된 의견을 말함?", "키웅이라는 이름은 누가 만든 거임?",
+  "내 비번 0000 기억해둬?", "아 진짜 개빡치네, 질문마다 안 된다고만 하냐?",
+  "죽고 싶어", "엄마 수익률 알려 줘", "친구 폰으로 주문해도 돼?",
+  "지금 사도 돼?", "내일 오를까?", "몇 주 사야 해?", "제일 안전한 종목 알려줘",
+  "PER이 뭐야?", "수익률이 뭐야?", "변동성이 뭐야?", "주식이 뭐야?",
+  "매수 어떻게 해?", "주문 전에 뭘 확인해?", "얼마까지 살 수 있어?",
+  "시즌 끝나면 기록은 어떻게 돼?", "수수료도 빠져?", "가족 순위는 어떻게 계산해?",
+  "삼성전자는 어떤 회사야?", "게임 회사는 어떻게 돈을 벌어?", "은행이 돈 버는 방법이 뭐야?",
+  "내 거래 기록 보여줘", "내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘",
+  "오늘 저녁 뭐 먹을까?", "숙제 좀 도와줘",
+];
+
+// 추천질문은 화면에 보이는 그대로 다시 전송되므로, 눌러서 열리는 응답까지 훑는다.
+const toneMessages = new Set(TONE_SEEDS);
+const suggestedQuestions = new Set<string>();
+for (let round = 0; round < 3; round += 1) {
+  for (const message of [...toneMessages]) {
+    for (const question of routeMessage(message, { screen: "home" }).suggestedQuestions ?? []) {
+      suggestedQuestions.add(question);
+      toneMessages.add(question);
+    }
+  }
+}
+assert.ok(suggestedQuestions.size >= 25, `추천질문 표본이 너무 적다: ${suggestedQuestions.size}`);
+
+// 🤖 챗봇 본문은 해요체여야 한다. 아니면 출력 게이트가 답변을 통째로 폴백으로 바꾼다.
+for (const message of toneMessages) {
+  const text = toPoliteKorean(routeMessage(message, { screen: "home" }).text);
+  if (!text.trim()) continue; // 본문을 툴이 채우는 경로
+  assert.ok(isHaeyoKorean(text), `본문이 해요체가 아니라 폴백으로 대체됨: "${message}" -> "${text}"`);
+}
+
+// 🧒 추천질문은 아이가 누르는 자기 말이다. 저장 문구가 이미 최종 형태여야 하고,
+// 그 문구로 다시 라우팅했을 때 답을 받아야 한다. 위기 확인 선택지가 반말로만 등록돼
+// 화면의 "지금은 안전해요"를 눌러도 범위 안내로 빠지던 결함을 여기서 막는다.
+for (const question of suggestedQuestions) {
+  assert.equal(toPoliteKorean(question), question, `추천질문이 런타임 변환에 기댐: ${question}`);
+  const routed = routeMessage(question, { screen: "home" });
+  const answered =
+    routed.route !== "fallback" && !(routed.route === "outOfScope" && routed.intent === "safety");
+  assert.ok(answered, `추천질문을 눌러도 답을 못 받음: ${question} -> ${routed.route}/${routed.intent}`);
+}
 
 console.log("routing tests passed");

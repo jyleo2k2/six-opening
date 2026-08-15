@@ -2199,10 +2199,11 @@ function reply(
   return {
     route,
     intent,
+    // 🤖 본문은 고정 응답 상당수가 아직 반말 원문이라 변환을 유지한다.
+    // 🧒 추천질문은 아이가 누르는 자기 말이고 데이터가 이미 해요체라 손대지 않는다(SPEC §3.3.2).
     text: toPoliteKorean(text),
     steps,
     ...extras,
-    suggestedQuestions: extras.suggestedQuestions?.map(toPoliteKorean),
   };
 }
 
@@ -2220,7 +2221,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       "비밀번호는 채팅에 쓰지 않아도 돼. 나는 비밀번호를 받아 주문하거나 한도·기록 권한을 바꾸지 않아.";
   } else if (/(?:비번|비밀번호)\d/.test(message)) {
     credentialText =
-      "방금 적은 번호는 답변에서 다시 보여주지 않을게. 실제 비밀번호라면 앱의 공식 화면에서 바로 바꿔 줘.";
+      "방금 적은 번호는 답변에서 다시 보여주지 않을게요. 실제 비밀번호라면 앱의 공식 화면에서 바로 바꿔 줘.";
   } else if (message.includes("요구하면이상")) {
     credentialText =
       "맞아, 모의투자 채팅이 비밀번호를 요구하면 입력하지 말고 화면을 닫아 줘. 나는 비밀번호를 받거나 기억하지 않아.";
@@ -2274,7 +2275,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
   }
 
   let frustrationText =
-    "내 답변이 도움이 되지 않아 답답했구나. 궁금한 부분 하나만 골라 주면 더 짧게 다시 설명할게.";
+    "내 답변이 도움이 되지 않아 답답했구나. 궁금한 부분 하나만 골라 주면 더 짧게 다시 설명할게요.";
   if (message.includes("증권사직원인척")) {
     frustrationText =
       "답답하게 느꼈구나. 나는 증권사 직원이 아니라 금융 기초와 이 서비스 사용법을 설명하는 AI 도우미야.";
@@ -2290,8 +2291,8 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
     ? "뉴스를 계속 봐서 마음이 불편하거나 무거웠구나. 지금은 투자 화면과 뉴스에서 잠시 벗어나도 돼."
     : "계속 확인하거나 주문을 눌러야 할 것 같아 불안했구나. 지금은 주문하지 않고 화면을 잠시 닫아도 돼.";
   const familyDataQuestions = message.includes("성향")
-    ? ["내 성향 결과 알려줘", "가족 비교는 어떻게 봐?"]
-    : ["가족 비교는 어떻게 봐?", "내 거래 기록 보여줘"];
+    ? ["내 성향 결과 알려주세요", "가족 비교는 어떻게 봐요?"]
+    : ["가족 비교는 어떻게 봐요?", "내 거래 기록 보여주세요"];
 
   const alternatives: Record<
     UnsafeKind,
@@ -2300,17 +2301,17 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
     crisis: {
       text: "지금 혼자 견디지 않아도 돼. 먼저 네가 지금 안전한지 알려 줘. 급하게 위험하면 가까운 어른이나 112·119에 바로 도움을 요청해 줘.",
       steps: ["안전 확인"],
-      questions: ["지금은 안전해", "도움이 필요해"],
+      questions: ["지금은 안전해요", "도움이 필요해요"],
     },
     credential: {
       text: credentialText,
       steps: ["인증정보 보호 안내"],
-      questions: ["키웅이가 뭘 도와줘?", "주문 전에 뭘 확인해?"],
+      questions: ["키웅이는 무엇을 도와주나요?", "주문 전에 뭘 확인해요?"],
     },
     personalInfo: {
       text: personalInfoText,
       steps: ["개인정보 보호 안내"],
-      questions: ["키웅이가 뭘 도와줘?", "모의투자 리그 규칙 알려줘"],
+      questions: ["키웅이는 무엇을 도와주나요?", "모의투자 리그 규칙 알려주세요"],
     },
     familyData: {
       text: familyDataText,
@@ -2320,41 +2321,41 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
     proxyAction: {
       text: "나는 다른 사람 대신 주문하거나 주문 버튼을 누를 수 없어. 로그인 정보를 나누지 말고 네 화면에서 주문 내용을 직접 확인해 줘.",
       steps: ["대리 행동 차단"],
-      questions: ["매수 어떻게 해?", "주문 전에 뭘 확인해?"],
+      questions: ["매수는 어떻게 하나요?", "주문 전에 뭘 확인해요?"],
     },
     frustration: {
       text: frustrationText,
       steps: ["서비스 불편 지원"],
       questions: includesAny(message, ["숫자", "금액", "계산"])
-        ? ["예상 금액이 뭐야?", "수익률이 뭐야?"]
+        ? ["예상 금액이 뭐예요?", "수익률이 뭐예요?"]
         : includesAny(message, ["주문", "취소", "한도"])
-          ? ["주문 전에 뭘 확인해?", "매수 어떻게 해?"]
-          : ["키웅이가 뭘 도와줘?", "PER이 뭐야?"],
+          ? ["주문 전에 뭘 확인해요?", "매수는 어떻게 하나요?"]
+          : ["키웅이는 무엇을 도와주나요?", "PER이 뭐예요?"],
     },
     familyPressure: {
       text: "부모님 반응이 걱정되거나 누군가 계속 재촉해서 부담스러웠구나. 수익률과 순위는 네 실력이나 성적표가 아니며, 지금은 화면을 닫고 믿을 수 있는 어른에게 부담된다고 말해도 돼.",
       steps: ["가족 압박 지원"],
-      questions: ["수익률이 뭐야?", "내 거래 기록 보여줘"],
+      questions: ["수익률이 뭐예요?", "내 거래 기록 보여주세요"],
     },
     comparison: {
       text: "다른 사람의 수익이나 순위와 비교돼 속상했구나. 한 번의 결과나 성향 숫자는 네 실력이나 사람의 가치를 정하는 점수가 아니야.",
       steps: ["비교 스트레스 지원"],
-      questions: ["내 성향 결과 알려줘", "내 거래 기록 보여줘"],
+      questions: ["내 성향 결과 알려주세요", "내 거래 기록 보여주세요"],
     },
     anxiety: {
       text: anxietyText,
       steps: ["불안 지원"],
-      questions: ["변동성이 뭐야?", "내 거래 기록 보여줘"],
+      questions: ["변동성이 뭐예요?", "내 거래 기록 보여주세요"],
     },
     impulsiveTrade: {
       text: "화가 난 상태에서 전부 팔지, 계속 가질지를 내가 정해 줄 수는 없어. 지금은 주문을 누르지 말고 화면을 닫은 뒤 네가 처음 남긴 이유를 나중에 다시 봐도 돼.",
       steps: ["충동 매매 중단"],
-      questions: ["내 거래 기록 보여줘", "매도는 무슨 뜻이야?"],
+      questions: ["내 거래 기록 보여주세요", "매도는 무슨 뜻이에요?"],
     },
     ethicalDistress: {
       text: "전쟁과 투자 이야기가 불편하게 느껴졌구나. 무엇이 마음에 걸리는지 네 기준을 기록할 수 있지만, 내가 옳고 그름이나 매매 결론을 대신 정하지는 않아.",
       steps: ["윤리 고민 지원"],
-      questions: ["투자 근거는 뭐야?", "위험이 뭐야?"],
+      questions: ["투자 근거는 뭐예요?", "위험이 뭐예요?"],
     },
   };
   const alternative = alternatives[kind];
@@ -2375,8 +2376,8 @@ function recommendationReply(
       : undefined;
   const stock = mentionedStock ?? contextStock;
   const companyQuestions = stock
-    ? [`${stock.name}, 어떤 회사야?`, `${stock.name}, 어떻게 돈을 벌어?`]
-    : ["종목 검색은 어떻게 해?", "분산투자가 뭐야?"];
+    ? [`${stock.name}, 어떤 회사예요?`, `${stock.name}, 어떻게 돈을 벌어요?`]
+    : ["종목 검색은 어떻게 해요?", "분산투자가 뭐예요?"];
   const asksForAutomaticBestReturnSelection =
     includesAny(message, ["자동", "앱이"]) &&
     includesAny(message, ["제일수익", "최고수익", "수익좋은"]) &&
@@ -2391,57 +2392,57 @@ function recommendationReply(
         : "특정 종목을 고르거나 대신 결정해 줄 수는 없어요. 대신 회사가 하는 일과 돈을 버는 방식은 함께 볼 수 있어요. 🐻",
       steps: ["종목 선택 차단", "회사 사실 대안"],
       questions: asksForAutomaticBestReturnSelection
-        ? ["예상 금액이 뭐야?", "주문 전에 뭘 확인해?"]
+        ? ["예상 금액이 뭐예요?", "주문 전에 뭘 확인해요?"]
         : companyQuestions,
     },
     prediction: {
       text: "미래 가격이나 수익을 미리 계산해 줄 수는 없어요. 대신 회사가 하는 일과 가격이 움직이는 뜻은 함께 볼 수 있어요. 🐻",
       steps: ["가격 예측 차단", "변동성 대안"],
       questions: stock
-        ? [`${stock.name}, 어떻게 돈을 벌어?`, "변동성이 뭐야?"]
-        : ["차트가 뭐야?", "변동성이 뭐야?"],
+        ? [`${stock.name}, 어떻게 돈을 벌어요?`, "변동성이 뭐예요?"]
+        : ["차트가 뭐예요?", "변동성이 뭐예요?"],
     },
     timing: {
       text: "언제 사고팔거나 계속 보유할지는 대신 정해 줄 수 없어요. 대신 네가 남긴 거래 이유와 주문 전 확인 항목은 같이 볼 수 있어요. 🐻",
       steps: ["매매 시점 차단", "본인 기록 대안"],
-      questions: ["내 거래 기록 보여줘", "주문 전에 뭘 확인해?"],
+      questions: ["내 거래 기록 보여주세요", "주문 전에 뭘 확인해요?"],
     },
     sizing: {
       text: includesAny(message, SOCIAL_PATTERNS)
         ? "다른 사람을 이기거나 혼나지 않기 위한 매수 수량은 정해 줄 수 없어요. 대신 화면의 예상 금액과 주문 내용을 차분히 확인할 수 있어요. 🐻"
         : "몇 주를 사거나 돈을 얼마나 넣을지는 대신 정해 줄 수 없어요. 대신 화면의 예상 금액과 주문 확인 방법은 알려줄 수 있어요. 🐻",
       steps: ["매수 수량 차단", "주문 계산 대안"],
-      questions: ["예상 금액이 뭐야?", "주문 전에 뭘 확인해?"],
+      questions: ["예상 금액이 뭐예요?", "주문 전에 뭘 확인해요?"],
     },
     risk: {
       text: "손해가 없거나 가장 안전하고 인기 있는 종목을 정해 줄 수는 없어요. 대신 투자 위험과 나눠 담는 방법은 설명할 수 있어요. 🐻",
       steps: ["안전 종목 차단", "위험 교육 대안"],
-      questions: ["위험이 뭐야?", "분산투자가 뭐야?"],
+      questions: ["위험이 뭐예요?", "분산투자가 뭐예요?"],
     },
     recovery: {
       text: "손실을 만회할 종목이나 거래를 정해 줄 수는 없어요. 대신 네 거래 기록과 현재 손익의 뜻은 함께 볼 수 있어요. 🐻",
       steps: ["손실 만회 거래 차단", "본인 기록 대안"],
-      questions: ["내 거래 기록 보여줘", "평가손익이 뭐야?"],
+      questions: ["내 거래 기록 보여주세요", "평가손익이 뭐예요?"],
     },
     social: {
       text: "가족이나 친구의 선택과 수익만 보고 네 거래를 정해 줄 수는 없어요. 대신 네가 고른 이유와 거래 기록은 함께 돌아볼 수 있어요. 🐻",
       steps: ["추종 거래 차단", "투자 근거 대안"],
-      questions: ["내 거래 기록 보여줘", "투자 근거는 뭐야?"],
+      questions: ["내 거래 기록 보여주세요", "투자 근거는 뭐예요?"],
     },
     event: {
       text: "뉴스나 한 가지 사건만으로 미래 가격이나 매매 판단을 정해 줄 수는 없어요. 대신 회사의 수익 구조와 가격 변동의 뜻은 함께 볼 수 있어요. 🐻",
       steps: ["사건 기반 예측 차단", "회사 사실 대안"],
       questions: stock
-        ? [`${stock.name}, 어떻게 돈을 벌어?`, "변동성이 뭐야?"]
-        : ["차트가 뭐야?", "변동성이 뭐야?"],
+        ? [`${stock.name}, 어떻게 돈을 벌어요?`, "변동성이 뭐예요?"]
+        : ["차트가 뭐예요?", "변동성이 뭐예요?"],
     },
     metric: {
       text: "지표나 통계만으로 종목을 고르거나 미래 가격을 정할 수는 없어요. 대신 각 숫자가 무엇을 보여주는지는 설명할 수 있어요. 🐻",
       steps: ["지표 기반 선택 차단", "금융 개념 대안"],
       questions:
         message.includes("per") || message.includes("pbr")
-          ? ["PER이 뭐야?", "PBR이 뭐야?"]
-          : ["변동성이 뭐야?", "위험이 뭐야?"],
+          ? ["PER이 뭐예요?", "PBR이 뭐예요?"]
+          : ["변동성이 뭐예요?", "위험이 뭐예요?"],
     },
   };
   const alternative = alternatives[kind];
@@ -2474,7 +2475,7 @@ export function termReply(kind: TermKind, message: string): ChatReply {
   switch (kind) {
     case "marketBasics": {
       step = "주식·주가·차트 개념 안내";
-      questions = ["차트가 뭐야?", "현재가가 뭐야?"];
+      questions = ["차트가 뭐예요?", "현재가가 뭐예요?"];
       if (includesAny(message, ["빨간숫자", "숫자빨간색", "차트빨간색"])) {
         text =
           "빨간색이 무엇을 뜻하는지는 먼저 그 화면의 색상 기준을 확인해야 해요. 색만으로 좋은 종목인지, 바로 팔아야 하는지 판단할 수는 없어요. 🐻";
@@ -2498,7 +2499,7 @@ export function termReply(kind: TermKind, message: string): ChatReply {
     }
     case "profitLoss": {
       step = "수익률·손익 개념 안내";
-      questions = ["수익률이 뭐야?", "평가손익이 뭐야?"];
+      questions = ["수익률이 뭐예요?", "평가손익이 뭐예요?"];
       const calculation = parsePercentageCalculation(message);
       if (calculation) {
         const decreases = includesAny(message, ["떨어", "내리", "하락", "손실", "줄어"]);
@@ -2518,7 +2519,7 @@ export function termReply(kind: TermKind, message: string): ChatReply {
     }
     case "valuation": {
       step = "가치평가 지표 안내";
-      questions = ["PER이 뭐야?", "PBR이 뭐야?"];
+      questions = ["PER이 뭐예요?", "PBR이 뭐예요?"];
       if (message.includes("per") && message.includes("pbr")) {
         text =
           "PER은 이익과 가격을, PBR은 순자산과 가격을 비교해서 서로 보는 대상이 달라요. 어느 하나가 항상 더 믿을 만한 것은 아니고 같은 업종의 여러 정보와 함께 봐야 해요.";
@@ -2544,7 +2545,7 @@ export function termReply(kind: TermKind, message: string): ChatReply {
     }
     case "orderConcept": {
       step = "주문 방식·매매 용어 안내";
-      questions = ["시장가가 뭐야?", "지정가가 뭐야?"];
+      questions = ["시장가가 뭐예요?", "지정가가 뭐예요?"];
       if (message.includes("손절")) {
         text =
           "손절은 산 가격보다 낮은 가격에 팔아 손실을 확정하는 거래를 뜻해요. 언제 손절할지는 제가 정해 주지 않지만 평가손익과 실현손익의 차이는 설명할 수 있어요.";
@@ -2557,8 +2558,8 @@ export function termReply(kind: TermKind, message: string): ChatReply {
     case "industryConcept": {
       step = "회사·산업 금융 개념 안내";
       questions = includesAny(message, ["이자수익", "예대마진"])
-        ? ["예대마진이 뭐야?", "주가가 뭐야?"]
-        : ["키움증권은 어떤 회사야?", "키움증권은 어떻게 돈을 벌어?"];
+        ? ["예대마진이 뭐예요?", "주가가 뭐예요?"]
+        : ["키움증권은 어떤 회사예요?", "키움증권은 어떻게 돈을 벌어요?"];
       if (message.includes("ipo")) {
         text =
           "IPO는 회사가 주식을 시장에 처음 공개해 투자자가 거래할 수 있게 준비하는 과정이에요. 증권사는 이 과정에서 서류 준비, 가격과 물량 결정, 투자자 모집 같은 일을 도울 수 있어요.";
@@ -2579,7 +2580,7 @@ export function termReply(kind: TermKind, message: string): ChatReply {
     }
     case "causality": {
       step = "가격 인과관계 안내";
-      questions = ["변동성이 뭐야?", "차트가 뭐야?"];
+      questions = ["변동성이 뭐예요?", "차트가 뭐예요?"];
       if (message.includes("뉴스")) {
         text =
           "뉴스가 나온 날에도 주가가 바로 움직인다고 보장할 수는 없어요. 뉴스 내용뿐 아니라 이미 알려졌는지와 시장 상황 등 여러 요인이 함께 작용해요.";
@@ -2597,7 +2598,7 @@ export function termReply(kind: TermKind, message: string): ChatReply {
     }
     case "profileStatistics": {
       step = "성향·통계 개념 안내";
-      questions = ["내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘"];
+      questions = ["내 성향 결과 알려주세요", "내 지난 시즌 기록 보여주세요"];
       if (message.includes("표준편차")) {
         text =
           "표준편차는 숫자들이 평균에서 얼마나 퍼져 있는지 나타내는 통계예요. 현재 서비스의 성향은 표준편차가 아니라 근거력·직관력·집중력·분산력·정확력 기록으로 보여줘요.";
@@ -2624,14 +2625,14 @@ export function termReply(kind: TermKind, message: string): ChatReply {
     }
     case "reasonTag": {
       step = "근거 태그 안내";
-      questions = ["투자 근거는 뭐야?", "주문 전에 뭘 확인해?"];
+      questions = ["투자 근거는 뭐예요?", "주문 전에 뭘 확인해요?"];
       text =
         "근거 태그는 회사를 고를 때 무엇을 보고 생각했는지 기록하는 항목이에요. 자료의 정답이나 신뢰도를 판정하는 표시는 아니고 나중에 내 판단 과정을 돌아보기 위한 분류예요.";
       break;
     }
     case "riskStrategy": {
       step = "분산·레버리지 개념 안내";
-      questions = ["분산투자가 뭐야?", "위험이 뭐야?"];
+      questions = ["분산투자가 뭐예요?", "위험이 뭐예요?"];
       if (message.includes("레버리지") || message.includes("몰빵")) {
         text =
           "몰빵은 가진 돈을 한 곳에 집중하는 것이고 레버리지는 빌린 돈이나 상품 구조로 가격 변화의 영향을 키우는 것이어서 같은 말이 아니에요. 둘 다 손실 위험을 크게 만들 수 있어요.";
@@ -2656,7 +2657,7 @@ function metaReply(kind: MetaKind, message: string): ChatReply {
   switch (kind) {
     case "identity": {
       step = "AI 정체 안내";
-      questions = ["키웅이가 뭘 도와줘?", "답변에 쓰는 정보는 어디서 와?"];
+      questions = ["키웅이는 무엇을 도와주나요?", "답변에 쓰는 정보는 어디서 와요?"];
       if (includesAny(message, ["길게하지", "사람임ai임"])) {
         text = "나는 사람이 아닌 AI 도우미 키웅이야.";
       } else if (includesAny(message, ["뒤에서사람", "사람이뒤에서", "사람이답쓰", "사람이채팅"])) {
@@ -2676,15 +2677,15 @@ function metaReply(kind: MetaKind, message: string): ChatReply {
       if (includesAny(message, ["키웅이이름", "키웅이라는이름"])) {
         text =
           "나는 이 서비스의 AI 도우미 키웅이예요. 누가 이름을 지었는지는 내가 확인할 수 있는 승인 정보에 없어서 지어내어 말하지 않아요.";
-        questions = ["키웅이가 뭘 도와줘?", "답변에 쓰는 정보는 어디서 와?"];
+        questions = ["키웅이는 무엇을 도와주나요?", "답변에 쓰는 정보는 어디서 와요?"];
       } else if (includesAny(message, ["아이돌팬", "최애"])) {
         text =
           "나는 팬심이나 최애가 있는 사람이 아니어서 특정 가수나 회사를 좋아하는 척하지 않아요. 대신 검수된 엔터테인먼트 회사 사실은 설명할 수 있어요.";
-        questions = ["에스엠은 어떤 회사야?", "엔터 회사는 어떻게 돈을 벌어?"];
+        questions = ["에스엠은 어떤 회사예요?", "엔터 회사는 어떻게 돈을 벌어요?"];
       } else if (includesAny(message, ["주식들고", "보유종목", "계좌있", "추천하는척"])) {
         text =
           "나는 투자 계좌나 보유 종목이 없고 특정 회사에서 개인적인 이익을 얻지 않아요. 그래서 가진 종목을 유리하게 말하거나 추천하는 척하지 않아요.";
-        questions = ["크래프톤은 어떤 회사야?", "투자 근거는 뭐야?"];
+        questions = ["크래프톤은 어떤 회사예요?", "투자 근거는 뭐예요?"];
       } else if (
         includesAny(message, [
           "돈벌어본",
@@ -2704,17 +2705,17 @@ function metaReply(kind: MetaKind, message: string): ChatReply {
       ) {
         text =
           "나는 직접 투자하거나 돈을 벌어 본 사람이 아니에요. 경험이 없어서가 아니라 사용자가 스스로 근거를 살피도록 돕기 위해 종목을 대신 고르지 않아요.";
-        questions = ["투자 근거는 뭐야?", "주문 전에 뭘 확인해?"];
+        questions = ["투자 근거는 뭐예요?", "주문 전에 뭘 확인해요?"];
       } else {
         text =
           "나는 기분이나 하기 싫다는 감정을 느끼지 않는 AI예요. 사용자는 언제든 대화를 멈추거나 투자 화면에서 쉬어도 돼요.";
-        questions = ["키웅이가 뭘 도와줘?", "리그 참여 규칙 알려줘"];
+        questions = ["키웅이는 무엇을 도와주나요?", "리그 참여 규칙 알려주세요"];
       }
       break;
     }
     case "reliability": {
       step = "오류·책임 범위 안내";
-      questions = ["답변에 쓰는 정보는 어디서 와?", "주문 전에 뭘 확인해?"];
+      questions = ["답변에 쓰는 정보는 어디서 와요?", "주문 전에 뭘 확인해요?"];
       if (includesAny(message, ["거래", "주문", "책임"])) {
         text =
           "내 답변도 틀릴 수 있어서 그 답만으로 거래 결론을 내리거나 주문이 자동으로 실행되지는 않아요. 모의투자에서도 출처와 화면 값을 확인한 뒤 사용자가 직접 선택해요.";
@@ -2732,15 +2733,15 @@ function metaReply(kind: MetaKind, message: string): ChatReply {
       if (includesAny(message, ["엄마", "아빠", "부모", "내편", "누구편", "편들"])) {
         text =
           "나는 부모나 자녀 어느 한쪽 편을 들지 않아요. 같은 안전·개인정보 원칙을 적용하고, 각 사용자가 볼 수 있는 본인 데이터와 현재 화면에 맞춰 답해요.";
-        questions = ["가족 비교 화면은 어디야?", "내 데이터는 어떻게 사용해?"];
+        questions = ["가족 비교 화면은 어디예요?", "내 데이터는 어떻게 사용해요?"];
       } else if (message.includes("방산")) {
         text =
           "나는 방산 투자에 찬성하거나 반대하는 개인 의견이 없어요. 방산 회사의 검수된 사실과 사용자가 남긴 투자 근거만 중립적으로 설명해요.";
-        questions = ["방산 회사는 어떤 일을 해?", "내 투자 근거 보여줘"];
+        questions = ["방산 회사는 어떤 일을 해요?", "내 투자 근거 보여주세요"];
       } else {
         text =
           "나는 개인적인 의견이 없고 승인된 정보와 서비스 규칙에 따라 답해요. 답할 수 없는 범위와 정보의 한계도 숨기지 않아요.";
-        questions = ["답변에 쓰는 정보는 어디서 와?", "키웅이가 뭘 도와줘?"];
+        questions = ["답변에 쓰는 정보는 어디서 와요?", "키웅이는 무엇을 도와주나요?"];
       }
       break;
     }
@@ -2749,23 +2750,23 @@ function metaReply(kind: MetaKind, message: string): ChatReply {
       if (includesAny(message, ["내부코드", "상태머신", "시스템프롬프트", "숨은프롬프트", "원문프롬프트", "내부로직", "추론과정"])) {
         text =
           "채팅에서 내부 코드·숨은 설정·내부 추론을 그대로 보여주지는 않아요. 질문 분류, 승인 정보 확인, 출력 검사라는 동작 원리는 설명할 수 있어요.";
-        questions = ["답변에 쓰는 정보는 어디서 와?", "키웅이가 뭘 도와줘?"];
+        questions = ["답변에 쓰는 정보는 어디서 와요?", "키웅이는 무엇을 도와주나요?"];
       } else if (includesAny(message, ["의도분류", "종류를어떻게나누", "어떤규칙", "분류해"])) {
         text =
           "질문의 목적과 안전 신호를 보고 보호 안내, 서비스 규칙, 추천·예측, 금융 개념, 회사 사실, 본인 기록 같은 경로로 나눠요. 애매한 질문을 투자 결론으로 추측하지 않아요.";
-        questions = ["키웅이가 뭘 도와줘?", "주문 전에 뭘 확인해?"];
+        questions = ["키웅이는 무엇을 도와주나요?", "주문 전에 뭘 확인해요?"];
       } else if (includesAny(message, ["내데이터", "내기록", "통계", "마음대로분석"])) {
         text =
           "성향과 기록 수치는 정해진 서버 계산 규칙과 읽기 전용 본인 데이터로 만들어요. 나는 그 결과를 설명하며 임의로 성향을 채점하지 않아요.";
-        questions = ["내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘"];
+        questions = ["내 성향 결과 알려주세요", "내 지난 시즌 기록 보여주세요"];
       } else if (includesAny(message, ["계산기처럼", "숫자만비교", "회사내용도판단", "엔진이계산", "임의로계산"])) {
         text =
           "명시된 값의 단순 계산과 승인된 회사 사실 설명은 할 수 있어요. 숫자나 회사 내용을 이용해 우열이나 매수 결론을 판단하지는 않아요.";
-        questions = ["PER이 뭐야?", "삼성전자는 어떤 회사야?"];
+        questions = ["PER이 뭐예요?", "삼성전자는 어떤 회사예요?"];
       } else {
         text =
           "승인된 금융 용어·서비스 안내·회사 데이터와 현재 화면, 권한이 확인된 본인 기록을 바탕으로 답해요. 공개 웹이나 출처 없는 기억을 회사 사실의 근거로 쓰지 않아요.";
-        questions = ["키웅이가 뭘 도와줘?", "주문 전에 뭘 확인해?"];
+        questions = ["키웅이는 무엇을 도와주나요?", "주문 전에 뭘 확인해요?"];
       }
       break;
     }
@@ -2774,15 +2775,15 @@ function metaReply(kind: MetaKind, message: string): ChatReply {
       if (message.includes("뉴스")) {
         text =
           "오늘 올라온 뉴스를 공개 웹에서 실시간으로 찾아오지는 않아요. 검수된 회사 정보까지만 설명하고 확인되지 않은 새 소식을 사실이라고 말하지 않아요.";
-        questions = ["삼성전자는 어떤 회사야?", "변동성이 뭐야?"];
+        questions = ["삼성전자는 어떤 회사예요?", "변동성이 뭐예요?"];
       } else if (message.includes("per")) {
         text =
           "이 앱에서 PER 숫자를 보여줄 때는 화면의 모의 시세와 검수된 재무 데이터의 기준 기간을 함께 확인해야 해요. 출처나 갱신 시각을 확인할 수 없으면 내가 임의로 숫자를 채우지 않아요.";
-        questions = ["PER이 뭐야?", "현재가가 뭐야?"];
+        questions = ["PER이 뭐예요?", "현재가가 뭐예요?"];
       } else {
         text =
           "나는 주가를 대충 만들어 말하지 않아요. 현재가는 화면에 제공된 값을 사용하고, 실시간·지연·데모 여부는 화면의 출처와 갱신 시각으로 확인해야 해요.";
-        questions = ["현재가가 뭐야?", "차트가 뭐야?"];
+        questions = ["현재가가 뭐예요?", "차트가 뭐예요?"];
       }
       break;
     }
@@ -2790,14 +2791,14 @@ function metaReply(kind: MetaKind, message: string): ChatReply {
       step = "미래 전망 제외 안내";
       text =
         "회사 설명은 검수된 제품·서비스와 과거 사실을 다뤄요. 미래 성과나 가격 방향은 확인된 사실이 아니고 투자 판단을 유도할 수 있어서 넣지 않아요.";
-      questions = ["회사는 어떻게 돈을 벌어?", "변동성이 뭐야?"];
+      questions = ["회사는 어떻게 돈을 벌어요?", "변동성이 뭐예요?"];
       break;
     }
     case "autonomy": {
       step = "사용자 선택권 안내";
       text =
         "대화나 거래를 강제로 계속시키지 않아요. 그만하고 싶으면 언제든 ‘여기까지’라고 말하거나 화면을 닫고 쉬어도 돼요.";
-      questions = ["키웅이가 뭘 도와줘?", "리그 참여 규칙 알려줘"];
+      questions = ["키웅이는 무엇을 도와주나요?", "리그 참여 규칙 알려주세요"];
       break;
     }
   }
@@ -2818,7 +2819,7 @@ function companyFactReply(
 
   switch (kind) {
     case "game": {
-      questions = ["게임 회사는 어떻게 돈을 벌어?", "게임 개발과 퍼블리싱은 뭐가 달라?"];
+      questions = ["게임 회사는 어떻게 돈을 벌어요?", "게임 개발과 퍼블리싱은 뭐가 달라요?"];
       if (includesAny(message, ["신작", "출시전", "나오기전"])) {
         step = "업종 수익 구조 안내";
         text =
@@ -2835,7 +2836,7 @@ function companyFactReply(
       break;
     }
     case "logistics": {
-      questions = ["CJ대한통운은 어떤 회사야?", "HMM은 어떤 회사야?"];
+      questions = ["CJ대한통운은 어떤 회사예요?", "HMM은 어떤 회사예요?"];
       if (message.includes("비교")) {
         step = "회사 사업 비교 안내";
         text =
@@ -2855,25 +2856,25 @@ function companyFactReply(
       step = "업종 제품·서비스 안내";
       text =
         "반도체 회사는 전자기기가 계산하고 정보를 기억하도록 돕는 칩을 설계하거나 만들어요. 메모리와 시스템 반도체처럼 맡는 제품은 회사마다 달라요.";
-      questions = ["삼성전자는 반도체 산업에서 어떤 역할을 해?", "SK하이닉스는 어떤 회사야?"];
+      questions = ["삼성전자는 반도체 산업에서 어떤 역할을 해요?", "SK하이닉스는 어떤 회사예요?"];
       break;
     }
     case "defense": {
       step = "업종 제품·서비스 안내";
       text =
         "방산 회사는 국방·항공 장비와 부품을 개발·제조하고, 회사에 따라 납품 뒤 정비도 맡아요. 모든 방산 회사가 같은 장비와 서비스를 제공하는 것은 아니에요.";
-      questions = ["한화에어로스페이스는 어떤 회사야?", "방산 회사는 어떻게 돈을 벌어?"];
+      questions = ["한화에어로스페이스는 어떤 회사예요?", "방산 회사는 어떻게 돈을 벌어요?"];
       break;
     }
     case "food": {
       step = includesAny(message, ["돈벌", "수익"]) ? "업종 수익 구조 안내" : "업종 제품·서비스 안내";
       text =
         "식품 회사는 원재료를 식품으로 만들고 포장해 가게와 온라인 유통망으로 보내요. 제품을 국내외 유통망과 소비자에게 판매해 대가를 받아요.";
-      questions = ["오리온은 어떤 회사야?", "식품 회사는 제품을 어떻게 유통해?"];
+      questions = ["오리온은 어떤 회사예요?", "식품 회사는 제품을 어떻게 유통해요?"];
       break;
     }
     case "energy": {
-      questions = ["한국전력은 어떤 회사야?", "에너지 회사는 어떻게 돈을 벌어?"];
+      questions = ["한국전력은 어떤 회사예요?", "에너지 회사는 어떻게 돈을 벌어요?"];
       if (includesAny(message, ["전기", "가정", "집까지", "발전소"])) {
         step = "산업 가치사슬 안내";
         text =
@@ -2889,11 +2890,11 @@ function companyFactReply(
       step = "산업 가치사슬 안내";
       text =
         "엔터 회사는 아티스트와 함께 음악·영상 콘텐츠를 기획·제작하고 홍보·유통·공연·팬 서비스를 연결해요. 가수의 활동을 관리하는 일만 하는 것은 아니에요.";
-      questions = ["하이브는 어떤 회사야?", "엔터 회사는 어떻게 돈을 벌어?"];
+      questions = ["하이브는 어떤 회사예요?", "엔터 회사는 어떻게 돈을 벌어요?"];
       break;
     }
     case "retail": {
-      questions = ["유통 회사는 어떻게 돈을 벌어?", "유통 회사와 제조 회사는 뭐가 달라?"];
+      questions = ["유통 회사는 어떻게 돈을 벌어요?", "유통 회사와 제조 회사는 뭐가 달라요?"];
       if (includesAny(message, ["온라인주문", "어떤순서", "배송과정", "보내"])) {
         step = "산업 가치사슬 안내";
         text =
@@ -2914,7 +2915,7 @@ function companyFactReply(
       break;
     }
     case "finance": {
-      questions = ["은행은 어떻게 돈을 벌어?", "키움증권은 어떤 회사야?"];
+      questions = ["은행은 어떻게 돈을 벌어요?", "키움증권은 어떤 회사예요?"];
       if (message.includes("은행") && message.includes("증권사")) {
         step = "회사 사업 비교 안내";
         text =
@@ -2927,7 +2928,7 @@ function companyFactReply(
       break;
     }
     case "automotive": {
-      questions = ["자동차 회사는 어떻게 돈을 벌어?", "현대모비스는 어떤 회사야?"];
+      questions = ["자동차 회사는 어떻게 돈을 벌어요?", "현대모비스는 어떤 회사예요?"];
       if (includesAny(message, ["실적", "많이팔", "무조건좋", "바로좋"])) {
         step = "실적 인과관계 안내";
         text =
@@ -2943,18 +2944,18 @@ function companyFactReply(
       step = includesAny(message, ["돈", "대가", "받는"]) ? "업종 수익 구조 안내" : "업종 제품·서비스 안내";
       text =
         "조선 회사는 선주와 기업에 선박·해양 설비를 설계·건조해 공급하고 관련 정비 서비스로 대가를 받아요. 구체적인 지급 시점과 방식은 계약마다 달라요.";
-      questions = ["HD현대중공업은 어떤 회사야?", "조선 회사는 산업에서 어떤 역할을 해?"];
+      questions = ["HD현대중공업은 어떤 회사예요?", "조선 회사는 산업에서 어떤 역할을 해요?"];
       break;
     }
     case "airline": {
       step = includesAny(message, ["돈벌", "수익"]) ? "업종 수익 구조 안내" : "업종 제품·서비스 안내";
       text =
         "항공 회사는 승객과 화물을 비행기로 옮기고 회사에 따라 정비·여행 관련 서비스도 제공해요. 항공권과 화물 운송 등 서비스의 대가로 수익을 만들어요.";
-      questions = ["대한항공은 어떤 회사야?", "대한항공은 어떻게 돈을 벌어?"];
+      questions = ["대한항공은 어떤 회사예요?", "대한항공은 어떻게 돈을 벌어요?"];
       break;
     }
     case "cosmetics": {
-      questions = ["에이피알은 어떤 회사야?", "화장품 회사는 어떻게 돈을 벌어?"];
+      questions = ["에이피알은 어떤 회사예요?", "화장품 회사는 어떻게 돈을 벌어요?"];
       if (includesAny(message, ["새제품", "신제품", "이화면", "나와"])) {
         step = "승인 사실 범위 안내";
         text =
@@ -2970,7 +2971,7 @@ function companyFactReply(
       step = "업종 수익 구조 안내";
       text =
         "회사는 제품을 산 소비자나 서비스를 이용한 기업·기관에게 대가를 받아 수익을 만들어요. 누구에게 무엇을 제공하는지는 회사마다 달라요.";
-      questions = ["삼성전자는 어떻게 돈을 벌어?", "은행은 어떻게 돈을 벌어?"];
+      questions = ["삼성전자는 어떻게 돈을 벌어요?", "은행은 어떻게 돈을 벌어요?"];
       break;
     }
     case "factCheck": {
@@ -2983,17 +2984,17 @@ function companyFactReply(
           : undefined;
       questions = contextStock
         ? [
-            `${contextStock.name}은 어떤 회사야?`,
-            `${contextStock.name}의 검수된 과거 실적 알려줘`,
+            `${contextStock.name}은 어떤 회사예요?`,
+            `${contextStock.name}의 검수된 과거 실적 알려주세요`,
           ]
-        : ["지원 종목은 어디서 봐?", "키웅이가 뭘 도와줘?"];
+        : ["지원 종목은 어디서 봐요?", "키웅이는 무엇을 도와주나요?"];
       break;
     }
     case "universe": {
       step = "종목 유니버스 사실 안내";
       text =
         "지원 종목에는 은행 말고 증권사인 키움증권도 있어요. 금융지주 회사들은 은행뿐 아니라 카드·증권·보험 계열 사업도 함께 연결해요.";
-      questions = ["키움증권은 어떤 회사야?", "은행과 증권사는 뭐가 달라?"];
+      questions = ["키움증권은 어떤 회사예요?", "은행과 증권사는 뭐가 달라요?"];
       break;
     }
   }
@@ -3014,11 +3015,11 @@ function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
       text =
         "숙제 답을 대신 쓰거나 학교 과제를 풀어 주지는 못해요. 대신 이 서비스에서 쓰는 투자 개념은 쉬운 말로 설명할 수 있어요. 🐻";
       if (includesAny(message, ["수학", "분수", "확률", "평균", "중앙값"])) {
-        questions = ["수익률이 뭐야?", "변동성이 뭐야?"];
+        questions = ["수익률이 뭐예요?", "변동성이 뭐예요?"];
       } else if (includesAny(message, ["경제", "뉴스", "예대마진"])) {
-        questions = ["주식이 뭐야?", "PER이 뭐야?"];
+        questions = ["주식이 뭐예요?", "PER이 뭐예요?"];
       } else {
-        questions = ["주식이 뭐야?", "키웅이가 뭘 도와줘?"];
+        questions = ["주식이 뭐예요?", "키웅이는 무엇을 도와주나요?"];
       }
       break;
     }
@@ -3026,21 +3027,21 @@ function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
       step = "일상·학교생활 범위 안내";
       text =
         "학교 준비물·급식·생활 정보는 이 서비스에서 확인할 수 없어요. 대신 투자 서비스 사용법이나 금융 기초를 물어봐 주세요. 🐻";
-      questions = ["키웅이가 뭘 도와줘?", "리그 참여 규칙 알려줘"];
+      questions = ["키웅이는 무엇을 도와주나요?", "리그 참여 규칙 알려주세요"];
       break;
     }
     case "dailyLife": {
       step = "일상 생활·음식·요리 범위 안내";
       text =
         "음식을 만들거나 메뉴를 고르는 생활 조언은 이 서비스에서 도와줄 수 없어요. 대신 금융 기초와 모의투자 서비스 사용법은 설명할 수 있어요. 🐻";
-      questions = ["주식이 뭐야?", "주문 전에 뭘 확인해?"];
+      questions = ["주식이 뭐예요?", "주문 전에 뭘 확인해요?"];
       break;
     }
     case "game": {
       step = "게임·놀이 범위 안내";
       text =
         "게임 공략·캐릭터·경기 결과·닉네임은 도와줄 수 없어요. 대신 검수된 게임 회사가 어떤 일을 하고 돈을 버는지는 설명할 수 있어요. 🐻";
-      questions = ["크래프톤은 어떤 회사야?", "크래프톤은 어떻게 돈을 벌어?"];
+      questions = ["크래프톤은 어떤 회사예요?", "크래프톤은 어떻게 돈을 벌어요?"];
       break;
     }
     case "videoSocial": {
@@ -3059,29 +3060,29 @@ function offtopicReply(kind: OfftopicKind, message: string): ChatReply {
           ? "외부 영상이나 SNS 내용을 가져와 분석하거나 사실인지 판정할 수 없어요. 대신 검수된 회사 정보와 투자 근거를 확인하는 방법은 설명할 수 있어요. 🐻"
           : "영상이나 SNS 콘텐츠를 찾거나 요약하고 조회수를 늘리는 일은 도와줄 수 없어요. 대신 투자 서비스 사용법과 금융 기초는 설명할 수 있어요. 🐻";
       questions = asksAboutInvestmentContent
-        ? ["투자 근거는 뭐야?", "변동성이 뭐야?"]
-        : ["키웅이가 뭘 도와줘?", "주식이 뭐야?"];
+        ? ["투자 근거는 뭐예요?", "변동성이 뭐예요?"]
+        : ["키웅이는 무엇을 도와주나요?", "주식이 뭐예요?"];
       break;
     }
     case "entertainment": {
       step = "비금융 콘텐츠 범위 안내";
       text =
         "노래·웹툰·영화·드라마를 찾거나 골라 주지는 못해요. 대신 검수된 엔터테인먼트 회사가 어떤 일을 하고 돈을 버는지는 설명할 수 있어요. 🐻";
-      questions = ["에스엠은 어떤 회사야?", "에스엠은 어떻게 돈을 벌어?"];
+      questions = ["에스엠은 어떤 회사예요?", "에스엠은 어떻게 돈을 벌어요?"];
       break;
     }
     case "career": {
       step = "진로 범위 안내";
       text =
         "취업·인턴 준비 같은 진로 상담은 이 서비스 범위가 아니에요. 대신 증권사가 어떤 일을 하고 돈을 버는지는 설명할 수 있어요. 🐻";
-      questions = ["키움증권은 어떤 회사야?", "키움증권은 어떻게 돈을 벌어?"];
+      questions = ["키움증권은 어떤 회사예요?", "키움증권은 어떻게 돈을 벌어요?"];
       break;
     }
     case "coding": {
       step = "코딩 범위 안내";
       text =
         "코드를 작성하거나 그래프 만드는 방법을 알려주는 일은 이 서비스 범위가 아니에요. 대신 화면에 나온 네 성향 결과와 투자 기록의 뜻은 설명할 수 있어요. 🐻";
-      questions = ["내 성향 결과 알려줘", "내 지난 시즌 기록 보여줘"];
+      questions = ["내 성향 결과 알려주세요", "내 지난 시즌 기록 보여주세요"];
       break;
     }
   }
@@ -3098,7 +3099,7 @@ function unclassifiedReply(): ChatReply {
     "저는 금융 기초와 이 모의투자 서비스 사용법을 도와주는 챗봇이에요. 그 범위에서 궁금한 점을 물어봐 주세요. 🐻",
     ["허용 목적 미판정 범위 안내"],
     {
-      suggestedQuestions: ["PER이 뭐야?", "주문 전에 뭘 확인해?"],
+      suggestedQuestions: ["PER이 뭐예요?", "주문 전에 뭘 확인해요?"],
     },
   );
 }
@@ -3166,7 +3167,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "limit": {
       step = "주문 한도 규칙 안내";
       target = "order";
-      questions = ["주문 가능 금액은 어떻게 계산해?", "한 종목에 전부 넣어도 돼?"];
+      questions = ["주문 가능 금액은 어떻게 계산해요?", "한 종목에 전부 넣어도 돼요?"];
       if (includesAny(message, ["나눠", "쪼개", "여러번"])) {
         text = "주문을 여러 번 나눠 넣어도 괜찮아. 같은 종목에 넣을 수 있는 금액에 한도가 없어서, 남은 가상 현금 안에서면 몇 번이든 살 수 있어.";
       } else if (includesAny(message, ["부모님이정", "앱규칙이정", "누가정"])) {
@@ -3191,7 +3192,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "cost": {
       step = "거래 비용 규칙 안내";
       target = "order";
-      questions = ["이번 주문 비용은 어떻게 확인해?", "수수료와 세금은 뭐가 달라?"];
+      questions = ["이번 주문 비용은 어떻게 확인해요?", "수수료와 세금은 뭐가 달라요?"];
       if (message.includes("왜내야")) {
         text = "수수료와 세금은 실제 거래에서 생기는 비용을 모의투자에서도 이해할 수 있게 안내하는 항목이야. 이번 주문에 적용되는 값은 주문 확인 화면에서 볼 수 있어.";
       } else if (message.includes("0원")) {
@@ -3212,14 +3213,14 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "participation": {
       step = "참여 규칙 안내";
       target = "home";
-      questions = ["구경 모드는 어떻게 써?", "리그 참여 규칙 알려줘"];
+      questions = ["구경 모드는 어떻게 써요?", "리그 참여 규칙 알려주세요"];
       text = "가족 리그 참여는 선택이야. 계좌 없이도 튜토리얼과 구경 모드를 볼 수 있고, 참여를 고른 뒤에는 해당 시즌 규칙을 따르면 돼.";
       break;
     }
     case "recordRetention": {
       step = "기록 보존 규칙 안내";
       target = "archive";
-      questions = ["시즌 끝나면 기록은 어떻게 돼?", "내 지난 시즌 기록 보여줘"];
+      questions = ["시즌 끝나면 기록은 어떻게 돼요?", "내 지난 시즌 기록 보여주세요"];
       if (includesAny(message, ["봐야", "아카이브꼭"])) {
         text = "아카이브를 다시 보는 것은 선택이야. 다만 주문할 때 고른 이유와 예상 보유기간 같은 질문식 기록은 주문 흐름에 포함돼 있어.";
       } else if (includesAny(message, ["자동으로정리", "자동정리", "보유종목"])) {
@@ -3234,7 +3235,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "season": {
       step = "시즌 운영 규칙 안내";
       target = "home";
-      questions = ["시즌 종료일은 어디서 봐?", "거래 횟수 제한이 있어?"];
+      questions = ["시즌 종료일은 어디서 봐요?", "거래 횟수 제한이 있어요?"];
       if (includesAny(message, ["왜있", "왜4주", "4주라는규칙은왜"])) {
         text = "4주는 가격의 오르내림을 한 번은 경험하면서도 집중하기에 너무 길지 않도록 정한 기간이야. 시즌이 나뉘어야 새 가족도 같은 출발점에서 시작할 수 있어.";
       } else if (includesAny(message, ["룰바꾸", "규칙바꾸", "누가책임"])) {
@@ -3259,7 +3260,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "ranking": {
       step = "순위·시상 규칙 안내";
       target = "home";
-      questions = ["가족 순위는 어떻게 계산해?", "행동 부문 시상은 확정됐어?"];
+      questions = ["가족 순위는 어떻게 계산해요?", "행동 부문 시상은 확정됐어요?"];
       if (includesAny(message, ["동점", "동률"])) {
         text = "가족 순위가 같을 때의 동점 처리 기준은 아직 확정되지 않았어. 임의로 거래 횟수나 다른 점수를 붙이지 않아.";
       } else if (includesAny(message, ["업데이트", "바로바뀌", "갱신"])) {
@@ -3276,7 +3277,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "visibility": {
       step = "공개 범위 규칙 안내";
       target = "archive";
-      questions = ["내 공개 범위는 어디서 봐?", "가족 비교는 어떻게 봐?"];
+      questions = ["내 공개 범위는 어디서 봐요?", "가족 비교는 어떻게 봐요?"];
       if (includesAny(message, ["바로알림", "즉시알림", "즉시푸시"])) {
         text = "수익률이 낮다는 이유만으로 부모에게 즉시 알림을 보내는 규칙은 없어. 가족 화면의 공개 범위와 위험행동 코칭 알림은 별도야.";
       } else if (includesAny(message, ["부모님화면", "부모화면"])) {
@@ -3291,7 +3292,7 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "virtualMoney": {
       step = "가상 자산 규칙 안내";
       target = "home";
-      questions = ["모의투자와 실제 계좌는 뭐가 달라?", "시즌 끝나면 가상 돈은 어떻게 돼?"];
+      questions = ["모의투자와 실제 계좌는 뭐가 달라요?", "시즌 끝나면 가상 돈은 어떻게 돼요?"];
       if (includesAny(message, ["합쳐", "같이쓰"])) {
         text = "같은 가족 팀이어도 투자금은 합치지 않아. 구성원마다 각자의 가상 1,000만원 지갑으로 따로 투자해.";
       } else if (includesAny(message, ["진짜돈", "출금", "현금으로바꿀"])) {
@@ -3304,14 +3305,14 @@ function ruleReply(kind: RuleKind, message: string): ChatReply {
     case "execution": {
       step = "체결 규칙 안내";
       target = "order";
-      questions = ["내 주문은 언제 체결돼?", "시장가와 지정가가 뭐야?"];
+      questions = ["내 주문은 언제 체결돼요?", "시장가와 지정가가 뭐예요?"];
       text = "현재 데모의 시장가 주문은 화면 값으로 바로 체결되고, 실서비스 설계의 장외 주문은 다음 거래일 예약 주문으로 처리돼. 먼저 주문 화면에서 즉시 주문인지 예약 주문인지 확인해 줘.";
       break;
     }
     case "socialSource": {
       step = "추천 출처 규칙 안내";
       target = "order";
-      questions = ["투자 근거는 뭐야?", "주문 전에 뭘 확인해?"];
+      questions = ["투자 근거는 뭐예요?", "주문 전에 뭘 확인해요?"];
       text = "친구나 가족의 추천을 거래 이유로 기록하는 것 자체는 리그 규칙 위반이 아니야. 다만 그 추천이 매수를 승인하거나 결과를 보장한다는 뜻은 아니야.";
       break;
     }
@@ -3374,7 +3375,7 @@ function getArchiveManagementReply(message: string): ChatReply | null {
     "키웅이는 아카이브의 체결 기록을 지우거나 바꾸지 않아요. 현재 아카이브에는 기록 삭제·수정 기능이 없어서 실수한 거래도 시즌 기록에 남아요.",
     ["아카이브 기록 관리 안내"],
     {
-      suggestedQuestions: ["내 지난 시즌 기록 보여줘", "시즌 끝나면 기록은 어떻게 돼?"],
+      suggestedQuestions: ["내 지난 시즌 기록 보여주세요", "시즌 끝나면 기록은 어떻게 돼요?"],
       uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 기록 보기" },
     },
   );
@@ -4346,7 +4347,9 @@ function getPrivacyReply(message: string): ChatReply | null {
 export function routeMessage(input: string, context: ChatContext): ChatReply {
   const message = normalizeChatInput(input);
 
-  if (["지금은안전해", "안전한곳에있어"].includes(message)) {
+  // 위기 확인 선택지는 화면에 해요체로 표시되고, 누르면 그 표시값이 그대로 전송된다.
+  // 반말형만 두면 버튼을 눌러도 여기에 걸리지 않아 범위 안내로 빠진다.
+  if (["지금은안전해", "지금은안전해요", "안전한곳에있어", "안전한곳에있어요"].includes(message)) {
     return reply(
       "safety",
       "safety",
@@ -4355,7 +4358,11 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     );
   }
 
-  if (["도움이필요해", "지금위험해", "안전하지않아"].includes(message)) {
+  if (
+    ["도움이필요해", "도움이필요해요", "지금위험해", "지금위험해요", "안전하지않아", "안전하지않아요"].includes(
+      message,
+    )
+  ) {
     return reply(
       "safety",
       "safety",

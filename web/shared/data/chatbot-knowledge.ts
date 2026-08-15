@@ -904,7 +904,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "ranking", kind: "faq", triggers: ["랭킹", "이번 주", "시즌 전체"], answer: "랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요.", actionTarget: "home", status: reviewed },
   { id: "family-feed", kind: "faq", triggers: ["가족 기록", "거래 가격", "차트에서 이 지점 보기"], answer: "가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요.", status: reviewed },
   { id: "profile-abilities", kind: "faq", triggers: ["정확력", "근거력", "집중력", "분산력", "직관력"], answer: "근거력·직관력은 매수 전 자료를 살펴본 기록을, 집중력·분산력은 보유 섹터와 현금 비중을, 정확력은 거래 뒤 5거래일의 가격 방향을 바탕으로 보여줘요. 어느 방향이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
-  { id: "profile-definition", kind: "faq", triggers: ["성향이 뭐야", "성향 뜻", "능력치 오각형"], answer: "성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.", actionTarget: "archive", status: reviewed },
+  { id: "profile-definition", kind: "faq", triggers: ["성향이 뭐", "성향 뜻", "능력치 오각형"], answer: "성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.", actionTarget: "archive", status: reviewed },
   { id: "profile-status", kind: "faq", triggers: ["관찰 초기", "별 판정 중", "5거래일"], answer: "관찰 초기에는 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족해요. 별 판정 중은 거래 뒤 5거래일이 지나지 않아 정확력 등급을 아직 계산하지 못한 상태예요.", actionTarget: "archive", status: reviewed },
   { id: "profile-character", kind: "faq", triggers: ["저격수", "전략가", "승부사", "탐험가", "성향 캐릭터"], answer: "성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
   { id: "season-record", kind: "faq", triggers: ["시즌 기록이 뭐야", "기록 카드"], answer: "시즌 기록은 이번 시즌의 매수·매도·메모·상세 열람 건수를 모아 보여줘요. 기록 카드는 시즌이 끝난 뒤 받는 요약이며, 현재는 4주차까지 잠겨 있어요.", actionTarget: "archive", status: reviewed },
@@ -924,7 +924,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "trade-history", kind: "faq", triggers: ["거래 내역", "지난 주문", "체결 내역", "지난 기록"], answer: "지난 거래와 그때 남긴 생각은 아카이브에서 다시 볼 수 있어요. 다른 가족의 원문 기록은 볼 수 없어요.", actionTarget: "archive", status: reviewed },
   { id: "price-location", kind: "faq", triggers: ["현재가 어디", "가격 어디", "주가 어디"], answer: "종목 상세 화면에서 현재가와 가격 변화를 볼 수 있어요. 현재가는 계속 바뀔 수 있으니 화면에 표시된 시각도 함께 확인해요.", actionTarget: "stock", status: reviewed },
   { id: "cash-balance", kind: "faq", triggers: ["남은 돈", "잔액", "모의투자금"], answer: "홈의 포트폴리오에서 남은 모의투자금을 확인할 수 있어요. 가족이 함께 쓰는 돈이 아니라 계정마다 따로 관리돼요.", actionTarget: "home", status: reviewed },
-  { id: "chatbot-role", kind: "faq", triggers: ["키웅이가 뭘", "챗봇이 뭘", "뭘 도와줘"], answer: "저는 금융 기초, 화면 사용법, 검수된 회사 정보와 기록을 쉽게 설명해 줘요. 종목을 골라 주거나 언제 사고팔지 정해 주지는 않아요. 🐻", status: reviewed },
+  { id: "chatbot-role", kind: "faq", triggers: ["키웅이가 뭘", "키웅이는 무엇을", "챗봇이 뭘", "뭘 도와줘", "무엇을 도와주"], answer: "저는 금융 기초, 화면 사용법, 검수된 회사 정보와 기록을 쉽게 설명해 줘요. 종목을 골라 주거나 언제 사고팔지 정해 주지는 않아요. 🐻", status: reviewed },
 ] satisfies readonly ChatbotKnowledgeEntry[]).map((entry) =>
   entry.kind === "faq" && DAPIE_SCREEN_TERM_IDS.has(entry.id)
     ? {
