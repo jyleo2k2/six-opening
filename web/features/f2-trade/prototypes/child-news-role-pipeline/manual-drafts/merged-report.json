@@ -4,12 +4,12 @@
   "runDateKst": "2026-08-15",
   "sourceRetrievedAt": "2026-08-15T07:31:13.537Z",
   "sourceBasis": "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함",
-  "generatedAt": "2026-08-15T11:03:04.375Z",
+  "generatedAt": "2026-08-15T11:21:29.085Z",
   "model": "gpt-5.6-luna",
   "stockCount": 51,
   "completedCount": 51,
-  "readyForStorageCount": 29,
-  "rejectedCount": 22,
+  "readyForStorageCount": 36,
+  "rejectedCount": 15,
   "decisionComplete": true,
   "cases": [
     {
@@ -105,16 +105,171 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-014-0005561828",
-        "stage": "editor",
-        "reasonCodes": [
-          "INVALID_PRICE_CONNECTION"
-        ],
-        "reasons": [
-          "주가 연결 설명의 유형이 중심 사건과 맞지 않습니다."
-        ],
-        "editorAttempts": 2
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-DAILYPOST-114845",
+          "title": "크래프톤, 상반기 매출 2조 6616억 원 '역대 최대'…영업이익 9725억원",
+          "publisher": "데일리포스트",
+          "publishedAt": "2026-07-29T06:53:00.000Z",
+          "sourceUrl": "https://www.thedailypost.kr/news/articleView.html?idxno=114845",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "크래프톤이 2026년 상반기 연결 기준 매출 2조 6616억 원, 영업이익 9725억 원을 기록하며 반기 기준 역대 최대 실적을 작성했다."
+            },
+            {
+              "id": "S2",
+              "text": "전년 동기 대비 매출은 73.3%, 영업이익은 38.3% 증가했다."
+            },
+            {
+              "id": "S3",
+              "text": "2분기 매출과 영업이익도 각각 1조 2902억 원과 4109억 원을 거두며 역대 2분기 중 최고치를 기록했다."
+            },
+            {
+              "id": "S4",
+              "text": "PUBG IP 상반기 매출은 전년 대비 25% 늘어났으며, 지난 5월 얼리 액세스로 선보인 서브노티카 2는 출시 22일 만에 누적 판매량 500만 장을 넘어섰다."
+            },
+            {
+              "id": "S5",
+              "text": "플랫폼별 상반기 매출은 모바일 1조 1,537억 원, PC 9,242억 원, 기타 5,460억 원, 콘솔 377억 원 순으로 집계됐다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-DAILYPOST-114845",
+          "primaryStockIds": [
+            "KRX:259960"
+          ],
+          "focusStatement": "크래프톤이 2026년 2분기 매출 1조 2902억 원, 영업이익 4109억 원을 거둬 역대 2분기 중 최고치를 기록했다.",
+          "anchorSourceId": "S3",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-DAILYPOST-114845",
+          "headline": {
+            "text": "크래프톤, 2분기 매출 1조2902억원으로 역대 2분기 최고",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "homeSummary": {
+            "text": "크래프톤, 2분기 매출 1조2902억원으로 역대 2분기 최고",
+            "sourceIds": [
+              "S3"
+            ]
+          },
+          "body": [
+            {
+              "text": "2분기 영업이익은 4109억원이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit"
+            },
+            {
+              "text": "서브노티카 2가 500만 장 팔렸어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "subnautica_sales"
+            },
+            {
+              "text": "상반기 매출은 2조6616억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "context",
+              "factKey": "half_year_revenue"
+            }
+          ],
+          "priceConnection": {
+            "text": "게임이 얼마나 팔렸는지는 회사의 사업 성과와 연결돼요.",
+            "sourceIds": [
+              "S3",
+              "S4"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-DAILYPOST-114845",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:259960"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "크래프톤이 2026년 2분기 매출 1조 2902억 원, 영업이익 4109억 원을 거둬 역대 2분기 중 최고치를 기록했다.",
+          "anchorSourceIds": [
+            "S3"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {
@@ -12454,17 +12609,160 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-024-0000107564",
-        "stage": "selector",
-        "reasonCodes": [
-          "NO_DIRECT_MATERIALITY",
-          "INSUFFICIENT_EVIDENCE"
-        ],
-        "reasons": [
-          "대신증권의 목표주가와 업황·주가 회복 전망이 중심이며, 삼성전자·SK하이닉스의 실제 실적·계약·배당·자사주 집행 등 확정된 새 사건이 확인되지 않는다.",
-          "최근 주가 하락 언급도 당일 국내 시장 흐름을 직접 설명하는 시황 기사가 아니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-SNSTIME-20260707",
+          "title": "삼성전자, 2026년 2분기 잠정 실적 발표... 2분기 연결기준 매출 171조원, 영업이익 89.4조원 예상",
+          "publisher": "SNS 타임즈",
+          "publishedAt": "2026-07-07T00:00:00.000Z",
+          "sourceUrl": "https://www.thesnstime.com/samseongjeonja-2026nyeon-2bungi-jamjeong-siljeog-balpyo-2bungi-yeongyeolgijun-maecul-171joweon-yeongeobiig-89-4joweon-yesang/",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "삼성전자가 연결기준으로 매출 171조원, 영업이익 89.4조원의 2026년 2분기 잠정 실적을 발표했다."
+            },
+            {
+              "id": "S2",
+              "text": "2분기 실적의 경우 전기 대비 매출은 27.74%, 영업이익은 56.21% 증가했고, 전년 동기 대비 매출은 129.31%, 영업이익은 1810.26% 증가했다."
+            },
+            {
+              "id": "S3",
+              "text": "잠정 실적은 한국채택 국제회계기준(IFRS)에 의거해 추정한 결과이며, 아직 결산이 종료되지 않은 가운데 투자자들의 편의를 돕는 차원에서 제공되는 것이다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-SNSTIME-20260707",
+          "primaryStockIds": [
+            "KRX:005930"
+          ],
+          "focusStatement": "삼성전자가 연결기준 매출 171조원, 영업이익 89.4조원의 2026년 2분기 잠정 실적을 발표했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "잠정"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-SNSTIME-20260707",
+          "headline": {
+            "text": "삼성전자, 2분기 매출 171조원·영업이익 89.4조원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "삼성전자, 2분기 매출 171조원·영업이익 89.4조원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "지난 분기보다 매출이 27.74% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth_qoq"
+            },
+            {
+              "text": "영업이익은 56.21% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_growth_qoq"
+            },
+            {
+              "text": "아직 계산이 끝나지 않은 잠정 숫자예요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "provisional_notice"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "잠정",
+              "easyText": "아직 최종 계산 전이라 조금 바뀔 수 있는 것",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-SNSTIME-20260707",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:005930"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "삼성전자가 연결기준 매출 171조원, 영업이익 89.4조원의 2026년 2분기 잠정 실적을 발표했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -12986,22 +13284,171 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-009-0005721476",
-        "stage": "reviewer",
-        "reasonCodes": [
-          "REVIEW_attributionAndTiming",
-          "REVIEW_termExplanationCoverage",
-          "attribution_timing_loss",
-          "missing_term_explanation"
-        ],
-        "reasons": [
-          "독립 검수 실패: attributionAndTiming",
-          "독립 검수 실패: termExplanationCoverage",
-          "S3는 관련 업계에 따른 수치이고 S5는 삼성전자가 지난달 30일 논의 중이라고 밝힌 내용인데, 초안은 출처와 주체·시점을 생략해 양사가 현재 논의 중인 것처럼 읽힙니다.",
-          "priceConnection에 금융 용어인 ‘주가’가 노출됐지만 원래 이름과 어린이용 풀이가 없습니다."
-        ],
-        "editorAttempts": 2
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-SKHYNIX-Q2-2026",
+          "title": "SK하이닉스, 2026년 2분기 경영실적 발표",
+          "publisher": "SK하이닉스 뉴스룸",
+          "publishedAt": "2026-07-29T00:00:00.000Z",
+          "sourceUrl": "https://news.skhynix.co.kr/q2-2026-business-results/",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "SK하이닉스가 올해 2분기 매출액 79조 3,187억 원, 영업이익 60조 5,426억 원(영업이익률76%), 순이익 93조 9,226억 원(순이익률 118%)의 분기 사상 최대 경영실적을 기록했다고 29일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "이로써 상반기 누적 매출은 사상 처음으로 100조 원대에 올라섰다."
+            },
+            {
+              "id": "S3",
+              "text": "전년 동기와 비교하면 매출과 영업이익은 각 257%, 557% 증가했다."
+            },
+            {
+              "id": "S4",
+              "text": "이 같은 실적 호조에 힘입어 2분기 말 회사의 현금성 자산은 전분기 말 대비 33.6조 원 늘어난 88조 원을 기록했다."
+            },
+            {
+              "id": "S5",
+              "text": "반면, 차입금은 0.7조 원 줄어든 18.6조 원에 그치며 순현금은 69.4조 원으로 확대됐다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-SKHYNIX-Q2-2026",
+          "primaryStockIds": [
+            "KRX:000660"
+          ],
+          "focusStatement": "SK하이닉스가 2026년 2분기 매출액 79조 3,187억 원, 영업이익 60조 5,426억 원, 순이익 93조 9,226억 원의 분기 사상 최대 실적을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-SKHYNIX-Q2-2026",
+          "headline": {
+            "text": "SK하이닉스, 2분기 매출 79조3187억원으로 사상 최대",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "SK하이닉스, 2분기 매출 79조3187억원으로 사상 최대",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "영업이익은 60조5426억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit"
+            },
+            {
+              "text": "지난해보다 매출이 257% 늘었어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "상반기 매출이 처음 100조원을 넘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "context",
+              "factKey": "half_year_record"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-SKHYNIX-Q2-2026",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:000660"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "SK하이닉스가 2026년 2분기 매출액 79조 3,187억 원, 영업이익 60조 5,426억 원, 순이익 93조 9,226억 원의 분기 사상 최대 실적을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {
@@ -17342,17 +17789,180 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-009-0005721352",
-        "stage": "selector",
-        "reasonCodes": [
-          "ROUTINE_OR_PROMOTIONAL",
-          "NO_DIRECT_MATERIALITY"
-        ],
-        "reasons": [
-          "서울대와의 교육·연구 협약 및 인재 양성 계획이 중심이다.",
-          "구속력 있는 계약·수주, 금액이나 의무 등 허용된 중요 사건의 구체적 근거가 확인되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-ETODAY-2609718",
+          "title": "한화에어로스페이스, 2분기 영업익 1조3655억…전년比 58.5%↑",
+          "publisher": "이투데이",
+          "publishedAt": "2026-07-31T04:18:00.000Z",
+          "sourceUrl": "https://www.etoday.co.kr/news/view/2609718",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "한화에어로스페이스가 올해 2분기 연결 기준 영업이익 1조3655억원을 기록했다고 31일 공시했다."
+            },
+            {
+              "id": "S2",
+              "text": "지난해 같은 기간보다 58.5% 증가한 수준이다."
+            },
+            {
+              "id": "S3",
+              "text": "같은 기간 매출은 9조2929억원으로 전년 동기 대비 47.2% 늘었다."
+            },
+            {
+              "id": "S4",
+              "text": "당기순이익은 1조805억원으로 277.5% 급증했다."
+            },
+            {
+              "id": "S5",
+              "text": "지배기업 소유주지분 순이익은 6364억원으로 253.2% 증가했다."
+            },
+            {
+              "id": "S6",
+              "text": "직전 분기와 비교하면 매출은 61.6%, 영업이익은 113.7% 늘었다."
+            },
+            {
+              "id": "S7",
+              "text": "올해 상반기 누적 매출은 15조439억원으로 전년 동기 대비 27.5% 증가했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-ETODAY-2609718",
+          "primaryStockIds": [
+            "KRX:012450"
+          ],
+          "focusStatement": "한화에어로스페이스가 2026년 2분기 연결 기준 매출 9조2929억원, 영업이익 1조3655억원을 기록했다고 공시했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "영업이익",
+            "매출",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-ETODAY-2609718",
+          "headline": {
+            "text": "한화에어로스페이스, 2분기 영업이익 1조3655억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "한화에어로스페이스, 2분기 영업이익 1조3655억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "지난해보다 58.5% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_growth"
+            },
+            {
+              "text": "매출은 9조2929억원이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue"
+            },
+            {
+              "text": "상반기 매출은 15조439억원이에요.",
+              "sourceIds": [
+                "S7"
+              ],
+              "role": "context",
+              "factKey": "half_year_revenue"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S7"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-ETODAY-2609718",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:012450"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "한화에어로스페이스가 2026년 2분기 연결 기준 매출 9조2929억원, 영업이익 1조3655억원을 기록했다고 공시했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -19755,17 +20365,175 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-008-0005400332",
-        "stage": "selector",
-        "reasonCodes": [
-          "NO_DIRECT_MATERIALITY",
-          "INSUFFICIENT_EVIDENCE"
-        ],
-        "reasons": [
-          "메이사와 KAI가 개발에 착수했다는 사실은 있으나, KAI의 구속력 있는 계약·수주나 판매·생산 실적은 직접 확인되지 않는다.",
-          "약 2년간의 기술개발 사업이라는 설명만으로는 허용된 회사 사건의 직접적·중대한 영향이 입증되지 않는다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-CBCNEWS-592928",
+          "title": "[속보] 한국항공우주, 2분기 매출 1조1,679억원…영업이익 484억원",
+          "publisher": "CBC뉴스",
+          "publishedAt": "2026-07-29T06:41:00.000Z",
+          "sourceUrl": "https://www.cbci.co.kr/news/articleView.html?idxno=592928",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "한국항공우주(KAI)는 2026년 2분기 연결 기준 잠정 실적을 공시하고 매출 1조1,679억원, 영업이익 484억원을 기록했다고 29일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "2분기 매출은 전분기(1조927억원) 대비 6.9%, 전년 동기(8,283억원) 대비 41.0% 증가했다."
+            },
+            {
+              "id": "S3",
+              "text": "반면 영업이익은 전분기(671억원) 대비 27.9%, 전년 동기(852억원) 대비 43.1% 감소했다."
+            },
+            {
+              "id": "S4",
+              "text": "상반기(1~6월) 누적 기준으로는 매출 2조2,606억원, 영업이익 1,156억원을 기록했다."
+            },
+            {
+              "id": "S5",
+              "text": "이는 전년 동기 대비 매출은 48.0% 증가했지만 영업이익은 12.4% 감소한 수준이다."
+            },
+            {
+              "id": "S6",
+              "text": "당기순이익은 370억원으로 전분기 대비 10.4%, 전년 동기 대비 35.2% 줄었으며, 지배기업 소유주지분 순이익도 359억원으로 전분기 대비 14.6%, 전년 동기 대비 36.4% 감소했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-CBCNEWS-592928",
+          "primaryStockIds": [
+            "KRX:047810"
+          ],
+          "focusStatement": "한국항공우주(KAI)가 2026년 2분기 연결 기준 매출 1조1,679억원, 영업이익 484억원을 기록했다고 공시했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-CBCNEWS-592928",
+          "headline": {
+            "text": "한국항공우주, 2분기 매출 1조1679억원·영업이익 484억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "한국항공우주, 2분기 매출 1조1679억원·영업이익 484억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 지난해보다 41.0% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "영업이익은 43.1% 줄었어요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_decline"
+            },
+            {
+              "text": "상반기 매출은 2조2606억원이에요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "half_year_revenue"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S4"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-CBCNEWS-592928",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:047810"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "한국항공우주(KAI)가 2026년 2분기 연결 기준 매출 1조1,679억원, 영업이익 484억원을 기록했다고 공시했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -30233,15 +31001,165 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-003-0014112197",
-        "stage": "selector",
-        "reasonCodes": [
-          "COMPANY_NOT_PRIMARY_SUBJECT"
-        ],
-        "reasons": [
-          "제목과 본문이 정유업계 여러 기업의 투자 흐름을 공동으로 다루고 SK이노베이션과 S-OIL의 실적 수치를 나란히 제시합니다. 기업별 투자와 실적이 하나의 동일한 직접 사건으로 묶이지 않아 특정 기업 중심 기사로 선별할 수 없습니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-TTLNEWS-3130994",
+          "title": "에쓰-오일, 고유가·윤활 호조에 2분기 매출 11.3조… \"윤활부문 역대급 이익\"",
+          "publisher": "퍼블릭뉴스통신",
+          "publishedAt": "2026-08-03T02:15:00.000Z",
+          "sourceUrl": "https://www.ttlnews.com/news/articleView.html?idxno=3130994",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "에쓰오일(S-OIL)이 2026년 2분기 매출액 11조 3435억 원, 영업이익 9650억 원, 당기순이익 5146억 원을 기록했다고 발표했다."
+            },
+            {
+              "id": "S2",
+              "text": "사업부문별로 살펴보면 정유부문은 매출액 9조 293억 원, 영업이익 5,324억 원을 기록했다."
+            },
+            {
+              "id": "S3",
+              "text": "석유화학부문은 매출액 1조 125억 원, 영업손실 448억 원으로 적자 전환했으며, 윤활부문은 매출액 1조 3017억 원, 영업이익 4774억 원의 뛰어난 성과를 냈다."
+            },
+            {
+              "id": "S4",
+              "text": "영업이익은 정제마진 강세에도 불구하고 전분기에 반영됐던 일회성 재고 관련 이익이 소멸하면서 정유부문을 중심으로 전분기 대비 소폭 감소했으나, 윤활부문이 역대 최고 수준의 분기 영업이익을 올리며 전체 실적을 견인했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-TTLNEWS-3130994",
+          "primaryStockIds": [
+            "KRX:010950"
+          ],
+          "focusStatement": "에쓰오일(S-OIL)이 2026년 2분기 매출액 11조 3435억 원, 영업이익 9650억 원을 기록했다고 발표했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "윤활부문"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-TTLNEWS-3130994",
+          "headline": {
+            "text": "에쓰오일, 2분기 매출 11조3435억원·영업이익 9650억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "에쓰오일, 2분기 매출 11조3435억원·영업이익 9650억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "순이익은 5146억원이에요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "net_income"
+            },
+            {
+              "text": "윤활부문 영업이익은 4774억원이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "lubricant_profit"
+            },
+            {
+              "text": "윤활부문은 역대 가장 좋은 분기였어요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "context",
+              "factKey": "lubricant_record"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S3"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "윤활부문",
+              "easyText": "기계가 부드럽게 돌아가게 하는 기름을 만드는 사업",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-TTLNEWS-3130994",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:010950"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "에쓰오일(S-OIL)이 2026년 2분기 매출액 11조 3435억 원, 영업이익 9650억 원을 기록했다고 발표했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -31528,20 +32446,176 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-648-0000049726",
-        "stage": "reviewer",
-        "reasonCodes": [
-          "REVIEW_allTermsEasy",
-          "REVIEW_termExplanationCoverage",
-          "unexplained_abbreviation"
-        ],
-        "reasons": [
-          "독립 검수 실패: allTermsEasy",
-          "독립 검수 실패: termExplanationCoverage",
-          "본문에 노출된 'GS EPS'를 설명하는 별도 쉬운 풀이가 없고, 발전 자회사라는 설명도 문장에 드러나지 않습니다."
-        ],
-        "editorAttempts": 2
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-AJUNEWS-20260811153955948",
+          "title": "GS, 정유·에너지 호조에 2분기 영업익 1조7174억원…전년比 253%↑",
+          "publisher": "아주경제",
+          "publishedAt": "2026-08-11T07:15:00.000Z",
+          "sourceUrl": "https://www.ajunews.com/view/20260811153955948",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "㈜GS는 올해 2분기 연결 기준 매출 7조4131억원, 영업이익 1조7174억원, 당기순이익 1조1320억원을 기록했다고 11일 밝혔다."
+            },
+            {
+              "id": "S2",
+              "text": "전년 동기 대비 매출은 24.9%, 영업이익은 253.4%, 당기순이익은 1180.5% 증가했다."
+            },
+            {
+              "id": "S3",
+              "text": "이에 따라 ㈜GS의 상반기 연결 기준 매출은 14조2555억원, 영업이익은 2조9760억원, 당기순이익은 1조9587억원으로 집계됐다."
+            },
+            {
+              "id": "S4",
+              "text": "GS칼텍스는 2분기 매출 16조6724억원, 영업이익 2조5507억원을 기록했다."
+            },
+            {
+              "id": "S5",
+              "text": "2분기 매출은 2조4219억원으로 전년 동기 대비 105% 증가했고, 영업이익은 1조5341억원으로 347% 급증했다."
+            },
+            {
+              "id": "S6",
+              "text": "GS리테일은 2분기 매출 3조1751억원, 영업이익 1094억원을 기록해 전년 동기 대비 각각 7%, 28% 증가했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-AJUNEWS-20260811153955948",
+          "primaryStockIds": [
+            "KRX:078930"
+          ],
+          "focusStatement": "㈜GS가 2026년 2분기 연결 기준 매출 7조4131억원, 영업이익 1조7174억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "상반기"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-AJUNEWS-20260811153955948",
+          "headline": {
+            "text": "GS, 2분기 매출 7조4131억원·영업이익 1조7174억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "GS, 2분기 매출 7조4131억원·영업이익 1조7174억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "영업이익이 지난해보다 253.4% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_growth"
+            },
+            {
+              "text": "매출은 24.9% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "상반기 영업이익은 2조9760억원이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "context",
+              "factKey": "half_year_operating_profit"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-AJUNEWS-20260811153955948",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:078930"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "㈜GS가 2026년 2분기 연결 기준 매출 7조4131억원, 영업이익 1조7174억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {

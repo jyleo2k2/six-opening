@@ -1,0 +1,39 @@
+{
+  "stockId": "KRX:012450",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-ETODAY-2609718",
+    "title": "한화에어로스페이스, 2분기 영업익 1조3655억…전년比 58.5%↑",
+    "publisher": "이투데이",
+    "publishedAt": "2026-07-31T04:18:00.000Z",
+    "sourceUrl": "https://www.etoday.co.kr/news/view/2609718",
+    "sourceUnits": [
+      { "id": "S1", "text": "한화에어로스페이스가 올해 2분기 연결 기준 영업이익 1조3655억원을 기록했다고 31일 공시했다." },
+      { "id": "S2", "text": "지난해 같은 기간보다 58.5% 증가한 수준이다." },
+      { "id": "S3", "text": "같은 기간 매출은 9조2929억원으로 전년 동기 대비 47.2% 늘었다." },
+      { "id": "S4", "text": "당기순이익은 1조805억원으로 277.5% 급증했다." },
+      { "id": "S5", "text": "지배기업 소유주지분 순이익은 6364억원으로 253.2% 증가했다." },
+      { "id": "S6", "text": "직전 분기와 비교하면 매출은 61.6%, 영업이익은 113.7% 늘었다." },
+      { "id": "S7", "text": "올해 상반기 누적 매출은 15조439억원으로 전년 동기 대비 27.5% 증가했다." }
+    ]
+  },
+  "focusStatement": "한화에어로스페이스가 2026년 2분기 연결 기준 매출 9조2929억원, 영업이익 1조3655억원을 기록했다고 공시했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "한화에어로스페이스, 2분기 영업이익 1조3655억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "지난해보다 58.5% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth" },
+    { "text": "매출은 9조2929억원이에요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "revenue" },
+    { "text": "상반기 매출은 15조439억원이에요.", "sourceIds": ["S7"], "role": "context", "factKey": "half_year_revenue" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S3"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S7"] }
+  ]
+}

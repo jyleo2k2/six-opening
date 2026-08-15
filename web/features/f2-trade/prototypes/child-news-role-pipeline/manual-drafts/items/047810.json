@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:047810",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-CBCNEWS-592928",
+    "title": "[속보] 한국항공우주, 2분기 매출 1조1,679억원…영업이익 484억원",
+    "publisher": "CBC뉴스",
+    "publishedAt": "2026-07-29T06:41:00.000Z",
+    "sourceUrl": "https://www.cbci.co.kr/news/articleView.html?idxno=592928",
+    "sourceUnits": [
+      { "id": "S1", "text": "한국항공우주(KAI)는 2026년 2분기 연결 기준 잠정 실적을 공시하고 매출 1조1,679억원, 영업이익 484억원을 기록했다고 29일 밝혔다." },
+      { "id": "S2", "text": "2분기 매출은 전분기(1조927억원) 대비 6.9%, 전년 동기(8,283억원) 대비 41.0% 증가했다." },
+      { "id": "S3", "text": "반면 영업이익은 전분기(671억원) 대비 27.9%, 전년 동기(852억원) 대비 43.1% 감소했다." },
+      { "id": "S4", "text": "상반기(1~6월) 누적 기준으로는 매출 2조2,606억원, 영업이익 1,156억원을 기록했다." },
+      { "id": "S5", "text": "이는 전년 동기 대비 매출은 48.0% 증가했지만 영업이익은 12.4% 감소한 수준이다." },
+      { "id": "S6", "text": "당기순이익은 370억원으로 전분기 대비 10.4%, 전년 동기 대비 35.2% 줄었으며, 지배기업 소유주지분 순이익도 359억원으로 전분기 대비 14.6%, 전년 동기 대비 36.4% 감소했다." }
+    ]
+  },
+  "focusStatement": "한국항공우주(KAI)가 2026년 2분기 연결 기준 매출 1조1,679억원, 영업이익 484억원을 기록했다고 공시했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "한국항공우주, 2분기 매출 1조1679억원·영업이익 484억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 41.0% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 43.1% 줄었어요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "operating_profit_decline" },
+    { "text": "상반기 매출은 2조2606억원이에요.", "sourceIds": ["S4"], "role": "context", "factKey": "half_year_revenue" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S4"] }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:078930",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-AJUNEWS-20260811153955948",
+    "title": "GS, 정유·에너지 호조에 2분기 영업익 1조7174억원…전년比 253%↑",
+    "publisher": "아주경제",
+    "publishedAt": "2026-08-11T07:15:00.000Z",
+    "sourceUrl": "https://www.ajunews.com/view/20260811153955948",
+    "sourceUnits": [
+      { "id": "S1", "text": "㈜GS는 올해 2분기 연결 기준 매출 7조4131억원, 영업이익 1조7174억원, 당기순이익 1조1320억원을 기록했다고 11일 밝혔다." },
+      { "id": "S2", "text": "전년 동기 대비 매출은 24.9%, 영업이익은 253.4%, 당기순이익은 1180.5% 증가했다." },
+      { "id": "S3", "text": "이에 따라 ㈜GS의 상반기 연결 기준 매출은 14조2555억원, 영업이익은 2조9760억원, 당기순이익은 1조9587억원으로 집계됐다." },
+      { "id": "S4", "text": "GS칼텍스는 2분기 매출 16조6724억원, 영업이익 2조5507억원을 기록했다." },
+      { "id": "S5", "text": "2분기 매출은 2조4219억원으로 전년 동기 대비 105% 증가했고, 영업이익은 1조5341억원으로 347% 급증했다." },
+      { "id": "S6", "text": "GS리테일은 2분기 매출 3조1751억원, 영업이익 1094억원을 기록해 전년 동기 대비 각각 7%, 28% 증가했다." }
+    ]
+  },
+  "focusStatement": "㈜GS가 2026년 2분기 연결 기준 매출 7조4131억원, 영업이익 1조7174억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "GS, 2분기 매출 7조4131억원·영업이익 1조7174억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "영업이익이 지난해보다 253.4% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth" },
+    { "text": "매출은 24.9% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "상반기 영업이익은 2조9760억원이에요.", "sourceIds": ["S3"], "role": "context", "factKey": "half_year_operating_profit" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

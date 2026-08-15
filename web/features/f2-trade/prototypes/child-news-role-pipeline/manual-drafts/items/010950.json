@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:010950",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-TTLNEWS-3130994",
+    "title": "에쓰-오일, 고유가·윤활 호조에 2분기 매출 11.3조… \"윤활부문 역대급 이익\"",
+    "publisher": "퍼블릭뉴스통신",
+    "publishedAt": "2026-08-03T02:15:00.000Z",
+    "sourceUrl": "https://www.ttlnews.com/news/articleView.html?idxno=3130994",
+    "sourceUnits": [
+      { "id": "S1", "text": "에쓰오일(S-OIL)이 2026년 2분기 매출액 11조 3435억 원, 영업이익 9650억 원, 당기순이익 5146억 원을 기록했다고 발표했다." },
+      { "id": "S2", "text": "사업부문별로 살펴보면 정유부문은 매출액 9조 293억 원, 영업이익 5,324억 원을 기록했다." },
+      { "id": "S3", "text": "석유화학부문은 매출액 1조 125억 원, 영업손실 448억 원으로 적자 전환했으며, 윤활부문은 매출액 1조 3017억 원, 영업이익 4774억 원의 뛰어난 성과를 냈다." },
+      { "id": "S4", "text": "영업이익은 정제마진 강세에도 불구하고 전분기에 반영됐던 일회성 재고 관련 이익이 소멸하면서 정유부문을 중심으로 전분기 대비 소폭 감소했으나, 윤활부문이 역대 최고 수준의 분기 영업이익을 올리며 전체 실적을 견인했다." }
+    ]
+  },
+  "focusStatement": "에쓰오일(S-OIL)이 2026년 2분기 매출액 11조 3435억 원, 영업이익 9650억 원을 기록했다고 발표했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "에쓰오일, 2분기 매출 11조3435억원·영업이익 9650억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "순이익은 5146억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "net_income" },
+    { "text": "윤활부문 영업이익은 4774억원이에요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "lubricant_profit" },
+    { "text": "윤활부문은 역대 가장 좋은 분기였어요.", "sourceIds": ["S4"], "role": "context", "factKey": "lubricant_record" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "윤활부문", "easyText": "기계가 부드럽게 돌아가게 하는 기름을 만드는 사업", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}
