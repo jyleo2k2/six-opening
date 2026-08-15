@@ -25,7 +25,7 @@
         { "q": "3주차면 시즌 끝날 때까지 며칠 남음?", "screen": "home", "intent": "rule" },
         { "q": "왜 내 성향 그래프가 삐뚤빼뚤해?", "screen": "archive", "intent": "mydata" },
         { "q": "엄마는 뭐 샀는지 말해주면 안 됨?", "screen": "home", "intent": "unsafe" },
-        { "q": "유튜브 주식 고수처럼 하면 나도 잘할 수 있어?", "screen": "home", "intent": "offtopic" }
+        { "q": "유튜브 주식 고수처럼 하면 나도 잘할 수 있어?", "screen": "home", "intent": "recommend" }
       ]
     },
     {
