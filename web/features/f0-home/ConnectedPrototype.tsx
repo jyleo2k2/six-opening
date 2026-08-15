@@ -15,6 +15,7 @@ import { ArchiveScreen } from "./ArchiveScreen";
 import { DetailScreen } from "./DetailScreen";
 import { ExploreScreen } from "./ExploreScreen";
 import { HomeScreen } from "./HomeScreen";
+import { OrderScreen } from "./OrderScreen";
 import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
 import {
@@ -55,6 +56,7 @@ const MIGRATED_SCREENS = new Set<ScreenRoute["screen"]>([
   "portfolio",
   "stock",
   "explore",
+  "order",
 ]);
 
 const isMigrated = (route: ScreenRoute | null) =>
@@ -289,6 +291,18 @@ export function ConnectedPrototype({
               onChatContext={setOverlayContext}
               onLeave={leaveToPath}
               sector={overlay.sector}
+            />
+          )}
+          {overlay.screen === "order" && (
+            <OrderScreen
+              account={account}
+              code={overlay.code}
+              // 종목·방향이 바뀌면 단계·초안을 처음부터 시작한다 — app.html 이 진입 때
+              // 초안을 새로 만들던 것과 같다.
+              key={`${overlay.side}-${overlay.code}`}
+              onChatContext={setOverlayContext}
+              onLeave={leaveToPath}
+              side={overlay.side}
             />
           )}
         </div>
