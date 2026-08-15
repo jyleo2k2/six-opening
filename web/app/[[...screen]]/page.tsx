@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ConnectedPrototype } from "../../features/f0-home/ConnectedPrototype";
 import { routeFromPath } from "../../features/f0-home/screen-route";
 import { loadDevelopmentEnvironment } from "../api/dev-env";
-import { findProfileById, SESSION_COOKIE } from "../api/supabase";
+import { findProfileById, SESSION_COOKIE, sessionUserIdFromCookie } from "../api/supabase";
 import { LoginGate } from "../LoginGate";
 
 /**
@@ -18,9 +18,10 @@ import { LoginGate } from "../LoginGate";
 async function currentProfile() {
   loadDevelopmentEnvironment();
   const store = await cookies();
-  const raw = store.get(SESSION_COOKIE)?.value;
-  const id = raw ? Number(raw) : NaN;
-  if (!Number.isInteger(id) || id <= 0) return null;
+  // 쿠키를 여기서 직접 뜯지 않는다. 부팅 표식 대조를 `api/supabase.ts` 한곳에 두어야
+  // 화면과 API 가 같은 기준으로 로그인 여부를 판단한다.
+  const id = sessionUserIdFromCookie(store.get(SESSION_COOKIE)?.value);
+  if (id === null) return null;
   try {
     return await findProfileById(id);
   } catch (error) {

@@ -1,9 +1,48 @@
 // 서버 전용 Supabase 접근. 키는 절대 클라이언트로 넘기지 않는다.
 // app/api/quote/stock-candles.ts 의 REST 호출 방식을 그대로 따른다.
+import { randomUUID } from "node:crypto";
 import type { NextRequest } from "next/server";
 import { loadDevelopmentEnvironment } from "./dev-env";
 
 export const SESSION_COOKIE = "kw_uid";
+
+/**
+ * 서버 프로세스가 뜰 때 한 번 만드는 부팅 표식. 로그인 쿠키 값에 같이 넣어 두고 읽을 때 대조한다.
+ * 앱을 다시 실행하면 표식이 달라지므로, 브라우저가 쿠키를 들고 와도 로그인 화면부터 시작한다.
+ *
+ * 쿠키를 브라우저 세션 쿠키로 만드는 것만으로는 부족했다. 크롬·엣지의 "이전에 열었던 페이지
+ * 계속 보기" 가 세션 쿠키까지 복원해서, 브라우저를 껐다 켜도 로그인 상태가 남는다.
+ * 언제 로그아웃할지를 브라우저 설정에 맡기지 않고 서버가 정한다.
+ *
+ * `globalThis` 에 두는 이유는 두 가지다. Next 는 서버 컴포넌트와 라우트 핸들러를 서로 다른
+ * 모듈 그래프로 불러올 수 있어 모듈 최상단 상수로 두면 값이 갈릴 수 있고, 그러면 로그인이
+ * 곧바로 무효가 된다. 또 개발 중 파일을 고쳐 모듈이 다시 평가돼도 표식이 유지돼야
+ * 작업하다 말고 로그아웃되지 않는다. 프로세스가 실제로 다시 뜰 때만 바뀐다.
+ */
+const BOOT_ID_KEY = Symbol.for("kiwoom.session.boot-id");
+
+function bootId(): string {
+  const globals = globalThis as Record<symbol, unknown>;
+  const existing = globals[BOOT_ID_KEY];
+  if (typeof existing === "string") return existing;
+  const created = randomUUID().replace(/-/gu, "").slice(0, 12);
+  globals[BOOT_ID_KEY] = created;
+  return created;
+}
+
+/**
+ * 로그인 쿠키 값에서 사용자 id 를 읽는다. 부팅 표식이 지금 서버의 것과 다르거나 아예 없으면
+ * 로그인하지 않은 것으로 본다. 표식이 없는 쿠키는 이 방식 이전에 발급된 옛 쿠키다 —
+ * 그중에는 30일 Max-Age 로 디스크에 저장된 것도 있어서, 무효로 봐야 다음 실행부터 정리된다.
+ */
+export function sessionUserIdFromCookie(raw: string | undefined | null): number | null {
+  if (!raw) return null;
+  const separator = raw.lastIndexOf(".");
+  if (separator < 0) return null;
+  if (raw.slice(separator + 1) !== bootId()) return null;
+  const id = Number(raw.slice(0, separator));
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
 
 function configuration() {
   loadDevelopmentEnvironment();
@@ -115,16 +154,19 @@ export async function findProfileById(id: number) {
 export function sessionUserId(request: NextRequest): number | null {
   // 쿠키가 없을 때 볼 DEMO_USER_ID 도 개발용 env 파일에 있다. 먼저 읽어 둔다.
   loadDevelopmentEnvironment();
-  const raw = request.cookies.get(SESSION_COOKIE)?.value ?? process.env.DEMO_USER_ID;
-  if (!raw) return null;
-  const id = Number(raw);
-  return Number.isInteger(id) && id > 0 ? id : null;
+  const raw = request.cookies.get(SESSION_COOKIE)?.value;
+  // 쿠키를 들고 왔으면 그 판정을 따른다. 부팅 표식이 어긋난 쿠키는 로그아웃된 것이므로
+  // DEMO_USER_ID 로 되살리지 않는다 — 화면은 로그인인데 API 만 열려 있으면 안 된다.
+  if (raw) return sessionUserIdFromCookie(raw);
+  const demo = Number(process.env.DEMO_USER_ID);
+  return Number.isInteger(demo) && demo > 0 ? demo : null;
 }
 
 // 브라우저를 닫으면 사라지는 세션 쿠키다. Max-Age를 주지 않는다 — 앱을 다시 열 때마다
 // 로그인 화면부터 시작해야 하므로 로그인을 브라우저 세션 너머로 유지하지 않는다.
+// 값에 부팅 표식을 붙여, 브라우저가 세션 쿠키를 복원해 오더라도 서버가 걸러낸다.
 export function sessionCookie(userId: number) {
-  const parts = [`${SESSION_COOKIE}=${userId}`, "Path=/", "HttpOnly", "SameSite=Lax"];
+  const parts = [`${SESSION_COOKIE}=${userId}.${bootId()}`, "Path=/", "HttpOnly", "SameSite=Lax"];
   if (process.env.NODE_ENV === "production") parts.push("Secure");
   return parts.join("; ");
 }
