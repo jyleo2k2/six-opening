@@ -1,52 +1,43 @@
 import assert from "node:assert/strict";
-import { canTrade, isSchoolTime, schoolOverride, setSchoolOverride } from "./use-wallet";
-
-// 이 테스트는 `window` 가 없는 환경에서 돈다. 강제 설정은 모듈 변수에만 남고
-// `localStorage` 는 건드리지 않는다 — 저장은 브라우저에서만 일어난다.
+import { isRegularMarketOpen } from "../../f2-trade/lib/scheduled-orders.js";
+import { canTrade, isSchoolTime } from "./use-wallet";
 
 const wed = (hour: number, minute = 0) => new Date(2026, 7, 12, hour, minute); // 수요일
 const sun = (hour: number) => new Date(2026, 7, 16, hour); // 일요일
 
-// ── 기본값 ──────────────────────────────────────────────────────────────
-// **아무것도 고르지 않으면 `off` 다.** 스쿨락 창(평일 09:00~15:30)이 정규장 창과
-// 정확히 같아서, `auto` 를 기본으로 두면 평일 낮에 자녀 계정이 주문 단계에서 막혀
-// 질문식 매매를 끝까지 진행할 수 없다.
-assert.equal(schoolOverride(), "off", "기본값은 강제 해제다");
-assert.equal(isSchoolTime(wed(10)), false, "기본값에서는 장중에도 안 잠긴다");
-assert.equal(canTrade("child", wed(10)), true);
+// ── 스쿨락은 꺼져 있다 ──────────────────────────────────────────────────
+// 예전 규칙은 평일 09:00~15:30 자녀 주문 차단이었다. 그 시간대에도 이제 안 잠긴다.
+assert.equal(isSchoolTime(wed(9)), false);
+assert.equal(isSchoolTime(wed(12)), false);
+assert.equal(isSchoolTime(wed(15, 29)), false);
+assert.equal(isSchoolTime(sun(12)), false);
 
-// ── 시계 판정 (`auto`) ──────────────────────────────────────────────────
-// 평일 09:00 이상 15:30 미만이 학교 시간이다. 경계는 포함/미포함이 갈린다.
-setSchoolOverride("auto");
-assert.equal(isSchoolTime(wed(9)), true, "09:00 은 학교 시간에 든다");
-assert.equal(isSchoolTime(wed(15, 29)), true);
-assert.equal(isSchoolTime(wed(15, 30)), false, "15:30 은 이미 하교 후다");
-assert.equal(isSchoolTime(wed(8, 59)), false);
-assert.equal(isSchoolTime(sun(12)), false, "주말은 종일 매매할 수 있다");
-
-// 자녀만 잠긴다.
-assert.equal(canTrade("child", wed(10)), false);
-assert.equal(canTrade("parent", wed(10)), true);
+assert.equal(canTrade("child", wed(10)), true, "자녀도 장중에 주문할 수 있다");
 assert.equal(canTrade("child", wed(20)), true);
+assert.equal(canTrade("parent", wed(10)), true);
 
-// ── 강제 설정 ───────────────────────────────────────────────────────────
-// `on` 이면 시계를 무시하고 잠근다 — 밤에 발표해도 잠금 화면을 보여 줄 수 있다.
-setSchoolOverride("on");
-assert.equal(schoolOverride(), "on");
-assert.equal(isSchoolTime(wed(20)), true);
-assert.equal(isSchoolTime(sun(3)), true);
-assert.equal(canTrade("child", sun(3)), false);
-// 부모는 강제 설정과 무관하게 열려 있다.
-assert.equal(canTrade("parent", sun(3)), true);
+// ── 껐어야 하는 이유 ────────────────────────────────────────────────────
+// 스쿨락 창과 정규장 창이 **정확히 같았다.** 그래서 스쿨락을 켜면 자녀 계정으로
+// 즉시 체결을 볼 수 있는 시간대가 존재하지 않는다 — 장중이면 주문이 막히고,
+// 장외면 주문은 되지만 다음 거래일 시가 예약이 된다.
+//
+// 이 대조가 깨지면(예: 스쿨락 창만 15:00 으로 바뀌면) 다시 켤 수 있는지 검토할 값어치가
+// 생긴다. 그래서 두 창이 같다는 사실 자체를 여기 남긴다.
+const SCHOOL_WINDOW = [
+  [wed(9), true],
+  [wed(12), true],
+  [wed(15, 29), true],
+  [wed(8, 59), false],
+  [wed(15, 30), false],
+  [sun(12), false],
+] as const;
 
-// `off` 는 반대다. 장중에도 매매 화면을 보여 줄 수 있다.
-setSchoolOverride("off");
-assert.equal(isSchoolTime(wed(10)), false);
-assert.equal(canTrade("child", wed(10)), true);
+for (const [at, inSchoolWindow] of SCHOOL_WINDOW) {
+  assert.equal(
+    isRegularMarketOpen(at),
+    inSchoolWindow,
+    `정규장 창이 옛 스쿨락 창과 어긋났다: ${at.toISOString()}`,
+  );
+}
 
-// `auto` 로 되돌리면 다시 시계만 본다.
-setSchoolOverride("auto");
-assert.equal(isSchoolTime(wed(10)), true);
-assert.equal(isSchoolTime(wed(20)), false);
-
-console.log("school lock override tests passed");
+console.log("school lock disabled tests passed");
