@@ -69,6 +69,10 @@ import { PROACTIVE_FOLLOWUP_QUESTION, PROACTIVE_SCRIPTS } from "./lib/routing";
 type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
   context?: ChatContext;
+  /**
+   * 답변 하단의 화면 이동 버튼을 없애면서 이 시트에는 누를 곳이 남지 않았다. 호스트
+   * (`f0-home`)가 아직 넘기고 있어 계약만 남긴다 — 지금은 호출되지 않는다.
+   */
   onUiAction?: (action: ChatUiAction) => void;
   /**
    * 폰 프레임 안 화면의 실제 사각형. 프로토타입 호스트가 `app.html` 요소를 재서 준다.
@@ -170,8 +174,6 @@ const COPY = {
     "안녕하세요, 저는 키웅이예요. 투자 기초와 화면 사용법을 함께 살펴볼 수 있어요.",
   input: "궁금한 것을 입력해 주세요",
   send: "\ubcf4\ub0b4\uae30",
-  relatedScreen: "관련 화면 보기",
-  openArchive: "아카이브에서 보기",
   reset: "초기화",
 } as const;
 
@@ -179,8 +181,8 @@ const COPY = {
  * 답변 아래 붙는 선택지·추천 질문 칩.
  *
  * 답변 말풍선이 `bg-bg` 채움이라 칩도 같은 채움이면 **읽을 것과 누를 것이 구분되지 않는다.**
- * 디자인 토큰에는 회색이 한 단계뿐이라 색을 더 만들 수 없으므로, 같은 말풍선의 화면 이동
- * 버튼처럼 흰 채움 + 남색 테두리로 성격을 가른다. 글씨는 답변 본문과 같은 `text-sm` 이다.
+ * 디자인 토큰에는 회색이 한 단계뿐이라 색을 더 만들 수 없으므로, 흰 채움 + 남색 테두리로
+ * 성격을 가른다. 글씨는 답변 본문과 같은 `text-sm` 이다.
  */
 const CHOICE_CHIP_CLASS =
   "rounded-full border border-navy/20 bg-white px-3 py-2 text-sm font-medium text-navy";
@@ -265,7 +267,6 @@ const SCREENS: Record<
 
 function MessageBubble({
   message,
-  onAction,
   onQuestion,
   onExplainChoice,
   onStockExploreChoice,
@@ -273,7 +274,6 @@ function MessageBubble({
   actionsDisabled,
 }: {
   message: Message;
-  onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
   onExplainChoice: (choice: ExplainChoice) => void;
   onStockExploreChoice: (
@@ -284,7 +284,6 @@ function MessageBubble({
   actionsDisabled: boolean;
 }) {
   const userMessage = message.role === "user";
-  const uiAction = message.uiAction;
 
   return (
     <div className={userMessage ? "flex justify-end" : "flex justify-start"}>
@@ -298,16 +297,6 @@ function MessageBubble({
         >
           {message.text}
         </p>
-        {!userMessage && uiAction && (
-          <button
-            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy"
-            disabled={actionsDisabled}
-            onClick={() => onAction(uiAction)}
-            type="button"
-          >
-            {uiAction.label ?? (uiAction.target === "archive" ? COPY.openArchive : COPY.relatedScreen)}
-          </button>
-        )}
         {!userMessage && Boolean(message.suggestedQuestions?.length) && (
           <div className="mt-2 flex flex-wrap gap-2">
             {message.suggestedQuestions?.map((question) => (
@@ -417,7 +406,6 @@ function ResponsePreparation({ status }: { status: string }) {
 
 export function F10ChatbotDemo({
   context,
-  onUiAction,
   screenRect,
 }: F10ChatbotDemoProps = {}) {
   const [screen, setScreen] = useState<Screen>(context?.screen ?? "stock");
@@ -1114,16 +1102,6 @@ export function F10ChatbotDemo({
     if (input.trim() && !isLoading) void ask(input);
   }
 
-  function handleUiAction(action: ChatUiAction) {
-    if (onUiAction) {
-      onUiAction(action);
-    } else if (action.target !== "portfolio" && action.target !== "ranking") {
-      setScreen(action.target);
-    }
-    closeChat();
-    setStatus(`${action.label ?? "관련 화면"}으로 이동했어요`);
-  }
-
   function recordBuyConfirmationAbandonment() {
     if (!chatContext.stockId) return;
     recordBehaviorEvent({
@@ -1387,7 +1365,6 @@ export function F10ChatbotDemo({
                     text: COPY.greeting,
                     suggestedQuestions: GREETING_SUGGESTED_QUESTIONS,
                   }}
-                  onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
                   }}
@@ -1403,7 +1380,6 @@ export function F10ChatbotDemo({
                 <MessageBubble
                   key={index}
                   message={message}
-                  onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
                   }}
