@@ -8,7 +8,8 @@ import {
   seedAccounts,
 } from "../../../shared/store/prototype-account.js";
 import type { Account } from "./portfolio-view";
-import { applyServerAccount, type ServerAccount } from "./server-account";
+import { applyServerAccount } from "./server-account";
+import { loadAccount } from "./use-account";
 
 /**
  * 옮겨 온 화면이 지갑을 읽고 쓴다.
@@ -39,6 +40,8 @@ export type WalletAccountId = "child" | "parent";
  *
  * 응답을 기다렸다가 **한 번에** 세운다. 저장소 값을 먼저 그리고 나중에 덮으면 시드 지갑이
  * 한 프레임 보였다 바뀐다 — 첫 렌더 전에 되살리기로 한 이유(PR #217)와 같다.
+ * 계좌는 `loadAccount()` 모듈 캐시를 같이 쓴다. 저장소(`kw_proto_v1`)는 iframe 화면이
+ * 사이에 쓸 수 있으므로 마운트마다 다시 읽지만, 서버 왕복은 세션당 한 번이면 된다.
  */
 export function useWallet() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
@@ -53,14 +56,10 @@ export function useWallet() {
       watchlist: [],
     };
     const local: Wallet = { ...seeded, ...readPersistedWallet(migrateLegacyAccount) };
-    const settle = (user: ServerAccount | null) => {
-      if (alive) setWallet({ ...local, acc: applyServerAccount(local.acc, user) });
-    };
     // 계좌를 못 읽어도 화면은 떠야 한다. 그때는 저장소 값 그대로다.
-    fetch("/api/account", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then(settle)
-      .catch(() => settle(null));
+    loadAccount().then((user) => {
+      if (alive) setWallet({ ...local, acc: applyServerAccount(local.acc, user) });
+    });
     return () => {
       alive = false;
     };
