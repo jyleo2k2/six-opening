@@ -3,7 +3,12 @@ import { readFileSync } from "node:fs";
 
 import { detectProactiveSignals } from "../../../shared/engine/proactive-help";
 import type { ChatBehaviorEvent } from "../../../shared/types/chatbot";
-import { parseBehaviorEvent, parseChatContext } from "./prototype-bridge";
+import {
+  parseBehaviorEvent,
+  parseChatContext,
+  PROTOTYPE_SCREEN_ID,
+  readPrototypeScreenRect,
+} from "./prototype-bridge";
 
 const NOW = 1_000_000;
 
@@ -303,6 +308,71 @@ test("-12% 매도 체결 후 동일 종목 4회 재진입에서 lossRevisit 신�
   }));
   assert.ok(
     detectProactiveSignals([filled, ...revisits], NOW + 4).includes("lossRevisit"),
+  );
+});
+
+// ── 폰 프레임 안 화면 실측 (챗봇 시트가 프레임을 넘지 않게 하는 기준) ──────────────
+
+function fakeFrame(options: {
+  screen?: { left: number; top: number; width: number; height: number } | null;
+  frame?: { left: number; top: number };
+}) {
+  const { screen, frame = { left: 0, top: 0 } } = options;
+  return {
+    contentDocument: {
+      getElementById: (id: string) =>
+        id === PROTOTYPE_SCREEN_ID && screen
+          ? { getBoundingClientRect: () => screen as DOMRect }
+          : null,
+    } as unknown as Document,
+    getBoundingClientRect: () => frame as DOMRect,
+  };
+}
+
+test("app.html 이 실제로 그 id 를 갖고 있다 — 없으면 실측이 통째로 죽는다", () => {
+  const appHtml = readFileSync(
+    new URL("../../../public/ui/app.html", import.meta.url),
+    "utf8",
+  );
+  assert.ok(appHtml.includes(`id="${PROTOTYPE_SCREEN_ID}"`));
+});
+
+test("iframe 안 좌표에 iframe 위치를 더해 부모 좌표로 옮긴다", () => {
+  const rect = readPrototypeScreenRect(
+    fakeFrame({
+      screen: { left: 24, top: 23, width: 402, height: 874 },
+      frame: { left: 100, top: 50 },
+    }),
+  );
+  assert.deepEqual(rect, {
+    left: 124,
+    top: 73,
+    width: 402,
+    height: 874,
+    scale: 1,
+  });
+});
+
+test("프레임이 줄어들면 배율도 실측값에서 나온다 — 창 크기로 다시 계산하지 않는다", () => {
+  const rect = readPrototypeScreenRect(
+    fakeFrame({
+      // --runtime-scale 0.5 로 줄어든 상태
+      screen: { left: 12, top: 11.5, width: 201, height: 437 },
+      frame: { left: 0, top: 0 },
+    }),
+  );
+  assert.equal(rect?.scale, 0.5);
+  assert.equal(rect?.width, 201);
+});
+
+test("아직 로드되지 않았거나 접히면 null 을 준다 — 호출한 쪽이 그리지 않는다", () => {
+  assert.equal(readPrototypeScreenRect(null), null);
+  assert.equal(readPrototypeScreenRect(fakeFrame({ screen: null })), null);
+  assert.equal(
+    readPrototypeScreenRect(
+      fakeFrame({ screen: { left: 0, top: 0, width: 0, height: 0 } }),
+    ),
+    null,
   );
 });
 
