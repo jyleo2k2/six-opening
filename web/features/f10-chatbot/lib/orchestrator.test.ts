@@ -229,6 +229,24 @@ async function main() {
   assert.equal(modelCalls, 0, "2단에서 풀리면 답변 모델을 부르지 않는다");
   assert.equal(followUp.response.text.includes("PER이 낮다는 사실만으로"), true);
 
+  // “그럼 반대면?”은 에너지 가격과 주가의 인과관계 설명을 반복하지 않고,
+  // 반대 방향도 단정할 수 없다는 고정 답변으로 이어 간다.
+  rewriteCalls = 0;
+  const oppositeCausality = await createChatOutcome(
+    {
+      message: "그럼 반대면?",
+      context,
+      lastAnswer:
+        "기름값이나 에너지 가격과 관련 회사 주가가 꼭 같은 방향으로 움직이는 것은 아니에요. 비용 구조, 판매 가격, 환율과 시장 기대처럼 다른 요인도 함께 작용해요.",
+    },
+    session,
+    { generateAnswer: noModel, rewriteQuestion: rewriteTo("에너지 가격이 내려가면 주가도 내려가나요?") },
+  );
+  assert.equal(rewriteCalls, 0, "반대 방향 후속 질문은 모델 재작성에 맡기지 않는다");
+  assert.equal(oppositeCausality.route, "faq");
+  assert.equal(oppositeCausality.response.text.includes("꼭 반대로 움직인다고 볼 수는 없어요"), true);
+  assert.equal(oppositeCausality.response.text.includes("기름값이나 에너지 가격과 관련 회사 주가가 꼭 같은 방향"), false);
+
   // 재작성이 직전과 같은 용어 정의로 흡수되면 아이가 물은 각도를 놓친다 → 3단.
   let generated = "";
   const followUpToModel = await createChatOutcome(

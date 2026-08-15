@@ -446,7 +446,7 @@ export function F10ChatbotDemo({
     useState<StockExploreActionPayload | null>(null);
   const [sectorExploreAction, setSectorExploreAction] =
     useState<SectorExploreActionPayload | null>(null);
-  const messagesRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const requestAbortRef = useRef<AbortController | null>(null);
   const chatSessionVersionRef = useRef(0);
   const sheetDragRef = useRef<SheetDragState | null>(null);
@@ -588,8 +588,10 @@ export function F10ChatbotDemo({
   }, [chatContext.stockId, recordBehaviorEvent, screen]);
 
   useEffect(() => {
-    const element = messagesRef.current;
-    if (element) element.scrollTop = element.scrollHeight;
+    const frame = window.requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ block: "end" });
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [isOpen, messages]);
 
   // 선제 도움 말풍선은 플로팅 버튼의 같은 중심 좌표를 앵커로 쓴다 (F10 SPEC §7).
@@ -1359,8 +1361,7 @@ export function F10ChatbotDemo({
             </div>
 
             <div
-              ref={messagesRef}
-              className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4"
+              className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
             >
               {messages.length === 0 && (
                 <MessageBubble
@@ -1398,9 +1399,10 @@ export function F10ChatbotDemo({
                 />
               ))}
               {isLoading && <ResponsePreparation status={status} />}
+              <div ref={messagesEndRef} aria-hidden="true" />
             </div>
 
-            <div className="shrink-0 border-t border-gray/40 px-4 py-3">
+            <div className="shrink-0 border-t border-gray/40 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <form className="flex gap-2" onSubmit={submit}>
                 <input
                   aria-label={COPY.input}

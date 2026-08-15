@@ -227,6 +227,16 @@ function isGenericOutOfScope(routed: ReturnType<typeof routeMessage>): boolean {
   return routed.route === "outOfScope" && routed.steps[0] === "허용 목적 미판정 범위 안내";
 }
 
+const CAUSALITY_ANSWER_PREFIX = "기름값이나에너지가격과관련회사주가가꼭같은방향으로움직이는것은아니에요";
+
+function isOppositeCausalityFollowUp(message: string, lastAnswer: string) {
+  const normalizedMessage = normalizeChatInput(message);
+  return (
+    ["반대면", "그럼반대면", "반대는", "그럼반대는"].includes(normalizedMessage) &&
+    normalizeChatInput(lastAnswer).includes(CAUSALITY_ANSWER_PREFIX)
+  );
+}
+
 function resolveStockExploreStep(
   request: ChatRequest,
   routed: ReturnType<typeof routeMessage>,
@@ -316,6 +326,18 @@ async function resolveFollowUp(
     firstPass.steps[0] === "미등록 종목명 대체 차단";
   if (!unresolved || !request.lastAnswer) {
     return { routed: firstPass, modelMessage: request.message };
+  }
+
+  if (isOppositeCausalityFollowUp(request.message, request.lastAnswer)) {
+    const causality = termReply("causality", "에너지가격이내려가면");
+    return {
+      routed: {
+        ...causality,
+        text:
+          "에너지 가격이 내려가도 관련 회사 주가가 꼭 반대로 움직인다고 볼 수는 없어요. 비용이 줄어드는 점 말고 판매 가격, 환율과 시장 기대도 함께 봐야 해요.",
+      },
+      modelMessage: request.message,
+    };
   }
 
   onStatus("무엇을 묻는지 확인하는 중");
