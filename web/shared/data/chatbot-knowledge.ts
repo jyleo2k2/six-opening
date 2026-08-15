@@ -2,10 +2,20 @@ import type { ExplainScript } from "../types/chatbot";
 
 export type ChatbotKnowledgeKind = "glossary" | "faq";
 
+export type ChatbotQuestionForm =
+  | "definition"
+  | "procedure"
+  | "location"
+  | "reason"
+  | "time"
+  | "quantity"
+  | "confirmation";
+
 export type ChatbotKnowledgeEntry = {
   id: string;
   kind: ChatbotKnowledgeKind;
   triggers: readonly string[];
+  questionForms?: readonly ChatbotQuestionForm[];
   answer: string;
   explainScript?: ExplainScript;
   actionTarget?: "home" | "stock" | "order" | "archive";
@@ -624,7 +634,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "stock", kind: "glossary", triggers: ["주식"], answer: "주식은 회사의 작은 조각이라고 생각하면 돼요. 주식을 가진 사람은 그 회사의 주주가 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.stock, status: reviewed },
   { id: "shareholder", kind: "glossary", triggers: ["주주"], answer: "주주는 회사의 주식을 가진 사람이에요. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.shareholder, status: reviewed },
   { id: "stock-item", kind: "glossary", triggers: ["종목"], answer: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해요. 여기서는 각 회사의 주식이 하나의 종목이에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS["stock-item"], status: reviewed },
-  { id: "buy", kind: "glossary", triggers: ["매수", "주식 사기"], answer: "매수는 주식을 사는 거래예요. 주문 전에 수량과 예상 금액, 그리고 고른 이유를 확인하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.buy, status: reviewed },
+  { id: "buy", kind: "glossary", triggers: ["매수", "주식 사기"], questionForms: ["definition"], answer: "매수는 주식을 사는 거래예요. 주문 전에 수량과 예상 금액, 그리고 고른 이유를 확인하면 돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.buy, status: reviewed },
   { id: "sell", kind: "glossary", triggers: ["매도", "팔기"], answer: "매도는 가지고 있던 주식을 파는 거래예요. 팔고 나면 그 거래의 결과가 실현손익으로 기록돼요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.sell, status: reviewed },
   { id: "order", kind: "glossary", triggers: ["주문"], answer: "주문은 주식을 사고팔겠다고 거래소에 알리는 과정이에요. 주문을 넣었다고 바로 거래가 끝나는 것은 아니에요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.order, status: reviewed },
   { id: "execution", kind: "glossary", triggers: ["체결"], answer: "체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태예요. 체결된 뒤에 보유 수량이 바뀌어요.", explainScript: GLOSSARY_EXPLAIN_SCRIPTS.execution, status: reviewed },
@@ -901,7 +911,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "reason", kind: "faq", triggers: ["투자 근거", "고른 이유", "기록"], answer: "기록에서는 고른 이유를 남길 수 있어요. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거예요.", status: reviewed },
   { id: "archive", kind: "faq", triggers: ["아카이브"], answer: "아카이브에서는 남긴 거래와 생각을 다시 볼 수 있어요. 점수표가 아니라 투자 스타일을 관찰하는 기록이에요.", actionTarget: "archive", status: reviewed },
   { id: "stock-search", kind: "faq", triggers: ["종목 검색", "회사 찾기", "종목 찾기"], answer: "종목 화면의 검색창에 회사 이름을 입력하거나 업종 칩을 눌러 찾아볼 수 있어요. 이 서비스가 제공하는 종목 안에서만 검색돼요.", actionTarget: "stock", status: reviewed },
-  { id: "buy-flow", kind: "faq", triggers: ["매수 어떻게", "사는 방법", "매수 방법"], answer: "종목 상세에서 매수를 누르고 수량과 예상 금액을 확인해요. 고른 이유·예상 보유기간을 기록한 뒤 주문 확인을 누르면 돼요.", actionTarget: "order", status: reviewed },
+  { id: "buy-flow", kind: "faq", triggers: ["매수 어떻게", "사는 방법", "매수 방법", "매수"], questionForms: ["procedure"], answer: "종목 상세에서 매수를 누르고 수량과 예상 금액을 확인해요. 고른 이유·예상 보유기간을 기록한 뒤 주문 확인을 누르면 돼요.", actionTarget: "order", status: reviewed },
   { id: "sell-flow", kind: "faq", triggers: ["매도 어떻게", "파는 방법", "매도 방법"], answer: "보유 종목에서 매도를 누르고 수량과 파는 이유를 확인해요. 주문 내용을 마지막으로 확인한 뒤 체결하면 기록에 남아요.", actionTarget: "order", status: reviewed },
   { id: "order-check", kind: "faq", triggers: ["주문 전에", "주문 확인", "주문 전 확인"], answer: "주문 전에는 종목 이름, 매수·매도 구분, 수량과 예상 금액을 확인해요. 남긴 이유도 맞는지 한 번 더 보면 돼요.", actionTarget: "order", status: reviewed },
   { id: "stock-pick-criteria", kind: "faq", triggers: ["종목 고를 때", "주식 고를 때", "회사 고를 때", "투자 기준"], answer: "회사가 무슨 일을 하는지, 어떻게 돈을 버는지, 최근에 무슨 일이 있었는지를 봐요.", actionTarget: "stock", status: reviewed },
@@ -929,9 +939,28 @@ function normalize(value: string) {
   return value.replaceAll(" ", "").toLowerCase();
 }
 
+export function findChatbotQuestionForm(query: string): ChatbotQuestionForm | null {
+  const normalized = normalize(query);
+  if (["뭐", "무엇", "무슨뜻", "뜻", "의미"].some((word) => normalized.includes(word))) return "definition";
+  if (["어디", "어느화면", "어떤버튼"].some((word) => normalized.includes(word))) return "location";
+  if (["어떻게", "어케", "방법", "순서", "하는법"].some((word) => normalized.includes(word))) return "procedure";
+  if (["왜", "이유", "까닭"].some((word) => normalized.includes(word))) return "reason";
+  if (["언제", "몇시", "며칠", "몇일"].some((word) => normalized.includes(word))) return "time";
+  if (["얼마", "몇개", "몇주", "몇원", "수량"].some((word) => normalized.includes(word))) return "quantity";
+  if (["돼", "되", "가능", "맞아"].some((word) => normalized.includes(word))) return "confirmation";
+  return null;
+}
+
 export function findChatbotKnowledge(query: string) {
   const normalized = normalize(query);
+  const questionForm = findChatbotQuestionForm(query);
   return CHATBOT_KNOWLEDGE.filter((entry) => entry.status === "reviewed")
+    .filter(
+      (entry) =>
+        !entry.questionForms ||
+        questionForm === null ||
+        entry.questionForms.includes(questionForm),
+    )
     .map((entry) => ({
       entry,
       matchLength: Math.max(

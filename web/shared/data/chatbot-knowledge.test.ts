@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
-import { CHATBOT_KNOWLEDGE, findChatbotKnowledge } from "./chatbot-knowledge";
+import {
+  CHATBOT_KNOWLEDGE,
+  findChatbotKnowledge,
+  findChatbotQuestionForm,
+} from "./chatbot-knowledge";
 
 assert.ok(CHATBOT_KNOWLEDGE.filter((entry) => entry.kind === "glossary").length >= 30);
 assert.ok(CHATBOT_KNOWLEDGE.filter((entry) => entry.kind === "faq").length >= 15);
@@ -52,5 +56,23 @@ assert.notEqual(
   findChatbotKnowledge("분봉이 뭐야")?.explainScript?.check.question,
   findChatbotKnowledge("주봉이 뭐야")?.explainScript?.check.question,
 );
+
+const buyQuestionForms = [
+  ["매수가 뭐임", "definition", "buy"],
+  ["매수는 어떻게 하나요?", "procedure", "buy-flow"],
+] as const;
+for (const [question, questionForm, knowledgeId] of buyQuestionForms) {
+  assert.equal(findChatbotQuestionForm(question), questionForm, question);
+  assert.equal(findChatbotKnowledge(question)?.id, knowledgeId, question);
+}
+for (const [question, questionForm] of [
+  ["매수는 어디서 해?", "location"],
+  ["매수는 왜 해?", "reason"],
+  ["매수는 언제 해?", "time"],
+  ["매수는 몇 주 해?", "quantity"],
+  ["매수해도 돼?", "confirmation"],
+] as const) {
+  assert.equal(findChatbotQuestionForm(question), questionForm, question);
+}
 
 console.log("chatbot knowledge tests passed");

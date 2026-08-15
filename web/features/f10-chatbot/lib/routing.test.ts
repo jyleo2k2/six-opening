@@ -1965,4 +1965,20 @@ assert.equal(
   "정의 질문까지 개인 데이터로 잡힘",
 );
 
+const buyQuestionFormRoutes = [
+  ["매수가 뭐임", "financial_concept", undefined],
+  ["매수는 어떻게 하나요?", "service_help", "order"],
+  ["매수는 어디서 해?", "service_help", "stock"],
+  ["매수는 왜 해?", "service_help", "stock"],
+  ["매수는 언제 해?", "service_help", "order"],
+  ["매수는 몇 주 해?", "service_help", "order"],
+] as const;
+for (const [question, intent, target] of buyQuestionFormRoutes) {
+  const routed = routeMessage(question, { screen: "home" });
+  assert.equal(routed.intent, intent, `질문 형식의 의도가 달라짐: ${question}`);
+  assert.equal(routed.uiAction?.target, target, `질문 형식의 화면 연결이 달라짐: ${question}`);
+}
+
+assert.equal(routeMessage("매수해도 돼?", { screen: "home" }).route, "refusal");
+
 console.log("routing tests passed");

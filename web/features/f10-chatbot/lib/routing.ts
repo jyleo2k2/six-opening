@@ -2,6 +2,7 @@ import {
   CHAT_PRIVACY_ANSWER,
   TRADE_VISIBILITY_ANSWER,
   findChatbotKnowledge,
+  findChatbotQuestionForm,
 } from "../../../shared/data/chatbot-knowledge";
 import { STOCKS } from "../../../shared/data/stocks";
 import { SECTORS, type SectorKey } from "../../../shared/data/sectors";
@@ -4290,6 +4291,40 @@ function getCuratedServiceHowToReply(message: string, context: ChatContext): Cha
     return serviceHowToReply(
       "부모님이 옆에 있어도 주문 내용과 마지막 확인은 계정 사용자가 직접 해야 해요. 키웅이나 다른 사람이 대신 주문을 확정하지 않아요.",
     );
+  }
+
+  if (message.includes("매수") && !findRecommendationKind(message)) {
+    switch (findChatbotQuestionForm(message)) {
+      case "location":
+        return serviceHowToReply(
+          "종목 상세에서 매수 버튼을 누르면 주문을 시작할 수 있어요. 수량이나 금액과 이유를 확인한 뒤 마지막 단계에서 직접 주문을 확인해요.",
+          "종목 화면으로 이동",
+          "stock",
+          stockDetails,
+        );
+      case "reason":
+        if (!includesAny(message, ["매수는왜", "매수를왜", "왜매수해", "왜사"])) break;
+        return serviceHowToReply(
+          "매수는 꼭 해야 하는 일이 아니에요. 회사와 자료를 살펴본 뒤 왜 관심이 갔는지 스스로 기록하고, 주문할지는 직접 결정하면 돼요.",
+          "종목 화면으로 이동",
+          "stock",
+          stockDetails,
+        );
+      case "time":
+        return serviceHowToReply(
+          "언제 살지 정해 주지는 않아요. 시장가 주문은 바로 체결될 수 있고, 지정가 주문은 정한 가격 조건이 맞을 때까지 기다릴 수 있어요.",
+          "주문 화면에서 확인하기",
+          "order",
+          { ...stockDetails, orderSide: "buy", orderStep: "confirmation" },
+        );
+      case "quantity":
+        return serviceHowToReply(
+          "몇 주를 살지는 정해 주지 않아요. 주문 화면에서 수량이나 금액을 직접 고르고, 예상 금액이 가상 지갑 안에 드는지 확인하면 돼요.",
+          "주문 수량 고르기",
+          "order",
+          { ...stockDetails, orderSide: "buy", orderStep: "quantity" },
+        );
+    }
   }
 
   return null;
