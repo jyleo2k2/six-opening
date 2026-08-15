@@ -18,7 +18,6 @@
     "template/shell-14.html",
     "screens/portfolio.html",
     "template/shell-16.html",
-    "screens/ranking.html",
     "template/shell-18.html",
     "screens/archive.html",
     "template/shell-20.html",
@@ -81,7 +80,6 @@
     "methods/polyline.js",
     "methods/chip.js",
     "methods/navItem.js",
-    "methods/rkSeg.js",
     "methods/navIcon.js",
     "methods/navLabel.js",
     "methods/renderVals-compute.js",
@@ -90,7 +88,6 @@
     "methods/renderVals-return-2-explore.js",
     "methods/renderVals-return-3-buy.js",
     "methods/renderVals-return-4-archive.js",
-    "methods/renderVals-return-5-ranking.js",
     "methods/renderVals-return-6-sell.js",
     "methods/renderVals-return-7-shared.js",
     "template/doc-tail.html"

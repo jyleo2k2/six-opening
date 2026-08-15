@@ -2,6 +2,10 @@
       backBtnStyle: 'width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)',
       stepPillStyle: 'min-width:58px;text-align:center;border-radius:999px;padding:8px 12px;font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#A9AEC4;background:#F1F2F8',
 
+      // 상태바 아이콘 색. 위가 남색이던 랭킹 화면이 React 로 떠나 지금은 어두운 쪽만 쓴다.
+      statusDark: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:block',
+      statusLight: 'position:absolute;left:0;top:0;z-index:3;pointer-events:none;display:none',
+
       navBarStyle: 'flex:none;display:flex;align-items:center;gap:8px;padding:6px 14px 10px',
       navPillStyle: 'flex:1;display:flex;align-items:center;border-radius:999px;padding:9px 6px;background:rgba(255,255,255,0.6);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:0 14px 28px -12px rgba(35,25,80,0.35),inset 0 0 0 1px rgba(255,255,255,0.5)',
       navHomeIcon: this.navIcon(s.screen === 'home'), navHomeLabel: this.navLabel(s.screen === 'home'),
@@ -49,6 +53,8 @@
 
       goHome: () => this.set({ screen:'home' }),
       goExplore: () => this.set({ screen:'explore' }),
+      // 랭킹은 React 로 옮겨 갔다. 문서를 갈아끼우므로 화면 임시값을 넘길 표시를 남긴다.
+      goRanking: () => this.leaveToRoute('/ranking'),
       goPortfolio: () => this.set({ screen:'portfolio' }),
       goArchive: () => { this.set({ screen:'archive' }); this.loadDailyCloses(); },
       startBuy: () => { if (locked) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false }); },

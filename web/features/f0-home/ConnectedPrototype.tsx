@@ -8,6 +8,7 @@ import {
   getPrototypeScreenRect,
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
+import { takePendingChatAction } from "./lib/leave-to-route";
 import {
   isRecord,
   parseBehaviorEvent,
@@ -70,18 +71,22 @@ export function ConnectedPrototype({ route }: { route?: ScreenRoute } = {}) {
   };
 
   // 주소 → 화면. 서버가 넘긴 첫 주소와 뒤로가기가 같은 길을 쓴다.
-  // 홈은 지시가 없다(앱이 홈에서 시작한다).
   const openRoute = (next: ScreenRoute) => {
     const action = actionFromRoute(next);
     if (action) openChatAction(action);
   };
 
   // iframe 이 뜬 뒤에야 지시를 받을 수 있다. 첫 주소는 onLoad 에서 한 번 적용한다.
+  //
+  // 옮겨 온 화면(예: `/ranking`)에서 챗봇이 시킨 이동은 주소보다 자세하다 — 업종·주문 단계·
+  // 아카이브 탭까지 담겨 있다. 그런 지시가 넘어왔으면 주소 대신 그것을 그대로 쓴다.
   const appliedFirstRoute = useRef(false);
   const applyFirstRoute = () => {
-    if (appliedFirstRoute.current || !route) return;
+    if (appliedFirstRoute.current) return;
     appliedFirstRoute.current = true;
-    openRoute(route);
+    const pending = takePendingChatAction();
+    if (pending) openChatAction(pending);
+    else if (route) openRoute(route);
   };
 
   // 화면 → 주소. app.html 이 화면 전환마다 보내는 맥락으로 주소만 갈아끼운다.

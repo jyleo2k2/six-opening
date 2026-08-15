@@ -68,7 +68,11 @@ test("주소 첫 칸 목록이 매핑과 어긋나지 않는다", () => {
 });
 
 test("주소를 app.html 이 아는 화면 이동 지시로 바꾼다", () => {
-  assert.equal(actionFromRoute({ screen: "home" }), null, "홈은 지시가 필요 없다");
+  // 홈도 지시를 보낸다. 되살린 화면 임시값 때문에 앱이 홈에서 시작하지 않을 수 있다.
+  assert.deepEqual(actionFromRoute({ screen: "home" }), {
+    type: "open_screen",
+    target: "home",
+  });
   assert.deepEqual(actionFromRoute({ screen: "ranking" }), {
     type: "open_screen",
     target: "ranking",

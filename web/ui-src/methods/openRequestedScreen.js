@@ -13,7 +13,8 @@
     if (action.target === 'home') {
       this.set({ screen:'home' });
     } else if (action.target === 'ranking') {
-      this.set({ screen:'ranking' });
+      // 랭킹 화면은 여기 없다. 주소로 넘겨 React 화면이 그리게 한다.
+      this.leaveToRoute('/ranking');
     } else if (action.target === 'portfolio') {
       this.set({ screen:'portfolio' });
     } else if (action.target === 'archive') {
