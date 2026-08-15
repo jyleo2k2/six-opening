@@ -121,14 +121,10 @@ export function sessionUserId(request: NextRequest): number | null {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
+// 브라우저를 닫으면 사라지는 세션 쿠키다. Max-Age를 주지 않는다 — 앱을 다시 열 때마다
+// 로그인 화면부터 시작해야 하므로 로그인을 브라우저 세션 너머로 유지하지 않는다.
 export function sessionCookie(userId: number) {
-  const parts = [
-    `${SESSION_COOKIE}=${userId}`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Lax",
-    `Max-Age=${60 * 60 * 24 * 30}`,
-  ];
+  const parts = [`${SESSION_COOKIE}=${userId}`, "Path=/", "HttpOnly", "SameSite=Lax"];
   if (process.env.NODE_ENV === "production") parts.push("Secure");
   return parts.join("; ");
 }
