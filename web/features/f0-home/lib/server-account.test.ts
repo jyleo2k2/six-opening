@@ -53,6 +53,23 @@ assert.equal(parentApplied.parent.cash, 8_000_000);
 assert.equal(parentApplied.parent.name, "찬영엄마");
 assert.deepEqual(parentApplied.child, seed.child);
 
+// 주문가능금액이 오면 그쪽이 화면의 cash 다. 총 현금(balance)을 쓰면 미체결 주문이 잠근
+// 돈까지 주문에 쓰려 들고 reserve_order 가 거절한다.
+assert.equal(
+  applyServerAccount(seed, { ...dbChild, balance: 5_000_000, available: 3_200_000 }).child.cash,
+  3_200_000,
+);
+// 잠긴 돈이 없으면 둘이 같다.
+assert.equal(
+  applyServerAccount(seed, { ...dbChild, balance: 5_000_000, available: 5_000_000 }).child.cash,
+  5_000_000,
+);
+// 전부 잠겨 0 이어도 0 이다 — 총 현금으로 되돌리면 안 된다.
+assert.equal(
+  applyServerAccount(seed, { ...dbChild, balance: 5_000_000, available: 0 }).child.cash,
+  0,
+);
+
 // 응답을 못 받았거나 로그인 전이면 지갑을 그대로 둔다.
 assert.equal(applyServerAccount(seed, null), seed);
 assert.equal(applyServerAccount(seed, { ...dbChild, user_id: 0 }), seed);
