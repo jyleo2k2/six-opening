@@ -8,6 +8,7 @@ import { buildDetailChart, type DetailTrade } from "./lib/detail-chart";
 import { NewsScreen } from "./NewsScreen";
 import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
+import { won } from "./lib/portfolio-view";
 import {
   BuyCtaFooter,
   SUB_PAGE,
@@ -61,6 +62,14 @@ const WATCH_BTN = styleFromCss(
 );
 const MORE_BTN = styleFromCss(
   "font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F1F2F8",
+);
+// 매수 화면의 "내 지갑" 알약과 같은 값 — 종목에 들어오자마자 쓸 수 있는 돈을 본다.
+const WALLET_PILL = styleFromCss(
+  "display:flex;align-items:center;gap:9px;background:#ECEDF7;border-radius:20px;padding:12px 15px;box-shadow:inset 0 0 0 1px #E4E6F1",
+);
+const WALLET_LABEL = styleFromCss("font-size:14px;font-weight:600;color:#5C6280;white-space:nowrap");
+const WALLET_CASH = styleFromCss(
+  "flex:1;text-align:right;font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap",
 );
 const PRICE_LABEL = styleFromCss("font-size:14.5px;font-weight:500;color:#8E93A8");
 const PRICE_TEXT = styleFromCss(
@@ -199,6 +208,7 @@ export function DetailScreen({
 
   if (!wallet || !live.stock) return <PhoneFrame />;
 
+  const me = wallet.acc[account];
   const stock = live.stock;
   const locked = !canTrade(account);
   const changeUp = live.change >= 0;
@@ -313,6 +323,10 @@ export function DetailScreen({
           title={stock.name}
         />
         <div style={SCROLL}>
+          <div style={WALLET_PILL}>
+            <span style={WALLET_LABEL}>내 지갑</span>
+            <span style={WALLET_CASH}>{won(me.cash)}</span>
+          </div>
           <div style={PRICE_CARD}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={badgeStyle}>{stock.logoUrl ? "" : stock.sectorName.charAt(0)}</div>

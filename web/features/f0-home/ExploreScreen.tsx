@@ -61,6 +61,12 @@ const DOTS_COL = styleFromCss(
   "position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;" +
     "align-items:center;gap:5px;pointer-events:none",
 );
+// "전체" 보기에서 업종이 바뀌는 첫 카드 위에 얹는 구분 헤더.
+const GROUP_WRAP = styleFromCss(
+  "position:absolute;left:0;right:0;top:0;height:60px;display:flex;flex-direction:column;justify-content:flex-end;pointer-events:none",
+);
+const GROUP_LINE = styleFromCss("position:absolute;left:0;right:0;top:0;height:1px;background:#E5E2EE");
+const GROUP_NAME = styleFromCss("font-size:22px;font-weight:800;color:#141B22;letter-spacing:-0.03em;padding-bottom:14px");
 
 /** 라우트의 섹터 구간이 아는 값이 아니면 기본(오늘 많이 오른 순)으로 되돌린다. */
 const knownFilter = (sector: string | undefined, sectorIds: string[]) =>
@@ -250,78 +256,51 @@ export function ExploreScreen({
           <div style={STAGE}>
             <div onPointerDown={rail.onPointerDown} onScroll={onRailScroll} ref={rail.ref} style={RAIL}>
               {list.map((stock, index) => {
-                const card = buildExploreCard(stock, universe, index === activeIndex);
+                const card = buildExploreCard(list, index, universe, index === activeIndex, filter === "all");
                 return (
                   <div key={card.code} style={styleFromCss(card.slideStyle)}>
-                    <div style={styleFromCss(card.auraMain)} />
-                    <div style={styleFromCss(card.auraNeon)} />
-                    <div style={styleFromCss(card.auraTrend)} />
+                    {card.groupShow && (
+                      <div style={GROUP_WRAP}>
+                        {card.groupShowLine && <div style={GROUP_LINE} />}
+                        <div style={GROUP_NAME}>{card.groupName}</div>
+                      </div>
+                    )}
                     <div
                       onClick={() => {
                         if (!rail.dragged()) onLeave(`/stock/${card.code}`);
                       }}
                       style={styleFromCss(card.cardStyle)}
                     >
-                      <div style={styleFromCss(card.gridStyle)} />
-                      <div style={styleFromCss(card.sheenStyle)} />
-                      <svg
-                        height={340}
-                        style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}
-                        viewBox="0 0 310 340"
-                        width={310}
-                      >
-                        <circle cx="196" cy="118" fill="#FFFFFF" fillOpacity="0.45" r="1.5" />
-                        <circle cx="86" cy="206" fill={card.brand} fillOpacity="0.7" r="1.2" />
-                        <circle cx="268" cy="176" fill="#FFFFFF" fillOpacity="0.3" r="1.1" />
-                        <circle cx="146" cy="66" fill={card.brand} fillOpacity="0.6" r="1" />
-                        <rect fill="none" height="328" rx="34" stroke="#FFFFFF" strokeOpacity="0.05" strokeWidth="13" width="298" x="6" y="6" />
-                        <rect fill="none" height="328" rx="34" stroke="#8FB0E8" strokeOpacity="0.16" strokeWidth="5" width="298" x="6" y="6" />
-                        <rect fill="none" height="328" rx="34" stroke={card.lineColor} strokeOpacity="0.35" strokeWidth="1.6" width="298" x="6" y="6" />
-                        <path d="M236 6 H270 A34 34 0 0 1 304 40 V86 L291 74 V29 H249 Z" fill="#070C1C" fillOpacity="0.9" />
-                        <path d="M249 29 H291 V74" fill="none" stroke={card.lineColor} strokeOpacity="0.5" strokeWidth="1.2" />
-                        <path d="M254 13 l11 11 M267 13 l11 11 M280 15 l10 10" stroke={card.lineColor} strokeLinecap="round" strokeOpacity="0.85" strokeWidth="2.2" />
-                        <path d="M6 266 V300 A34 34 0 0 0 40 334 H86 L74 322 H31 V278 Z" fill="#070C1C" fillOpacity="0.85" />
-                        <path d="M16 300 l12 12 M16 286 l26 26" stroke={card.lineColor} strokeLinecap="round" strokeOpacity="0.6" strokeWidth="1.8" />
-                        <path d="M286 318 l8 -8 M295 309 l6 -6" stroke={card.lineColor} strokeLinecap="round" strokeOpacity="0.7" strokeWidth="1.8" />
-                        <path d="M6 128 V40 A34 34 0 0 1 40 6 H132" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeWidth="4" style={{ filter: `drop-shadow(0 0 7px ${card.lineColor})` }} />
-                        <path d="M236 6 H270 A34 34 0 0 1 304 40 V86" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeWidth="2.6" style={{ filter: `drop-shadow(0 0 5px ${card.lineColor})` }} />
-                        <path d="M304 150 V214" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeWidth="3.4" style={{ filter: `drop-shadow(0 0 7px ${card.lineColor})` }} />
-                        <path d="M304 258 V300 A34 34 0 0 1 270 334 H244" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeOpacity="0.4" strokeWidth="1.8" />
-                        <path d="M96 334 H40 A34 34 0 0 1 6 300 V268" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeOpacity="0.55" strokeWidth="2.6" />
-                        <path d="M6 190 V236" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeOpacity="0.3" strokeWidth="1.6" />
-                        <path d="M132 334 H186" fill="none" stroke="#FFFFFF" strokeLinecap="round" strokeOpacity="0.9" strokeWidth="3.4" style={{ filter: "drop-shadow(0 0 6px #FFFFFF)" }} />
-                        <path d="M140 6 H186" fill="none" stroke="#FFFFFF" strokeLinecap="round" strokeOpacity="0.85" strokeWidth="2.2" />
-                        <path d="M6 72 V104" fill="none" stroke="#FFFFFF" strokeLinecap="round" strokeOpacity="0.45" strokeWidth="2" />
-                        <path d="M304 108 V138" fill="none" stroke="#FFFFFF" strokeLinecap="round" strokeOpacity="0.35" strokeWidth="1.8" />
-                        <path d="M28 120 L39 129 H105 L116 120" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.9" strokeWidth="2.2" style={{ filter: `drop-shadow(0 0 5px ${card.lineColor})` }} />
-                        <path d="M50 133 H94" fill="none" stroke={card.lineColor} strokeLinecap="round" strokeOpacity="0.45" strokeWidth="1" />
-                      </svg>
                       <div style={styleFromCss(card.artStyle)}>
                         {!card.hasLogo && <span style={{ fontSize: 40 }}>{card.emoji}</span>}
                       </div>
                       <div style={styleFromCss(card.catStyle)}>{card.category}</div>
-                      <svg height={8} style={styleFromCss(card.catBarStyle)} viewBox="0 0 140 8" width={140}>
-                        <path d="M2 7 L8 1 M11 7 L17 1 M20 7 L26 1 M29 7 L35 1" stroke={card.brand} strokeLinecap="round" strokeWidth="2.6" />
-                        <path d="M42 4 H126" fill="none" stroke={card.brand} strokeOpacity="0.45" strokeWidth="1.4" />
-                        <circle cx="133" cy="4" fill={card.brand} r="3.4" style={{ filter: `drop-shadow(0 0 4px ${card.brand})` }} />
-                      </svg>
-                      <div style={styleFromCss(card.nameStyle)}>{card.name}</div>
-                      <div style={styleFromCss(card.descStyle)}>{card.desc}</div>
-                      <div style={styleFromCss(card.priceStyle)}>{card.priceText}</div>
-                      <div style={styleFromCss(card.changeStyle)}>{card.changeText}</div>
-                      <svg height={104} style={styleFromCss(card.chartStyle)} viewBox="0 0 127 104" width={127}>
+                      <div style={styleFromCss(card.nameStyle)}>
+                        <div style={styleFromCss(card.nameTextStyle)}>{card.name}</div>
+                        <div style={styleFromCss(card.codeStyle)}>{card.codeText}</div>
+                      </div>
+                      <div style={styleFromCss(card.priceStyle)}>
+                        <span>{card.priceText}</span>
+                        <span style={styleFromCss(card.wonStyle)}>원</span>
+                      </div>
+                      <div style={styleFromCss(card.changeStyle)}>
+                        {card.changeText}
+                        <span style={styleFromCss(card.changePctStyle)}>{card.changePctText}</span>
+                      </div>
+                      <svg height={104} style={styleFromCss(card.chartStyle)} viewBox="0 0 310 104" width={310}>
                         <defs>
                           <linearGradient id={card.gradId} x1="0" x2="0" y1="0" y2="1">
-                            <stop offset="0" stopColor={card.lineColor} stopOpacity="0.42" />
-                            <stop offset="1" stopColor={card.lineColor} stopOpacity="0" />
+                            <stop offset="0" stopColor={card.lineColor} stopOpacity="0.16" />
+                            <stop offset="1" stopColor={card.lineColor} stopOpacity="0.16" />
                           </linearGradient>
                         </defs>
                         <path d={card.sparkArea} fill={`url(#${card.gradId})`} />
-                        <polyline fill="none" points={card.sparkLine} stroke={card.lineColor} strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.13" strokeWidth="9" />
-                        <polyline fill="none" points={card.sparkLine} stroke={card.lineColor} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.8" style={{ filter: `drop-shadow(0 0 5px ${card.lineColor})` }} />
-                        <circle cx={card.endX} cy={card.endY} fill={card.lineColor} fillOpacity="0.24" r="10" />
-                        <circle cx={card.endX} cy={card.endY} fill="#FFFFFF" r="4.2" style={{ filter: `drop-shadow(0 0 7px ${card.lineColor})` }} />
+                        <polyline fill="none" points={card.sparkLine} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8" strokeWidth="6" />
+                        <polyline fill="none" points={card.sparkLine} stroke={card.lineColor} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.6" />
+                        <circle cx={card.endX} cy={card.endY} fill="#FFFFFF" fillOpacity="0.9" r="6.5" />
+                        <circle cx={card.endX} cy={card.endY} fill={card.lineColor} r="3.6" />
                       </svg>
+                      <div style={styleFromCss(card.glintStyle)} />
                     </div>
                   </div>
                 );

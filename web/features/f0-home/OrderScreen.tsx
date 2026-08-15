@@ -514,12 +514,9 @@ export function OrderScreen({
         </div>
       </div>
     ) : (
-      <div style={{ flex: "none", padding: "8px 16px 10px", display: "flex", gap: 10 }}>
-        <div onClick={() => onLeave("/")} style={SUB_CTA}>
+      <div style={{ flex: "none", padding: "8px 16px 10px", display: "flex", justifyContent: "center" }}>
+        <div onClick={() => onLeave("/")} style={{ ...SUB_CTA, flex: "none", minWidth: 200 }}>
           홈으로
-        </div>
-        <div onClick={() => onLeave("/portfolio")} style={{ flex: 1.3, ...CTA_ON }}>
-          <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" }}>내 계좌 보기</span>
         </div>
       </div>
     );
@@ -991,8 +988,9 @@ export function OrderScreen({
         }}
       >
         {/* 풍선·색종이. app.html 과 같은 마크업이고 kw* keyframes 는 `phone-frame.css` 가
-            정의한다 — 유실돼 죽어 있던 연출을 이관하면서 복원했다. */}
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+            정의한다 — 유실돼 죽어 있던 연출을 이관하면서 복원했다. zIndex 를 마스코트·카드보다
+            높여서 뒤로 지나가지 않고 앞으로 지나가게 한다. */}
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 100 }}>
           {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => (
             <div
               key={i}
@@ -1623,11 +1621,55 @@ export function OrderScreen({
 
     const sdQty = done ? `${Math.round(done.qty * 100) / 100}주` : "";
     const step3 = done && (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingBottom: 6 }}>
+      <div
+        style={{
+          position: "relative",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          paddingBottom: 6,
+        }}
+      >
+        {/* 풍선·색종이 — 매수 완료와 같은 연출이다. 원래 프로토타입에는 매도 완료에 이
+            연출이 없었지만 사용자 요청으로 매수와 맞춘다. */}
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 100 }}>
+          {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => (
+            <div
+              key={i}
+              style={styleFromCss(
+                `position:absolute;left:${8 + i * 21}%;bottom:-40px;font-size:${26 + (i % 3) * 7}px;` +
+                  `--kwx:${i % 2 ? "" : "-"}${10 + i * 6}px;` +
+                  `animation:kwRise ${2.6 + i * 0.35}s ease-in ${i * 0.18}s forwards`,
+              )}
+            >
+              {emoji}
+            </div>
+          ))}
+          {Array.from({ length: 14 }, (_, i) => {
+            const col = ["#F5327F", "#FFC53D", "#4FC3F7", "#7BE3A0", "#9B8CFF", "#FF8AD0"][i % 6];
+            return (
+              <div
+                key={`c${i}`}
+                style={styleFromCss(
+                  `position:absolute;top:-20px;left:${4 + i * 6.8}%;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
+                    `border-radius:2px;background:${col};--kwx:${i % 2 ? "" : "-"}${14 + (i % 5) * 12}px;` +
+                    `animation:kwFall ${2 + (i % 5) * 0.3}s linear ${i * 0.09}s forwards`,
+                )}
+              />
+            );
+          })}
+        </div>
+        <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
         <img
           alt="키웅이"
           src="/ui/assets/mascot-bear.png"
-          style={{ display: "block", filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))" }}
+          style={{
+            display: "block",
+            animation: "kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both",
+            filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))",
+          }}
           width={150}
         />
         <div style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", letterSpacing: "0.08em", marginTop: 14 }}>
@@ -1705,6 +1747,7 @@ export function OrderScreen({
               {memoSaved ? "저장됐어 ✓" : "저장하기"}
             </div>
           </div>
+        </div>
         </div>
       </div>
     );
