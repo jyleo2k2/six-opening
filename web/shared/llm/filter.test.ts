@@ -16,6 +16,27 @@ assert.equal(filterGeneratedText("주문 수량을 확인하는 게 좋아요.")
 assert.equal(filterGeneratedText("화면에서 확인하면 돼요."), true);
 assert.equal(filterGeneratedText("주문 수량을 확인해야 해요."), true);
 
+// "오를지 내릴지"처럼 양쪽 방향을 함께 말하는 용어 설명은 전망이 아니므로 통과한다.
+for (const text of [
+  "주가 전망은 앞으로 주식 가격이 오를지 내릴지 예상해 보는 뜻이에요.",
+  "‘주가 전망’은 앞으로 주식 가격이 오를지 내릴지 예상해 보는 뜻이에요. 여러 정보로 판단하지만 실제 결과는 다를 수 있어요.",
+  "변동성은 가격이 상승할까 하락할까 얼마나 흔들리는지를 말해요.",
+  "주가 전망은 앞으로 주식 가격이 어떻게 움직일지 예상하는 말이에요.",
+]) {
+  assert.equal(filterGeneratedText(text), true, `용어 설명이 차단됐어: ${text}`);
+}
+
+// 방향을 하나로 고른 실제 전망 문장은 계속 막힌다.
+for (const text of [
+  "삼성전자 주가는 앞으로 오를 거예요.",
+  "이 회사 주가는 곧 하락해요.",
+  "앞으로 가격이 상승할 가능성이 높아요.",
+  "수익률이 앞으로 오를 것 같아요.",
+  "주가가 오를지 내릴지 보면 앞으로 오를 거예요.",
+]) {
+  assert.equal(filterGeneratedText(text), false, `전망 문장이 통과했어: ${text}`);
+}
+
 assert.deepEqual(gateChatOutput({ text: "PER은 이익과 주가를 비교하는 숫자야.", source: "model" }), {
   ok: true,
   text: "PER은 이익과 주가를 비교하는 숫자야.",
