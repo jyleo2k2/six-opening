@@ -26,7 +26,10 @@ body {
   font-family: "Pretendard", "Segoe UI", "Malgun Gothic", sans-serif;
 }
 
-button, input { font: inherit; }
+/* `button, input { font: inherit }` 를 여기에 두지 않는다. 이 파일의 규칙은 레이어 밖이라
+   Tailwind 의 `@layer utilities` 안에 있는 `text-sm`·`font-medium` 을 카스케이드에서 이겨,
+   버튼과 입력창이 글씨 클래스를 통째로 무시하고 부모의 16px·400 을 물려받았다. 같은 선언은
+   Tailwind preflight 가 `@layer base` 에서 이미 하고 있으므로 여기서 다시 쓸 이유가 없다. */
 
 /* 폰 화면 사각형으로 잘라내는 `clip-path` 는 `ConnectedPrototype` 이 실측값으로 채운다.
    iframe 안 프레임 이미지와 스태킹 컨텍스트가 갈려 z-index 로는 순서를 정할 수 없다. */
