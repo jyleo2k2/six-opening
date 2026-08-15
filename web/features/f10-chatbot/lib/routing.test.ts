@@ -1925,4 +1925,44 @@ assert.equal(sameSectorComparison.text.includes("더 낫다고 고르지"), true
 
 assert.equal(routeMessage("몇 주 살까 추천해줘", stockContext).route, "refusal");
 
+// ── 내 데이터 질문은 용어 사전으로 떨어지지 않는다 ───────────────────────────
+// 600문항 실측에서 mydata 53건 중 41건이 개인 값 질문에 용어 정의를 받았다.
+const walletContext = {
+  screen: "home" as const,
+  pnlPercent: -0.09,
+  cash: 9_339_500,
+  holdingCount: 2,
+};
+
+// 화면 값이 있으면 그 값으로 답한다.
+const myPnl = routeMessage("나 지금 수익률 몇퍼야?", walletContext);
+assert.equal(myPnl.route, "context", "수익률 질문이 화면 값으로 답하지 않음");
+assert.equal(myPnl.intent, "own_records");
+assert.equal(myPnl.text.includes("-0.09%"), true, `화면 수익률이 안 나옴: ${myPnl.text}`);
+
+const myCash = routeMessage("나 쓸 수 있는 돈 얼마 남았어?", walletContext);
+assert.equal(myCash.route, "context");
+assert.equal(myCash.text.includes("9,339,500원"), true, `화면 잔고가 안 나옴: ${myCash.text}`);
+
+const myHoldings = routeMessage("내가 가진 회사 몇 곳이야?", walletContext);
+assert.equal(myHoldings.route, "context");
+assert.equal(myHoldings.text.includes("2곳"), true, `보유 종목 수가 안 나옴: ${myHoldings.text}`);
+
+// 화면 값이 없으면 숫자를 지어내지 않고 화면으로 보낸다.
+const noValue = routeMessage("나 지금 수익률 몇퍼야?", { screen: "home" });
+assert.notEqual(noValue.intent, "financial_concept", "값이 없을 때 용어 정의로 떨어짐");
+assert.equal(noValue.uiAction?.target, "portfolio");
+assert.equal(/\d+(\.\d+)?%/.test(noValue.text), false, `없는 수익률을 지어냄: ${noValue.text}`);
+
+// 성향은 본인 데이터 도구가 받고, 순위는 값을 말하지 않고 화면으로 보낸다.
+assert.equal(routeMessage("내 성향 결과 알려줘", { screen: "home" }).tool, "own_behavior_profile");
+assert.equal(routeMessage("나 지금 몇 등이야?", { screen: "home" }).uiAction?.target, "ranking");
+
+// 개인 소유 표현이 없는 순수 정의 질문은 그대로 용어 사전이 답한다.
+assert.equal(
+  routeMessage("수익률이 뭐야?", { screen: "home" }).intent,
+  "financial_concept",
+  "정의 질문까지 개인 데이터로 잡힘",
+);
+
 console.log("routing tests passed");
