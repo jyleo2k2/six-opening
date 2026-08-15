@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
@@ -25,6 +25,7 @@ import {
   type WeekCard,
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
+import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
@@ -217,7 +218,9 @@ export function ArchiveScreen({
   const [who, setWho] = useState("all");
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const rail = useRef<HTMLDivElement>(null);
+  // 끌어서 넘기고, 멎은 자리의 가운데 카드를 켠다. 켜는 쪽이 없으면 손가락으로 밀었을 때
+  // 엉뚱한 카드가 커진 채로 남고, 가운데 카드를 눌러도 시트가 아니라 스냅만 다시 걸린다.
+  const rail = useRailDrag(setCardActive);
   const sheet = useSheetDrag(SHEET_HEIGHT);
 
   const prices = useMemo(
@@ -268,7 +271,7 @@ export function ArchiveScreen({
     sheet.openSheet();
   };
   const snapTo = (index: number) => {
-    const node = rail.current?.children[index] as HTMLElement | undefined;
+    const node = rail.ref.current?.children[index] as HTMLElement | undefined;
     node?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   };
 
@@ -389,8 +392,10 @@ export function ArchiveScreen({
             <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
               <div
                 className="kwcardrail"
-                ref={rail}
-                style={{ flex: "none", display: "flex", alignItems: "center", gap: 4, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "14px 36px", scrollbarWidth: "none" }}
+                onPointerDown={rail.onPointerDown}
+                onScroll={rail.onScroll}
+                ref={rail.ref}
+                style={{ flex: "none", display: "flex", alignItems: "center", gap: 4, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "14px 36px", scrollbarWidth: "none", cursor: "grab", touchAction: "pan-x", userSelect: "none", WebkitUserSelect: "none" }}
               >
                 {cards.map((card, index) => {
                   const on = index === activeCard;
@@ -410,6 +415,8 @@ export function ArchiveScreen({
                     >
                       <div
                         onClick={() => {
+                          // 끌고 난 직후의 click 은 삼킨다. 안 그러면 손을 뗀 자리의 카드가 열린다.
+                          if (rail.dragged()) return;
                           if (index !== activeCard) {
                             snapTo(index);
                             setCardActive(index);
