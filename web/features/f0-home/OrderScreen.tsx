@@ -24,6 +24,7 @@ import {
   buyStepOk,
   judgePlanMatch,
   lastBuyRecord,
+  orderChatContext,
   sellMath,
   shuffledIndexes,
   type BuyDraft,
@@ -272,29 +273,28 @@ export function OrderScreen({
     if (live.loaded && !live.stock) onLeave("/explore");
   }, [live.loaded, live.stock, onLeave]);
 
-  // 챗봇 맥락 — `app.html` 의 `notifyChatContext` 가 주문 화면에서 싣던 값 그대로.
+  // 챗봇 맥락. 값 계산은 `lib/order-view.ts` 의 `orderChatContext` 가 소유한다 — 화면이
+  // 쓰는 `buyMath`·`sellMath` 를 그대로 거쳐야 화면과 챗봇이 같은 수량을 말한다.
   const stockName = stock?.name ?? "";
   const walletRef = useRef(wallet);
   walletRef.current = wallet;
   useEffect(() => {
     const current = walletRef.current?.acc[account];
     if (!stockName || !current) return;
-    const context: ChatContext = { screen: "order", stockId: `KRX:${code}`, stockName };
-    const unitPrice =
-      side === "sell"
-        ? price
-        : draft.orderType === "limit"
-          ? Math.round(price * (1 + draft.limitPct / 100))
-          : price;
-    const quantity =
-      side === "sell" ? (sellDraft?.qty ?? 0) : unitPrice > 0 ? draft.amount / unitPrice : 0;
-    if (Number.isFinite(quantity) && quantity > 0) context.quantity = quantity;
-    if (Number.isFinite(unitPrice) && unitPrice > 0) context.unitPrice = unitPrice;
-    const total = accountTotalAsset(current, (symbol: string) => live.prices[symbol] ?? 0);
-    if (Number.isFinite(total)) context.pnlPercent = Math.round(((total - SEED) / SEED) * 10000) / 100;
-    if (Number.isFinite(current.cash) && current.cash >= 0) context.cash = Math.round(current.cash);
-    context.holdingCount = current.holdings.filter((h) => Number(h.qty) > 0).length;
-    onChatContext(context);
+    onChatContext(
+      orderChatContext({
+        account: current,
+        code,
+        draft,
+        price,
+        reservedQty: reservedSellQty(current.pending || [], code),
+        seed: SEED,
+        sellDraft,
+        side,
+        stockName,
+        totalAsset: accountTotalAsset(current, (symbol: string) => live.prices[symbol] ?? 0),
+      }),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, side, stockName, account, wallet, price, draft, sellDraft, onChatContext]);
   useEffect(() => () => onChatContext(null), [onChatContext]);

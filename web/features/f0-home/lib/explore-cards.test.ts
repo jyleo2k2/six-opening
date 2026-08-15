@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
-import { buildExploreCard, cardDots, exploreList, exploreTitle, emptyState } from "./explore-cards";
+import {
+  buildExploreCard,
+  cardDots,
+  emptyState,
+  exploreList,
+  hasManySectors,
+  sectorChips,
+} from "./explore-cards";
 import type { Universe } from "./use-universe";
 
 // 정렬·필터가 틀리면 "오늘 많이 오른 순"이 거짓말을 한다 — app.html 과 같은 판정이어야 한다.
@@ -17,13 +24,13 @@ const universe: Universe = {
 };
 const live = { quotes: { "005930": { price: 210, rate: 4.0 } }, sparks: { "005930": [10, 90] } };
 
-// rank — 실시간 등락률 내림차순, 시세는 폴링 값이 픽스처를 덮는다.
-const rank = exploreList(universe, live, "rank", "", []);
+// 많이 오른 순 — 실시간 등락률 내림차순, 시세는 폴링 값이 픽스처를 덮는다.
+const rank = exploreList(universe, live, "all", "", [], "change");
 assert.deepEqual(rank.map((s) => s.code), ["005930", "259960", "036570"]);
 assert.equal(rank[0].price, 210);
 assert.deepEqual(rank[0].spark, [10, 90]);
 
-// 섹터 필터.
+// 섹터 필터 — 업종이 하나뿐이라 업종별 정렬은 유니버스 차례를 그대로 남긴다(안정 정렬).
 assert.deepEqual(exploreList(universe, live, "game", "", []).map((s) => s.code), ["259960", "036570"]);
 
 // 관심 필터는 담아둔 종목만.
@@ -45,21 +52,46 @@ assert.deepEqual(exploreList(universe, live, "game", "엔프", []).map((s) => s.
 // 순서가 뒤집히면 붙어 있어도 찾지 않는다.
 assert.deepEqual(exploreList(universe, live, "game", "프엔", []), []);
 
-// 전체 — 업종끼리 묶여 구분 헤더를 세울 수 있다.
+// 업종별(기본) — 유니버스 업종 차례로 묶인다. 같은 업종 안에서는 원래 차례가 남는다.
 assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), [
   "259960",
   "036570",
   "005930",
 ]);
 
-// 제목.
-assert.equal(exploreTitle(universe, "all", "", 3), "");
-assert.equal(exploreTitle(universe, "rank", "", 3), "");
-assert.equal(exploreTitle(universe, "watch", "", 1), "관심 기업 1곳");
-assert.equal(exploreTitle(universe, "game", "", 2), "게임 회사 2곳");
-assert.equal(exploreTitle(universe, "game", "삼성", 1), '"삼성" 검색 결과');
-// 칩을 펼친 동안은 무슨 필터든 제목을 비운다 — 칩 줄이 이미 말해준다.
-assert.equal(exploreTitle(universe, "game", "", 2, true), "");
+// 가나다순 — 정렬은 필터와 다른 축이라 섹터를 골라도 같이 간다.
+assert.deepEqual(exploreList(universe, live, "all", "", [], "name").map((s) => s.name), [
+  "삼성전자",
+  "엔씨소프트",
+  "크래프톤",
+]);
+assert.deepEqual(exploreList(universe, live, "game", "", [], "name").map((s) => s.name), [
+  "엔씨소프트",
+  "크래프톤",
+]);
+
+// 업종 헤더는 목록에 업종이 둘 이상일 때만 세운다 — 섹터 하나를 고른 화면에서 세우면
+// 이번에 걷어낸 "게임 회사 2곳" 제목이 그대로 되살아난다.
+assert.equal(hasManySectors(exploreList(universe, live, "all", "", [])), true);
+assert.equal(hasManySectors(exploreList(universe, live, "game", "", [])), false);
+assert.equal(hasManySectors([]), false);
+
+// 칩 줄 — 고른 섹터가 전체 바로 뒤로 올라오고 원래 자리에서는 빠진다. 목록 위 제목을
+// 걷어냈으므로 이 자리가 "지금 무엇을 보고 있는지"를 말하는 유일한 곳이다.
+assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.id), [
+  "all",
+  "semi",
+  "watch",
+  "game",
+]);
+// 섹터가 아닌 필터에는 끌어올릴 칩이 없다.
+assert.deepEqual(sectorChips(universe, "all").map((chip) => chip.id), ["all", "watch", "game", "semi"]);
+
+// 고른 칩은 채워진 배경 위 흰 글자다. `background` 선언이 깨져 있으면 흰 글자만 남아 안 보인다.
+const picked = sectorChips(universe, "semi").find((chip) => chip.id === "semi")!;
+assert.match(picked.style, /background:#F5327F;/u);
+assert.match(picked.style, /color:#FFFFFF/u);
+assert.equal(picked.active, true);
 
 // 빈 상태 문구는 검색과 관심이 다르다.
 assert.equal(emptyState("삼성").title, "찾는 회사가 없어요");
@@ -87,7 +119,8 @@ const bigList = [{ ...rank[0], price: 123_456_789 }];
 const bigPrice = buildExploreCard(bigList, 0, universe, true, false);
 assert.match(bigPrice.priceStyle, /font-size:36px/u);
 
-// "전체" 보기에서만 업종이 바뀌는 첫 카드에 구분 헤더를 세우고, 맨 첫 카드는 선을 생략한다.
+// `showGroups` 를 켠 목록에서만 업종이 바뀌는 첫 카드에 구분 헤더를 세우고, 맨 첫 카드는
+// 위에 아무것도 없으니 선을 생략한다. 켤지 말지는 화면이 정렬을 보고 정한다.
 const all = exploreList(universe, live, "all", "", []);
 const allCards = all.map((_, i) => buildExploreCard(all, i, universe, false, true));
 assert.deepEqual(allCards.map((c) => c.groupShow), [true, false, true]);

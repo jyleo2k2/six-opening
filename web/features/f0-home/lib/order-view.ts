@@ -1,5 +1,6 @@
 // 주문 화면(매수·매도)의 순수 계산. `ui-src/methods/renderVals-compute.js` 의
 // 매수·매도 부분과 `judgePlanMatch`·`lastBuy` 를 그대로 옮겨 왔다.
+import type { ChatContext } from "../../../shared/types/chatbot";
 import type { Account, Holding } from "./portfolio-view";
 
 /** `ui-src/logic/constants.js` 와 같은 값 — 단기 계획(plan_short)의 실천 판정 기한. */
@@ -116,6 +117,58 @@ export function sellMath(draft: SellDraft, price: number, heldQty: number, reser
       ? "이 금액으로는 아직 팔 수 없어. 조금 더 올려볼까?"
       : "";
   return { limPct, limPrice, execPrice, byQty, maxQty, want, qty, proceeds, warn, canConfirm: qty > 0 && !over };
+}
+
+/**
+ * 주문 화면이 챗봇에게 넘기는 맥락.
+ *
+ * 화면이 지금 보여 주는 값이 원본이다. 챗봇은 서버에서 돌아 이 화면의 초안을 못 보고,
+ * 주문의 서버 저장은 best-effort 라 DB 가 최신이 아닐 수 있다.
+ *
+ * 수량·주문가는 반드시 `buyMath`·`sellMath` 를 거친다. 화면이 쓰는 계산을 여기서 다시
+ * 적으면 두 벌이 갈라진다 — 실제로 갈라져서 `금액 ÷ 주문가` 만 아는 코드가 **주 수로 넣은
+ * 주 수를 통째로 놓쳤고**, 화면에 "10주"가 떠 있어도 챗봇은 몰랐다.
+ *
+ * 수량은 소수가 정상이다(금액으로 사면 `금액 ÷ 주문가`). 자리 반올림은 요청 계약
+ * (`f10-chatbot/lib/contracts.ts`)이 화면과 같은 소수 둘째 자리로 한 곳에서 맡는다.
+ */
+export function orderChatContext(input: {
+  code: string;
+  stockName: string;
+  side: "buy" | "sell";
+  draft: BuyDraft;
+  sellDraft: SellDraft | null;
+  price: number;
+  account: Account;
+  reservedQty: number;
+  /** 화면이 계산한 총자산. 시세를 알아야 해서 여기서 구하지 않는다. */
+  totalAsset: number;
+  seed: number;
+}): ChatContext {
+  const { account, code, draft, price, sellDraft, side, stockName } = input;
+  const context: ChatContext = { screen: "order", stockId: `KRX:${code}`, stockName };
+  const held = account.holdings.find((holding) => holding.code === code);
+  const math =
+    side === "sell" && sellDraft
+      ? sellMath(sellDraft, price, held?.qty ?? 0, input.reservedQty)
+      : buyMath(draft, price, account.cash);
+
+  if (Number.isFinite(math.qty) && math.qty > 0) context.quantity = math.qty;
+  if (Number.isFinite(math.execPrice) && math.execPrice > 0) {
+    context.unitPrice = math.execPrice;
+  }
+  if (Number.isFinite(input.totalAsset)) {
+    context.pnlPercent =
+      Math.round(((input.totalAsset - input.seed) / input.seed) * 10000) / 100;
+  }
+  // 소수 수량 매매로 현금에 소수점이 생긴다. 요청 계약은 현금을 정수로만 받는다.
+  if (Number.isFinite(account.cash) && account.cash >= 0) {
+    context.cash = Math.round(account.cash);
+  }
+  context.holdingCount = account.holdings.filter(
+    (holding) => Number(holding.qty) > 0,
+  ).length;
+  return context;
 }
 
 export type BuyRecordRow = {

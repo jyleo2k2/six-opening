@@ -64,7 +64,15 @@ import {
   isOverDismissTarget,
   pickNextAvatarIndex,
 } from "./lib/floating-avatar";
-import { PROACTIVE_FOLLOWUP_QUESTION, PROACTIVE_SCRIPTS } from "./lib/routing";
+import { PROACTIVE_SCRIPTS, PROACTIVE_SUGGESTED_QUESTIONS } from "./lib/routing";
+import {
+  UNREACHABLE_CHAT_FAILURE,
+  type ChatFailure,
+  chatFailureLog,
+  chatFailureText,
+  isRetryableChatFailure,
+  readChatFailure,
+} from "./lib/request-failure";
 
 type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
@@ -88,6 +96,8 @@ type Message = {
   stockExploreTurn?: StockExploreTurn;
   sectorExploreTurn?: SectorExploreTurn;
   uiAction?: ChatUiAction;
+  /** 다시 보내 볼 만한 실패에만 붙는다. 값이 있으면 이 질문 그대로 재전송하는 버튼을 그린다. */
+  retryQuestion?: string;
 };
 /**
  * 새로고침해도 보던 대화가 남게 한다. 탭을 닫으면 사라지는 `sessionStorage` 만
@@ -174,7 +184,9 @@ const COPY = {
     "안녕하세요, 저는 키웅이예요. 투자 기초와 화면 사용법을 함께 살펴볼 수 있어요.",
   input: "궁금한 것을 입력해 주세요",
   send: "\ubcf4\ub0b4\uae30",
+  retry: "다시 보내기",
   reset: "초기화",
+  enableProactive: "먼저 알려주기 켜기",
 } as const;
 
 /**
@@ -203,15 +215,8 @@ const VILLAIN_AVATARS = [
   villain04,
   villain05,
 ] as const;
-const PROACTIVE_BUBBLE_TOGGLE_COPY: Record<
-  ProactiveSignal,
-  { accept: string; decline: string }
-> = {
-  buyHesitation: { accept: "응!", decline: "아니" },
-  orderMethodConfusion: { accept: "그래!", decline: "싫어" },
-  dwell: { accept: "응!", decline: "아니" },
-  lossRevisit: { accept: "응!", decline: "아니" },
-};
+/** 신호마다 다르게 두지 않는다 — 같은 자리의 같은 버튼이 매번 다른 말을 하면 읽는 데 힘이 든다. */
+const PROACTIVE_BUBBLE_TOGGLE_COPY = { accept: "네", decline: "아니요" } as const;
 
 function defaultFloatingChatPosition(
   prototypeScreen: PrototypeScreenRect | null,
@@ -297,6 +302,18 @@ function MessageBubble({
         >
           {message.text}
         </p>
+        {!userMessage && message.retryQuestion && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              className={CHOICE_CHIP_CLASS}
+              disabled={actionsDisabled}
+              onClick={() => onQuestion(message.retryQuestion ?? "")}
+              type="button"
+            >
+              {COPY.retry}
+            </button>
+          </div>
+        )}
         {!userMessage && Boolean(message.suggestedQuestions?.length) && (
           <div className="mt-2 flex flex-wrap gap-2">
             {message.suggestedQuestions?.map((question) => (
@@ -456,6 +473,9 @@ export function F10ChatbotDemo({
   const signalVersion = useChatBehaviorStore((state) => state.activeSignalVersion);
   const recordBehaviorEvent = useChatBehaviorStore((state) => state.recordEvent);
   const acceptActiveSignal = useChatBehaviorStore((state) => state.acceptActiveSignal);
+  const dismissActiveSignal = useChatBehaviorStore((state) => state.dismissActiveSignal);
+  const enableProactiveHelp = useChatBehaviorStore((state) => state.enableProactiveHelp);
+  const isProactiveOff = useChatBehaviorStore((state) => state.proactiveMute.off);
 
   const currentScreen = SCREENS[screen];
   const resolvedFloatingChatPosition = clampFloatingChatPosition(
@@ -635,17 +655,21 @@ export function F10ChatbotDemo({
 
     setMessages((current) => [
       ...current,
-      { role: "assistant", text: PROACTIVE_SCRIPTS[signal].text },
+      {
+        role: "assistant",
+        text: PROACTIVE_SCRIPTS[signal].text,
+        suggestedQuestions: [...PROACTIVE_SUGGESTED_QUESTIONS[signal]],
+      },
     ]);
     acceptActiveSignal();
     openChat();
-    const followUp = PROACTIVE_FOLLOWUP_QUESTION[signal];
-    if (followUp) void ask(followUp);
   }
 
+  // "아니요"는 수락과 다른 말이다. 그 신호를 이번 세션 동안 재우고, 세 번 쌓이면 전체가 꺼진다.
   function dismissProactiveHelp() {
+    if (!signal) return;
     setIsBuyHesitationBubbleVisible(false);
-    acceptActiveSignal();
+    dismissActiveSignal(signal);
   }
 
   function handleFloatingChatPointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
@@ -910,6 +934,8 @@ export function F10ChatbotDemo({
     let pendingStockExploreAction: StockExploreActionPayload | null = null;
     let pendingSectorExploreAction: SectorExploreActionPayload | null = null;
     let pendingStandardAction: StandardChatActionPayload | null = null;
+    // 응답을 읽다 만 실패는 여기 남지 않는다. 그런 실패는 서버까지 닿지 못한 것과 똑같이 다룬다.
+    let failure: ChatFailure | null = null;
 
     try {
       const response = await fetch("/api/chat", {
@@ -963,7 +989,13 @@ export function F10ChatbotDemo({
         }),
       });
 
-      if (!response.ok || !response.body) throw new Error("Chat request failed");
+      if (!response.ok || !response.body) {
+        // 상태 코드를 여기서 읽어 둔다. catch 는 fetch 가 던진 실패와 구분할 수단이 없다.
+        failure = response.ok
+          ? UNREACHABLE_CHAT_FAILURE
+          : readChatFailure(response.status, response.headers);
+        throw new Error("Chat request failed");
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -1077,6 +1109,10 @@ export function F10ChatbotDemo({
       if (abortController.signal.aborted || chatSessionVersion !== chatSessionVersionRef.current) {
         return;
       }
+      const reason = failure ?? UNREACHABLE_CHAT_FAILURE;
+      // 서버 로그의 `{"event":"f10_chat", …}` 를 같은 요청 ID 로 찾으라고 남긴다.
+      // 질문 원문은 넣지 않는다 (SPEC §11).
+      console.error("[f10] 챗봇 요청 실패", chatFailureLog(reason));
       setStatus("연결을 다시 확인해 주세요");
       await new Promise<void>((resolve) => {
         setTimeout(resolve, remainingPreparationMs(startedAt, Date.now()));
@@ -1084,7 +1120,11 @@ export function F10ChatbotDemo({
       setMessages((current) => {
         return [
           ...current,
-          { role: "assistant", text: "키웅이가 잠깐 낮잠 중이에요! 조금 있다 다시 물어봐 주세요 🐻" },
+          {
+            role: "assistant",
+            text: chatFailureText(reason),
+            ...(isRetryableChatFailure(reason) ? { retryQuestion: question } : {}),
+          },
         ];
       });
     } finally {
@@ -1205,14 +1245,14 @@ export function F10ChatbotDemo({
                 onClick={openProactiveChat}
                 type="button"
               >
-                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].accept}
+                {PROACTIVE_BUBBLE_TOGGLE_COPY.accept}
               </button>
               <button
                 className="rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
                 onClick={dismissProactiveHelp}
                 type="button"
               >
-                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].decline}
+                {PROACTIVE_BUBBLE_TOGGLE_COPY.decline}
               </button>
             </div>
           </div>
@@ -1346,7 +1386,21 @@ export function F10ChatbotDemo({
                 />
               </div>
 
-              <div className="flex justify-end border-b border-gray/40 px-5 pb-3">
+              {/*
+                다시 켜는 자리는 여기다. 선제 도움을 끈 아이가 설정 화면을 뒤지게 하지 않는다 —
+                대화창을 여는 사람은 이미 도움을 원하는 상태라 맥락이 맞다. 켜져 있을 때는
+                보이지 않는다. 끄지도 않은 기능의 스위치가 늘 떠 있을 이유가 없다.
+              */}
+              <div className="flex items-center justify-end gap-1 border-b border-gray/40 px-5 pb-3">
+                {isProactiveOff && (
+                  <button
+                    className="mr-auto rounded-lg px-3 py-2 text-sm font-semibold text-navy"
+                    onClick={enableProactiveHelp}
+                    type="button"
+                  >
+                    {COPY.enableProactive}
+                  </button>
+                )}
                 <button
                   className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
                   onClick={resetChat}

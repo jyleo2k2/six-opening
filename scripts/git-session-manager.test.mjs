@@ -11,7 +11,9 @@ import {
   SessionError,
   analyzeLocalConflicts,
   auditWorktreeEntries,
+  classifyDevServer,
   classifySession,
+  describeDevServer,
   expectedWorktreePath,
   isDeleteOnlyPush,
   localConflicts,
@@ -50,6 +52,52 @@ test("허용된 AI와 여섯 작업자의 한글 브랜치를 받는다", () => 
     });
     assert.equal(parseBranchIdentity(`claude/${worker}/문서정리`).worker, worker);
   }
+});
+
+test("개발 서버 상태를 기록·생사·나이로 가른다", () => {
+  const now = Date.parse("2026-08-15T23:00:00+09:00");
+  const startedAt = "2026-08-15T22:00:00+09:00";
+
+  // 기록이 없으면 아직 띄우지 않은 것이다.
+  assert.equal(classifyDevServer(undefined, false, now).state, "off");
+  assert.equal(classifyDevServer({ startedAt }, true, now).state, "off");
+
+  // 기록은 있는데 프로세스가 없다 — 터미널을 닫았거나 서버가 죽었다. 이 상태로 남은
+  // 화면에 질문을 던지면 요청이 그냥 실패한다.
+  assert.equal(classifyDevServer({ pid: 4242, startedAt }, false, now).state, "orphan");
+
+  // 하루를 넘긴 서버는 지금 브랜치를 보여 주지 않는다.
+  const fresh = classifyDevServer({ pid: 4242, startedAt }, true, now);
+  assert.equal(fresh.state, "running");
+  assert.equal(Math.round(fresh.hours), 1);
+  const old = classifyDevServer(
+    { pid: 4242, startedAt: "2026-08-13T21:03:00+09:00" },
+    true,
+    now,
+  );
+  assert.equal(old.state, "stale");
+  assert.ok(old.hours > POLICY.devServerStaleHours);
+
+  // 시작 시각이 깨져 있어도 살아 있으면 살아 있다고만 말한다.
+  const unknownAge = classifyDevServer({ pid: 4242, startedAt: "언제였더라" }, true, now);
+  assert.equal(unknownAge.state, "running");
+  assert.equal(unknownAge.hours, null);
+});
+
+test("개발 서버 상태를 한 줄로 같은 말로 보고한다", () => {
+  const now = Date.parse("2026-08-15T23:00:00+09:00");
+  assert.equal(describeDevServer(3101, classifyDevServer(null, false, now)), "dev=3101 꺼짐");
+  assert.match(
+    describeDevServer(3101, classifyDevServer({ pid: 7, startedAt: "언제" }, false, now)),
+    /기록만 남음/u,
+  );
+  assert.match(
+    describeDevServer(
+      3103,
+      classifyDevServer({ pid: 7, startedAt: "2026-08-13T21:03:00+09:00" }, true, now),
+    ),
+    /실행 중\(pid 7\).*오래됨/u,
+  );
 });
 
 test("구형 작업자와 영문·숫자·공백 작업명을 거부한다", () => {

@@ -60,7 +60,44 @@ function matchesQuery(name: string, code: string, query: string): boolean {
   return searchAliasesFor(code).some((alias) => alias.toLowerCase().includes(query));
 }
 
-export type ExploreFilter = string; // 'rank' | 'watch' | 유니버스 섹터 id
+export type ExploreFilter = string; // 'all' | 'watch' | 유니버스 섹터 id
+
+/**
+ * 줄 세우는 기준. **무엇을 보는지(필터)와 다른 축이라** 주소가 아니라 화면이 소유한다.
+ *
+ * 예전에는 "오늘 많이 오른 순"이 칩 하나로 필터 줄에 섞여 있었다. 그래서 섹터를 고르면
+ * 정렬을 잃고 정렬을 고르면 섹터를 잃었다 — 둘을 동시에 가질 수 없었다.
+ *
+ * `sector` 는 업종끼리 묶는 차례이고 기본값이다. 카드 사이 업종 구분 헤더는 이 차례로
+ * 줄을 세웠을 때만 뜻이 있으므로, **숨은 규칙으로 두지 않고 정렬의 한 항목으로 드러낸다.**
+ */
+export type ExploreSort = "sector" | "change" | "name";
+
+export const SORT_LABEL: Record<ExploreSort, string> = {
+  sector: "업종별",
+  change: "많이 오른 순",
+  name: "가나다순",
+};
+
+export const SORT_OPTIONS = Object.keys(SORT_LABEL) as ExploreSort[];
+
+/** 업종 차례는 유니버스가 정한 순서다 — 그래야 같은 업종이 한 덩어리로 붙어 헤더가 한 번만 선다. */
+function comparator(sort: ExploreSort, universe: Universe) {
+  if (sort === "change") return (a: ExploreStockRow, b: ExploreStockRow) => b.change - a.change;
+  if (sort === "name")
+    return (a: ExploreStockRow, b: ExploreStockRow) => a.name.localeCompare(b.name, "ko");
+  const order = universe.sectors.map((sector) => sector.id);
+  return (a: ExploreStockRow, b: ExploreStockRow) =>
+    order.indexOf(a.sector) - order.indexOf(b.sector);
+}
+
+/**
+ * 업종 헤더를 세울지. **목록에 업종이 둘 이상 있을 때만** 뜻이 있다 — 섹터 하나를 고른
+ * 화면에서 세우면 칩이 이미 말한 업종 이름을 제목으로 한 번 더 얹는 꼴이고, 그건 이번에
+ * 걷어낸 "자동차 회사 3곳" 줄과 같은 것이다.
+ */
+export const hasManySectors = (list: ExploreStockRow[]) =>
+  list.some((stock) => stock.sector !== list[0]?.sector);
 
 export type ExploreStockRow = {
   code: string;
@@ -72,13 +109,14 @@ export type ExploreStockRow = {
   spark: number[];
 };
 
-/** 검색어가 있으면 섹터·관심 선택보다 검색이 앞선다. 정렬·필터는 `app.html` 과 같다. */
+/** 검색어가 있으면 섹터·관심 선택보다 검색이 앞선다. 어느 목록이든 `sort` 가 줄을 세운다. */
 export function exploreList(
   universe: Universe,
   live: Pick<UniverseLive, "quotes" | "sparks">,
   filter: ExploreFilter,
   query: string,
   watchlist: string[],
+  sort: ExploreSort = "sector",
 ): ExploreStockRow[] {
   const merged = universe.stocks.map((stock) => ({
     code: stock.code,
@@ -89,28 +127,31 @@ export function exploreList(
     change: live.quotes[stock.code]?.rate ?? stock.change,
     spark: live.sparks[stock.code] ?? stock.spark ?? [],
   }));
+  // 아래 목록은 전부 `merged` 에서 새로 만든 배열이라 제자리 정렬해도 원본이 상하지 않는다.
+  // `Array.sort` 가 안정 정렬이라, 업종별에서 같은 업종끼리는 유니버스 차례가 그대로 남는다.
+  const ordered = (rows: ExploreStockRow[]) => rows.sort(comparator(sort, universe));
   const q = query.trim().toLowerCase();
-  if (q) {
-    return merged
-      .filter((stock) => matchesQuery(stock.name, stock.code, q))
-      .sort((a, b) => b.change - a.change);
-  }
-  if (filter === "all") {
-    // 업종끼리 묶어 카드 사이에 업종 구분 헤더를 세울 수 있게 한다(프로토타입 전체 보기).
-    const order = universe.sectors.map((sector) => sector.id);
-    return [...merged].sort((a, b) => order.indexOf(a.sector) - order.indexOf(b.sector));
-  }
-  if (filter === "rank") return [...merged].sort((a, b) => b.change - a.change);
-  if (filter === "watch") return merged.filter((stock) => watchlist.includes(stock.code));
-  return merged.filter((stock) => stock.sector === filter);
+  if (q) return ordered(merged.filter((stock) => matchesQuery(stock.name, stock.code, q)));
+  if (filter === "all") return ordered(merged);
+  if (filter === "watch") return ordered(merged.filter((stock) => watchlist.includes(stock.code)));
+  return ordered(merged.filter((stock) => stock.sector === filter));
 }
 
+/**
+ * 필터 칩 줄. **고른 섹터를 맨 앞(전체 다음)으로 끌어올린다.**
+ *
+ * 예전에는 목록 위에 "자동차 회사 3곳" 제목이 지금 무엇을 보고 있는지 말해 줬다. 그 줄을
+ * 걷어냈으므로 칩 줄이 그 일을 대신해야 하는데, 섹터가 20개 넘게 가로로 흐르는 줄이라
+ * 고른 칩이 화면 밖에 있으면 아무 단서도 남지 않는다. 자리를 고정하면 스크롤하지 않아도
+ * 항상 보인다.
+ */
 export function sectorChips(universe: Universe, filter: ExploreFilter) {
+  const picked = universe.sectors.find((sector) => sector.id === filter);
   return [
     { id: "all", name: "전체", emoji: "" },
-    { id: "rank", name: "오늘 많이 오른 순", emoji: "" },
+    ...(picked ? [picked] : []),
     { id: "watch", name: "관심 기업", emoji: "" },
-    ...universe.sectors,
+    ...universe.sectors.filter((sector) => sector.id !== filter),
   ].map((sector) => ({
     id: sector.id,
     name: sector.name,
@@ -119,28 +160,13 @@ export function sectorChips(universe: Universe, filter: ExploreFilter) {
       "display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:" +
       (sector.id === filter ? "700" : "500") +
       ";white-space:nowrap;cursor:pointer;" +
+      // 고른 칩은 분홍으로 채우고 흰 글자를 얹는다. `background` 선언 하나에 box-shadow 값이
+      // 섞여 들어가 있어서 선언 전체가 무효였고, 그래서 **흰 글자만 남아 안 보였다.**
       (sector.id === filter
-        ? "color:#fff;background:#F5327F,0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)"
+        ? "color:#FFFFFF;background:#F5327F;box-shadow:0 2px 8px rgba(245,50,127,0.35)," +
+          "0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)"
         : "color:#5C6280;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)"),
   }));
-}
-
-/** 칩을 펼친 동안은 칩 줄이 이미 무슨 목록인지 말해주므로 제목을 비운다. */
-export function exploreTitle(
-  universe: Universe,
-  filter: ExploreFilter,
-  query: string,
-  listLength: number,
-  chipsOpen = false,
-) {
-  const q = query.trim();
-  if (chipsOpen) return "";
-  if (q) return `"${q}" 검색 결과`;
-  if (filter === "all" || filter === "rank") return "";
-  if (filter === "watch") return `관심 기업 ${listLength}곳`;
-  const sector = universe.sectors.find((entry) => entry.id === filter);
-  const count = universe.stocks.filter((stock) => stock.sector === filter).length;
-  return `${sector?.name ?? ""} 회사 ${count}곳`;
 }
 
 export function emptyState(query: string) {
@@ -214,14 +240,15 @@ function mixDark(hex: string, weight: number) {
  * 카드 한 장의 그리기 값 전부. 스타일 문자열은 새 claude.ai/design 프로토타입과 같은 값이다
  * (밝은 유리 카드 — 어둡고 빛나는 수집 카드 디자인은 지난 라운드 것이라 걷어냈다).
  *
- * `list`·`index`는 "전체" 보기에서 업종이 바뀌는 첫 카드 위에 구분 헤더를 세우기 위해서다.
+ * `list`·`index`는 업종이 바뀌는 첫 카드 위에 구분 헤더를 세우기 위해서다. 세울지 말지는
+ * 부르는 쪽이 `showGroups`로 정한다 — 업종별로 줄을 세웠고 업종이 둘 이상일 때만이다.
  */
 export function buildExploreCard(
   list: ExploreStockRow[],
   index: number,
   universe: Universe,
   active: boolean,
-  isAll: boolean,
+  showGroups: boolean,
 ) {
   const stock = list[index];
   const sector = universe.sectors.find((entry) => entry.id === stock.sector) ?? {
@@ -274,13 +301,13 @@ export function buildExploreCard(
     changePctText: (stock.change >= 0 ? "+" : "") + stock.change.toFixed(2) + "%",
     // "전체" 보기에서 업종이 바뀌는 첫 카드에만 구분 헤더를 세운다. 맨 첫 카드는 위에
     // 아무것도 없으니 구분선은 생략한다.
-    groupShow: isAll && groupChanged,
-    groupShowLine: isAll && groupChanged && index !== 0,
+    groupShow: showGroups && groupChanged,
+    groupShowLine: showGroups && groupChanged && index !== 0,
     groupName: sector.name,
     // scroll-snap-stop:always — 네이티브 플링이 스냅 지점을 건너뛰지 못하게 막는다.
     slideStyle:
       "position:relative;isolation:isolate;flex:none;scroll-snap-align:center;scroll-snap-stop:always;padding-top:" +
-      (isAll && groupChanged ? "60px" : "0") +
+      (showGroups && groupChanged ? "60px" : "0") +
       ";opacity:" + (active ? "1" : "0.72") + ";transition:opacity 300ms ease",
     // 카드 몸체 — 색 없는 두꺼운 유리판. 등락색은 아래·오른쪽 엣지에서만 아주 옅게 굴절한다.
     cardStyle:
