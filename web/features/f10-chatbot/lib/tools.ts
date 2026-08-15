@@ -138,9 +138,11 @@ export function createReadOnlyToolRunner(
     if (tool === "own_trade_records") {
       const summary = await dataSource.getTradeRecordSummary(session.userId);
       if (!summary) {
+        // 주문의 서버 저장은 best-effort 라 방금 한 거래가 여기 없을 수 있다.
+        // "기록이 없다" 고 단정하지 않고 화면을 원본으로 안내한다.
         return unavailable(
           tool,
-          "아직 연결된 투자 기록이 없어요. 거래 기능이 연결되면 남긴 이유만 되짚어 줄게요.",
+          "서버에 저장된 거래 기록을 찾지 못했어요. 방금 한 거래는 아카이브 화면에 먼저 보이니 거기서 확인해 주세요.",
           "archive",
         );
       }
@@ -163,7 +165,7 @@ export function createReadOnlyToolRunner(
       if (!holdings || holdings.holdingCount === 0) {
         return unavailable(
           tool,
-          "아직 갖고 있는 주식이 없어요. 주식을 사면 여기에서 수량과 평균 매수가를 알려 줄게요.",
+          "서버에 저장된 보유 종목을 찾지 못했어요. 지금 가진 주식은 내 자산 화면에서 바로 확인할 수 있어요.",
           "portfolio",
         );
       }

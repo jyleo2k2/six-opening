@@ -3486,6 +3486,160 @@ function getOwnDataReply(message: string): ChatReply | null {
   return null;
 }
 
+/**
+ * 내 데이터 질문 판정 — 1인칭 소유 표현과 지갑·기록 명사가 함께 있을 때.
+ *
+ * 여기 걸린 질문은 **용어 사전으로 떨어지지 않는다.** 600문항 실측에서 `mydata`
+ * 53건 중 41건이 "나 지금 수익률 몇퍼야?" → "수익률이란 ~하는 방법이에요" 처럼
+ * 개인 값 질문에 용어 정의가 나갔다. 넓게 잡아도 안전한데, 오탐은 정의 카드가
+ * 아니라 화면 안내나 모델 경로로 가기 때문이다.
+ */
+// `가진`·`거래` 같은 조각은 "내가 진짜", "내가 거래소" 처럼 다른 말에 얹혀
+// 잡히므로 쓰지 않는다. 실제로 "수익률 마이너스면 내가 진짜 돈 잃은 거야?"
+// 라는 개념 질문이 `내`+`가진` 으로 오탐됐다.
+const PERSONAL_DATA_QUESTION =
+  /(?:내|제|나|저|우리)[가-힣0-9]{0,6}(?:수익률|수익율|잔고|현금|예수금|쓸수있는돈|남은돈|자산|손익|보유|가진회사|가진종목|기록|성향|등수|몇등|순위|시즌)|(?:지금|현재|오늘)[가-힣0-9]{0,4}(?:수익률|수익율|잔고|현금|쓸수있는돈|자산|손익|몇등)/;
+
+/**
+ * 같은 낱말이라도 **값**이 아니라 **원리**를 묻는 질문은 개념 설명이 맞다.
+ * "내 성향 점수는 거래 표본을 모아서 계산한 통계야?" 는 내 점수가 아니라
+ * 산식을 묻는다 — 이런 건 용어 사전이 답해야 한다.
+ */
+const CONCEPT_MECHANISM_MARKERS = [
+  "계산", "원리", "기준", "통계", "무슨뜻", "무슨의미", "의미야", "차이", "왜", "이유",
+];
+
+function isPersonalDataQuestion(message: string) {
+  if (includesAny(message, CONCEPT_MECHANISM_MARKERS)) return false;
+  return PERSONAL_DATA_QUESTION.test(message);
+}
+
+/**
+ * 용어 사전이 답해도 되는 **정의 질문 형태**인지.
+ *
+ * 사전은 정의 질문에 강하다 — 600문항 실측에서 `term` 의도 정확도가 98% 였다.
+ * 문제는 정의를 묻지 않은 문장까지 낱말만 보고 카드를 냈다는 것이다.
+ * "왜 주식 가격이 매일 바뀌어?" 에 "주식은 회사의 작은 조각이에요" 가 나갔다.
+ *
+ * 여기서 걸러진 질문은 `fallback` 으로 내려가 생성 + 2단 판정을 받는다.
+ * 그 경로는 이미 있는데 트래픽이 0.3% 뿐이라 놀고 있었다.
+ */
+/**
+ * [측정 후 폐기] 사전을 "정의 질문 형태"로만 좁혀 나머지를 모델로 내려보내는
+ * 게이트를 만들어 600문항으로 재봤다. 두 방향 모두 값을 내지 못했다.
+ *
+ * - 허용 형태 나열: 정의·성질·확인 질문의 표현이 끝없이 갈라져
+ *   ("~ 거야?", "~ 건가요?", "~ 수도 있음?") 목록이 따라가지 못했다.
+ * - 제외 형태만(왜·어떻게·언제·어디): fallback 이 3→12건으로 2% 만 움직였고,
+ *   "차트 빨간색이 왜 이렇게 많아" 처럼 큐레이트 답이 맞는 질문까지 걷어냈다.
+ *
+ * 남은 오답은 "답이 주제는 맞는데 물은 지점을 비껴간" 경우라 **문장 형태로는
+ * 구분되지 않는다.** 답과 질문을 함께 읽어야 판정되므로 다음 단계는
+ * 의미 기반 답변 적합성 검사다 — 그때 이 자리를 다시 쓴다.
+ */
+const ASKS_PNL = ["수익률", "수익율", "손익", "얼마나올랐", "얼마나내렸", "몇퍼", "몇프로"];
+const ASKS_CASH = ["잔고", "현금", "쓸수있는돈", "남은돈", "예수금", "돈얼마", "얼마남았"];
+const ASKS_HOLDINGS = ["보유", "가진회사", "가진종목", "몇곳", "몇개샀", "종목수"];
+
+function formatPercent(value: number) {
+  const rounded = Math.round(value * 100) / 100;
+  return `${rounded > 0 ? "+" : ""}${rounded}%`;
+}
+
+/**
+ * 화면이 실어 보낸 내 지갑 값으로 답한다. 값이 없으면 `null` 을 돌려주고
+ * 지어내지 않는다 — 서버 DB 는 주문 저장이 best-effort 라 최신이 아닐 수 있어
+ * 화면 값을 원본으로 쓴다(`ChatContext` 주석).
+ */
+function getPersonalValueReply(
+  message: string,
+  context: ChatContext,
+): ChatReply | null {
+  // 종목을 콕 집어 물으면 전체 수익률을 답하면 안 된다. "내가 산 오리온
+  // 수익률은?" 에 지갑 전체 수익률을 주는 건 확신에 찬 오답이다.
+  if (findMentionedStock(message)) return null;
+  // "어디서 봐" 는 값이 아니라 위치를 묻는다. 화면 안내가 맞다.
+  if (includesAny(message, ["어디서", "어디에", "어디야", "어디있"])) return null;
+  if (includesAny(message, ASKS_PNL) && context.pnlPercent !== undefined) {
+    const moved =
+      context.pnlPercent > 0
+        ? "시작할 때보다 늘었어요"
+        : context.pnlPercent < 0
+          ? "시작할 때보다 줄었어요"
+          : "시작할 때와 같아요";
+    return reply(
+      "context",
+      "own_records",
+      `지금 화면 기준으로 내 수익률은 ${formatPercent(context.pnlPercent)}이고 ${moved}. 아직 팔지 않은 종목은 값이 계속 바뀌어요.`,
+      ["화면 수익률 확인"],
+      { uiAction: { type: "open_screen", target: "portfolio", label: "내 자산에서 보기" } },
+    );
+  }
+  if (includesAny(message, ASKS_CASH) && context.cash !== undefined) {
+    return reply(
+      "context",
+      "own_records",
+      `지금 화면 기준으로 쓸 수 있는 돈은 ${formatWon(context.cash)}이에요. 기다리는 주문이 있으면 그만큼은 미리 잡혀 있어요.`,
+      ["화면 잔고 확인"],
+      { uiAction: { type: "open_screen", target: "portfolio", label: "내 자산에서 보기" } },
+    );
+  }
+  if (includesAny(message, ASKS_HOLDINGS) && context.holdingCount !== undefined) {
+    return reply(
+      "context",
+      "own_records",
+      `지금 화면 기준으로 가진 회사는 ${context.holdingCount}곳이에요. 어떤 회사인지는 내 자산 화면에서 하나씩 볼 수 있어요.`,
+      ["화면 보유 종목 수 확인"],
+      { uiAction: { type: "open_screen", target: "portfolio", label: "내 자산에서 보기" } },
+    );
+  }
+  return null;
+}
+
+/**
+ * 화면 값이 없을 때. 숫자를 지어내는 대신 어디서 보는지만 알려준다.
+ * 성향·시즌은 값을 말하지 않고 화면으로 보내는 기존 방침을 그대로 따른다.
+ */
+function getPersonalScreenGuidance(message: string): ChatReply | null {
+  if (includesAny(message, ["성향", "캐릭터", "능력치"])) {
+    return reply(
+      "faq",
+      "own_profile",
+      "내 성향 결과는 아카이브의 성향 화면에 캐릭터와 능력치로 정리돼 있어요. 거기서 직접 보는 게 가장 정확해요.",
+      ["성향 화면 안내"],
+      { uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 보기" } },
+    );
+  }
+  if (includesAny(message, ["등수", "순위", "몇등"])) {
+    return reply(
+      "faq",
+      "own_records",
+      "가족 리그 순위는 랭킹 화면에서 볼 수 있어요. 나는 화면에 없는 순위를 추측하지 않아요.",
+      ["랭킹 화면 안내"],
+      { uiAction: { type: "open_screen", target: "ranking", label: "랭킹에서 보기" } },
+    );
+  }
+  if (includesAny(message, ["시즌", "지난기록", "예전기록"])) {
+    return reply(
+      "faq",
+      "own_archive",
+      "지난 시즌 기록은 아카이브에서 주차별로 볼 수 있어요. 거기서 직접 보는 게 가장 정확해요.",
+      ["시즌 기록 화면 안내"],
+      { uiAction: { type: "open_screen", target: "archive", label: "아카이브에서 보기" } },
+    );
+  }
+  if (includesAny(message, [...ASKS_PNL, ...ASKS_CASH, ...ASKS_HOLDINGS, "자산", "평가금액"])) {
+    return reply(
+      "faq",
+      "own_records",
+      "내 수익률과 남은 돈, 가진 회사는 내 자산 화면에 함께 나와요. 나는 화면에 없는 숫자를 지어내지 않아요.",
+      ["내 자산 화면 안내"],
+      { uiAction: { type: "open_screen", target: "portfolio", label: "내 자산에서 보기" } },
+    );
+  }
+  return null;
+}
+
 function getFinancialConceptReply(message: string): ChatReply | null {
   if (includesAny(message, ["수익이랑손해", "수익하고손해", "수익과손해", "이익이랑손해", "수익손해차이"])) {
     return reply(
@@ -4189,6 +4343,15 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const unsafeKind = findUnsafeKind(message);
   if (unsafeKind) return unsafeReply(unsafeKind, message);
 
+  // 안전 판정 뒤. 화면이 실어 보낸 내 지갑 값은 사전·FAQ보다 먼저 답한다 —
+  // "나 쓸 수 있는 돈 얼마 남았어?" 에 잔고 대신 용어 설명이 나가는 걸 막는
+  // 지점이다. 값이 실려 오지 않았으면 아무것도 하지 않고 기존 순서로 흘린다.
+  // 추천·예측 질문은 여기서 답하지 않는다 — 거절이 먼저다.
+  if (isPersonalDataQuestion(message) && !findRecommendationKind(message)) {
+    const earlyPersonalValue = getPersonalValueReply(message, context);
+    if (earlyPersonalValue) return earlyPersonalValue;
+  }
+
   const childFriendlyIntentReply = getChildFriendlyIntentReply(message, context);
   if (childFriendlyIntentReply) return childFriendlyIntentReply;
 
@@ -4251,7 +4414,11 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const ownDataReply = getOwnDataReply(message);
   if (ownDataReply) return ownDataReply;
 
-  const termKind = findTermKind(message);
+  // 내 데이터 질문이면 용어 사전을 끈다. 실제 답변은 아래 본인 데이터 도구를
+  // 먼저 태운 뒤에 고른다 — 도구가 있으면 도구가 이긴다.
+  const personalData = isPersonalDataQuestion(message);
+
+  const termKind = personalData ? null : findTermKind(message);
   const termTakesPriorityOverCompany =
     termKind === "causality" ||
     (termKind === "industryConcept" &&
@@ -4299,9 +4466,23 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
       tool: "own_archive",
     });
   }
+
+  // 위 도구 패턴에 안 걸린 내 데이터 질문. 화면이 실어 보낸 값 → 화면 안내
+  // 순으로 답하고, 둘 다 안 되면 아래 fallback 으로 내려가 모델이 받는다.
+  // 용어 사전(termKind)은 이미 꺼져 있어 정의 카드로 떨어지지 않는다.
+  if (personalData) {
+    const personalValueReply = getPersonalValueReply(message, context);
+    if (personalValueReply) return personalValueReply;
+    const personalGuidance = getPersonalScreenGuidance(message);
+    if (personalGuidance) return personalGuidance;
+  }
+
   const explicitCompanyFactReply = getExplicitCompanyFactReply(message, context);
   if (explicitCompanyFactReply) return explicitCompanyFactReply;
 
+  // `findChatbotKnowledge` 는 항목마다 고른 트리거로 매칭하므로 정확도가 높다
+  // (실측 term 98%). 여기에는 정의 형태 게이트를 걸지 않는다 — 게이트는 낱말
+  // 조합으로 넓게 잡는 `findTermKind` 쪽 오답만 막는 게 목적이다.
   const knowledge = findChatbotKnowledge(message);
   if (knowledge) {
     return reply(
