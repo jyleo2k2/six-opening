@@ -13,7 +13,9 @@ import {
   auditWorktreeEntries,
   classifySession,
   expectedWorktreePath,
+  isDeleteOnlyPush,
   localConflicts,
+  parsePushRefs,
   matchingHotspots,
   parseBranchIdentity,
   parseWorktreePorcelain,
@@ -156,6 +158,29 @@ test("claim 은 겹쳐도 실제 수정 파일이 안 겹치면 경고로 낮춘
     changedFilesOf: () => null,
   });
   assert.equal(unknown.conflicts.length, 1);
+});
+
+test("pre-push 는 원격 ref 삭제만 있는 push 를 통과시킨다", () => {
+  const zero = "0000000000000000000000000000000000000000";
+  const sha = "1111111111111111111111111111111111111111";
+
+  // 병합 끝난 브랜치 삭제 — claim 도 worktree 도 없는 정리 단계다.
+  const del = parsePushRefs(`(delete) ${zero} refs/heads/claude/이재용/끝난작업 ${sha}`);
+  assert.equal(del.length, 1);
+  assert.equal(isDeleteOnlyPush(del), true);
+
+  // 일반 push 는 그대로 검사한다.
+  const push = parsePushRefs(`refs/heads/a ${sha} refs/heads/a ${zero}`);
+  assert.equal(isDeleteOnlyPush(push), false);
+
+  // 삭제와 갱신이 섞이면 통과시키지 않는다.
+  const mixed = parsePushRefs(
+    `(delete) ${zero} refs/heads/a ${sha}\nrefs/heads/b ${sha} refs/heads/b ${zero}`,
+  );
+  assert.equal(isDeleteOnlyPush(mixed), false);
+
+  // stdin 이 비면 삭제로 보지 않는다.
+  assert.equal(isDeleteOnlyPush(parsePushRefs("")), false);
 });
 
 test("claim 이 끝났는지를 관측값으로 판정한다", () => {

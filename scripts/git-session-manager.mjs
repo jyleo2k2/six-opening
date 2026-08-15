@@ -989,7 +989,41 @@ function commandCheckStaged() {
   process.stdout.write(`[git-session] pre-commit 통과: ${managed.branch}\n`);
 }
 
+/**
+ * pre-push 는 `<local ref> <local sha> <remote ref> <remote sha>` 줄들을 stdin 으로 준다.
+ * 삭제 push 는 local sha 가 전부 0 이다.
+ */
+export function parsePushRefs(raw) {
+  return String(raw)
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [localRef, localSha, remoteRef, remoteSha] = line.split(/\s+/u);
+      return { localRef, localSha, remoteRef, remoteSha };
+    });
+}
+
+/** 삭제만 있는 push 인가. 하나라도 실제 갱신이 섞이면 false 다. */
+export function isDeleteOnlyPush(refs) {
+  return refs.length > 0 && refs.every((ref) => /^0+$/u.test(ref.localSha ?? ""));
+}
+
 function commandCheckPush() {
+  // 병합 끝난 원격 브랜치를 지우는 건 정상 정리 절차인데, 그때는 claim 도
+  // worktree 도 이미 없어서 아래 검사에 걸렸다. 훅이 우회(gh api)를 유도하던
+  // 지점이다. ref 삭제는 파일을 건드리지 않으므로 그대로 통과시킨다.
+  let refs = [];
+  try {
+    refs = parsePushRefs(fs.readFileSync(0, "utf8"));
+  } catch {
+    refs = [];
+  }
+  if (isDeleteOnlyPush(refs)) {
+    process.stdout.write("[git-session] pre-push 통과: 원격 ref 삭제\n");
+    return;
+  }
+
   const context = repositoryContext();
   const managed = validateManagedSession(context);
   validateChangedPaths(context, managed.identity, managed.claim, changedPaths(context.root));
