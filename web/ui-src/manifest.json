@@ -34,6 +34,7 @@
     "methods/postJson.js",
     "methods/flushTabViews.js",
     "methods/saveTrade.js",
+    "methods/reserveOrder.js",
     "methods/persist.js",
     "methods/set.js",
     "methods/setDraft.js",

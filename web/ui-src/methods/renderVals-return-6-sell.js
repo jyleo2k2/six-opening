@@ -211,7 +211,21 @@
           sellDraft: Object.assign({}, s.sellDraft, { memo:'', memoSaved:false }),
           sellDone: { name: st.name, qty: sellQty, proceeds: sellProceeds, limit: isLimit ? sellLimPrice : null, scheduled:isScheduled, scheduledFor:isScheduled ? scheduledFor : null }
         });
-        if (isLimit || isScheduled) return;
+        if (isLimit || isScheduled) {
+          // 미체결 매도는 서버 주문 잔고가 원본이어야 한다. 매도는 보유에서 빼지 않고
+          // 수량만 잠그므로(reserve_order) 잠글 수량을 함께 보낸다.
+          this.reserveOrder({
+            side:'sell', stock_code:st.code,
+            order_type: isLimit ? 'limit' : 'market',
+            limit_price: isLimit ? sellLimPrice : null,
+            request_mode: 'quantity',
+            requested_quantity: sellQty,
+            scheduled_for: isScheduled ? scheduledFor : null,
+            reason: s.sellDraft.reason,
+            plan_match: rec.plan_match, plan_changed_reason: rec.change_reason_code
+          });
+          return;
+        }
         this.saveTrade('sell', st.code, price, sellQty, s.sellDraft.reason, {
           plan_match: rec.plan_match, plan_changed_reason: rec.change_reason_code
         });

@@ -140,6 +140,7 @@
             scheduledFor:scheduledFor, reservationMode:'cash', createdAt:new Date().toISOString()
           });
         } else {
+          // 즉시 체결은 아래 saveTrade 가 보낸다. 미체결 주문만 주문 잔고로 접수한다.
           const idx = hold.map(h => h.code).indexOf(st.code);
           if (idx >= 0) {
             const h = hold[idx], nq = h.qty + qty;
@@ -175,6 +176,20 @@
           });
           this.flushTabViews(st.code);
           this.notifyChatBehavior({ kind:'trade_filled', stockId:'KRX:' + st.code, side:'buy' });
+        } else {
+          // 미체결 주문은 서버 주문 잔고가 원본이어야 한다 — 앱을 닫아도 살아 있어야 하고
+          // 예약이 잡은 현금도 서버가 잠근다. 매수는 잠글 금액이 있어야 되돌릴 수 있다.
+          this.reserveOrder({
+            side:'buy', stock_code:st.code,
+            order_type: isLimit ? 'limit' : 'market',
+            limit_price: isLimit ? limPrice : null,
+            reserved_amount: amount,
+            request_mode: byQty ? 'quantity' : 'amount',
+            requested_quantity: byQty ? qty : null,
+            scheduled_for: isScheduled ? scheduledFor : null,
+            reason: s.draft.reason,
+            plan_code: rec.plan_code, plan_target_price: rec.plan_target_price, memo: rec.memo
+          });
         }
       },
       buyBack: () => {
