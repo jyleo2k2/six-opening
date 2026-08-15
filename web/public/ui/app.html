@@ -2275,7 +2275,12 @@ class Component extends DCLogic {
     if (this.receiveNavigation) window.removeEventListener('message', this.receiveNavigation);
     if (this.receiveChartReady) window.removeEventListener('message', this.receiveChartReady);
   }
-  componentDidUpdate(prevProps, prevState){
+  componentDidUpdate(prevProps){
+    // support.js 호스트는 이 훅에 prevProps 하나만 넘긴다. 이전 상태는 직접 들고 비교한다.
+    // setState 는 매번 새 state 객체를 만들므로 참조를 스냅샷해 두면 그대로 남는다.
+    const prevState = this.prevState;
+    this.prevState = this.state;
+    if (prevState === this.state) return;
     if (prevState && prevState.sectorId !== this.state.sectorId && this.cardsEl) this.cardsEl.scrollLeft = 0;
     if (prevState && prevState.sellStep !== 2 && this.state.sellStep === 2) this.retroAt = Date.now();
     const orderContextChanged = prevState && ['buy', 'sell'].indexOf(this.state.screen) >= 0 && (
