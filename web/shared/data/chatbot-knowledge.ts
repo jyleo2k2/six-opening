@@ -1059,6 +1059,84 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   // 아이가 실수로 숨기면 다시 부를 방법을 물을 곳이 챗봇밖에 없는데, 그 답이 없어
   // 범위 안내로 끝나고 있었다.
   { id: "chatbot-restore", kind: "faq", triggers: ["챗봇 다시", "키웅이 다시", "챗봇 없앴", "키웅이 없앴", "챗봇 사라졌", "키웅이 사라졌", "챗봇 숨겼", "키웅이 숨겼", "챗봇 안 보여", "키웅이 안 보여", "챗봇 어떻게 켜", "플로팅 챗봇"], answer: "플로팅 키웅이를 숨겼다면 홈 화면의 키웅이 버튼을 눌러 다시 부를 수 있어요. 숨긴 동안에도 기록은 그대로 남아 있어요. 🐻", actionTarget: "home", status: reviewed },
+
+  // ── T2 정의 항목 [2026-08-16 일괄 추가] ────────────────────────────────
+  //
+  // 위쪽 용어는 전부 `explainScript`(DAPIE)를 갖는다. 그건 **행동에 직접 붙는 말**이라
+  // 대화형 확인이 값을 한다. 아래 40개는 정의 한 줄만 둔다 — 화면과 뉴스에 나오지만
+  // 아이가 그 낱말로 결정을 내리지는 않는 말이다. 스크립트가 없으므로 `explain.ts`의
+  // "비슷한 용어" 추천 카드에도 오르지 않는다(그쪽이 `explainScript` 있는 항목만 고른다).
+  //
+  // 넣을 말을 고른 기준은 하나다 — **앱 화면이나 어린이 뉴스에 실제로 나오는 낱말.**
+  // 실측이 근거다. 사전 밖 후보 57개 중 보유가 4개(7%)였고, `시가`·`종가`는 차트
+  // 화면에 떠 있는 글자인데 물으면 범위 밖이라고 답했다. 뉴스 쪽 근거는
+  // `f2-trade/prototypes/child-news-role-pipeline/term-frequency.ts` 가 집계한다
+  // (상반기 11회·순이익 8회가 사전에 없었다).
+  //
+  // **우리가 다루지 않는 상품은 정의와 함께 그 경계를 적는다.** 아이는 뉴스와 유튜브에서
+  // 공매도·레버리지를 듣고 와서 묻는다. 모른 척하면 다른 데서 답을 찾고, 그냥 설명만
+  // 하면 여기서도 되는 줄 안다. 그래서 "무엇인지"와 "여기서는 하지 않는다"를 함께 준다.
+  //
+  // [검수 필요] 이 40개는 한 번에 들어왔고 사람이 아직 통독하지 않았다. 문장이 틀렸거나
+  // 톤이 어긋나면 그 항목만 `status: "draft"` 로 바꾸면 즉시 응답에서 빠진다.
+
+  // 가격 표기 — 차트와 종목 상세에 그대로 떠 있는 글자다.
+  { id: "open-price", kind: "faq", triggers: ["시가"], answer: "시가는 그날 거래가 시작될 때 처음 정해진 가격이에요. 차트에서 하루를 나타내는 막대의 시작점이에요.", status: reviewed },
+  { id: "close-price", kind: "faq", triggers: ["종가"], answer: "종가는 그날 거래가 끝날 때 마지막으로 정해진 가격이에요. 다음 날 거래가 시작되면 가격은 또 달라져요.", status: reviewed },
+  { id: "high-price", kind: "faq", triggers: ["고가"], answer: "고가는 그날 거래된 가격 중에서 가장 높았던 가격이에요.", status: reviewed },
+  { id: "low-price", kind: "faq", triggers: ["저가"], answer: "저가는 그날 거래된 가격 중에서 가장 낮았던 가격이에요.", status: reviewed },
+  { id: "upper-limit", kind: "faq", triggers: ["상한가"], answer: "상한가는 하루에 오를 수 있는 가장 높은 가격이에요. 국내 주식은 하루에 30%까지만 오르내릴 수 있게 정해져 있어요.", status: reviewed },
+  { id: "lower-limit", kind: "faq", triggers: ["하한가"], answer: "하한가는 하루에 내릴 수 있는 가장 낮은 가격이에요. 상한가와 똑같이 하루 30% 한도가 정해져 있어요.", status: reviewed },
+  // `호가` 는 넣지 않는다. 이미 `orderbook-unsupported` 가 "이 서비스는 모의투자라서
+  // 호가창은 제공하지 않아요" 로 답한다 — **없는 화면의 용어를 설명하면 있는 줄 안다.**
+
+  // 시장 구조 — 뉴스와 랭킹 화면에서 계속 마주친다.
+  { id: "kospi", kind: "faq", triggers: ["코스피"], answer: "코스피는 국내를 대표하는 주식시장이에요. 그 시장 전체가 어떻게 움직이는지 보여 주는 숫자를 뜻하기도 해요.", status: reviewed },
+  { id: "kosdaq", kind: "faq", triggers: ["코스닥"], answer: "코스닥은 코스피보다 작거나 새로 자라는 회사들이 모여 있는 주식시장이에요.", status: reviewed },
+  { id: "listing", kind: "faq", triggers: ["상장"], answer: "상장은 회사의 주식을 시장에서 누구나 사고팔 수 있게 되는 것을 말해요.", status: reviewed },
+  { id: "delisting", kind: "faq", triggers: ["상장폐지"], answer: "상장폐지는 회사의 주식을 더 이상 시장에서 사고팔 수 없게 되는 것이에요. 시장이 정한 조건을 지키지 못했을 때 일어나요.", status: reviewed },
+  { id: "ipo-share", kind: "faq", triggers: ["공모주"], answer: "공모주는 회사가 상장할 때 처음으로 사람들에게 파는 주식이에요. 이 모의투자에서는 공모주를 다루지 않아요.", status: reviewed },
+  { id: "trading-halt", kind: "faq", triggers: ["거래정지"], answer: "거래정지는 어떤 이유로 그 종목을 잠시 사고팔 수 없게 막아 둔 상태예요. 풀릴 때까지 주문이 들어가지 않아요.", status: reviewed },
+
+  // 거래 시간 — 주문이 왜 안 되는지 묻는 자리다.
+  { id: "market-close", kind: "faq", triggers: ["장마감", "장 마감"], answer: "장마감은 그날의 주식 거래가 끝나는 것이에요. 국내 주식시장은 평일 오후 3시 30분에 마감해요.", status: reviewed },
+  { id: "market-holiday", kind: "faq", triggers: ["휴장"], answer: "휴장은 주식시장이 문을 열지 않는 날이에요. 주말과 공휴일에는 거래가 없어요.", status: reviewed },
+
+  // 재무·뉴스 — 어린이 뉴스가 실제로 풀어 쓰는 말이다(term-frequency.ts 집계).
+  { id: "net-income", kind: "faq", triggers: ["순이익"], answer: "순이익은 회사가 번 돈에서 쓴 돈과 세금까지 모두 빼고 마지막에 남은 돈이에요.", status: reviewed },
+  { id: "deficit", kind: "faq", triggers: ["적자"], answer: "적자는 번 돈보다 쓴 돈이 많아서 남은 것이 마이너스인 상태를 말해요.", status: reviewed },
+  { id: "surplus", kind: "faq", triggers: ["흑자"], answer: "흑자는 번 돈이 쓴 돈보다 많아서 이익이 남은 상태를 말해요.", status: reviewed },
+  { id: "first-half", kind: "faq", triggers: ["상반기"], answer: "상반기는 한 해를 둘로 나눈 앞쪽 여섯 달, 1월부터 6월까지예요. 뒤쪽 여섯 달은 하반기라고 해요.", status: reviewed },
+  { id: "quarter", kind: "faq", triggers: ["분기"], answer: "분기는 한 해를 넷으로 나눈 석 달이에요. 1분기는 1월부터 3월까지이고, 회사는 보통 분기마다 실적을 알려요.", status: reviewed },
+  { id: "subsidiary", kind: "faq", triggers: ["자회사"], answer: "자회사는 어떤 회사가 주식을 많이 가지고 있어서 그 회사에 속하게 된 다른 회사예요.", status: reviewed },
+  { id: "order-received", kind: "faq", triggers: ["수주"], answer: "수주는 만들어 달라거나 해 달라는 주문을 받는 것이에요. 배나 공장 설비처럼 큰 물건에서 자주 쓰는 말이에요.", status: reviewed },
+
+  // 돈의 기초 — 금융교육에서 주식보다 먼저 나오는 말인데 사전에 하나도 없었다.
+  { id: "principal", kind: "faq", triggers: ["원금"], answer: "원금은 처음에 넣은 돈이에요. 여기에 이익이 더해지거나 손해가 빠져요.", status: reviewed },
+  { id: "interest", kind: "faq", triggers: ["이자"], answer: "이자는 돈을 맡기거나 빌릴 때 원금에 더 붙는 돈이에요.", status: reviewed },
+  { id: "compound-interest", kind: "faq", triggers: ["복리"], answer: "복리는 이자에 다시 이자가 붙는 방식이에요. 맡겨 두는 기간이 길수록 차이가 커져요.", status: reviewed },
+  { id: "deposit", kind: "faq", triggers: ["예금"], answer: "예금은 은행에 돈을 맡겨 두고 이자를 받는 거예요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
+  { id: "installment-savings", kind: "faq", triggers: ["적금"], answer: "적금은 정해진 기간 동안 매달 조금씩 모아서 맡기는 거예요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
+  { id: "tax", kind: "faq", triggers: ["세금"], answer: "세금은 나라에 내는 돈이에요. 실제 주식 거래에는 세금이 붙지만 이 모의투자에서는 계산하지 않아요.", status: reviewed },
+  { id: "fee", kind: "faq", triggers: ["수수료"], answer: "수수료는 거래를 도와주는 곳에 내는 값이에요. 실제 거래에는 수수료가 붙지만 이 모의투자에서는 계산하지 않아요.", status: reviewed },
+
+  // 돈의 세상 — 뉴스의 배경에 계속 나오는 말이다.
+  { id: "interest-rate", kind: "faq", triggers: ["금리"], answer: "금리는 돈을 맡기거나 빌릴 때 붙는 이자의 비율이에요. 뉴스에서 금리가 오르내린다는 말이 자주 나와요.", status: reviewed },
+  { id: "exchange-rate", kind: "faq", triggers: ["환율"], answer: "환율은 우리나라 돈과 다른 나라 돈을 바꾸는 비율이에요.", status: reviewed },
+  { id: "price-level", kind: "faq", triggers: ["물가"], answer: "물가는 물건과 서비스의 값이 전체적으로 어느 정도인지를 말해요.", status: reviewed },
+  { id: "inflation", kind: "faq", triggers: ["인플레이션"], answer: "인플레이션은 물가가 계속 올라서 같은 돈으로 살 수 있는 것이 줄어드는 것이에요.", status: reviewed },
+
+  // 다른 금융 상품 — 여기서 다루지 않는다는 경계를 함께 적는다.
+  { id: "bond", kind: "faq", triggers: ["채권"], answer: "채권은 돈을 빌려주고 정해진 날에 이자와 함께 돌려받기로 한 증서예요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
+  { id: "fund", kind: "faq", triggers: ["펀드"], answer: "펀드는 여러 사람의 돈을 모아 전문가가 대신 굴리는 상품이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
+
+  // 이 서비스가 다루지 않는 방법 — 뉴스·영상에서 듣고 와서 묻는 말이다.
+  // 뜻을 알려 주되 **여기서는 하지 않는다**를 같은 답에 둔다. 하는 방법은 설명하지 않는다.
+  { id: "short-selling", kind: "faq", triggers: ["공매도"], answer: "공매도는 주식을 빌려서 먼저 팔고 나중에 다시 사서 갚는 방법이에요. 이 모의투자에서는 하지 않아요.", status: reviewed },
+  // `레버리지` 는 넣지 않는다. term 9종의 `riskStrategy` 가 몰빵과 함께 이미 답한다.
+  { id: "futures", kind: "faq", triggers: ["선물거래", "선물 거래"], answer: "선물거래는 나중 날짜의 가격을 미리 정해 두고 사고파는 방법이에요. 이 모의투자에서는 회사 주식만 다뤄요.", status: reviewed },
+  { id: "derivatives", kind: "faq", triggers: ["파생상품"], answer: "파생상품은 주식이나 환율 같은 것의 값에 따라 값이 정해지는 상품이에요. 이 모의투자에서는 다루지 않아요.", status: reviewed },
+  { id: "margin-trading", kind: "faq", triggers: ["신용거래"], answer: "신용거래는 증권사에서 돈을 빌려 주식을 사는 것이에요. 이 모의투자에서는 빌리지 않고 가진 가상 현금으로만 주문해요.", status: reviewed },
 ] satisfies readonly ChatbotKnowledgeEntry[]).map((entry) =>
   entry.kind === "faq" && DAPIE_SCREEN_TERM_IDS.has(entry.id)
     ? {

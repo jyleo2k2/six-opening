@@ -123,4 +123,27 @@ for (const entry of CHATBOT_KNOWLEDGE) {
   assert.ok(entry.questionForms.length > 0, `${entry.id} 의 questionForms 가 비었다`);
 }
 
+// 이 서비스가 다루지 않는 상품·방법은 **뜻과 함께 그 경계를 말한다.**
+//
+// 아이는 뉴스와 영상에서 공매도·선물을 듣고 와서 묻는다. 모른 척하면 다른 데서 답을
+// 찾고, 뜻만 알려 주면 여기서도 되는 줄 안다. 우리는 51종 국내 주식을 가상 현금
+// 안에서만 사고파는 모의투자다(§4). 그 경계 문장이 빠지면 이 검사가 실패한다.
+for (const id of ["short-selling", "futures", "derivatives", "margin-trading", "ipo-share"]) {
+  const entry = CHATBOT_KNOWLEDGE.find((item) => item.id === id);
+  assert.ok(entry, `${id} 가 사전에 없다`);
+  assert.ok(
+    ["하지 않아요", "다루지 않아요", "주식만 다뤄요", "가상 현금으로만"].some((phrase) =>
+      entry.answer.includes(phrase),
+    ),
+    `${id} 의 답에 서비스 경계가 없다: ${entry.answer}`,
+  );
+}
+
+// 실제 거래에는 붙지만 이 모의투자는 계산하지 않는 것도 같은 이유로 밝힌다(§4).
+for (const id of ["tax", "fee"]) {
+  const entry = CHATBOT_KNOWLEDGE.find((item) => item.id === id);
+  assert.ok(entry, `${id} 가 사전에 없다`);
+  assert.ok(entry.answer.includes("계산하지 않아요"), `${id} 가 계산 안 함을 밝히지 않는다`);
+}
+
 console.log("chatbot knowledge tests passed");
