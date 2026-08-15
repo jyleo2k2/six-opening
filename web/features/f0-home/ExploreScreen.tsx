@@ -366,7 +366,7 @@ export function ExploreScreen({
           <div style={STAGE}>
             <div onPointerDown={rail.onPointerDown} onScroll={onRailScroll} ref={rail.ref} style={RAIL}>
               {list.map((stock, index) => {
-                const card = buildExploreCard(list, index, universe, index === activeIndex, showGroups);
+                const card = buildExploreCard(list, index, universe, activeIndex, showGroups);
                 return (
                   <div key={card.code} style={styleFromCss(card.slideStyle)}>
                     {card.groupShow && (
