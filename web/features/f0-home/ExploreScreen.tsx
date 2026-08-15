@@ -111,7 +111,9 @@ const knownFilter = (sector: string | undefined, sectorIds: string[]) =>
 const explorePath = (filter: string) => (filter === "all" ? "/explore" : `/explore/${filter}`);
 
 /**
- * 종목 탐색 화면. `ui-src/screens/explore.html` 을 그대로 옮겨 왔다.
+ * 종목 탐색 화면. `ui-src/screens/explore.html` 에서 옮겨 왔고 그 파일은 옮기면서 지웠다 —
+ * 이제 이 화면의 디자인 원본은 `web/design-system/prototype/모의투자-화면-프로토타입.html`
+ * 이고, 카드 연출이 그 원본과 같은 값인지는 `lib/explore-cards.test.ts` 가 대조한다.
  *
  * 섹터 선택은 주소(`/explore/{섹터}`)가 소유한다 — 칩을 누르면 주소를 바꾸고, 챗봇의
  * "게임 회사 보여줘" 같은 점프도 같은 주소로 들어온다. 검색어·카드 위치는 화면 임시값이다.
@@ -136,9 +138,10 @@ export function ExploreScreen({
   const [sortOpen, setSortOpen] = useState(false);
   // 정렬은 섹터를 옮겨도 따라간다. 화면을 떠났다 와도 마찬가지라 초기값을 기억에서 읽는다.
   const [sort, setSort] = useState<ExploreSort>(lastExploreSort);
-  // 카드가 켜졌는지는 아래 `onRailScroll` 이 정한다 — 여기서는 끄는 손만 받는다. 카드가
-  // 위아래로 넘어가는 세로 레일이라 축은 'y'.
-  const rail = useRailDrag(undefined, undefined, "y");
+  // 끄는 손과 **켜진 카드 판정**을 함께 이 훅에 맡긴다. 카드가 위아래로 넘어가는 세로
+  // 레일이라 축은 'y'. 견주는 값은 `activeIndex` 가 아니라 `cardIndex` 다 — 목록이 줄어
+  // 범위를 벗어난 `cardIndex` 가 남았을 때, 잰 값과 달라야 다음 스크롤에서 제자리를 찾는다.
+  const rail = useRailDrag(setCardIndex, cardIndex, "y");
 
   // 유니버스가 오기 전에는 섹터 id 목록이 비어 있어 무엇이든 전체로 떨어진다. 도착하면
   // 같은 렌더에서 제 필터가 잡히고, 아래 effect 들이 그 값으로 한 번 더 돈다.
@@ -223,21 +226,6 @@ export function ExploreScreen({
   const toggleSearch = () => {
     setSearchOpen((open) => !open);
     if (searchOpen) setQuery("");
-  };
-
-  // 카드 간격은 슬라이드 높이 + gap 이다. 상수로 두면 gap 을 바꿀 때 어긋나므로
-  // 앞 두 슬라이드의 실제 거리를 잰다. 세로 레일이라 top 을 잰다. (`cardsScroll` 그대로)
-  const onRailScroll = (event: React.UIEvent<HTMLDivElement>) => {
-    const el = event.currentTarget;
-    const first = el.firstElementChild as HTMLElement | null;
-    const second = first?.nextElementSibling as HTMLElement | null;
-    const step = first
-      ? second
-        ? second.getBoundingClientRect().top - first.getBoundingClientRect().top
-        : first.getBoundingClientRect().height
-      : 280;
-    const index = Math.max(0, Math.min(list.length - 1, Math.round(el.scrollTop / step)));
-    if (index !== cardIndex) setCardIndex(index);
   };
 
   return (
@@ -364,7 +352,7 @@ export function ExploreScreen({
           </div>
         ) : (
           <div style={STAGE}>
-            <div onPointerDown={rail.onPointerDown} onScroll={onRailScroll} ref={rail.ref} style={RAIL}>
+            <div onPointerDown={rail.onPointerDown} onScroll={rail.onScroll} ref={rail.ref} style={RAIL}>
               {list.map((stock, index) => {
                 const card = buildExploreCard(list, index, universe, activeIndex, showGroups);
                 return (
