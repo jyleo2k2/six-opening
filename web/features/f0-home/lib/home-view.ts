@@ -162,6 +162,7 @@ export type HomeView = {
   dayCount: string;
   itemLine: string;
   rateText: string;
+  profitText: string;
   rateColor: string;
   /** 계좌를 읽었는데 보유가 하나도 없을 때만 참. */
   noHoldings: boolean;
@@ -199,6 +200,7 @@ export function homeView(
       (info.brand ? info.brand + " " : "") + info.unit + " " + goalCount + "개 살 수 있어요",
     // 실제 계좌를 붙이면 손실도 나온다. 부호와 색을 함께 바꾼다.
     rateText: (rate >= 0 ? "+" : "−") + Math.abs(rate).toFixed(1) + "%",
+    profitText: (profit >= 0 ? "+" : "−") + won(Math.abs(profit)),
     rateColor: rate >= 0 ? "#D5327A" : "#2E6BE6",
     noHoldings: loaded && live.length === 0,
   };

@@ -224,7 +224,10 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
                 color: view.rateColor,
               }}
             >
-              {view.rateText}
+              {view.profitText}
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", marginLeft: 6 }}>
+                {view.rateText}
+              </span>
             </div>
           </div>
 
