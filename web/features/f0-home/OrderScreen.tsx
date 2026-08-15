@@ -14,6 +14,7 @@ import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import { parseBehaviorEvent } from "./lib/prototype-bridge";
 import { won } from "./lib/portfolio-view";
+import { flushTabViews } from "./lib/tab-views";
 import {
   applyBuyFill,
   applySellFill,
@@ -462,6 +463,8 @@ export function OrderScreen({
         plan_target_price: rec.plan_target_price,
         memo: rec.memo,
       });
+      // 상세·차트·뉴스에서 쌓인 유효 열람을 이 매수와 묶어 보낸다 (`app.html` 과 같은 시점).
+      flushTabViews(code, syncable);
       notifyBehavior({ kind: "trade_filled", stockId: `KRX:${code}`, side: "buy" });
     };
 
@@ -831,14 +834,15 @@ export function OrderScreen({
           paddingBottom: 6,
         }}
       >
-        {/* 풍선·색종이 마크업은 app.html 과 같다. kw* keyframes 는 현재 어느 쪽에도 정의돼
-            있지 않아 연출이 나오지 않는 상태 그대로 옮겼다 — 복원 여부는 PR 에서 따로 묻는다. */}
+        {/* 풍선·색종이. app.html 과 같은 마크업이고 kw* keyframes 는 `phone-frame.css` 가
+            정의한다 — 유실돼 죽어 있던 연출을 이관하면서 복원했다. */}
         <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
           {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => (
             <div
               key={i}
               style={styleFromCss(
                 `position:absolute;left:${8 + i * 21}%;bottom:-40px;font-size:${26 + (i % 3) * 7}px;` +
+                  `--kwx:${i % 2 ? "" : "-"}${10 + i * 6}px;` +
                   `animation:kwRise ${2.6 + i * 0.35}s ease-in ${i * 0.18}s forwards`,
               )}
             >
@@ -852,7 +856,8 @@ export function OrderScreen({
                 key={`c${i}`}
                 style={styleFromCss(
                   `position:absolute;top:-20px;left:${4 + i * 6.8}%;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
-                    `border-radius:2px;background:${col};animation:kwFall ${2 + (i % 5) * 0.3}s linear ${i * 0.09}s forwards`,
+                    `border-radius:2px;background:${col};--kwx:${i % 2 ? "" : "-"}${14 + (i % 5) * 12}px;` +
+                    `animation:kwFall ${2 + (i % 5) * 0.3}s linear ${i * 0.09}s forwards`,
                 )}
               />
             );
@@ -862,7 +867,11 @@ export function OrderScreen({
           <img
             alt="키웅이"
             src="/ui/assets/mascot-bear.png"
-            style={{ display: "block", filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))" }}
+            style={{
+              display: "block",
+              animation: "kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both",
+              filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))",
+            }}
             width={132}
           />
           <div style={{ fontSize: 14, fontWeight: 700, color: "#F5327F", letterSpacing: "0.08em", marginTop: 14 }}>
