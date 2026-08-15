@@ -1,5 +1,13 @@
 import assert from "node:assert/strict";
-import { homeRole, homeView, liveHoldings, popItems, type AccountUser } from "./home-view";
+import {
+  HOME_INFO,
+  homeRole,
+  homeView,
+  liveHoldings,
+  popItems,
+  withStockCodes,
+  type AccountUser,
+} from "./home-view";
 
 // 홈 보유종목 카드는 두 번이나 고정 데모로 되돌아간 적이 있다(PR #180·#186·#187 복구 이력).
 // 그 감시는 조립된 app.html 마크업을 읽는 `home-holdings-ui.test.ts` 가 했는데, 홈이 React 로
@@ -49,6 +57,11 @@ assert.deepEqual(
     ["크래프톤", "1주", "180,000원", "−10.0%", false],
   ],
 );
+// 홈에서 한 줄을 누르면 상세로 간다 — 실제 보유는 계좌의 종목코드를 그대로 싣는다.
+assert.deepEqual(
+  live.map((h) => h.code),
+  ["005930", "259960"],
+);
 // 수익 = (120000-100000)*2 + (180000-200000)*1 = 20,000
 const view = homeView(held, prices);
 assert.equal(view.loaded, true);
@@ -82,6 +95,26 @@ const frac = liveHoldings(
   prices,
 );
 assert.equal(frac[0].qty, "0.37주");
+
+// 데모 보유는 코드가 없다. 유니버스에서 이름이 같은 종목을 찾았을 때만 붙고, 못 찾으면
+// 그 줄은 code 가 없어 눌리지 않는다 — 코드를 데모 값에 적어 두지 않기 위한 규칙이다.
+const universeStocks = [
+  { code: "005930", name: "삼성전자" },
+  { code: "271560", name: "오리온" },
+];
+const demoCoded = withStockCodes(HOME_INFO.child.holdings, universeStocks);
+assert.deepEqual(
+  demoCoded.map((h) => [h.name, h.code]),
+  [
+    ["삼성전자", "005930"],
+    ["롯데웰푸드", undefined],
+    ["오리온", "271560"],
+  ],
+);
+// 유니버스를 아직 못 받았으면 데모 보유를 그대로 둔다(코드 키가 생기지 않는다).
+assert.deepEqual(withStockCodes(HOME_INFO.child.holdings, []), HOME_INFO.child.holdings);
+// 홈 화면도 같은 길로 코드를 받는다.
+assert.equal(homeView(null, {}, universeStocks).holdings[0].code, "005930");
 
 // 튀어오르는 아이템은 목표 개수만큼만, 최대 6개. 자리는 순번이 정하므로 다시 눌러도 같다.
 assert.equal(popItems(true, 3).filter((p) => p.on).length, 3);
