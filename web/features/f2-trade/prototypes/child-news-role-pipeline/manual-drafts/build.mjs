@@ -100,8 +100,10 @@ let replaced = 0;
 const cases = report.cases.map((caseResult) => {
   const item = byStock.get(caseResult.stock.stockId);
   if (!item) return caseResult;
-  if (caseResult.pipelineResult.status === "ready_for_storage") {
-    throw new Error(`${item.stockId}: 이미 파이프라인이 통과시킨 종목입니다. 초안을 지우세요.`);
+  // 통과분을 실수로 덮어쓰는 걸 막는다. 일부러 갈아끼울 때만 `replaces` 에 이유를 적는다
+  // (적재된 쪽은 published → withdrawn 으로 회수해야 화면에서 사라진다).
+  if (caseResult.pipelineResult.status === "ready_for_storage" && !item.replaces) {
+    throw new Error(`${item.stockId}: 이미 파이프라인이 통과시킨 종목입니다. 갈아끼우려면 replaces 에 이유를 적으세요.`);
   }
   assertDraft(item, report.runDateKst);
   replaced += 1;

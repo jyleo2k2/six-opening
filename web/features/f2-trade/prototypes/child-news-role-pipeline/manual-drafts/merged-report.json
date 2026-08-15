@@ -4,12 +4,12 @@
   "runDateKst": "2026-08-15",
   "sourceRetrievedAt": "2026-08-15T07:31:13.537Z",
   "sourceBasis": "네이버 뉴스 최신순 검색으로 후보 URL을 찾고, 네이버 표준 기사 페이지에서 제목·언론사·발행 시각·언론사 원문 링크·본문 근거를 다시 확인한 뒤 최신 날짜부터 최대 8개 후보를 과거 순으로 평가함",
-  "generatedAt": "2026-08-15T09:56:35.903Z",
+  "generatedAt": "2026-08-15T11:03:04.375Z",
   "model": "gpt-5.6-luna",
   "stockCount": 51,
   "completedCount": 51,
-  "readyForStorageCount": 26,
-  "rejectedCount": 25,
+  "readyForStorageCount": 29,
+  "rejectedCount": 22,
   "decisionComplete": true,
   "cases": [
     {
@@ -41658,192 +41658,99 @@
       "pipelineResult": {
         "status": "ready_for_storage",
         "article": {
-          "articleId": "NAVER-008-0005390487",
-          "runDateKst": "2026-08-15",
-          "scope": "company",
-          "title": "'JYP 글로벌 보이그룹' 뻔푸소년CIIU, 내달 中 첫 번째 미니 앨범 발매",
-          "publisher": "머니투데이",
-          "publishedAt": "2026-07-24T04:30:26.000Z",
-          "sourceUrl": "https://www.mt.co.kr/stock/2026/07/24/2026072412260456288",
+          "articleId": "MANUAL-BUSINESSPOST-444610",
+          "title": "JYP엔터 2분기 영업이익 310억 41% 줄어, 스트레이키즈 활동 공백 영향",
+          "publisher": "비즈니스포스트",
+          "publishedAt": "2026-08-12T08:07:59.000Z",
+          "sourceUrl": "https://www.businesspost.co.kr/BP?command=article_view&num=444610",
           "sourceUnits": [
             {
               "id": "S1",
-              "text": "/사진제공=JYP엔터테인먼트 JYP엔터테인먼트(이하 JYP, JYP Ent.)는 글로벌 보이그룹 뻔푸소년CIIU(씨투유)가 현지 첫 미니 앨범을 발매한다고 24일 밝혔다."
+              "text": "JYP엔터테인먼트는 2분기 연결기준 매출 1831억 원, 영업이익 310억 원을 낸 것으로 잠정집계했다고 12일 밝혔다."
             },
             {
               "id": "S2",
-              "text": "뻔푸소년CIIU는 다음달 4일 첫 번째 미니 앨범 'Closer To 'You'(?近·?)'(클로저 투 '유'(카오진·니))와 타이틀곡 'Closer'(클로저)로 중국에서 컴백한다."
+              "text": "2025년 2분기보다 매출은 15.1%, 영업이익은 41.4% 줄었다."
             },
             {
               "id": "S3",
-              "text": "이 그룹은 지난 8일 앨범 포스터와 콘셉트 필름 공개를 시작으로 컴백 준비를 시작했다."
+              "text": "같은 기간 순이익은 40.3% 감소한 217억 원을 기록했다."
             },
             {
               "id": "S4",
-              "text": "새 앨범은 '너에게 가까워지는 과정' 속 청춘의 다양한 감정을 하나의 이야기로 풀어냈다."
-            },
-            {
-              "id": "S5",
-              "text": "지난 14일에는 수록곡 '一步一步(Step By Step)'(이부이부(스텝 바이 스텝)) 음원과 뮤직비디오를 선공개했다."
-            },
-            {
-              "id": "S6",
-              "text": "뻔푸소년CIIU는 중국에서 유명 브랜드와의 잇단 협업과 대형 무대를 누비며 음악계 유망주로서 영향력을 넓히고 있다."
-            },
-            {
-              "id": "S7",
-              "text": "다음달 22일에는 중화권 대형 음악 시상식 '2026 TIMA'(TMELive International Music Awards)에 출격한다."
-            },
-            {
-              "id": "S8",
-              "text": "지난해 '2025 TIMA'를 통해 정식 데뷔를 알린지 약 1년 만이다."
-            },
-            {
-              "id": "S9",
-              "text": "JYP의 현지화 전략 '글로벌라이제이션 바이 로컬라이제이션'(Globalization by Localization)의 일환으로 탄생한 뻔푸소년CIIU는 2025년 8월 데뷔 앨범 타이틀곡 '출발의 여름'으로 중국 최대 음악 플랫폼 QQ 뮤직 일간 인기 차트, 일간 트렌딩 차트 톱 10에 오르기도 했다."
-            },
-            {
-              "id": "S10",
-              "text": "한편 JYP는 박진영 대표 프로듀서를 필두로 트와이스, 스트레이 키즈, 데이식스 등 글로벌 탑티어 아티스트를 보유한 종합 엔터테인먼트 기업이다."
+              "text": "영업이익 또한 매출 감소와 판매관리비성 지급수수료 증가에 따라 감소한 것으로 분석됐다."
             }
-          ]
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
         },
         "selection": {
-          "articleId": "NAVER-008-0005390487",
+          "articleId": "MANUAL-BUSINESSPOST-444610",
           "primaryStockIds": [
             "KRX:035900"
           ],
-          "focusStatement": "JYP는 중국에서 뻔푸소년CIIU의 첫 번째 미니 앨범을 다음달 4일 발매한다고 밝혔다.",
+          "focusStatement": "JYP엔터테인먼트가 2026년 2분기 연결기준 매출 1831억 원, 영업이익 310억 원을 냈다고 잠정집계해 밝혔다.",
           "anchorSourceId": "S1",
           "includedSourceIds": [
             "S1",
             "S2",
-            "S5"
-          ],
-          "excludedSourceIds": [
             "S3",
-            "S4",
-            "S6",
-            "S7",
-            "S8",
-            "S9",
-            "S10"
+            "S4"
           ],
+          "excludedSourceIds": [],
           "difficultTerms": [
-            {
-              "term": "JYP Ent.",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            {
-              "term": "글로벌 보이그룹",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            {
-              "term": "발매",
-              "sourceIds": [
-                "S1"
-              ]
-            },
-            {
-              "term": "미니 앨범",
-              "sourceIds": [
-                "S1",
-                "S2"
-              ]
-            },
-            {
-              "term": "타이틀곡",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "컴백",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "수록곡",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "음원",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "뮤직비디오",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "선공개",
-              "sourceIds": [
-                "S5"
-              ]
-            }
+            "매출",
+            "영업이익",
+            "순이익"
           ],
           "reasonCodes": [],
-          "reasons": [
-            "JYP가 직접 중국 현지 그룹의 앨범 발매를 발표한 판매·생산 관련 사건이다."
-          ],
+          "reasons": [],
           "decision": "accept",
           "kind": "company",
-          "eventType": "sales_or_production"
+          "eventType": "earnings"
         },
         "draft": {
-          "articleId": "NAVER-008-0005390487",
+          "articleId": "MANUAL-BUSINESSPOST-444610",
           "headline": {
-            "text": "JYP Ent., 뻔푸소년CIIU 중국 첫 미니 앨범 8월 4일 발매",
+            "text": "JYP엔터, 2분기 매출 1831억원·영업이익 310억원",
             "sourceIds": [
-              "S1",
-              "S2"
+              "S1"
             ]
           },
           "homeSummary": {
-            "text": "JYP Ent., 뻔푸소년CIIU 중국 첫 미니 앨범 8월 4일 발매",
+            "text": "JYP엔터, 2분기 매출 1831억원·영업이익 310억원",
             "sourceIds": [
-              "S1",
-              "S2"
+              "S1"
             ]
           },
           "body": [
             {
-              "text": "7월 14일 음원과 뮤직비디오를 선공개했어요.",
-              "sourceIds": [
-                "S5"
-              ],
-              "role": "key_detail",
-              "factKey": "pre_release_media"
-            },
-            {
-              "text": "타이틀곡은 'Closer'예요.",
+              "text": "매출은 지난해보다 15.1% 줄었어요.",
               "sourceIds": [
                 "S2"
               ],
-              "role": "business_detail",
-              "factKey": "title_track_name"
+              "role": "key_detail",
+              "factKey": "revenue_decline"
             },
             {
-              "text": "뻔푸소년CIIU는 글로벌 보이그룹이에요.",
+              "text": "영업이익은 41.4% 줄었어요.",
               "sourceIds": [
-                "S1"
+                "S2"
               ],
-              "role": "context",
-              "factKey": "group_description"
+              "role": "key_detail",
+              "factKey": "operating_profit_decline"
+            },
+            {
+              "text": "순이익은 217억원이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "net_income"
             }
           ],
           "priceConnection": {
-            "text": "앨범 발매는 음악을 팔아 얻는 돈과 연결될 수 있어요.",
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
             "sourceIds": [
               "S1",
               "S2"
@@ -41853,99 +41760,41 @@
           },
           "termTreatments": [
             {
-              "term": "JYP Ent.",
-              "easyText": "뻔푸소년CIIU 앨범을 내는 회사 이름",
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
               "treatment": "explained",
               "sourceIds": [
                 "S1"
               ]
             },
             {
-              "term": "글로벌 보이그룹",
-              "easyText": "여러 나라에서 활동하는 남자 가수 그룹",
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
               "treatment": "explained",
               "sourceIds": [
                 "S1"
               ]
             },
             {
-              "term": "발매",
-              "easyText": "노래나 앨범을 사람들에게 내놓는 일",
+              "term": "순이익",
+              "easyText": "세금까지 다 내고 최종적으로 남은 돈",
               "treatment": "explained",
               "sourceIds": [
-                "S1"
-              ]
-            },
-            {
-              "term": "미니 앨범",
-              "easyText": "노래를 몇 곡 담은 작은 앨범",
-              "treatment": "explained",
-              "sourceIds": [
-                "S1",
-                "S2"
-              ]
-            },
-            {
-              "term": "타이틀곡",
-              "easyText": "앨범을 대표하는 노래",
-              "treatment": "explained",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "컴백",
-              "easyText": "새 노래로 다시 활동하는 일",
-              "treatment": "explained",
-              "sourceIds": [
-                "S2"
-              ]
-            },
-            {
-              "term": "수록곡",
-              "easyText": "앨범 안에 들어 있는 노래",
-              "treatment": "explained",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "음원",
-              "easyText": "기기에서 들을 수 있는 노래 파일",
-              "treatment": "explained",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "뮤직비디오",
-              "easyText": "노래에 맞춰 만든 영상",
-              "treatment": "explained",
-              "sourceIds": [
-                "S5"
-              ]
-            },
-            {
-              "term": "선공개",
-              "easyText": "정식 발표 전에 먼저 공개하는 일",
-              "treatment": "explained",
-              "sourceIds": [
-                "S5"
+                "S3"
               ]
             }
           ]
         },
         "review": {
-          "articleId": "NAVER-008-0005390487",
+          "articleId": "MANUAL-BUSINESSPOST-444610",
           "independentKind": "company",
           "primaryStockIds": [
             "KRX:035900"
           ],
-          "eventType": "sales_or_production",
-          "focusStatement": "JYP Ent.가 뻔푸소년CIIU의 중국 첫 미니 앨범을 8월 4일 발매한다고 알렸다.",
+          "eventType": "earnings",
+          "focusStatement": "JYP엔터테인먼트가 2026년 2분기 연결기준 매출 1831억 원, 영업이익 310억 원을 냈다고 잠정집계해 밝혔다.",
           "anchorSourceIds": [
-            "S1",
-            "S2"
+            "S1"
           ],
           "checks": {
             "allowedScope": true,
@@ -41966,7 +41815,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 2
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {
@@ -54785,15 +54634,180 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-031-0001049355",
-        "stage": "prefilter",
-        "reasonCodes": [
-          "NOT_TODAYS_MARKET"
-        ],
-        "reasons": [
-          "기사는 2026-08-13에 발행됐고 기준일은 2026-08-15이므로 당일 국내 시황이 아니다."
-        ],
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-1CONOMY-49682",
+          "title": "신한금융, 2Q 순이익 1조8201억원…'분기·반기' 역대 최대",
+          "publisher": "1코노미뉴스",
+          "publishedAt": "2026-07-23T07:24:00.000Z",
+          "sourceUrl": "https://www.1conomynews.co.kr/news/articleView.html?idxno=49682",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "23일 신한금융의 2026년 2분기 경영실적 발표에 따르면 2분기 당기순이익은 1조8201억원으로 전년 동기(1조5491억원) 대비 17.5% 증가했다."
+            },
+            {
+              "id": "S2",
+              "text": "상반기 누적 당기순이익도 전년 동기보다 13.3% 늘어난 3조4427억원으로 집계됐다."
+            },
+            {
+              "id": "S3",
+              "text": "2분기 이자이익은 3조1344억원으로 전분기 대비 3.6% 증가했다."
+            },
+            {
+              "id": "S4",
+              "text": "비이자이익은 1조4499억원으로 전분기보다 22.0% 늘었다."
+            },
+            {
+              "id": "S5",
+              "text": "2분기 수수료이익은 1조1889억원으로 전분기 대비 26.4% 증가했다."
+            },
+            {
+              "id": "S6",
+              "text": "판매관리비는 1조6707억원으로 전분기 대비 8.1% 증가했다."
+            },
+            {
+              "id": "S7",
+              "text": "신한금융은 실적 개선과 자본 여력을 바탕으로 올해 총주주환원 규모로 '2조8000억원+α'를 제시했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-1CONOMY-49682",
+          "primaryStockIds": [
+            "KRX:055550"
+          ],
+          "focusStatement": "신한금융이 2026년 2분기 당기순이익 1조8201억원을 기록해 분기·반기 기준 역대 최대를 냈다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6",
+            "S7"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "순이익",
+            "상반기",
+            "이자이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-1CONOMY-49682",
+          "headline": {
+            "text": "신한금융, 2분기 순이익 1조8201억원으로 역대 최대",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "신한금융, 2분기 순이익 1조8201억원으로 역대 최대",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "지난해 같은 기간보다 17.5% 늘었어요.",
+              "sourceIds": [
+                "S1"
+              ],
+              "role": "key_detail",
+              "factKey": "net_income_growth"
+            },
+            {
+              "text": "상반기 순이익은 3조4427억원이에요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "business_detail",
+              "factKey": "half_year_net_income"
+            },
+            {
+              "text": "이자이익은 3조1344억원이에요.",
+              "sourceIds": [
+                "S3"
+              ],
+              "role": "business_detail",
+              "factKey": "interest_income"
+            }
+          ],
+          "priceConnection": {
+            "text": "순이익은 회사가 한 해 동안 얼마나 벌었는지를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "순이익",
+              "easyText": "세금까지 다 내고 최종적으로 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "상반기",
+              "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달",
+              "treatment": "explained",
+              "sourceIds": [
+                "S2"
+              ]
+            },
+            {
+              "term": "이자이익",
+              "easyText": "돈을 빌려주고 받은 이자로 번 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S3"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-1CONOMY-49682",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:055550"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "신한금융이 2026년 2분기 당기순이익 1조8201억원을 기록해 분기·반기 기준 역대 최대를 냈다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
         "editorAttempts": 0
       },
       "roleAttempts": [
@@ -59113,26 +59127,167 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-277-0005798924",
-        "stage": "reviewer",
-        "reasonCodes": [
-          "REVIEW_primarySubject",
-          "REVIEW_focusAlignment",
-          "REVIEW_allTermsEasy",
-          "REVIEW_termExplanationCoverage",
-          "MULTI_COMPANY_COMPARISON_NARROWED",
-          "UNEXPLAINED_INDUSTRY_TERM"
-        ],
-        "reasons": [
-          "독립 검수 실패: primarySubject",
-          "독립 검수 실패: focusAlignment",
-          "독립 검수 실패: allTermsEasy",
-          "독립 검수 실패: termExplanationCoverage",
-          "원문은 현대차와 기아의 판매 흐름을 비교하지만 draft 본문은 기아 수치와 성과에 치우쳐 비교 주제를 한 회사 중심으로 좁혔다.",
-          "노출문에 반복된 산업 용어 '글로벌'에 10~13세가 이해할 별도 풀이가 없다."
-        ],
-        "editorAttempts": 2
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-INTHENEWS-89738",
+          "title": "[2026 2분기 실적] 기아, 글로벌 판매 확대에 분기 최대 매출…영업이익률 8.0%",
+          "publisher": "인더뉴스",
+          "publishedAt": "2026-07-24T07:07:11.000Z",
+          "sourceUrl": "https://www.inthenews.co.kr/news/article.html?no=89738",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "기아는 24일 2026년 2분기 연결 기준 매출액 33조3037억원, 영업이익 2조6290억원을 기록했다고 밝혔습니다."
+            },
+            {
+              "id": "S2",
+              "text": "지난해 같은 기간과 비교해 매출은 12.6% 증가했지만 영업이익은 4.9% 감소했습니다."
+            },
+            {
+              "id": "S3",
+              "text": "연결 매출대수는 80만3985대로 4.3% 증가했으며 원·달러 평균 환율은 1502원으로 7.0% 상승했습니다."
+            },
+            {
+              "id": "S4",
+              "text": "글로벌 현지 판매는 83만9000대로 5.8% 증가했습니다."
+            },
+            {
+              "id": "S5",
+              "text": "기아의 2분기 글로벌 전동화 판매량은 29만6000대로 전년 동기 18만5000대보다 60.0% 늘었습니다."
+            },
+            {
+              "id": "S6",
+              "text": "2분기 연결 평균판매가격은 4110만원으로 전년 동기 3810만원보다 7.9% 상승했습니다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-INTHENEWS-89738",
+          "primaryStockIds": [
+            "KRX:000270"
+          ],
+          "focusStatement": "기아가 2026년 2분기 연결 기준 매출액 33조3037억원, 영업이익 2조6290억원을 기록했다고 밝혔다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5",
+            "S6"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-INTHENEWS-89738",
+          "headline": {
+            "text": "기아, 2분기 매출 33조3037억원·영업이익 2조6290억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "기아, 2분기 매출 33조3037억원·영업이익 2조6290억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 지난해보다 12.6% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "영업이익은 4.9% 줄었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_decline"
+            },
+            {
+              "text": "전기차는 29만6000대 팔려 60% 늘었어요.",
+              "sourceIds": [
+                "S5"
+              ],
+              "role": "business_detail",
+              "factKey": "ev_sales_growth"
+            }
+          ],
+          "priceConnection": {
+            "text": "얼마나 많이 팔았는지는 회사의 사업 성과와 연결돼요.",
+            "sourceIds": [
+              "S1",
+              "S5"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-INTHENEWS-89738",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:000270"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "기아가 2026년 2분기 연결 기준 매출액 33조3037억원, 영업이익 2조6290억원을 기록했다고 밝혔다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {
@@ -60846,308 +61001,146 @@
       "pipelineResult": {
         "status": "ready_for_storage",
         "article": {
-          "articleId": "NAVER-277-0005803462",
-          "runDateKst": "2026-08-15",
-          "scope": "company",
-          "title": "18일 현대차 노사 다시 협상 테이블에…하반기 실적 반등 '분수령'",
-          "publisher": "아시아경제",
-          "publishedAt": "2026-08-14T23:00:00.000Z",
-          "sourceUrl": "https://view.asiae.co.kr/article/2026081416381162776",
+          "articleId": "MANUAL-INTHENEWS-89683",
+          "title": "[2026 2분기 실적] 현대차, 역대 최대 2분기 매출 달성…수익성은 둔화",
+          "publisher": "인더뉴스",
+          "publishedAt": "2026-07-23T06:07:00.000Z",
+          "sourceUrl": "https://www.inthenews.co.kr/news/article.html?no=89683",
           "sourceUnits": [
             {
               "id": "S1",
-              "text": "현대차 노조, 사측 교섭 재개 요청에 18일 파업 유보"
+              "text": "현대자동차가 올해 2분기 하이브리드 차량 판매 확대와 환율 효과에 힘입어 역대 최대 분기 매출을 기록했습니다."
             },
             {
               "id": "S2",
-              "text": "신차 효과 앞두고 노사 갈등 봉합 여부 주목 현대자동차 노사가 한 달여 만에 다시 협상 테이블에 앉는다."
+              "text": "현대차는 23일 경영실적 콘퍼런스콜을 열고 2026년 2분기 연결 기준 매출액 49조2153억원, 영업이익 2조8509억원을 기록했다고 밝혔습니다."
             },
             {
               "id": "S3",
-              "text": "여름휴가 이후 파업 수위를 높이던 현대자동차 노동조합이 사측의 교섭 재개 요청을 받아들이면서 오는 18일 오후 2시 본교섭을 재개하기로 했다."
+              "text": "매출은 지난해 같은 기간보다 1.9% 증가하며 종전 최대였던 2025년 2분기 48조2867억원을 넘어섰습니다."
             },
             {
               "id": "S4",
-              "text": "특히 올해 파업으로 이미 4만대가 넘는 생산 차질이 발생한 데다 하반기 신차 출시를 통한 실적 반등이 필요한 상황인 만큼 18일 교섭 결과가 현대차의 하반기 경영 성적을 좌우할 주요 분수령이 될 전망이다."
+              "text": "반면 글로벌 도매 판매는 99만1885대로 전년 동기보다 6.9% 감소했습니다."
             },
             {
               "id": "S5",
-              "text": "12일 울산시 북구 현대자동차 울산공장 명촌정문에서 오전조 근무자들이 4시간 부분파업으로 일찍 퇴근하고 있다."
+              "text": "국내 판매는 부품사 화재에 따른 공급 차질로 16.4% 감소한 15만7647대에 그쳤습니다."
             },
             {
               "id": "S6",
-              "text": "현대차 노조는 이날부터 18일까지 매일 4∼6시간 파업을 이어간다."
-            },
-            {
-              "id": "S7",
-              "text": "현대차 노조는 지난달 13~15일 근무조별 매일 2시간씩 부분파업을 벌인 데 이어 20~22일과 29~31일에도 매일 4시간씩 파업했다."
-            },
-            {
-              "id": "S8",
-              "text": "현대차 입장에서는 하반기 실적 반등을 위해 생산 정상화가 어느 때보다 중요한 시점이다."
-            },
-            {
-              "id": "S9",
-              "text": "상반기 부진을 만회하기 위해 하반기 신차 효과와 판매 확대에 기대를 걸고 있지만, 파업이 장기화하면 신차를 생산하고 적기에 공급하는 데 차질이 생길 수밖에 없다."
-            },
-            {
-              "id": "S10",
-              "text": "현대차가 제시한 기본급 8만9000원과 성과금 350%+1000만원, 자사주 15주보다 높은 수준이다."
+              "text": "2분기 글로벌 전동화 차량 판매는 26만6627대로 전년 동기보다 1.7% 증가했습니다."
             }
-          ]
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
         },
         "selection": {
-          "articleId": "NAVER-277-0005803462",
+          "articleId": "MANUAL-INTHENEWS-89683",
           "primaryStockIds": [
             "KRX:005380"
           ],
-          "focusStatement": "현대차 노조의 파업으로 4만대가 넘는 생산 차질이 발생한 가운데, 현대차와 노조는 18일 오후 2시 본교섭을 재개하기로 했다.",
-          "anchorSourceId": "S3",
+          "focusStatement": "현대차가 2026년 2분기 연결 기준 매출액 49조2153억원, 영업이익 2조8509억원을 기록해 역대 최대 분기 매출을 냈다고 밝혔다.",
+          "anchorSourceId": "S2",
           "includedSourceIds": [
-            "S3",
-            "S4",
-            "S6"
-          ],
-          "excludedSourceIds": [
             "S1",
             "S2",
+            "S3",
+            "S4",
             "S5",
-            "S7",
-            "S8",
-            "S9",
-            "S10"
+            "S6"
           ],
+          "excludedSourceIds": [],
           "difficultTerms": [
-            {
-              "term": "파업",
-              "sourceIds": [
-                "S3",
-                "S4",
-                "S6"
-              ]
-            },
-            {
-              "term": "파업 수위",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "노동조합",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "사측",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "교섭",
-              "sourceIds": [
-                "S3",
-                "S4"
-              ]
-            },
-            {
-              "term": "본교섭",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "생산 차질",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "하반기",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "신차 출시",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "실적 반등",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "노조",
-              "sourceIds": [
-                "S6"
-              ]
-            }
+            "매출",
+            "영업이익"
           ],
           "reasonCodes": [],
-          "reasons": [
-            "현대차가 직접 영향받는 노조 파업과 4만대 이상의 생산 차질이 확인됐고, 18일 본교섭 재개 일정도 제시됐다."
-          ],
+          "reasons": [],
           "decision": "accept",
           "kind": "company",
-          "eventType": "material_operational_risk"
+          "eventType": "earnings"
         },
         "draft": {
-          "articleId": "NAVER-277-0005803462",
+          "articleId": "MANUAL-INTHENEWS-89683",
           "headline": {
-            "text": "현대차 노동조합, 18일 오후 2시 본교섭 재개하기로",
+            "text": "현대차, 2분기 매출 49조2153억원으로 역대 최대",
             "sourceIds": [
+              "S2",
               "S3"
             ]
           },
           "homeSummary": {
-            "text": "현대차 노동조합, 18일 오후 2시 본교섭 재개하기로",
+            "text": "현대차, 2분기 매출 49조2153억원으로 역대 최대",
             "sourceIds": [
+              "S2",
               "S3"
             ]
           },
           "body": [
             {
-              "text": "올해 파업으로 4만대 넘는 생산 차질이 났어요.",
+              "text": "영업이익은 2조8509억원이에요.",
               "sourceIds": [
-                "S4"
+                "S2"
               ],
               "role": "key_detail",
-              "factKey": "production_disruption"
+              "factKey": "operating_profit"
             },
             {
-              "text": "노조는 18일까지 매일 4∼6시간 파업해요.",
+              "text": "지난해 최대 기록을 넘어섰어요.",
               "sourceIds": [
-                "S6"
+                "S3"
               ],
-              "role": "business_detail",
-              "factKey": "strike_schedule"
+              "role": "context",
+              "factKey": "record_broken"
             },
             {
-              "text": "하반기 신차 출시를 통한 실적 반등이 필요해요.",
+              "text": "전 세계 판매는 6.9% 줄었어요.",
               "sourceIds": [
                 "S4"
               ],
-              "role": "context",
-              "factKey": "h2_rebound_need"
+              "role": "business_detail",
+              "factKey": "global_sales_decline"
             }
           ],
           "priceConnection": {
-            "text": "생산 차질은 차량을 만들고 팔 수 있는 수와 연결될 수 있어요.",
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
             "sourceIds": [
-              "S4"
+              "S2",
+              "S3"
             ],
-            "kind": "operational_continuity",
+            "kind": "business_performance",
             "basis": "event_education"
           },
           "termTreatments": [
             {
-              "term": "파업",
-              "easyText": "일하는 사람들이 요구를 알리려고 일을 멈추는 행동",
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
               "treatment": "explained",
               "sourceIds": [
-                "S3",
-                "S4",
-                "S6"
+                "S2"
               ]
             },
             {
-              "term": "파업 수위",
-              "easyText": "파업을 얼마나 오래 또는 강하게 할지의 정도",
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
               "treatment": "explained",
               "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "노동조합",
-              "easyText": "일하는 사람들이 권리를 지키려고 만든 모임",
-              "treatment": "explained",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "사측",
-              "easyText": "회사를 운영하는 쪽",
-              "treatment": "explained",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "교섭",
-              "easyText": "회사와 노동자가 조건을 의논하는 일",
-              "treatment": "explained",
-              "sourceIds": [
-                "S3",
-                "S4"
-              ]
-            },
-            {
-              "term": "본교섭",
-              "easyText": "회사와 노동자가 공식적으로 하는 협상",
-              "treatment": "explained",
-              "sourceIds": [
-                "S3"
-              ]
-            },
-            {
-              "term": "생산 차질",
-              "easyText": "제품을 계획대로 만들지 못하는 상황",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "하반기",
-              "easyText": "한 해의 뒤쪽 절반",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "신차 출시",
-              "easyText": "새 자동차를 시장에 내놓는 일",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "실적 반등",
-              "easyText": "사업 결과가 다시 좋아지는 것",
-              "treatment": "explained",
-              "sourceIds": [
-                "S4"
-              ]
-            },
-            {
-              "term": "노조",
-              "easyText": "일하는 사람들이 함께 만든 모임",
-              "treatment": "explained",
-              "sourceIds": [
-                "S6"
+                "S2"
               ]
             }
           ]
         },
         "review": {
-          "articleId": "NAVER-277-0005803462",
+          "articleId": "MANUAL-INTHENEWS-89683",
           "independentKind": "company",
           "primaryStockIds": [
             "KRX:005380"
           ],
-          "eventType": "material_operational_risk",
-          "focusStatement": "현대차 노조가 사측 요청을 받아들여 18일 오후 2시 본교섭을 재개하기로 했다.",
+          "eventType": "earnings",
+          "focusStatement": "현대차가 2026년 2분기 연결 기준 매출액 49조2153억원, 영업이익 2조8509억원을 기록해 역대 최대 분기 매출을 냈다고 밝혔다.",
           "anchorSourceIds": [
-            "S3"
+            "S2"
           ],
           "checks": {
             "allowedScope": true,
@@ -61168,7 +61161,7 @@
           },
           "issues": []
         },
-        "editorAttempts": 2
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {
@@ -63996,16 +63989,171 @@
         ]
       },
       "pipelineResult": {
-        "status": "rejected",
-        "articleId": "NAVER-016-0002683946",
-        "stage": "editor",
-        "reasonCodes": [
-          "UNEXPLAINED_TERM"
-        ],
-        "reasons": [
-          "'노조'의 풀이 근거가 선별 결과와 다릅니다."
-        ],
-        "editorAttempts": 2
+        "status": "ready_for_storage",
+        "article": {
+          "articleId": "MANUAL-BUSINESSPOST-443050",
+          "title": "현대모비스 2분기 영업이익 9752억 12% 늘어, 매출 16.3조로 2.4% 증가",
+          "publisher": "비즈니스포스트",
+          "publishedAt": "2026-07-24T01:35:23.000Z",
+          "sourceUrl": "https://www.businesspost.co.kr/BP?command=article_view&num=443050",
+          "sourceUnits": [
+            {
+              "id": "S1",
+              "text": "현대모비스가 올해 2분기 연결기준 매출 16조3247억 원, 영업이익 9752억 원을 낸 것으로 잠정 집계했다고 24일 공시했다."
+            },
+            {
+              "id": "S2",
+              "text": "2025년 2분기와 비교해 매출은 2.4%, 영업이익은 12.1% 늘었다."
+            },
+            {
+              "id": "S3",
+              "text": "부문별로 보면 모듈과 핵심부품 사업에서 매출 12조8942억 원, 영업이익 218억 원을 기록했다."
+            },
+            {
+              "id": "S4",
+              "text": "A/S부품 사업에서는 매출 3조4304억 원, 영업이익 9534억 원을 냈다."
+            },
+            {
+              "id": "S5",
+              "text": "현대모비스는 상반기 누적 연구개발(R&D)비 9508억 원을 집행했다."
+            }
+          ],
+          "runDateKst": "2026-08-15",
+          "scope": "company"
+        },
+        "selection": {
+          "articleId": "MANUAL-BUSINESSPOST-443050",
+          "primaryStockIds": [
+            "KRX:012330"
+          ],
+          "focusStatement": "현대모비스가 2026년 2분기 연결기준 매출 16조3247억 원, 영업이익 9752억 원을 냈다고 공시했다.",
+          "anchorSourceId": "S1",
+          "includedSourceIds": [
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S5"
+          ],
+          "excludedSourceIds": [],
+          "difficultTerms": [
+            "매출",
+            "영업이익",
+            "A/S부품"
+          ],
+          "reasonCodes": [],
+          "reasons": [],
+          "decision": "accept",
+          "kind": "company",
+          "eventType": "earnings"
+        },
+        "draft": {
+          "articleId": "MANUAL-BUSINESSPOST-443050",
+          "headline": {
+            "text": "현대모비스, 2분기 매출 16조3247억원·영업이익 9752억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "homeSummary": {
+            "text": "현대모비스, 2분기 매출 16조3247억원·영업이익 9752억원",
+            "sourceIds": [
+              "S1"
+            ]
+          },
+          "body": [
+            {
+              "text": "매출은 지난해보다 2.4% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "revenue_growth"
+            },
+            {
+              "text": "영업이익은 12.1% 늘었어요.",
+              "sourceIds": [
+                "S2"
+              ],
+              "role": "key_detail",
+              "factKey": "operating_profit_growth"
+            },
+            {
+              "text": "A/S부품 영업이익은 9534억원이에요.",
+              "sourceIds": [
+                "S4"
+              ],
+              "role": "business_detail",
+              "factKey": "as_parts_profit"
+            }
+          ],
+          "priceConnection": {
+            "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+            "sourceIds": [
+              "S1",
+              "S2"
+            ],
+            "kind": "business_performance",
+            "basis": "event_education"
+          },
+          "termTreatments": [
+            {
+              "term": "매출",
+              "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "영업이익",
+              "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+              "treatment": "explained",
+              "sourceIds": [
+                "S1"
+              ]
+            },
+            {
+              "term": "A/S부품",
+              "easyText": "이미 판 자동차를 고칠 때 갈아 끼우는 부품",
+              "treatment": "explained",
+              "sourceIds": [
+                "S4"
+              ]
+            }
+          ]
+        },
+        "review": {
+          "articleId": "MANUAL-BUSINESSPOST-443050",
+          "independentKind": "company",
+          "primaryStockIds": [
+            "KRX:012330"
+          ],
+          "eventType": "earnings",
+          "focusStatement": "현대모비스가 2026년 2분기 연결기준 매출 16조3247억 원, 영업이익 9752억 원을 냈다고 공시했다.",
+          "anchorSourceIds": [
+            "S1"
+          ],
+          "checks": {
+            "allowedScope": true,
+            "primarySubject": true,
+            "directMateriality": true,
+            "sourceFidelity": true,
+            "focusAlignment": true,
+            "conciseThreeLineSummary": true,
+            "noIrrelevantDetail": true,
+            "attributionAndTiming": true,
+            "allTermsEasy": true,
+            "sameHeadlineAcrossSurfaces": true,
+            "distinctSummaryFacts": true,
+            "priceConnectionGrounded": true,
+            "termExplanationCoverage": true,
+            "investmentSafety": true,
+            "noSentimentLabel": true
+          },
+          "issues": []
+        },
+        "editorAttempts": 0
       },
       "roleAttempts": [
         {

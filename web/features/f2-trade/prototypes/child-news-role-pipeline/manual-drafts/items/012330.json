@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:012330",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-BUSINESSPOST-443050",
+    "title": "현대모비스 2분기 영업이익 9752억 12% 늘어, 매출 16.3조로 2.4% 증가",
+    "publisher": "비즈니스포스트",
+    "publishedAt": "2026-07-24T01:35:23.000Z",
+    "sourceUrl": "https://www.businesspost.co.kr/BP?command=article_view&num=443050",
+    "sourceUnits": [
+      { "id": "S1", "text": "현대모비스가 올해 2분기 연결기준 매출 16조3247억 원, 영업이익 9752억 원을 낸 것으로 잠정 집계했다고 24일 공시했다." },
+      { "id": "S2", "text": "2025년 2분기와 비교해 매출은 2.4%, 영업이익은 12.1% 늘었다." },
+      { "id": "S3", "text": "부문별로 보면 모듈과 핵심부품 사업에서 매출 12조8942억 원, 영업이익 218억 원을 기록했다." },
+      { "id": "S4", "text": "A/S부품 사업에서는 매출 3조4304억 원, 영업이익 9534억 원을 냈다." },
+      { "id": "S5", "text": "현대모비스는 상반기 누적 연구개발(R&D)비 9508억 원을 집행했다." }
+    ]
+  },
+  "focusStatement": "현대모비스가 2026년 2분기 연결기준 매출 16조3247억 원, 영업이익 9752억 원을 냈다고 공시했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "현대모비스, 2분기 매출 16조3247억원·영업이익 9752억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 2.4% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 12.1% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth" },
+    { "text": "A/S부품 영업이익은 9534억원이에요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "as_parts_profit" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "A/S부품", "easyText": "이미 판 자동차를 고칠 때 갈아 끼우는 부품", "treatment": "explained", "sourceIds": ["S4"] }
+  ]
+}

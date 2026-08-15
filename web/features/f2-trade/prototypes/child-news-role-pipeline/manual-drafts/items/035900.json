@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:035900",
+  "eventType": "earnings",
+  "replaces": "그룹명이 '뻔푸소년CIIU'로 깨진 앨범 발매 기사(published). withdrawn 후 교체한다.",
+  "article": {
+    "articleId": "MANUAL-BUSINESSPOST-444610",
+    "title": "JYP엔터 2분기 영업이익 310억 41% 줄어, 스트레이키즈 활동 공백 영향",
+    "publisher": "비즈니스포스트",
+    "publishedAt": "2026-08-12T08:07:59.000Z",
+    "sourceUrl": "https://www.businesspost.co.kr/BP?command=article_view&num=444610",
+    "sourceUnits": [
+      { "id": "S1", "text": "JYP엔터테인먼트는 2분기 연결기준 매출 1831억 원, 영업이익 310억 원을 낸 것으로 잠정집계했다고 12일 밝혔다." },
+      { "id": "S2", "text": "2025년 2분기보다 매출은 15.1%, 영업이익은 41.4% 줄었다." },
+      { "id": "S3", "text": "같은 기간 순이익은 40.3% 감소한 217억 원을 기록했다." },
+      { "id": "S4", "text": "영업이익 또한 매출 감소와 판매관리비성 지급수수료 증가에 따라 감소한 것으로 분석됐다." }
+    ]
+  },
+  "focusStatement": "JYP엔터테인먼트가 2026년 2분기 연결기준 매출 1831억 원, 영업이익 310억 원을 냈다고 잠정집계해 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "JYP엔터, 2분기 매출 1831억원·영업이익 310억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 15.1% 줄었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_decline" },
+    { "text": "영업이익은 41.4% 줄었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_decline" },
+    { "text": "순이익은 217억원이에요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "net_income" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "순이익", "easyText": "세금까지 다 내고 최종적으로 남은 돈", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

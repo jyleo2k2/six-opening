@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:005380",
+  "eventType": "earnings",
+  "replaces": "노조 본교섭 재개 기사(published). 어린이 뉴스로 부적절해 withdrawn 후 교체한다.",
+  "article": {
+    "articleId": "MANUAL-INTHENEWS-89683",
+    "title": "[2026 2분기 실적] 현대차, 역대 최대 2분기 매출 달성…수익성은 둔화",
+    "publisher": "인더뉴스",
+    "publishedAt": "2026-07-23T06:07:00.000Z",
+    "sourceUrl": "https://www.inthenews.co.kr/news/article.html?no=89683",
+    "sourceUnits": [
+      { "id": "S1", "text": "현대자동차가 올해 2분기 하이브리드 차량 판매 확대와 환율 효과에 힘입어 역대 최대 분기 매출을 기록했습니다." },
+      { "id": "S2", "text": "현대차는 23일 경영실적 콘퍼런스콜을 열고 2026년 2분기 연결 기준 매출액 49조2153억원, 영업이익 2조8509억원을 기록했다고 밝혔습니다." },
+      { "id": "S3", "text": "매출은 지난해 같은 기간보다 1.9% 증가하며 종전 최대였던 2025년 2분기 48조2867억원을 넘어섰습니다." },
+      { "id": "S4", "text": "반면 글로벌 도매 판매는 99만1885대로 전년 동기보다 6.9% 감소했습니다." },
+      { "id": "S5", "text": "국내 판매는 부품사 화재에 따른 공급 차질로 16.4% 감소한 15만7647대에 그쳤습니다." },
+      { "id": "S6", "text": "2분기 글로벌 전동화 차량 판매는 26만6627대로 전년 동기보다 1.7% 증가했습니다." }
+    ]
+  },
+  "focusStatement": "현대차가 2026년 2분기 연결 기준 매출액 49조2153억원, 영업이익 2조8509억원을 기록해 역대 최대 분기 매출을 냈다고 밝혔다.",
+  "anchorSourceId": "S2",
+  "headline": { "text": "현대차, 2분기 매출 49조2153억원으로 역대 최대", "sourceIds": ["S2", "S3"] },
+  "body": [
+    { "text": "영업이익은 2조8509억원이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "지난해 최대 기록을 넘어섰어요.", "sourceIds": ["S3"], "role": "context", "factKey": "record_broken" },
+    { "text": "전 세계 판매는 6.9% 줄었어요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "global_sales_decline" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S2", "S3"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}
