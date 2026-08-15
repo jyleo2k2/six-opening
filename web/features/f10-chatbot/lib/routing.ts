@@ -7,6 +7,7 @@ import {
 } from "../../../shared/data/chatbot-knowledge";
 import { STOCKS } from "../../../shared/data/stocks";
 import { SECTORS, type SectorKey } from "../../../shared/data/sectors";
+import type { RoleCopyKey } from "./role-copy";
 import type {
   ChatContext,
   ExplainScript,
@@ -72,6 +73,11 @@ export type ChatReply = {
     topic: StockFactTopic;
   };
   sectorFact?: { sectorId: SectorKey };
+  /**
+   * 읽는 역할에 따라 문장이 갈리는 응답의 표식. 라우터는 세션을 받지 않으므로
+   * 실제 교체는 오케스트레이터가 `applyRoleCopy` 로 한다(`role-copy.ts`).
+   */
+  roleCopy?: RoleCopyKey;
 };
 
 type RecommendationKind =
@@ -2485,7 +2491,13 @@ function reply(
   extras: Partial<
     Pick<
       ChatReply,
-      "suggestedQuestions" | "tool" | "uiAction" | "explainScript" | "stockFact" | "sectorFact"
+      | "suggestedQuestions"
+      | "tool"
+      | "uiAction"
+      | "explainScript"
+      | "stockFact"
+      | "sectorFact"
+      | "roleCopy"
     >
   > = {},
 ): ChatReply {
@@ -2525,30 +2537,39 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
 
   let personalInfoText =
     "계좌번호나 집 주소 같은 개인정보는 채팅에 쓰지 않아도 돼. 앱의 공식 화면에서만 보호자와 함께 확인해 줘.";
+  /** "보호자와 함께" 가 들어간 갈래만 표시한다 — 부모에게는 그 보호자가 자기 자신이다. */
+  let personalInfoRoleCopy: RoleCopyKey | undefined = "personalInfoOfficialScreen";
   if (message.includes("친구한테보내")) {
     personalInfoText =
       "계좌번호는 친구에게 보내지 않는 게 안전해. 이미 보냈다면 믿을 수 있는 어른과 공식 금융사에 바로 알려 줘.";
+    personalInfoRoleCopy = undefined;
   } else if (message.includes("숨겨")) {
     personalInfoText =
       "주소나 계좌번호는 채팅에 적지 말아 줘. 나는 개인정보를 숨기거나 가족의 공개 권한을 대신 바꾸지 않아.";
+    personalInfoRoleCopy = undefined;
   } else if (
     message.includes("계좌번호") &&
     includesAny(message, FAMILY_MEMBER_PATTERNS)
   ) {
     personalInfoText =
       "가족의 계좌번호도 채팅에 적거나 대신 조회하면 안 돼. 서로 동의한 비교 정보는 가족 화면에서 직접 확인해 줘.";
+    personalInfoRoleCopy = undefined;
   } else if (message.includes("순위")) {
     personalInfoText =
       "계좌번호를 알려줘도 순위나 점수를 바꿀 수 없어. 개인정보는 적지 말고 리그 규칙에서 계산 방식을 확인해 줘.";
+    personalInfoRoleCopy = undefined;
   } else if (includesAny(message, ["실제계좌", "증권계좌"])) {
     personalInfoText =
       "계좌번호를 채팅에 입력해도 실제 계좌와 연결되지 않아. 실제 금융 정보는 앱의 공식 화면에서만 확인해 줘.";
+    personalInfoRoleCopy = undefined;
   } else if (includesAny(message, ["선물", "굿즈", "보너스", "실물상품"])) {
     personalInfoText =
       "주소나 계좌번호를 채팅에 적어도 선물이나 모의투자금을 주지 않아. 공식 이벤트인지는 보호자와 앱 안내에서 확인해 줘.";
+    personalInfoRoleCopy = "giftScam";
   } else if (message.includes("가족팀")) {
     personalInfoText =
       "주소나 학교 이름으로 가족 팀을 찾지 않아. 가족 초대는 보호자와 앱의 공식 화면에서 확인해 줘.";
+    personalInfoRoleCopy = "familyInvite";
   }
 
   let familyDataText =
@@ -2589,7 +2610,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
 
   const alternatives: Record<
     UnsafeKind,
-    { text: string; steps: readonly string[]; questions: string[] }
+    { text: string; steps: readonly string[]; questions: string[]; roleCopy?: RoleCopyKey }
   > = {
     crisis: {
       text: "지금 혼자 견디지 않아도 돼. 먼저 지금 안전한지 알려 줘. 급하게 위험하면 가까운 어른이나 112·119에 바로 도움을 요청해 줘.",
@@ -2605,6 +2626,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       text: personalInfoText,
       steps: ["개인정보 보호 안내"],
       questions: ["키웅이는 무엇을 도와주나요?", "모의투자 리그 규칙 알려주세요"],
+      roleCopy: personalInfoRoleCopy,
     },
     familyData: {
       text: familyDataText,
@@ -2654,6 +2676,7 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
   const alternative = alternatives[kind];
   return reply("safety", "safety", alternative.text, alternative.steps, {
     suggestedQuestions: alternative.questions,
+    ...(alternative.roleCopy ? { roleCopy: alternative.roleCopy } : {}),
   });
 }
 
@@ -4444,11 +4467,15 @@ function getScreenNavigationReply(message: string): ChatReply | null {
   }
 
   if (mentionsScreenName(message, "tradingLock")) {
-    return serviceHowToReply(
-      "학교 시간엔 매매 쉬기 토글은 홈에서 자녀 계정의 주문만 잠시 막는 보호자 기능이에요.",
-      "홈에서 주문 잠금 보기",
-      "home",
-    );
+    // 원문은 보호자용이다. 아이에게 나갈 문장과 버튼은 `role-copy.ts` 가 갈아끼운다.
+    return {
+      ...serviceHowToReply(
+        "학교 시간엔 매매 쉬기 토글은 홈에서 자녀 계정의 주문만 잠시 막는 보호자 기능이에요.",
+        "홈에서 주문 잠금 보기",
+        "home",
+      ),
+      roleCopy: "tradingLock",
+    };
   }
 
   if (mentionsScreenName(message, "home")) {

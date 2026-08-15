@@ -37,6 +37,7 @@ import {
   type ChatRoute,
 } from "./routing";
 import type { ChatSession } from "./session";
+import { applyRoleCopy } from "./role-copy";
 import {
   advanceStockExplore,
   createStockExploreTurn,
@@ -401,12 +402,15 @@ export async function createChatOutcome(
 ): Promise<ChatOutcome> {
   const onStatus = dependencies.onStatus ?? (() => undefined);
   const firstPass = routeMessage(request.message, request.context);
-  const { routed, modelMessage, rewritten, approvedFallbackText } = await resolveFollowUp(
-    request,
-    firstPass,
-    dependencies,
-    onStatus,
-  );
+  const {
+    routed: routedForAnyRole,
+    modelMessage,
+    rewritten,
+    approvedFallbackText,
+  } = await resolveFollowUp(request, firstPass, dependencies, onStatus);
+  // 라우터는 세션을 모른다(요청이 역할을 지정하지 못하게 하는 경계다). 역할로 갈리는
+  // 문장은 라우팅이 끝난 여기서 한 번만 갈아끼운다 — `role-copy.ts` 참고.
+  const routed = applyRoleCopy(routedForAnyRole, session.role);
   const explainStep = resolveExplainStep(request, routed);
   const stockExploreStep = resolveStockExploreStep(request, routed);
   const sectorExploreStep = resolveSectorExploreStep(request, routed);
