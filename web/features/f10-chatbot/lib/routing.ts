@@ -16,6 +16,14 @@ import type {
   StockFactTopic,
 } from "../../../shared/types/chatbot";
 import { toPoliteKorean } from "./polite";
+import {
+  TRADE_DECISION_PATTERNS,
+  asksFamilyData,
+  asksOwnPastTrades,
+  asksPopularityFollowing,
+  asksTargetPriceDecision,
+  targetsInvestmentDecision,
+} from "./intent-slots";
 
 export type { ChatContext, ProactiveSignal } from "../../../shared/types/chatbot";
 
@@ -367,7 +375,11 @@ const SIZING_PATTERNS = [
   "얼마넣",
   "돈전부어느",
 ];
-const RISK_AND_POPULARITY_PATTERNS = [
+/**
+ * 손해 없는·안전한·더 좋은 종목을 골라 달라는 요구. 1인칭이 붙어도 요구가
+ * 달라지지 않으므로("내가 안 망할 종목") 언제나 차단한다.
+ */
+const SAFETY_SEEKING_PATTERNS = [
   "안망",
   "손해안보",
   "손해보지않",
@@ -379,14 +391,6 @@ const RISK_AND_POPULARITY_PATTERNS = [
   "덜무서",
   "덜신경",
   "안정적인종목",
-  "제일인기",
-  "가장인기",
-  "인기많은",
-  "인기있는",
-  "많이산종목",
-  "많이담은",
-  "제일많이사",
-  "다들산",
   "제일많이오를",
   "가장많이오를",
   "제일크게오를",
@@ -396,9 +400,24 @@ const RISK_AND_POPULARITY_PATTERNS = [
   "제일나아",
   "좋은종목",
   "유망",
-  // "다른 애들은 뭐 많이 사?", "많이 산 주식" — SPEC §6.1.1 이 인기 종목 거절
-  // 예시로 든 표현이다. "많이 사면 수수료 많이 나와?" 같은 비용 질문까지 삼키지
-  // 않도록 종목을 가리키는 형태로만 좁힌다.
+];
+
+/**
+ * 남들이 많이 산 것을 따라 사려는 요구(SPEC §6.1.1). 위 안전 요구와 달리
+ * **1인칭이 붙으면 뜻이 뒤집힌다** — "내가 제일 많이 산 종목 뭐야?" 는 추종이
+ * 아니라 본인 기록 조회다. 그래서 두 목록을 나눠 둔다.
+ * "많이 사면 수수료 많이 나와?" 같은 비용 질문까지 삼키지 않도록 종목을
+ * 가리키는 형태로만 좁힌다.
+ */
+const POPULARITY_FOLLOWING_PATTERNS = [
+  "제일인기",
+  "가장인기",
+  "인기많은",
+  "인기있는",
+  "많이산종목",
+  "많이담은",
+  "제일많이사",
+  "다들산",
   "뭐많이사",
   "많이산주식",
   "많이사는종목",
@@ -1339,12 +1358,11 @@ function findUnsafeKind(message: string): UnsafeKind | null {
   const familyHoldingRequest =
     includesAny(message, FAMILY_MEMBER_PATTERNS) &&
     includesAny(message, HOLDING_PATTERNS);
+  // 가족어 × 데이터어 × 조회요구의 곱으로 본다(`intent-slots`). 구절 목록으로
+  // 두면 "엄마 수익률 얼마야?"(조회 동사 없음)·"엄마가 왜 샀는지 이유 보여줘"
+  // (`거래이유`만 있고 `이유`가 없음)처럼 칸이 빠진 자리로 그대로 샌다.
   const familyDataRequest =
-    !familyComparisonHelp &&
-    ((includesAny(message, FAMILY_MEMBER_PATTERNS) &&
-      includesAny(message, FAMILY_DATA_PATTERNS) &&
-      includesAny(message, FAMILY_DATA_ACCESS_PATTERNS)) ||
-      familyHoldingRequest);
+    !familyComparisonHelp && (asksFamilyData(message) || familyHoldingRequest);
   const ownDataSharing =
     (message.includes("내성향") &&
       message.includes("친구") &&
@@ -1449,20 +1467,30 @@ function findRecommendationKind(message: string): RecommendationKind | null {
 
   const selection =
     includesAny(message, SELECTION_PATTERNS) ||
+    includesAny(message, TRADE_DECISION_PATTERNS) ||
     includesAny(message, [
       "뭐가제일좋",
       "뭐가가장좋",
       "제일좋은종목",
       "가장좋은종목",
     ]);
+  // 목표가·손절가는 `intent-slots` 가 어간과 요구 동사를 떨어뜨려 본다.
+  // 인접만 보던 정규식은 "목표가 좀 정해줘" 의 `좀` 한 글자에 무너졌다.
   const prediction =
     includesAny(message, PREDICTION_PATTERNS) ||
-    /(?:목표가|손절가)(?:를|가)?(?:알려|정해|찍|얼마)/.test(message) ||
+    asksTargetPriceDecision(message) ||
     (includesAny(message, FUTURE_PATTERNS) &&
       (includesAny(message, FUTURE_OUTCOME_PATTERNS) ||
         includesAny(message, VAGUE_FORECAST_PATTERNS)));
   const timing = includesAny(message, TIMING_PATTERNS);
-  const risk = includesAny(message, RISK_AND_POPULARITY_PATTERNS);
+  // `제일많이사` 같은 구절은 "제일 많이 **산** 거"의 활용을 놓친다. 인기어와
+  // 이미 산 것을 가리키는 말의 곱으로 함께 본다(SPEC §6.1.1 "많이 산 주식").
+  // 1인칭이 붙은 같은 표현은 본인 기록 조회이므로 추종 요구에서 빼낸다.
+  const risk =
+    includesAny(message, SAFETY_SEEKING_PATTERNS) ||
+    ((includesAny(message, POPULARITY_FOLLOWING_PATTERNS) ||
+      asksPopularityFollowing(message)) &&
+      !asksOwnPastTrades(message));
   const automaticBestReturnSelection =
     includesAny(message, ["자동", "앱이"]) &&
     includesAny(message, ["제일수익", "최고수익", "수익좋은"]) &&
@@ -1641,6 +1669,10 @@ function findOfftopicKind(
   message: string,
   recommendationKind: RecommendationKind | null,
 ): OfftopicKind | null {
+  // SPEC §6.1.4: 비금융 대상을 고르는 요청은 범위 밖, 실제 투자 판단을 요구하면
+  // 추천 차단이 우선이다. 그 갈림을 `targetsInvestmentDecision` 한 곳에 둔다 —
+  // 여기 목록에 `사도돼`·`사도되`만 있어 "…지금 사도 됨?"이 영상 콘텐츠 거절로
+  // 새던 자리다.
   const explicitInvestmentDecision =
     recommendationKind !== null &&
     ((findMentionedStock(message) !== undefined &&
@@ -1649,33 +1681,7 @@ function findOfftopicKind(
         ...VIDEO_SOCIAL_PATTERNS,
         ...ENTERTAINMENT_PATTERNS,
       ])) ||
-      includesAny(message, [
-      "종목",
-      "주식",
-      "주가",
-      "매수",
-      "매도",
-      "보유",
-      "방산주",
-      "게임주",
-      "유통주",
-      "자동차주",
-      "사도돼",
-      "사도되",
-      "사야",
-      "뭐살",
-      "뭘살",
-      "팔아",
-      "팔까",
-      "들고",
-      "손절",
-      "목표가",
-      "투자할",
-      "가진돈",
-      "돈전부",
-      "넣을래",
-        "어디에넣",
-      ]));
+      targetsInvestmentDecision(message));
   if (explicitInvestmentDecision) return null;
 
   const companyFactQuestion =
@@ -4828,10 +4834,17 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   const archiveAbilityReply = getArchiveAbilityReply(message, context);
   if (archiveAbilityReply) return archiveAbilityReply;
 
+  // SPEC §6.1.5 의 예외 — 복합 금융 개념이 추천·예측보다 앞서지만, "실제 선택·
+  // 시점·가격 판단을 요구하면 recommend 가 우선한다". 그 판정을 용어 경로보다
+  // 먼저 확정해 둔다. 아래 용어 분기들이 이 값을 보고 비켜난다.
+  const recommendationKind = findRecommendationKind(message);
+
   // 안전·개인정보·규칙 안내 뒤에는 승인된 화면 용어를 먼저 설명한다.
   // "목표 가격"처럼 매매 요청과 같은 단어를 쓰더라도, 단순 용어 질문은
   // 추천·예측 거절로 보내지 않고 화면의 실제 뜻을 알려 준다.
-  const earlyKnowledge = findChatbotKnowledge(message);
+  // 다만 대신 정해 달라는 요구는 용어 질문이 아니다 — "목표가 좀 정해줘"가
+  // `목표 가격` 설명으로 새던 자리다.
+  const earlyKnowledge = recommendationKind ? undefined : findChatbotKnowledge(message);
   if (
     earlyKnowledge &&
     EARLY_SCREEN_TERM_IDS.has(earlyKnowledge.id) &&
@@ -4853,7 +4866,6 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
     );
   }
 
-  const recommendationKind = findRecommendationKind(message);
   const metaKind = findMetaKind(message, recommendationKind);
   if (metaKind) return metaReply(metaKind, message);
 
@@ -4868,7 +4880,11 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // term 9종 고정 응답은 사전에 없는 개념을 메우는 그물이라, 되물어 가며 설명할 수 있는
   // 쪽이 있으면 양보한다. 정의형으로 좁히는 이유는 SPEC §3.4다 — 두 개념 비교, 단정 교정,
   // 수치 계산은 한 용어의 DAPIE 로 답할 수 없어 고정 응답이 맡아야 한다.
-  const scriptedTerm = personalData ? undefined : findScriptedTerm(message);
+  // 대신 골라·정해 달라는 요구에는 용어 DAPIE 를 열지 않는다. `findTermKind` 는
+  // 이미 결정 요구를 스스로 걸러 내지만(`asksForDecision`), 사전 스크립트에는 그
+  // 가드가 없어 "목표가 좀 정해줘 손절가도" 가 손절 설명으로 새 나갔다.
+  const scriptedTerm =
+    personalData || recommendationKind ? undefined : findScriptedTerm(message);
   const termKind = personalData || scriptedTerm ? null : findTermKind(message);
   const termTakesPriorityOverCompany =
     termKind === "causality" ||
