@@ -1,63 +1,62 @@
 <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column">
-<div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 20px 12px">
-<div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:20px;font-weight:800;color:#01185A;letter-spacing:-0.02em">영웅 키움</span><span style="font-size:13px;font-weight:500;color:#A9AEC4">시즌 3</span></div>
-</div>
-
-<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
-
-<div style="background:#FFFFFF;border-radius:30px;padding:20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:11px">
-<div style="width:44px;height:44px;border-radius:999px;background:#01185A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800">{{ initial }}</div>
+<div style="position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)">
+<div style="flex:none;display:flex;align-items:center;gap:11px;padding:10px 18px 12px">
+<img src="{{ homeAvatarImg }}" width="42" height="42" alt="" style="display:block;width:42px;height:42px;border-radius:999px;object-fit:cover;background:#fff;flex:none">
 <div style="flex:1;min-width:0">
-<div style="font-size:17px;font-weight:800;color:#01185A">{{ meName }}</div>
-<div style="font-size:12.5px;font-weight:500;color:#8E93A8;margin-top:2px;white-space:nowrap">모의투자 계좌 · 8***-**42</div>
+<div style="font-size:12px;font-weight:700;color:#8E7BC7">{{ homeSeason }}</div>
+<div style="font-size:17.5px;font-weight:800;color:#01185A;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ homeGreeting }}</div>
+</div>
+<div onClick="{{ toggleMenu }}" style="flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+<svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true"><g stroke="#3B3F60" stroke-width="2.2" stroke-linecap="round"><path d="M1.5 2h19"></path><path d="M1.5 8h19"></path><path d="M1.5 14h19"></path></g></svg>
 </div>
 </div>
-<div style="height:1px;background:#EFEFF5;margin:16px 0 14px"></div>
-<div style="font-size:13.5px;font-weight:500;color:#8E93A8">내 지갑 전체</div>
-<div style="font-size:32px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:6px;white-space:nowrap">{{ totalAssetText }}</div>
-<div style="display:flex;align-items:baseline;gap:9px;margin-top:8px">
-<span style="{{ pnlStyle }}">{{ pnlText }}</span>
-<span style="font-size:13px;font-weight:500;color:#A9AEC4;white-space:nowrap">시작할 때 10,000,000원</span>
-</div>
-<div style="display:flex;gap:10px;margin-top:16px">
-<div style="flex:1;background:#F4F4FA;border-radius:16px;padding:11px 13px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<div style="font-size:12.5px;font-weight:500;color:#8E93A8">쓸 수 있는 돈</div>
-<div style="font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ cashText }}</div>
-</div>
-<div style="flex:1;background:#F4F4FA;border-radius:16px;padding:11px 13px;box-shadow:inset 0 0 0 1px #E4E6F1">
-<div style="font-size:12.5px;font-weight:500;color:#8E93A8">가진 회사</div>
-<div style="font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;margin-top:4px;white-space:nowrap">{{ holdCountText }}</div>
-</div>
-</div>
-<div onClick="{{ goPortfolio }}" style="margin-top:14px;text-align:center;border-radius:16px;padding:14px;font-size:15.5px;font-weight:800;color:#01185A;cursor:pointer;background:#F1F2F8">내 계좌 보기</div>
-</div>
-
-<div style="padding:2px 4px">
-<div style="display:flex;justify-content:space-between;align-items:baseline">
-<span style="font-size:14px;font-weight:600;color:#01185A">시즌 진행</span>
-<span style="font-size:13.5px;font-weight:600;color:#8E93A8;font-variant-numeric:tabular-nums;white-space:nowrap"><b style="color:#F5327F">3주차</b> / 4주</span>
-</div>
-<div style="height:10px;border-radius:999px;background:#E7E8F3;overflow:hidden;margin-top:10px;box-shadow:none"><div style="width:75%;height:100%;border-radius:999px;background:#F5327F"></div></div>
-</div>
-
-<sc-if value="{{ isParentAcct }}" hint-placeholder-val="{{ false }}">
-<div style="background:#FFFFFF;border-radius:26px;padding:17px 19px;box-shadow:0 2px 10px rgba(30,25,60,0.05)">
-<div style="display:flex;align-items:center;gap:13px">
-<div style="flex:1;min-width:0">
-<div style="font-size:15.5px;font-weight:800;color:#01185A">학교 시간엔 매매 쉬기</div>
-<div style="font-size:13px;font-weight:500;color:#8E93A8;margin-top:4px;white-space:nowrap">평일 09:00~16:00 · 김찬영 계정에만</div>
-</div>
-<div onClick="{{ toggleLock }}" style="{{ lockToggleStyle }}"><div style="{{ lockKnobStyle }}"></div></div>
-</div>
-<div style="font-size:13px;font-weight:600;color:#5C6280;background:#F4F4FA;border-radius:14px;padding:11px 13px;margin-top:13px;box-shadow:inset 0 0 0 1px #E4E6F1">{{ schoolStateText }}</div>
-<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;line-height:1.65;margin-top:10px;text-wrap:pretty">구경하고 배우는 건 언제든 할 수 있어요. 주문만 잠깐 쉬어요.</div>
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ toggleMenu }}" style="position:absolute;left:0;top:0;right:0;bottom:0;z-index:1"></div>
+<div style="position:absolute;right:16px;top:104px;z-index:2;width:184px;border-radius:20px;padding:6px;background:#fff;box-shadow:0 18px 34px -12px rgba(35,25,80,0.3),inset 0 0 0 1px rgba(35,25,80,0.06)">
+<div onClick="{{ openNotifications }}" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#01185A;cursor:pointer">알림</div>
+<div onClick="{{ logout }}" style="display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#D5327A;cursor:pointer;border-top:1px solid #F1F1F7">로그아웃</div>
 </div>
 </sc-if>
 
-<div onClick="{{ goExplore }}" style="position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%),radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%),linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)"><span style="text-shadow:0 1px 2px rgba(170,30,95,0.22)">모의투자 하러 가기</span></div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 0;display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ notifyOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ dismissNotify }}" style="text-align:center;border-radius:16px;padding:12px 14px;font-size:13px;font-weight:600;color:#5C6280;background:#F4F4FA;cursor:pointer">새 알림이 없어요</div>
+</sc-if>
 
+<div style="text-align:center;padding:6px 0 2px">
+<div style="display:inline-block;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 6px 12px -8px rgba(35,25,80,0.3)">{{ homeDayCount }}</div>
+<div style="font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:10px">{{ homeItemLine }}</div>
+<div style="font-size:19px;font-weight:800;color:#D5327A;letter-spacing:-0.02em;margin-top:4px">{{ homeRateText }}</div>
+</div>
+
+<div onClick="{{ popGoal }}" style="position:relative;cursor:pointer">
+<img src="{{ goalImg }}" width="228" alt="" style="display:block;width:228px;height:auto;margin:-6px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18))">
+<sc-for list="{{ popItems }}" as="p" hint-placeholder-count="6">
+<img src="{{ goalItemImg }}" alt="" style="{{ p.style }}">
+</sc-for>
+</div>
+
+<div onClick="{{ toggleHoldings }}" style="background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);cursor:pointer;margin-top:auto">
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<span style="font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap">{{ holdingsTitle }}</span>
+<span style="font-size:12.5px;font-weight:700;color:#A9AEC4;white-space:nowrap">{{ holdingsCount }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+<sc-for list="{{ holdingsPreview }}" as="h" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:11px;border-radius:16px;padding:12px 13px;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%)">
+<div style="flex:none;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 4px 8px -5px rgba(35,25,80,0.3)">{{ h.tick }}</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:14.5px;font-weight:700;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
+<div style="font-size:12px;font-weight:500;color:#A9AEC4;margin-top:2px;white-space:nowrap">{{ h.qty }}</div>
+</div>
+<div style="flex:none;text-align:right">
+<div style="font-size:14px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap">{{ h.value }}</div>
+<div style="{{ h.pctStyle }}">{{ h.pct }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
 </div>
 
 <div style="{{ navBarStyle }}">
@@ -80,5 +79,31 @@
 </div>
 </div>
 </div>
+
+<sc-if value="{{ holdingsExpanded }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ toggleHoldings }}" style="position:absolute;inset:0;z-index:7;background:rgba(15,10,40,0.42)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:82%;z-index:8;background:#F5F2F8;border-radius:28px 28px 0 0;display:flex;flex-direction:column;box-shadow:0 -20px 40px -12px rgba(20,10,50,0.35);animation:sheetUp 0.34s cubic-bezier(0.22,1,0.36,1)">
+<div style="flex:none;display:flex;justify-content:center;padding:10px 0 2px"><div style="width:38px;height:5px;border-radius:999px;background:#D9D8E6"></div></div>
+<div style="flex:none;display:flex;align-items:center;gap:10px;padding:10px 18px 8px">
+<div onClick="{{ toggleHoldings }}" style="{{ backBtnStyle }}">‹</div>
+<div style="font-size:16px;font-weight:800;color:#01185A">{{ holdingsTitle }}</div>
+</div>
+<div style="flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 16px 24px;display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ holdingsFull }}" as="h" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:11px;border-radius:16px;padding:14px;background:#fff;box-shadow:0 4px 12px -6px rgba(35,25,80,0.12)">
+<div style="flex:none;width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5B23D6;background:#F4F4FA">{{ h.tick }}</div>
+<div style="flex:1;min-width:0">
+<div style="font-size:15px;font-weight:700;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
+<div style="font-size:12.5px;font-weight:500;color:#A9AEC4;margin-top:2px">{{ h.qty }}</div>
+</div>
+<div style="flex:none;text-align:right">
+<div style="font-size:15px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums">{{ h.value }}</div>
+<div style="{{ h.pctStyle }}">{{ h.pct }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
 </div>
 </sc-if>

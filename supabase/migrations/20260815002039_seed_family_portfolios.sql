@@ -9,8 +9,20 @@
 -- 세 계정분만 지우고 다시 채운다. 평단가는 2026-08-13~14 종가(stock_candles) 부근으로,
 -- 매수 시각은 그보다 앞선 날짜로 흩어 자연스러운 매수 이력을 만든다.
 -- 수량·평단가·매수 사유는 실제 사용자 데이터가 아니라 데모용으로 임의 구성한 값이다.
+--
+-- 이 파일은 라이브에 이미 있는 세 계정의 데이터를 고치는 마이그레이션이다. 계정 자체는
+-- 저장소에 없으므로(README 참고) 새 환경에는 profiles 1·2·3 이 없고, 그대로 두면
+-- `supabase db reset` 이 holdings_user_id_fkey 로 깨진다. 고칠 대상이 없으면 아무것도
+-- 하지 않게 세 계정이 다 있을 때만 실행한다.
 
 begin;
+
+do $$
+begin
+if (select count(*) from public.profiles where id in (1, 2, 3)) < 3 then
+  raise notice '찬영 가족 계정(1,2,3)이 없어 포트폴리오 시드를 건너뛴다.';
+  return;
+end if;
 
 delete from public.trade_likes
   where transaction_id in (select id from public.transactions where user_id in (1, 2, 3));
@@ -50,5 +62,6 @@ insert into public.transactions
 update public.account set balance = 1035000 where user_id = 1;
 update public.account set balance = 3055000 where user_id = 2;
 update public.account set balance = 2086000 where user_id = 3;
+end $$;
 
 commit;

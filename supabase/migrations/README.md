@@ -9,6 +9,7 @@
 | `20260814052538_stock_tab_views_per_stock_category_count.sql` | `stock_tab_views` 를 종목별 카운트로 개편 |
 | `20260814111455_add_profiles_guardian_role.sql` | `profiles.guardian_role`·`updated_at` 추가 |
 | `20260814150827_add_trade_plan_fields.sql` | `transactions` 에 `plan_code`·`plan_target_price`·`memo`·`plan_match`·`plan_changed_reason` 추가, `apply_trade` 인자 확장 (F2 SPEC §7.1) |
+| `20260815002039_seed_family_portfolios.sql` | 찬영 가족 3계정의 보유·매수 이력·잔액을 데모 포트폴리오로 교체. **계정이 없는 새 환경에서는 건너뛴다** |
 
 베이스 파일은 **뒤의 ALTER 2건이 아직 적용되지 않은 모양**이다. 즉 `stock_tab_views` 에는
 `duration_seconds`·`opened_at`·`closed_at` 만 있고 `stock_id`·`created_at` 은 없으며,
@@ -43,21 +44,32 @@ supabase migration list # local·remote 양쪽에 같은 목록이 보이는지 
 적용된 마이그레이션을 다시 올리려다 `already exists` 로 깨진다. 적용 후 `migration list` 로
 확인하고 어긋나면 파일 이름을 기록된 버전으로 고친다.
 
-## 라이브 이력 정리 — 2026-08-14 완료 [사실]
+## 라이브 이력 정리 — 2026-08-15 기준 [사실]
 
-저장소 파일 8개가 모두 라이브 `supabase_migrations.schema_migrations` 의 같은 버전과 1:1 로
+저장소 파일 9개가 모두 라이브 `supabase_migrations.schema_migrations` 의 같은 버전과 1:1 로
 맞는다. `supabase db push` 는 이제 올릴 것이 없다.
 
-정리하면서 한 일은 두 가지다.
+정리하면서 한 일은 다음과 같다.
 
 | 무엇 | 조치 |
 |---|---|
 | `20260813000000_create_app_base.sql` 이 remote 에 없었다 | 이력만 등록했다(`repair --status applied` 와 같은 결과). **SQL 은 실행하지 않았다** — 그 스키마는 이미 라이브에 있다 |
 | `add_profiles_guardian_role` 의 타임스탬프가 저장소 `20260814190000`, remote `20260814111455` 로 달랐다 | 저장소 파일 이름을 remote 기록인 `20260814111455_...` 로 바꿨다 |
+| `add_trade_plan_fields` 가 저장소 `20260814210000`, remote `20260814150827` 로 달랐다 | 저장소 파일 이름을 `20260814150827_...` 로 바꿨다 |
+| `seed_family_portfolios` 가 저장소 `20260815120000`, remote `20260815002039` 로 달랐다 | 저장소 파일 이름을 `20260815002039_...` 로 바꿨다 |
 
-`add_trade_plan_fields` 도 적용 결과 remote 에 `20260814150827` 로 기록돼, 처음 지었던
-`20260814210000` 에서 파일 이름을 바꿨다. **파일 이름의 타임스탬프는 remote 기록과 같아야 한다.**
-다르면 다음 `db push` 가 이미 적용된 마이그레이션을 다시 올리려다 `already exists` 로 깨진다.
+**파일 이름의 타임스탬프는 remote 기록과 같아야 한다.** 다르면 다음 `db push` 가 이미 적용된
+마이그레이션을 다시 올리려다 `already exists` 로 깨진다. 같은 어긋남이 세 번 반복됐다 — 대시보드나
+MCP 로 적용하면 그때의 UTC 시각으로 기록되므로 **적용 직후 `supabase migration list` 로 확인하고
+파일 이름을 맞추는 것**을 절차에 넣는다.
+
+## 새 환경에서 도는지가 판단 기준이다
+
+마이그레이션은 라이브 한 곳이 아니라 **빈 DB 에서도** 순서대로 성공해야 한다. 라이브에만 있는
+데이터(계정 등)를 전제로 쓰면 `supabase db reset` 이 깨진다. 실제로
+`seed_family_portfolios` 가 `profiles` 1·2·3 을 전제해 `holdings_user_id_fkey` 로 실패했고,
+계정이 없으면 통째로 건너뛰도록 고쳤다. 데이터 보정 마이그레이션은 **고칠 대상이 없을 때 조용히
+아무것도 하지 않아야 한다.**
 
 ### 저장소에 파일이 없는 remote 기록 8건은 그대로 둔다
 
@@ -91,7 +103,7 @@ supabase migration list            # local·remote 양쪽에 표시되는지 확
 ## 새 환경 검증
 
 ```bash
-supabase db reset   # 마이그레이션 8건 + seed.sql 이 순서대로 성공해야 한다
+supabase db reset   # 마이그레이션 9건 + seed.sql 이 순서대로 성공해야 한다
 ```
 
 Docker 를 쓸 수 없는 환경이면 빈 PostgreSQL 에 직접 넣어 확인한다. `supabase db reset` 이
