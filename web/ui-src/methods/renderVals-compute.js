@@ -41,8 +41,25 @@
     const dbRole = this.dbUser ? (this.dbUser.parent_child === 'child' ? 'child' : this.dbUser.guardian_role) : null;
     // dbUser 를 아직 못 불러왔을 때는 빈 화면 대신 아이 계정 데모로 보여준다.
     const home = HOME_INFO[dbRole] || HOME_INFO.child;
+    // 로그인 사용자의 실제 Supabase 보유종목이 있으면 그 값을 쓰고, 아직 못 불러왔으면 위 데모로 대신한다.
+    // 평가금액·수익률은 buildArchive() 의 수익률 탭과 같은 계산(현재가·평단가 기준)이다.
+    const holdings = (dbRole && this.dbUser && Array.isArray(this.dbUser.holdings))
+      ? this.dbUser.holdings.filter(h => h.stock_code).map(h => {
+          const x = u.stocks.filter(y => y.code === h.stock_code)[0];
+          const price = x ? x.price : h.avg_price;
+          const pc = h.avg_price > 0 ? (price - h.avg_price) / h.avg_price * 100 : 0;
+          return {
+            tick: (h.stock_name || h.stock_code || '').slice(0, 2),
+            name: h.stock_name || h.stock_code,
+            qty: (h.quantity >= 1 ? (Math.round(h.quantity * 100) / 100) : h.quantity.toFixed(2)) + '주',
+            value: won(h.quantity * price),
+            pct: (pc >= 0 ? '+' : '−') + Math.abs(pc).toFixed(1) + '%',
+            up: pc >= 0
+          };
+        })
+      : home.holdings;
     const goalCount = Math.max(0, Math.floor(home.profit / home.unitPrice));
-    const homeHoldingsTotal = home.holdings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
+    const homeHoldingsTotal = holdings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
     const homeRate = homeHoldingsTotal ? (home.profit / homeHoldingsTotal * 100) : 0;
     const homeHoldingStyle = (h) => Object.assign({}, h, {
       pctStyle: 'font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:' + (h.up ? '#D5327A' : '#2E6BE6')

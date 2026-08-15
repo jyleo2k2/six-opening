@@ -27,8 +27,8 @@
 
       holdingsTitle: '내 보유 종목',
       holdingsCount: '전체보기',
-      holdingsPreview: home.holdings.slice(0, 3).map(homeHoldingStyle),
-      holdingsFull: home.holdings.map(homeHoldingStyle),
+      holdingsPreview: holdings.slice(0, 3).map(homeHoldingStyle),
+      holdingsFull: holdings.map(homeHoldingStyle),
       holdingsExpanded: Boolean(s.holdingsExpanded),
       toggleHoldings: () => this.set({ holdingsExpanded: !s.holdingsExpanded }),
 
