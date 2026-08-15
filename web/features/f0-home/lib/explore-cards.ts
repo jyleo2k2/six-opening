@@ -36,14 +36,28 @@ function isChosungQuery(query: string): boolean {
 }
 
 /**
- * 종목명·별칭(`shared/data/stocks`의 `searchAliases`) 어느 하나에 검색어가 들어 있으면
- * 맞는다 — "YG"로 와이지엔터테인먼트를 찾는 식이다. 자음만 쳤으면 이름을 초성으로 줄여
- * 견준다 — "ㅅㅅㅈㅈ"로 삼성전자를 찾는 식이다.
+ * `query`의 글자가 `text`에 이 순서 그대로 나오면(붙어 있지 않아도 된다) 맞는다.
+ * "SK하이닉스"에서 "하"(3번째) 다음에 "닉"(5번째)이 나오므로 "하닉"이 걸리는 식이다.
+ * 한 글자짜리 검색어는 부분일치와 결과가 같다.
+ */
+function isOrderedSubsequence(query: string, text: string): boolean {
+  let i = 0;
+  for (const char of text) {
+    if (i < query.length && char === query[i]) i += 1;
+  }
+  return i === query.length;
+}
+
+/**
+ * 종목명은 순서만 맞으면 붙어 있지 않아도 찾는다("하닉"→SK하이닉스, "현차"→현대차).
+ * 별칭(`shared/data/stocks`의 `searchAliases`)은 정확한 표기라 부분일치로만 찾는다 —
+ * "YG"로 와이지엔터테인먼트를 찾는 식이다. 자음만 쳤으면 초성으로 줄여 견준다 —
+ * "ㅅㅅㅈㅈ"로 삼성전자를 찾는 식이다.
  */
 function matchesQuery(name: string, code: string, query: string): boolean {
   if (isChosungQuery(query)) return chosungString(name).includes(query);
-  const candidates = [name, ...searchAliasesFor(code)];
-  return candidates.some((candidate) => candidate.toLowerCase().includes(query));
+  if (isOrderedSubsequence(query, name.toLowerCase())) return true;
+  return searchAliasesFor(code).some((alias) => alias.toLowerCase().includes(query));
 }
 
 export type ExploreFilter = string; // 'rank' | 'watch' | 유니버스 섹터 id

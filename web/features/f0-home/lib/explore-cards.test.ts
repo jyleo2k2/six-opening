@@ -38,6 +38,13 @@ assert.deepEqual(exploreList(universe, live, "game", "nc", []).map((s) => s.code
 // 자음만 쳐도(초성) 찾는다 — 삼성전자 = ㅅㅅㅈㅈ.
 assert.deepEqual(exploreList(universe, live, "semi", "ㅅㅅㅈㅈ", []).map((s) => s.code), ["005930"]);
 
+// 붙어 있지 않아도 순서만 맞으면 찾는다 — 엔씨소프트에서 "엔"(1번째)·"프"(4번째)를 그 순서로.
+// 실제 서비스에서는 "SK하이닉스"→"하닉", "현대차"→"현차" 같은 준말이 이 규칙으로 걸린다.
+assert.deepEqual(exploreList(universe, live, "game", "엔프", []).map((s) => s.code), ["036570"]);
+
+// 순서가 뒤집히면 붙어 있어도 찾지 않는다.
+assert.deepEqual(exploreList(universe, live, "game", "프엔", []), []);
+
 // 전체 — 업종끼리 묶여 구분 헤더를 세울 수 있다.
 assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), [
   "259960",
