@@ -4,11 +4,20 @@ import { canTrade, isSchoolTime, schoolOverride, setSchoolOverride } from "./use
 // 이 테스트는 `window` 가 없는 환경에서 돈다. 강제 설정은 모듈 변수에만 남고
 // `localStorage` 는 건드리지 않는다 — 저장은 브라우저에서만 일어난다.
 
-// ── 시계 판정 ───────────────────────────────────────────────────────────
-// 평일 09:00 이상 15:30 미만이 학교 시간이다. 경계는 포함/미포함이 갈린다.
 const wed = (hour: number, minute = 0) => new Date(2026, 7, 12, hour, minute); // 수요일
 const sun = (hour: number) => new Date(2026, 7, 16, hour); // 일요일
 
+// ── 기본값 ──────────────────────────────────────────────────────────────
+// **아무것도 고르지 않으면 `off` 다.** 스쿨락 창(평일 09:00~15:30)이 정규장 창과
+// 정확히 같아서, `auto` 를 기본으로 두면 평일 낮에 자녀 계정이 주문 단계에서 막혀
+// 질문식 매매를 끝까지 진행할 수 없다.
+assert.equal(schoolOverride(), "off", "기본값은 강제 해제다");
+assert.equal(isSchoolTime(wed(10)), false, "기본값에서는 장중에도 안 잠긴다");
+assert.equal(canTrade("child", wed(10)), true);
+
+// ── 시계 판정 (`auto`) ──────────────────────────────────────────────────
+// 평일 09:00 이상 15:30 미만이 학교 시간이다. 경계는 포함/미포함이 갈린다.
+setSchoolOverride("auto");
 assert.equal(isSchoolTime(wed(9)), true, "09:00 은 학교 시간에 든다");
 assert.equal(isSchoolTime(wed(15, 29)), true);
 assert.equal(isSchoolTime(wed(15, 30)), false, "15:30 은 이미 하교 후다");
@@ -20,9 +29,7 @@ assert.equal(canTrade("child", wed(10)), false);
 assert.equal(canTrade("parent", wed(10)), true);
 assert.equal(canTrade("child", wed(20)), true);
 
-// ── 시연용 강제 설정 ────────────────────────────────────────────────────
-assert.equal(schoolOverride(), "auto", "기본값은 시계를 따른다");
-
+// ── 강제 설정 ───────────────────────────────────────────────────────────
 // `on` 이면 시계를 무시하고 잠근다 — 밤에 발표해도 잠금 화면을 보여 줄 수 있다.
 setSchoolOverride("on");
 assert.equal(schoolOverride(), "on");

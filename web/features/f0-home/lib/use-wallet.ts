@@ -106,11 +106,21 @@ export function useWallet() {
 }
 
 /**
- * 시연용 스쿨락 강제. `auto` 면 시계를 보고, `on`·`off` 면 시계를 무시한다.
+ * 스쿨락 강제 설정. `auto` 면 시계를 보고, `on`·`off` 면 시계를 무시한다.
+ *
+ * **기본값이 `off` 다 — 이 프로토타입에서 스쿨락은 꺼진 채로 시작한다.**
+ *
+ * 스쿨락 창(평일 09:00~15:30)이 정규장 창(`isRegularMarketOpen`)과 **정확히 같다.**
+ * 그래서 `auto` 를 기본으로 두면 평일 낮에는 자녀 계정이 주문 단계에서 막혀
+ * 질문식 매매 흐름을 끝까지 진행할 수 없다. 시연·검토가 평일 낮에 이뤄지는 이상
+ * 기본값이 `auto` 인 쪽이 오히려 제품을 못 보여 준다.
+ *
+ * 기능을 지우지는 않는다. 칩으로 `on` 을 누르면 잠금 화면을 그대로 보여 줄 수 있고,
+ * `auto` 로 두면 실제 시계 동작을 확인할 수 있다.
  *
  * 예전에는 `app.html` 오른쪽 패널의 화면 상태(`forceSchool`)였다. 주문 화면까지 React 로
- * 옮기면서 오버레이가 iframe 을 항상 덮게 돼 그 칩을 **누를 수 없게 됐고**, 장중이 아니면
- * 스쿨락을 시연할 방법이 사라졌다. 그래서 판정이 모이는 이 파일로 가져온다.
+ * 옮기면서 오버레이가 iframe 을 항상 덮게 돼 그 칩을 누를 수 없게 됐다. 그래서 판정이
+ * 모이는 이 파일로 가져온다.
  *
  * 화면을 오가도 남아야 하므로 `localStorage` 에 적는다. 주소 파라미터로 두면 `openRoute` 가
  * 경로만 `replaceState` 하므로 화면을 옮기는 순간 사라진다.
@@ -118,27 +128,31 @@ export function useWallet() {
 export type SchoolOverride = "auto" | "on" | "off";
 
 const FORCE_SCHOOL_KEY = "kw_force_school";
+const DEFAULT_OVERRIDE: SchoolOverride = "off";
 
 // `isSchoolTime` 은 렌더 중에 불린다. 매 렌더마다 저장소를 읽지 않도록 모듈에 들고 있는다.
-let override: SchoolOverride = "auto";
+let override: SchoolOverride = DEFAULT_OVERRIDE;
 let overrideLoaded = false;
 
 function readOverride(): SchoolOverride {
   if (overrideLoaded || typeof window === "undefined") return override;
   const saved = window.localStorage.getItem(FORCE_SCHOOL_KEY);
-  if (saved === "on" || saved === "off") override = saved;
+  if (saved === "on" || saved === "off" || saved === "auto") override = saved;
   overrideLoaded = true;
   return override;
 }
 
 export const schoolOverride = () => readOverride();
 
+/**
+ * 세 값을 모두 저장한다. `auto` 를 지우는 방식으로 두면 기본값이 `off` 인 지금은
+ * "자동을 골랐다" 와 "고른 적 없다" 가 구분되지 않아 다음 방문에 `off` 로 되돌아간다.
+ */
 export function setSchoolOverride(next: SchoolOverride) {
   override = next;
   overrideLoaded = true;
   if (typeof window === "undefined") return;
-  if (next === "auto") window.localStorage.removeItem(FORCE_SCHOOL_KEY);
-  else window.localStorage.setItem(FORCE_SCHOOL_KEY, next);
+  window.localStorage.setItem(FORCE_SCHOOL_KEY, next);
 }
 
 /** 자녀는 정규장(평일 09:00~15:30) 동안 매매가 잠긴다. 강제 설정이 있으면 그쪽이 이긴다. */
