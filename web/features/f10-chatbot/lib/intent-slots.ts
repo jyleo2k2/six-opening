@@ -22,7 +22,11 @@ function includesAny(message: string, patterns: readonly string[]) {
   return patterns.some((pattern) => message.includes(pattern));
 }
 
-/** 가족 구성원. 짧은 낱말(`형`·`동생`)은 다른 말에 섞여 오탐하므로 넣지 않는다. */
+/**
+ * 가족 구성원. 짧은 낱말(`형`·`동생`)은 `형태`·`형식` 같은 말에 섞여 오탐하므로
+ * 홑으로 넣지 않고, **소유격이 붙은 꼴만** 함께 둔다 — `우리 형이 뭐 샀는지`가
+ * 가족 데이터 보호를 지나쳐 범위 밖으로 새던 자리다.
+ */
 export const FAMILY_MEMBER_SLOT = [
   "엄마",
   "아빠",
@@ -33,6 +37,10 @@ export const FAMILY_MEMBER_SLOT = [
   "누나",
   "언니",
   "오빠",
+  "우리형",
+  "내형",
+  "우리동생",
+  "내동생",
 ] as const;
 
 /** 본인 아닌 사람. 본인 기록 판정에서 빼는 데 쓴다. */
@@ -125,26 +133,36 @@ export const PRICE_DECISION_SLOT = [
 /** 실제 매매 판단을 요구하는 어간. 아래 어미와 곱해 쓴다. */
 const TRADE_STEMS = ["사", "살", "샀", "팔", "판", "매수", "매도", "담", "넣"] as const;
 
-/** 판단을 요구하는 어미. 어간 바로 뒤에 붙을 때만 인정한다. */
+/**
+ * 판단을 요구하는 어미. 어간 바로 뒤에 붙을 때만 인정한다.
+ *
+ * `됌`은 아이가 자주 내는 종성 오타이고(`머사면됌?`), `거야`는 가정법으로 감싼
+ * 요구(`네가 어른이면 뭐 살 거야?`)가 지나가던 자리다. 어간과 붙어 있을 때만
+ * 보므로 `주식은 어떻게 사는 거야?`(`사`와 `거야` 사이에 `는`이 낀다)는 걸리지 않는다.
+ */
 const DECISION_TAILS = [
   "도돼",
   "도되",
   "도됨",
+  "도됌",
   "도될까",
   "도괜찮",
   "야돼",
   "야되",
   "야됨",
+  "야됌",
   "야될까",
   "야해",
   "야하",
   "야할",
   "면돼",
   "면되",
+  "면됌",
   "면될까",
   "면안",
   "까",
   "래",
+  "거야",
 ] as const;
 
 /**
@@ -154,6 +172,63 @@ const DECISION_TAILS = [
 export const TRADE_DECISION_PATTERNS: readonly string[] = TRADE_STEMS.flatMap((stem) =>
   DECISION_TAILS.map((tail) => `${stem}${tail}`),
 );
+
+/**
+ * 추천 요구의 표기 변형. 낱말 목록은 **바르게 쓴 한 가지 표기**만 알아본다.
+ * 아이는 오타를 내고(`츄천`), 영어를 섞고(`recommend`·`buy`), 은어를 쓴다(`가즈아`).
+ * 실측에서 `삼성전자 츄천해줘`·`삼성전자 buy 해도 돼?`는 거절이 아니라 **회사 소개**로
+ * 답했다 — 차단 낱말을 못 알아본 자리를 종목 사실 경로가 채웠기 때문이다.
+ */
+const RECOMMEND_VARIANT_SLOT = [
+  "츄천",
+  "추쳔",
+  "추전해",
+  "recommend",
+  "buy",
+  "가즈아",
+  "가즈앙",
+] as const;
+
+/** 살 것을 가리키는 말. 아래 고르기 요구와 곱한다. */
+const BUY_TARGET_SLOT = ["살거", "살것", "살종목", "살주식", "사야할"] as const;
+
+/** 대신 골라 달라는 요구. */
+const PICK_REQUEST_SLOT = ["알려", "골라", "정해", "말해", "추천", "찍어", "가르쳐"] as const;
+
+/**
+ * 우열을 정해 달라는 말. `제일좋은종목` 처럼 통째로 적은 목록은 `둘 중에 뭐가 더
+ * 조아?` 를 놓쳤다. 좋다는 뜻의 낱말에 `더`·`어느`가 붙은 꼴만 본다 — `무슨 좋은
+ * 제품 만들어?` 같은 회사 사실 질문을 삼키지 않기 위해서다.
+ */
+const SUPERIORITY_SLOT = [
+  "더좋",
+  "더조아",
+  "더조은",
+  "더나은",
+  "더나아",
+  "어느게좋",
+  "어느쪽이좋",
+  "어느게나",
+] as const;
+
+/**
+ * 표기를 바꾼 추천 요구(SPEC §6.1.5). 뜻을 묻는 질문은 승인 용어 설명이므로 뺀다 —
+ * `buy가 무슨 뜻이야?` 까지 막으면 과차단이다.
+ */
+export function asksRecommendationVariant(message: string): boolean {
+  if (includesAny(message, DEFINITION_MARKERS)) return false;
+  return includesAny(message, RECOMMEND_VARIANT_SLOT);
+}
+
+/** 살 것을 대신 골라 달라는 요구. `살 거 알려주는 거야` 처럼 역할극에 감싸도 같다. */
+export function asksBuyTargetSelection(message: string): boolean {
+  return includesAny(message, BUY_TARGET_SLOT) && includesAny(message, PICK_REQUEST_SLOT);
+}
+
+/** 둘을 견주어 우열을 정해 달라는 요구. */
+export function asksSuperiorityComparison(message: string): boolean {
+  return includesAny(message, SUPERIORITY_SLOT);
+}
 
 /** 최상급·인기 표현. 그 자체로는 투자 질문이 아니다. */
 const POPULARITY_SLOT = ["제일", "가장", "많이", "인기", "다들", "남들", "애들"] as const;
@@ -408,6 +483,11 @@ export function targetsInvestmentDecision(message: string): boolean {
     includesAny(message, INVESTMENT_TARGET_SLOT) ||
     asksTradeDecision(message) ||
     asksPopularityFollowing(message) ||
-    asksTargetPriceDecision(message)
+    asksTargetPriceDecision(message) ||
+    // `살 거 알려줘` 는 대상이 분명한 매수 판단 요구다. 역할극(`우리 게임하자…`)에
+    // 감싸면 `게임` 한 낱말 때문에 콘텐츠 거절로 새던 자리다.
+    asksBuyTargetSelection(message)
   );
+  // 표기 변형(`recommend`·`가즈아`)은 여기 넣지 않는다. `노래 추천해 줘` 처럼
+  // 대상이 비금융이면 SPEC §6.1.4 대로 범위 밖 안내가 맞다.
 }

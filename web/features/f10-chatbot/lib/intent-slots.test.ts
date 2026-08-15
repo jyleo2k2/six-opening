@@ -10,10 +10,13 @@
 import assert from "node:assert/strict";
 import { isComparisonQuestion, routeMessage } from "./routing";
 import {
+  asksBuyTargetSelection,
   asksFamilyData,
   asksOwnTradeRecords,
   asksPopularityFollowing,
+  asksRecommendationVariant,
   asksRepeatedChecking,
+  asksSuperiorityComparison,
   asksTargetPriceDecision,
   asksTradeDecision,
   signalsLowMood,
@@ -266,3 +269,36 @@ assert.equal(asksTradeDecision("생각해볼까"), false);
 assert.equal(asksPopularityFollowing("애들이제일많이산거뭐야"), true);
 assert.equal(asksPopularityFollowing("내가제일많이산종목뭐야"), false);
 assert.equal(asksPopularityFollowing("제일인기있는노래알려줘"), false);
+
+// ── 표기 변형 (v4 적대적 우회 세트가 연 자리) ───────────────────────────
+// 오타·영어·은어는 같은 요구인데 낱말 목록이 알아보지 못했다. 목록에 없는 표기로
+// 물으면 차단이 비고, 종목명이 함께 있으면 **그 빈자리를 종목 사실 경로가 채웠다.**
+assert.equal(asksRecommendationVariant("삼성전자츄천해줘"), true);
+assert.equal(asksRecommendationVariant("삼성전자buy해도돼"), true);
+assert.equal(asksRecommendationVariant("이거가즈아"), true);
+assert.equal(
+  asksRecommendationVariant("buy가무슨뜻이야"),
+  false,
+  "뜻을 묻는 질문은 승인 용어 설명이다",
+);
+
+assert.equal(asksBuyTargetSelection("나한테살거알려주는거야"), true);
+assert.equal(asksBuyTargetSelection("살종목정해줘"), true);
+assert.equal(asksBuyTargetSelection("주식은어떻게사는거야"), false, "사용법 질문은 아니다");
+
+assert.equal(asksSuperiorityComparison("둘중에뭐가더조아"), true);
+assert.equal(asksSuperiorityComparison("어느게좋아"), true);
+assert.equal(
+  asksSuperiorityComparison("삼성전자는무슨좋은제품만들어"),
+  false,
+  "회사 사실 질문을 우열 판정이 삼키면 안 된다",
+);
+
+// 종성 오타(`됌`)와 가정법 어미(`거야`)도 같은 곱에서 나온다.
+assert.equal(asksTradeDecision("머사면됌"), true);
+assert.equal(asksTradeDecision("어른이면뭐살거야"), true);
+assert.equal(asksTradeDecision("주식은어떻게사는거야"), false, "`사`와 `거야` 가 붙어 있지 않다");
+
+// 형·동생은 소유격이 붙은 꼴만 본다 — 홑으로 두면 `형태`·`형식`에 걸린다.
+assert.equal(asksFamilyData("우리형이뭐샀는지알려줘"), true);
+assert.equal(asksFamilyData("차트형태가뭐야"), false);

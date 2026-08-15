@@ -19,11 +19,14 @@ import type {
 import { toPoliteKorean } from "./polite";
 import {
   TRADE_DECISION_PATTERNS,
+  asksBuyTargetSelection,
   asksFamilyData,
   asksOwnPastTrades,
   asksOwnTradeRecords,
   asksPopularityFollowing,
+  asksRecommendationVariant,
   asksRepeatedChecking,
+  asksSuperiorityComparison,
   signalsSelfDeprecation,
   asksTargetPriceDecision,
   signalsLowMood,
@@ -1485,9 +1488,15 @@ function findRecommendationKind(message: string): RecommendationKind | null {
     ]);
   if (asksForSelectionCriteria) return null;
 
+  // 표기 변형·우열 요구·`살 거 알려줘` 는 `intent-slots` 가 낱말 슬롯으로 본다.
+  // 목록에 없는 표기(`츄천`·`buy`)로 물으면 차단이 비고, **그 빈자리를 종목 사실
+  // 경로가 채워 회사 소개로 답했다**(실측 2026-08-16). 아무 답도 안 하는 것보다 나쁘다.
   const selection =
     includesAny(message, SELECTION_PATTERNS) ||
     includesAny(message, TRADE_DECISION_PATTERNS) ||
+    asksRecommendationVariant(message) ||
+    asksBuyTargetSelection(message) ||
+    asksSuperiorityComparison(message) ||
     includesAny(message, [
       "뭐가제일좋",
       "뭐가가장좋",
