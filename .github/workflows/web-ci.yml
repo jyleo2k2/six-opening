@@ -1,0 +1,35 @@
+name: web-ci
+
+# web 의 테스트와 빌드를 PR 마다 돌린다. 지금까지 CI 는 세션 정책만 검사해서
+# 코드가 빌드되는지조차 확인하지 않았다.
+#
+# app.html 은 생성물이라 저장소에 없다. `pretest`·`prebuild` 가 ui-src 에서 먼저 조립하므로
+# 별도 단계를 두지 않는다 — 조립이 깨지면 그 자리에서 실패한다.
+# 비밀키 없이 통과해야 한다. 빌드가 환경변수를 요구하기 시작하면 CI 가 먼저 잡는다.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Test
+        run: npm test
+      - name: Build
+        run: npm run build
