@@ -12,6 +12,7 @@ import type {
   ProfileSell,
   ProfileTabView,
 } from "../../../../shared/types/behavior-profile";
+import { computePortfolioReturn } from "../../../../shared/engine/portfolio-return";
 import { selectFilledTrades, selectRows, sessionUserId } from "../../supabase";
 import { chartRetentionCutoff, readStoredCandles } from "../../quote/stock-candles";
 
@@ -196,6 +197,7 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
     if (last) priceBySymbol[symbol] = last.close;
   }
 
+  const cash = accounts[0] ? asNumber(accounts[0].balance) : SEED_BALANCE;
   const snapshot = computeBehaviorProfile({
     userId: String(userId),
     periodEnd: kstDateOf(deps.now().toISOString()),
@@ -203,13 +205,16 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
     sells,
     tabViews: synthesizeTabViews(buys, rowsBySymbol),
     holdings,
-    cash: accounts[0] ? asNumber(accounts[0].balance) : SEED_BALANCE,
+    cash,
     priceBySymbol,
     sectorBySymbol,
     dailyClosesBySymbol,
   });
 
   return {
+    // 가족 달리기 트랙(F9 수익률 탭)이 쓰는 평가값. `/api/family` 는 이 중 비율만
+    // 타인에게 넘기고 금액은 본인에게만 준다 — 자산 규모 마스킹 규칙 그대로다.
+    valuation: computePortfolioReturn(holdings, priceBySymbol, cash),
     // 화면은 `card`(0~10, 신버전 그대로)를 읽는다. 호환용 0~100 배열은 없앴다.
     weeks: snapshot.weeks.map((week) => ({
       weekStart: week.weekStart,

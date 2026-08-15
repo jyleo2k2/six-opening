@@ -58,12 +58,22 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
       user_id: `in.(${memberIds.join(",")})`,
       order: "created_at.desc",
     }),
-    Promise.all(members.map(async (member) => ({
-      userId: member.id,
-      behavior: (await deps.buildProfile(member.id)).cumulative,
-    }))),
+    Promise.all(members.map(async (member) => {
+      const profile = await deps.buildProfile(member.id);
+      return {
+        userId: member.id,
+        behavior: profile.cumulative,
+        // 비율만 꺼낸다. 평가금액·원금·현금은 자산 규모라 여기서 버린다 (§ members 아래 주석).
+        // 원금이 0이면 잰 것이 없다는 뜻이라 0% 가 아니라 null 이다 — 화면은 이걸 "아직" 으로
+        // 그린다. 0% 로 내려보내면 본전인 사람과 아직 안 산 사람이 같아 보인다.
+        returnRate: profile.valuation && profile.valuation.cost > 0
+          ? profile.valuation.returnRate
+          : null,
+      };
+    })),
   ]);
   const behaviorByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.behavior]));
+  const returnRateByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.returnRate]));
   const memberById = new Map(members.map((member) => [member.id, member]));
 
   return {
@@ -72,11 +82,15 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
       name: viewer.name,
       role: viewer.parent_child === "parent" ? "parent" as const : "child" as const,
     },
+    // 수익률(%)은 타인 것도 내려보낸다 — 가족 달리기 트랙이 구성원을 나란히 세우는 화면이라
+    // 없으면 기능 자체가 성립하지 않는다. 자산 규모를 드러내는 평가금액·원금·현금은 계속
+    // 가리므로, 아래 `trades` 의 price·quantity 마스킹과 어긋나지 않는다.
     members: members.map((member) => ({
       id: member.id,
       name: member.name,
       role: member.parent_child === "parent" ? "parent" as const : "child" as const,
       behavior: behaviorByUser.get(member.id),
+      returnRate: returnRateByUser.get(member.id) ?? null,
     })),
     trades: transactions.flatMap((row) => {
       const member = memberById.get(row.user_id);
