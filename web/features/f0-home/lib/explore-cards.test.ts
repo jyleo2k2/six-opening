@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   buildExploreCard,
   cardDots,
@@ -140,6 +141,72 @@ const above = buildExploreCard(rank, 0, universe, 1, false);
 assert.match(above.slideStyle, /rotateX\(11\.00deg\)/u);
 assert.match(above.slideStyle, /transform-origin:50% 100%/u);
 assert.match(above.slideStyle, /opacity:0\.82/u);
+
+// ── 디자인 원본 대조 ────────────────────────────────────────────────────
+// 이 연출은 claude.ai/design 프로토타입에서 **손으로** 옮겨 온 것이다. 옮기다 빠뜨려도
+// 알려 주는 것이 없어서, `transform` 한 덩어리가 통째로 빠진 채 병합돼 카드가 흐려지기만
+// 한 적이 있다(PR #283 이 되돌렸다). 위 단언들은 숫자를 여기 또 적어 둔 것이라 원본이
+// 바뀌면 같이 틀려진다 — 그래서 원본 파일에서 계수를 직접 읽어 같은 식을 세우고 코드가
+// 만든 문자열과 **글자 하나까지** 맞춘다.
+//
+// 이 검사가 깨지는 경우는 둘이다.
+//   - 디자인을 다시 반입해 값이 바뀌었다 → `STACK` 상수를 원본에 맞춘다
+//   - 원본 코드의 생김새가 바뀌어 정규식이 못 읽는다 → `grab` 이 그렇게 말해 준다
+const prototype = readFileSync(
+  new URL("../../../design-system/prototype/모의투자-화면-프로토타입.html", import.meta.url),
+  "utf8",
+);
+
+function grab(re: RegExp, what: string) {
+  const match = prototype.match(re);
+  assert.ok(
+    match,
+    `프로토타입에서 ${what} 를 찾지 못했다 — 원본 형태가 바뀌었으면 이 정규식부터 맞춘다`,
+  );
+  return match;
+}
+
+const clamp = grab(/const d = Math\.max\(-(\d+), Math\.min\((\d+), ci - s\.cardIndex\)\);/u, "스택 clamp");
+assert.equal(clamp[1], clamp[2], "원본 clamp 의 위아래 한계가 다르다");
+const reach = Number(clamp[1]);
+const knobs = grab(
+  /transform:perspective\((\d+)px\) rotateX\(' \+ \(-d \* ([\d.]+) \* depth\)\.toFixed\(2\) \+ 'deg\) translateZ\(' \+ \(-a \* ([\d.]+) \* depth\)\.toFixed\(1\) \+ 'px\) scale\(' \+ \(1 - a \* ([\d.]+) \* depth\)\.toFixed\(3\)/u,
+  "perspective·기울기·깊이·크기",
+);
+const origin = grab(
+  /transform-origin:50% ' \+ \(d > 0 \? '(\d+%)' : d < 0 \? '(\d+%)' : '(\d+%)'\)/u,
+  "회전축",
+);
+const fade = grab(/opacity:' \+ \(a === 0 \? ([\d.]+) : a === 1 \? ([\d.]+) : ([\d.]+)\)/u, "투명도 3단");
+const base = grab(/return '(position:relative;isolation:isolate;[^']*)'/u, "슬라이드 기본 스타일");
+const pad = grab(/\+ 'padding-top:' \+ \(isAll \? '(\d+px)' : '(\d+)'\) \+ ';'/u, "구분 헤더 여백");
+const motion = grab(
+  /transition:(transform \d+ms cubic-bezier\([^)]+\),opacity \d+ms ease)'/u,
+  "전환",
+);
+
+/** 원본 식 그대로. `depth` 는 앱에 없는 Tweaks 노브라 기본값 1 이다. */
+function designSlideStyle(offset: number) {
+  const d = Math.max(-reach, Math.min(reach, offset));
+  const a = Math.abs(d);
+  return (
+    base[1] +
+    "padding-top:" + pad[2] +
+    ";transform:perspective(" + knobs[1] + "px) rotateX(" + (-d * Number(knobs[2])).toFixed(2) +
+    "deg) translateZ(" + (-a * Number(knobs[3])).toFixed(1) +
+    "px) scale(" + (1 - a * Number(knobs[4])).toFixed(3) + ")" +
+    ";transform-origin:50% " + (d > 0 ? origin[1] : d < 0 ? origin[2] : origin[3]) +
+    ";opacity:" + (a === 0 ? fade[1] : a === 1 ? fade[2] : fade[3]) +
+    ";transition:" + motion[1]
+  );
+}
+
+// clamp 밖(±5)까지 넣어 양끝이 원본과 같은 자리에서 멎는지 함께 본다.
+for (const offset of [-5, -3, -2, -1, 0, 1, 2, 3, 5]) {
+  // `signed = index - activeIndex` 이므로 activeIndex 를 밀어 원하는 칸수를 만든다.
+  const card = buildExploreCard(rank, 1, universe, 1 - offset, false);
+  assert.equal(card.slideStyle, designSlideStyle(offset), `스택 연출이 원본과 다르다 (${offset}칸)`);
+}
 
 // `showGroups` 를 켠 목록에서만 업종이 바뀌는 첫 카드에 구분 헤더를 세우고, 맨 첫 카드는
 // 위에 아무것도 없으니 선을 생략한다. 켤지 말지는 화면이 정렬을 보고 정한다.
