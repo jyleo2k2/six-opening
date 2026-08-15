@@ -89,6 +89,8 @@
     const planMatch = this.judgePlanMatch(buyRec, price);
     const isFirstSell = buyRec ? !(s.sellRecords || []).some(r => r.linked_buy_order_id === buyRec.order_id) : true;
     const showJudge = isFirstSell && planMatch !== null;
+    // 완료 화면(3단계)에서도 배지를 다시 보여준다 — 2단계에서만 보이면 빨리 넘긴 사람은 놓친다.
+    const hasBadge = showJudge && planMatch === true;
     // 매도도 매수와 같은 방식으로 넣는다 — 금액 또는 주 수, 시장가 또는 지정가
     const sellLimPct = s.sellDraft.limitPct === null || s.sellDraft.limitPct === undefined ? 0 : s.sellDraft.limitPct;
     const sellLimPrice = Math.round(price * (1 + sellLimPct / 100));
@@ -96,6 +98,22 @@
     const sellByQty = s.sellDraft.sellBy !== 'amount';
     const sellReservedQty = reservedSellQty(m.pending || [], st ? st.code : '');
     const sellMaxQty = Math.max(0, heldQty - sellReservedQty);
+    // 매수 화면의 "판매" 탭 — 지금 보는 종목을 그대로 매도 1단계로 넘긴다.
+    // `holdingCards[].sell` 과 같은 섞기·초기화지만 대상이 보유 목록의 행이 아니라 `st` 하나다.
+    const goToSell = () => {
+      if (locked || !st || sellMaxQty < 0.01) return;
+      const order = [0, 1, 2, 3, 4];
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = order[i]; order[i] = order[j]; order[j] = t;
+      }
+      this.retroMs = 0; this.retroAt = null;
+      this.set({
+        screen: 'sell', sellStep: 1, sellReasonOrder: order.concat([5]),
+        showSellPad: false, sellQtyStr: '', sellPick: 'all',
+        sellDraft: { qty: sellMaxQty, reason: null, change: null, memo: '', memoSaved: false },
+      });
+    };
     const sellWant = sellByQty
       ? (s.sellDraft.qty || 0)
       : (sellExecPrice > 0 ? (s.sellDraft.amountInput || 0) / sellExecPrice : 0);
@@ -136,4 +154,29 @@
         this.setDraft({ amount: Math.min(availableCash, parseInt(v || '0', 10) || 0), amountSource:'custom' });
       }
     }));
+
+    // ── 매수·매도 공용 주문 시트 — 구매·판매 탭과 대기 목록 한 곳에서 본다 ─────
+    // 대기 목록(pendingCards)·취소(cancelPendingOrder·markOrderCancelled)는 이미 있던
+    // 계산이다(renderVals-return-6-sell.js) — 화면에는 아직 안 이어져 있었을 뿐이다.
+    const sheetTab = on => 'flex:1;display:flex;align-items:center;justify-content:center;height:38px;border-radius:999px;font-size:14px;font-weight:' + (on ? '800' : '600')
+      + ';cursor:pointer;color:' + (on ? '#D5327A' : '#8E93A8') + ';background:' + (on ? '#FFFFFF' : 'transparent')
+      + (on ? ';box-shadow:0 2px 6px -2px rgba(35,25,80,0.22)' : '');
+    // 1단계에서만 탭을 보여 준다 — 이후 단계에서는 흐름을 방해한다
+    const buyTabRowStyle = s.buyStep === 1 ? 'flex:none;display:flex;gap:4px;background:#EFEEF6;border-radius:999px;padding:4px' : 'display:none';
+    const sellTabRowStyle = s.sellStep === 1 ? 'flex:none;display:flex;gap:4px;background:#EFEEF6;border-radius:999px;padding:4px' : 'display:none';
+    const flowTabBuyStyle = sheetTab(s.screen === 'buy');
+    const flowTabSellStyle = sheetTab(s.screen === 'sell');
+    const flowTabWaitStyle = sheetTab(false);
+    const pickTabBuy = () => { if (locked || !st) return; this.set({ screen:'buy', buyStep:1, draft:this.blankDraft(), showPad:false, orderSheet:false }); };
+    const pickTabSell = () => goToSell();
+    const orderSheetOpen = !!s.orderSheet;
+    const openWaitSheet = () => this.setState({ orderSheet:true });
+    const closeOrderSheet = () => this.setState({ orderSheet:false });
+    const sheetScrimStyle = 'position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(18,14,40,0.34);z-index:40';
+    const sheetStyle = 'position:absolute;left:0;right:0;bottom:0;z-index:41;max-height:70%;overflow-y:auto;background:#FFFFFF;border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -14px 34px -12px rgba(20,16,50,0.28)';
+    const sheetGrabStyle = 'width:42px;height:4px;border-radius:999px;background:#E1E0EC;margin:0 auto 14px';
+    const noPending = (m.pending || []).length === 0;
+    const sheetEmptyStyle = noPending
+      ? 'font-size:14px;font-weight:500;color:#8E93A8;line-height:1.6;padding:10px 2px 6px'
+      : 'display:none';
 

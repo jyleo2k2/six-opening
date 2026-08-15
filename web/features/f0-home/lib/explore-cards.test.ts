@@ -32,19 +32,33 @@ assert.deepEqual(exploreList(universe, live, "watch", "", ["036570"]).map((s) =>
 // 검색이 섹터·관심 선택보다 앞선다.
 assert.deepEqual(exploreList(universe, live, "game", "삼성", ["036570"]).map((s) => s.code), ["005930"]);
 
+// 전체 — 정렬하지 않은 원래 순서.
+assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), [
+  "259960",
+  "005930",
+  "036570",
+]);
+
 // 제목.
+assert.equal(exploreTitle(universe, "all", "", 3), "");
 assert.equal(exploreTitle(universe, "rank", "", 3), "");
 assert.equal(exploreTitle(universe, "watch", "", 1), "관심 기업 1곳");
 assert.equal(exploreTitle(universe, "game", "", 2), "게임 회사 2곳");
-assert.equal(exploreTitle(universe, "game", "삼성", 1), '"삼성" 검색 결과 1곳');
+assert.equal(exploreTitle(universe, "game", "삼성", 1), '"삼성" 검색 결과');
+// 칩을 펼친 동안은 무슨 필터든 제목을 비운다 — 칩 줄이 이미 말해준다.
+assert.equal(exploreTitle(universe, "game", "", 2, true), "");
 
 // 빈 상태 문구는 검색과 관심이 다르다.
-assert.equal(emptyState("삼성").title, "찾는 회사가 없어");
-assert.equal(emptyState("").title, "아직 관심 기업이 없어");
+assert.equal(emptyState("삼성").title, "찾는 회사가 없어요");
+assert.equal(emptyState("").title, "아직 관심 기업이 없어요");
 
 // 도트는 9개 창으로 자르고 현재 위치가 창 안에 있다.
 assert.equal(cardDots(5, 0).length, 5);
 assert.equal(cardDots(51, 25).length, 9);
+
+// 세로 레일에서는 폭↔높이가 바뀐다 — 켜진 도트는 세로로 길다.
+assert.match(cardDots(5, 0, "y")[0], /width:6px;height:18px/u);
+assert.match(cardDots(5, 0)[0], /width:18px;height:6px/u);
 
 // 카드 — 상승은 빨강, 로고 없으면 섹터 이모지, 가격 자릿수에 따라 글자 크기가 준다.
 const up = buildExploreCard(rank[0], universe, true);

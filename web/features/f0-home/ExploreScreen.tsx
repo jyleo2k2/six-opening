@@ -19,11 +19,8 @@ import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
 
 const PAGE = styleFromCss(
-  // `renderVals-return-2-explore.js` 의 exploreBgStyle 과 같은 값 — 페이지 전체가 하나의 밝은 배경.
-  "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;" +
-    "background:radial-gradient(circle at 18% 7%,rgba(225,219,255,0.34) 0%,rgba(225,219,255,0) 32%)," +
-    "radial-gradient(circle at 88% 92%,rgba(255,226,239,0.25) 0%,rgba(255,226,239,0) 30%)," +
-    "linear-gradient(180deg,#FAF9FD 0%,#F5F3FB 52%,#FAF8FC 100%)",
+  // 프로토타입 exploreBgStyle 과 같은 값 — 홈과 같은 연회보라 한 색. 카드 영역과 경계를 만들지 않는다.
+  "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;background:#F4F0FF",
 );
 const HEADER = styleFromCss("flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px");
 const BACK = styleFromCss(
@@ -33,32 +30,41 @@ const BACK = styleFromCss(
 const TITLE = styleFromCss(
   "flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em",
 );
-const SEARCH_ROW = styleFromCss("flex:none;padding:0 16px 10px;display:flex;align-items:center;gap:8px");
+const SEARCH_BTN = styleFromCss(
+  "flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent",
+);
+const SEARCH_ROW = styleFromCss("flex:none;padding:0 16px 12px");
+const SEARCH_INPUT_WRAP = styleFromCss(
+  "display:flex;align-items:center;gap:9px;background:#EDECF3;border-radius:999px;padding:13px 18px",
+);
 const SEARCH_INPUT = styleFromCss(
-  "flex:1;min-width:0;box-sizing:border-box;border:0;outline:none;background:#FFFFFF;border-radius:14px;padding:12px 14px;" +
-    "font-family:'Pretendard',sans-serif;font-size:14.5px;font-weight:600;color:#01185A;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
+  "flex:1;min-width:0;box-sizing:border-box;border:0;outline:none;background:transparent;" +
+    "font-family:'Pretendard',sans-serif;font-size:14.5px;font-weight:600;color:#01185A",
 );
-const SEARCH_CLEAR = styleFromCss(
-  "flex:none;font-size:13px;font-weight:700;color:#8E93A8;padding:11px 13px;border-radius:14px;cursor:pointer;" +
-    "background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
-);
-const TITLE_ROW = styleFromCss(
-  "flex:none;display:flex;align-items:baseline;justify-content:space-between;padding:0 20px 8px",
-);
+const CHIPS_ROW = styleFromCss("flex:none;display:flex;align-items:flex-start;gap:4px;padding:2px 0 12px");
+const CHIPS_TOGGLE = (open: boolean) =>
+  styleFromCss(
+    "flex:none;width:36px;height:40px;margin-right:8px;display:flex;align-items:center;justify-content:center;" +
+      `cursor:pointer;transition:transform 0.2s ease;transform:rotate(${open ? "180deg" : "0deg"})`,
+  );
+const TITLE_ROW = styleFromCss("flex:none;width:310px;margin:0 auto;padding:8px 0 2px");
 const STAGE = styleFromCss(
   "position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:transparent",
 );
+// 카드가 위아래로 넘어가는 세로 레일. `scroll-snap-stop:always` 를 카드 쪽에서 이미 준다.
 const RAIL = styleFromCss(
-  "position:relative;flex:1;overflow-x:auto;overflow-y:hidden;display:flex;align-items:center;gap:33px;padding:2px 46px 6px;" +
-    "scroll-snap-type:x mandatory;cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none",
+  "position:relative;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overflow-anchor:none;display:flex;" +
+    "flex-direction:column;align-items:center;gap:26px;padding:16px 0 20px;scroll-snap-type:y mandatory;" +
+    "cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none",
 );
-const DOTS_ROW = styleFromCss(
-  "position:relative;flex:none;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 0 14px",
+const DOTS_COL = styleFromCss(
+  "position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;" +
+    "align-items:center;gap:5px;pointer-events:none",
 );
 
 /** 라우트의 섹터 구간이 아는 값이 아니면 기본(오늘 많이 오른 순)으로 되돌린다. */
 const knownFilter = (sector: string | undefined, sectorIds: string[]) =>
-  sector && (sector === "watch" || sectorIds.includes(sector)) ? sector : "rank";
+  sector && (sector === "all" || sector === "watch" || sectorIds.includes(sector)) ? sector : "rank";
 
 /**
  * 종목 탐색 화면. `ui-src/screens/explore.html` 을 그대로 옮겨 왔다.
@@ -81,15 +87,18 @@ export function ExploreScreen({
   const { universe, quotes, sparks } = useUniverseLive();
   const [query, setQuery] = useState("");
   const [cardIndex, setCardIndex] = useState(0);
-  // 카드가 켜졌는지는 아래 `onRailScroll` 이 정한다 — 여기서는 끄는 손만 받는다.
-  const rail = useRailDrag();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [chipsOpen, setChipsOpen] = useState(false);
+  // 카드가 켜졌는지는 아래 `onRailScroll` 이 정한다 — 여기서는 끄는 손만 받는다. 카드가
+  // 위아래로 넘어가는 세로 레일이라 축은 'y'.
+  const rail = useRailDrag(undefined, undefined, "y");
 
   const filter = knownFilter(sector, universe?.sectors.map((entry) => entry.id) ?? []);
 
   // 필터·검색이 바뀌면 처음 카드부터 다시 본다 — `componentDidUpdate` 의 scrollLeft 리셋과 같다.
   useEffect(() => {
     setCardIndex(0);
-    if (rail.ref.current) rail.ref.current.scrollLeft = 0;
+    if (rail.ref.current) rail.ref.current.scrollTop = 0;
   }, [filter, query]);
 
   // 챗봇 맥락. `app.html` 의 notifyChatContext 는 탐색을 'home' 으로 묶어 지갑 값만 실었다.
@@ -116,24 +125,31 @@ export function ExploreScreen({
 
   const list = exploreList(universe, { quotes, sparks }, filter, query, wallet.watchlist);
   const chips = sectorChips(universe, filter);
-  const title = exploreTitle(universe, filter, query, list.length);
+  const title = exploreTitle(universe, filter, query, list.length, chipsOpen);
   const empty = emptyState(query);
   const activeIndex = Math.min(cardIndex, Math.max(0, list.length - 1));
 
-  const pickChip = (id: string) => onLeave(id === "rank" ? "/explore" : `/explore/${id}`);
+  const pickChip = (id: string) => {
+    setChipsOpen(false);
+    onLeave(id === "rank" ? "/explore" : `/explore/${id}`);
+  };
+  const toggleSearch = () => {
+    setSearchOpen((open) => !open);
+    if (searchOpen) setQuery("");
+  };
 
-  // 카드 간격은 슬라이드 폭 + gap 이다. 상수로 두면 gap 을 바꿀 때 어긋나므로
-  // 앞 두 슬라이드의 실제 거리를 잰다. (`cardsScroll` 그대로)
+  // 카드 간격은 슬라이드 높이 + gap 이다. 상수로 두면 gap 을 바꿀 때 어긋나므로
+  // 앞 두 슬라이드의 실제 거리를 잰다. 세로 레일이라 top 을 잰다. (`cardsScroll` 그대로)
   const onRailScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const el = event.currentTarget;
     const first = el.firstElementChild as HTMLElement | null;
     const second = first?.nextElementSibling as HTMLElement | null;
     const step = first
       ? second
-        ? second.getBoundingClientRect().left - first.getBoundingClientRect().left
-        : first.getBoundingClientRect().width
+        ? second.getBoundingClientRect().top - first.getBoundingClientRect().top
+        : first.getBoundingClientRect().height
       : 280;
-    const index = Math.max(0, Math.min(list.length - 1, Math.round(el.scrollLeft / step)));
+    const index = Math.max(0, Math.min(list.length - 1, Math.round(el.scrollTop / step)));
     if (index !== cardIndex) setCardIndex(index);
   };
 
@@ -144,42 +160,74 @@ export function ExploreScreen({
           <div onClick={() => onLeave("/")} style={BACK}>
             ‹
           </div>
-          <div style={TITLE}>어떤 회사를 살까?</div>
-          <div style={{ width: 38 }} />
-        </div>
-
-        <div style={SEARCH_ROW}>
-          <input
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="회사 이름으로 찾기"
-            style={SEARCH_INPUT}
-            value={query}
-          />
-          {query.trim() !== "" && (
-            <div onClick={() => setQuery("")} style={SEARCH_CLEAR}>
-              지우기
-            </div>
-          )}
-        </div>
-
-        <div style={styleFromCss("flex:none;overflow-x:auto;padding:2px 0 12px")}>
-          <div style={styleFromCss("display:flex;gap:8px;padding:0 16px;width:max-content")}>
-            {chips.map((chip) => (
-              <div key={chip.id} onClick={() => pickChip(chip.id)} style={styleFromCss(chip.style)}>
-                <span>{chip.name}</span>
-              </div>
-            ))}
+          <div style={TITLE}>어떤 회사를 살까요?</div>
+          <div onClick={toggleSearch} style={SEARCH_BTN}>
+            <svg fill="none" height="21" viewBox="0 0 21 21" width="21">
+              <circle cx="9" cy="9" r="6.2" stroke="#01185A" strokeWidth="2" />
+              <path d="M13.6 13.6 L18 18" stroke="#01185A" strokeLinecap="round" strokeWidth="2" />
+            </svg>
           </div>
         </div>
 
-        <div style={TITLE_ROW}>
-          <span style={styleFromCss("font-size:13.5px;font-weight:600;color:#01185A;white-space:nowrap")}>
-            {title}
-          </span>
-          <span style={styleFromCss("font-size:12.5px;font-weight:500;color:#A9AEC4;white-space:nowrap")}>
-            손가락으로 슉 밀어봐 →
-          </span>
+        {searchOpen && (
+          <div style={SEARCH_ROW}>
+            <div style={SEARCH_INPUT_WRAP}>
+              <svg fill="none" height="17" style={{ flex: "none", display: "block" }} viewBox="0 0 17 17" width="17">
+                <circle cx="7.3" cy="7.3" r="5.1" stroke="#8E93A8" strokeWidth="1.8" />
+                <path d="M11.1 11.1 L15 15" stroke="#8E93A8" strokeLinecap="round" strokeWidth="1.8" />
+              </svg>
+              <input
+                autoFocus
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="회사 이름으로 찾기"
+                style={SEARCH_INPUT}
+                value={query}
+              />
+            </div>
+          </div>
+        )}
+
+        <div style={CHIPS_ROW}>
+          <div
+            style={styleFromCss(
+              "flex:1;min-width:0;overflow-y:hidden;overflow-anchor:none;" +
+                (chipsOpen ? "overflow-x:hidden" : "overflow-x:auto"),
+            )}
+          >
+            <div
+              style={styleFromCss(
+                chipsOpen
+                  ? "display:flex;flex-wrap:wrap;gap:8px;padding:0 4px 0 16px"
+                  : "display:flex;gap:8px;padding:0 12px 0 16px;width:max-content",
+              )}
+            >
+              {chips.map((chip) => (
+                <div key={chip.id} onClick={() => pickChip(chip.id)} style={styleFromCss(chip.style)}>
+                  <span>{chip.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div onClick={() => setChipsOpen((open) => !open)} style={CHIPS_TOGGLE(chipsOpen)}>
+            <svg fill="none" height="18" viewBox="0 0 18 18" width="18">
+              <path
+                d="M4 7 L9 12 L14 7"
+                stroke="#6E7488"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+          </div>
         </div>
+
+        {title !== "" && (
+          <div style={TITLE_ROW}>
+            <span style={styleFromCss("font-size:22px;font-weight:800;color:#141B22;letter-spacing:-0.03em;white-space:nowrap")}>
+              {title}
+            </span>
+          </div>
+        )}
 
         {list.length === 0 ? (
           <div
@@ -279,17 +327,10 @@ export function ExploreScreen({
                 );
               })}
             </div>
-            <div style={DOTS_ROW}>
-              {cardDots(list.length, activeIndex).map((style, index) => (
+            <div style={DOTS_COL}>
+              {cardDots(list.length, activeIndex, "y").map((style, index) => (
                 <div key={index} style={styleFromCss(style)} />
               ))}
-              <span
-                style={styleFromCss(
-                  "margin-left:8px;font-size:11.5px;font-weight:700;color:#A8A6C4;font-variant-numeric:tabular-nums;white-space:nowrap",
-                )}
-              >
-                {list.length > 9 ? `${Math.min(activeIndex + 1, list.length)} / ${list.length}` : ""}
-              </span>
             </div>
           </div>
         )}

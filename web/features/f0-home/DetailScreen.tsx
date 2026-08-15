@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ChatContext } from "../../shared/types/chatbot";
 import { accountTotalAsset, SEED } from "../../shared/store/prototype-account.js";
 import { ChartScreen } from "./ChartScreen";
+import { buildDetailChart, type DetailTrade } from "./lib/detail-chart";
 import { NewsScreen } from "./NewsScreen";
 import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
@@ -13,7 +14,7 @@ import {
   SubScreenHeader,
 } from "./lib/stock-chrome";
 import { validNewsItem, type NewsItem } from "./lib/stock-news";
-import { sparkPolyline, useStockLive } from "./lib/use-universe";
+import { useStockLive } from "./lib/use-universe";
 import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
 
 const UP = "#E8322E";
@@ -24,6 +25,21 @@ const SCROLL = styleFromCss(
 );
 const PRICE_CARD = styleFromCss(
   "background:#FFFFFF;border-radius:30px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)",
+);
+const CHART_WRAP = styleFromCss("position:relative;margin-top:14px");
+const HI_LO_LABEL = styleFromCss(
+  "position:absolute;transform:translate(-50%,0);font-size:11.5px;font-weight:600;white-space:nowrap;pointer-events:none",
+);
+const PIN = styleFromCss(
+  "position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;" +
+    "pointer-events:none;filter:drop-shadow(0 2px 4px rgba(30,25,60,0.16))",
+);
+const PIN_BODY = styleFromCss(
+  "display:flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:8px;" +
+    "font-size:12px;font-weight:800;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4)",
+);
+const PIN_TAIL = styleFromCss(
+  "width:0;height:0;margin-top:-1px;border-left:5px solid transparent;border-right:5px solid transparent",
 );
 const CARD = styleFromCss(
   "background:#FFFFFF;border-radius:26px;padding:16px 18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)",
@@ -89,6 +105,25 @@ export function DetailScreen({
   const [newsStatus, setNewsStatus] = useState<NewsStatus>("loading");
   const [newsItem, setNewsItem] = useState<NewsItem | null>(null);
   const [activeNews, setActiveNews] = useState<NewsItem | null>(null);
+  const [trades, setTrades] = useState<DetailTrade[]>([]);
+
+  // 최근 매매 지점(B/S 핀)의 출처. `TradingViewChart` 의 가족 체결 마커와 같은 API다
+  // (F11 SPEC §6.1) — 없는 체결을 지어내지 않는다.
+  useEffect(() => {
+    let cancelled = false;
+    setTrades([]);
+    fetch(`/api/trades?symbol=${encodeURIComponent(code)}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { trades?: DetailTrade[] } | null) => {
+        if (!cancelled && data) setTrades(data.trades ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setTrades([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
 
   // 종목 뉴스 요약 — `app.html` 이 상세 진입 때 부르던 `loadNews` 와 같은 경로·판정.
   const loadNews = (symbol: string) => {
@@ -209,10 +244,10 @@ export function DetailScreen({
   const newsSummary =
     newsItem?.headline ??
     (newsStatus === "error"
-      ? "뉴스를 불러오지 못했어. 다시 눌러 줘."
+      ? "뉴스를 불러오지 못했어요. 다시 눌러 주세요."
       : newsStatus === "empty"
-        ? "아직 검수를 통과한 새 소식이 없어."
-        : "검수를 통과한 새 소식을 찾고 있어.");
+        ? "아직 검수를 통과한 새 소식이 없어요."
+        : "검수를 통과한 새 소식을 찾고 있어요.");
   const newsMoreLabel = newsItem
     ? "뉴스 자세히 보기"
     : newsStatus === "error"
@@ -234,6 +269,12 @@ export function DetailScreen({
         ? `;background-image:url(${stock.logoUrl});background-position:center;background-size:contain;background-repeat:no-repeat`
         : ""),
   );
+  const chart = buildDetailChart({
+    spark: live.spark,
+    price: live.price,
+    changePercent: live.change,
+    trades,
+  });
 
   const screen =
     view === "chart" ? (
@@ -285,23 +326,62 @@ export function DetailScreen({
               </div>
               <span style={changeStyle}>{changeText}</span>
             </div>
-            <svg
-              height={112}
-              preserveAspectRatio="none"
-              style={{ display: "block", marginTop: 14 }}
-              viewBox="0 0 336 112"
-              width={336}
-            >
-              <polyline
-                fill="none"
-                points={sparkPolyline(live.spark, 336, 112)}
-                stroke={changeUp ? UP : DOWN}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.6}
-              />
-            </svg>
-            <div style={CARD_FOOT} >
+            <div style={CHART_WRAP}>
+              <svg
+                height={164}
+                preserveAspectRatio="none"
+                style={{ display: "block" }}
+                viewBox="0 0 336 164"
+                width={336}
+              >
+                {chart && (
+                  <>
+                    <polyline
+                      fill="none"
+                      points={chart.linePoints}
+                      stroke={changeUp ? UP : DOWN}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.4}
+                    />
+                    {chart.pins.map((pin) => (
+                      <line
+                        key={pin.id}
+                        stroke={`var(--color-trade-${pin.member})`}
+                        strokeDasharray="2 3"
+                        strokeOpacity={0.35}
+                        x1={pin.x}
+                        x2={pin.x}
+                        y1={pin.y}
+                        y2={164}
+                      />
+                    ))}
+                    <circle cx={chart.hi.x} cy={chart.hi.y} fill={changeUp ? UP : DOWN} r={2.6} />
+                    <circle cx={chart.lo.x} cy={chart.lo.y} fill={changeUp ? UP : DOWN} r={2.6} />
+                  </>
+                )}
+              </svg>
+              {chart?.hi.visible && (
+                <div style={{ ...HI_LO_LABEL, left: chart.hi.x, top: chart.hi.labelY, color: changeUp ? UP : DOWN }}>
+                  {chart.hi.text}
+                </div>
+              )}
+              {chart?.lo.visible && (
+                <div style={{ ...HI_LO_LABEL, left: chart.lo.x, top: chart.lo.labelY, color: changeUp ? UP : DOWN }}>
+                  {chart.lo.text}
+                </div>
+              )}
+              {chart?.pins.map((pin) => {
+                const color = `var(--color-trade-${pin.member})`;
+                return (
+                  <div key={pin.id} style={{ ...PIN, left: pin.x, top: pin.y - 7 }} title={pin.title}>
+                    <div style={{ ...PIN_BODY, background: color }}>{pin.label}</div>
+                    <div style={{ ...PIN_TAIL, borderTop: `7px solid ${color}` }} />
+                  </div>
+                );
+              })}
+            </div>
+            <div style={CARD_FOOT}>
               <span style={CARD_HINT}>최근 흐름 · 15분 지연 시세</span>
               <div onClick={openChart} style={MORE_BTN}>
                 차트 자세히 보기 ›
@@ -311,18 +391,17 @@ export function DetailScreen({
 
           <div style={CARD}>
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <span style={CARD_TITLE}>이 회사는 뭘 해?</span>
+              <span style={CARD_TITLE}>이 회사는 뭘 하나요?</span>
             </div>
             <div style={CARD_BODY}>{`${stock.name}${josa(stock.name)} ${stock.desc}.`}</div>
           </div>
 
           <div style={CARD}>
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <span style={CARD_TITLE}>요즘 무슨 일이 있었어?</span>
+              <span style={CARD_TITLE}>요즘 무슨 일이 있었나요?</span>
             </div>
             <div style={CARD_BODY}>{newsSummary}</div>
-            <div style={CARD_FOOT}>
-              <span style={CARD_HINT}>키움 뉴스를 어린이 눈높이로</span>
+            <div style={styleFromCss("display:flex;align-items:center;justify-content:flex-end;margin-top:13px")}>
               <div onClick={openNews} style={newsMoreStyle}>
                 {newsMoreLabel} ›
               </div>

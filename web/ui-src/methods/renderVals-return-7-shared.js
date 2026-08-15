@@ -40,6 +40,15 @@
       goPortfolio: () => this.leaveToRoute('/portfolio'),
       // 아카이브도 React 로 옮겨 갔다. 문서는 그대로 두고 부모가 그 화면을 얹는다.
       goArchive: () => this.leaveToRoute('/archive'),
+      // 매수·매도 공용 주문 시트 — 계산은 renderVals-compute.js, 값은 여기서 내보낸다.
+      // `pendingCards`·`hasPending` 는 이미 renderVals-return-6-sell.js 가 내보낸다(같은
+      // 객체로 합쳐진다) — 여기서 다시 적으면 존재하지 않는 지역변수를 참조하게 된다.
+      buyTabRowStyle, sellTabRowStyle, flowTabBuyStyle, flowTabSellStyle, flowTabWaitStyle,
+      pickTabBuy, pickTabSell,
+      orderSheetOpen, openWaitSheet, closeOrderSheet,
+      sheetScrimStyle, sheetStyle, sheetGrabStyle, sheetEmptyStyle,
+      hasBadge,
+
       resetAll: () => {
         const fresh = seedAccounts();
         this.set({ acc: fresh, records: [], events: [], sellRecords: [], seq: 1, draft: this.blankDraft() , watchlist: [] });
