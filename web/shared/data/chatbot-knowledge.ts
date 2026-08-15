@@ -1042,6 +1042,10 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "price-location", kind: "faq", triggers: ["현재가 어디", "가격 어디", "주가 어디"], answer: "종목 상세 화면에서 현재가와 가격 변화를 볼 수 있어요. 현재가는 계속 바뀔 수 있으니 화면에 표시된 시각도 함께 확인해요.", actionTarget: "stock", status: reviewed },
   { id: "cash-balance", kind: "faq", triggers: ["남은 돈", "잔액", "모의투자금"], answer: "홈의 포트폴리오에서 남은 모의투자금을 확인할 수 있어요. 가족이 함께 쓰는 돈이 아니라 계정마다 따로 관리돼요.", actionTarget: "home", status: reviewed },
   { id: "chatbot-role", kind: "faq", triggers: ["키웅이가 뭘", "키웅이는 무엇을", "챗봇이 뭘", "뭘 도와줘", "무엇을 도와주"], answer: "저는 금융 기초, 화면 사용법, 검수된 회사 정보와 기록을 쉽게 설명해 줘요. 종목을 골라 주거나 언제 사고팔지 정해 주지는 않아요. 🐻", status: reviewed },
+  // SPEC §3.2 — 플로팅 버튼을 삭제 타깃으로 숨긴 뒤 되살리는 길은 홈 화면 버튼뿐이다.
+  // 아이가 실수로 숨기면 다시 부를 방법을 물을 곳이 챗봇밖에 없는데, 그 답이 없어
+  // 범위 안내로 끝나고 있었다.
+  { id: "chatbot-restore", kind: "faq", triggers: ["챗봇 다시", "키웅이 다시", "챗봇 없앴", "키웅이 없앴", "챗봇 사라졌", "키웅이 사라졌", "챗봇 숨겼", "키웅이 숨겼", "챗봇 안 보여", "키웅이 안 보여", "챗봇 어떻게 켜", "플로팅 챗봇"], answer: "플로팅 키웅이를 숨겼다면 홈 화면의 키웅이 버튼을 눌러 다시 부를 수 있어요. 숨긴 동안에도 기록은 그대로 남아 있어요. 🐻", actionTarget: "home", status: reviewed },
 ] satisfies readonly ChatbotKnowledgeEntry[]).map((entry) =>
   entry.kind === "faq" && DAPIE_SCREEN_TERM_IDS.has(entry.id)
     ? {
