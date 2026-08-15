@@ -8,7 +8,9 @@
     const nameOf = code => { const x = u.stocks.filter(v => v.code === code)[0]; return x ? x.name : code; };
     const rgba = (h, a) => { const n = parseInt(h.slice(1), 16); return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')'; };
 
-    // 가족 구성원 ↔ 앱 계정. dad 는 아직 계정이 없어 값이 비어 있다.
+    // 비로그인 폴백용 로컬 구성원. 얼굴·색만 쓰고, 로그인 상태에서는 `/api/family` 의
+    // 실제 구성원(dbFamilyMembers)이 이 자리를 대신한다. 로컬 계정은 child·parent 둘뿐이라
+    // dad 의 acc 는 비어 있다 — DB 에는 아빠 계정이 있다.
     const MEMBERS = [
       { key:'dad', name:'찬영 아빠', short:'아빠', acc:null,     face:A + 'face-dad.jpg', user:'parent_dad',  col:'#FFD84D', fill:'rgba(255,197,61,0.24)', pose:A + 'pose-yw-cheer.png' },
       { key:'mom', name:'찬영 엄마', short:'엄마', acc:'parent', face:A + 'face-mom.jpg', user:'parent_mom',  col:'#FF8AD0', fill:'rgba(245,50,127,0.26)', pose:A + 'pose-yw-magnify.png' },
@@ -466,14 +468,25 @@
     // 마이너스면 START 왼쪽에서 왼쪽을 보고 땀을 흘린다.
     const RUN_START = 40;
     const LANE_H = 74;
-    const runRaw = ['me', 'mom', 'dad'].map(k => {
-      const x = byKey[k];
-      if (!x.acc) return { m:x, has:false, pct:0 };
-      const a = s.acc[x.acc];
-      let val = 0, cst = 0;
-      a.holdings.forEach(h => { val += h.qty * price(h.code); cst += h.qty * h.avg; });
-      return { m:x, has: cst > 0, pct: cst > 0 ? (val - cst) / cst * 100 : 0 };
-    });
+    // 로그인 상태면 실제 가족 구성원과 서버가 낸 수익률을 쓴다. `/api/family` 는 타인의
+    // 평가금액·원금을 주지 않으므로(자산 규모 마스킹) 비율을 그대로 받아 쓴다.
+    // 비로그인이면 예전처럼 로컬 계정 둘로 그린다 — 그때는 아빠 칸이 비어 있다.
+    const runRaw = dbFamilyMembers.length
+      ? dbFamilyMembers.map(member => {
+          // Number(null) 은 0 이라 여기서 형변환을 하면 안 된다. 아직 산 게 없는 구성원의
+          // null 이 0% 로 바뀌어 본전인 사람처럼 출발선에 서 버린다.
+          const rate = member.returnRate;
+          const has = Number.isFinite(rate);
+          return { m: dbFeedMembers[member.id] || byKey.me, has: has, pct: has ? rate : 0 };
+        })
+      : ['me', 'mom', 'dad'].map(k => {
+          const x = byKey[k];
+          if (!x.acc) return { m:x, has:false, pct:0 };
+          const a = s.acc[x.acc];
+          let val = 0, cst = 0;
+          a.holdings.forEach(h => { val += h.qty * price(h.code); cst += h.qty * h.avg; });
+          return { m:x, has: cst > 0, pct: cst > 0 ? (val - cst) / cst * 100 : 0 };
+        });
     // 가장 많이 간 사람이 트랙 끝에 닿도록 잡되, 다들 0 에 가까우면 5% 를 기준으로 둔다
     const runMax = Math.max(5, ...runRaw.map(r => Math.abs(r.pct)));
     const runners = runRaw.map(r => {

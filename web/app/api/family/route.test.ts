@@ -45,6 +45,11 @@ const deps: FamilyDataDeps = {
   },
   buildProfile: async (userId) => ({
     weeks: [], cumulative: { ...neutral, samples: { ...neutral.samples, buys: userId } },
+    // 구성원마다 다른 수익률을 줘서 어느 값이 어디로 가는지 구분한다.
+    valuation: {
+      marketValue: 1_000_000 + userId, cost: 1_000_000, cash: 500_000,
+      profit: userId, returnRate: userId * 1.5, valuedCount: 1, pricelessCount: 0,
+    },
   }),
 };
 
@@ -55,6 +60,29 @@ async function main() {
   assert.equal(transactionFilter, "in.(1,2,3)");
   assert.deepEqual(family.members.map((member) => member.name), ["찬영", "찬영엄마", "찬영아빠"]);
   assert.equal(family.members[2].behavior?.samples.buys, 3);
+
+  // 수익률은 타인 것도 내려간다 — 트랙이 구성원을 나란히 세우는 화면이라 필요하다.
+  assert.deepEqual(family.members.map((member) => member.returnRate), [1.5, 3, 4.5]);
+
+  // 원금이 0이면 0% 가 아니라 null 이다. 본전인 사람과 아직 안 산 사람을 구분해야
+  // 화면이 "아직" 으로 그린다.
+  const noCost = await buildFamilyData(1, {
+    ...deps,
+    buildProfile: async () => ({
+      weeks: [], cumulative: neutral,
+      valuation: {
+        marketValue: 0, cost: 0, cash: 10_000_000,
+        profit: 0, returnRate: 0, valuedCount: 0, pricelessCount: 0,
+      },
+    }),
+  });
+  assert.deepEqual(noCost?.members.map((member) => member.returnRate), [null, null, null]);
+  // 자산 규모는 계속 가린다. 평가금액·원금·현금은 응답에 실리지 않는다.
+  for (const member of family.members) {
+    assert.equal("marketValue" in member, false);
+    assert.equal("cost" in member, false);
+    assert.equal("cash" in member, false);
+  }
   assert.equal(family.trades[0].price, 70000);
   assert.equal(family.trades[0].quantity, 2);
   assert.equal(family.trades[1].price, null);
