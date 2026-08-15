@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:079550",
+  "eventType": "earnings",
+  "note": "LIG넥스원은 2026-03-31 주주총회에서 'LIG디펜스앤에어로스페이스'로 사명을 바꿨다(변경상장 2026-04-14, 종목코드 079550 그대로). 기사의 회사명이 앱의 종목명과 달라 보이지만 같은 회사다.",
+  "article": {
+    "articleId": "MANUAL-CBCNEWS-595323",
+    "title": "[속보] LIG디펜스앤에어로스페이스, 2분기 매출 1조1101억원…영업이익 1057억원 기록",
+    "publisher": "CBC뉴스",
+    "publishedAt": "2026-08-06T05:28:00.000Z",
+    "sourceUrl": "https://www.cbci.co.kr/news/articleView.html?idxno=595323",
+    "sourceUnits": [
+      { "id": "S1", "text": "2분기 매출은 1조1101억원으로 전 분기(1조1679억원) 대비 4.9% 감소했지만, 전년 동기(9454억원) 대비 17.4% 증가했다." },
+      { "id": "S2", "text": "같은 기간 영업이익은 1057억원으로 전 분기(1711억원) 대비 38.2% 감소했으나, 전년 동기(816억원)와 비교하면 29.5% 증가했다." },
+      { "id": "S3", "text": "당기순이익은 782억원으로 전 분기보다 42.3%, 전년 동기보다 24.5% 감소했다." },
+      { "id": "S4", "text": "상반기 누적 기준으로는 매출 2조2780억원, 영업이익 2768억원을 기록했다." },
+      { "id": "S5", "text": "회사 측은 2026년 2분기 말 기준 수주잔액이 24조5700억원이라고 밝혔다." }
+    ]
+  },
+  "focusStatement": "LIG디펜스앤에어로스페이스(옛 LIG넥스원)가 2026년 2분기 매출 1조1101억원, 영업이익 1057억원을 기록했고 수주잔액이 24조5700억원이라고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "LIG디펜스앤에어로스페이스, 2분기 매출 1조1101억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "영업이익은 1057억원이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "지난해보다 매출이 17.4% 늘었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "받아 둔 주문이 24조5700억원이에요.", "sourceIds": ["S5"], "role": "business_detail", "factKey": "order_backlog" }
+  ],
+  "priceConnection": {
+    "text": "받아 둔 주문은 앞으로 만들 일감이 얼마나 쌓였는지를 보여줘요.",
+    "sourceIds": ["S1", "S5"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

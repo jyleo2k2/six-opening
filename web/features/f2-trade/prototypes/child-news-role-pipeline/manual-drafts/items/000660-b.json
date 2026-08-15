@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:000660",
+  "eventType": "binding_contract",
+  "second": "실적 말고 다른 사건. 장기공급계약.",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260729000469",
+    "title": "SK하이닉스, HBM4 양산 본격화…10여개 고객과 장기공급계약",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-07-29T01:53:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260729000469",
+    "sourceUnits": [
+      { "id": "S1", "text": "SK하이닉스는 주요 고객사를 대상으로 올해 2분기부터 HBM4 양산 공급을 시작했다." },
+      { "id": "S2", "text": "현재까지 핵심 고객을 포함한 11개 고객사와 장기공급계약(LTA)을 마무리했다." },
+      { "id": "S3", "text": "계약 기간은 통상 5년을 기본으로 하되 고객과 제품 특성에 따라 달라질 수 있다." },
+      { "id": "S4", "text": "HBM4의 양산 수율과 품질은 이미 성숙 단계에 진입한 HBM3E에 근접한 수준까지 올라왔다." },
+      { "id": "S5", "text": "SK하이닉스는 HBM4E의 주요 고객사 대상 샘플 공급을 완료했다." }
+    ]
+  },
+  "focusStatement": "SK하이닉스가 2분기부터 HBM4 양산 공급을 시작했고 핵심 고객을 포함한 11개 고객사와 장기공급계약을 마무리했다.",
+  "anchorSourceId": "S2",
+  "headline": { "text": "SK하이닉스, 11개 회사와 오래 팔기로 계약했다", "sourceIds": ["S2"] },
+  "body": [
+    { "text": "계약 기간은 보통 5년이에요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "contract_duration" },
+    { "text": "2분기부터 HBM4를 만들어 보내요.", "sourceIds": ["S1"], "role": "business_detail", "factKey": "hbm4_shipment_start" },
+    { "text": "다음 제품 HBM4E도 견본을 보냈어요.", "sourceIds": ["S5"], "role": "context", "factKey": "hbm4e_sample" }
+  ],
+  "priceConnection": {
+    "text": "오래 팔기로 약속하면 앞으로 들어올 일감이 정해져요.",
+    "sourceIds": ["S2", "S3"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "계약", "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "HBM4", "easyText": "인공지능 컴퓨터에 쓰는 아주 빠른 기억 부품", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

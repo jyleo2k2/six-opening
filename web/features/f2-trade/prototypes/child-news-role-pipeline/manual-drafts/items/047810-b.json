@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:047810",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 전투기 양산·인도.",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260514001318",
+    "title": "[르포] KF-21, 사천에서 뜨다…\"연 40대 생산·수출 1000대까지 노린다\"",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-05-14T09:28:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260514001318",
+    "sourceUnits": [
+      { "id": "S1", "text": "현재 월 3대 수준인 생산 능력은 추가 투자 시 연 30~40대까지 끌어올려 향후 KF-21 수출 물량까지 뒷받침할 수 있다" },
+      { "id": "S2", "text": "KAI와 방사청은 내년과 2028년에 각각 20대씩을 넘겨 KF-5E/F '제공호'와 F-5E/F 등 F-5 계열 3세대 전투기 50여대를 순차적으로 대체한다는 계획이다." },
+      { "id": "S3", "text": "양산 1호기는 이미 공군 시험비행에 들어갔고, 올 하반기부터 공군 정식 인도가 시작된다." },
+      { "id": "S4", "text": "현재 각국과 협의 중인 KF-21 잠재 수출 물량은 '200대+알파' 수준" }
+    ]
+  },
+  "focusStatement": "한국항공우주가 사천에서 KF-21 전투기를 월 3대 수준으로 만들고 있으며 올 하반기부터 공군에 정식 인도를 시작한다.",
+  "anchorSourceId": "S3",
+  "headline": { "text": "한국항공우주, 올 하반기부터 전투기를 공군에 넘긴다", "sourceIds": ["S3"] },
+  "body": [
+    { "text": "1호기는 이미 시험비행을 했어요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "first_unit_test" },
+    { "text": "지금은 한 달에 3대씩 만들어요.", "sourceIds": ["S1"], "role": "business_detail", "factKey": "monthly_output" },
+    { "text": "내년과 2028년에 20대씩 넘겨요.", "sourceIds": ["S2"], "role": "context", "factKey": "delivery_schedule" }
+  ],
+  "priceConnection": {
+    "text": "만들어 넘기기 시작하면 그때부터 돈이 들어와요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "시험비행", "easyText": "제대로 나는지 미리 날려 보는 것", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

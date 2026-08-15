@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:105560",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-ENEWSTODAY-2451811",
+    "title": "KB금융, 상반기 순익 3조8846억원 '사상 최대'",
+    "publisher": "이뉴스투데이",
+    "publishedAt": "2026-07-23T06:22:00.000Z",
+    "sourceUrl": "http://www.enewstoday.co.kr/news/articleView.html?idxno=2451811",
+    "sourceUnits": [
+      { "id": "S1", "text": "KB금융그룹이 올해 2분기 당기순이익으로 1조9922억원을 거뒀다고 밝혔다." },
+      { "id": "S2", "text": "상반기 당기순이익은 3조8846억원으로 사상 최대 실적을 기록했다." },
+      { "id": "S3", "text": "KB금융의 상반기 당기순이익은 전년 동기 대비 13.1% 증가한 3조8846억원, ROE는 14.09%를 기록했다." },
+      { "id": "S4", "text": "2분기 당기순이익은 은행과 비은행의 균형 잡힌 포트폴리오와 고른 성장으로 1조 9,922억원을 기록했다." },
+      { "id": "S5", "text": "다변화된 포트폴리오를 기반으로 은행, 증권, 보험 등 핵심 계열사들이 시장 환경 변화에 대응하여 상호 보완적인 실적을 이어온 가운데, 비은행 계열사의 상반기 그룹 내 실적 기여도가 44%까지 상승했다." }
+    ]
+  },
+  "focusStatement": "KB금융이 2026년 2분기 당기순이익 1조9922억원, 상반기 3조8846억원으로 사상 최대 실적을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "KB금융, 2분기 순이익 1조9922억원·상반기 사상 최대", "sourceIds": ["S1", "S2"] },
+  "body": [
+    { "text": "상반기 순이익은 3조8846억원이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "half_year_net_income" },
+    { "text": "지난해보다 13.1% 늘었어요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "net_income_growth" },
+    { "text": "계열사 기여도가 44%까지 올랐어요.", "sourceIds": ["S5"], "role": "business_detail", "factKey": "non_bank_contribution" }
+  ],
+  "priceConnection": {
+    "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "순이익", "easyText": "세금까지 다 내고 최종적으로 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "계열사", "easyText": "같은 그룹에 속한 형제 회사들", "treatment": "explained", "sourceIds": ["S5"] }
+  ]
+}

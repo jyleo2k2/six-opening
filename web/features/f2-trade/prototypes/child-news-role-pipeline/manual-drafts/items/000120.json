@@ -1,0 +1,111 @@
+{
+  "stockId": "KRX:000120",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-1CONOMY-49936",
+    "title": "CJ대한통운, 2Q 영업익 1016억…전년比 11.9％↓",
+    "publisher": "1코노미뉴스",
+    "publishedAt": "2026-08-11T05:21:00.000Z",
+    "sourceUrl": "https://www.1conomynews.co.kr/news/articleView.html?idxno=49936",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "올해 2분기 연결 기준 매출은 3조3800억원으로 전년 동기 대비 10.9% 증가했다."
+      },
+      {
+        "id": "S2",
+        "text": "영업이익은 1016억원으로 같은 기간 11.9% 감소했다."
+      },
+      {
+        "id": "S3",
+        "text": "영업이익률은 지난해 2분기 3.8%에서 올해 2분기 3%로 0.8%포인트 하락했다."
+      },
+      {
+        "id": "S4",
+        "text": "2분기 순이익은 368억원으로 전년 동기보다 36.8% 줄었다."
+      },
+      {
+        "id": "S5",
+        "text": "오네부문의 2분기 매출은 9848억원으로 전년 동기 대비 8.5% 증가했지만 영업이익은 409억원으로 10.7% 감소했다."
+      },
+      {
+        "id": "S6",
+        "text": "CL부문의 2분기 매출은 9001억원으로 전년 동기 대비 8% 증가했다."
+      },
+      {
+        "id": "S7",
+        "text": "건설부문의 2분기 매출은 2891억원으로 전년 동기 대비 41.2% 증가했으나 영업이익은 5억원에 그치며 86.8% 급감했다."
+      }
+    ]
+  },
+  "focusStatement": "CJ대한통운이 2026년 2분기 연결 기준 매출 3조3800억원, 영업이익 1016억원, 순이익 368억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "CJ대한통운, 2분기 매출 3조3800억원·영업이익 1016억원",
+    "sourceIds": [
+      "S1",
+      "S2"
+    ]
+  },
+  "body": [
+    {
+      "text": "매출은 지난해보다 10.9% 늘었어요.",
+      "sourceIds": [
+        "S1"
+      ],
+      "role": "key_detail",
+      "factKey": "revenue_growth"
+    },
+    {
+      "text": "영업이익은 11.9% 줄었어요.",
+      "sourceIds": [
+        "S2"
+      ],
+      "role": "key_detail",
+      "factKey": "operating_profit_decline"
+    },
+    {
+      "text": "순이익은 368억원으로 36.8% 줄었어요.",
+      "sourceIds": [
+        "S4"
+      ],
+      "role": "business_detail",
+      "factKey": "net_income_decline"
+    }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": [
+      "S1",
+      "S2"
+    ],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "매출",
+      "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부",
+      "treatment": "explained",
+      "sourceIds": [
+        "S1"
+      ]
+    },
+    {
+      "term": "영업이익",
+      "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈",
+      "treatment": "explained",
+      "sourceIds": [
+        "S2"
+      ]
+    },
+    {
+      "term": "순이익",
+      "easyText": "세금까지 다 내고 최종적으로 남은 돈",
+      "treatment": "explained",
+      "sourceIds": [
+        "S4"
+      ]
+    }
+  ]
+}

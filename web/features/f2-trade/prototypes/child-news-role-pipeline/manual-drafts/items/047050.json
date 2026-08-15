@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:047050",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-DIGITALTODAY-688294",
+    "title": "포스코인터내셔널, 2026년 2분기 당기순이익 2473억원…전년동기대비 173.3% 급증",
+    "publisher": "디지털투데이",
+    "publishedAt": "2026-07-30T02:32:00.000Z",
+    "sourceUrl": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=688294",
+    "sourceUnits": [
+      { "id": "S1", "text": "2026년 2분기(4월 1일부터 6월 30일까지) 당해실적 기준 연결 매출액은 9조6232억원으로 전년동기 8조1288억원 대비 18.4% 증가했다." },
+      { "id": "S2", "text": "영업이익은 4290억원으로 전년동기 3381억원 대비 26.9% 늘었다." },
+      { "id": "S3", "text": "당기순이익은 2473억원으로 전년동기 905억원 대비 173.3% 급증했다." },
+      { "id": "S4", "text": "지배기업소유주지분순이익은 2384억원으로 전년동기 898억원 대비 165.5% 증가했다." },
+      { "id": "S5", "text": "2026년 상반기(1월 1일부터 6월 30일까지) 누계실적은 매출액 18조336억원, 영업이익 7865억원, 당기순이익 5246억원이다." }
+    ]
+  },
+  "focusStatement": "포스코인터내셔널이 2026년 2분기 연결 매출액 9조6232억원, 영업이익 4290억원, 당기순이익 2473억원을 기록했다.",
+  "anchorSourceId": "S3",
+  "headline": { "text": "포스코인터내셔널, 2분기 순이익 2473억원으로 173.3% 증가", "sourceIds": ["S3"] },
+  "body": [
+    { "text": "매출은 9조6232억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "revenue" },
+    { "text": "영업이익은 4290억원이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "상반기 매출은 18조336억원이에요.", "sourceIds": ["S5"], "role": "context", "factKey": "half_year_revenue" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "순이익", "easyText": "세금까지 다 내고 최종적으로 남은 돈", "treatment": "explained", "sourceIds": ["S3"] },
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

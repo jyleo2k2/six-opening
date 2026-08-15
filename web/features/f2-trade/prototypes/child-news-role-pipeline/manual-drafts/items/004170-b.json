@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:004170",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 단일 점포 매출 기록.",
+  "article": {
+    "articleId": "MANUAL-HANKOOKILBO-A2026072915300001004",
+    "title": "신세계 강남 연 매출 4조 시대 성큼… 세계 3대 백화점 노리는 비결은",
+    "publisher": "한국일보",
+    "publishedAt": "2026-08-02T19:30:00.000Z",
+    "sourceUrl": "https://www.hankookilbo.com/news/article/A2026072915300001004",
+    "sourceUnits": [
+      { "id": "S1", "text": "강남점은 2023년 국내 단일 점포 최초로 연 매출 3조 원을 돌파한 데 이어 2024년(약 3조2,000억 원)과 지난해(약 3조6,700억 원)까지 3년 연속 3조 원을 넘었다." },
+      { "id": "S2", "text": "3조 원 달성 시기는 12월 20일(2023년)→11월 28일(2024년)→11월 7일(2025년)로 매년 단축됐다." },
+      { "id": "S3", "text": "이외 연 매출이 3조 원 이상인 곳은 롯데백화점 잠실점(지난해 약 3조3,000억 원)뿐이다." },
+      { "id": "S4", "text": "신세계 강남점은 올해 매출 4조 원을 노리고 있다." },
+      { "id": "S5", "text": "연 매출 4조 원대인 일본의 이세탄백화점, 영국 해러즈백화점과 어깨를 나란히 하는 글로벌 톱3 등극이다." }
+    ]
+  },
+  "focusStatement": "신세계백화점 강남점이 3년 연속 연 매출 3조 원을 넘겼고 올해 4조 원을 목표로 하고 있다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "신세계 강남점, 3년 연속 매출 3조원을 넘겼다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "지난해에는 약 3조6700억원이었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "last_year_revenue" },
+    { "text": "3조원을 채우는 날이 해마다 빨라졌어요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "faster_milestone" },
+    { "text": "국내에서 3조원 넘는 곳은 두 곳뿐이에요.", "sourceIds": ["S3"], "role": "context", "factKey": "domestic_peers" }
+  ],
+  "priceConnection": {
+    "text": "한 가게에서 많이 팔수록 회사가 버는 돈도 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

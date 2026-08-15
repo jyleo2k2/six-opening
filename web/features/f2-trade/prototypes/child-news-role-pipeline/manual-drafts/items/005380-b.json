@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:005380",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 공장 로봇 투입 계획.",
+  "article": {
+    "articleId": "MANUAL-MT-2026071416364587365",
+    "title": "아틀라스가 자동차판 바꾼다…현대차가 노리는 '두 마리 토끼'",
+    "publisher": "머니투데이",
+    "publishedAt": "2026-07-14T09:00:00.000Z",
+    "sourceUrl": "https://www.mt.co.kr/industry/2026/07/14/2026071416364587365",
+    "sourceUnits": [
+      { "id": "S1", "text": "현대차그룹은 아틀라스를 미국 조지아주 현대차·기아 공장에 우선 투입할 예정이다." },
+      { "id": "S2", "text": "현대차그룹은 지난 5월 해외 기관투자가 기업설명회에서 현대차·기아 자동차 생산라인에 아틀라스를 2만5000대 이상 투입할 계획이라고 밝힌 바 있다." },
+      { "id": "S3", "text": "아틀라스의 실제 가격은 양산이 시작되는 2028년 전후에 확정될 전망이다." },
+      { "id": "S4", "text": "재코우스키 CPTO가 아틀라스의 ROI를 2년으로 제시하며 강조한 '비용 효율성'은 글로벌 자동차 업계 최대 화두 중 하나다." }
+    ]
+  },
+  "focusStatement": "현대차그룹이 사람 모양 로봇 아틀라스를 미국 조지아주 공장에 먼저 투입하고 생산라인에 2만5000대 이상 넣을 계획이다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "현대차, 사람 모양 로봇을 공장에 넣는다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "로봇 이름은 아틀라스예요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "robot_name" },
+    { "text": "2만5000대 넘게 넣을 계획이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "planned_units" },
+    { "text": "미국 조지아주 공장부터 시작해요.", "sourceIds": ["S1"], "role": "business_detail", "factKey": "first_site" }
+  ],
+  "priceConnection": {
+    "text": "공장에서 일하는 방법이 바뀌면 만드는 비용도 달라져요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "로봇", "easyText": "사람 대신 일하도록 만든 기계", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "공장", "easyText": "물건을 많이 만들어 내는 큰 건물", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

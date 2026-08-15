@@ -1,0 +1,39 @@
+{
+  "stockId": "KRX:055550",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-1CONOMY-49682",
+    "title": "신한금융, 2Q 순이익 1조8201억원…'분기·반기' 역대 최대",
+    "publisher": "1코노미뉴스",
+    "publishedAt": "2026-07-23T07:24:00.000Z",
+    "sourceUrl": "https://www.1conomynews.co.kr/news/articleView.html?idxno=49682",
+    "sourceUnits": [
+      { "id": "S1", "text": "23일 신한금융의 2026년 2분기 경영실적 발표에 따르면 2분기 당기순이익은 1조8201억원으로 전년 동기(1조5491억원) 대비 17.5% 증가했다." },
+      { "id": "S2", "text": "상반기 누적 당기순이익도 전년 동기보다 13.3% 늘어난 3조4427억원으로 집계됐다." },
+      { "id": "S3", "text": "2분기 이자이익은 3조1344억원으로 전분기 대비 3.6% 증가했다." },
+      { "id": "S4", "text": "비이자이익은 1조4499억원으로 전분기보다 22.0% 늘었다." },
+      { "id": "S5", "text": "2분기 수수료이익은 1조1889억원으로 전분기 대비 26.4% 증가했다." },
+      { "id": "S6", "text": "판매관리비는 1조6707억원으로 전분기 대비 8.1% 증가했다." },
+      { "id": "S7", "text": "신한금융은 실적 개선과 자본 여력을 바탕으로 올해 총주주환원 규모로 '2조8000억원+α'를 제시했다." }
+    ]
+  },
+  "focusStatement": "신한금융이 2026년 2분기 당기순이익 1조8201억원을 기록해 분기·반기 기준 역대 최대를 냈다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "신한금융, 2분기 순이익 1조8201억원으로 역대 최대", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "지난해 같은 기간보다 17.5% 늘었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "net_income_growth" },
+    { "text": "상반기 순이익은 3조4427억원이에요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "half_year_net_income" },
+    { "text": "이자이익은 3조1344억원이에요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "interest_income" }
+  ],
+  "priceConnection": {
+    "text": "순이익은 회사가 한 해 동안 얼마나 벌었는지를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "순이익", "easyText": "세금까지 다 내고 최종적으로 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "이자이익", "easyText": "돈을 빌려주고 받은 이자로 번 돈", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

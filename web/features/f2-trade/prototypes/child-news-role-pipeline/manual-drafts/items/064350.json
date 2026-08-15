@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:064350",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-ETODAY-2607167",
+    "title": "현대로템, 2분기 영업익 2324억…수주잔고 첫 30조 돌파 [종합]",
+    "publisher": "이투데이",
+    "publishedAt": "2026-07-24T05:27:00.000Z",
+    "sourceUrl": "https://www.etoday.co.kr/news/view/2607167",
+    "sourceUnits": [
+      { "id": "S1", "text": "현대로템은 24일 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했다고 밝혔다." },
+      { "id": "S2", "text": "지난해 같은 기간보다 매출은 13.3% 증가했지만 영업이익은 9.7% 감소했다." },
+      { "id": "S3", "text": "상반기 누적 매출은 3조635억원으로 전년 동기 대비 18.1% 늘었다." },
+      { "id": "S4", "text": "2분기 말 기준 수주잔고는 30조4046억원으로 집계됐다." },
+      { "id": "S5", "text": "창사 이후 처음으로 30조원을 넘어선 최대 규모다." },
+      { "id": "S6", "text": "사업 부문별 수주잔고는 AD&RH(Aero·Defense·Robot·Hydrogen) 부문이 9조8197억원, 철도(Rail System) 부문이 19조8670억원이다." }
+    ]
+  },
+  "focusStatement": "현대로템이 2026년 2분기 연결 기준 매출 1조6060억원, 영업이익 2324억원을 기록했고 수주잔고가 창사 이후 처음으로 30조원을 넘었다고 밝혔다.",
+  "anchorSourceId": "S4",
+  "headline": { "text": "현대로템, 수주잔고 30조원 넘어 창사 이후 최대", "sourceIds": ["S4", "S5"] },
+  "body": [
+    { "text": "2분기 매출은 1조6060억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "revenue" },
+    { "text": "영업이익은 2324억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "철도에서 받은 주문이 19조8670억원이에요.", "sourceIds": ["S6"], "role": "business_detail", "factKey": "rail_backlog" }
+  ],
+  "priceConnection": {
+    "text": "수주잔고는 앞으로 만들어야 할 일감이 얼마나 쌓였는지를 보여줘요.",
+    "sourceIds": ["S4", "S5"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "수주잔고", "easyText": "주문을 받아 두고 아직 만들지 않은 일감", "treatment": "explained", "sourceIds": ["S4"] },
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

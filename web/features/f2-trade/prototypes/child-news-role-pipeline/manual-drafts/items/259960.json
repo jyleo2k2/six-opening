@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:259960",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-DAILYPOST-114845",
+    "title": "크래프톤, 상반기 매출 2조 6616억 원 '역대 최대'…영업이익 9725억원",
+    "publisher": "데일리포스트",
+    "publishedAt": "2026-07-29T06:53:00.000Z",
+    "sourceUrl": "https://www.thedailypost.kr/news/articleView.html?idxno=114845",
+    "sourceUnits": [
+      { "id": "S1", "text": "크래프톤이 2026년 상반기 연결 기준 매출 2조 6616억 원, 영업이익 9725억 원을 기록하며 반기 기준 역대 최대 실적을 작성했다." },
+      { "id": "S2", "text": "전년 동기 대비 매출은 73.3%, 영업이익은 38.3% 증가했다." },
+      { "id": "S3", "text": "2분기 매출과 영업이익도 각각 1조 2902억 원과 4109억 원을 거두며 역대 2분기 중 최고치를 기록했다." },
+      { "id": "S4", "text": "PUBG IP 상반기 매출은 전년 대비 25% 늘어났으며, 지난 5월 얼리 액세스로 선보인 서브노티카 2는 출시 22일 만에 누적 판매량 500만 장을 넘어섰다." },
+      { "id": "S5", "text": "플랫폼별 상반기 매출은 모바일 1조 1,537억 원, PC 9,242억 원, 기타 5,460억 원, 콘솔 377억 원 순으로 집계됐다." }
+    ]
+  },
+  "focusStatement": "크래프톤이 2026년 2분기 매출 1조 2902억 원, 영업이익 4109억 원을 거둬 역대 2분기 중 최고치를 기록했다.",
+  "anchorSourceId": "S3",
+  "headline": { "text": "크래프톤, 2분기 매출 1조2902억원으로 역대 2분기 최고", "sourceIds": ["S3"] },
+  "body": [
+    { "text": "2분기 영업이익은 4109억원이에요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "서브노티카 2가 500만 장 팔렸어요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "subnautica_sales" },
+    { "text": "상반기 매출은 2조6616억원이에요.", "sourceIds": ["S1"], "role": "context", "factKey": "half_year_revenue" }
+  ],
+  "priceConnection": {
+    "text": "게임이 얼마나 팔렸는지는 회사의 사업 성과와 연결돼요.",
+    "sourceIds": ["S3", "S4"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S3"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

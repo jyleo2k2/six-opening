@@ -1,0 +1,98 @@
+{
+  "stockId": "KRX:086280",
+  "eventType": "sales_or_production",
+  "article": {
+    "articleId": "MANUAL-GENEWS-20260518",
+    "title": "현대글로비스, '1만 대 벽' 깼다… 1만800대 수송 가능한 세계 최대 자동차 운반선 전격 투입",
+    "publisher": "글로벌이코노믹",
+    "publishedAt": "2026-05-17T23:16:00.000Z",
+    "sourceUrl": "https://www.g-enews.com/article/Global-Biz/2026/05/2026051808144716870c8c1c064d_1",
+    "sourceUnits": [
+      {
+        "id": "S1",
+        "text": "현대글로비스는 최대 1만800대의 소형차를 수송할 수 있는 초대형 자동차 운반선 '글로비스 리더(Glovis Leader)호'를 글로벌 오션 노선에 본격 투입하고 명명식을 거쳐 상업 운항을 개시했다."
+      },
+      {
+        "id": "S2",
+        "text": "선체 길이 230m, 너비 40m, 총톤수 10만2590톤에 달하며 내부에는 총 14개 층의 차량 적재 데크를 갖추고 있다."
+      },
+      {
+        "id": "S3",
+        "text": "기존 세계 기록이었던 노르웨이 회그 오토라이너스(Höegh Autoliners)사 '회그 오로라호'의 수송 용량(9100대)을 약 19% 이상 전격 경신 한 수치다."
+      },
+      {
+        "id": "S4",
+        "text": "글로비스 리더호는 세계적인 국영 조선 그룹인 중국선박집단(CSSC) 산하 '광저우 조선소(Guangzhou Shipyard International·GSI)'가 건조를 맡았다."
+      },
+      {
+        "id": "S5",
+        "text": "이 선박의 핵심 심장부는 액화천연가스(LNG)와 기존 선박유를 모두 사용할 수 있는 친환경 이중연료(Dual-Fuel) 추진 엔진 이다."
+      },
+      {
+        "id": "S6",
+        "text": "현대글로비스는 이번 호를 시작으로 오는 2027년까지 동급의 자매선들을 순차적으로 추가 투입해, 2030년까지 총 128척의 대규모 카캐리어 선단을 구축하겠다는 공격적인 로드맵을 확정했다."
+      }
+    ]
+  },
+  "focusStatement": "현대글로비스가 소형차 1만800대를 실을 수 있는 세계 최대 자동차 운반선 '글로비스 리더호'를 투입해 상업 운항을 시작했다.",
+  "anchorSourceId": "S1",
+  "headline": {
+    "text": "현대글로비스, 자동차 1만800대 싣는 세계 최대 운반선 투입",
+    "sourceIds": [
+      "S1"
+    ]
+  },
+  "body": [
+    {
+      "text": "배 이름은 글로비스 리더호예요.",
+      "sourceIds": [
+        "S1"
+      ],
+      "role": "key_detail",
+      "factKey": "ship_name"
+    },
+    {
+      "text": "길이 230m, 너비 40m 크기예요.",
+      "sourceIds": [
+        "S2"
+      ],
+      "role": "business_detail",
+      "factKey": "ship_size"
+    },
+    {
+      "text": "이전 세계 기록은 9100대였어요.",
+      "sourceIds": [
+        "S3"
+      ],
+      "role": "context",
+      "factKey": "previous_record"
+    }
+  ],
+  "priceConnection": {
+    "text": "한 번에 실어 나를 수 있는 양은 회사가 할 수 있는 일의 크기와 연결돼요.",
+    "sourceIds": [
+      "S1",
+      "S3"
+    ],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    {
+      "term": "운반선",
+      "easyText": "짐을 잔뜩 싣고 바다를 건너는 큰 배",
+      "treatment": "explained",
+      "sourceIds": [
+        "S1"
+      ]
+    },
+    {
+      "term": "글로비스 리더호",
+      "easyText": "이번에 새로 띄운 배 이름",
+      "treatment": "explained",
+      "sourceIds": [
+        "S1"
+      ]
+    }
+  ]
+}

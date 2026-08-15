@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:078930",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 데이터센터 투자.",
+  "article": {
+    "articleId": "MANUAL-NEWSQUEST-271610",
+    "title": "\"GS칼텍스가 번 '역대급 현금', GS의 '15조 AI 데이터센터' 실탄 됐다\"",
+    "publisher": "뉴스퀘스트",
+    "publishedAt": "2026-08-12T05:05:00.000Z",
+    "sourceUrl": "https://www.newsquest.co.kr/news/articleView.html?idxno=271610",
+    "sourceUnits": [
+      { "id": "S1", "text": "GS는 동해 지역에 1.2GW 규모의 데이터센터 건설을 추진 중이며, 현재 인허가 절차와 함께 잠재 테넌트들과 계약 협의를 진행하고 있다." },
+      { "id": "S2", "text": "총 투자비는 15조원으로, 이 중 11~12조원은 차입금으로 조달하고, 나머지 3~4조원 중에 절반 이상의 지분 확보를 목표로 하고 있다." },
+      { "id": "S3", "text": "GS의 최종적인 Equity 투입은 1조5000억~2조원 수준이 될 전망이다." },
+      { "id": "S4", "text": "AI 데이터센터(DC) 투자도 본격 추진된다." }
+    ]
+  },
+  "focusStatement": "GS가 동해 지역에 1.2GW 규모의 AI 데이터센터 건설을 추진하고 있으며 총 투자비는 15조원이다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "GS, 동해에 15조원짜리 데이터센터를 짓는다", "sourceIds": ["S1", "S2"] },
+  "body": [
+    { "text": "크기는 1.2기가와트예요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "capacity" },
+    { "text": "지금은 허가를 받는 중이에요.", "sourceIds": ["S1"], "role": "business_detail", "factKey": "permit_stage" },
+    { "text": "인공지능에 쓰려고 짓는 거예요.", "sourceIds": ["S4"], "role": "context", "factKey": "ai_purpose" }
+  ],
+  "priceConnection": {
+    "text": "새 시설을 지으면 회사가 할 수 있는 사업이 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "데이터센터", "easyText": "컴퓨터를 잔뜩 모아 두고 돌리는 큰 건물", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "stockId": "KRX:329180",
+  "eventType": "binding_contract",
+  "replaces": "노동 쟁의 조정 신청 기사(published). 아이가 보는 '요즘 무슨 일'로 맞지 않아 withdrawn 후 교체한다.",
+  "article": {
+    "articleId": "MANUAL-DIGITALTODAY-662456",
+    "title": "HD현대중공업, KSS해운과 5048억원 규모 VLGC 3척 계약 체결",
+    "publisher": "디지털투데이",
+    "publishedAt": "2026-05-04T05:32:00.000Z",
+    "sourceUrl": "https://www.digitaltoday.co.kr/news/articleView.html?idxno=662456",
+    "sourceUnits": [
+      { "id": "S1", "text": "종합 조선 기업 HD현대중공업(329180)이 5월 4일 공시를 통해 KSS해운과의 VLGC 3척 건조 계약 체결을 발표했다." },
+      { "id": "S2", "text": "계약금액은 5048억원이며, 이는 최근 결산 기준 매출액 17조5806억원 대비 2.87%에 해당한다." },
+      { "id": "S3", "text": "계약은 2026년 4월 30일 시작되어 2029년 8월 31일에 종료될 예정이다." },
+      { "id": "S4", "text": "주요 계약 조건으로는 계약금 및 선급금이 있으며, 대금은 공사진척에 따라 지급된다." },
+      { "id": "S5", "text": "HD현대중공업은 2019년 6월 3일 코스피 시장에 상장된 선박 및 보트 건조업체다." }
+    ]
+  },
+  "focusStatement": "HD현대중공업이 KSS해운과 5048억원 규모의 VLGC 3척 건조 계약을 체결했다고 공시했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "HD현대중공업, 5048억원 규모 가스 운반선 3척 계약", "sourceIds": ["S1", "S2"] },
+  "body": [
+    { "text": "KSS해운에서 주문을 받았어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "customer" },
+    { "text": "2029년 8월까지 만들어 주기로 했어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "delivery_deadline" },
+    { "text": "지난해 매출의 2.87%에 해당해요.", "sourceIds": ["S2"], "role": "context", "factKey": "revenue_share" }
+  ],
+  "priceConnection": {
+    "text": "계약을 따내면 앞으로 만들 일감이 그만큼 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "계약", "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "가스 운반선", "easyText": "액체로 만든 가스를 실어 나르는 배", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

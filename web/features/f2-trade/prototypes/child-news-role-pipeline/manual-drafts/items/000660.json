@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:000660",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-SKHYNIX-Q2-2026",
+    "title": "SK하이닉스, 2026년 2분기 경영실적 발표",
+    "publisher": "SK하이닉스 뉴스룸",
+    "publishedAt": "2026-07-29T00:00:00.000Z",
+    "sourceUrl": "https://news.skhynix.co.kr/q2-2026-business-results/",
+    "sourceUnits": [
+      { "id": "S1", "text": "SK하이닉스가 올해 2분기 매출액 79조 3,187억 원, 영업이익 60조 5,426억 원(영업이익률76%), 순이익 93조 9,226억 원(순이익률 118%)의 분기 사상 최대 경영실적을 기록했다고 29일 밝혔다." },
+      { "id": "S2", "text": "이로써 상반기 누적 매출은 사상 처음으로 100조 원대에 올라섰다." },
+      { "id": "S3", "text": "전년 동기와 비교하면 매출과 영업이익은 각 257%, 557% 증가했다." },
+      { "id": "S4", "text": "이 같은 실적 호조에 힘입어 2분기 말 회사의 현금성 자산은 전분기 말 대비 33.6조 원 늘어난 88조 원을 기록했다." },
+      { "id": "S5", "text": "반면, 차입금은 0.7조 원 줄어든 18.6조 원에 그치며 순현금은 69.4조 원으로 확대됐다." }
+    ]
+  },
+  "focusStatement": "SK하이닉스가 2026년 2분기 매출액 79조 3,187억 원, 영업이익 60조 5,426억 원, 순이익 93조 9,226억 원의 분기 사상 최대 실적을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "SK하이닉스, 2분기 매출 79조3187억원으로 사상 최대", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "영업이익은 60조5426억원이에요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "operating_profit" },
+    { "text": "지난해보다 매출이 257% 늘었어요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "상반기 매출이 처음 100조원을 넘었어요.", "sourceIds": ["S2"], "role": "context", "factKey": "half_year_record" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

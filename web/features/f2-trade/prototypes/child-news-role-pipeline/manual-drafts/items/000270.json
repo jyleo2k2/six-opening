@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:000270",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-INTHENEWS-89738",
+    "title": "[2026 2분기 실적] 기아, 글로벌 판매 확대에 분기 최대 매출…영업이익률 8.0%",
+    "publisher": "인더뉴스",
+    "publishedAt": "2026-07-24T07:07:11.000Z",
+    "sourceUrl": "https://www.inthenews.co.kr/news/article.html?no=89738",
+    "sourceUnits": [
+      { "id": "S1", "text": "기아는 24일 2026년 2분기 연결 기준 매출액 33조3037억원, 영업이익 2조6290억원을 기록했다고 밝혔습니다." },
+      { "id": "S2", "text": "지난해 같은 기간과 비교해 매출은 12.6% 증가했지만 영업이익은 4.9% 감소했습니다." },
+      { "id": "S3", "text": "연결 매출대수는 80만3985대로 4.3% 증가했으며 원·달러 평균 환율은 1502원으로 7.0% 상승했습니다." },
+      { "id": "S4", "text": "글로벌 현지 판매는 83만9000대로 5.8% 증가했습니다." },
+      { "id": "S5", "text": "기아의 2분기 글로벌 전동화 판매량은 29만6000대로 전년 동기 18만5000대보다 60.0% 늘었습니다." },
+      { "id": "S6", "text": "2분기 연결 평균판매가격은 4110만원으로 전년 동기 3810만원보다 7.9% 상승했습니다." }
+    ]
+  },
+  "focusStatement": "기아가 2026년 2분기 연결 기준 매출액 33조3037억원, 영업이익 2조6290억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "기아, 2분기 매출 33조3037억원·영업이익 2조6290억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 12.6% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 4.9% 줄었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_decline" },
+    { "text": "전기차는 29만6000대 팔려 60% 늘었어요.", "sourceIds": ["S5"], "role": "business_detail", "factKey": "ev_sales_growth" }
+  ],
+  "priceConnection": {
+    "text": "얼마나 많이 팔았는지는 회사의 사업 성과와 연결돼요.",
+    "sourceIds": ["S1", "S5"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

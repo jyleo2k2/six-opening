@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:010140",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-INTHENEWS-89740",
+    "title": "[2026 2분기 실적] 삼성중공업, 생산 확대 효과에 2분기 수익성 개선 지속",
+    "publisher": "인더뉴스",
+    "publishedAt": "2026-07-24T07:07:15.000Z",
+    "sourceUrl": "https://www.inthenews.co.kr/news/article.html?no=89740",
+    "sourceUnits": [
+      { "id": "S1", "text": "삼성중공업은 2026년 2분기 잠정 매출액 3조2307억원, 영업이익 3250억원을 기록했다고 24일 공시했습니다." },
+      { "id": "S2", "text": "지난해 같은 기간과 비교해 매출은 20%, 영업이익은 59% 증가했습니다." },
+      { "id": "S3", "text": "상반기 누적 매출은 6조1330억원, 영업이익은 5981억원으로 집계됐습니다." },
+      { "id": "S4", "text": "전년 동기 매출 5조1733억원, 영업이익 3279억원과 비교하면 각각 19%, 82% 증가한 규모입니다." },
+      { "id": "S5", "text": "삼성중공업의 올해 1월부터 7월까지 누적 신규 수주는 100억달러입니다." }
+    ]
+  },
+  "focusStatement": "삼성중공업이 2026년 2분기 잠정 매출액 3조2307억원, 영업이익 3250억원을 기록했다고 공시했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "삼성중공업, 2분기 매출 3조2307억원·영업이익 3250억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 20% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 59% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth" },
+    { "text": "새로 받은 주문이 100억달러예요.", "sourceIds": ["S5"], "role": "business_detail", "factKey": "new_orders" }
+  ],
+  "priceConnection": {
+    "text": "새로 받은 주문은 앞으로 할 일이 얼마나 쌓였는지를 보여줘요.",
+    "sourceIds": ["S1", "S5"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

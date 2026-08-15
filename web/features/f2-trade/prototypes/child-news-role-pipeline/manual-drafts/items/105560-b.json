@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:105560",
+  "eventType": "capital_or_dividend",
+  "second": "실적 말고 다른 사건. 자사주 소각.",
+  "article": {
+    "articleId": "MANUAL-NEWSFREEZONE-703018",
+    "title": "KB금융, 7000억 자사주 소각·4000억 영구채 발행",
+    "publisher": "뉴스프리존",
+    "publishedAt": "2026-08-07T06:32:00.000Z",
+    "sourceUrl": "https://www.newsfreezone.co.kr/news/articleView.html?idxno=703018",
+    "sourceUnits": [
+      { "id": "S1", "text": "KB금융지주가 지난달 23일 이사회에서 7000억원 규모 자사주 매입·소각과 4000억원 한도 신종자본증권(영구채) 발행을 함께 결의했다." },
+      { "id": "S2", "text": "소각 대상은 보통주 399만7715주로 발행주식총수 3억5468만7734주의 1.13% 수준이다." },
+      { "id": "S3", "text": "이사회 결의 전날 종가 17만5100원을 기준으로 산정했으며 주가 변동에 따라 실제 수량은 달라질 수 있다." },
+      { "id": "S4", "text": "자기주식 취득은 지난달 24일부터 오는 12월 16일까지 삼성증권에 위탁해 장내매수로 진행한다." }
+    ]
+  },
+  "focusStatement": "KB금융지주가 이사회에서 7000억원 규모 자사주 매입·소각을 결의했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "KB금융, 자기 주식 7000억원어치를 없앤다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "없애는 주식은 399만7715주예요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "shares_to_cancel" },
+    { "text": "전체 주식의 1.13%예요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "share_ratio" },
+    { "text": "12월 16일까지 사들일 계획이에요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "buyback_period" }
+  ],
+  "priceConnection": {
+    "text": "회사가 자기 주식을 없애면 남은 주식 하나하나의 몫이 커져요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "shareholder_return",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "주식", "easyText": "회사를 조금씩 나눠 가진 증서", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

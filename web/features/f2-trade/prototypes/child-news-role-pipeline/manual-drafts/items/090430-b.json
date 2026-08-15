@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:090430",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 해외 유통 채널 입점.",
+  "article": {
+    "articleId": "MANUAL-HANKYUNG-202603035209g",
+    "title": "아모레퍼시픽 아이오페, '세포라' 입점…\"북미 공략 가속\"",
+    "publisher": "한국경제",
+    "publishedAt": "2026-03-03T01:54:00.000Z",
+    "sourceUrl": "https://www.hankyung.com/article/202603035209g",
+    "sourceUnits": [
+      { "id": "S1", "text": "아이오페는 이달부터 세포라 온·오프라인 채널에 입점해 고기능성 피부 설루션(솔루션)을 제안하는 '클리니컬 그레이드' 스킨케어 제품을 선보인다." },
+      { "id": "S2", "text": "주력 판매 제품은 'XMD 스템3 클리니컬 리커버리 세럼', '레티놀 레티젝션 세럼' 등이다." },
+      { "id": "S3", "text": "인체적용시험을 통해 모공 축소, 탄력·주름 개선 등의 효과를 확인했다고 회사 측은 설명했다." },
+      { "id": "S4", "text": "아모레퍼시픽은 이번 입점을 계기로 북미 시장에서 기술력 중심의 고효능 안티에이징 브랜드로 자리매김해 관련 시장을 공략할 계획이다." }
+    ]
+  },
+  "focusStatement": "아모레퍼시픽의 아이오페가 세포라 온·오프라인 채널에 입점해 북미 시장에 공식 진출한다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "아모레퍼시픽 아이오페, 미국 세포라에서 판다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "온라인과 매장 둘 다에서 팔아요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "sales_channels" },
+    { "text": "피부에 바르는 세럼이 주력이에요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "main_products" },
+    { "text": "북미 시장을 더 공략하려는 거예요.", "sourceIds": ["S4"], "role": "context", "factKey": "market_goal" }
+  ],
+  "priceConnection": {
+    "text": "파는 가게가 늘면 물건을 살 사람도 늘어나요.",
+    "sourceIds": ["S1", "S4"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "세포라", "easyText": "화장품을 여러 브랜드 모아 파는 큰 가게", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

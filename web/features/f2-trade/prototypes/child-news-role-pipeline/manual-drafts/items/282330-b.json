@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:282330",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 해외 점포 확장.",
+  "article": {
+    "articleId": "MANUAL-GENEWS-20260414-CU",
+    "title": "[편의점 글로벌 진출현황] CU 800호점 눈앞·GS25 700호점 돌파…해외 확장 '박차'",
+    "publisher": "글로벌이코노믹",
+    "publishedAt": "2026-04-14T06:33:00.000Z",
+    "sourceUrl": "https://www.g-enews.com/article/Distribution/2026/04/202604141526584931056c162803_1",
+    "sourceUnits": [
+      { "id": "S1", "text": "BGF리테일이 운영하는 CU는 3월 말 기준 몽골 556점, 말레이시아 176점, 카자흐스탄 56점, 미국 하와이 2점 등 총 790점을 운영 중이다." },
+      { "id": "S2", "text": "CU는 해외에서 △차별화 △현지화 △콜라보 3가지 콘셉트로 현지 고객에게 매력을 선보이고 있다." },
+      { "id": "S3", "text": "2018년 진출한 몽골에서는 수도인 울란바토르를 넘어 몽골 제2의 도시인 다르항(Darkhan) 등에도 다수의 점포를 개점하면서 몽골 전역으로 출점 범위를 확대하고 있다." },
+      { "id": "S4", "text": "CU는 현지 출점 속도를 감안할 때 1~2개월 내 해외 800호점 돌파가 가능할 것으로 보고 있다." },
+      { "id": "S5", "text": "앞서 2028년까지 해외 진출 국가를 5개 이상으로 늘리고, 점포 수를 최대 1200개까지 확대하겠다는 목표도 제시한 바 있다." }
+    ]
+  },
+  "focusStatement": "BGF리테일이 운영하는 CU가 3월 말 기준 몽골·말레이시아·카자흐스탄·미국 하와이에서 해외 점포 790곳을 운영 중이다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "BGF리테일 CU, 외국에서 편의점 790곳을 운영한다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "몽골에 556곳으로 가장 많아요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "mongolia_stores" },
+    { "text": "말레이시아에는 176곳이 있어요.", "sourceIds": ["S1"], "role": "business_detail", "factKey": "malaysia_stores" },
+    { "text": "몽골에는 2018년에 처음 갔어요.", "sourceIds": ["S3"], "role": "context", "factKey": "mongolia_entry_year" }
+  ],
+  "priceConnection": {
+    "text": "가게 수가 늘면 물건을 팔 수 있는 곳도 함께 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "편의점", "easyText": "밤늦게까지 문을 여는 작은 가게", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:086790",
+  "eventType": "capital_or_dividend",
+  "second": "실적 말고 다른 사건. 배당·자사주 소각.",
+  "article": {
+    "articleId": "MANUAL-GOODKYUNG-286298",
+    "title": "\"배당 늘리고 자사주 소각\"…하나금융, 주주환원 '실행력' 승부수",
+    "publisher": "굿모닝경제",
+    "publishedAt": "2026-04-24T07:47:00.000Z",
+    "sourceUrl": "https://www.goodkyung.com/news/articleView.html?idxno=286298",
+    "sourceUnits": [
+      { "id": "S1", "text": "그룹은 상반기 총 4000억원 규모의 자사주 매입·소각을 추진 중이며 이 가운데 2000억원을 추가로 결의했다." },
+      { "id": "S2", "text": "1분기 주당배당금(DPS)은 1145원으로 전년 평균 분기배당 대비 11.6%, 전년 동기 대비 24.6% 증가했다." },
+      { "id": "S3", "text": "1분기 기준 주주환원 총액은 5560억원으로, 이 가운데 현금배당 3070억원, 자사주 매입 2490억원이 반영됐다." },
+      { "id": "S4", "text": "실제로 주식 수 감소 효과가 반영되면서 1분기 주당순이익(EPS)은 전년 동기 대비 11.4% 증가했다." }
+    ]
+  },
+  "focusStatement": "하나금융이 상반기 총 4000억원 규모의 자사주 매입·소각을 추진하고 1분기 주당배당금을 1145원으로 늘렸다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "하나금융, 자기 주식 4000억원어치를 없앤다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "주식 하나당 배당은 1145원이에요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "dividend_per_share" },
+    { "text": "지난해 같은 때보다 24.6% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "dividend_growth" },
+    { "text": "1분기에 주주에게 5560억원을 돌려줬어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "total_shareholder_return" }
+  ],
+  "priceConnection": {
+    "text": "배당은 회사가 번 돈을 주식 가진 사람에게 나눠 주는 것이에요.",
+    "sourceIds": ["S2", "S3"],
+    "kind": "shareholder_return",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "배당", "easyText": "회사가 번 돈을 주식 가진 사람에게 나눠 주는 것", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "주주", "easyText": "그 회사 주식을 가지고 있는 사람", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

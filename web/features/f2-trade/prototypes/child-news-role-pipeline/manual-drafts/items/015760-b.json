@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:015760",
+  "eventType": "binding_contract",
+  "second": "실적 말고 다른 사건. 해외 기술협력 계약.",
+  "article": {
+    "articleId": "MANUAL-ASIAE-2026042908482075579",
+    "title": "한전, 美PSEG와 765kV 송전망 기술협력…김동철 \"전력시장 진출 지속 확대\"",
+    "publisher": "아시아경제",
+    "publishedAt": "2026-04-29T00:38:00.000Z",
+    "sourceUrl": "https://www.asiae.co.kr/article/economic-general/2026042908482075579",
+    "sourceUnits": [
+      { "id": "S1", "text": "한전은 28일 서울 양재동 한전 아트센터에서 미국 에너지기업 PSEG와 765kV 초고압 송전망 사업 협력을 위한 계약을 체결했다고 밝혔다." },
+      { "id": "S2", "text": "이번 계약은 한전이 보유한 765kV급 초고압 송전망의 설계·조달·시공(EPC) 역량과 안정적인 계통 운영능력을 국제적으로 입증한 중요한 성과로 평가된다" },
+      { "id": "S3", "text": "한전은 이번 협력을 계기로 단순 기술 자문을 넘어 사업개발 및 수행 전반에 보다 적극적으로 참여할 계획이다." },
+      { "id": "S4", "text": "한전은 국내 기자재 기업들과 함께 '팀 코리아' 체계를 구축해 미국 765kV 송전망 시장 진출을 추진할 예정이다." }
+    ]
+  },
+  "focusStatement": "한국전력이 미국 에너지기업 PSEG와 765kV 초고압 송전망 사업 협력 계약을 체결했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "한국전력, 미국 회사와 송전망 협력 계약을 맺었다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "상대는 미국 에너지 회사 PSEG예요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "partner" },
+    { "text": "전기를 멀리 보내는 시설을 다뤄요.", "sourceIds": ["S1", "S2"], "role": "business_detail", "factKey": "transmission_scope" },
+    { "text": "국내 회사들과 함께 미국에 나가요.", "sourceIds": ["S4"], "role": "context", "factKey": "team_korea" }
+  ],
+  "priceConnection": {
+    "text": "해외에서 계약을 따내면 새로 벌 수 있는 일이 생겨요.",
+    "sourceIds": ["S1", "S4"],
+    "kind": "contracted_business",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "계약", "easyText": "무엇을 언제까지 해 주기로 서로 약속하는 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "송전망", "easyText": "발전소에서 만든 전기를 멀리 보내는 길", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

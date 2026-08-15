@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:000120",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 배송 서비스 확장.",
+  "article": {
+    "articleId": "MANUAL-SIDAE-2026072817445666360",
+    "title": "대형·비규격 화물도 '오네'…CJ대한통운, 배송 서비스 확장",
+    "publisher": "시대",
+    "publishedAt": "2026-07-28T08:53:38.000Z",
+    "sourceUrl": "https://www.sidae.com/article/2026072817445666360",
+    "sourceUnits": [
+      { "id": "S1", "text": "CJ대한통운은 지난 27일 군포복합물류터미널에서 대신택배와 '이형 상품 배송서비스 확대 및 협업모델 구축을 위한 업무협약'(MOU)을 체결했다고 28일 밝혔다." },
+      { "id": "S2", "text": "이형화물은 일반 택배 기준(가로·세로·높이의 합 160cm, 무게 25kg 이하)을 넘어서는 크기나 무게, 또는 일정하지 않은 형태로 인해 별도의 운송·취급 역량이 필요한 상품을 말한다." },
+      { "id": "S3", "text": "최근 캠핑·낚시·골프용품 등 대형 상품의 온라인 거래가 늘고 1인 가구 증가에 따른 셀프 인테리어 수요도 확대되면서 이형화물 배송 수요는 꾸준히 증가하는 추세다." },
+      { "id": "S4", "text": "지난해에는 주 7일 배송 서비스인 '매일오네'를 선보였다." },
+      { "id": "S5", "text": "올해 4월에는 개인 간(C2C) 배송 서비스인 '보내오네'를 출시했고, 이번에는 대형·이형화물 배송까지 추가하며 포트폴리오를 확장했다." }
+    ]
+  },
+  "focusStatement": "CJ대한통운이 대신택배와 업무협약을 맺고 일반 택배 기준을 넘는 대형·이형화물 배송 서비스를 확대하기로 했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "CJ대한통운, 크고 무거운 짐도 배송한다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "대신택배와 함께 하기로 했어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "partner" },
+    { "text": "160cm·25kg을 넘는 짐이에요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "size_threshold" },
+    { "text": "캠핑·낚시 용품 주문이 늘었대요.", "sourceIds": ["S3"], "role": "context", "factKey": "demand_driver" }
+  ],
+  "priceConnection": {
+    "text": "배송할 수 있는 짐이 늘면 받을 수 있는 일도 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "배송", "easyText": "주문한 물건을 집까지 가져다주는 것", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

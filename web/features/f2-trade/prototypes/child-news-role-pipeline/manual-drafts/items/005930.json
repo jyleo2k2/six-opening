@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:005930",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-SNSTIME-20260707",
+    "title": "삼성전자, 2026년 2분기 잠정 실적 발표... 2분기 연결기준 매출 171조원, 영업이익 89.4조원 예상",
+    "publisher": "SNS 타임즈",
+    "publishedAt": "2026-07-07T00:00:00.000Z",
+    "sourceUrl": "https://www.thesnstime.com/samseongjeonja-2026nyeon-2bungi-jamjeong-siljeog-balpyo-2bungi-yeongyeolgijun-maecul-171joweon-yeongeobiig-89-4joweon-yesang/",
+    "sourceUnits": [
+      { "id": "S1", "text": "삼성전자가 연결기준으로 매출 171조원, 영업이익 89.4조원의 2026년 2분기 잠정 실적을 발표했다." },
+      { "id": "S2", "text": "2분기 실적의 경우 전기 대비 매출은 27.74%, 영업이익은 56.21% 증가했고, 전년 동기 대비 매출은 129.31%, 영업이익은 1810.26% 증가했다." },
+      { "id": "S3", "text": "잠정 실적은 한국채택 국제회계기준(IFRS)에 의거해 추정한 결과이며, 아직 결산이 종료되지 않은 가운데 투자자들의 편의를 돕는 차원에서 제공되는 것이다." }
+    ]
+  },
+  "focusStatement": "삼성전자가 연결기준 매출 171조원, 영업이익 89.4조원의 2026년 2분기 잠정 실적을 발표했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "삼성전자, 2분기 매출 171조원·영업이익 89.4조원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "지난 분기보다 매출이 27.74% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth_qoq" },
+    { "text": "영업이익은 56.21% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth_qoq" },
+    { "text": "아직 계산이 끝나지 않은 잠정 숫자예요.", "sourceIds": ["S3"], "role": "context", "factKey": "provisional_notice" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "잠정", "easyText": "아직 최종 계산 전이라 조금 바뀔 수 있는 것", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

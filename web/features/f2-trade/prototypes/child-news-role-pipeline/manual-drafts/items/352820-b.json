@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:352820",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 월드투어 규모.",
+  "article": {
+    "articleId": "MANUAL-THEGURU-100946",
+    "title": "하이브 BTS \"전 세계에 K-아리랑 전하고 올게요\"…월드투어 출국 현장",
+    "publisher": "THE GURU",
+    "publishedAt": "2026-04-23T04:59:16.000Z",
+    "sourceUrl": "https://www.theguru.co.kr/news/article.html?no=100946",
+    "sourceUnits": [
+      { "id": "S1", "text": "BTS 멤버들은 23일 오전 인천국제공항 제2여객터미널을 통해 미국 애틀란타로 출국했다." },
+      { "id": "S2", "text": "이번 출국으로 BTS는 오는 25일부터 북미에서 월드투어를 이어간다." },
+      { "id": "S3", "text": "이번 BTS 월드투어는 '아리랑'은 전 세계 23개국 34개 도시에서 82회 이상 공연이 예정돼 있으며 K-팝 사상 최대 규모의 월드투어다." },
+      { "id": "S4", "text": "지난 9일 경기 고양종합운동장을 시작으로 월드투어에 나서며 본격적인 완전체 활동에 돌입했다." },
+      { "id": "S5", "text": "지난 18일에는 일본 도쿄돔에서 팬들을 만났다." }
+    ]
+  },
+  "focusStatement": "하이브 소속 BTS가 23개국 34개 도시에서 82회 이상 공연하는 월드투어 '아리랑'을 진행하며 북미 일정에 들어갔다.",
+  "anchorSourceId": "S3",
+  "headline": { "text": "하이브 BTS, 34개 도시에서 82번 공연한다", "sourceIds": ["S3"] },
+  "body": [
+    { "text": "23개 나라를 돌아요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "country_count" },
+    { "text": "K팝 역사상 가장 큰 규모예요.", "sourceIds": ["S3"], "role": "context", "factKey": "largest_kpop_tour" },
+    { "text": "월드투어는 4월 9일 고양에서 시작했어요.", "sourceIds": ["S4"], "role": "business_detail", "factKey": "tour_start" }
+  ],
+  "priceConnection": {
+    "text": "공연을 많이 하면 표를 판 돈도 늘어나요.",
+    "sourceIds": ["S3", "S4"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "월드투어", "easyText": "여러 나라를 돌아다니며 하는 공연", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

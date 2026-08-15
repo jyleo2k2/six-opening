@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:122870",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 소속 그룹 월드투어.",
+  "article": {
+    "articleId": "MANUAL-ETNEWS-20260626000026",
+    "title": "글로벌 '춤판' 드디어 시작…베이비몬스터, 서울콘 D-DAY",
+    "publisher": "전자신문",
+    "publishedAt": "2026-06-26T00:04:00.000Z",
+    "sourceUrl": "https://www.etnews.com/20260626000026",
+    "sourceUnits": [
+      { "id": "S1", "text": "베이비몬스터가 6월 26일부터 28일까지 서울 잠실실내체육관에서 '2026-27 BABYMONSTER WORLD TOUR [춤 (CHOOM)] IN SEOUL'을 개최하고 두 번째 월드투어의 포문을 연다." },
+      { "id": "S2", "text": "현재까지 공개된 일정만 18개 도시·29회 공연으로, 첫 번째 월드투어 'HELLO MONSTERS'보다 규모를 확장했다." },
+      { "id": "S3", "text": "이번 투어는 아시아, 북미, 오세아니아, 유럽, 남미 등 5개 대륙을 아우른다." },
+      { "id": "S4", "text": "특히 미니 3집 [춤 (CHOOM)] 수록곡과 투어 전용 무대가 준비돼 기대를 모은다." }
+    ]
+  },
+  "focusStatement": "와이지엔터테인먼트 소속 베이비몬스터가 서울 공연을 시작으로 18개 도시 29회 규모의 두 번째 월드투어에 들어갔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "와이지엔터 베이비몬스터, 두 번째 월드투어를 시작했다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "6월 26일 서울에서 시작했어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "tour_start" },
+    { "text": "18개 도시에서 29번 공연해요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "tour_scale" },
+    { "text": "다섯 개 대륙을 돌아요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "continents" }
+  ],
+  "priceConnection": {
+    "text": "공연을 많이 하면 표를 판 돈도 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "월드투어", "easyText": "여러 나라를 돌아다니며 하는 공연", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "대륙", "easyText": "아시아·유럽처럼 아주 큰 땅덩어리", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:020560",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-ASIAE-2026081317185786293",
+    "title": "아시아나 2분기 영업손실 2951억원…화물기 사업 매각 영향",
+    "publisher": "아시아경제",
+    "publishedAt": "2026-08-13T08:18:00.000Z",
+    "sourceUrl": "https://www.asiae.co.kr/article/2026081317185786293",
+    "sourceUnits": [
+      { "id": "S1", "text": "아시아나항공은 올해 2분기 매출액 1조5470억원과 영업손실 2951억원을 기록했다고 13일 밝혔다." },
+      { "id": "S2", "text": "매출은 화물기 사업 매각 영향으로 전년 동기 대비 1286억원 줄었다." },
+      { "id": "S3", "text": "여객사업 매출은 1조2809억원을 기록해 전년 대비 1633억원(15%) 증가했다." },
+      { "id": "S4", "text": "화물사업 매출은 작년 8월 화물기 사업부 매각 영향으로 전년 대비 2565억원 감소한 1147억원을 기록했다." }
+    ]
+  },
+  "focusStatement": "아시아나항공이 2026년 2분기 매출액 1조5470억원과 영업손실 2951억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "아시아나항공, 2분기 매출 1조5470억원·영업손실 2951억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "손님을 태워 1조2809억원을 벌었어요.", "sourceIds": ["S3"], "role": "key_detail", "factKey": "passenger_revenue" },
+    { "text": "여객 매출은 15% 늘었어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "passenger_revenue_growth" },
+    { "text": "화물 사업을 판 뒤 매출이 줄었어요.", "sourceIds": ["S2", "S4"], "role": "context", "factKey": "cargo_divestiture_effect" }
+  ],
+  "priceConnection": {
+    "text": "영업손실은 번 돈보다 쓴 돈이 많았다는 뜻이에요.",
+    "sourceIds": ["S1"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "영업손실", "easyText": "번 돈보다 쓴 돈이 많아서 밑진 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "여객", "easyText": "비행기를 타는 손님", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

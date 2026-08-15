@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:086790",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-1CONOMY-49701",
+    "title": "하나금융, 2Q 순이익 1조1928억원…'기업가치 제고 2.0' 발표",
+    "publisher": "1코노미뉴스",
+    "publishedAt": "2026-07-24T07:57:00.000Z",
+    "sourceUrl": "https://www.1conomynews.co.kr/news/articleView.html?idxno=49701",
+    "sourceUnits": [
+      { "id": "S1", "text": "2026년 2분기 연결 기준 잠정 당기순이익은 1조1928억원으로, 전년 동기보다 1.7% 증가했다." },
+      { "id": "S2", "text": "계열사별로는 하나은행이 2분기 1조169억원의 순이익을 기록했다." },
+      { "id": "S3", "text": "하나증권은 전년 동기보다 약 439% 급증한 1698억원의 순이익을 거뒀다." },
+      { "id": "S4", "text": "하나카드의 순이익은 684억원으로 전년 동기보다 약 23% 증가했다." },
+      { "id": "S5", "text": "하나캐피탈은 509억원의 순이익을 내 전년 동기 166억원 순손실에서 흑자로 전환했다." },
+      { "id": "S6", "text": "하나생명은 전년 동기보다 약 223.8% 증가한 68억원을 기록했다." }
+    ]
+  },
+  "focusStatement": "하나금융지주가 2026년 2분기 연결 기준 잠정 당기순이익 1조1928억원을 기록해 전년 동기보다 1.7% 증가했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "하나금융, 2분기 순이익 1조1928억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "지난해 같은 기간보다 1.7% 늘었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "net_income_growth" },
+    { "text": "하나은행이 1조169억원을 벌었어요.", "sourceIds": ["S2"], "role": "business_detail", "factKey": "bank_net_income" },
+    { "text": "하나증권은 1698억원을 벌었어요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "securities_net_income" }
+  ],
+  "priceConnection": {
+    "text": "순이익은 회사가 얼마나 벌었는지를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "순이익", "easyText": "세금까지 다 내고 최종적으로 남은 돈", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

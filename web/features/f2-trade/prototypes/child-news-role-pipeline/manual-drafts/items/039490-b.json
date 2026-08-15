@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:039490",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 새 서비스 도입.",
+  "article": {
+    "articleId": "MANUAL-NSPNA-815522",
+    "title": "키움증권, MTS 커뮤니티에 AI 기능 도입…정보·모니터링 강화",
+    "publisher": "NSP통신",
+    "publishedAt": "2026-06-05T02:20:00.000Z",
+    "sourceUrl": "https://www.nspna.com/news/?mode=view&newsid=815522",
+    "sourceUnits": [
+      { "id": "S1", "text": "키움증권 커뮤니티는 모바일트레이딩시스템(MTS) 내 실시간 채팅형 서비스다." },
+      { "id": "S2", "text": "서비스 내 정보 제공 역량 제고를 위해서는 AI 기반 뉴스·공시 정보 요약 및 해당 이슈에 대한 긍·부정 투표 시스템이 도입됐다." },
+      { "id": "S3", "text": "건전한 투자환경 조성을 위해서는 AI 기반 모더레이션 시스템과 전문 인력을 결합한 2중 모니터링 운영체계를 마련했다." },
+      { "id": "S4", "text": "키움증권은 해당 서비스가 출시 약 4개월 만에 이용자 수 150만명을 넘어섰다." }
+    ]
+  },
+  "focusStatement": "키움증권이 모바일 앱 안 채팅 서비스에 AI 기반 뉴스 요약과 모니터링 기능을 도입했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "키움증권, 앱 채팅에 인공지능 기능을 넣었다", "sourceIds": ["S1", "S2"] },
+  "body": [
+    { "text": "인공지능이 뉴스를 짧게 요약해 줘요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "ai_summary" },
+    { "text": "이용자가 150만명을 넘었어요.", "sourceIds": ["S4"], "role": "key_detail", "factKey": "user_count" },
+    { "text": "나쁜 글은 두 단계로 걸러내요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "moderation" }
+  ],
+  "priceConnection": {
+    "text": "쓰는 사람이 늘면 회사가 돈을 벌 기회도 늘어나요.",
+    "sourceIds": ["S1", "S4"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "인공지능", "easyText": "사람처럼 생각하고 답하도록 만든 컴퓨터 기술", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

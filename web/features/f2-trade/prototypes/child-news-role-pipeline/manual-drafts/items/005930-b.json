@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:005930",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 신제품 공개.",
+  "article": {
+    "articleId": "MANUAL-MT-2026070808210313284",
+    "title": "삼성전자, 갤럭시 Z8 시리즈 영국 런던서 22일 선보인다",
+    "publisher": "머니투데이",
+    "publishedAt": "2026-07-07T23:37:00.000Z",
+    "sourceUrl": "https://www.mt.co.kr/amp/tech/2026/07/08/2026070808210313284",
+    "sourceUnits": [
+      { "id": "S1", "text": "삼성전자가 오는 22일(한국시간), 영국 런던에서 '갤럭시 언팩 2026(Galaxy Unpacked July 2026)'을 개최한다고 8일 밝혔다." },
+      { "id": "S2", "text": "이번에는 차세대 폴더블 스마트폰 '갤럭시 Z8' 시리즈를 선보인다." },
+      { "id": "S3", "text": "갤럭시 언팩 2026은 한국시간으로 22일 오후 10시(현지시간 7월 22일 오후 2시)에 삼성닷컴과 삼성전자 뉴스룸, 삼성전자 유튜브 채널을 통해 온라인으로 생중계될 예정이다." },
+      { "id": "S4", "text": "삼성전자는 이번에 선보일 폴더블 라인업 재편을 공식화했다." }
+    ]
+  },
+  "focusStatement": "삼성전자가 영국 런던에서 갤럭시 언팩 2026을 열고 차세대 폴더블 스마트폰 갤럭시 Z8 시리즈를 공개한다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "삼성전자, 런던에서 새 접는 휴대폰을 공개한다", "sourceIds": ["S1", "S2"] },
+  "body": [
+    { "text": "이름은 갤럭시 Z8 시리즈예요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "product_name" },
+    { "text": "7월 22일에 보여줬어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "event_date" },
+    { "text": "인터넷으로도 생중계했어요.", "sourceIds": ["S3"], "role": "context", "factKey": "live_stream" }
+  ],
+  "priceConnection": {
+    "text": "새 제품이 잘 팔리면 회사가 버는 돈도 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "시리즈", "easyText": "같은 이름으로 여러 개를 묶어 낸 것", "treatment": "explained", "sourceIds": ["S2"] }
+  ]
+}

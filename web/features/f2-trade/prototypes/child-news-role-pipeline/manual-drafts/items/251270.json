@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:251270",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-ZDNET-20260805155239",
+    "title": "넷마블, 2분기 매출 7492억·영업익 801억…하반기 신작 3종 출격",
+    "publisher": "ZDNet Korea",
+    "publishedAt": "2026-08-05T06:52:00.000Z",
+    "sourceUrl": "https://zdnet.co.kr/view/?no=20260805155239",
+    "sourceUnits": [
+      { "id": "S1", "text": "넷마블은 2026년 2분기 연결기준 매출 7492억원, 영업이익 801억원을 기록했다고 5일 밝혔다." },
+      { "id": "S2", "text": "전년 동기 대비 매출은 4.4% 늘었으나 영업이익은 20.8% 감소했다." },
+      { "id": "S3", "text": "전 분기와 비교하면 매출은 15.0%, 영업이익은 50.8% 상승하며 완연한 실적 개선을 이뤄냈다." },
+      { "id": "S4", "text": "상각전 영업이익(EBITDA)은 1120억원, 당기순이익은 2039억원으로 집계됐다." },
+      { "id": "S5", "text": "이에 따른 올해 상반기 누적 매출은 1조 4009억원, 누적 영업이익은 1332억원이다." },
+      { "id": "S6", "text": "2분기 해외 매출은 5808억원으로 전체 매출의 78%를 차지하며 전 분기 대비 13.4% 상승했다." }
+    ]
+  },
+  "focusStatement": "넷마블이 2026년 2분기 연결기준 매출 7492억원, 영업이익 801억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "넷마블, 2분기 매출 7492억원·영업이익 801억원", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "매출은 지난해보다 4.4% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 20.8% 줄었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_decline" },
+    { "text": "매출의 78%를 외국에서 벌었어요.", "sourceIds": ["S6"], "role": "business_detail", "factKey": "overseas_revenue_share" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

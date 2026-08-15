@@ -1,0 +1,5 @@
+# 파이프라인 실행 산출물 — 매 실행마다 수십 MB씩 새로 쌓인다.
+# 화면이 읽는 값은 Supabase 에 있고, 게시된 내용의 원본은 manual-drafts/items/ 다.
+# 탈락 후보와 판정 로그가 필요하면 그 실행을 다시 돌린다.
+reports/
+manual-drafts/merged-report.json

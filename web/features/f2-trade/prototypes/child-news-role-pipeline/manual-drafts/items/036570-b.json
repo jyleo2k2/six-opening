@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:036570",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 게임 글로벌 출시.",
+  "article": {
+    "articleId": "MANUAL-STARTUPTODAY-610723",
+    "title": "엔씨 아이온2, 2026년 하반기 글로벌 출시 ··· PC 플랫폼으로 서비스",
+    "publisher": "오늘경제",
+    "publishedAt": "2026-04-22T03:45:00.000Z",
+    "sourceUrl": "https://www.startuptoday.co.kr/news/articleView.html?idxno=610723",
+    "sourceUnits": [
+      { "id": "S1", "text": "엔씨(공동대표 김택진, 박병무)의 MMORPG(다중접속역할수행게임) '아이온2'가 글로벌 출시 일정을 올해 하반기로 확정했다." },
+      { "id": "S2", "text": "아이온2 글로벌 버전은 스팀(Steam)과 퍼플(PURPLE)을 통한 PC 전용 플랫폼으로 개발 중이다." },
+      { "id": "S3", "text": "엔씨는 북미, 남미, 유럽, 일본 각 지역별 서버를 구축해 운영할 계획이다." },
+      { "id": "S4", "text": "영어, 독일어, 프랑스어, 스페인어, 포르투갈어, 일본어, 한국어, 러시아어, 중국어(간체·번체) 등 총 10개 언어를 지원한다." }
+    ]
+  },
+  "focusStatement": "엔씨소프트의 MMORPG 아이온2가 글로벌 출시 일정을 2026년 하반기로 확정했다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "엔씨소프트 아이온2, 올해 하반기 전 세계에 나온다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "10개 언어로 만들어요.", "sourceIds": ["S4"], "role": "key_detail", "factKey": "language_count" },
+    { "text": "북미·남미·유럽·일본에 서버를 둬요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "server_regions" },
+    { "text": "컴퓨터로만 할 수 있어요.", "sourceIds": ["S2"], "role": "context", "factKey": "pc_only" }
+  ],
+  "priceConnection": {
+    "text": "더 많은 나라에서 팔면 게임을 살 사람도 늘어나요.",
+    "sourceIds": ["S1", "S3"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "서버", "easyText": "게임을 돌려 주는 큰 컴퓨터", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

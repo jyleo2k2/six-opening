@@ -1,0 +1,37 @@
+{
+  "stockId": "KRX:282330",
+  "eventType": "earnings",
+  "article": {
+    "articleId": "MANUAL-NEWSPIM-20260806000889",
+    "title": "BGF리테일, 2분기 영업익 849억원…전년 比 22.3%↑",
+    "publisher": "뉴스핌",
+    "publishedAt": "2026-08-06T06:18:00.000Z",
+    "sourceUrl": "https://www.newspim.com/news/view/20260806000889",
+    "sourceUnits": [
+      { "id": "S1", "text": "BGF리테일은 올해 2분기 매출액이 2조4268억원으로 전년 동기 대비 6.0% 증가했다고 6일 밝혔다." },
+      { "id": "S2", "text": "영업이익은 849억원으로 22.3% 늘었다." },
+      { "id": "S3", "text": "올해 상반기 누적 매출액은 4조5472억원으로 전년 동기 대비 5.6% 증가했다." },
+      { "id": "S4", "text": "영업이익은 1230억원으로 33.7% 늘었다." },
+      { "id": "S5", "text": "동일점 매출 성장세가 확대되며 실적 개선을 이끌었다." }
+    ]
+  },
+  "focusStatement": "BGF리테일이 2026년 2분기 매출액 2조4268억원, 영업이익 849억원을 기록했다고 밝혔다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "BGF리테일, 2분기 매출 2조4268억원·영업이익 849억원", "sourceIds": ["S1", "S2"] },
+  "body": [
+    { "text": "매출은 지난해보다 6.0% 늘었어요.", "sourceIds": ["S1"], "role": "key_detail", "factKey": "revenue_growth" },
+    { "text": "영업이익은 22.3% 늘었어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "operating_profit_growth" },
+    { "text": "상반기 매출은 4조5472억원이에요.", "sourceIds": ["S3"], "role": "context", "factKey": "half_year_revenue" }
+  ],
+  "priceConnection": {
+    "text": "매출과 영업이익은 회사의 사업 성과를 보여주는 숫자예요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "business_performance",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "매출", "easyText": "물건이나 서비스를 팔아서 들어온 돈 전부", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "영업이익", "easyText": "번 돈에서 쓴 돈을 빼고 남은 돈", "treatment": "explained", "sourceIds": ["S2"] },
+    { "term": "상반기", "easyText": "한 해를 둘로 나눈 앞쪽 여섯 달", "treatment": "explained", "sourceIds": ["S3"] }
+  ]
+}

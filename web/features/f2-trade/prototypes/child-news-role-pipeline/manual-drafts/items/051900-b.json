@@ -1,0 +1,35 @@
+{
+  "stockId": "KRX:051900",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 해외 유통 채널 입점.",
+  "article": {
+    "articleId": "MANUAL-MT-2026060210075012442",
+    "title": "LG생활건강, 닥터그루트 북미 공략 본격화… 세포라 핵심 매장 선론칭",
+    "publisher": "머니투데이",
+    "publishedAt": "2026-06-02T01:09:00.000Z",
+    "sourceUrl": "https://www.mt.co.kr/living/2026/06/02/2026060210075012442",
+    "sourceUnits": [
+      { "id": "S1", "text": "닥터그루트는 최근 미국 세포라 핵심 매장 90여 곳에 전용 진열 공간인 '헤어타워'를 설치하고 대표 제품인 SRS 라인 제품을 선보였다." },
+      { "id": "S2", "text": "오는 8월 미국 전역 400여 개 세포라 매장 정식 입점을 앞두고 시장 반응과 판매 데이터를 사전에 확보하기 위한 전략이다." },
+      { "id": "S3", "text": "매장에서는 샴푸와 컨디셔너, 롤온 세럼 등 SRS 라인 핵심 제품을 직접 체험할 수 있도록 구성해 소비자 접점을 확대했다." },
+      { "id": "S4", "text": "닥터그루트는 현재 아마존과 틱톡숍 등 북미 주요 유통 채널에서 성장세를 이어가고 있으며, 올해 1분기에는 전년 동기 대비 세 자릿수 매출 성장률을 기록했다." }
+    ]
+  },
+  "focusStatement": "LG생활건강의 닥터그루트가 미국 세포라 핵심 매장 90여 곳에 먼저 들어가고 8월 전역 400여 개 매장 정식 입점을 앞두고 있다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "LG생활건강 샴푸, 미국 세포라 90곳에 들어갔다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "8월에는 400곳으로 늘어나요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "expansion_plan" },
+    { "text": "샴푸와 컨디셔너를 팔아요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "product_lineup" },
+    { "text": "전용 진열대도 따로 놓았어요.", "sourceIds": ["S1"], "role": "context", "factKey": "dedicated_display" }
+  ],
+  "priceConnection": {
+    "text": "파는 가게가 늘면 물건을 살 사람도 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "recurring_sales",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "세포라", "easyText": "화장품을 여러 브랜드 모아 파는 큰 가게", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

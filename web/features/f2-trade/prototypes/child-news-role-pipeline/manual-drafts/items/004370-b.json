@@ -1,0 +1,36 @@
+{
+  "stockId": "KRX:004370",
+  "eventType": "sales_or_production",
+  "second": "실적 말고 다른 사건. 수출 전용 공장 완공.",
+  "article": {
+    "articleId": "MANUAL-HANKYUNG-2026073185261",
+    "title": "\"수출 영토 넓히자\"…라면 공장 신설 경쟁",
+    "publisher": "한국경제",
+    "publishedAt": "2026-07-31T08:27:00.000Z",
+    "sourceUrl": "https://www.hankyung.com/article/2026073185261",
+    "sourceUnits": [
+      { "id": "S1", "text": "농심은 2024년 8월 부산 강서구 녹산국가산업단지에 수출 전용 라면공장을 짓겠다고 발표했다." },
+      { "id": "S2", "text": "올해 하반기 완공되면 연 5억 개를 생산할 수 있다." },
+      { "id": "S3", "text": "농심은 유럽과 북미, 중남미 등으로 늘어나는 수출 물량을 전담하는 생산기지로 활용할 계획이다." },
+      { "id": "S4", "text": "삼양식품의 해외 매출 비중은 80%, 농심은 40%에 이른다." }
+    ]
+  },
+  "focusStatement": "농심이 부산 녹산에 짓는 수출 전용 라면공장이 2026년 하반기 완공되면 연 5억 개를 생산할 수 있다.",
+  "anchorSourceId": "S1",
+  "headline": { "text": "농심, 수출만 하는 라면공장을 부산에 짓는다", "sourceIds": ["S1"] },
+  "body": [
+    { "text": "올해 하반기에 다 지어져요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "completion_timing" },
+    { "text": "1년에 5억 개를 만들 수 있어요.", "sourceIds": ["S2"], "role": "key_detail", "factKey": "annual_capacity" },
+    { "text": "유럽·북미·중남미로 보낼 거예요.", "sourceIds": ["S3"], "role": "business_detail", "factKey": "target_regions" }
+  ],
+  "priceConnection": {
+    "text": "공장이 생기면 한 번에 만들 수 있는 양이 늘어나요.",
+    "sourceIds": ["S1", "S2"],
+    "kind": "production_capacity",
+    "basis": "event_education"
+  },
+  "termTreatments": [
+    { "term": "수출", "easyText": "우리나라에서 만든 것을 외국에 파는 것", "treatment": "explained", "sourceIds": ["S1"] },
+    { "term": "공장", "easyText": "물건을 많이 만들어 내는 큰 건물", "treatment": "explained", "sourceIds": ["S1"] }
+  ]
+}

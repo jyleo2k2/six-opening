@@ -147,12 +147,16 @@ export async function runUniverseNewsEvaluation(
     onCaseCompleted?: (report: UniverseNewsReport, latest: UniverseNewsCaseResult) => Promise<void> | void;
   } = {},
 ) {
-  if (collection.candidates.length !== 51) {
-    throw new Error(`51종목 수집 결과가 필요합니다. 현재 ${collection.candidates.length}건입니다.`);
+  // 51종목을 여러 프로세스로 나눠 돌릴 수 있게 조각 입력을 허용한다(`shard-universe-run.mjs`).
+  // 종목끼리는 서로를 참조하지 않으므로 나눠 돌려도 판정 결과가 같다. 완전성은 여기가 아니라
+  // 적재 게이트(`renderUniverseNewsStorageSql`)가 병합 리포트에서 검사한다 — 조각 리포트는
+  // `decisionComplete: false` 로 남아 그대로는 적재에 쓸 수 없다.
+  if (collection.candidates.length === 0 || collection.candidates.length > 51) {
+    throw new Error(`수집 종목은 1~51건이어야 합니다. 현재 ${collection.candidates.length}건입니다.`);
   }
   const stockIds = collection.candidates.map((item) => item.stock.stockId);
-  if (new Set(stockIds).size !== 51) {
-    throw new Error("51종목 수집 결과에 중복 종목이 있습니다.");
+  if (new Set(stockIds).size !== stockIds.length) {
+    throw new Error("수집 결과에 중복 종목이 있습니다.");
   }
 
   const existingByStock = new Map(
