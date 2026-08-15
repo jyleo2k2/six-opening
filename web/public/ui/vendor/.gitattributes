@@ -1,0 +1,4 @@
+# 이 폴더는 내려받은 원본 그대로여야 한다.
+# core.autocrlf=true 인 환경에서 체크아웃할 때 개행이 CRLF 로 바뀌면 파일 바이트가 달라져
+# support.js 의 SRI 해시와 어긋나고, vendor-react-offline 검사가 깨진다.
+* -text
