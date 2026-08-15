@@ -47,11 +47,9 @@ assert.equal(first.text, toPoliteKorean(`궁금한 걸 잘 짚었어요 — ${pe
 assert.deepEqual(first.kind === "turn" ? first.turn : null, {
   scriptId: "term:per",
   stage: "brief",
-  prompt: toPoliteKorean(per.check.question),
-  choices: [
-    ...per.check.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
-    { id: "unsure", label: toPoliteKorean("잘 모르겠어요") },
-  ],
+  // 🤖 prompt 와 🧒 선택지 라벨은 승인 데이터를 그대로 내보낸다(SPEC §3.3.2).
+  prompt: per.check.question,
+  choices: [...per.check.choices, { id: "unsure", label: "잘 모르겠어요" }],
 });
 
 // ② 정답이면 구체적으로 피드백하고 다음 행동을 묻는다.
@@ -72,10 +70,7 @@ const wrong = advanceExplain(per, {
 });
 assert.equal(wrong?.kind, "turn");
 assert.equal(wrong?.text, toPoliteKorean(`그렇게 생각할 수 있어요. ${per.adjust?.explanation}`));
-assert.deepEqual(
-  wrong?.kind === "turn" ? wrong.turn.choices : null,
-  per.adjust?.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
-);
+assert.deepEqual(wrong?.kind === "turn" ? wrong.turn.choices : null, per.adjust?.choices);
 assert.equal(wrong?.kind === "turn" ? wrong.turn.stage : null, "detail");
 
 // ④ 작은 질문의 정답이면 개념을 연결하고, 오답이면 예시 뒤 같은 작은 질문으로 돌아간다.
@@ -218,10 +213,7 @@ assert.equal(gateChatOutput({ text: unsureAtBrief!.text, source: "fixed" }).ok, 
 const reask = reaskExplain(per, "detail");
 assert.equal(reask.kind, "turn");
 assert.equal(reask.kind === "turn" ? reask.turn.stage : null, "detail");
-assert.deepEqual(reask.kind === "turn" ? reask.turn.choices : null, [
-  { id: "no", label: "들어가지 않아요" },
-  { id: "yes", label: "들어가" },
-]);
+assert.deepEqual(reask.kind === "turn" ? reask.turn.choices : null, per.adjust?.choices);
 // 되물을 때마다 turn에 횟수를 실어 보낸다 — 클라이언트가 다음 요청에 그대로
 // 돌려보내야 상한을 셀 수 있다.
 assert.equal(reask.kind === "turn" ? reask.turn.reaskCount : null, 1);

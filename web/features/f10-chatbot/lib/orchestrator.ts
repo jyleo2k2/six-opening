@@ -276,44 +276,17 @@ function dapieFeedback(
   return "궁금한 지점을 잘 짚었어요";
 }
 
-function toPoliteAction(
-  action: ChatActionPayload | undefined,
-): ChatActionPayload | undefined {
-  if (!action) return undefined;
-  const suggestedQuestions = action.suggestedQuestions?.map(toPoliteKorean);
-  if (!("kind" in action)) return { ...action, suggestedQuestions };
-
-  if (action.kind === "explain") {
-    return {
-      ...action,
-      suggestedQuestions,
-      turn: {
-        ...action.turn,
-        prompt: toPoliteKorean(action.turn.prompt),
-        choices: action.turn.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
-      },
-    };
-  }
-  if (action.kind === "stock-explore") {
-    return {
-      ...action,
-      suggestedQuestions,
-      turn: {
-        ...action.turn,
-        prompt: toPoliteKorean(action.turn.prompt),
-        choices: action.turn.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
-      },
-    };
-  }
-  return {
-    ...action,
-    suggestedQuestions,
-    turn: {
-      ...action.turn,
-      prompt: toPoliteKorean(action.turn.prompt),
-      choices: action.turn.choices.map((choice) => ({ ...choice, label: toPoliteKorean(choice.label) })),
-    },
-  };
+/**
+ * 액션에 담긴 문구의 화자별 처리 (SPEC §3.3.2).
+ *
+ * - 🤖 챗봇 발화(`prompt`)는 승인 데이터가 이미 해요체다. 변환하지 않고 출력 게이트로 검사만 한다.
+ * - 🧒 자녀 발화(`choices[].label`, `suggestedQuestions`)는 아이가 누르는 자기 말이라 손대지 않는다.
+ *   변환을 걸면 "도와줘?" -> "도와주세요?" 처럼 질문이 지시체로 바뀐다.
+ *
+ * 그래서 여기서 액션 문구를 손보는 단계는 두지 않는다.
+ */
+function actionPrompts(action: ChatActionPayload | undefined): string[] {
+  return action && "kind" in action ? [action.turn.prompt] : [];
 }
 
 /**
@@ -693,18 +666,20 @@ export async function createChatOutcome(
     }
   }
 
-  response = {
-    ...response,
-    text: toPoliteKorean(response.text),
-    ...(response.suggestedQuestions
-      ? { suggestedQuestions: response.suggestedQuestions.map(toPoliteKorean) }
-      : {}),
-  };
+  // 본문은 승인 데이터 상당수가 아직 반말 원문이라 변환을 유지한다.
+  // 추천질문은 아이가 누르는 자기 말이므로 변환하지 않는다(SPEC §3.3.2).
+  response = { ...response, text: toPoliteKorean(response.text) };
 
   onStatus("답변을 안전하게 점검하는 중");
-  const politeOutput =
-    isHaeyoKorean(response.text) &&
-    (response.suggestedQuestions?.every(isHaeyoKorean) ?? true);
+  // 🤖 챗봇이 말하는 것만 검사한다. 본문과 확인 질문(prompt)이 대상이고,
+  // 🧒 아이가 누르는 추천질문·선택지 라벨은 검사하지 않는다.
+  const chatbotUtterances = [
+    response.text,
+    ...actionPrompts(explainAction),
+    ...actionPrompts(stockExploreAction),
+    ...actionPrompts(sectorExploreAction),
+  ];
+  const politeOutput = chatbotUtterances.every(isHaeyoKorean);
   const gate = politeOutput
     ? gateChatOutput({
         text: response.text,
@@ -754,7 +729,7 @@ export async function createChatOutcome(
   const standardAction = safeOutput
     ? sanitizeActionPayload(response)
     : undefined;
-  const outputAction = toPoliteAction(safeOutput
+  const outputAction = safeOutput
     ? sectorExploreAction
       ? { ...standardAction, ...sectorExploreAction }
       : stockExploreAction
@@ -762,7 +737,7 @@ export async function createChatOutcome(
       : explainAction
         ? { ...standardAction, ...explainAction }
         : standardAction
-    : undefined);
+    : undefined;
   const gatedResponse: ChatResponse = {
     text: useSimplerFallback
       ? useSimplerFallback

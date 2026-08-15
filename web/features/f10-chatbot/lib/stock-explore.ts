@@ -64,12 +64,12 @@ export function advanceStockExplore(
 
   const nextTopic = findNextStockExploreTopic(reply.shownTopics);
   if (reply.choiceId === "done") {
-    return { kind: "end", text: toPoliteKorean("좋아, 여기까지 볼게. 궁금한 종목이 생기면 이름을 말해 줘.") };
+    return { kind: "end", text: "좋아요, 여기까지 볼게요. 궁금한 종목이 생기면 이름을 말해 주세요." };
   }
   if (reply.choiceId === "ask-other") {
     return nextTopic
       ? null
-      : { kind: "end", text: toPoliteKorean("좋아, 다른 종목 이름과 궁금한 점을 적어 줄래?") };
+      : { kind: "end", text: "좋아요, 다른 종목 이름과 궁금한 점을 적어 줄래요?" };
   }
   if (reply.choiceId !== nextTopic) return null;
   return {
@@ -92,7 +92,7 @@ export function createStockExploreTurn(
     return {
       stockId,
       shownTopics,
-      prompt: "이것도 알려줄까?",
+      prompt: "이것도 알려줄까요?",
       choices: [
         { id: nextTopic, label: TOPIC_QUESTIONS[nextTopic](stock.name) },
         { id: "done", label: "여기까지 볼래" },
@@ -104,8 +104,8 @@ export function createStockExploreTurn(
     stockId,
     shownTopics,
     prompt: shownTopics.includes("financial")
-      ? `${stock.name}의 2024년 실적을 살펴봤어. 다른 종목도 알아볼까?`
-      : `${stock.name}의 회사·사업·업종 정보는 모두 살펴봤어. 다른 종목도 알아볼까?`,
+      ? `${stock.name}의 2024년 실적을 살펴봤어요. 다른 종목도 알아볼까요?`
+      : `${stock.name}의 회사·사업·업종 정보는 모두 살펴봤어요. 다른 종목도 알아볼까요?`,
     choices: [
       { id: "ask-other", label: "다른 종목 물어볼래" },
       { id: "done", label: "여기까지 볼래" },

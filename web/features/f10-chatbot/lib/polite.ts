@@ -11,7 +11,9 @@ export function toPoliteKorean(text: string): string {
     .replace(/구나(?=[.!?]|$)/g, "군요")
     .replace(/해(?=[.!?]|$)/g, "해요")
     .replace(/돼(?=[.!?]|$)/g, "돼요")
-    .replace(/줘(?=[.!?]|$)/g, "주세요")
+    // 물음표 앞에서는 바꾸지 않는다. "도와줘?" -> "도와주세요?" 는 질문을 지시로 바꿔
+    // SPEC §3.3 이 금지한 "~하세요" 체가 된다.
+    .replace(/줘(?=[.!]|$)/g, "주세요")
     .replace(/봐(?=[.!?]|$)/g, "봐요")
     .replace(/써(?=[.!?]|$)/g, "써요")
     .replace(/라(?=[.!?]|$)/g, "라요")
@@ -21,7 +23,11 @@ export function toPoliteKorean(text: string): string {
     .replace(/래\?/g, "래요?");
 }
 
-/** 문장마다 해요체 종결을 사용했는지 확인한다. 이모지는 말끝으로 보지 않는다. */
+/**
+ * 문장마다 해요체 종결을 사용했는지 확인한다. 이모지는 말끝으로 보지 않는다.
+ * "~죠"는 "~지요"의 준말이라 해요체로 인정한다. 빼면 "정해지죠." 같은 정상 문장이
+ * 반말로 오판돼 답변 전체가 폐기된다.
+ */
 export function isHaeyoKorean(text: string): boolean {
   const sentences = text
     .replace(/[🐻]/g, "")
@@ -29,5 +35,5 @@ export function isHaeyoKorean(text: string): boolean {
     .map((sentence) => sentence.trim())
     .filter(Boolean);
 
-  return sentences.length > 0 && sentences.every((sentence) => /요$/.test(sentence));
+  return sentences.length > 0 && sentences.every((sentence) => /(요|죠)$/.test(sentence));
 }

@@ -13,7 +13,7 @@ export function createSectorExploreTurn(sectorId: SectorKey): SectorExploreTurn 
   const sector = findSector(sectorId)!;
   return {
     sectorId,
-    prompt: `우리 종목 유니버스에서 ${sector.label} 회사도 볼래?`,
+    prompt: `우리 종목 유니버스에서 ${sector.label} 회사도 볼래요?`,
     choices: [
       { id: "yes", label: "응" },
       { id: "no", label: "아니" },
@@ -25,7 +25,7 @@ export function resolveSectorExplore(reply: SectorExploreReply) {
   const sector = findSector(reply.sectorId);
   if (!sector) return null;
   if (reply.choiceId === "no") {
-    return { text: "좋아, 다른 섹터가 궁금하면 이름을 말해 줘." };
+    return { text: "좋아요, 다른 섹터가 궁금하면 이름을 말해 주세요." };
   }
   const stocks = STOCKS.filter((stock) => stock.sector === sector.key);
   return {
