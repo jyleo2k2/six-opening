@@ -59,7 +59,7 @@ async function main() {
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(continued.response.text.includes("PER에는 회사가 번 돈"), true);
+  assert.equal(continued.response.text.includes("PER이 비교하는 것은 딱 두 가지"), true);
   assert.equal(isExplainAction(continued.action), true);
   assert.equal(modelCalls, 0);
 
