@@ -4,7 +4,10 @@
       homeGreeting: home.greeting,
       homeDayCount: '시즌 3 · ' + home.day,
       homeItemLine: (home.brand ? home.brand + ' ' : '') + home.unit + ' ' + goalCount + '개 살 수 있어요',
-      homeRateText: '+' + homeRate.toFixed(1) + '%',
+      // 실제 계좌를 붙이면 손실도 나온다. 부호와 색을 함께 바꾼다.
+      homeRateText: (homeRate >= 0 ? '+' : '−') + Math.abs(homeRate).toFixed(1) + '%',
+      homeRateStyle: 'font-size:19px;font-weight:800;letter-spacing:-0.02em;margin-top:4px;color:'
+        + (homeRate >= 0 ? '#D5327A' : '#2E6BE6'),
       goalImg: home.goalImg,
       goalItemImg: home.img,
       popGoal: () => {
@@ -27,6 +30,7 @@
 
       holdingsTitle: '내 보유 종목',
       holdingsCount: '전체보기',
+      homeNoHoldings: homeLoaded && holdings.length === 0,
       holdingsPreview: holdings.slice(0, 3).map(homeHoldingStyle),
       holdingsFull: holdings.map(homeHoldingStyle),
       holdingsExpanded: Boolean(s.holdingsExpanded),

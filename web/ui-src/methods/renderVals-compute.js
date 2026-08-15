@@ -3,8 +3,8 @@
     const total = this.totalAsset(), pnl = total - SEED;
     const up = '#E8322E', down = '#1668DC';
     // 홈 화면 — 로그인 계정(dbUser)에 따라 아빠/엄마/아이 홈을 통째로 다르게 그린다.
-    // 디자인 시안(front UI 로그인·가입 v2)의 "계정별 홈 화면 3개" 데모 그대로이며, 아직 실제 보유
-    // 종목·수익과는 연동하지 않은 고정 데모 데이터다.
+    // 인사말·아바타·목표 아이템은 저장소에 없는 값이라 여기 고정 데모로 남는다.
+    // 보유 종목과 수익은 아래에서 실제 계좌 값으로 갈아 끼운다.
     const HOME_INFO = {
       mom: {
         season: '보호자 계정', greeting: '찬영 어머님, 어서 오세요', avatarImg: 'assets/profile-mom.png',
@@ -43,7 +43,8 @@
     const home = HOME_INFO[dbRole] || HOME_INFO.child;
     // 로그인 사용자의 실제 Supabase 보유종목이 있으면 그 값을 쓰고, 아직 못 불러왔으면 위 데모로 대신한다.
     // 평가금액·수익률은 buildArchive() 의 수익률 탭과 같은 계산(현재가·평단가 기준)이다.
-    const holdings = (dbRole && this.dbUser && Array.isArray(this.dbUser.holdings))
+    const homeLoaded = Boolean(dbRole && this.dbUser && Array.isArray(this.dbUser.holdings));
+    const liveHoldings = homeLoaded
       ? this.dbUser.holdings.filter(h => h.stock_code).map(h => {
           const x = u.stocks.filter(y => y.code === h.stock_code)[0];
           const price = x ? x.price : h.avg_price;
@@ -54,13 +55,19 @@
             qty: (h.quantity >= 1 ? (Math.round(h.quantity * 100) / 100) : h.quantity.toFixed(2)) + '주',
             value: won(h.quantity * price),
             pct: (pc >= 0 ? '+' : '−') + Math.abs(pc).toFixed(1) + '%',
-            up: pc >= 0
+            up: pc >= 0,
+            profit: (price - h.avg_price) * h.quantity
           };
         })
-      : home.holdings;
-    const goalCount = Math.max(0, Math.floor(home.profit / home.unitPrice));
+      : [];
+    // 계좌를 읽은 뒤에는 보유가 없어도 데모로 되돌아가지 않고 빈 상태를 보여 준다.
+    const holdings = homeLoaded ? liveHoldings : home.holdings;
+    // 수익도 실제 보유에서 낸다. 데모 상수(home.profit)를 실제 평가금액으로 나누면
+    // 목표 개수와 수익률이 근거 없는 숫자가 된다.
+    const homeProfit = homeLoaded ? liveHoldings.reduce((sum, h) => sum + h.profit, 0) : home.profit;
+    const goalCount = Math.max(0, Math.floor(homeProfit / home.unitPrice));
     const homeHoldingsTotal = holdings.reduce((sum, h) => sum + parseInt(h.value.replace(/[^0-9]/g, ''), 10), 0);
-    const homeRate = homeHoldingsTotal ? (home.profit / homeHoldingsTotal * 100) : 0;
+    const homeRate = homeHoldingsTotal ? (homeProfit / homeHoldingsTotal * 100) : 0;
     const homeHoldingStyle = (h) => Object.assign({}, h, {
       pctStyle: 'font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:' + (h.up ? '#D5327A' : '#2E6BE6')
     });

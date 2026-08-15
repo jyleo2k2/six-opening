@@ -26,7 +26,7 @@
 <div style="text-align:center;padding:6px 0 2px">
 <div style="display:inline-block;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 6px 12px -8px rgba(35,25,80,0.3)">{{ homeDayCount }}</div>
 <div style="font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:10px">{{ homeItemLine }}</div>
-<div style="font-size:19px;font-weight:800;color:#D5327A;letter-spacing:-0.02em;margin-top:4px">{{ homeRateText }}</div>
+<div style="{{ homeRateStyle }}">{{ homeRateText }}</div>
 </div>
 
 <div onClick="{{ popGoal }}" style="position:relative;cursor:pointer">
@@ -42,6 +42,9 @@
 <span style="font-size:12.5px;font-weight:700;color:#A9AEC4;white-space:nowrap">{{ holdingsCount }}</span>
 </div>
 <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+<sc-if value="{{ homeNoHoldings }}" hint-placeholder-val="{{ false }}">
+<div style="text-align:center;border-radius:16px;padding:20px 13px;font-size:13.5px;font-weight:600;color:#8E93A8;line-height:1.6;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%)">아직 가진 회사가 없어<br>모의투자 탭에서 하나 골라 보자</div>
+</sc-if>
 <sc-for list="{{ holdingsPreview }}" as="h" hint-placeholder-count="3">
 <div style="display:flex;align-items:center;gap:11px;border-radius:16px;padding:12px 13px;background:linear-gradient(157deg,#F4F4FA 0%,#EFEFF7 100%)">
 <div style="flex:none;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 4px 8px -5px rgba(35,25,80,0.3)">{{ h.tick }}</div>
