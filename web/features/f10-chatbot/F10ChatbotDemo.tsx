@@ -64,7 +64,7 @@ import {
   isOverDismissTarget,
   pickNextAvatarIndex,
 } from "./lib/floating-avatar";
-import { PROACTIVE_FOLLOWUP_QUESTION, PROACTIVE_SCRIPTS } from "./lib/routing";
+import { PROACTIVE_SCRIPTS, PROACTIVE_SUGGESTED_QUESTIONS } from "./lib/routing";
 import {
   UNREACHABLE_CHAT_FAILURE,
   type ChatFailure,
@@ -214,15 +214,8 @@ const VILLAIN_AVATARS = [
   villain04,
   villain05,
 ] as const;
-const PROACTIVE_BUBBLE_TOGGLE_COPY: Record<
-  ProactiveSignal,
-  { accept: string; decline: string }
-> = {
-  buyHesitation: { accept: "응!", decline: "아니" },
-  orderMethodConfusion: { accept: "그래!", decline: "싫어" },
-  dwell: { accept: "응!", decline: "아니" },
-  lossRevisit: { accept: "응!", decline: "아니" },
-};
+/** 신호마다 다르게 두지 않는다 — 같은 자리의 같은 버튼이 매번 다른 말을 하면 읽는 데 힘이 든다. */
+const PROACTIVE_BUBBLE_TOGGLE_COPY = { accept: "네", decline: "아니요" } as const;
 
 function defaultFloatingChatPosition(
   prototypeScreen: PrototypeScreenRect | null,
@@ -658,12 +651,14 @@ export function F10ChatbotDemo({
 
     setMessages((current) => [
       ...current,
-      { role: "assistant", text: PROACTIVE_SCRIPTS[signal].text },
+      {
+        role: "assistant",
+        text: PROACTIVE_SCRIPTS[signal].text,
+        suggestedQuestions: [...PROACTIVE_SUGGESTED_QUESTIONS[signal]],
+      },
     ]);
     acceptActiveSignal();
     openChat();
-    const followUp = PROACTIVE_FOLLOWUP_QUESTION[signal];
-    if (followUp) void ask(followUp);
   }
 
   function dismissProactiveHelp() {
@@ -1244,14 +1239,14 @@ export function F10ChatbotDemo({
                 onClick={openProactiveChat}
                 type="button"
               >
-                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].accept}
+                {PROACTIVE_BUBBLE_TOGGLE_COPY.accept}
               </button>
               <button
                 className="rounded-xl border border-navy/20 bg-white px-3 py-2 text-xs font-semibold text-navy"
                 onClick={dismissProactiveHelp}
                 type="button"
               >
-                {PROACTIVE_BUBBLE_TOGGLE_COPY[signal].decline}
+                {PROACTIVE_BUBBLE_TOGGLE_COPY.decline}
               </button>
             </div>
           </div>
