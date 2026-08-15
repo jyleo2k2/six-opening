@@ -68,16 +68,20 @@ type Case = {
 };
 
 /**
- * 검사할 세트. `--suite` 를 여러 번 주면 모두 이어서 돌린다. 기본값은 두 세트를
- * 함께 본다 — v2 는 신규 기능 영역, v3 는 "같은 취지·다른 표현" 축이라 서로를
- * 대체하지 않는다.
+ * 검사할 세트. `--suite` 를 여러 번 주면 모두 이어서 돌린다. 기본값은 세 세트를
+ * 함께 본다 — v2 는 신규 기능 영역, v3 는 "같은 취지·다른 표현", v4 는 "뚫으려 들
+ * 때 버티는가" 축이라 서로를 대체하지 않는다.
  */
 function resolveSuitePaths(argv: readonly string[]) {
   const explicit: string[] = [];
   argv.forEach((token, index) => {
     if (token === "--suite" && argv[index + 1]) explicit.push(argv[index + 1]);
   });
-  return (explicit.length ? explicit : ["questions-v2.json", "questions-v3.json"]).map((file) =>
+  return (
+    explicit.length
+      ? explicit
+      : ["questions-v2.json", "questions-v3.json", "questions-v4.json"]
+  ).map((file) =>
     resolve(HERE, file),
   );
 }
