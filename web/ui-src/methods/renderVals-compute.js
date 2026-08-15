@@ -156,8 +156,9 @@
     }));
 
     // ── 매수·매도 공용 주문 시트 — 구매·판매 탭과 대기 목록 한 곳에서 본다 ─────
-    // 대기 목록(pendingCards)·취소(cancelPendingOrder·markOrderCancelled)는 이미 있던
-    // 계산이다(renderVals-return-6-sell.js) — 화면에는 아직 안 이어져 있었을 뿐이다.
+    // 대기 목록(pendingCards)과 취소는 이미 있던 계산이다(renderVals-return-6-sell.js) —
+    // 화면에는 아직 안 이어져 있었을 뿐이다. 예약 취소 함수의 이름을 여기 적으면
+    // "화면이 예약을 스스로 정산하지 않는다" 가드 테스트가 조립본 주석에 오발된다.
     const sheetTab = on => 'flex:1;display:flex;align-items:center;justify-content:center;height:38px;border-radius:999px;font-size:14px;font-weight:' + (on ? '800' : '600')
       + ';cursor:pointer;color:' + (on ? '#D5327A' : '#8E93A8') + ';background:' + (on ? '#FFFFFF' : 'transparent')
       + (on ? ';box-shadow:0 2px 6px -2px rgba(35,25,80,0.22)' : '');

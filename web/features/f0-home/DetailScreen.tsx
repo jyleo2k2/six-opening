@@ -14,6 +14,7 @@ import {
   SubScreenHeader,
 } from "./lib/stock-chrome";
 import { validNewsItem, type NewsItem } from "./lib/stock-news";
+import { recordTabView } from "./lib/tab-views";
 import { useStockLive } from "./lib/use-universe";
 import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
 
@@ -82,8 +83,8 @@ type NewsStatus = "loading" | "ready" | "empty" | "error";
  *
  * `app.html` 이 하던 세 가지 기록을 그대로 잇는다.
  * - 챗봇 맥락: 지금 보는 종목·내 지갑 값을 부모(`ConnectedPrototype`)에 올린다.
- * - 상세 탭 유효 열람(10초): `kiwoom:tab-view` 메시지로 iframe 버퍼에 되돌려 보낸다.
- *   매수 체결 때 `flushTabViews` 가 서버로 보내는 구조는 그대로다.
+ * - 상세 탭 유효 열람(10초): `lib/tab-views` 버퍼에 쌓는다. 매수 체결 때
+ *   `OrderScreen` 이 서버로 보낸다 — 매수도 React 로 옮겨 와 버퍼와 방아쇠가 한 집에 산다.
  * - 행동 이벤트: 차트·뉴스 열람을 지갑 `events` 에 남긴다(아카이브 열람 수가 읽는다).
  */
 export function DetailScreen({
@@ -153,22 +154,17 @@ export function DetailScreen({
     if (live.loaded && !live.stock) onLeave("/explore");
   }, [live.loaded, live.stock, onLeave]);
 
-  // 상세 탭 유효 열람. 화면(상세·차트·뉴스)마다 한 방문이고 10초 이상만 보낸다.
+  // 상세 탭 유효 열람. 화면(상세·차트·뉴스)마다 한 방문이고 10초 이상만 쌓는다.
   // 판정은 서버(`/api/tab-view`)가 다시 한다.
   useEffect(() => {
     const openedAt = new Date();
     return () => {
       const closedAt = new Date();
       if (closedAt.getTime() - openedAt.getTime() >= 10_000) {
-        postToPrototype({
-          type: "kiwoom:tab-view",
-          code,
-          opened_at: openedAt.toISOString(),
-          closed_at: closedAt.toISOString(),
-        });
+        recordTabView(code, openedAt.toISOString(), closedAt.toISOString());
       }
     };
-  }, [view, code, postToPrototype]);
+  }, [view, code]);
 
   // 챗봇 맥락. `app.html` 의 `notifyChatContext` 가 싣던 값과 같은 모양이다.
   const stockName = live.stock?.name ?? "";
