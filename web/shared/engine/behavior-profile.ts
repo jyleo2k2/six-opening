@@ -5,10 +5,12 @@
  * 기록이 쌓일수록 5에서 멀어진다. 극단값은 증거가 있을 때만 나온다.
  *
  * 기간 자르기와 점수 계산을 분리한다 — `computeAbilities` 는 기간을 모르고 표본만 받는다.
- * 그래서 주간 결산 카드와 누적 카드가 **같은 함수**를 쓴다.
+ * 그래서 주차 카드와 누적 카드가 **같은 함수**를 쓴다.
  *
- * 화면(`app.html`)이 쓰는 구버전 엔진은 아직 `archive-profile.js` 다. 화면 이관이 끝나면
- * 그 파일을 지운다. 그때까지 두 엔진의 점수는 서로 다르다 (구버전은 0~100·정확 5거래일).
+ * **주차 카드는 그 주까지의 누적이다** (2026-08-16 유저 확정). 2주차 카드는 1+2주차,
+ * 3주차 카드는 1+2+3주차를 본다. 그 주만 잘라 보면 표본이 주 2~3건이라 카드가 거의 항상
+ * 판정 보류에 머물렀다 — "8월 2주차 성향"이 아니라 "8월 2주차까지 쌓인 성향"이 카드의 뜻이다.
+ * 그래서 마지막 주 카드는 `cumulative` 와 같은 값이 된다.
  */
 import type {
   AbilityCard,
@@ -44,13 +46,33 @@ export const ACCURACY_WAIT_TRADING_DAYS = 2;
 export const VALID_DWELL_MS = 10_000;
 /** 매수 하나가 근거로 인정되려면 3탭 중 이만큼을 유효 열람해야 한다 */
 export const EVIDENCE_TAB_MIN = 2;
-/** 캐릭터를 확정하는 최소 체결 매수 수 */
-export const MIN_BUYS_FOR_PROFILE = 3;
+/**
+ * 캐릭터를 확정하는 최소 체결 매수 수 (누적 기준).
+ *
+ * 1건은 우연과 구별되지 않아 막는다. 0건은 이 문턱이 없어도 근거·직관이 나란히 5라
+ * `judgeCharacter` 가 `TIE_BAND` 로 막으므로, 이 상수가 실제로 일하는 구간은 **1건뿐이다.**
+ */
+export const MIN_BUYS_FOR_PROFILE = 2;
 /** 보완쌍 차이가 이 값 미만이면 동점대로 보고 캐릭터를 확정하지 않는다 */
 export const TIE_BAND = 1;
 /** 정확 레벨 경계 — 기존 적중 비율 1/3·2/3 을 0~10 으로 옮긴 값 */
 export const ACCURACY_LEVEL_3_SCORE = 20 / 3;
 export const ACCURACY_LEVEL_2_SCORE = 10 / 3;
+
+/**
+ * 표본이 문턱에 못 미칠 때 카드가 내보내는 점수. **전 축이 중립이다.**
+ *
+ * 표본 축소만으로는 부족하다 — 매수 1건이면 근거력이 4.0 이라 화면 반올림을 거쳐 `4` 로
+ * 또렷하게 찍히는데 그 옆에서 유형은 `관찰 중` 이라, 화면이 스스로 모순된 말을 한다.
+ * 판정을 보류했으면 숫자도 보류한 값을 보여 준다.
+ */
+export const NEUTRAL_SCORES: BehaviorAbilities = Object.freeze({
+  evidence: NEUTRAL,
+  intuition: NEUTRAL,
+  focus: NEUTRAL,
+  diversification: NEUTRAL,
+  accuracy: NEUTRAL,
+});
 
 // ── 스케일 ──────────────────────────────────────────────────────────────────
 
@@ -349,9 +371,10 @@ function observationOf(buyCount: number): ObservationState {
 }
 
 export function buildCard(sample: AbilitySample): AbilityCard {
-  const scores = computeAbilities(sample);
   const observation = observationOf(sample.buys.length);
   const ready = observation === "ready";
+  // 판정을 보류하면 점수도 보류한다 — 위 `NEUTRAL_SCORES` 주석 참고.
+  const scores = ready ? computeAbilities(sample) : { ...NEUTRAL_SCORES };
   const samples: AbilitySamples = {
     buys: sample.buys.length,
     sells: sample.sells.length,
@@ -460,17 +483,20 @@ export function computeBehaviorProfile(input: BehaviorProfileInput): BehaviorPro
 
   const weeks: WeekCard[] = weekBucketsKST(periodStart, input.periodEnd).map((window) => {
     const current = inWindow(input.periodEnd, window);
-    const weekBuys = input.buys.filter((buy) => inWindow(kstDateOf(buy.tradedAt), window));
-    const weekSells = input.sells.filter((sell) => inWindow(kstDateOf(sell.tradedAt), window));
-    // 정확력은 **채점이 끝난 주**에 귀속한다. 그래야 끝난 주 카드가 나중에 바뀌지 않는다.
-    const weekGraded = graded.filter((trade) => inWindow(trade.settledOn, window));
-    // 보류는 반대로 **그 주에 한 거래 중 아직 판정이 안 난 것**을 센다.
+    // **그 주까지 누적**이다. 이번 주 카드는 오늘까지만 본다 — 주 끝이 아직 오지 않았다.
+    const until = current ? input.periodEnd : window.end;
+    const weekBuys = input.buys.filter((buy) => kstDateOf(buy.tradedAt) <= until);
+    const weekSells = input.sells.filter((sell) => kstDateOf(sell.tradedAt) <= until);
+    // 정확력은 **채점이 끝난 날**로 자른다. 그래야 끝난 주 카드가 나중에 바뀌지 않는다 —
+    // 2거래일 뒤에야 판정이 나므로 체결일로 자르면 지난 카드가 뒤늦게 흔들린다.
+    const weekGraded = graded.filter((trade) => trade.settledOn <= until);
+    // 보류는 그 시점까지 한 거래 중 아직 판정이 안 난 것이다.
     const weekPending = [...weekBuys, ...weekSells].filter((trade) => pendingIds.has(trade.id)).length;
     const portfolio = replayPortfolio(
       { holdings: input.holdings, cash: input.cash },
       input.buys,
       input.sells,
-      current ? input.periodEnd : window.end,
+      until,
       input.dailyClosesBySymbol,
     );
     return {
