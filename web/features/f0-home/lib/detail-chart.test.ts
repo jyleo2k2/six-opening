@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
-import { buildDetailChart } from "./detail-chart";
+import { buildDetailChart, PIN_COLORS } from "./detail-chart";
 
 // spark 가 짧으면(0·1개) 그릴 선이 없다.
-assert.equal(buildDetailChart({ spark: [], price: 1000, changePercent: 1, trades: [] }), null);
-assert.equal(buildDetailChart({ spark: [50], price: 1000, changePercent: 1, trades: [] }), null);
+assert.equal(buildDetailChart({ code: "005930", spark: [], price: 1000, changePercent: 1, trades: [] }), null);
+assert.equal(buildDetailChart({ code: "005930", spark: [50], price: 1000, changePercent: 1, trades: [] }), null);
 
 const spark = [40, 60, 30, 80, 20, 55, 45];
-const base = { spark, price: 10_000, changePercent: 2.5, trades: [] };
+const base = { code: "005930", spark, price: 10_000, changePercent: 2.5, trades: [] };
 
 const geo = buildDetailChart(base);
 assert.ok(geo);
@@ -38,7 +38,21 @@ assert.deepEqual(
 assert.equal(withTrades!.pins[0].label, "B");
 assert.equal(withTrades!.pins[1].label, "S");
 
-// 체결 기록이 없으면 핀도 없다 — 없는 매매를 지어내지 않는다.
-assert.equal(buildDetailChart(base)!.pins.length, 0);
+// 가족 기록이 없어도 **원본처럼** B/S 지점을 세운다 — 51종 어디서나 보인다(B·B·S 세 개).
+// 프로토타입이 갖고 있던 시연 폴백을 그대로 옮긴 것이다.
+const noTrades = buildDetailChart({ ...base, trades: [] });
+assert.equal(noTrades!.pins.length, 3);
+assert.deepEqual(noTrades!.pins.map((p) => p.label), ["B", "B", "S"]);
+// 코드만으로 정해지므로 같은 종목은 늘 같은 색·같은 자리다.
+const again = buildDetailChart({ ...base, trades: [] });
+assert.deepEqual(again!.pins.map((p) => p.color), noTrades!.pins.map((p) => p.color));
+// 다른 종목은 다른 사람이 찍힌다(코드 해시가 색 순서를 돌린다).
+const other = buildDetailChart({ ...base, code: "000660", trades: [] });
+assert.notDeepEqual(other!.pins.map((p) => p.color), noTrades!.pins.map((p) => p.color));
+// 색은 프로토타입의 파스텔 세 색 안에서만 고른다.
+const palette = Object.values(PIN_COLORS);
+for (const pin of noTrades!.pins) assert.ok(palette.includes(pin.color), pin.color);
+// 실제 기록이 있으면 시연 지점은 쓰지 않는다.
+assert.equal(withTrades!.pins.every((p) => !p.id.startsWith("demo_")), true);
 
 console.log("detail chart tests passed");
