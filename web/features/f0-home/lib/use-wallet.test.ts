@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import { isRegularMarketOpen } from "../../f2-trade/lib/scheduled-orders.js";
 import { canTrade, isSchoolTime } from "./use-wallet";
 
-const wed = (hour: number, minute = 0) => new Date(2026, 7, 12, hour, minute); // 수요일
-const sun = (hour: number) => new Date(2026, 7, 16, hour); // 일요일
+// `isRegularMarketOpen`은 절대 시각을 KST로 환산해 비교한다(scheduled-orders.js).
+// 로컬 타임존으로 필드를 만들면 UTC 러너(CI)에서 9시간 어긋나므로, UTC 필드에서
+// KST 9시간을 미리 빼 절대 시각을 만든다 — 실행 환경의 타임존과 무관하다.
+const wed = (hour: number, minute = 0) => new Date(Date.UTC(2026, 7, 12, hour - 9, minute)); // 수요일 KST
+const sun = (hour: number) => new Date(Date.UTC(2026, 7, 16, hour - 9, 0)); // 일요일 KST
 
 // ── 스쿨락은 꺼져 있다 ──────────────────────────────────────────────────
 // 예전 규칙은 평일 09:00~15:30 자녀 주문 차단이었다. 그 시간대에도 이제 안 잠긴다.
