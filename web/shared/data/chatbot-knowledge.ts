@@ -42,7 +42,7 @@ function termScript(
 
 const GLOSSARY_EXPLAIN_SCRIPTS = {
   stock: termScript("stock", {
-    brief: "주식은 회사를 잘게 나눈 작은 조각이에요. 주식을 가지면 회사의 일부를 함께 가진 주주가 돼요.",
+    brief: "주식은 회사를 잘게 나눈 작은 조각이에요.",
     check: {
       question: "주식 한 주는 무엇을 뜻할까요?",
       choices: [
@@ -61,11 +61,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "yes",
     },
-    detail: "회사는 필요한 돈을 모으려고 주식을 만들어요. 사람들은 그 주식을 사고팔 수 있고, 가진 사람을 주주라고 불러요.",
+    detail: "회사는 필요한 돈을 모으려고 주식을 만들고, 그 조각을 가진 사람을 주주라고 불러요.",
     example: "피자 한 판을 여러 조각으로 나눈 모습을 떠올려 봐요. 주식 한 주는 그중 한 조각처럼 회사의 일부를 나타내요.",
   }),
   shareholder: termScript("shareholder", {
-    brief: "주주는 회사의 주식을 가진 사람이에요. 회사에서 일하지 않아도 주식만 있으면 주주예요.",
+    brief: "주주는 그 회사의 주식을 가진 사람이에요.",
     check: {
       question: "누구를 주주라고 부를까요?",
       choices: [
@@ -84,11 +84,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "stock",
     },
-    detail: "주주는 가진 주식 수만큼 회사의 일부를 함께 가진 사람이에요. 직원이나 손님이라는 이유만으로 주주가 되는 것은 아니에요.",
+    detail: "직원이나 손님이라는 이유만으로 주주가 되지는 않아요.",
     example: "피자 조각을 가진 사람이 그 조각의 주인인 것과 비슷해요. 회사의 주식 조각을 가진 사람이 주주예요.",
   }),
   "stock-item": termScript("stock-item", {
-    brief: "종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해요. 여기서는 회사마다 주식이 하나의 종목이에요.",
+    brief: "종목은 거래 화면에서 구분하는 회사나 상품 하나예요.",
     check: {
       question: "거래 화면에서 종목 하나는 무엇을 가리킬까요?",
       choices: [
@@ -107,7 +107,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "one-item",
     },
-    detail: "종목에는 구분을 위한 이름과 코드가 있어요. 같은 시장에서도 회사나 상품이 다르면 서로 다른 종목이에요.",
+    detail: "종목마다 구분하는 이름과 코드가 따로 있어요.",
     example: "도서관에서 책마다 제목과 번호가 있는 것과 비슷해요. 거래 화면도 종목 이름과 코드로 회사를 구분해요.",
   }),
   buy: termScript("buy", {
@@ -203,7 +203,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
     example: "중고 장터에서 사고 싶은 사람과 팔고 싶은 사람이 조건에 동의한 순간과 비슷해요. 약속이 맞아 거래가 끝난 상태가 체결이에요.",
   }),
   "current-price": termScript("current-price", {
-    brief: "현재가는 지금 화면에 표시된 최근 거래 가격이에요. 새 거래가 생기면 달라질 수 있어요.",
+    brief: "현재가는 화면에 표시된 가장 최근 거래 가격이에요.",
     check: {
       question: "현재가는 무엇을 보여줄까요?",
       choices: [
@@ -222,7 +222,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "can-change",
     },
-    detail: "현재가는 새 거래가 생길 때 달라질 수 있어요. 미래 가격을 미리 정해 둔 숫자가 아니라 최근 거래 기록이에요.",
+    detail: "새 거래가 생길 때마다 달라지는 기록이라 미리 정해 둔 값이 아니에요.",
     example: "운동 경기의 현재 점수가 경기 중에 계속 바뀌는 것과 비슷해요. 화면을 본 시각에 따라 표시된 값이 다를 수 있어요.",
   }),
   quantity: termScript("quantity", {
@@ -272,7 +272,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
     example: "연필 한 자루 값에 살 자루 수를 곱해 미리 필요한 돈을 보는 것과 같아요. 주식도 수량과 가격으로 예상 금액을 계산해요.",
   }),
   "evaluation-amount": termScript("evaluation-amount", {
-    brief: "평가금액은 가진 주식을 현재 가격으로 계산한 금액이에요. 가격이 움직이면 함께 달라질 수 있어요.",
+    brief: "평가금액은 지금 가진 주식을 현재 가격으로 계산한 금액이에요.",
     check: {
       question: "평가금액은 무엇을 현재 가격으로 계산할까요?",
       choices: [
@@ -291,11 +291,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "can-change",
     },
-    detail: "평가금액은 보유 수량과 현재가로 계산해요. 아직 팔지 않은 주식의 현재 값이라 가격이 움직이면 함께 바뀔 수 있어요.",
+    detail: "보유 수량에 현재가를 곱해 내므로 가격이 움직이면 함께 바뀌어요.",
     example: "가지고 있는 카드들을 오늘의 카드 값으로 다시 계산하는 것과 비슷해요. 카드 값이 바뀌면 전체 평가금액도 달라져요.",
   }),
   return: termScript("return", {
-    brief: "수익률은 처음 금액에 비해 지금 금액이 얼마나 달라졌는지 비율로 보는 값이에요. 기준은 항상 처음 출발한 금액이에요.",
+    brief: "수익률은 처음 금액에 비해 지금 금액이 얼마나 달라졌는지 비율로 보는 값이에요.",
     check: {
       question: "수익률은 무엇을 비교할까요?",
       choices: [
@@ -314,11 +314,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "compare",
     },
-    detail: "수익률은 서로 다른 크기의 투자 결과를 비율로 살펴볼 때 사용해요. 지난 변화를 보여줄 뿐 앞으로의 결과를 알려주지는 않아요.",
+    detail: "크기가 다른 투자도 비율로 견줄 수 있지만 앞으로의 결과를 알려주지는 않아요.",
     example: "서로 다른 길이의 달리기에서 출발점부터 얼마나 이동했는지 비율로 비교하는 것과 비슷해요. 출발한 금액이 기준이 돼요.",
   }),
   "average-price": termScript("average-price", {
-    brief: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 낸 가격이에요. 지금 시장의 현재가와는 다른 값이에요.",
+    brief: "평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 낸 가격이에요.",
     check: {
       question: "평균 매수가는 무엇을 보여줄까요?",
       choices: [
@@ -337,11 +337,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "average-price",
     },
-    detail: "평균 매수가는 같은 종목에 쓴 전체 금액을 산 주식 수로 나누어 계산해요. 현재가와는 다른 값이에요.",
+    detail: "그 종목에 쓴 전체 금액을 산 주식 수로 나눠 구하고, 지금의 현재가와는 달라요.",
     example: "같은 연필을 다른 날 서로 다른 값에 샀다고 해 봐요. 산 연필 전체의 한 자루당 평균값이 평균 매수가와 비슷해요.",
   }),
   sector: termScript("sector", {
-    brief: "업종은 비슷한 일을 하는 회사들을 묶은 이름이에요. 게임 회사끼리, 식품 회사끼리 묶는 식이에요.",
+    brief: "업종은 주로 하는 일이 비슷한 회사들을 묶은 이름이에요.",
     check: {
       question: "같은 업종의 회사들은 무엇이 비슷할까요?",
       choices: [
@@ -360,11 +360,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "work",
     },
-    detail: "업종을 보면 회사가 어떤 산업에서 활동하는지 알 수 있어요. 같은 업종이라도 회사마다 사업 내용과 결과는 다를 수 있어요.",
+    detail: "같은 업종이라도 회사마다 사업 내용과 결과는 다를 수 있어요.",
     example: "도서관에서 과학책과 역사책을 분야별로 묶는 것과 비슷해요. 회사도 하는 일이 비슷하면 같은 업종으로 묶어요.",
   }),
   "market-cap": termScript("market-cap", {
-    brief: "시가총액은 회사의 모든 주식을 현재 가격으로 계산한 전체 크기예요. 현재가에 전체 주식 수를 곱해 구해요.",
+    brief: "시가총액은 현재가에 전체 주식 수를 곱해 낸 회사의 전체 크기예요.",
     check: {
       question: "시가총액을 계산할 때 무엇을 함께 볼까요?",
       choices: [
@@ -383,11 +383,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "company-size",
     },
-    detail: "시가총액은 현재가에 전체 주식 수를 곱해 계산해요. 시장에서 본 회사의 크기를 나타내지만 회사의 모든 장점과 단점을 말해 주지는 않아요.",
+    detail: "시장에서 본 크기일 뿐 회사의 장점과 단점을 다 말해 주지는 않아요.",
     example: "퍼즐 한 조각의 현재 값에 전체 조각 수를 곱해 퍼즐 전체 값을 보는 것과 비슷해요. 주식 조각 전체의 값이 시가총액이에요.",
   }),
   revenue: termScript("revenue", {
-    brief: "매출은 회사가 물건이나 서비스를 팔아 받은 돈의 전체 규모예요. 아직 비용을 빼기 전의 값이에요.",
+    brief: "매출은 물건이나 서비스를 팔아 받은 돈을 비용 빼기 전에 모두 더한 값이에요.",
     check: {
       question: "매출에서 비용은 이미 모두 빠졌을까요?",
       choices: [
@@ -406,11 +406,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "sales-money",
     },
-    detail: "매출은 판매로 들어온 돈을 먼저 모아 본 값이에요. 재료비나 월급 같은 비용을 빼기 전이라 매출과 이익은 달라요.",
+    detail: "재료비나 월급을 아직 빼지 않아서 매출과 이익은 서로 달라요.",
     example: "학교 장터에서 물건을 팔아 받은 돈을 모두 더한 것이 매출과 비슷해요. 재료를 산 돈을 빼기 전의 값이에요.",
   }),
   "operating-profit": termScript("operating-profit", {
-    brief: "영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요. 본업의 성적을 보는 값이에요.",
+    brief: "영업이익은 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요.",
     check: {
       question: "영업이익을 볼 때 매출에서 무엇을 뺄까요?",
       choices: [
@@ -429,11 +429,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "operating-profit",
     },
-    detail: "영업이익은 회사의 본업이 지난 기간에 어떤 결과를 냈는지 보는 값이에요. 회사의 모든 돈 흐름이나 미래 결과를 뜻하지는 않아요.",
+    detail: "본업의 지난 성적을 보는 값이라 회사의 모든 돈 흐름을 뜻하지는 않아요.",
     example: "주스 가게의 판매금에서 과일값과 가게 운영비를 뺀 결과와 비슷해요. 본업을 운영하고 남은 돈을 보는 거예요.",
   }),
   dividend: termScript("dividend", {
-    brief: "배당은 회사가 이익의 일부를 주주에게 나누어 주는 일이에요. 주식을 가진 사람만 받을 수 있어요.",
+    brief: "배당은 회사가 이익의 일부를 주주에게 나누어 주는 일이에요.",
     check: {
       question: "배당을 받는 대상은 누구일까요?",
       choices: [
@@ -452,11 +452,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "dividend",
     },
-    detail: "회사는 정해진 절차를 거쳐 배당 여부와 규모를 결정해요. 모든 회사가 언제나 배당하는 것은 아니에요.",
+    detail: "정해진 절차를 거쳐 정하기 때문에 모든 회사가 언제나 배당하지는 않아요.",
     example: "동아리 활동으로 남은 돈 일부를 구성원에게 나누는 모습과 비슷해요. 회사는 이익 일부를 주주에게 나눌 수 있어요.",
   }),
   etf: termScript("etf", {
-    brief: "ETF는 여러 회사의 주식 같은 자산을 한 바구니에 담아 거래하는 상품이에요. 하나만 사도 여러 자산에 나눠 담는 효과가 있어요.",
+    brief: "ETF는 여러 회사의 주식 같은 자산을 한 바구니에 담아 거래하는 상품이에요.",
     check: {
       question: "ETF 한 상품 안에는 무엇이 담길 수 있을까요?",
       choices: [
@@ -475,11 +475,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "bundle",
     },
-    detail: "ETF는 정해진 기준에 따라 여러 자산을 담고 주식처럼 거래돼요. 어떤 자산이 얼마나 담겼는지는 상품 설명에서 확인해야 해요.",
+    detail: "어떤 자산이 얼마나 담겼는지는 상품 설명에서 확인해야 해요.",
     example: "여러 맛 과자가 함께 든 묶음 상자와 비슷해요. 상자마다 들어 있는 과자의 종류와 비율이 다를 수 있어요.",
   }),
   index: termScript("index", {
-    brief: "지수는 여러 주식의 가격 움직임을 한눈에 보려고 만든 숫자예요. 시장 전체나 업종의 흐름을 볼 때 써요.",
+    brief: "지수는 여러 주식의 가격 움직임을 한눈에 보려고 만든 숫자예요.",
     check: {
       question: "주가지수는 보통 무엇의 움직임을 묶어 보여줄까요?",
       choices: [
@@ -498,11 +498,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "many",
     },
-    detail: "지수는 시장 전체나 특정 업종에 속한 여러 종목의 움직임을 요약해요. 한 회사의 값이나 미래 방향을 정해 주는 숫자는 아니에요.",
+    detail: "시장이나 업종의 흐름을 요약할 뿐 한 회사의 값이나 방향을 정해 주지는 않아요.",
     example: "반 친구들의 기록을 모아 반 평균을 보는 것과 비슷해요. 한 친구가 아니라 여러 주식의 흐름을 묶어 보여줘요.",
   }),
   chart: termScript("chart", {
-    brief: "차트는 시간이 지나며 가격이 어떻게 움직였는지 그림으로 보여주는 기록이에요. 지나간 기록이지 미래의 정답은 아니에요.",
+    brief: "차트는 가격이 어떻게 움직였는지 그림으로 보여주는 지나간 기록이에요.",
     check: {
       question: "주가 차트가 직접 보여주는 것은 무엇일까요?",
       choices: [
@@ -521,11 +521,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "cannot",
     },
-    detail: "차트의 가로축은 시간, 세로축은 가격처럼 변화를 읽는 기준을 보여줘요. 과거 기록을 살펴보는 도구이지 미래를 보장하는 그림은 아니에요.",
+    detail: "가로축은 시간, 세로축은 가격이지만 지나간 기록이라 미래를 보장하지는 않아요.",
     example: "지난날의 기온을 선으로 그린 날씨 기록과 비슷해요. 지나간 변화는 볼 수 있지만 다음 날 기온의 정답은 아니에요.",
   }),
   volume: termScript("volume", {
-    brief: "거래량은 일정한 동안 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자예요. 많이 거래될수록 커져요.",
+    brief: "거래량은 일정한 동안 사고팔린 주식 수를 나타내는 숫자예요.",
     check: {
       question: "거래량은 무엇을 셀까요?",
       choices: [
@@ -544,11 +544,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "larger",
     },
-    detail: "거래량은 시장에서 거래가 얼마나 활발했는지 살펴보는 기록이에요. 거래량이 많다는 사실만으로 가격 방향을 알 수는 없어요.",
+    detail: "거래가 얼마나 활발했는지 알려 줄 뿐 가격 방향까지 알려주지는 않아요.",
     example: "장터에서 하루 동안 주인이 바뀐 카드 수를 세는 것과 비슷해요. 많이 오가면 거래량은 크지만 카드 값의 다음 방향은 따로 알 수 없어요.",
   }),
   volatility: termScript("volatility", {
-    brief: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 나타내는 말이에요. 폭이 크면 변동성이 크다고 해요.",
+    brief: "변동성은 가격이 오르내리는 폭이 얼마나 큰지 나타내는 말이에요.",
     check: {
       question: "가격이 크게 오르내리면 변동성은 어떻게 보일까요?",
       choices: [
@@ -567,11 +567,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "yes",
     },
-    detail: "변동성이 크면 짧은 동안에도 가격이 크게 달라질 수 있어요. 변동성은 움직임의 폭을 말할 뿐 오를지 내릴지를 알려주지는 않아요.",
+    detail: "움직임의 폭을 말할 뿐 오를지 내릴지를 알려주지는 않아요.",
     example: "잔잔한 산책길과 높낮이가 큰 놀이기구를 비교해 봐요. 오르내림의 폭이 큰 쪽이 변동성이 큰 모습과 비슷해요.",
   }),
   risk: termScript("risk", {
-    brief: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요. 결과가 미리 정해져 있지 않다는 말이에요.",
+    brief: "투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요.",
     check: {
       question: "투자 위험은 무엇을 뜻할까요?",
       choices: [
@@ -590,7 +590,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "risk",
     },
-    detail: "투자에는 값이 줄거나 원하는 때 거래되지 않는 등 여러 위험이 있어요. 위험이 없다고 단정하지 않고 무엇이 달라질 수 있는지 살펴보면 돼요.",
+    detail: "값이 줄거나 원하는 때 거래되지 않는 것처럼 무엇이 달라질 수 있는지 살펴보면 돼요.",
     example: "소풍날 비가 올 수도 있는 것처럼 결과가 계획과 달라질 가능성이 있어요. 가능성을 미리 알고 살펴보는 것이 위험을 이해하는 출발점이에요.",
   }),
 } satisfies Record<string, ExplainScript>;
@@ -1060,7 +1060,7 @@ const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
       ],
       answerId: "yes",
     },
-    detail: "주가는 사고팔려는 사람들의 주문이 만나 정해져요. 그래서 하루에도 여러 번 바뀌어요.",
+    detail: "사고팔려는 주문이 만나 정해지기 때문에 하루에도 여러 번 바뀌어요.",
     example: "문구점에서 같은 공책 값이 날마다 달라진다고 생각해 봐요. 주가도 그날의 거래에 따라 달라져요.",
   }),
   "stop-loss": termScript("stop-loss", {
@@ -1083,7 +1083,7 @@ const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
       ],
       answerId: "yes",
     },
-    detail: "언제 파는지는 사람마다 다르고 정해진 답이 없어요. 저는 파는 때를 정해 줄 수 없어요.",
+    detail: "언제 파는지는 사람마다 달라서 저는 파는 때를 정해 줄 수 없어요.",
     example: "놀이에서 더 지기 전에 판을 접는 것과 비슷해요. 다만 언제 접을지는 스스로 정해요.",
   }),
   "net-interest-margin": termScript("net-interest-margin", {
@@ -1106,7 +1106,7 @@ const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
       ],
       answerId: "yes",
     },
-    detail: "예대마진은 은행이 돈을 버는 방법 가운데 하나예요. 수익 구성은 은행마다 달라요.",
+    detail: "은행이 돈을 버는 방법 가운데 하나이고 수익 구성은 은행마다 달라요.",
     example: "연필을 빌리며 사탕 하나를 주고, 다른 친구에게 빌려주며 사탕 둘을 받으면 그 차이가 남는 몫이에요.",
   }),
   "reason-tag": termScript("reason-tag", {
@@ -1130,7 +1130,7 @@ const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
       ],
       answerId: "no",
     },
-    detail: "뉴스·차트·회사 이해처럼 지금 이유에 가까운 것을 고르면 돼요. 나중에 아카이브에서 그때 생각을 다시 볼 수 있어요.",
+    detail: "나중에 아카이브에서 그때 생각을 다시 볼 수 있어요.",
     example: "일기에 왜 그렇게 했는지 한 줄 적어 두는 것과 비슷해요. 나중에 읽으면 그때 마음이 보여요.",
   }),
 };
@@ -1233,7 +1233,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "moving",
         },
         detail:
-          "평가손익은 지금 가진 주식을 오늘 값으로 계산한 결과예요. 아직 거래가 끝나지 않아서 숫자가 계속 바뀌어요.",
+          "아직 거래가 끝나지 않아서 숫자가 계속 바뀌어요.",
         example:
           "서랍에 넣어 둔 카드의 요즘 값을 적어 둔 쪽지와 비슷해요. 아직 바꾸지 않았으니 숫자는 계속 달라져요.",
       },
@@ -1261,7 +1261,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "fixed",
         },
         detail:
-          "실현손익은 거래가 이미 끝나서 더 이상 바뀌지 않아요. 평가손익과 달리 지나간 기록이에요.",
+          "거래가 이미 끝나 더는 바뀌지 않는 지나간 기록이에요.",
         example:
           "친구와 카드를 바꾸고 나서 적어 둔 결과표와 비슷해요. 바꾼 뒤에는 숫자가 그대로 남아요.",
       },
@@ -1301,7 +1301,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
         ],
         answerId: "no",
       },
-      detail: "PER은 회사가 번 이익과 주가, 두 가지만 비교하는 숫자예요. 같은 업종 회사끼리 함께 보면 이익에 비해 주가가 어떻게 보이는지 비교할 수 있어요.",
+      detail: "같은 업종 회사끼리 함께 보면 이익에 비해 주가가 어떻게 보이는지 견줄 수 있어요.",
       example: "같은 업종의 두 회사가 비슷한 이익을 냈다고 해 봐요. 한 회사의 주가가 더 높다면 두 회사의 PER은 다르게 보여요.",
     },
     status: reviewed,
@@ -1329,7 +1329,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "asset",
         },
         detail:
-          "PBR은 회사 전체 값을 회사가 가진 재산으로 나눈 값이에요. 재산에는 건물과 기계, 남아 있는 돈이 함께 들어가요.",
+          "여기서 재산에는 건물과 기계, 남아 있는 돈이 함께 들어가요.",
         example:
           "가진 물건이 똑같은 가게가 두 곳 있다고 해 봐요. 한 곳이 세 배 비싸면 그 가게의 PBR이 더 커요.",
       },
@@ -1357,7 +1357,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "shares",
         },
         detail:
-          "회사가 한 해에 번 돈을 전체 주식 수로 나누면 EPS가 나와요. 조각 하나가 얼마씩 벌었는지 보는 숫자예요.",
+          "주식 조각 하나가 얼마씩 벌었는지 보는 숫자예요.",
         example:
           "피자 한 판을 여덟 조각으로 나누면 한 조각 몫이 정해져요. EPS도 번 돈을 조각 수로 나눈 몫이에요.",
       },
@@ -1387,7 +1387,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "remain",
         },
         detail:
-          "여러 곳에 나눠 두면 한 곳이 나빠져도 전체가 한꺼번에 흔들리지 않아요. 대신 한 곳이 아주 잘돼도 전체는 그만큼 크게 달라지지 않아요.",
+          "대신 한 곳이 아주 잘돼도 전체는 그만큼 크게 달라지지 않아요.",
         example:
           "달걀을 한 바구니에 다 담지 않는 것과 같아요. 바구니 하나를 떨어뜨려도 남은 달걀은 무사해요.",
       },

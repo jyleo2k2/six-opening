@@ -111,17 +111,15 @@ for (const entry of SCRIPTED) {
   );
 }
 
-// 주문 카테고리의 직접 쓴 스크립트는 1문장 예산을 지킨다 (SPEC §3.4.4).
+// 직접 쓴 용어 스크립트는 전부 1문장 예산을 지킨다 (SPEC §3.4.4).
 //
-// 같은 카테고리라도 faq 3건(기다리는 주문·주문 취소·받게 되는 돈)은 제외한다.
-// 그 셋의 brief 는 screenTermScript 가 `answer` 를 그대로 쓴 것이라 FAQ 단답을
-// 겸하는데, 둘째 문장이 "이미 체결된 주문은 취소할 수 없어요" 처럼 실제 정보를
-// 나른다. 1문장으로 깎으면 길이 대신 정보를 잃는다.
-const ORDER_SCRIPTED = SCRIPTED.filter(
-  (entry) => entry.category === "order" && entry.kind === "glossary",
-);
-assert.equal(ORDER_SCRIPTED.length, 8);
-for (const entry of ORDER_SCRIPTED) {
+// 화면 용어(kind === "faq")만 제외한다. 그 brief 는 screenTermScript 가 `answer`
+// 를 그대로 쓴 것이라 FAQ 단답을 겸하는데, 둘째 문장이 "이미 체결된 주문은
+// 취소할 수 없어요" 처럼 실제 정보를 나른다. 1문장으로 깎으면 길이 대신 정보를
+// 잃는다.
+const GLOSSARY_SCRIPTED = SCRIPTED.filter((entry) => entry.kind === "glossary");
+assert.ok(GLOSSARY_SCRIPTED.length >= 36);
+for (const entry of GLOSSARY_SCRIPTED) {
   const script = entry.explainScript!;
   assert.equal(countSentences(script.brief), 1, `${entry.id}: brief 는 1문장이다`);
   assert.equal(countSentences(script.detail), 1, `${entry.id}: detail 은 1문장이다`);
