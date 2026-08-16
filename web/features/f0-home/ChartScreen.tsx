@@ -8,7 +8,7 @@ import {
   SubScreenHeader,
 } from "./lib/stock-chrome";
 import { styleFromCss } from "./lib/css-style";
-import { buildTradeLegend, type LegendTrade } from "./lib/chart-trade-legend";
+import { buildTradeLegend, type LegendTrade, type PinRole } from "./lib/chart-trade-legend";
 
 const CHART_READY_MESSAGE = "kiwoom:chart-ready";
 const CHART_OPTIONS_MESSAGE = "kiwoom:chart-options";
@@ -67,11 +67,15 @@ const LEGEND_ROW = styleFromCss("display:flex;align-items:center;gap:7px");
  * 범례가 있는 이유가 "이 색 핀이 이 사람"이라서 색이 갈리면 안 된다. 글자색도 같이
  * 토큰(`--color-trade-ink`)에서 받는다 — 파스텔 바탕에 흰 글씨는 읽히지 않는다.
  */
-const LEGEND_DOT = (member: "child" | "parent") =>
+const ROLE_COLOR: Record<PinRole, string> = {
+  child: "var(--color-trade-child)",
+  mom: "var(--color-trade-mom)",
+  dad: "var(--color-trade-dad)",
+};
+const LEGEND_DOT = (role: PinRole) =>
   styleFromCss(
     "flex:none;display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:8px;" +
-      "font-size:12px;font-weight:800;color:var(--color-trade-ink);background:" +
-      (member === "child" ? "var(--color-trade-child)" : "var(--color-trade-parent)"),
+      `font-size:12px;font-weight:800;color:var(--color-trade-ink);background:${ROLE_COLOR[role]}`,
   );
 const LEGEND_TEXT = styleFromCss(
   "display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:#5C6280;white-space:nowrap",
@@ -293,7 +297,7 @@ export function ChartScreen({
             <div style={LEGEND}>
               {legend.map((row) => (
                 <div key={row.id} style={LEGEND_ROW}>
-                  <div style={LEGEND_DOT(row.member)}>{row.label}</div>
+                  <div style={LEGEND_DOT(row.role)}>{row.label}</div>
                   <div style={LEGEND_TEXT}>
                     <span style={LEGEND_WHO}>{row.who}</span>
                     <span style={LEGEND_BAR}>|</span>

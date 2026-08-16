@@ -24,10 +24,10 @@ assert.equal(lastIsHigh!.hi.visible, false);
 
 // 매매 지점은 최근 3개만, 시간순으로.
 const trades = [
-  { id: "t1", name: "민지", member: "child" as const, side: "buy" as const, tradedAt: "2026-08-01T00:00:00Z" },
-  { id: "t2", name: "엄마", member: "parent" as const, side: "sell" as const, tradedAt: "2026-08-03T00:00:00Z" },
-  { id: "t3", name: "민지", member: "child" as const, side: "buy" as const, tradedAt: "2026-08-02T00:00:00Z" },
-  { id: "t4", name: "아빠", member: "parent" as const, side: "buy" as const, tradedAt: "2026-08-04T00:00:00Z" },
+  { id: "t1", name: "민지", role: "child" as const, side: "buy" as const, tradedAt: "2026-08-01T00:00:00Z" },
+  { id: "t2", name: "엄마", role: "mom" as const, side: "sell" as const, tradedAt: "2026-08-03T00:00:00Z" },
+  { id: "t3", name: "민지", role: "child" as const, side: "buy" as const, tradedAt: "2026-08-02T00:00:00Z" },
+  { id: "t4", name: "아빠", role: "dad" as const, side: "buy" as const, tradedAt: "2026-08-04T00:00:00Z" },
 ];
 const withTrades = buildDetailChart({ ...base, trades });
 assert.equal(withTrades!.pins.length, 3);
@@ -43,5 +43,13 @@ assert.equal(buildDetailChart(base)!.pins.length, 0);
 // 핀 색은 프로토타입의 파스텔 표에서 고른다.
 const palette: string[] = Object.values(PIN_COLORS);
 for (const pin of withTrades!.pins) assert.ok(palette.includes(pin.color), pin.color);
+
+// 엄마와 아빠가 서로 다른 색을 받는다 — 부모로 묶으면 누가 판 것인지 못 가른다.
+// 남은 셋은 t3(민지)·t2(엄마)·t4(아빠)다.
+const [child, mom, dad] = withTrades!.pins;
+assert.equal(child.color, PIN_COLORS.child);
+assert.equal(mom.color, PIN_COLORS.mom);
+assert.equal(dad.color, PIN_COLORS.dad);
+assert.notEqual(mom.color, dad.color);
 
 console.log("detail chart tests passed");

@@ -11,9 +11,12 @@
   /* 차트 매매 지점 마커. 등락색(up·down)을 쓰면 마커를 상승·하락으로 오독한다.
      값은 상세 화면 미니 차트 핀(`f0-home/lib/detail-chart.ts` 의 `PIN_COLORS`)과 같은
      파스텔이다. 같은 체결이 상세에서는 연보라, 차트 화면에서는 진초록으로 보이면
-     같은 사람의 매매인지 알아볼 수 없다. 바탕이 옅으므로 글자는 흰색이 아니라 짙은 색을 쓴다. */
+     같은 사람의 매매인지 알아볼 수 없다. 바탕이 옅으므로 글자는 흰색이 아니라 짙은 색을 쓴다.
+     엄마·아빠를 따로 둔다 — 부모를 한 색으로 묶으면 둘 중 누가 산 것인지 못 가른다
+     (F11 SPEC §5.1 의 `role`). */
   --color-trade-child: #A8B8E8;
-  --color-trade-parent: #F2AECB;
+  --color-trade-mom: #F2AECB;
+  --color-trade-dad: #A9D5C8;
   --color-trade-ink: #3A3F5C;
   --shadow-card: 0 8px 24px rgb(0 30 90 / 0.08);
 }

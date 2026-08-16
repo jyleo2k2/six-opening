@@ -26,6 +26,28 @@ import {
 
 type LoadState = "loading" | "ready" | "error";
 
+/**
+ * 핀 색을 정하는 값. `GET /api/trades` 가 줄마다 싣는다 (F11 SPEC §5.1).
+ *
+ * `ChartTrade.member` 는 부모·자녀 둘뿐이라 엄마와 아빠가 같은 색이 된다. 마커가
+ * 답해야 하는 질문에 "누가 샀나"가 들어 있으므로 그 구분이 사라지면 안 된다.
+ *
+ * `shared/engine/trade-markers.ts` 의 `ChartTrade` 를 넓히지 않고 여기서 받는다 —
+ * `web/shared` 는 오케스트레이터 소유이고, 마커 **계산**에는 색이 필요 없다. 색은
+ * 그리는 쪽의 관심사다. 같은 리터럴이 `f0-home` 에도 있어 언젠가 `shared` 로 올려야
+ * 하며 그 정리는 SPEC §5.1 에 적어 두었다.
+ */
+type PinRole = "child" | "mom" | "dad";
+
+/** 응답 한 줄. 마커 계산이 읽는 부분(`ChartTrade`)에 색만 얹었다. */
+type ChartTradeRow = ChartTrade & { role: PinRole };
+
+const ROLE_COLOR: Record<PinRole, string> = {
+  child: "var(--color-trade-child)",
+  mom: "var(--color-trade-mom)",
+  dad: "var(--color-trade-dad)",
+};
+
 /** 차트가 떴다고 app.html 에 알린다. 답으로 현재 기간·차트종류가 온다. */
 const CHART_READY_MESSAGE = "kiwoom:chart-ready";
 const CHART_OPTIONS_MESSAGE = "kiwoom:chart-options";
@@ -213,7 +235,7 @@ export function TradingViewChart({ symbol, period, chartType }: {
   const [state, setState] = useState<LoadState>("loading");
   const [placed, setPlaced] = useState<PlacedMarker[]>([]);
   /** 이 종목의 가족 체결. `GET /api/trades` 가 유일한 출처다 (F11 SPEC §6.1). */
-  const [trades, setTrades] = useState<ChartTrade[]>([]);
+  const [trades, setTrades] = useState<ChartTradeRow[]>([]);
   /** 이 종목에서 찾은 체결 수. `placed` 와 갈리면 좌표를 못 잡았다는 뜻이다. */
   const [found, setFound] = useState(0);
   /**
@@ -342,7 +364,7 @@ export function TradingViewChart({ symbol, period, chartType }: {
 
     fetch(`/api/trades?symbol=${encodeURIComponent(symbol)}`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error("trades request failed"))))
-      .then((payload: { trades?: ChartTrade[] }) => setTrades(payload.trades ?? []))
+      .then((payload: { trades?: ChartTradeRow[] }) => setTrades(payload.trades ?? []))
       .catch(() => {});
 
     return () => controller.abort();
@@ -547,11 +569,14 @@ export function TradingViewChart({ symbol, period, chartType }: {
             // 빈 공간이라, 원래 방향 그대로 꼬리를 그리면 차트가 없는 쪽(축 여백)을
             // 가리킨다 — 체결가가 지금 보이는 봉 범위를 완전히 벗어난 경우다.
             // 뒤집으면 항상 봉이 실제로 있는 안쪽을 가리킨다.
+            // 마커는 봉·방향당 대표 체결 하나만 남기지만 그 `id` 는 실제 체결의 것이라
+            // 여기서 되찾을 수 있다. 못 찾으면 `member` 로 접는다 — 색이 없어 핀이
+            // 통째로 사라지는 것보다 낫다.
+            const roleById = new Map(trades.map((trade) => [trade.id, trade.role]));
             const laid = placed.map((marker) => {
-              const fill =
-                marker.member === "child"
-                  ? "var(--color-trade-child)"
-                  : "var(--color-trade-parent)";
+              const role =
+                roleById.get(marker.id) ?? (marker.member === "child" ? "child" : "mom");
+              const fill = ROLE_COLOR[role];
               const rawTop = marker.side === "buy" ? marker.y - GAP - BADGE : marker.y + GAP;
               const badgeY = clampBadgeTop(rawTop, pane.height, marker.side);
               const overflowsTailBuffer =

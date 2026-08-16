@@ -92,10 +92,20 @@ type FeedComment = {
 | 정렬 | `created_at` 오름차순 |
 | 수량 | 본인만 값, 타인은 서버에서 `null` |
 | 위치 | 체결 시각 이하의 마지막 봉 x좌표 + 체결가 y좌표 |
-| 모양 | 자녀/부모 색의 B·S SVG 배지 |
+| 모양 | 자녀/엄마/아빠 색의 B·S SVG 배지 + 체결 지점에서 시간축까지 점선 |
 | 상호작용 | 표시 전용, 클릭 없음 |
 
 응답 형식은 `{ trades: ChartTrade[] }`이다. 현재 저장소의 `transactions`에 체결이 없으면 마커가 없는 것이 정상이다.
+
+### 5.1 핀 색을 정하는 `role`
+
+응답의 각 줄은 `member`(`parent`·`child`)와 별개로 **`role`**(`child`·`mom`·`dad`)을 싣는다. `profiles.parent_child`가 `child`면 `child`, 아니면 `profiles.guardian_role`을 그대로 쓰고 그 값이 비면 `mom`으로 접는다.
+
+`member`만으로는 엄마와 아빠가 같은 색이 되어 **누구의 매매인지 차트에서 못 가른다.** `member`는 부모·자녀 이분법이 필요한 곳(성향 비교 등)이 계속 쓰므로 지우지 않고 `role`을 더했다.
+
+색은 자녀 `#A8B8E8`, 엄마 `#F2AECB`, 아빠 `#A9D5C8`이며 차트 마커(`app/globals.css`의 `--color-trade-*`)와 상세 미니 차트 핀(`f0-home/lib/detail-chart.ts`의 `PIN_COLORS`)이 같은 값을 쓴다. 같은 체결이 화면마다 다른 색이면 범례가 거짓말을 한다.
+
+`role` 리터럴 타입은 지금 소비자마다 따로 적혀 있다(`f2-trade/TradingViewChart.tsx`, `f0-home/lib/chart-trade-legend.ts`, `f0-home/lib/detail-chart.ts`). `shared/types/trade.ts`는 오케스트레이터 소유라 이번 작업에서 건드리지 않았다 — **셋을 `shared`의 한 타입으로 올리는 것은 오케스트레이터에게 넘긴다.**
 
 ## 6. 백엔드 구현과 프론트 연결 상태
 

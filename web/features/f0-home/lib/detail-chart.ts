@@ -7,16 +7,16 @@
  * 값 자체는 `GET /api/trades` 가 준 진짜 가족 체결이다(F11 SPEC §6.1). 기록이 없으면
  * 핀 없이 선만 그린다 — 없는 체결을 지어내지 않는다.
  */
-import type { FamilyMember, TradeSide } from "../../../shared/types/trade";
+import type { TradeSide } from "../../../shared/types/trade";
+import type { PinRole } from "./chart-trade-legend";
 
 export type DetailTrade = {
   id: string;
   name: string;
-  member: FamilyMember;
+  /** 핀 색을 정한다. 차트 화면 마커·범례와 같은 기준이다 (F11 SPEC §5.1). */
+  role: PinRole;
   side: TradeSide;
   tradedAt: string;
-  /** 시연 핀만 채운다. 없으면 구성원으로 색을 고른다. */
-  color?: string;
 };
 
 export type DetailPin = {
@@ -25,22 +25,23 @@ export type DetailPin = {
   y: number;
   label: string;
   title: string;
-  member: FamilyMember;
+  role: PinRole;
   /** 핀 바탕색. 프로토타입의 `MEM` 표와 같은 파스텔 세 색이다. */
   color: string;
 };
 
 /**
- * 가족 구성원별 핀 색 — 프로토타입 `MEM` 그대로다.
- * 자녀·엄마·아빠 셋인데 우리 `FamilyMember` 는 자녀·부모 둘이라, 실제 체결은 앞의 둘로
- * 접어 쓰고 시연 핀만 세 색을 돌려 쓴다.
+ * 가족 구성원별 핀 색 — 프로토타입 `MEM` 그대로다. `GET /api/trades` 의 `role` 이
+ * 셋을 갈라 주므로 실제 체결도 세 색을 그대로 받는다 (F11 SPEC §5.1).
+ *
+ * 값은 `app/globals.css` 의 `--color-trade-*` 와 같아야 한다. 여기서 토큰을 못 읽는
+ * 이유는 이 파일이 브라우저 없이 도는 순수 계산이라서다 — 두 곳을 함께 고친다.
  */
-export const PIN_COLORS = Object.freeze({
+export const PIN_COLORS: Readonly<Record<PinRole, string>> = Object.freeze({
   child: "#A8B8E8",
   mom: "#F2AECB",
   dad: "#A9D5C8",
 });
-const PIN_CYCLE = [PIN_COLORS.child, PIN_COLORS.mom, PIN_COLORS.dad];
 
 
 export type DetailChartGeometry = {
@@ -99,8 +100,8 @@ export function buildDetailChart(options: {
       y: y(sp[at]),
       label: trade.side === "buy" ? "B" : "S",
       title: `${trade.name} ${trade.side === "buy" ? "매수" : "매도"}`,
-      member: trade.member,
-      color: trade.color ?? (trade.member === "child" ? PIN_COLORS.child : PIN_COLORS.mom),
+      role: trade.role,
+      color: PIN_COLORS[trade.role],
     };
   });
 

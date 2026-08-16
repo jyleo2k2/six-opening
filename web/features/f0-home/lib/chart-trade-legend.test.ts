@@ -3,7 +3,7 @@ import { buildTradeLegend, type LegendTrade } from "./chart-trade-legend";
 
 const trade = (over: Partial<LegendTrade> & { id: string }): LegendTrade => ({
   name: "김찬영",
-  member: "child",
+  role: "child",
   side: "buy",
   price: 232_000,
   tradedAt: "2026-08-04T01:20:00+09:00",
@@ -20,17 +20,22 @@ assert.equal(one.who, "김찬영");
 assert.equal(one.date, "8/4");
 assert.equal(one.price, "232,000원");
 assert.equal(one.side, "매수");
-assert.equal(one.member, "child");
+assert.equal(one.role, "child");
 
 // 매도는 S 와 `매도` 로 뒤집힌다.
 const [sold] = buildTradeLegend([trade({ id: "t2", side: "sell" })]);
 assert.equal(sold.label, "S");
 assert.equal(sold.side, "매도");
 
-// 부모 체결은 member 를 그대로 넘겨 점 색이 차트 마커와 같아진다.
-const [byParent] = buildTradeLegend([trade({ id: "t3", member: "parent", name: "찬영엄마" })]);
-assert.equal(byParent.member, "parent");
-assert.equal(byParent.who, "찬영엄마");
+// 부모 체결은 role 을 그대로 넘겨 점 색이 차트 마커와 같아진다.
+const [byMom] = buildTradeLegend([trade({ id: "t3", role: "mom", name: "찬영엄마" })]);
+assert.equal(byMom.role, "mom");
+assert.equal(byMom.who, "찬영엄마");
+
+// 엄마와 아빠는 서로 다른 색을 받는다 — 부모로 묶으면 누가 산 것인지 못 가른다.
+const [byDad] = buildTradeLegend([trade({ id: "t3b", role: "dad", name: "찬영아빠" })]);
+assert.equal(byDad.role, "dad");
+assert.notEqual(byDad.role, byMom.role);
 
 // 다섯 건이면 오래된 하나를 버리고 마지막 넷만, 시간 오름차순으로 남긴다.
 const many = buildTradeLegend([

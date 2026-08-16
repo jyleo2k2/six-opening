@@ -25,14 +25,35 @@ type TransactionRow = {
   plan_match: boolean | null;
   plan_changed_reason: string | null;
   created_at: string;
-  profiles: { name: string; parent_child: "parent" | "child" | null } | null;
+  profiles: {
+    name: string;
+    parent_child: "parent" | "child" | null;
+    guardian_role: "mom" | "dad" | null;
+  } | null;
 };
+
+/**
+ * 핀 색을 정하는 값 (F11 SPEC §5.1).
+ *
+ * `parent_child` 는 부모·자녀 둘뿐이라 엄마와 아빠가 같은 색이 된다 — 차트에서 누구의
+ * 매매인지 못 가른다. `profiles.guardian_role` 이 이미 `mom`·`dad` 를 들고 있으므로
+ * 그대로 싣는다. 보호자인데 비어 있는 행은 `mom` 으로 접는다: 색이 없어 핀이 사라지는
+ * 것보다는 낫고, 이름이 옆에 붙어 있어 누구인지는 범례가 답한다.
+ */
+type PinRole = "child" | "mom" | "dad";
+
+function pinRole(profile: TransactionRow["profiles"]): PinRole {
+  if (profile?.parent_child !== "parent") return "child";
+  return profile.guardian_role === "dad" ? "dad" : "mom";
+}
 
 /**
  * 마커 계산에 필요한 `ChartTrade` 에 질문식 기록을 얹은 모양 (F2 SPEC §7.1).
  * `buildTradeMarkers` 는 이 필드를 읽지 않으므로 `ChartTrade` 자체는 그대로 둔다.
  */
 type TradeResponseRow = ChartTrade & {
+  /** 핀 색. `member` 와 달리 엄마·아빠를 가른다 (F11 SPEC §5.1). */
+  role: PinRole;
   reasonCode: string | null;
   planCode: string | null;
   planTargetPrice: number | null;
@@ -44,7 +65,7 @@ type TradeResponseRow = ChartTrade & {
 const SELECT =
   "id,user_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
   "memo,plan_match,plan_changed_reason,created_at," +
-  "stocks!inner(stock_code),profiles!inner(name,parent_child,family_tag)";
+  "stocks!inner(stock_code),profiles!inner(name,parent_child,family_tag,guardian_role)";
 
 export async function GET(request: NextRequest) {
   const userId = sessionUserId(request);
@@ -75,6 +96,7 @@ export async function GET(request: NextRequest) {
       id: row.id,
       name: row.profiles?.name ?? "가족",
       member: row.profiles?.parent_child === "parent" ? "parent" : "child",
+      role: pinRole(row.profiles),
       side: row.side,
       price: Number(row.trade_price),
       // 남의 체결 수량은 지운다 — 자산 규모 비노출 (SPEC §6).
