@@ -44,10 +44,8 @@ import { PhoneFrame } from "./PhoneFrame";
 const PAGE = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:#F7F6FB",
 );
-const BACK = styleFromCss(
-  "width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;" +
-    "font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
-);
+// 뒤로가기 버튼은 없앴지만, 아래 성분·수익률 탭 헤더가 밀리지 않게 자리만 비워 둔다.
+const HEADER_SPACER = styleFromCss("width:38px;height:38px;flex:none");
 const WEEK_LABEL = styleFromCss("font-size:14px;font-weight:600;color:#9095AA");
 const TITLE = styleFromCss(
   "font-size:27px;font-weight:800;color:#001E5A;letter-spacing:-0.025em;margin-top:2px",
@@ -274,7 +272,7 @@ export function ArchiveScreen({
     <PhoneFrame>
       <div style={PAGE}>
         <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 12, padding: "6px 20px 0" }}>
-          <div onClick={() => onLeave("/")} style={BACK}>‹</div>
+          <div style={HEADER_SPACER} />
           <div style={{ flex: 1 }} />
         </div>
         <div style={{ flex: "none", padding: "10px 20px 0" }}>

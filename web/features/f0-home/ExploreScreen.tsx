@@ -32,10 +32,6 @@ const PAGE = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;background:#F4F0FF",
 );
 const HEADER = styleFromCss("flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px");
-const BACK = styleFromCss(
-  "width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;" +
-    "font-size:17px;font-weight:700;color:#01185A;cursor:pointer;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
-);
 const TITLE = styleFromCss(
   "flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em",
 );
@@ -59,9 +55,9 @@ const CHIPS_TOGGLE = (open: boolean) =>
 const SORT_BTN = styleFromCss(
   "flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent",
 );
-// 헤더 오른쪽에 버튼이 둘이라, 왼쪽에 한 칸을 비워야 제목이 가운데에 선다.
-// 왼쪽 38+12+38+12 = 오른쪽 12+38+12+38. 정렬 버튼이 검색 버튼과 같은 38px 이어야 맞는다.
-const HEADER_SPACER = styleFromCss("flex:none;width:38px");
+// 헤더 오른쪽에 버튼이 둘이라, 왼쪽도 같은 폭을 비워야 제목이 가운데에 선다.
+// 왼쪽 88+12 = 오른쪽 12+38+12+38.
+const HEADER_SPACER = styleFromCss("flex:none;width:88px");
 // 헤더 버튼 바로 아래(59 패딩 + 6 + 38 = 103px). PAGE 가 `overflow:hidden` 이라 이 안을 벗어나지 않는다.
 const SORT_MENU = styleFromCss(
   "position:absolute;right:16px;top:108px;z-index:2;min-width:148px;padding:6px;border-radius:16px;" +
@@ -232,9 +228,6 @@ export function ExploreScreen({
     <PhoneFrame>
       <div style={PAGE}>
         <div style={HEADER}>
-          <div onClick={() => onLeave("/")} style={BACK}>
-            ‹
-          </div>
           <div style={HEADER_SPACER} />
           <div style={TITLE}>어떤 회사를 살까요?</div>
           <div onClick={() => setSortOpen((open) => !open)} style={SORT_BTN}>
