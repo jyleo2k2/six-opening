@@ -71,9 +71,13 @@ const ITEM_LINE = styleFromCss(
 /**
  * 수익금액과 수익률은 **한 문장**이다. 크기나 색이 갈리면 괄호 안이 다른 종류의 숫자로
  * 읽힌다 — 둘 다 `rateColor` 를 그대로 쓴다.
+ *
+ * 크기는 이 자리에 있던 총자산과 같은 `23px` 다. 총자산이 헤더로 올라가면서 가운데의
+ * 주인공이 수익으로 바뀌었으므로, 자리만 물려받고 크기를 줄이면 목표 문장보다 작아져
+ * 무엇이 주인공인지 흐려진다.
  */
 const PROFIT_LINE = styleFromCss(
-  "font-size:21px;font-weight:800;letter-spacing:-0.02em;margin-top:7px;font-variant-numeric:tabular-nums",
+  "font-size:23px;font-weight:800;letter-spacing:-0.02em;margin-top:7px;font-variant-numeric:tabular-nums",
 );
 /**
  * 캐릭터 그림 자리는 **높이가 고정**이다. 원본 그림의 비율이 서로 달라(아빠 368×655,
