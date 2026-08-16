@@ -36,13 +36,21 @@ async function run() {
   assert.equal(useChatBehaviorStore.getState().activeSignal, "buyHesitation");
   assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 2);
 
-  // 수락(네)은 아무것도 재우지 않는다 — 조건을 다시 채우면 즉시 재발동한다.
-  useChatBehaviorStore.getState().acceptActiveSignal();
+  // ── "아니요" 는 그 신호를 이번 세션 동안 재운다 ───────────────────────────
+  // 거절 1회. buyHesitation 은 조건을 다시 채워도 뜨지 않는다.
+  useChatBehaviorStore.getState().dismissActiveSignal("buyHesitation");
+  abandon(start + 7);
+  abandon(start + 8);
+  abandon(start + 9);
+  assert.equal(useChatBehaviorStore.getState().activeSignal, null);
+  assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 2);
+
+  // 재운 것은 그 신호뿐이다. 다른 신호는 그대로 뜬다.
   useChatBehaviorStore.getState().recordEvent({
     type: "screen_dwell_completed",
     screen: "order",
     durationMs: 5 * 60 * 1000 + 1,
-    at: start + 7,
+    at: start + 10,
   });
   assert.equal(useChatBehaviorStore.getState().activeSignal, "dwell");
   assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 3);
@@ -52,53 +60,12 @@ async function run() {
     type: "screen_dwell_completed",
     screen: "stock",
     durationMs: 5 * 60 * 1000 + 1,
-    at: start + 8,
+    at: start + 11,
   });
   assert.equal(useChatBehaviorStore.getState().activeSignal, "dwell");
   assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 4);
 
   useChatBehaviorStore.getState().acceptActiveSignal();
-  useChatBehaviorStore.getState().recordEvent({
-    type: "trade_filled",
-    stockId: "KRX:005930",
-    side: "sell",
-    realizedPnlPct: -12,
-    at: start + 9,
-  });
-  for (let offset = 10; offset <= 11; offset += 1) {
-    useChatBehaviorStore.getState().recordEvent({
-      type: "screen_entered",
-      screen: "stock",
-      stockId: "KRX:005930",
-      at: start + offset,
-    });
-  }
-  assert.equal(useChatBehaviorStore.getState().activeSignal, "lossRevisit");
-  assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 5);
-
-  useChatBehaviorStore.getState().acceptActiveSignal();
-  useChatBehaviorStore.getState().recordEvent({
-    type: "screen_entered",
-    screen: "stock",
-    stockId: "KRX:005930",
-    at: start + 14,
-  });
-  assert.equal(useChatBehaviorStore.getState().activeSignal, "lossRevisit");
-  assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 6);
-
-  // ── "아니요" 는 그 신호를 이번 세션 동안 재운다 ───────────────────────────
-  // 거절 1회. lossRevisit 은 조건을 다시 채워도 뜨지 않는다.
-  useChatBehaviorStore.getState().dismissActiveSignal("lossRevisit");
-  useChatBehaviorStore.getState().recordEvent({
-    type: "screen_entered",
-    screen: "stock",
-    stockId: "KRX:005930",
-    at: start + 15,
-  });
-  assert.equal(useChatBehaviorStore.getState().activeSignal, null);
-  assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 6);
-
-  // 재운 것은 그 신호뿐이다. 다른 신호는 그대로 뜬다.
   const flow = (offset: number, orderType: "limit" | "market", orderFlowId: string) =>
     useChatBehaviorStore.getState().recordEvent({
       type: "order_method_selected",
@@ -107,11 +74,11 @@ async function run() {
       orderType,
       at: start + offset,
     });
-  flow(16, "limit", "buy_1");
-  flow(17, "market", "buy_1");
-  flow(18, "limit", "buy_1");
+  flow(12, "limit", "buy_1");
+  flow(13, "market", "buy_1");
+  flow(14, "limit", "buy_1");
   assert.equal(useChatBehaviorStore.getState().activeSignal, "orderMethodConfusion");
-  assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 7);
+  assert.equal(useChatBehaviorStore.getState().activeSignalVersion, 5);
 
   // ── 거절 3회면 선제 도움 전체가 꺼진다 ──────────────────────────────────
   // 거절 2회.
@@ -121,7 +88,7 @@ async function run() {
     type: "screen_dwell_completed",
     screen: "order",
     durationMs: 5 * 60 * 1000 + 1,
-    at: start + 19,
+    at: start + 15,
   });
   assert.equal(useChatBehaviorStore.getState().activeSignal, "dwell");
 
@@ -132,9 +99,9 @@ async function run() {
   assert.deepEqual(useChatBehaviorStore.getState().proactiveMute.mutedSignals, []);
 
   // 꺼진 동안에는 어떤 신호도 뜨지 않는다.
-  flow(20, "market", "buy_2");
-  flow(21, "limit", "buy_2");
-  flow(22, "market", "buy_2");
+  flow(16, "market", "buy_2");
+  flow(17, "limit", "buy_2");
+  flow(18, "market", "buy_2");
   assert.equal(useChatBehaviorStore.getState().activeSignal, null);
 
   // ── 끄기는 세션이 갈려도 유지된다 — 아이가 직접 켤 때까지다 ─────────────

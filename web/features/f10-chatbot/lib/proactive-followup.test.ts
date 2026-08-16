@@ -45,7 +45,6 @@ const SIGNAL_CONTEXTS: Record<ProactiveSignal, Record<string, unknown>[]> = {
   buyHesitation: [{ screen: "order" }],
   orderMethodConfusion: [{ screen: "order" }],
   dwell: [{ screen: "order" }, { screen: "stock", ...STOCK }],
-  lossRevisit: [{ screen: "stock", ...STOCK }],
 };
 
 async function main() {

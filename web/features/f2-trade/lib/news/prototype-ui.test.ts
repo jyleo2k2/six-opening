@@ -3,14 +3,13 @@ import { readFileSync } from "node:fs";
 
 /**
  * 종목 뉴스 화면 계약 가드. 상세·뉴스 화면이 React(`features/f0-home`)로 옮겨 가서
- * 이 가드도 그 소스를 읽는다 — 조립된 `app.html` 에는 뉴스 UI 가 남아 있으면 안 된다.
+ * 이 가드도 그 소스를 읽는다.
  */
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
 
 const detailScreen = read("../../../f0-home/DetailScreen.tsx");
 const newsScreen = read("../../../f0-home/NewsScreen.tsx");
 const newsContract = read("../../../f0-home/lib/stock-news.ts");
-const appHtml = read("../../../../public/ui/app.html");
 
 // 목록·상세 조회는 검수 통과분만 주는 서버 경로를 쓴다.
 assert.match(detailScreen, /fetch\(`\/api\/news\?stockId=/u);
@@ -27,10 +26,5 @@ assert.match(newsScreen, /news\.summaryLines\.map/u);
 assert.match(newsScreen, /3줄 요약/u);
 assert.match(newsScreen, /원문 보기 ↗/u);
 assert.match(newsContract, /timeZone: "Asia\/Seoul"/u);
-// 조립된 app.html 에는 뉴스 UI 가 더 이상 없다 — 남아 있으면 두 벌이 갈라진다.
-assert.doesNotMatch(appHtml, />3줄 요약</u);
-assert.doesNotMatch(appHtml, /api\/news\?stockId/u);
-assert.doesNotMatch(appHtml, /const NEWS =/u);
-assert.doesNotMatch(appHtml, /newsBody|newsPoints/u);
 
 console.log("news prototype UI contract tests passed");

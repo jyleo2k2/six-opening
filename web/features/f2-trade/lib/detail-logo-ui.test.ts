@@ -3,10 +3,10 @@ import { existsSync, readFileSync } from "node:fs";
 
 const universeUrl = new URL("../../../public/ui/assets/universe.js", import.meta.url);
 const universeSource = readFileSync(universeUrl, "utf8");
-// 조립 결과를 읽는다. ui-src 안에서 조각을 어떻게 나누든 계약은 그대로 확인된다
-// (같은 폴더의 buy-amount-ui·news/prototype-ui 테스트와 같은 방식).
-const uiSource = readFileSync(
-  new URL("../../../public/ui/app.html", import.meta.url),
+// 종목 상세 화면이 React(`features/f0-home`)로 옮겨 가서 로고·이모지 대체 계약도
+// 그 소스를 읽는다 (같은 폴더의 buy-amount-ui·news/prototype-ui 테스트와 같은 방식).
+const detailScreen = readFileSync(
+  new URL("../../f0-home/DetailScreen.tsx", import.meta.url),
   "utf8",
 );
 
@@ -36,7 +36,7 @@ for (const stockCode of stockCodes) {
   );
 }
 
-assert.match(uiSource, /stockEmoji: st && !logos\[st\.code\]/u);
-assert.match(uiSource, /background-image:url\(' \+ logos\[st\.code\] \+ '\)/u);
+assert.match(detailScreen, /background-image:url\(\$\{stock\.logoUrl\}\)/u);
+assert.match(detailScreen, /\{stock\.logoUrl \? "" : stock\.sectorName\.charAt\(0\)\}/u);
 
 console.log("detail stock logo UI contract tests passed");

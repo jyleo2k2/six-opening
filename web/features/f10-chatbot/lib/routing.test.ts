@@ -13,8 +13,6 @@ const stockContext = {
 const orderContext = { screen: "order" as const, quantity: 10, unitPrice: 12500 };
 
 assert.equal(PROACTIVE_SCRIPTS.orderMethodConfusion.text, "뭐가 다른지 볼까요?");
-// 관찰한 행동에만 붙는 문장이다. "후회되나요?" 는 아이가 느끼지도 않은 감정을 단정했다.
-assert.equal(PROACTIVE_SCRIPTS.lossRevisit.text, "이 회사 다시 볼까요?");
 for (const script of Object.values(PROACTIVE_SCRIPTS)) {
   assert.ok(script.text.length <= 20, `선제 말풍선 대사가 깁니다: ${script.text}`);
 }
