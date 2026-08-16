@@ -63,31 +63,20 @@ function matchesQuery(name: string, code: string, query: string): boolean {
   return searchAliasesFor(code).some((alias) => alias.toLowerCase().includes(query));
 }
 
-export type ExploreFilter = string; // 'all' | 'watch' | 유니버스 섹터 id
+export type ExploreFilter = string; // 'all' | 'rank' | 'watch' | 유니버스 섹터 id
 
 /**
- * 칩 줄에 섞여 있는 정렬 칩의 id. 필터가 아니라 정렬을 바꾸므로 `ExploreFilter` 가 아니다 —
- * 챗봇의 `/explore/rank` 점프와 같은 말을 쓰려고 이름만 맞춰 둔다.
+ * `오늘 많이 오른 순` 칩의 id. **다른 칩과 같은 자격의 카테고리다** — 전체 종목을 당일
+ * 등락률 내림차순으로 세워 보여 주는 목록이고, 주소는 챗봇 점프와 같은 `/explore/rank` 다.
+ *
+ * 한때는 이 칩만 정렬 축을 따로 갖고 필터와 겹쳐 켜졌지만, 카테고리 하나로 접었다.
+ * 그래서 `관심 기업 + 많이 오른 순` 같은 조합은 없다 — 칩은 언제나 하나만 켜진다.
  */
 export const RANK_CHIP = "rank";
 
-/**
- * 줄 세우는 기준. **무엇을 보는지(필터)와 다른 축이라** 주소가 아니라 화면이 소유한다.
- *
- * 고를 수 있는 값은 둘뿐이다 — 고르는 자리가 `오늘 많이 오른 순` 칩 하나이기 때문이다.
- * 헤더의 정렬 메뉴(`업종별`·`많이 오른 순`·`가나다순`)는 걷어냈고 `가나다순` 은 부를 길이
- * 없어져 함께 지웠다. `sector` 는 그 칩이 꺼진 기본 차례이고 이름이 곧 규칙이다 —
- * 업종끼리 묶으므로 카드 사이 업종 구분 헤더가 이때만 뜻이 있다.
- */
-export type ExploreSort = "sector" | "change";
-
-/** 칩을 누를 때마다 오가는 두 상태. 켜면 등락순, 다시 누르면 기본 차례로 돌아간다. */
-export const toggleRankSort = (sort: ExploreSort): ExploreSort =>
-  sort === "change" ? "sector" : "change";
-
 /** 업종 차례는 유니버스가 정한 순서다 — 그래야 같은 업종이 한 덩어리로 붙어 헤더가 한 번만 선다. */
-function comparator(sort: ExploreSort, universe: Universe) {
-  if (sort === "change") return (a: ExploreStockRow, b: ExploreStockRow) => b.change - a.change;
+function comparator(filter: ExploreFilter, universe: Universe) {
+  if (filter === RANK_CHIP) return (a: ExploreStockRow, b: ExploreStockRow) => b.change - a.change;
   const order = universe.sectors.map((sector) => sector.id);
   return (a: ExploreStockRow, b: ExploreStockRow) =>
     order.indexOf(a.sector) - order.indexOf(b.sector);
@@ -101,6 +90,13 @@ function comparator(sort: ExploreSort, universe: Universe) {
 export const hasManySectors = (list: ExploreStockRow[]) =>
   list.some((stock) => stock.sector !== list[0]?.sector);
 
+/**
+ * 카드 사이 업종 구분 헤더를 세울지. **`오늘 많이 오른 순`에서는 세우지 않는다** — 등락률로
+ * 섞인 줄이라 같은 업종이 흩어지고, 그러면 헤더가 곳곳에 서서 없는 묶음을 있다고 말한다.
+ */
+export const showSectorGroups = (filter: ExploreFilter, list: ExploreStockRow[]) =>
+  filter !== RANK_CHIP && hasManySectors(list);
+
 export type ExploreStockRow = {
   code: string;
   name: string;
@@ -111,14 +107,16 @@ export type ExploreStockRow = {
   spark: number[];
 };
 
-/** 검색어가 있으면 섹터·관심 선택보다 검색이 앞선다. 어느 목록이든 `sort` 가 줄을 세운다. */
+/**
+ * 검색어가 있으면 섹터·관심 선택보다 검색이 앞선다. 줄 세우는 차례는 **고른 카테고리가
+ * 정한다** — `rank` 면 당일 등락률 내림차순이고 나머지는 업종 차례다.
+ */
 export function exploreList(
   universe: Universe,
   live: Pick<UniverseLive, "quotes" | "sparks">,
   filter: ExploreFilter,
   query: string,
   watchlist: string[],
-  sort: ExploreSort = "sector",
 ): ExploreStockRow[] {
   const merged = universe.stocks.map((stock) => ({
     code: stock.code,
@@ -131,10 +129,11 @@ export function exploreList(
   }));
   // 아래 목록은 전부 `merged` 에서 새로 만든 배열이라 제자리 정렬해도 원본이 상하지 않는다.
   // `Array.sort` 가 안정 정렬이라, 업종별에서 같은 업종끼리는 유니버스 차례가 그대로 남는다.
-  const ordered = (rows: ExploreStockRow[]) => rows.sort(comparator(sort, universe));
+  const ordered = (rows: ExploreStockRow[]) => rows.sort(comparator(filter, universe));
   const q = query.trim().toLowerCase();
   if (q) return ordered(merged.filter((stock) => matchesQuery(stock.name, stock.code, q)));
-  if (filter === "all") return ordered(merged);
+  // `전체` 와 `오늘 많이 오른 순` 은 같은 51종목을 본다. 다른 것은 줄 세우는 차례뿐이다.
+  if (filter === "all" || filter === RANK_CHIP) return ordered(merged);
   if (filter === "watch") return ordered(merged.filter((stock) => watchlist.includes(stock.code)));
   return ordered(merged.filter((stock) => stock.sector === filter));
 }
@@ -154,22 +153,17 @@ export function exploreList(
  * 밑에서 왼쪽으로 튀고, 옆 칩들이 밀려 다음에 누르려던 칩이 딴 자리에 가 있었다. 원본
  * 프로토타입(`sectorChips`)은 `defs` 를 고정 순서로 만들고 색·굵기만 바꾼다.
  *
- * 원본의 `오늘 많이 오른 순` 칩은 `전체` 와 `관심 기업` 사이에 그대로 선다. 다만 그 칩은
- * **무엇을 보는지가 아니라 줄 세우는 기준**을 바꾼다 — 켜짐 판정도 `filter` 가 아니라
- * `sort` 가 한다. 그래서 섹터를 골라 둔 채로 눌러도 섹터를 잃지 않는다(PR #263이 고친 것).
+ * `오늘 많이 오른 순` 은 원본처럼 `전체` 와 `관심 기업` 사이에 서고, **다른 칩과 같은
+ * 규칙을 따른다** — 켜짐 판정은 모두 `filter` 하나가 하므로 언제나 하나만 켜진다.
  */
-export function sectorChips(
-  universe: Universe,
-  filter: ExploreFilter,
-  sort: ExploreSort = "sector",
-) {
+export function sectorChips(universe: Universe, filter: ExploreFilter) {
   return [
     { id: "all", name: "전체", emoji: "" },
     { id: RANK_CHIP, name: "오늘 많이 오른 순", emoji: "" },
     { id: "watch", name: "관심 기업", emoji: "" },
     ...universe.sectors,
   ].map((sector) => {
-    const on = sector.id === RANK_CHIP ? sort === "change" : sector.id === filter;
+    const on = sector.id === filter;
     return {
       id: sector.id,
       name: sector.name,

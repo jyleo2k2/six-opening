@@ -11,21 +11,15 @@ import {
   cardDots,
   emptyState,
   exploreList,
-  hasManySectors,
   RANK_CHIP,
   sectorChips,
-  toggleRankSort,
-  type ExploreSort,
+  showSectorGroups,
 } from "./lib/explore-cards";
-import {
-  exploreSpotFor,
-  lastExploreSort,
-  rememberExploreSort,
-  rememberExploreSpot,
-} from "./lib/explore-memo";
+import { exploreSpotFor, rememberExploreSpot } from "./lib/explore-memo";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
+import { useWatchlist } from "./lib/use-watchlist";
 
 const PAGE = styleFromCss(
   // 배경은 두지 않는다 — 원본과 같이 `PhoneFrame` 의 화면 컨테이너 색(`SCREEN_BG`)을 그대로
@@ -79,11 +73,14 @@ const GROUP_NAME = styleFromCss("font-size:22px;font-weight:800;color:#141B22;le
 /**
  * 라우트의 섹터 구간이 아는 값이 아니면 전체로 되돌린다.
  *
- * `rank` 는 챗봇의 "오늘 뭐가 많이 올랐어" 점프가 보내는 값이다(`f10-chatbot/lib/routing.ts`).
- * 정렬은 필터가 아니므로 목록은 전체로 보내고, 등락순 정렬은 아래 effect 가 칩을 켜서 맞춘다.
+ * `rank` 도 아는 값이다 — 칩 줄의 `오늘 많이 오른 순` 이 쓰는 카테고리이자, 챗봇의
+ * "오늘 뭐가 많이 올랐어" 점프가 보내는 값이다(`f10-chatbot/lib/routing.ts`).
  */
 const knownFilter = (sector: string | undefined, sectorIds: string[]) =>
-  sector && (sector === "all" || sector === "watch" || sectorIds.includes(sector)) ? sector : "all";
+  sector &&
+  (sector === "all" || sector === RANK_CHIP || sector === "watch" || sectorIds.includes(sector))
+    ? sector
+    : "all";
 
 /** 필터 → 주소. 칩과 자리 기억이 같은 문자열을 써야 돌아왔을 때 같은 목록으로 친다. */
 const explorePath = (filter: string) => (filter === "all" ? "/explore" : `/explore/${filter}`);
@@ -108,13 +105,12 @@ export function ExploreScreen({
   onChatContext: (context: ChatContext | null) => void;
 }) {
   const { wallet } = useWallet();
+  const { codes: watchCodes } = useWatchlist();
   const { universe, quotes, sparks } = useUniverseLive();
   const [query, setQuery] = useState("");
   const [cardIndex, setCardIndex] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [chipsOpen, setChipsOpen] = useState(false);
-  // 정렬은 섹터를 옮겨도 따라간다. 화면을 떠났다 와도 마찬가지라 초기값을 기억에서 읽는다.
-  const [sort, setSort] = useState<ExploreSort>(lastExploreSort);
   // 끄는 손과 **켜진 카드 판정**을 함께 이 훅에 맡긴다. 카드가 위아래로 넘어가는 세로
   // 레일이라 축은 'y'. 견주는 값은 `activeIndex` 가 아니라 `cardIndex` 다 — 목록이 줄어
   // 범위를 벗어난 `cardIndex` 가 남았을 때, 잰 값과 달라야 다음 스크롤에서 제자리를 찾는다.
@@ -125,13 +121,6 @@ export function ExploreScreen({
   const filter = knownFilter(sector, universe?.sectors.map((entry) => entry.id) ?? []);
   const path = explorePath(filter);
   const ready = universe !== null && wallet !== null;
-
-  // 챗봇의 "오늘 뭐가 많이 올랐어"(`/explore/rank`)는 목록이 아니라 정렬로 답한다.
-  useEffect(() => {
-    if (sector !== "rank") return;
-    setSort("change");
-    rememberExploreSort("change");
-  }, [sector]);
 
   // 필터·검색이 바뀌면 처음 카드부터 다시 본다 — `componentDidUpdate` 의 scrollLeft 리셋과 같다.
   useEffect(() => {
@@ -183,25 +172,17 @@ export function ExploreScreen({
 
   if (!universe || !wallet) return <PhoneFrame />;
 
-  const list = exploreList(universe, { quotes, sparks }, filter, query, wallet.watchlist, sort);
-  const chips = sectorChips(universe, filter, sort);
-  // 업종 구분 헤더는 **업종별로 줄을 세웠을 때만** 뜻이 있다. 예전에는 "전체 보기면 무조건"
-  // 이었는데, 그러면 전체를 다른 기준으로 정렬하는 순간 같은 업종이 흩어져 헤더가 곳곳에 선다.
-  const showGroups = sort === "sector" && hasManySectors(list);
+  const list = exploreList(universe, { quotes, sparks }, filter, query, watchCodes);
+  const chips = sectorChips(universe, filter);
+  // 업종 구분 헤더는 업종끼리 묶인 줄에서만 뜻이 있다 — `오늘 많이 오른 순` 은 등락률로
+  // 섞이므로 세우지 않는다. 그 판정은 `showSectorGroups` 가 소유한다.
+  const showGroups = showSectorGroups(filter, list);
   const empty = emptyState(query);
   const activeIndex = Math.min(cardIndex, Math.max(0, list.length - 1));
 
+  // 칩은 모두 같은 규칙이다 — 무엇을 보는지는 주소가 소유하므로 누르면 주소만 바꾼다.
   const pickChip = (id: string) => {
     setChipsOpen(false);
-    // "오늘 많이 오른 순"만 주소를 바꾸지 않는다 — 무엇을 보는지(필터)가 아니라 줄 세우는
-    // 기준을 바꾸는 칩이라, **누를 때마다 켜졌다 꺼진다.** 꺼진 자리는 기본 차례다.
-    // 여기서 `/explore/rank` 로 보내면 골라 둔 업종이 전체로 풀려 정렬과 필터를 함께 못 갖는다.
-    if (id === RANK_CHIP) {
-      const next = toggleRankSort(sort);
-      setSort(next);
-      rememberExploreSort(next);
-      return;
-    }
     onLeave(explorePath(id));
   };
   const toggleSearch = () => {
