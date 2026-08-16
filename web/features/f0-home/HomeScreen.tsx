@@ -30,9 +30,9 @@ const AVATAR = styleFromCss(
  * 붙어 보여 둘 중 어느 쪽이 번 돈인지 읽는 사람이 구분하지 못한다. 이름을 앞에 달아
  * "누구의 무슨 돈"인지까지 한 줄로 말한다.
  */
-const ASSET_LABEL = styleFromCss("font-size:18px;font-weight:700;color:#8E7BC7");
+const ASSET_LABEL = styleFromCss("font-size:17px;font-weight:700;color:#8E7BC7");
 const ASSET_TOTAL = styleFromCss(
-  "font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;line-height:1.2;" +
+  "font-size:21px;font-weight:800;color:#01185A;letter-spacing:-0.02em;line-height:1.2;" +
     "font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
 );
 const MENU_BTN = styleFromCss(
