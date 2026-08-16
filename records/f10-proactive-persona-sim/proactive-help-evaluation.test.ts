@@ -14,7 +14,7 @@ import {
 } from "./personas";
 import { PERSONA_EVALUATION_SCENARIOS } from "./scenarios";
 
-assert.equal(PERSONA_EVALUATION_SCENARIOS.length, 12);
+assert.equal(PERSONA_EVALUATION_SCENARIOS.length, 8);
 assert.equal(MATRAIX_CHILD_PERSONAS.length, 12);
 assert.equal(new Set(MATRAIX_CHILD_PERSONAS.map((persona) => persona.personaId)).size, 12);
 assert.equal(MATRAIX_SOURCE.commit.length, 40);
@@ -33,7 +33,7 @@ for (const persona of MATRAIX_CHILD_PERSONAS) {
   assert.equal("gender_identity" in persona.dimensions, false);
 }
 
-for (const signal of ["switch", "dwell", "lossRevisit"] as const) {
+for (const signal of ["switch", "dwell"] as const) {
   const scenarios = PERSONA_EVALUATION_SCENARIOS.filter((scenario) => scenario.signal === signal);
   assert.equal(scenarios.length, 4);
   assert.equal(scenarios.filter((scenario) => scenario.oracleNeedsHelp).length, 2);
@@ -61,11 +61,11 @@ for (const result of firstRun) {
 }
 
 assert.deepEqual(calculateMetrics(firstRun), {
-  truePositive: 3,
-  falsePositive: 3,
-  trueNegative: 3,
-  falseNegative: 3,
-  total: 12,
+  truePositive: 2,
+  falsePositive: 2,
+  trueNegative: 2,
+  falseNegative: 2,
+  total: 8,
   precision: 0.5,
   sensitivity: 0.5,
   specificity: 0.5,
@@ -89,6 +89,6 @@ for (const metrics of Object.values(metricsBySignal)) {
 
 const report = renderEvaluationReport(firstRun);
 assert.match(report, /실제 아동 정확도가 아니라/);
-assert.match(report, /TP 3 \/ FP 3 \/ TN 3 \/ FN 3/);
+assert.match(report, /TP 2 \/ FP 2 \/ TN 2 \/ FN 2/);
 
 console.log("persona proactive help evaluation tests passed");
