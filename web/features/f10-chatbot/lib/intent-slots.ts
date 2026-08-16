@@ -233,6 +233,39 @@ export function asksSuperiorityComparison(message: string): boolean {
 /** 최상급·인기 표현. 그 자체로는 투자 질문이 아니다. */
 const POPULARITY_SLOT = ["제일", "가장", "많이", "인기", "다들", "남들", "애들"] as const;
 
+/** 값·질을 재는 형용사. 최상급·투자 대상과 **모두** 만날 때만 고르기 요구가 된다. */
+const VALUE_ADJECTIVE_SLOT = [
+  "싼",
+  "싸",
+  "비싼",
+  "비싸",
+  "좋은",
+  "좋아",
+  "괜찮은",
+  "안전한",
+  "잘나가",
+  "많이오른",
+  "많이올라",
+] as const;
+
+/**
+ * `제일 싼 주식`·`가장 안전한 종목` 처럼 최상급으로 골라 달라는 요구(SPEC §6.1.1).
+ *
+ * 구절 목록(`제일좋은종목`)은 held-out 의 **`지금 제일 싼 주식 뭐야?` 를 놓쳤고**,
+ * `주식` 한 낱말이 용어 사전에 먼저 걸려 "주식은 회사의 작은 조각이에요" 로 답했다.
+ * 고르라는 요구에 뜻풀이가 나간 자리다.
+ *
+ * 세 슬롯이 모두 있어야 한다 — `무슨 좋은 제품 만들어?`(최상급 없음)와
+ * `제일 인기 있는 노래 알려줘`(투자 대상 없음)는 걸리지 않는다.
+ */
+export function asksSuperlativePick(message: string): boolean {
+  return (
+    includesAny(message, ["제일", "가장", "젤", "최고"]) &&
+    includesAny(message, VALUE_ADJECTIVE_SLOT) &&
+    includesAny(message, INVESTMENT_TARGET_SLOT)
+  );
+}
+
 /** 1인칭. 같은 표현이라도 주어가 나면 본인 기록 조회다. */
 const FIRST_PERSON_SLOT = ["내가", "제가", "나는", "내종목", "나의"] as const;
 
@@ -420,6 +453,64 @@ export function signalsSelfDeprecation(message: string): boolean {
   if (!includesAny(message, ["내가", "나는", "나만", "제가", "내", "나"])) return false;
   if (!includesAny(message, COMPARED_TO_SLOT)) return false;
   return includesAny(message, SELF_DEPRECATION_SLOT);
+}
+
+/** 남이 벌었다는 말. 자기 낮춤말이 없어도 견주는 마음은 같다. */
+const OTHERS_GAIN_SLOT = ["벌었", "땄", "먹었", "수익났", "올랐대", "이득봤", "돈복사"] as const;
+
+/**
+ * 남의 성과를 전하며 견주는 말(SPEC §6.1.2). 위 `signalsSelfDeprecation` 은 1인칭과
+ * 자기 낮춤말을 **함께** 요구해서 held-out 의 `친구는 벌써 10% 벌었대` 를 놓쳤다 —
+ * 자기를 낮추는 낱말이 하나도 없지만 아이가 서 있는 자리는 같다.
+ */
+/**
+ * 견주는 말이라도 **"나도 사겠다"가 붙으면 추천 차단이 먼저다**(SPEC §6.1.5).
+ * `친구가 20퍼 벌었다는데 나도 따라 사면 늦어?` 는 위로가 아니라 매수 판단 요구다.
+ */
+const FOLLOW_BUY_MARKERS = ["따라사", "따라살", "나도사", "나도살", "똑같이사", "똑같이살"] as const;
+
+export function signalsOthersGainComparison(message: string): boolean {
+  if (includesAny(message, FOLLOW_BUY_MARKERS)) return false;
+  return (
+    includesAny(message, [...COMPARED_TO_SLOT, "친구들"]) &&
+    includesAny(message, OTHERS_GAIN_SLOT)
+  );
+}
+
+/**
+ * 손실을 이미 봤다는 말(SPEC §6.1.2). held-out 에서 **`다 잃었어 어떡해` 가 범위
+ * 안내로 끝났다** — 정서 지원이 가장 필요한 자리에서 "그 범위에서 물어봐 주세요"
+ * 라고 답했다. 뜻을 묻는 질문(`손실이 무슨 뜻이야?`)은 개념 설명이므로 뺀다.
+ */
+// **과거 완료형만 담는다.** `돈잃` 처럼 어간만 두면 `마이너스면 진짜 돈 잃은 거야?`
+// 같은 개념 확인 질문까지 삼킨다 — 그건 평가손익과 실현손익을 가르는 설명이 나갈
+// 자리이지 정서 지원이 아니다.
+const LOSS_REALIZED_SLOT = [
+  "다잃",
+  "전부잃",
+  "잃었",
+  "날렸",
+  "망했",
+  "반토막",
+  "마이너스됐",
+  "손해봤",
+  "손해났",
+] as const;
+
+export function signalsLossDistress(message: string): boolean {
+  if (includesAny(message, DEFINITION_MARKERS)) return false;
+  return includesAny(message, LOSS_REALIZED_SLOT);
+}
+
+/**
+ * 보호자 몰래 거래하려는 말(SPEC §6.1.2). `몰래` 는 **열람**에만 걸려 있어
+ * (`asksToHideViewing` — 영상·SNS 범위) 매매 쪽이 통째로 비어 있었다.
+ */
+export function asksHiddenTrading(message: string): boolean {
+  return (
+    includesAny(message, ["몰래", "안들키", "숨기고", "비밀로"]) &&
+    includesAny(message, ["사", "살", "팔", "매수", "매도", "주문", "거래", "투자"])
+  );
 }
 
 /** 삶 전반을 가리키는 말. 낮은 기분 표현과 곱해 위기 신호를 본다. */

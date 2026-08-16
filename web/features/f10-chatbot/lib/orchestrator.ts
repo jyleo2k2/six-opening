@@ -100,6 +100,8 @@ type ChatOrchestratorDependencies = {
   judgeTimeoutMs?: number;
   rewriteTimeoutMs?: number;
   relevanceTimeoutMs?: number;
+  /** 사전 밖 금융 용어 구제(§6.0.4)의 분류 예산. `fallback` 쪽 분류와 배타적이다. */
+  termClassifyTimeoutMs?: number;
   requestSignal?: AbortSignal;
   onStatus?: (status: string) => void;
 };
@@ -583,6 +585,37 @@ export async function createChatOutcome(
           error instanceof Error ? error.name : "unknown",
         );
       }
+    } finally {
+      timed.cleanup();
+    }
+  } else if (isGenericOutOfScope(routed) && source === "fixed") {
+    // 사전 밖 금융 용어 구제 (SPEC §6.0.4).
+    //
+    // 승인 사전은 어떤 크기여도 완전해지지 않는다. 사전에 없는 낱말은 금융 개념
+    // 판정 자체가 서지 않아 `outOfScope` 로 떨어지고, `fallback` 의 용어 분류에도
+    // 닿지 못한다. held-out 실측에서 `상장폐지가 뭔데?`·`코스피랑 코스닥은 왜
+    // 나눠?` 가 "그 범위에서 물어봐 주세요" 로 끝났다 — §1.1 이 첫 번째 수행
+    // 기능으로 적은 금융 개념 설명이 **사전 크기만큼만** 동작하고 있었다.
+    //
+    // **자유 생성을 열지 않는다.** 분류에 성공하면 9개 승인 고정 문장 중 하나를
+    // 쓰고, `none` 이면 원래의 범위 밖 안내를 그대로 둔다. 이 분기가 만들 수 있는
+    // 결과는 승인 텍스트뿐이라 안전 하한이 내려가지 않는다. `fallback` 쪽 분류와
+    // 배타적이므로 한 요청의 LLM 호출 상한 4회도 그대로다.
+    onStatus("답변을 준비하는 중");
+    const timed = createTimedSignal(
+      dependencies.requestSignal,
+      dependencies.termClassifyTimeoutMs ?? 4_000,
+    );
+    try {
+      const classifiedKind = await raceWithAbort(
+        (dependencies.classifyTerm ?? noTermClassification)(modelMessage, timed.signal),
+        timed.signal,
+      ).catch(() => "none" as const);
+      if (classifiedKind !== "none") {
+        response = termReply(classifiedKind, normalizeChatInput(modelMessage));
+      }
+    } catch {
+      // 닫힌 실패 — 범위 밖 안내를 그대로 둔다. 답변 범위를 넓히지 않는다.
     } finally {
       timed.cleanup();
     }

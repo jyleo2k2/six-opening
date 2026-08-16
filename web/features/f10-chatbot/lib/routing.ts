@@ -27,6 +27,10 @@ import {
   asksRecommendationVariant,
   asksRepeatedChecking,
   asksSuperiorityComparison,
+  asksSuperlativePick,
+  asksHiddenTrading,
+  signalsLossDistress,
+  signalsOthersGainComparison,
   signalsSelfDeprecation,
   asksTargetPriceDecision,
   signalsLowMood,
@@ -103,6 +107,7 @@ type UnsafeKind =
   | "frustration"
   | "familyPressure"
   | "comparison"
+  | "hiddenTrading"
   | "anxiety"
   | "impulsiveTrade"
   | "ethicalDistress";
@@ -1444,9 +1449,15 @@ function findUnsafeKind(message: string): UnsafeKind | null {
     return "familyPressure";
   }
 
+  // 보호자 몰래 사고팔려는 말은 비교·불안보다 먼저 본다. `몰래` 가 영상·SNS 범위
+  // 안내(`asksToHideViewing`)에만 걸려 있어 매매 쪽이 통째로 비어 있었다.
+  if (asksHiddenTrading(message)) return "hiddenTrading";
+
   const comparisonDistress =
     includesAny(message, COMPARISON_DISTRESS_PATTERNS) ||
     signalsSelfDeprecation(message) ||
+    // 자기 낮춤말이 없어도 남이 벌었다는 말은 견주는 자리다(`친구는 벌써 10% 벌었대`).
+    signalsOthersGainComparison(message) ||
     (message.includes("나만") &&
       includesAny(message, ["못", "뒤처", "꼴찌", "떨어", "바보"])) ||
     (includesAny(message, ["친구", "친구들", "애들"]) &&
@@ -1456,6 +1467,8 @@ function findUnsafeKind(message: string): UnsafeKind | null {
 
   const anxiety =
     includesAny(message, ANXIETY_PATTERNS) ||
+    // 손실을 이미 봤다는 말은 정서 지원이 가장 필요한 자리인데 범위 안내로 끝났다.
+    signalsLossDistress(message) ||
     (includesAny(message, ["주문", "종목", "뉴스", "투자화면"]) &&
       includesAny(message, ["불안", "무서", "초조", "쫄", "마음이무거", "자꾸확인"]));
   const explicitPrediction =
@@ -1497,6 +1510,7 @@ function findRecommendationKind(message: string): RecommendationKind | null {
     asksRecommendationVariant(message) ||
     asksBuyTargetSelection(message) ||
     asksSuperiorityComparison(message) ||
+    asksSuperlativePick(message) ||
     includesAny(message, [
       "뭐가제일좋",
       "뭐가가장좋",
@@ -2632,9 +2646,13 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       "주문이 뜻대로 되지 않아 답답했구나. 매매를 재촉하지 않고 어디에서 막혔는지 한 단계씩 확인할 수 있어.";
   }
 
-  const anxietyText = includesAny(message, ["뉴스", "마음이무거"])
-    ? "뉴스를 계속 봐서 마음이 불편하거나 무거웠구나. 지금은 투자 화면과 뉴스에서 잠시 벗어나도 돼."
-    : "계속 확인하거나 주문을 눌러야 할 것 같아 불안했구나. 지금은 주문하지 않고 화면을 잠시 닫아도 돼.";
+  // 손실을 본 뒤에는 "이 돈이 진짜 사라진 건가"가 먼저다. 그 답을 안 주고 불안만
+  // 다독이면 아이는 계속 그 자리에 있다. 모의투자금이 연습용이라는 사실을 먼저 말한다.
+  const anxietyText = signalsLossDistress(message)
+    ? "손해를 봐서 속상했구나. 이 리그의 돈은 연습용 가상 현금이라 실제 내 돈이 줄어든 것은 아니야."
+    : includesAny(message, ["뉴스", "마음이무거"])
+      ? "뉴스를 계속 봐서 마음이 불편하거나 무거웠구나. 지금은 투자 화면과 뉴스에서 잠시 벗어나도 돼."
+      : "계속 확인하거나 주문을 눌러야 할 것 같아 불안했구나. 지금은 주문하지 않고 화면을 잠시 닫아도 돼.";
   const familyDataQuestions = message.includes("성향")
     ? ["내 성향 결과 알려주세요", "가족 비교는 어떻게 봐요?"]
     : ["가족 비교는 어떻게 봐요?", "내 거래 기록 보여주세요"];
@@ -2687,6 +2705,13 @@ function unsafeReply(kind: UnsafeKind, message: string): ChatReply {
       text: "다른 사람의 수익이나 순위와 비교돼 속상했구나. 한 번의 결과나 성향 숫자는 실력이나 사람의 가치를 정하는 점수가 아니야.",
       steps: ["비교 스트레스 지원"],
       questions: ["내 성향 결과 알려주세요", "내 거래 기록 보여주세요"],
+    },
+    // 몰래 하는 방법을 묻는 말에 방법을 주지 않는다. 대신 이 서비스가 왜 함께
+    // 보는 구조인지 말한다 — 숨길 필요가 없다는 것이 답이다.
+    hiddenTrading: {
+      text: "가족 몰래 사고파는 방법은 알려줄 수 없어. 이 리그는 가상의 돈으로 함께 연습하는 곳이라 거래 기록이 가족에게 보이고, 그래서 마음 편히 시도해 봐도 돼.",
+      steps: ["비공개 거래 차단"],
+      questions: ["내가 뭐 샀는지 엄마도 봐요?", "매수는 어떻게 하나요?"],
     },
     anxiety: {
       text: anxietyText,
