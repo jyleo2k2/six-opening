@@ -37,9 +37,10 @@ const PIN = styleFromCss(
   "position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;" +
     "pointer-events:none;filter:drop-shadow(0 2px 4px rgba(30,25,60,0.16))",
 );
+// 원본은 파스텔 바탕에 짙은 남회색 글씨다 — 흰 글씨는 이 색 위에서 읽히지 않는다.
 const PIN_BODY = styleFromCss(
   "display:flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:8px;" +
-    "font-size:12px;font-weight:800;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.4)",
+    "font-size:12px;font-weight:800;color:#3A3F5C;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7)",
 );
 const PIN_TAIL = styleFromCss(
   "width:0;height:0;margin-top:-1px;border-left:5px solid transparent;border-right:5px solid transparent",
@@ -53,10 +54,8 @@ const CARD_TITLE = styleFromCss(
 const CARD_BODY = styleFromCss(
   "font-size:16px;font-weight:500;color:#5C6280;line-height:1.75;margin-top:10px;text-wrap:pretty",
 );
-const CARD_FOOT = styleFromCss(
-  "display:flex;align-items:center;justify-content:space-between;margin-top:13px",
-);
-const CARD_HINT = styleFromCss("font-size:13px;font-weight:500;color:#A9AEC4");
+// 원본은 이 줄에 캡션 없이 버튼만 오른쪽에 둔다.
+const CARD_FOOT = styleFromCss("display:flex;align-items:center;justify-content:flex-end;margin-top:14px");
 const WATCH_BTN = styleFromCss(
   "width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;" +
     "background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
@@ -72,10 +71,41 @@ const WALLET_LABEL = styleFromCss("font-size:14px;font-weight:600;color:#5C6280;
 const WALLET_CASH = styleFromCss(
   "flex:1;text-align:right;font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap",
 );
-const PRICE_LABEL = styleFromCss("font-size:14.5px;font-weight:500;color:#8E93A8");
-const PRICE_TEXT = styleFromCss(
-  "font-size:34px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:4px;white-space:nowrap;letter-spacing:-0.02em",
+// 가격 카드 머리 — 원본 그대로. 종목명이 왼쪽, 업종 배지가 오른쪽 끝, 그 아래 큰 가격,
+// 그 아래 변동액과 등락률 한 줄이다.
+const NAME_ROW = styleFromCss("display:flex;align-items:flex-start;justify-content:space-between;gap:10px");
+const NAME_TEXT = styleFromCss(
+  "flex:1;min-width:0;font-size:17px;font-weight:700;color:#141B3D;letter-spacing:-0.02em;" +
+    "white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
 );
+const PRICE_TEXT = styleFromCss(
+  "font-size:36px;font-weight:800;color:#0D1330;font-variant-numeric:tabular-nums;line-height:1.1;" +
+    "margin-top:7px;white-space:nowrap;letter-spacing:-0.035em",
+);
+const CHANGE_ROW = styleFromCss("display:flex;align-items:baseline;gap:8px;margin-top:7px");
+/** 업종 배지 — 업종마다 글자색과 옅은 배경 한 쌍. 원본 `detailCatStyle` 의 표와 같다. */
+const SECTOR_BADGE: Record<string, [string, string]> = {
+  semi: ["#2F6BE0", "#E6EEFD"],
+  game: ["#6D3FD4", "#F0EAFE"],
+  food: ["#C4571F", "#FDEDE2"],
+  auto: ["#1F7A5F", "#E3F4EE"],
+  enter: ["#C42A6D", "#FCE7F0"],
+  beauty: ["#A93E9B", "#F7E9F6"],
+  air: ["#1E8FCC", "#E4F3FC"],
+  ship: ["#106E7E", "#DEF0F2"],
+  defense: ["#4E5C78", "#EBEEF4"],
+  energy: ["#A07207", "#FBF1DC"],
+  retail: ["#7A5230", "#F2EBE2"],
+  logi: ["#5C6B3D", "#EFF2E6"],
+  bank: ["#2A3B6E", "#E8EAF2"],
+};
+const badgeFor = (sector: string) => {
+  const [ink, bg] = SECTOR_BADGE[sector] ?? ["#4E5C78", "#EBEEF4"];
+  return styleFromCss(
+    "flex:none;display:inline-flex;align-items:center;height:28px;padding:0 13px;border-radius:999px;" +
+      `font-size:12.5px;font-weight:700;white-space:nowrap;color:${ink};background:${bg}`,
+  );
+};
 
 /** `app.html` 의 `topic()` — 이름 끝 받침에 맞는 조사(은/는). */
 function josa(name: string) {
@@ -223,10 +253,18 @@ export function DetailScreen({
   const locked = !canTrade(account);
   const changeUp = live.change >= 0;
   const priceText = `${live.price.toLocaleString("ko-KR")}원`;
-  const changeText = `${changeUp ? "▲ " : "▼ "}${Math.abs(live.change).toFixed(2)}%`;
+  // 원본은 **얼마 올랐는지(원)가 먼저**, 몇 %인지는 세로선 뒤에 작게 붙는다.
+  // 변동액은 등락률에서 되짚는다 — `price * change / (100 + change)`.
+  const changeWon = Math.abs(Math.round((live.price * live.change) / (100 + live.change)));
+  const changeText = `${changeUp ? "▲ " : "▼ "}${changeWon.toLocaleString("ko-KR")}원`;
+  const diffText = `${live.change >= 0 ? "+" : ""}${live.change.toFixed(2)}%`;
   const changeStyle = styleFromCss(
-    "font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:" +
+    "font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:" +
       (changeUp ? UP : DOWN),
+  );
+  const diffStyle = styleFromCss(
+    "font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;" +
+      `padding-left:9px;border-left:1px solid ${changeUp ? UP : DOWN}59;color:${changeUp ? UP : DOWN}`,
   );
   const watched = wallet.watchlist.includes(code);
   const startBuy = () => {
@@ -284,6 +322,7 @@ export function DetailScreen({
         : ""),
   );
   const chart = buildDetailChart({
+    code,
     spark: live.spark,
     price: live.price,
     changePercent: live.change,
@@ -331,7 +370,8 @@ export function DetailScreen({
               </svg>
             </div>
           }
-          title={stock.name}
+          // 원본 헤더 제목은 종목 이름이 아니라 화면 이름이다 — 이름은 아래 카드가 말한다.
+          title="종목 상세"
         />
         <div style={SCROLL}>
           <div style={WALLET_PILL}>
@@ -339,13 +379,14 @@ export function DetailScreen({
             <span style={WALLET_CASH}>{won(me.cash)}</span>
           </div>
           <div style={PRICE_CARD}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={badgeStyle}>{stock.logoUrl ? "" : stock.sectorName.charAt(0)}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={PRICE_LABEL}>지금 가격</div>
-                <div style={PRICE_TEXT}>{priceText}</div>
-              </div>
+            <div style={NAME_ROW}>
+              <div style={NAME_TEXT}>{stock.name}</div>
+              <div style={badgeFor(stock.sector)}>{stock.sectorName}</div>
+            </div>
+            <div style={PRICE_TEXT}>{priceText}</div>
+            <div style={CHANGE_ROW}>
               <span style={changeStyle}>{changeText}</span>
+              <span style={diffStyle}>{diffText}</span>
             </div>
             <div style={CHART_WRAP}>
               <svg
@@ -368,7 +409,7 @@ export function DetailScreen({
                     {chart.pins.map((pin) => (
                       <line
                         key={pin.id}
-                        stroke={`var(--color-trade-${pin.member})`}
+                        stroke={pin.color}
                         strokeDasharray="2 3"
                         strokeOpacity={0.35}
                         x1={pin.x}
@@ -393,7 +434,7 @@ export function DetailScreen({
                 </div>
               )}
               {chart?.pins.map((pin) => {
-                const color = `var(--color-trade-${pin.member})`;
+                const color = pin.color;
                 return (
                   <div key={pin.id} style={{ ...PIN, left: pin.x, top: pin.y - 7 }} title={pin.title}>
                     <div style={{ ...PIN_BODY, background: color }}>{pin.label}</div>
@@ -403,7 +444,6 @@ export function DetailScreen({
               })}
             </div>
             <div style={CARD_FOOT}>
-              <span style={CARD_HINT}>최근 흐름 · 15분 지연 시세</span>
               <div onClick={openChart} style={MORE_BTN}>
                 차트 자세히 보기 ›
               </div>

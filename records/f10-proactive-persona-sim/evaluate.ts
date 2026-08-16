@@ -40,7 +40,7 @@ export type EvaluationMetrics = ConfusionMatrix & {
   accuracy: number;
 };
 
-const SIGNALS: readonly ProactiveSignal[] = ["switch", "dwell", "lossRevisit"];
+const SIGNALS: readonly ProactiveSignal[] = ["switch", "dwell"];
 
 function classify(oracleNeedsHelp: boolean, engineOffersHelp: boolean): Classification {
   if (oracleNeedsHelp) return engineOffersHelp ? "true-positive" : "false-negative";
