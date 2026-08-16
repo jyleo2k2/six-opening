@@ -1,23 +1,28 @@
 # F9 — 가족 아카이브 기능 명세
 
-> **현재 구현 단일 원본** · 2026-08-15 · 기준: 아카이브 화면 React 이관 이후
+> **현재 구현 단일 원본** · 2026-08-16 · 기준: 디자인 목업 반영 이후
 >
-> 현행 동작은 **`features/f0-home/ArchiveScreen.tsx` 렌더링 → `lib/archive-profile-view.ts`·`lib/archive-feed.ts` → `shared/engine/` → 이 문서** 순으로 확인한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따른다.
+> 현행 동작은 **`features/f0-home/ArchiveScreen.tsx` 렌더링 → `lib/archive-profile-view.ts`·`lib/archive-feed.ts`·`lib/archive-season.ts` → `shared/engine/` → 이 문서** 순으로 확인한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따른다.
 
 ## 1. 현재 범위
 
-F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **두 개**다. 탭 안쪽 자리도 주소를 갖는다 — `/archive`(성향) · `/archive/return` · `/archive/cards` · `/archive/family`.
+F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **두 개**다. 탭 안쪽 자리도 주소를 갖는다 — `/archive`(성향) · `/archive/return` · `/archive/cards` · `/archive/family` · `/archive/last`.
 
 1. **성향**: 능력치 오각형, 투자 유형 카드, 축 상세 시트
-2. **수익률**: 가족 달리기 트랙, 총자산·현금, 거래 피드
+2. **수익률**: 머리 요약 카드(총자산·손익·상세), 가족 달리기 트랙, 거래 피드
 
-탭 밖에서 열리는 오버레이가 셋 있다.
+탭 밖에서 열리는 자리가 넷 있다. 머리의 뒤로가기(`‹`)가 이 자리들에서 탭으로 돌아오는 길이다.
 
-| 오버레이 | 여는 곳 | 내용 |
+| 자리 | 여는 곳 | 내용 |
 |---|---|---|
-| 카드 모아보기 | 성향 탭 | 주 단위 성향 카드. 기록이 있는 주(로컬 또는 Supabase, §3.5) + 이번 주 |
-| 카드 상세 시트 | 카드 모아보기 | 그 주 카드 한 장 |
+| 카드 모아보기 | 성향 탭 | 주 단위 성향 카드. 기록이 있는 주(§3.5) + 이번 주 |
+| 카드 상세 시트 | 카드 모아보기 | 그 주 카드 한 장의 다섯 축 막대 |
 | 가족 투자 성향 비교 | 성향 탭 | 구성원 오각형 겹치기 |
+| 지난 시즌 | 카드 모아보기·가족 비교의 `지난시즌` 탭 | 시즌 종합 리포트와 구성원별 주차 흐름. **원본이 픽스처다 — §9** |
+
+카드 모아보기와 지난 시즌 위에는 `이번시즌`·`지난시즌` 두 칸짜리 탭 줄이 뜬다. 성향·수익률 탭 줄과 같은 자리를 쓰며 동시에 뜨지 않는다.
+
+**축 상세 시트는 다섯 축 막대다.** 2026-08-16 디자인 목업은 이 시트를 "같은 성향 투자자들이 많이 담은 종목" 목록과 3단계 주문 흐름으로 바꿔 놨지만, 루트 가드가 종목 추천·목표가를 금지하므로 옮기지 않았다. 되살리려면 통합문서 v2 부터 고친다.
 
 가족 체결 마커는 F2 차트 안에 있다. 가족 거래 피드는 **이 화면의 수익률 탭 한 곳에만** 있다 — F11 React 오버레이 `FeedScreen`은 소비자가 없어 삭제됐으므로 여기에 다시 만들지 않는다.
 
@@ -27,7 +32,8 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 |---|---|---|
 | 아카이브 화면 | `web/features/f0-home/ArchiveScreen.tsx` | 마크업과 화면 상태 |
 | 성향 계산 | `web/features/f0-home/lib/archive-profile-view.ts` | 오각형 좌표·주차 카드·가족 비교 값 |
-| 수익률 계산 | `web/features/f0-home/lib/archive-feed.ts` | 달리기 트랙·피드 카드·머리 카드 값 |
+| 수익률 계산 | `web/features/f0-home/lib/archive-feed.ts` | 달리기 트랙(등수·위치)·피드 카드·머리 요약 카드 값 |
+| 지난 시즌 계산 | `web/features/f0-home/lib/archive-season.ts` | 시즌 최빈 유형·주차 흐름 문장. **입력이 픽스처다(§9)** |
 | 서버 조회·쓰기 | `web/features/f0-home/lib/use-archive-data.ts` | 성향·주차 카드·가족·반응 조회와 좋아요·댓글 쓰기 |
 | **계산(정본, 유일)** | `web/shared/engine/behavior-profile.ts` | **능력치 다섯 축, 캐릭터·레벨, 정확 채점** (0~10, §6). `ArchiveScreen` 연결은 §6.11 |
 | 계산(구버전) | `web/shared/engine/archive-profile.js` | **import 하는 실행 코드가 없다**(§3). iframe 사본이 사라져 자기 테스트만 남은 삭제 후보 (0~100) |
@@ -40,7 +46,7 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 | 지난 주차 카드 조회 | `lib/use-archive-data.ts` | 진입 시 위 API를 불러 `useArchiveData()` 의 `season`에 저장 |
 | 가족 성향 조회 | `lib/use-archive-data.ts` | `/api/family`의 실제 가족 구성원과 누적 성향을 `useArchiveData()` 의 `family`에 저장 |
 | 가족 피드 반응 조회 | `lib/use-archive-data.ts` | 실제 가족 거래 ID별 댓글·좋아요를 일괄 조회 |
-| 가족 피드 반응 변경 | `lib/use-archive-data.ts` | 좋아요 토글, 댓글 저장, 본인 댓글 삭제를 서버 API로 처리 |
+| 가족 피드 반응 변경 | `lib/use-archive-data.ts` | 좋아요 토글, 댓글 저장, 본인 댓글 수정(`PATCH /api/comments`)·삭제를 서버 API로 처리 |
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
@@ -174,11 +180,10 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
   type: { key; name; desc; img; pal; lv; title };
   weekCards: WeekCard[];              // 주별 카드
   famPolys: FamPoly[];                // 가족 비교 오각형
-  runners: Runner[];                  // 수익률 달리기
-  retHeroLabel · retHeroPctText · retHeroPctStyle · retHeroTotalText · retCashText;
-  retSectors · retFeed · retFeedLabel;
-  secModal · secModalEmoji · secModalIconStyle · secModalName
-    · secModalCount · secModalValue · secModalPctText · secModalPctStyle · secModalRows;
+  runners: Runner[];                  // 수익률 달리기 — 등수·트랙 위치
+  retSummary;                         // 머리 요약 카드 — 총자산·손익·수익률·예수금
+  retFeed · retFeedLabel;
+  season: SeasonReport;               // 지난 시즌 — §5.2
 }
 ```
 
@@ -188,7 +193,17 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 
 ### 5.1 수익률 탭 가족 피드
 
-수익률 탭의 `가족 피드`는 `this.dbFamily.trades`를 원본으로 사용한다. 각 카드의 거래 ID는 Supabase `transactions.id`와 같아야 하며, 앱 진입과 아카이브 재진입 때 `/api/comments`와 `/api/likes`를 일괄 조회한다. 댓글 작성·본인 댓글 삭제·좋아요 토글은 성공한 서버 응답으로만 화면 상태를 갱신한다. 다른 가족의 체결가는 `/api/family`에서 마스킹된 값을 그대로 사용하며 화면에서 추론하지 않는다.
+수익률 탭의 `가족 피드`는 `this.dbFamily.trades`를 원본으로 사용한다. 각 카드의 거래 ID는 Supabase `transactions.id`와 같아야 하며, 앱 진입과 아카이브 재진입 때 `/api/comments`와 `/api/likes`를 일괄 조회한다. 댓글 작성·본인 댓글 수정·본인 댓글 삭제·좋아요 토글은 성공한 서버 응답으로만 화면 상태를 갱신한다. 다른 가족의 체결가는 `/api/family`에서 마스킹된 값을 그대로 사용하며 화면에서 추론하지 않는다.
+
+카드 안쪽은 판이 둘이다. **왼쪽 색 판**은 매수면 초록에 체결가를, 매도면 지금 시세와 견준 등락률을 띄운다(오르면 분홍, 내리면 남색). **실현 손익은 낼 수 없다** — `/api/family` 의 매도 행에는 살 때 가격이 없다. **오른쪽 회색 판**은 매수면 계획(목표 금액 또는 가지고 갈 기간), 매도면 판 가격을 적고 그 아래 한 줄 이유를 붙인다. 체결가를 못 보는 남의 카드는 양쪽 모두 `비공개`다.
+
+### 5.2 지난 시즌 — `lib/archive-season.ts`
+
+**원본이 아직 서버에 없다.** `/api/profile/season-cards` 는 이번 시즌 주차 카드만 주고 시즌 경계를 아는 곳이 없다. 그래서 표본 한 벌(`LAST_SEASON`)을 이 파일에 두고 계산만 순수 함수로 갈라 놨다 — API 가 생기면 `LAST_SEASON` 자리에 응답을 꽂고 `lastSeasonReport` 는 그대로 쓴다. 화면은 픽스처를 직접 읽지 않는다.
+
+계산은 둘뿐이다. 한 사람의 시즌 성향은 **그 사람 주차 유형 중 최빈값**, 가족의 시즌 성향은 **구성원 시즌 성향 중 최빈값**이다. 동점이면 입력 순서가 앞선 쪽을 고른다 — `Object.keys` 순서에 맡기면 같은 입력이 브라우저마다 다른 유형을 낸다. **점수를 다시 매기지 않는다.** 채점은 `shared/engine/behavior-profile.ts` 하나가 한다.
+
+구성원 색은 이번 시즌 가족 비교(`familyMembers` 의 `FAMILY_COLORS`)와 같은 순서를 쓴다. 같은 사람이 두 오각형에서 다른 색이면 겹쳐 볼 수가 없다.
 
 ## 6. 신버전 엔진 — `shared/engine/behavior-profile.ts` (화면 이관 전)
 
@@ -358,10 +373,11 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 
 - 종가 배치가 밀리면 최근 거래가 오래 `pending` 에 남아 정확이 기본값 50에 머문다.
 - `WeekCard.scaleMax`·`Profile.scaleMax`는 이제 항상 10이다. 필드를 지우면 `Radar`·카드 시트 렌더까지 손대야 해서 남겨 뒀다. iframe 이 철거돼 0~100 스케일을 만드는 경로가 사라졌으므로 `archive-profile.js` 를 지울 때 이 필드도 함께 정리한다.
-- 수익률 탭에서 `보유 종목 · 섹터별` 레일을 뺐다. 그 레일에서만 열리던 **섹터 상세 모달(`secModal*`)과 `retSectors` 계산이 화면에서 도달 불가**로 남아 있다. 되살리거나 지우는 판단이 필요하다.
+- ~~수익률 탭 `보유 종목 · 섹터별` 레일과 도달 불가 섹터 상세 모달.~~ **2026-08-16 지웠다.** 디자인 목업에도 레일이 없어 되살리지 않기로 정했고, 계산하던 `lib/archive-sectors.ts` 와 그 테스트도 같은 변경에서 지웠다.
 - 가족 비교의 아빠(`dad`)는 이제 DB 계정이 있다 — `profiles.id=3`, `login_id='dad'`, `guardian_role='dad'`, `family_tag='찬영가족'`. `GET /api/family` 응답에 포함되므로 **로그인 상태 가족 비교에는 아빠가 나온다.** `ArchiveScreen`의 `MEMBERS` 상수는 아직 `dad.acc:null`이지만 이는 비로그인·응답 전 폴백에서만 쓰인다. 그 폴백과 "아빠는 계정이 없다"고 적힌 주변 주석은 정리 대상이다.
 - 부모 단독 화면으로 전환하는 전역 계정 스위처는 **만들지 않기로 확정됐다.** 계정 전환은 로그아웃 후 재로그인이다 (`docs/기능명세.md` §4.2).
-- 시즌 기록 탭은 없다. 주별 누적은 카드 모아보기가 대신하고 주차 목록은 `season-cards`가 준다. "시즌" 이라는 이름의 화면·데이터 개념은 여전히 없다 — 카드에는 "이번 주"·"○월 ○주차" 라벨만 있다.
+- **`지난시즌` 자리는 화면만 있고 데이터가 없다.** 카드 모아보기 위 탭 줄로 들어가지만 내용은 `archive-season.ts` 픽스처다(§5.2). 서버에는 시즌 경계도, 지난 시즌 주차 기록도 없다 — `season-cards` 는 이번 시즌 주차만 준다. **로그인한 사람이 누구든 같은 표본이 보인다.** API 를 붙이기 전에는 시연용으로만 쓴다.
+- 가족 달리기 트랙에 **등수 배지(1·2·3)** 가 붙었다. 아직 산 게 없는 구성원은 등수를 매기지 않는다(`rank: null`) — 수익률 0으로 세면 마이너스인 사람보다 앞선다. §8 의 "우열·등수 금지" 는 캐릭터·능력치에 대한 규칙이고 이 배지는 수익률 순서다. 표현을 더 눌러야 한다는 판단이 서면 배지부터 뗀다.
 - **F9 는 LLM 을 쓰지 않는다.** 캐릭터 카드에 붙일 Luna 서술(`lib/narration.ts` + `POST /api/profile`)은 어느 화면도 부른 적이 없어 PR #221 에서 삭제했다. 다시 붙일 때는 이 SPEC 에 계약부터 적고 화면 연결까지 한 작업으로 처리한다 (`docs/기능명세.md` §7.1).
 
 ## 8. 금지 사항
@@ -374,6 +390,6 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 
 ## 9. 완료 기준
 
-- 성향·수익률 두 탭과 오버레이 셋이 실제 `ArchiveScreen` 데이터 흐름과 일치한다.
+- 성향·수익률 두 탭과 탭 밖 자리 넷이 실제 `ArchiveScreen` 데이터 흐름과 일치한다.
 - 엔진 산식별 경계 테스트가 통과한다 (`shared/engine/behavior-profile.test.ts`).
 - `web` 의 `npm test` 와 `npm run build` 가 통과한다.

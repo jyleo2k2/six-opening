@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { deleteRows, findProfileById, insertRow, selectRows, sessionUserId } from "../supabase";
+import { deleteRows, findProfileById, insertRow, selectRows, sessionUserId, updateRow } from "../supabase";
 import {
   authorizeFeedTarget,
   filterFamilyTransactionIds,
@@ -156,7 +156,75 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** DELETE /api/comments?id=<id> — 작성자 본인만. 수정은 없다 (SPEC §4). */
+/**
+ * PATCH /api/comments { id, body } — 작성자 본인만 고칠 수 있다 (F11 SPEC §4).
+ *
+ * **게이트를 POST 와 똑같이 다시 건다.** 통과한 문장으로 저장한 뒤 고치는 길이 열리면,
+ * 막힌 말을 빈 댓글로 올려 두고 수정으로 바꿔 넣을 수 있다. 작성자 확인도 서버가 한다 —
+ * 화면이 보낸 `mine` 은 버튼을 보일지 정하는 값일 뿐이다.
+ */
+export async function PATCH(request: NextRequest) {
+  const userId = sessionUserId(request);
+  if (!userId) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
+
+  let payload: unknown;
+  try {
+    payload = await request.json();
+  } catch {
+    return Response.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  }
+  const input = (payload ?? {}) as Record<string, unknown>;
+  const id = input.id;
+  const rawBody = input.body;
+
+  if (!isTransactionId(id) || typeof rawBody !== "string") {
+    return Response.json({ error: "코멘트 내용이 올바르지 않습니다." }, { status: 400 });
+  }
+
+  try {
+    const rows = await selectRows<{ id: string; user_id: number; transaction_id: string }>(
+      "trade_comments",
+      { select: "id,user_id,transaction_id", id: `eq.${id}`, limit: "1" },
+    );
+    if (rows.length === 0) return Response.json({ error: "코멘트를 찾을 수 없습니다." }, { status: 404 });
+    if (rows[0].user_id !== userId) {
+      return Response.json({ error: "본인이 쓴 코멘트만 고칠 수 있습니다." }, { status: 403 });
+    }
+
+    // 원래 달았던 거래에 아직 접근할 수 있는지까지 본다. 가족에서 빠진 뒤에도 남은 댓글을
+    // 고칠 수 있으면 안 된다.
+    const access = await authorizeFeedTarget(userId, rows[0].transaction_id);
+    if (!access.ok) return Response.json({ error: access.error }, { status: access.status });
+
+    const { author, result: gate } = resolveCommentGate({
+      body: rawBody,
+      viewerRole: access.target.viewer.parent_child,
+      ownerRole: access.target.ownerRole,
+    });
+    if (!gate.ok) {
+      console.info(JSON.stringify({ event: "comment_blocked", userId, id, reason: gate.reason }));
+      return Response.json({ error: gate.message, reason: gate.reason }, { status: 422 });
+    }
+
+    const row = await updateRow<CommentRow>("trade_comments", { id: `eq.${id}`, user_id: `eq.${userId}` }, { body: gate.body });
+    if (!row) return Response.json({ error: "코멘트를 찾을 수 없습니다." }, { status: 404 });
+    console.info(JSON.stringify({ event: "comment_edited", userId, id }));
+    return Response.json({
+      id: row.id,
+      transactionId: row.transaction_id,
+      author,
+      authorName: access.target.viewer.name,
+      body: gate.body,
+      createdAt: row.created_at,
+      mine: true,
+    } satisfies FeedComment);
+  } catch (error) {
+    console.error(JSON.stringify({ event: "comment_edited", result: "error", message: String(error) }));
+    return Response.json({ error: "코멘트를 고치지 못했습니다." }, { status: 502 });
+  }
+}
+
+/** DELETE /api/comments?id=<id> — 작성자 본인만. */
 export async function DELETE(request: NextRequest) {
   const userId = sessionUserId(request);
   if (!userId) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });

@@ -10,6 +10,10 @@ test("주소를 화면으로 읽는다", () => {
   assert.deepEqual(routeFromPath("/"), { screen: "home" });
   assert.deepEqual(routeFromPath(""), { screen: "home" });
   assert.deepEqual(routeFromPath("/archive"), { screen: "archive" });
+  // 아카이브 안의 자리 넷은 주소를 갖는다. `report` 는 기본이라 주소에 적지 않는다.
+  for (const view of ["return", "cards", "family", "last"]) {
+    assert.deepEqual(routeFromPath(`/archive/${view}`), { screen: "archive", view });
+  }
   assert.deepEqual(routeFromPath("/ranking"), { screen: "ranking" });
   assert.deepEqual(routeFromPath("/portfolio"), { screen: "portfolio" });
   assert.deepEqual(routeFromPath("/explore"), { screen: "explore" });
@@ -48,6 +52,8 @@ test("화면을 주소로 되돌린다 — 왕복이 같아야 한다", () => {
     { screen: "ranking" },
     { screen: "portfolio" },
     { screen: "archive" },
+    { screen: "archive", view: "cards" },
+    { screen: "archive", view: "last" },
     { screen: "stock", code: "005930" },
     { screen: "order", code: "005930", side: "buy" },
     { screen: "order", code: "000660", side: "sell" },

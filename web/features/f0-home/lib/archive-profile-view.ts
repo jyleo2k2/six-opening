@@ -23,27 +23,44 @@ export const TRAIT_META = [
 
 export type TypeKey = "sniper" | "strategist" | "fighter" | "explorer";
 
-/** 어느 유형인지와 레벨은 엔진이 정한다. 여기 있는 건 이름·색·설명뿐이다. */
-export const TYPES: Record<TypeKey, { name: string; pal: string[]; desc: string }> = {
+/**
+ * 어느 유형인지와 레벨은 엔진이 정한다. 여기 있는 건 이름·색·설명뿐이다.
+ *
+ * `desc` 는 한 주를 되짚는 카드 문구이고, `trait`·`sectors` 는 시즌을 통째로 되짚는
+ * 지난 시즌 리포트가 쓴다(`archive-season.ts`). 셋 다 **지나간 행동을 설명하는 문구**다 —
+ * 앞으로 무엇을 사라는 말을 여기에 넣지 않는다.
+ */
+export const TYPES: Record<
+  TypeKey,
+  { name: string; pal: string[]; desc: string; trait: string; sectors: string }
+> = {
   sniper: {
     name: "저격수",
     pal: ["#FCE3B4", "#F7D08A", "#E3AF57", "#63430A"],
     desc: "찾아볼 건 다 찾아보고, 확신이 선 소수 섹터에 몰아 담았어요.\n근거는 촘촘하지만 한쪽으로 쏠려 있어요.",
+    trait: "찾아볼 건 다 찾아보고 확신이 선 소수 종목에 몰아 담는 성향이에요.",
+    sectors: "반도체·전자 같은 큰 기업",
   },
   strategist: {
     name: "전략가",
     pal: ["#F0F8CC", "#E3F09B", "#C6DA66", "#404F16"],
     desc: "알아본 뒤 여러 섹터에 나눠 담았어요.\n근거와 분산을 모두 챙긴 한 주였어요.",
+    trait: "알아본 뒤 여러 곳에 나눠 담아 위험을 줄이는 성향이에요.",
+    sectors: "금융·자동차처럼 익숙한 업종",
   },
   fighter: {
     name: "승부사",
     pal: ["#FCC7AB", "#F79F79", "#DE7B50", "#5E2410"],
     desc: "마음에 들면 바로 한 곳에 걸었어요.\n결정은 빠르지만 남긴 기록은 얇아요.",
+    trait: "마음에 들면 빠르게 한 곳에 걸어보는 성향이에요.",
+    sectors: "게임·방산처럼 움직임이 큰 종목",
   },
   explorer: {
     name: "탐험가",
     pal: ["#B2D2C7", "#87B6A7", "#619484", "#1B3F35"],
     desc: "여기저기 가볍게 조금씩 담거나 현금을 남겨뒀어요.\n부담은 적지만 확신은 아직 얕아요.",
+    trait: "여기저기 조금씩 담아보며 부담을 낮추는 성향이에요.",
+    sectors: "식품·엔터처럼 생활에서 아는 회사",
   },
 };
 

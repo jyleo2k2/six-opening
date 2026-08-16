@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveCommentGate, toComment } from "./route";
+import { PATCH, resolveCommentGate, toComment } from "./route";
 
 // 라우트의 401·502 분기는 세션·DB 에 의존한다. `DEMO_USER_ID` 가 개발용 `.env` 에서
 // 늦게 주입되므로 여기서 검사하면 환경에 따라 결과가 달라진다.
@@ -52,6 +52,12 @@ function main() {
     resolveCommentGate({ body: "가".repeat(201), viewerRole: "child", ownerRole: "parent" }).result.ok,
     false,
   );
+
+  // PATCH 도 POST 와 **같은 게이트**를 탄다. 통과한 문장으로 저장한 뒤 고칠 수 있으면,
+  // 막힌 말을 무해한 댓글로 올려 두고 수정으로 바꿔 넣는 길이 열린다.
+  assert.equal(typeof PATCH, "function");
+  const edited = resolveCommentGate({ body: "그러니까 내가 뭐랬어", viewerRole: "parent", ownerRole: "child" });
+  assert.equal(edited.result.ok, false);
 
   console.log("comments route tests passed");
 }
