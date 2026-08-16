@@ -81,3 +81,28 @@ export function shouldDismissSheet(drag: SheetDrag, sheetHeight: number) {
     sheetHeight,
   });
 }
+
+/**
+ * 위로 쓸어올려 여는 손짓의 기준 높이. 닫을 때처럼 시트 높이를 쓰면 문턱(20%)이
+ * 시트의 5분의 1이라 손가락이 끌던 카드를 한참 벗어난 뒤에야 열린다 — 여는 손은
+ * 카드 위에 있으므로 카드 크기의 기준을 따로 둔다. 20% = 32px 이 문턱이다.
+ */
+export const SHEET_PULL_REFERENCE = 160;
+
+/**
+ * 카드를 위로 밀어 시트를 열지. 거리·속도 규칙은 닫을 때와 같은
+ * `shouldDismissBottomSheet` 를 방향만 뒤집어 쓴다 — 같은 시트를 여닫는 문턱이
+ * 손짓마다 다르면 안 된다.
+ *
+ * 좌표는 배율이 걸리기 **전** 창 좌표로 들어오므로 `advanceSheetDrag` 와 같은 이유로
+ * 배율로 나눠 화면 안쪽 거리로 고친다.
+ */
+export function shouldOpenSheetByPull(
+  { startY, endY, elapsedMs }: { startY: number; endY: number; elapsedMs: number },
+  { scale, reference = SHEET_PULL_REFERENCE }: { scale: number; reference?: number },
+) {
+  const safeScale = scale > 0 ? scale : 1;
+  const distance = (startY - endY) / safeScale;
+  const velocity = elapsedMs > 0 ? (distance / elapsedMs) * 1_000 : 0;
+  return shouldDismissBottomSheet({ distance, velocity, sheetHeight: reference });
+}
