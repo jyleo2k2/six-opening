@@ -3,10 +3,12 @@ import { existsSync, readFileSync } from "node:fs";
 
 const universeUrl = new URL("../../../public/ui/assets/universe.js", import.meta.url);
 const universeSource = readFileSync(universeUrl, "utf8");
-// 종목 상세 화면이 React(`features/f0-home`)로 옮겨 가서 로고·이모지 대체 계약도
-// 그 소스를 읽는다 (같은 폴더의 buy-amount-ui·news/prototype-ui 테스트와 같은 방식).
-const detailScreen = readFileSync(
-  new URL("../../f0-home/DetailScreen.tsx", import.meta.url),
+// 로고가 있으면 이미지, 없으면 섹터 이모지 — 그 분기는 **탐색 카드**가 갖는다.
+//
+// 잠깐 종목 상세를 읽었는데, 상세의 가격 카드를 프로토타입 원본대로 되돌리면서 그 자리에
+// 로고가 없어졌다(원본은 종목명과 업종 배지만 둔다). 계약이 사는 곳은 카드이므로 그쪽을 본다.
+const exploreCards = readFileSync(
+  new URL("../../f0-home/lib/explore-cards.ts", import.meta.url),
   "utf8",
 );
 
@@ -36,7 +38,8 @@ for (const stockCode of stockCodes) {
   );
 }
 
-assert.match(detailScreen, /background-image:url\(\$\{stock\.logoUrl\}\)/u);
-assert.match(detailScreen, /\{stock\.logoUrl \? "" : stock\.sectorName\.charAt\(0\)\}/u);
+// 로고가 있으면 카드 아트에 이미지를 깔고, 없으면 섹터 이모지로 대신한다.
+assert.match(exploreCards, /logo \? "url\(" \+ logo \+ "\) center\/84px 84px no-repeat," : ""/u);
+assert.match(exploreCards, /hasLogo: !!logo/u);
 
 console.log("detail stock logo UI contract tests passed");
