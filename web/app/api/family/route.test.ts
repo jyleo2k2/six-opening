@@ -77,12 +77,25 @@ async function main() {
     }),
   });
   assert.deepEqual(noCost?.members.map((member) => member.returnRate), [null, null, null]);
-  // 자산 규모는 계속 가린다. 평가금액·원금·현금은 응답에 실리지 않는다.
+  // 자산 규모는 **구성원 줄에서는** 계속 가린다. 평가금액·원금·현금은 실리지 않는다.
   for (const member of family.members) {
     assert.equal("marketValue" in member, false);
     assert.equal("cost" in member, false);
     assert.equal("cash" in member, false);
   }
+
+  // 같은 family_tag 세 사람의 자산을 합쳐서만 낸다 (2026-08-16 유저 확정).
+  // 평가 1,000,001+1,000,002+1,000,003 에 현금 500,000×3 을 더한 값이다.
+  assert.equal(family.total.assets, 3_000_006 + 1_500_000);
+  assert.equal(family.total.cost, 3_000_000);
+  assert.equal(family.total.profit, 6);
+  assert.equal(family.total.memberCount, 3);
+  // 합계 수익률은 구성원 수익률(1.5·3·4.5)의 평균이 아니라 합계 원금 대비 합계 손익이다.
+  assert.equal(family.total.returnRate, (6 / 3_000_000) * 100);
+
+  // 아직 아무도 안 샀으면 합계 수익률은 0% 가 아니라 null 이다. 현금은 그대로 합친다.
+  assert.equal(noCost?.total.returnRate, null);
+  assert.equal(noCost?.total.assets, 30_000_000);
   assert.equal(family.trades[0].price, 70000);
   assert.equal(family.trades[0].quantity, 2);
   assert.equal(family.trades[1].price, null);

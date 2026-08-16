@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
-import { ACCENT, feedCards, LANE_HEIGHT, returnSummary, runners, RUN_START } from "./lib/archive-feed";
+import { ACCENT, familySummary, feedCards, LANE_HEIGHT, returnSummary, runners, RUN_START } from "./lib/archive-feed";
 import {
   familyMembers,
   formatScore,
@@ -23,7 +23,7 @@ import {
   type WeekCard,
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
-import { sectorCards } from "./lib/archive-sectors";
+import { lastSeasonReport } from "./lib/archive-season";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
@@ -33,20 +33,37 @@ import { PhoneFrame } from "./PhoneFrame";
 /**
  * 성장 아카이브. `ui-src/screens/archive.html` 과 `methods/buildArchive.js` 를 옮겨 왔다.
  *
- * 값 계산은 `lib/archive-profile-view.ts`(성향)와 `lib/archive-feed.ts`(수익률)가 하고
- * 여기는 붙이기만 한다. 화면 안에 네 자리가 있다 — 성향 탭, 수익률 탭, 카드 모아보기,
- * 가족 비교. 뒤 둘은 탭을 덮는 **자리**이지 시트가 아니다(원본과 같다).
+ * 값 계산은 `lib/archive-profile-view.ts`(성향)·`lib/archive-feed.ts`(수익률)·
+ * `lib/archive-season.ts`(지난 시즌)가 하고 여기는 붙이기만 한다.
  *
- * **`보유 종목 · 섹터별` 레일과 그 섹터 상세 모달은 옮기지 않았다.** 레일은 이미 화면에서
- * 빠져 모달로 갈 길이 없었고(기능명세 §10-6 · F9 SPEC §7 의 도달 불가 항목), 이관은 그
- * 판단을 내리는 자리다 — 되살리려면 레일부터 다시 설계해야 한다.
+ * **자리는 셋이고 첫 화면만 개인 것이다.** 들어오면 로그인한 사람의 주차 성향 카드가
+ * 레일로 깔리고(`cards`), 머리의 단추 둘은 가족 것이다 — `우리 가족 투자`(`family`)가 가족
+ * 성향을 현재 시즌·과거 시즌으로 갈아 끼우고, `우리 가족 수익`(`return`)이 수익률 자리다.
+ * 가족 단추 둘은 첫 화면에만 있고 들어가면 사라진다. 돌아오는 길은 머리의 `‹` 다.
+ *
+ * **`보유 종목 · 섹터별` 레일은 2026-08-16 지웠다.** 그 레일에서만 열리던 섹터 상세 모달은
+ * 이관 때 이미 빠져 도달 불가로 남아 있었고(F9 SPEC §7), 디자인 목업에도 레일이 없다.
+ * 계산하던 `lib/archive-sectors.ts` 와 그 테스트도 같은 변경에서 지웠다 — 되살리려면
+ * 레일부터 다시 설계한다.
+ *
+ * **축 상세 시트는 다섯 축 막대 그대로다.** 2026-08-16 디자인 목업은 이 시트를 "같은 성향
+ * 투자자들이 많이 담은 종목" 목록과 3단계 주문 흐름으로 바꿔 놨지만, 루트 가드가 종목
+ * 추천·목표가를 금지하므로 그 자리는 옮기지 않았다. 되살리자는 요청이 오면 통합문서 v2
+ * 부터 고쳐야 한다.
  */
 const PAGE = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:#F7F6FB",
 );
-const WEEK_LABEL = styleFromCss("font-size:14px;font-weight:600;color:#9095AA");
 const TITLE = styleFromCss(
   "font-size:27px;font-weight:800;color:#001E5A;letter-spacing:-0.025em;margin-top:2px",
+);
+/**
+ * 첫 화면의 가족 자리 단추. 탭이 아니라 문이라 **켜짐·꺼짐이 없다** — 들어가면 줄째로
+ * 사라지므로 늘 같은 분홍이다.
+ */
+const ENTER = styleFromCss(
+  "flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;" +
+    `white-space:nowrap;color:#fff;background:${ACCENT};box-shadow:0 3px 10px -2px rgba(215,0,130,0.4)`,
 );
 const tabStyle = (on: boolean) =>
   styleFromCss(
@@ -57,8 +74,10 @@ const tabStyle = (on: boolean) =>
 const BODY = styleFromCss(
   "flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 16px;display:flex;flex-direction:column",
 );
-const CTA = styleFromCss(
-  `width:230px;text-align:center;font-size:14px;font-weight:800;color:#fff;border-radius:18px;padding:13px 0;cursor:pointer;background:${ACCENT}`,
+const BACK = styleFromCss(
+  "width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;" +
+    "font-size:22px;font-weight:800;line-height:1;padding-bottom:2px;color:#001E5A;cursor:pointer;" +
+    "background:#FFFFFF;box-shadow:0 2px 8px rgba(30,25,60,0.14),inset 0 0 0 1px #E4E6F1",
 );
 const SHEET_RATIO = 0.82;
 const SHEET_HEIGHT = PROTOTYPE_PHONE.screenHeight * SHEET_RATIO;
@@ -161,6 +180,89 @@ function Radar({
   );
 }
 
+/**
+ * 여러 사람의 오각형을 겹쳐 그리는 큰 판. 가족 비교와 지난 시즌 리포트가 **같은 것**을 쓴다 —
+ * 두 화면에서 같은 사람의 오각형이 다른 크기·다른 라벨 자리로 보이면 겹쳐 볼 수가 없다.
+ */
+function FamilyRadar({
+  shown,
+}: {
+  shown: { key: string; color: string; fill: string; scores: number[]; scaleMax: number }[];
+}) {
+  return (
+    <div style={{ flex: "none", display: "flex", justifyContent: "center", background: "#FFFFFF", borderRadius: 26, padding: "10px 12px 14px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: 300, aspectRatio: "1/1" }}>
+        <svg style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", display: "block", overflow: "visible" }} viewBox="0 0 236 236">
+          {gridRings(92, 118, 118).map((ring, i) => (
+            <polygon fill="none" key={i} points={ring.points} stroke="#E4E6F1" strokeWidth="1.2" />
+          ))}
+          {TRAIT_LABELS.map((_, i) => {
+            const outer = pointAt(i, 1, 92, 118, 118);
+            return <line key={i} stroke="#EAEBF4" strokeWidth="1.2" x1="118" x2={outer[0]} y1="118" y2={outer[1]} />;
+          })}
+          {shown.map((f) => (
+            <polygon
+              fill={f.fill}
+              key={f.key}
+              points={f.scores.map((sc, i) => pointAt(i, sc / f.scaleMax, 92, 118, 118).join(",")).join(" ")}
+              stroke={f.color}
+              strokeLinejoin="round"
+              strokeWidth="2.6"
+            />
+          ))}
+          {shown.flatMap((f) =>
+            f.scores.map((sc, i) => {
+              const d = pointAt(i, sc / f.scaleMax, 92, 118, 118);
+              return <circle cx={d[0]} cy={d[1]} fill={f.color} key={`${f.key}-${i}`} r="3.4" stroke="#FFFFFF" strokeWidth="1.4" />;
+            }),
+          )}
+        </svg>
+        {TRAIT_LABELS.map((label, i) => {
+          const at = labelAt(i, 92, 118, 118, 236, 1.24);
+          return (
+            <div key={label} style={{ position: "absolute", left: `${at.left.toFixed(1)}%`, top: `${at.top.toFixed(1)}%`, transform: "translate(-50%,-50%)", whiteSpace: "nowrap", fontSize: 11.5, fontWeight: 800, color: "#5C6280" }}>
+              {label}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** 이름표 칩 한 줄. 가족 비교·지난 시즌·피드 필터가 같은 모양을 쓴다. */
+function Chips({
+  items,
+  picked,
+  onPick,
+  compact = false,
+}: {
+  items: { key: string; name: string }[];
+  picked: string;
+  onPick: (key: string) => void;
+  compact?: boolean;
+}) {
+  return (
+    <>
+      {items.map((item) => (
+        <div
+          key={item.key}
+          onClick={() => onPick(item.key)}
+          style={{
+            flex: "none", padding: compact ? "6px 12px" : "9px 16px", borderRadius: 999, cursor: "pointer",
+            fontSize: compact ? 12 : 13, fontWeight: 700, whiteSpace: "nowrap", transition: "all 0.18s",
+            ...(picked === item.key
+              ? { color: "#fff", background: ACCENT }
+              : { color: "#6B6F85", background: "#fff", boxShadow: "0 1px 5px rgba(30,25,60,0.05)" }),
+          }}
+        >
+          {item.name}
+        </div>
+      ))}
+    </>
+  );
+}
+
 /** 카드 겉면 — 성향 카드와 주차 카드가 같은 유리 질감을 쓴다. */
 function CardShell({ type, children, style }: { type: ResolvedType; children: React.ReactNode; style?: React.CSSProperties }) {
   const [p0, p1, p2] = type.pal;
@@ -200,19 +302,27 @@ export function ArchiveScreen({
   const { wallet } = useWallet();
   const { universe, quotes } = useUniverseLive();
   const data = useArchiveData();
-  const [tab, setTab] = useState<"report" | "return">(
-    requested === "return" ? "return" : "report",
+  /**
+   * 자리 셋. **첫 화면(`cards`)은 로그인한 사람 개인의 주차 성향 카드**이고, 두 탭은 가족
+   * 것이다 — `family` 가 가족 성향, `return` 이 가족 수익이다. `last` 주소는 가족 성향의
+   * 지난 시즌 자리를 가리키므로 `family` + `season: "last"` 로 편다.
+   */
+  const [view, setView] = useState<"cards" | "family" | "return">(
+    requested === "return" ? "return" : requested === "family" || requested === "last" ? "family" : "cards",
   );
-  const [view, setView] = useState<"tabs" | "cards" | "family">(
-    requested === "cards" ? "cards" : requested === "family" ? "family" : "tabs",
-  );
-  const [traitPick, setTraitPick] = useState<number | null>(null);
+  /** 가족 성향 탭 안에서 보고 있는 시즌. 주소 `/archive/last` 로 바로 들어올 수 있다. */
+  const [season, setSeason] = useState<"now" | "last">(requested === "last" ? "last" : "now");
   const [cardActive, setCardActive] = useState<number | null>(null);
   const [sheetIndex, setSheetIndex] = useState<number | null>(null);
   const [famPick, setFamPick] = useState("all");
   const [who, setWho] = useState("all");
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [lastPick, setLastPick] = useState("all");
+  const [lastOpen, setLastOpen] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  /** 고칠 댓글 하나. 두 개를 동시에 열 수 없다 — 열려 있던 쪽은 저장 없이 닫힌다. */
+  const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
   const sheet = useSheetDrag(SHEET_HEIGHT);
 
   const prices = useMemo(
@@ -241,10 +351,11 @@ export function ArchiveScreen({
   const lanes = runners(data.family?.members ?? []);
   const me = wallet?.acc[account];
   const summary = returnSummary(me?.cash ?? 0, me?.holdings ?? [], prices);
-  const sectors = sectorCards(me?.holdings ?? [], prices);
-  // 섹터 레일은 카드 모아보기 레일과 배선을 나눠 쓸 수 없다 — 같은 훅 인스턴스를 두 레일이
-  // 쓰면 한쪽을 끌 때 다른 쪽의 스냅이 풀린다. 켜진 카드를 고르지 않는 레일이라 인자는 없다.
-  const sectorRail = useRailDrag();
+  /**
+   * 제목 옆 지갑 — 같은 `family_tag` 사람들의 자산 합계다. 서버가 합계를 못 줄 때만
+   * (비로그인·조회 실패) 내 계좌 요약으로 되돌아가므로 자리가 비지 않는다.
+   */
+  const walletHead = familySummary(data.family?.total) ?? summary;
   const feed = feedCards(
     data.family?.trades ?? [],
     data.family?.members ?? [],
@@ -264,78 +375,80 @@ export function ArchiveScreen({
   };
 
   const sheetCard: WeekCard | undefined = cards[sheetIndex ?? activeCard] ?? cards[cards.length - 1];
-  const now = new Date();
+
+  // 지난 시즌 — 아직 서버 값이 없어 `archive-season` 픽스처를 그대로 쓴다(그 파일 머리말).
+  const last = useMemo(() => lastSeasonReport(), []);
+  const lastShown = last.members.filter((m) => lastPick === "all" || m.key === lastPick);
+
+  /** 제목이 곧 현재 자리다 — 머리말 줄을 없앴으므로 여기 말고 어디인지 적는 곳이 없다. */
+  const screenTitle =
+    view === "return" ? "우리 가족 수익" : view === "family" ? "우리 가족 투자" : "성장 아카이브";
+  /**
+   * 뒤로 — 가족 탭에서는 내 카드(첫 화면)로 돌아오고, 첫 화면에서는 화면을 뜬다.
+   * 목업의 뒤로가기는 첫 화면에서 아무 일도 하지 않지만, 그건 나갈 곳이 없는 단독
+   * 페이지라서다. 여기서는 홈으로 보낸다 — 눌러도 안 움직이는 단추를 두지 않는다.
+   */
+  const goBack = () => {
+    if (view !== "cards") return setView("cards");
+    onLeave("/");
+  };
 
   return (
     <PhoneFrame>
       <div style={PAGE}>
-        <div style={{ flex: "none", padding: "10px 20px 0" }}>
-          <div style={WEEK_LABEL}>{`${now.getMonth() + 1}월 ${Math.ceil(now.getDate() / 7)}주차`}</div>
-          <div style={TITLE}>성장 아카이브</div>
+        <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 12, padding: "6px 20px 0" }}>
+          <div onClick={goBack} style={BACK}>‹</div>
+          <div style={{ flex: 1 }} />
         </div>
-        <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-          <div onClick={() => { setTab("report"); setView("tabs"); }} style={tabStyle(view === "tabs" && tab === "report")}>성향</div>
-          <div onClick={() => { setTab("return"); setView("tabs"); }} style={tabStyle(view === "tabs" && tab === "return")}>수익률</div>
+        <div style={{ flex: "none", display: "flex", alignItems: "flex-end", gap: 10, padding: "10px 20px 0" }}>
+          <div style={{ ...TITLE, flex: 1, minWidth: 0 }}>{screenTitle}</div>
+          {/*
+            첫 화면 제목 옆의 지갑. 같은 `family_tag` 사람들의 자산 합계이고, 서버가 합계를
+            못 줄 때만 내 계좌로 되돌아간다. 눌러서 `우리 가족 수익` 자리로 들어간다.
+          */}
+          {view === "cards" && (
+            <div onClick={() => setView("return")} style={{ flex: "none", textAlign: "right", paddingBottom: 3, cursor: "pointer" }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9095AA", whiteSpace: "nowrap" }}>우리 가족 자산</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "#001E5A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 2 }}>{walletHead.totalText}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5, marginTop: 2, fontSize: 11.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: walletHead.pctColor }}>
+                <span>{walletHead.pnlText}</span>
+                <span style={{ width: 1, height: 9, background: "#DFE1EB" }} />
+                <span>{walletHead.pctText}</span>
+              </div>
+            </div>
+          )}
         </div>
-
+        {/*
+          가족 단추 둘은 **첫 화면에만** 있다. 누르면 그 자리로 들어가고 단추는 사라진다 —
+          켜진 탭으로 남지 않으므로 어디에 있는지는 제목(`screenTitle`)이 말하고, 돌아오는
+          길은 머리의 `‹` 하나다.
+        */}
+        {view === "cards" && (
+          <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
+            <div onClick={() => setView("family")} style={ENTER}>우리 가족 투자</div>
+            <div onClick={() => setView("return")} style={ENTER}>우리 가족 수익</div>
+          </div>
+        )}
+        {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
         {view === "family" && (
+          <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
+            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>현재 시즌</div>
+            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>과거 시즌</div>
+          </div>
+        )}
+
+        {view === "family" && season === "now" && (
           <>
             <div style={{ ...BODY, gap: 12 }}>
               <div style={{ flex: "none", display: "flex", gap: 7, flexWrap: "wrap" }}>
-                {[{ key: "all", name: "전체" } as Pick<FamilyMember, "key" | "name">, ...family].map((f) => (
-                  <div
-                    key={f.key}
-                    onClick={() => setFamPick(f.key)}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 5, padding: "9px 16px", borderRadius: 999,
-                      cursor: "pointer", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", transition: "all 0.18s",
-                      ...(famPick === f.key
-                        ? { color: "#fff", background: ACCENT }
-                        : { color: "#6B6F85", background: "#fff", boxShadow: "0 1px 5px rgba(30,25,60,0.05)" }),
-                    }}
-                  >
-                    <span>{f.name}</span>
-                  </div>
-                ))}
+                <Chips
+                  items={[{ key: "all", name: "전체" }, ...family.map((f) => ({ key: f.key, name: f.name }))]}
+                  onPick={setFamPick}
+                  picked={famPick}
+                />
               </div>
 
-              <div style={{ flex: "none", display: "flex", justifyContent: "center", background: "#FFFFFF", borderRadius: 26, padding: "10px 12px 14px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
-                <div style={{ position: "relative", width: "100%", maxWidth: 300, aspectRatio: "1/1" }}>
-                  <svg style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", display: "block", overflow: "visible" }} viewBox="0 0 236 236">
-                    {gridRings(92, 118, 118).map((ring, i) => (
-                      <polygon fill="none" key={i} points={ring.points} stroke="#E4E6F1" strokeWidth="1.2" />
-                    ))}
-                    {TRAIT_LABELS.map((_, i) => {
-                      const outer = pointAt(i, 1, 92, 118, 118);
-                      return <line key={i} stroke="#EAEBF4" strokeWidth="1.2" x1="118" x2={outer[0]} y1="118" y2={outer[1]} />;
-                    })}
-                    {famShown.map((f) => (
-                      <polygon
-                        fill={f.fill}
-                        key={f.key}
-                        points={f.scores.map((sc, i) => pointAt(i, sc / f.scaleMax, 92, 118, 118).join(",")).join(" ")}
-                        stroke={f.color}
-                        strokeLinejoin="round"
-                        strokeWidth="2.6"
-                      />
-                    ))}
-                    {famShown.flatMap((f) =>
-                      f.scores.map((sc, i) => {
-                        const d = pointAt(i, sc / f.scaleMax, 92, 118, 118);
-                        return <circle cx={d[0]} cy={d[1]} fill={f.color} key={`${f.key}-${i}`} r="3.4" stroke="#FFFFFF" strokeWidth="1.4" />;
-                      }),
-                    )}
-                  </svg>
-                  {TRAIT_LABELS.map((label, i) => {
-                    const at = labelAt(i, 92, 118, 118, 236, 1.24);
-                    return (
-                      <div key={label} style={{ position: "absolute", left: `${at.left.toFixed(1)}%`, top: `${at.top.toFixed(1)}%`, transform: "translate(-50%,-50%)", whiteSpace: "nowrap", fontSize: 11.5, fontWeight: 800, color: "#5C6280" }}>
-                        {label}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <FamilyRadar shown={famShown} />
 
               {family.map((f) => (
                 <div
@@ -365,8 +478,77 @@ export function ArchiveScreen({
                 누가 더 좋다는 뜻은 아니에요. 서로 왜 그렇게 했는지 이야기해 보세요.
               </div>
             </div>
-            <div style={{ flex: "none", display: "flex", justifyContent: "center", padding: "6px 16px 18px" }}>
-              <div onClick={() => setView("tabs")} style={CTA}>성향 화면으로 돌아가기</div>
+          </>
+        )}
+
+        {view === "family" && season === "last" && (
+          <>
+            <div style={{ ...BODY, gap: 12 }}>
+              {/* 시즌 종합 카드. 겉면 색과 캐릭터는 가족의 최빈 시즌 성향에서 나온다. */}
+              <div style={{ flex: "none", borderRadius: 26, padding: 7, background: last.gradient }}>
+                <div style={{ position: "relative", overflow: "hidden", borderRadius: 20, padding: "16px 18px 14px", background: "linear-gradient(158deg,rgba(255,255,255,0.5) 0%,rgba(255,255,255,0.16) 44%,rgba(255,255,255,0.24) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7),inset 0 0 0 1px rgba(255,255,255,0.4)" }}>
+                  <div style={{ position: "absolute", right: -40, bottom: -40, width: 170, height: 170, borderRadius: "50%", filter: "blur(22px)", pointerEvents: "none", background: last.glow }} />
+                  <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ flex: "none", width: 104, height: 124, margin: "-8px 0 -12px", background: last.image, filter: last.imageShadow }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: last.inkSoft }}>지난 시즌 종합 리포트</div>
+                      <div style={{ fontSize: 21, fontWeight: 900, marginTop: 4, letterSpacing: "-0.01em", lineHeight: 1.25, color: last.ink }}>{last.title}</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, marginTop: 6, textWrap: "pretty", color: last.inkSoft }}>{last.text}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ flex: "none", display: "flex", gap: 7, flexWrap: "wrap" }}>
+                <Chips
+                  items={[{ key: "all", name: "전체" }, ...last.members.map((m) => ({ key: m.key, name: m.name }))]}
+                  onPick={setLastPick}
+                  picked={lastPick}
+                />
+              </div>
+
+              <FamilyRadar shown={lastShown} />
+
+              {last.members.map((m) => {
+                const open = lastOpen === m.key;
+                return (
+                  <div key={m.key} style={{ flex: "none", background: "#FFFFFF", borderRadius: 22, padding: "13px 15px", boxShadow: open ? `inset 0 0 0 2px ${m.color},0 2px 10px rgba(30,25,60,0.05)` : "0 2px 10px rgba(30,25,60,0.05)" }}>
+                    <div
+                      // 펼치면서 오각형도 그 사람만 남긴다. 접으면 다시 전체로 돌린다 —
+                      // 카드를 닫았는데 오각형만 한 명으로 남아 있으면 왜 그런지 알 수가 없다.
+                      onClick={() => { setLastOpen(open ? null : m.key); setLastPick(open ? "all" : m.key); }}
+                      style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}
+                    >
+                      <div style={{ width: 42, height: 42, flex: "none", borderRadius: 999, background: `url(${m.face}) center/cover no-repeat,${m.color}2E`, boxShadow: `inset 0 0 0 2px ${m.color}99` }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                          <div style={{ width: 9, height: 9, borderRadius: 999, flex: "none", background: m.color }} />
+                          <span style={{ fontSize: 15, fontWeight: 800, color: "#001E5A" }}>{m.name}</span>
+                          <span style={{ fontSize: 12.5, fontWeight: 700, color: ACCENT }}>{m.title}</span>
+                        </div>
+                        <div style={{ fontSize: 12.5, fontWeight: 500, color: "#7E849B", lineHeight: 1.65, marginTop: 5, textWrap: "pretty" }}>{m.desc}</div>
+                      </div>
+                      <div style={{ flex: "none", fontSize: 12, fontWeight: 700, color: "#A9AEC4", paddingTop: 3, whiteSpace: "nowrap" }}>{open ? "닫기" : "주차별"}</div>
+                    </div>
+                    {open && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12, paddingTop: 12, borderTop: "1px solid #F0F1F7" }}>
+                        {m.weeks.map((week) => (
+                          <div key={week.label} style={{ display: "flex", alignItems: "center", gap: 10, borderRadius: 14, padding: "9px 11px", background: week.bg }}>
+                            <span style={{ flex: "none", fontSize: 12, fontWeight: 700, color: "#8E93A8", whiteSpace: "nowrap" }}>{week.label}</span>
+                            <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 800, color: week.ink, whiteSpace: "nowrap" }}>{week.typeName}</span>
+                            <span style={{ flex: "none", fontSize: 12, fontWeight: 600, color: "#8E93A8", whiteSpace: "nowrap" }}>{week.note}</span>
+                          </div>
+                        ))}
+                        <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.6, padding: "2px 2px 0", textWrap: "pretty" }}>{m.trend}</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
+                지난 시즌 기록은 그대로 보관돼요. 위 단추로 현재 시즌과 견줘 보세요.
+              </div>
             </div>
           </>
         )}
@@ -435,162 +617,109 @@ export function ArchiveScreen({
               </div>
               <div style={{ flex: "none", textAlign: "center", padding: "14px 26px 0" }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#8E93A8", lineHeight: 1.6, textWrap: "pretty" }}>
-                  한 주에 한 장씩 쌓여요. 옆으로 넘겨서 지난 주의 나를 볼 수 있어요.
+                  한 주에 한 장씩 쌓여요. 옆으로 넘겨 지난 주의 나를 보고, 가운데 카드를 누르면 다섯 축을 펼쳐 봐요.
                 </div>
               </div>
-            </div>
-            <div style={{ flex: "none", display: "flex", justifyContent: "center", padding: "0 16px 18px" }}>
-              <div onClick={() => setView("tabs")} style={CTA}>성향 화면으로 돌아가기</div>
             </div>
           </>
         )}
 
-        {view === "tabs" && tab === "report" && (
-          <div style={BODY}>
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 11, paddingBottom: 6 }}>
-              <CardShell type={myType}>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: rgba(myType.ink, 0.9), letterSpacing: "0.12em" }}>나의 투자 성향</span>
-                </div>
-                <div style={{ position: "relative", textAlign: "center", fontSize: 24, fontWeight: 900, color: myType.ink, marginTop: 5, letterSpacing: "-0.01em", textShadow: "0 1px 0 rgba(255,255,255,0.6)" }}>{myType.title}</div>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-                  <div style={{ flex: "none", width: 142, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
-                    {/* 유형이 정해지기 전에는 그림 자리를 비운다. 자리는 남겨 둬야 오각형이 안 움직인다. */}
-                    <div style={{ width: 168, height: 208, margin: "0 -14px -4px -12px", background: myType.key ? `url(${typeImage(myType.key)}) center bottom/contain no-repeat` : "none", filter: myType.key ? `drop-shadow(0 12px 14px ${rgba(myType.ink, 0.38)})` : "none" }} />
-                    <div style={{ width: 90, height: 20, marginTop: -8, borderRadius: "50%", background: `radial-gradient(ellipse at center,${rgba(myType.ink, 0.22)} 0%,${rgba(myType.ink, 0.06)} 46%,rgba(0,0,0,0) 72%)` }} />
-                  </div>
-                  <Radar
-                    ink={myType.ink}
-                    labelSize={11}
-                    onPick={(i) => setTraitPick(traitPick === i ? null : i)}
-                    picked={traitPick}
-                    scaleMax={mine.scaleMax}
-                    scores={mine.scores}
-                  />
-                </div>
-                <div style={{ position: "relative", marginTop: 10, borderRadius: 14, padding: "11px 13px", background: "rgba(255,255,255,0.5)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75),inset 0 0 0 1px rgba(255,255,255,0.45)" }}>
-                  {traitPick !== null && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: myType.ink }}>{TRAIT_LABELS[traitPick]}</span>
-                      <span style={{ fontSize: 16, fontWeight: 900, color: myType.ink, fontVariantNumeric: "tabular-nums" }}>{formatScore(mine.scores[traitPick])}</span>
-                    </div>
-                  )}
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: rgba(myType.ink, 0.9), lineHeight: 1.65, marginTop: traitPick !== null ? 6 : 0, textWrap: "pretty", whiteSpace: "pre-line" }}>
-                    {traitPick !== null ? TRAIT_META[traitPick].desc : myType.desc}
-                  </div>
-                </div>
-              </CardShell>
-            </div>
-            <div style={{ display: "flex", gap: 10, paddingBottom: 2, marginTop: 14 }}>
-              <div onClick={() => { setCardActive(null); setView("cards"); }} style={{ flex: 1, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: "#fff", borderRadius: 16, padding: "14px 0", cursor: "pointer", background: ACCENT }}>카드 모아보기</div>
-              <div onClick={() => setView("family")} style={{ flex: 1, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: "#001E5A", borderRadius: 16, padding: "14px 0", cursor: "pointer", background: "#fff", boxShadow: "0 2px 10px rgba(30,25,60,0.06)" }}>가족 투자 성향 비교</div>
-            </div>
-          </div>
-        )}
-
-        {view === "tabs" && tab === "return" && (
+        {view === "return" && (
           <div style={BODY}>
             <div style={{ display: "flex", flexDirection: "column", gap: 13, paddingBottom: 10 }}>
-              <div style={{ background: "#FFFFFF", borderRadius: 22, padding: "16px 16px 14px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                  <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A" }}>가족 수익률 달리기</div>
-                  <div style={{ fontSize: 11.5, fontWeight: 500, color: "#A9AEC4", whiteSpace: "nowrap" }}>START 왼쪽은 마이너스</div>
+              {/*
+                머리 카드 — 내 계좌 하나의 총액·손익이다. `상세` 를 켜야 예수금과 결제 기준이
+                나온다. 접어 두는 이유는 아이가 먼저 볼 숫자가 총액과 수익률이기 때문이다.
+              */}
+              <div style={{ background: "#FFFFFF", borderRadius: 22, padding: "18px 19px 16px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em" }}>우리 가족 수익률</div>
+                  <div onClick={() => setDetailOpen(!detailOpen)} style={{ flex: "none", display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: detailOpen ? "#3D4460" : "#9CA1B4" }}>상세</span>
+                    <div style={{ width: 40, height: 23, borderRadius: 999, padding: 2, display: "flex", transition: "background 0.2s ease", background: detailOpen ? ACCENT : "#DFE1EB", justifyContent: detailOpen ? "flex-end" : "flex-start" }}>
+                      <div style={{ width: 19, height: 19, borderRadius: 999, background: "#fff", boxShadow: "0 1px 3px rgba(30,25,60,0.28)" }} />
+                    </div>
+                  </div>
                 </div>
-                <div style={{ position: "relative", marginTop: 12, borderRadius: 16, overflow: "hidden", background: "#F4F5FB", boxShadow: "inset 0 0 0 1px #E4E6F1" }}>
-                  <div style={{ position: "absolute", left: `${RUN_START}%`, top: 4, transform: "translateX(-50%)", zIndex: 3, fontSize: 9.5, fontWeight: 800, letterSpacing: "0.1em", color: "#8E93A8", background: "#F4F5FB", padding: "0 5px", whiteSpace: "nowrap" }}>START</div>
-                  <div style={{ position: "absolute", left: `${RUN_START}%`, top: 0, bottom: 0, width: 0, borderLeft: "2px dashed #C6CBDD", transform: "translateX(-1px)", pointerEvents: "none" }} />
+                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 8 }}>
+                  <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "#111524" }}>{summary.totalNumber}</div>
+                  <div style={{ fontSize: 19, fontWeight: 700, color: "#111524" }}>원</div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 7, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: summary.pctColor }}>
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{summary.pnlText}</span>
+                  <span style={{ width: 1, height: 13, background: "#DFE1EB" }} />
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{summary.pctText}</span>
+                </div>
+                {detailOpen && (
+                  <div style={{ marginTop: 15, paddingTop: 14, borderTop: "1px solid #EFF0F6", display: "flex", flexDirection: "column", gap: 11 }}>
+                    {[
+                      { label: "예수금", value: summary.cashText },
+                      { label: "출금가능금액", value: summary.withdrawText },
+                    ].map((row) => (
+                      <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 600, color: "#8E93A8" }}>{row.label}</div>
+                        <div style={{ flex: "none", fontSize: 15, fontWeight: 700, color: "#2C3245", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{row.value}</div>
+                      </div>
+                    ))}
+                    <div style={{ alignSelf: "flex-end", fontSize: 12, fontWeight: 600, color: "#A9AEC4", whiteSpace: "nowrap" }}>{summary.settleText}</div>
+                  </div>
+                )}
+              </div>
+
+              {/*
+                달리기 트랙. 어두운 판 위에 결승선 체크무늬를 둬서 어디가 끝인지 보이게 한다 —
+                밝은 판일 때는 주자가 오른쪽 끝에 붙어도 다 온 것인지 알 수 없었다.
+              */}
+              <div style={{ background: "#2F3140", borderRadius: 22, padding: "15px 14px 14px", boxShadow: "0 6px 18px -8px rgba(20,18,40,0.5)" }}>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, padding: "0 3px" }}>
+                  <div style={{ flex: "none", fontSize: 15.5, fontWeight: 800, color: "#FFFFFF", whiteSpace: "nowrap", letterSpacing: "-0.01em" }}>가족 수익률 달리기</div>
+                  <div style={{ flex: 1, minWidth: 0, textAlign: "right", fontSize: 11, fontWeight: 700, color: "#F3C64B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>START 왼쪽은 마이너스</div>
+                </div>
+                <div style={{ position: "relative", marginTop: 13, borderRadius: 16, overflow: "hidden", background: "#3A3C4C", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
+                  <div style={{ position: "absolute", left: `${RUN_START}%`, top: 0, bottom: 0, width: 0, borderLeft: "2px dashed rgba(255,255,255,0.42)", transform: "translateX(-1px)", zIndex: 2, pointerEvents: "none" }} />
+                  <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${RUN_START}%`, zIndex: 1, pointerEvents: "none", background: "rgba(0,0,0,0.16)" }} />
+                  <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 11, zIndex: 1, pointerEvents: "none", background: "repeating-conic-gradient(#F2F3F7 0% 25%,#33353F 0% 50%) 0 0/11px 11px" }} />
+                  <div style={{ position: "absolute", left: `${RUN_START}%`, top: 5, transform: "translateX(-50%)", zIndex: 3, fontSize: 9.5, fontWeight: 800, letterSpacing: "0.1em", color: "#FFFFFF", whiteSpace: "nowrap", background: "#3A3C4C", padding: "0 6px", borderRadius: 999 }}>START</div>
                   {lanes.map((lane) => (
-                    <div key={lane.key} style={{ position: "relative", height: LANE_HEIGHT, boxShadow: "inset 0 -1px 0 #E4E6F1" }}>
-                      <div style={{ position: "absolute", left: 8, top: 6, zIndex: 3, fontSize: 11, fontWeight: 700, color: "#8E93A8", whiteSpace: "nowrap", background: "rgba(244,245,251,0.9)", borderRadius: 999, padding: "1px 6px" }}>{lane.name}</div>
-                      <div style={{ position: "absolute", left: `${lane.at.toFixed(1)}%`, top: "50%", transform: `translate(-50%,-50%)${lane.minus ? " scaleX(-1)" : ""}`, display: "flex", alignItems: "center", gap: 4, transition: "left 0.4s ease" }}>
-                        {lane.showDash && <div style={{ width: 14, height: 12, flex: "none", borderRadius: 2, opacity: 0.45, background: `repeating-linear-gradient(to bottom,${lane.color} 0 2px,transparent 2px 5px)` }} />}
-                        <div style={{ width: 34, height: 34, flex: "none", borderRadius: 999, background: `url(${lane.face}) center/cover no-repeat,#EDEFF6`, boxShadow: `0 0 0 2.5px ${lane.color}${lane.has ? "" : "55"},0 2px 6px rgba(30,25,60,0.18)`, ...(lane.has ? {} : { filter: "grayscale(0.6)", opacity: 0.6 }) }} />
-                        <div style={{ position: "absolute", left: "50%", top: 34, transform: `translateX(-50%)${lane.minus ? " scaleX(-1)" : ""}`, fontSize: 11, fontWeight: 800, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: lane.pctColor }}>{lane.pctText}</div>
+                    <div key={lane.key} style={{ position: "relative", height: LANE_HEIGHT, boxShadow: "inset 0 -1px 0 rgba(255,255,255,0.09)" }}>
+                      <div style={{ position: "absolute", left: 9, top: "50%", transform: "translateY(-50%)", zIndex: 3, fontSize: 11.5, fontWeight: 800, color: "#EDEEF4", whiteSpace: "nowrap", textShadow: "0 1px 3px rgba(0,0,0,0.55)" }}>{lane.name}</div>
+                      <div style={{ position: "absolute", left: `${lane.at.toFixed(1)}%`, top: "50%", zIndex: 2, transform: "translate(-50%,-50%)", display: "flex", alignItems: "center", gap: 5, transition: "left 0.4s ease" }}>
+                        {/* 속도선은 마이너스일 때 반대쪽으로 붙는다 — 주자 얼굴은 뒤집지 않는다. */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 3, flex: "none", opacity: lane.showDash ? 0.75 : 0, order: lane.minus ? 2 : 0, transform: lane.minus ? "scaleX(-1)" : "none" }}>
+                          <div style={{ width: 22, height: 2.5, borderRadius: 999, background: lane.color }} />
+                          <div style={{ width: 15, height: 2.5, borderRadius: 999, marginLeft: 7, background: lane.color }} />
+                          <div style={{ width: 19, height: 2.5, borderRadius: 999, marginLeft: 3, background: lane.color }} />
+                        </div>
+                        <div
+                          onClick={() => setWho(who === lane.key ? "all" : lane.key)}
+                          style={{ position: "relative", flex: "none", cursor: "pointer", order: 1 }}
+                        >
+                          <div style={{ width: 36, height: 36, borderRadius: 999, background: `url(${lane.face}) center/cover no-repeat,#EDEFF6`, boxShadow: `0 0 0 3px ${lane.color}${lane.has ? "" : "55"},0 3px 8px rgba(0,0,0,0.4)`, ...(lane.has ? {} : { filter: "grayscale(0.6)", opacity: 0.6 }) }} />
+                          {lane.rank !== null && (
+                            <div style={{ position: "absolute", left: -6, top: -7, width: 18, height: 18, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, color: "#fff", background: lane.color, boxShadow: "0 2px 5px rgba(0,0,0,0.4)" }}>{lane.rank}</div>
+                          )}
+                          <div style={{ position: "absolute", left: "50%", top: 38, transform: "translateX(-50%)", whiteSpace: "nowrap", fontSize: 11.5, fontWeight: 800, fontVariantNumeric: "tabular-nums", textShadow: "0 1px 3px rgba(0,0,0,0.6)", color: lane.pctColor }}>{lane.pctText}</div>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div style={{ position: "relative", overflow: "hidden", background: "#001E5A", borderRadius: 26, padding: "20px 22px 21px" }}>
-                <div style={{ fontSize: 12.5, fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>내 수익률</div>
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 10, marginTop: 5 }}>
-                  <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: summary.positive ? "#FF8574" : "#8AB6FF" }}>{summary.pctText}</div>
-                </div>
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginTop: 15, paddingTop: 13, borderTop: "1px solid rgba(255,255,255,0.13)" }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.52)", whiteSpace: "nowrap" }}>지금 총 금액</div>
-                    <div style={{ fontSize: 21, fontWeight: 800, color: "#fff", fontVariantNumeric: "tabular-nums", marginTop: 3, whiteSpace: "nowrap" }}>{summary.totalText}</div>
-                  </div>
-                  <div style={{ flex: "none", textAlign: "right" }}>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.52)", whiteSpace: "nowrap" }}>쓸 수 있는 돈</div>
-                    <div style={{ fontSize: 15.5, fontWeight: 800, color: "rgba(255,255,255,0.82)", fontVariantNumeric: "tabular-nums", marginTop: 3, whiteSpace: "nowrap" }}>{summary.cashText}</div>
-                  </div>
-                </div>
-              </div>
-
-              {/*
-                보유 종목 · 섹터별. 카드 하나가 한 분야이고 값은 그 분야 **합계**로 낸다.
-                끌어 넘기는 배선은 카드 모아보기와 같은 `useRailDrag` 를 쓴다 — 한 화면
-                안에서 레일마다 끌리는 느낌이 다르면 안 된다.
-                보유가 없으면 빈 레일 대신 아무것도 그리지 않는다.
-              */}
-              {sectors.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: "#001E5A", letterSpacing: "-0.01em", padding: "6px 0 0" }}>
-                    보유 종목 · 섹터별
-                  </div>
-                  {/*
-                    **`touch-action` 을 두지 않는다(기본 `auto`).** 카드 모아보기 레일은
-                    `pan-x` 를 쓰지만 그건 세로로 스크롤되지 않는 자기 자리에 있어서다.
-                    이 레일은 세로로 스크롤되는 `BODY` 안에 있으므로 `pan-x` 를 걸면
-                    "세로 팬은 브라우저가 처리하지 말라"가 돼, 섹터 카드에 손가락을 얹고
-                    아래로 밀 때 피드가 따라 내려오지 않는다. `useRailDrag` 는 터치를
-                    아예 무시하고 네이티브 스크롤에 맡기므로 여기서 막으면 대신할 것이 없다.
-                  */}
-                  <div
-                    onPointerDown={sectorRail.onPointerDown}
-                    ref={sectorRail.ref}
-                    style={{ display: "flex", alignItems: "stretch", gap: 9, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "11px 2px 4px", scrollbarWidth: "none", cursor: "grab", userSelect: "none", WebkitUserSelect: "none" }}
-                  >
-                    {sectors.map((sector) => (
-                      <div
-                        key={sector.id}
-                        style={{ flex: "none", width: 108, scrollSnapAlign: "start", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", borderRadius: 20, padding: "16px 10px 17px", background: "#fff", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}
-                      >
-                        <div style={{ width: 50, height: 50, flex: "none", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 25, fontWeight: 800, color: "#6B6F85", background: "#F5F6FB" }}>
-                          {sector.emoji}
-                        </div>
-                        <div style={{ fontSize: 13.5, fontWeight: 800, color: "#001E5A", marginTop: 9, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>{sector.name}</div>
-                        <div style={{ fontSize: 11.5, fontWeight: 500, color: "#A9AEC4", marginTop: 3, whiteSpace: "nowrap" }}>{sector.countText}</div>
-                        <div style={{ fontSize: 12.5, fontWeight: 600, color: "#6B6F85", marginTop: 6, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{sector.valueText}</div>
-                        <div style={{ fontSize: 16, fontWeight: 800, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 4, color: sector.pctColor }}>{sector.pctText}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
-                {[{ key: "all", name: "전체" }, ...family.map((f) => ({ key: f.key, name: f.name }))].map((f) => (
-                  <div
-                    key={f.key}
-                    onClick={() => setWho(f.key)}
-                    style={{
-                      padding: "8px 14px", borderRadius: 999, cursor: "pointer", fontSize: 12.5, fontWeight: 700, whiteSpace: "nowrap",
-                      ...(who === f.key
-                        ? { color: "#fff", background: ACCENT }
-                        : { color: "#6B6F85", background: "#fff", boxShadow: "0 1px 5px rgba(30,25,60,0.05)" }),
-                    }}
-                  >
-                    {f.name}
-                  </div>
-                ))}
-              </div>
-
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#001E5A", letterSpacing: "-0.01em", padding: "6px 0 0" }}>
-                  {who === "all" ? "가족 피드" : `${family.find((f) => f.key === who)?.name ?? ""}의 피드`}
+                {/* 제목과 필터 칩이 한 줄이다. 칩이 오른쪽으로 밀려 제목과 나란히 선다. */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 2px 0" }}>
+                  <div style={{ flex: "none", fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
+                    {who === "all" ? "가족 피드" : `${family.find((f) => f.key === who)?.name ?? ""}의 피드`}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "flex-end", gap: 5, overflowX: "auto", scrollbarWidth: "none" }}>
+                    <Chips
+                      compact
+                      items={[{ key: "all", name: "전체" }, ...family.map((f) => ({ key: f.key, name: f.name }))]}
+                      onPick={setWho}
+                      picked={who}
+                    />
+                  </div>
                 </div>
                 {feed.map((card) => (
                   <div key={card.id} style={{ background: "#fff", borderRadius: 22, padding: "16px 17px 14px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
@@ -603,18 +732,18 @@ export function ArchiveScreen({
                     </div>
 
                     <div style={{ display: "flex", borderRadius: 16, overflow: "hidden", marginTop: 13, minHeight: 112 }}>
-                      <div style={{ flex: "none", width: "39%", position: "relative", overflow: "hidden", padding: "13px 14px 14px", display: "flex", flexDirection: "column", justifyContent: "space-between", background: card.positive ? ACCENT : "#001E5A" }}>
+                      <div style={{ flex: "none", width: "39%", position: "relative", overflow: "hidden", padding: "13px 14px 14px", display: "flex", flexDirection: "column", justifyContent: "space-between", background: card.bigBg }}>
                         <div>
                           <div style={{ fontSize: 10.5, fontWeight: 700, color: "rgba(255,255,255,0.75)", whiteSpace: "nowrap" }}>{card.dateLabel}</div>
                           <div style={{ fontSize: 12, fontWeight: 800, color: "#fff", marginTop: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{card.stockName}</div>
-                          <div style={{ fontSize: 25, fontWeight: 800, color: "#fff", marginTop: 5, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>{card.bigPctText}</div>
+                          <div style={{ fontSize: card.bigSize, fontWeight: 800, color: "#fff", marginTop: 5, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>{card.bigValue}</div>
                         </div>
                         <div style={{ position: "absolute", right: -2, bottom: -2, width: 56, height: 60, background: `url(${card.pose}) right bottom/contain no-repeat`, filter: "drop-shadow(0 4px 7px rgba(0,0,0,0.3))" }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0, background: "#F5F6FB", padding: "14px 15px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>{card.avgLabel}</div>
-                        <div style={{ fontSize: 25, fontWeight: 800, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", marginTop: 4, whiteSpace: "nowrap", color: card.avgColor }}>{card.avgText}</div>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: "#3D4460", marginTop: 5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{card.oneLiner}</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>{card.sideLabel}</div>
+                        <div style={{ fontSize: 17, fontWeight: 800, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", marginTop: 4, lineHeight: 1.35, textWrap: "pretty", color: card.sideColor }}>{card.sideValue}</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: "#3D4460", marginTop: 3, lineHeight: 1.4, textWrap: "pretty" }}>{card.shortMent}</div>
                       </div>
                     </div>
 
@@ -631,30 +760,74 @@ export function ArchiveScreen({
                         onClick={() => { void data.toggleLike(card.id).catch((e) => window.alert(e.message)); }}
                         style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, cursor: "pointer", fontVariantNumeric: "tabular-nums", color: card.liked ? ACCENT : "#A9AEC4" }}
                       >
-                        <span style={{ fontSize: 19 }}>좋아요</span>
+                        <svg fill={card.liked ? ACCENT : "none"} height="17" stroke={card.liked ? ACCENT : "#A9AEC4"} strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="17">
+                          <path d="M12 20.5 4.6 13.3a4.7 4.7 0 0 1 0-6.7 4.7 4.7 0 0 1 6.7 0l.7.7.7-.7a4.7 4.7 0 0 1 6.7 0 4.7 4.7 0 0 1 0 6.7z" />
+                        </svg>
                         <span>{card.likeCount}</span>
                       </div>
                     </div>
 
                     {openComments[card.id] && (
                       <div style={{ display: "flex", flexDirection: "column", gap: 11, marginTop: 13, paddingTop: 12, borderTop: "1px solid #F0F1F7" }}>
-                        {card.comments.map((comment) => (
-                          <div key={comment.id} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                            <div style={{ width: 26, height: 26, flex: "none", borderRadius: 999, background: `url(${comment.face}) center/cover no-repeat,#FFFFFF` }} />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 12.5, fontWeight: 800, color: "#001E5A" }}>{comment.authorName}</div>
-                              <div style={{ fontSize: 13, fontWeight: 500, color: "#5C6280", lineHeight: 1.6, marginTop: 2, textWrap: "pretty" }}>{comment.body}</div>
-                            </div>
-                            {comment.canDelete && (
-                              <div
-                                onClick={() => { void data.deleteComment(card.id, comment.id).catch((e) => window.alert(e.message)); }}
-                                style={{ flex: "none", fontSize: 11.5, fontWeight: 700, color: "#A9AEC4", padding: "4px 8px", borderRadius: 999, background: "#F2F3FA", cursor: "pointer", whiteSpace: "nowrap" }}
-                              >
-                                삭제
+                        {card.comments.map((comment) => {
+                          const editingThis = editing?.id === String(comment.id);
+                          return (
+                            <div key={comment.id} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                              <div style={{ width: 26, height: 26, flex: "none", borderRadius: 999, background: `url(${comment.face}) center/cover no-repeat,#FFFFFF` }} />
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: 12.5, fontWeight: 800, color: "#001E5A" }}>{comment.authorName}</div>
+                                {editingThis ? (
+                                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5 }}>
+                                    <input
+                                      onChange={(event) => setEditing({ id: String(comment.id), body: event.target.value })}
+                                      style={{ flex: 1, minWidth: 0, border: "none", outline: "none", background: "#F2F3FA", borderRadius: 10, padding: "8px 11px", fontSize: 13, fontWeight: 600, color: "#001E5A", fontFamily: "inherit" }}
+                                      value={editing.body}
+                                    />
+                                    <div
+                                      onClick={() => {
+                                        const body = editing.body.trim();
+                                        // 비우면 저장하지 않는다. 지우려면 삭제를 쓴다 —
+                                        // 빈 댓글이 남으면 누가 무슨 말을 지웠는지 알 수 없다.
+                                        if (!body) return;
+                                        void data
+                                          .editComment(card.id, comment.id, body)
+                                          .then(() => setEditing(null))
+                                          .catch((e) => window.alert(e.message));
+                                      }}
+                                      style={{ flex: "none", fontSize: 11.5, fontWeight: 800, color: "#fff", background: "#001E5A", borderRadius: 999, padding: "7px 10px", cursor: "pointer", whiteSpace: "nowrap" }}
+                                    >
+                                      저장
+                                    </div>
+                                    <div
+                                      onClick={() => setEditing(null)}
+                                      style={{ flex: "none", fontSize: 11.5, fontWeight: 700, color: "#A9AEC4", padding: "7px 4px", cursor: "pointer", whiteSpace: "nowrap" }}
+                                    >
+                                      취소
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div style={{ fontSize: 13, fontWeight: 500, color: "#5C6280", lineHeight: 1.6, marginTop: 2, textWrap: "pretty" }}>{comment.body}</div>
+                                )}
                               </div>
-                            )}
-                          </div>
-                        ))}
+                              {comment.canDelete && !editingThis && (
+                                <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 5 }}>
+                                  <div
+                                    onClick={() => setEditing({ id: String(comment.id), body: comment.body ?? "" })}
+                                    style={{ fontSize: 11.5, fontWeight: 700, color: "#7E849B", padding: "4px 8px", borderRadius: 999, background: "#F2F3FA", cursor: "pointer", whiteSpace: "nowrap" }}
+                                  >
+                                    수정
+                                  </div>
+                                  <div
+                                    onClick={() => { void data.deleteComment(card.id, comment.id).catch((e) => window.alert(e.message)); }}
+                                    style={{ fontSize: 11.5, fontWeight: 700, color: "#A9AEC4", padding: "4px 8px", borderRadius: 999, background: "#F2F3FA", cursor: "pointer", whiteSpace: "nowrap" }}
+                                  >
+                                    삭제
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <input
                             onChange={(event) => setDrafts((current) => ({ ...current, [card.id]: event.target.value }))}

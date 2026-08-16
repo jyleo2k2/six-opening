@@ -9,7 +9,7 @@
 const STOCK_CODE = /^\d{6}$/u;
 
 /** 아카이브 안의 자리. `report` 는 기본이라 주소에 적지 않는다. */
-const ARCHIVE_VIEWS = ["return", "cards", "family"];
+const ARCHIVE_VIEWS = ["return", "cards", "family", "last"];
 
 /** 주소로 표현하는 화면. `app.html` 의 `screen` 상태보다 거칠다(위 제약 참고). */
 export type ScreenRoute =
@@ -19,7 +19,7 @@ export type ScreenRoute =
   | { screen: "ranking" }
   | { screen: "portfolio" }
   /**
-   * `view` 는 아카이브 안에서 어디를 보고 있는지 — `report`(기본)·`return`·`cards`·`family`.
+   * `view` 는 아카이브 안에서 어디를 보고 있는지 — `report`(기본)·`return`·`cards`·`family`·`last`.
    * 챗봇이 "내 성향 카드 보여줘" 로 바로 뛰어드는 자리라 주소로 표현한다.
    */
   | { screen: "archive"; view?: string }

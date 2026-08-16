@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { feedCards, returnSummary, runners, type FamilyTrade } from "./archive-feed";
+import { familySummary, feedCards, returnSummary, runners, type FamilyTrade } from "./archive-feed";
 import {
   axesFromCard,
   familyMembers,
@@ -11,6 +11,7 @@ import {
   weekCards,
   type FamilyRow,
 } from "./archive-profile-view";
+import { lastSeasonReport, seasonTypeOf } from "./archive-season";
 
 // ── 성향: 원본은 season-cards 누적 카드 하나다 ──────────────────────────────
 const card = {
@@ -116,17 +117,21 @@ const lanes = runners(members);
 assert.equal(lanes.length, 3);
 // 아직 산 게 없는 사람(returnRate: null)은 출발선에 선다. Number(null)===0 함정.
 assert.equal(lanes[2].has, false);
-assert.equal(lanes[2].at, 40);
+assert.equal(lanes[2].at, 38);
 assert.equal(lanes[2].pctText, "아직");
+// 등수는 산 적 있는 사람끼리만 매긴다. 안 산 사람의 0% 를 같이 세면 마이너스인 사람보다
+// 앞서서, 출발선에 서 있는데 2등이라고 적힌다.
+assert.deepEqual(lanes.map((l) => l.rank), [1, 2, null]);
 // 플러스는 오른쪽, 마이너스는 왼쪽을 보고 선다.
-assert.ok(lanes[0].at > 40);
+assert.ok(lanes[0].at > 38);
 assert.equal(lanes[0].minus, false);
-assert.ok(lanes[1].at < 40);
+assert.ok(lanes[1].at < 38);
 assert.equal(lanes[1].minus, true);
 assert.equal(lanes[1].pctText, "−4.2%");
-// 트랙 밖으로는 못 나간다.
+// 트랙 밖으로는 못 나간다 — 오른쪽 끝 결승선 체크무늬 아래로 깔리면 안 된다.
 const extreme = runners([{ id: 9, name: "x", role: "child", returnRate: 9999 }]);
-assert.ok(extreme[0].at <= 87);
+assert.ok(extreme[0].at <= 76);
+assert.ok(runners([{ id: 9, name: "x", role: "child", returnRate: -9999 }])[0].at >= 26);
 
 // ── 피드 ────────────────────────────────────────────────────────────────
 const trades: FamilyTrade[] = [
@@ -144,26 +149,36 @@ const trades: FamilyTrade[] = [
 const feed = feedCards(trades, members, { "005930": 120000 }, { t1: [{ id: "c1", transactionId: "t1", authorName: "찬영엄마", body: "좋은 선택이야", mine: true }] }, { t1: { transactionId: "t1", liked: true, count: 2 } }, "all", now);
 // 최신순.
 assert.deepEqual(feed.map((f) => f.id), ["t2", "t1"]);
-// 본인이 보는 카드는 체결가와 등락률이 보인다.
+// 본인이 보는 매수 카드는 색 판에 **산 가격**이, 옆 판에 계획이 온다.
 const buy = feed[1];
-assert.equal(buy.avgText, "100,000원");
-// 값은 이 거래 한 건의 **주당** 체결가다. 2주를 20만원어치 샀어도 10만원으로 적힌다 —
-// 라벨이 "평단가" 로 고정돼 있을 때는 이 숫자가 총 거래금액으로 읽혔다.
-assert.equal(buy.avgLabel, "산 가격");
-assert.equal(buy.bigPctText, "+20.00%");
+assert.equal(buy.bigValue, "100,000원");
+assert.equal(buy.bigBg, "#12874F");
+assert.equal(buy.dateLabel, "8월 14일 매수");
+// 목표가가 있으면 목표 금액, 없으면 가지고 갈 기간이다. 값은 이 거래 한 건의 **주당**
+// 체결가 계열이라, 라벨이 "평단가" 로 고정돼 있을 때는 총 거래금액으로 읽혔다.
+assert.equal(buy.sideLabel, "목표 금액");
+assert.equal(buy.sideValue, "130,000원");
 assert.equal(buy.positive, true);
 // 이유·계획·목표가가 한 문장으로 붙는다.
 assert.equal(buy.text, "담았어. 뉴스를 보고 결정했어. 목표 가격이 되면 가지려고 했어. 목표 130,000원.");
-assert.equal(buy.oneLiner, "뉴스를 보고");
+assert.equal(buy.shortMent, "뉴스를 보고");
 assert.equal(buy.likeCount, 2);
 assert.equal(buy.liked, true);
 assert.equal(buy.comments[0].canDelete, true);
-// 남의 카드는 체결가가 마스킹돼 등락률 대신 매도만 적는다 — 화면에서 추론하지 않는다.
+// 목표가가 없는 매수는 보유 계획을 적는다.
+const noTarget = feedCards(
+  [{ ...trades[0], planTargetPrice: null, planCode: "plan_season" }],
+  members, {}, {}, {}, "all", now,
+)[0];
+assert.equal(noTarget.sideLabel, "가지고 갈 기간");
+assert.equal(noTarget.sideValue, "시즌 끝까지");
+// 남의 카드는 체결가가 마스킹된다 — 화면에서 추론하지 않는다.
 const sell = feed[0];
-assert.equal(sell.avgText, "비공개");
+assert.equal(sell.bigValue, "비공개");
+assert.equal(sell.sideValue, "비공개");
 // 마스킹돼도 라벨은 방향을 따른다 — 값만 가리고 무슨 가격이었는지는 숨기지 않는다.
-assert.equal(sell.avgLabel, "판 가격");
-assert.equal(sell.bigPctText, "매도");
+assert.equal(sell.sideLabel, "판 가격");
+assert.equal(sell.dateLabel, "8월 15일 매도");
 // 매도는 계획 변경 이유를 덧붙인다.
 assert.match(sell.text, /계획을 바꿨어 — 가격이 움직여서 불안해졌어$/u);
 
@@ -171,11 +186,77 @@ assert.match(sell.text, /계획을 바꿨어 — 가격이 움직여서 불안�
 assert.deepEqual(feedCards(trades, members, {}, {}, {}, "db_1", now).map((f) => f.id), ["t1"]);
 
 // ── 머리 카드 ────────────────────────────────────────────────────────────
-const summary = returnSummary(500000, [{ code: "005930", qty: 2, avg: 100000 }], { "005930": 120000 });
+const summary = returnSummary(
+  500000,
+  [{ code: "005930", qty: 2, avg: 100000 }],
+  { "005930": 120000 },
+  new Date("2026-08-16T09:00:00+09:00"),
+);
 assert.equal(summary.pctText, "+20.00%");
+assert.equal(summary.pnlText, "▲ 40,000원");
 assert.equal(summary.totalText, "740,000원");
+// 카드가 `원` 을 따로 붙이므로 숫자만 낸다.
+assert.equal(summary.totalNumber, "740,000");
 assert.equal(summary.cashText, "500,000원");
-// 원금이 0 이면 수익률도 0 이다 — 0 으로 나누지 않는다.
-assert.equal(returnSummary(100, [], {}).pctText, "+0.00%");
+// 모의투자에는 결제 대기 중인 돈이 없다 — 출금가능금액은 예수금과 같다.
+assert.equal(summary.withdrawText, summary.cashText);
+assert.equal(summary.settleText, "결제기준 08.16(일) 15:30");
+// 원금이 0 이면 수익률도 0 이다 — 0 으로 나누지 않는다. 손익 0 은 빨강도 파랑도 아니다.
+const flat = returnSummary(100, [], {});
+assert.equal(flat.pctText, "0.00%");
+assert.equal(flat.pctColor, "#9CA1B4");
+
+// ── 지난 시즌 ────────────────────────────────────────────────────────────
+// 한 사람의 시즌 성향은 네 주 중 최빈 유형, 가족 성향은 그 최빈 유형 중 최빈이다.
+assert.equal(
+  seasonTypeOf([
+    { label: "1주차", type: "explorer", count: 1 },
+    { label: "2주차", type: "sniper", count: 1 },
+    { label: "3주차", type: "sniper", count: 1 },
+  ]),
+  "sniper",
+);
+// 동점이면 먼저 나온 주차의 유형을 고른다 — 같은 입력이 늘 같은 답을 내야 한다.
+assert.equal(
+  seasonTypeOf([
+    { label: "1주차", type: "fighter", count: 1 },
+    { label: "2주차", type: "explorer", count: 1 },
+  ]),
+  "fighter",
+);
+const report = lastSeasonReport();
+// 표본은 저격수 2명·전략가 1명이다.
+assert.equal(report.type, "sniper");
+assert.equal(report.title, "저격수 가족이었어요");
+assert.deepEqual(report.members.map((m) => m.title), [
+  "시즌 성향 · 저격수",
+  "시즌 성향 · 전략가",
+  "시즌 성향 · 저격수",
+]);
+assert.equal(
+  report.members[2].trend,
+  "주차별로 보면 탐험가 → 승부사 → 저격수 → 저격수 순서였어요.",
+);
+assert.equal(report.members[0].weeks[0].note, "거래 2건");
+// 오각형은 가족 비교와 같은 0~10 스케일이다 — 두 화면을 겹쳐 볼 수 있어야 한다.
+assert.deepEqual(report.members.map((m) => m.scaleMax), [10, 10, 10]);
+
+// ── 첫 화면 제목 옆 지갑: 가족 자산 합계 ────────────────────────────────────
+// `returnSummary` 와 같은 모양으로 편다 — 두 값이 같은 자리에 번갈아 들어간다.
+const famWallet = familySummary({
+  assets: 4_500_006, cost: 3_000_000, profit: 6, returnRate: 0.0002, memberCount: 3,
+});
+assert.equal(famWallet?.totalText, "4,500,006원");
+assert.equal(famWallet?.pnlText, "▲ 6원");
+assert.equal(famWallet?.pctText, "+0.00%");
+// 아직 아무도 안 샀으면 수익률 자리에 `아직` 을 적는다. `0.00%` 는 본전으로 읽힌다.
+const idleWallet = familySummary({
+  assets: 10_000_000, cost: 0, profit: 0, returnRate: null, memberCount: 2,
+});
+assert.equal(idleWallet?.pctText, "아직");
+assert.equal(idleWallet?.pctColor, "#9CA1B4");
+// 합계가 없으면 화면이 내 계좌 요약으로 되돌아갈 수 있게 `null` 을 낸다.
+assert.equal(familySummary(null), null);
+assert.equal(familySummary(undefined), null);
 
 console.log("archive view tests passed");

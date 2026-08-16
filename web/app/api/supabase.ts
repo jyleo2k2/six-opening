@@ -97,6 +97,25 @@ export async function insertRow<T>(table: string, row: Record<string, unknown>):
 }
 
 /**
+ * PostgREST 부분 수정. `deleteRows` 와 같은 이유로 `params` 에 필터가 반드시 있어야 한다 —
+ * 빈 필터로 부르면 테이블의 모든 행이 같은 값으로 덮인다.
+ */
+export async function updateRow<T>(
+  table: string,
+  params: Record<string, string>,
+  patch: Record<string, unknown>,
+): Promise<T | undefined> {
+  if (Object.keys(params).length === 0) throw new Error("updateRow 에는 필터가 필요합니다.");
+  const query = new URLSearchParams(params);
+  const response = await supabaseFetch(`rest/v1/${table}?${query}`, {
+    method: "PATCH",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify(patch),
+  });
+  return ((await response.json()) as T[])[0];
+}
+
+/**
  * PostgREST 삭제. `params` 는 반드시 대상을 좁히는 필터를 담아야 한다 —
  * 빈 필터로 부르면 테이블 전체가 지워진다.
  */

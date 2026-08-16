@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { FeedComment, FeedLike, FamilyTrade } from "./archive-feed";
+import type { FeedComment, FeedLike, FamilyTotal, FamilyTrade } from "./archive-feed";
 import type { FamilyRow, SeasonCards } from "./archive-profile-view";
 
 /**
@@ -16,7 +16,12 @@ import type { FamilyRow, SeasonCards } from "./archive-profile-view";
  */
 export type ArchiveData = {
   season: SeasonCards;
-  family: { viewer?: { id: number }; members: FamilyRow[]; trades: FamilyTrade[] } | null;
+  family: {
+    viewer?: { id: number };
+    members: FamilyRow[];
+    trades: FamilyTrade[];
+    total?: FamilyTotal;
+  } | null;
   comments: Record<string, FeedComment[]>;
   likes: Record<string, FeedLike>;
 };
@@ -112,6 +117,28 @@ export function useArchiveData() {
       });
   }, []);
 
+  /** 고친 댓글도 서버가 돌려준 본문으로 갈아 끼운다 — 게이트가 다듬은 문장이 원본이다. */
+  const editComment = useCallback(
+    (transactionId: string, commentId: string | number, body: string) => {
+      return fetch("/api/comments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: String(commentId), body }),
+      })
+        .then((response) => response.json().then((payload) => ({ response, payload })))
+        .then(({ response, payload }) => {
+          if (!response.ok) throw new Error(payload.error || "댓글을 고치지 못했습니다.");
+          setComments((current) => ({
+            ...current,
+            [transactionId]: (current[transactionId] ?? []).map((comment) =>
+              String(comment.id) === String(commentId) ? { ...comment, ...payload } : comment,
+            ),
+          }));
+        });
+    },
+    [],
+  );
+
   const deleteComment = useCallback((transactionId: string, commentId: string | number) => {
     return fetch(`/api/comments?id=${encodeURIComponent(String(commentId))}`, { method: "DELETE" })
       .then((response) => response.json().then((payload) => ({ response, payload })))
@@ -133,6 +160,7 @@ export function useArchiveData() {
     likes,
     toggleLike,
     sendComment,
+    editComment,
     deleteComment,
   };
 }
