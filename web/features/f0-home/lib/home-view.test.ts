@@ -37,6 +37,8 @@ assert.deepEqual(demo.holdings, [
 assert.equal(demo.goalCount, 35);
 assert.equal(demo.itemLine, "왁뿌볼 35개 살 수 있어요");
 assert.equal(demo.noHoldings, false);
+// 계좌를 못 읽은 동안은 현금을 모른다 — 총자산은 데모 보유 평가금액만이다(238,500+124,000+96,500).
+assert.equal(demo.totalAssetsText, "459,000원");
 
 // 실제 계좌 — 평가금액과 수익률은 현재가·평단가로 낸다.
 const held: AccountUser = {
@@ -70,6 +72,12 @@ assert.equal(view.goalCount, Math.floor(20000 / 12000)); // 1개
 assert.equal(view.rateText, "+4.8%");
 assert.equal(view.rateColor, "#D5327A");
 assert.equal(view.profitText, "+20,000원");
+// 총자산 = 현금(balance) + 보유 평가금액(240,000+180,000). 현금이 없으면(undefined) 0으로 본다.
+assert.equal(homeView(held, prices).totalAssetsText, "420,000원");
+assert.equal(
+  homeView({ ...held, balance: 1_000_000 }, prices).totalAssetsText,
+  "1,420,000원",
+);
 
 // 손실이면 부호와 색이 함께 바뀌고 목표 개수는 0 아래로 내려가지 않는다.
 const losing = homeView(held, { "005930": 50000, "259960": 100000 });
