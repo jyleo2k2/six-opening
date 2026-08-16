@@ -119,6 +119,14 @@ const bigList = [{ ...rank[0], price: 123_456_789 }];
 const bigPrice = buildExploreCard(bigList, 0, universe, 0, false);
 assert.match(bigPrice.priceStyle, /font-size:36px/u);
 
+// 로고 — 가로만 84px 로 잡고 세로는 원본 비율에 맡긴다. 정사각으로 못 박으면 가로형
+// 원본(에이피알·LG·S-Oil …)이 세로로 늘어난다.
+assert.equal(up.hasLogo, false);
+assert.doesNotMatch(up.artStyle, /url\(/u);
+const withLogo = buildExploreCard(rank, 0, { ...universe, logos: { "005930": "assets/logos/005930.png" } }, 0, false);
+assert.equal(withLogo.hasLogo, true);
+assert.match(withLogo.artStyle, /url\(\/ui\/assets\/logos\/005930\.png\) center\/84px auto no-repeat,/u);
+
 // 입체 스택 — 중앙에서 멀어진 칸수가 눕는 양을, 방향이 회전축을 정한다.
 assert.deepEqual(stackOffset(4, 4), { signed: 0, steps: 0 });
 assert.deepEqual(stackOffset(6, 4), { signed: 2, steps: 2 });

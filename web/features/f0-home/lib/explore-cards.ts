@@ -366,9 +366,13 @@ export function buildExploreCard(
       "-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 116px,#000 150px);" +
       "mask-image:linear-gradient(90deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 116px,#000 150px)",
     // 로고 뒤에만 업종색 — 카드 전체가 아니라 이 자리에서만 색이 돈다
+    // 로고 크기는 **가로 84px, 세로 auto**다. `84px 84px` 로 두면 정사각이 아닌 원본
+    // (에이피알 4:3, LG 3:2, S-Oil 3:1 …)이 세로로 늘어난다. 51개 로고가 모두 가로형
+    // 이거나 정사각이므로 가로를 84px 로 맞추면 정사각 로고는 지금과 똑같이 84x84 로
+    // 남고 가로형만 원본 비율을 되찾는다.
     artStyle:
       "position:absolute;left:28px;top:24px;width:88px;height:88px;display:flex;align-items:center;justify-content:center;background:" +
-      (logo ? "url(" + logo + ") center/84px 84px no-repeat," : "") +
+      (logo ? "url(" + logo + ") center/84px auto no-repeat," : "") +
       "radial-gradient(circle at 50% 52%," + SA + "2E 0%," + SA + "14 46%," + SA + "00 72%)",
     // 업종 태그 — 카드 우상단
     catStyle:
