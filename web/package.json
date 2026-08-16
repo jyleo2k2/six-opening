@@ -6,7 +6,8 @@
     "build": "next build",
     "start": "next start",
     "seed:candles": "tsx scripts/seed-candles.ts",
-    "test": "tsx --test \"app/**/*.test.ts\" \"features/**/*.test.ts\" \"shared/**/*.test.ts\""
+    "seed:news:export": "tsx scripts/export-news-seed.ts",
+    "test": "tsx --test \"app/**/*.test.ts\" \"features/**/*.test.ts\" \"scripts/**/*.test.ts\" \"shared/**/*.test.ts\""
   },
   "dependencies": {
     "dotenv": "^17.4.2",
