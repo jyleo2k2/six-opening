@@ -78,16 +78,15 @@ assert.equal(hasManySectors(exploreList(universe, live, "all", "", [])), true);
 assert.equal(hasManySectors(exploreList(universe, live, "game", "", [])), false);
 assert.equal(hasManySectors([]), false);
 
-// 칩 줄 — 고른 섹터가 전체 바로 뒤로 올라오고 원래 자리에서는 빠진다. 목록 위 제목을
-// 걷어냈으므로 이 자리가 "지금 무엇을 보고 있는지"를 말하는 유일한 곳이다.
-assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.id), [
-  "all",
-  "semi",
-  "watch",
-  "game",
-]);
-// 섹터가 아닌 필터에는 끌어올릴 칩이 없다.
-assert.deepEqual(sectorChips(universe, "all").map((chip) => chip.id), ["all", "watch", "game", "semi"]);
+// 칩 줄 — **무엇을 골라도 순서가 같다.** 원본 프로토타입처럼 고른 칩은 자리를 옮기지 않고
+// 점등만 한다. 끌어올리면 누르는 순간 그 칩이 손가락 밑에서 튀고 옆 칩들이 밀린다.
+const ORDER = ["all", "watch", "game", "semi"];
+assert.deepEqual(sectorChips(universe, "all").map((chip) => chip.id), ORDER);
+assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.id), ORDER);
+assert.deepEqual(sectorChips(universe, "game").map((chip) => chip.id), ORDER);
+assert.deepEqual(sectorChips(universe, "watch").map((chip) => chip.id), ORDER);
+// 고른 칩 하나만 켜진다.
+assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.active), [false, false, false, true]);
 
 // 고른 칩은 채워진 배경 위 흰 글자다. `background` 선언이 깨져 있으면 흰 글자만 남아 안 보인다.
 const picked = sectorChips(universe, "semi").find((chip) => chip.id === "semi")!;

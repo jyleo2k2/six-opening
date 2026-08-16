@@ -145,13 +145,21 @@ export function exploreList(
  * 고른 칩이 화면 밖에 있으면 아무 단서도 남지 않는다. 자리를 고정하면 스크롤하지 않아도
  * 항상 보인다.
  */
+/**
+ * 업종 칩 줄. **순서는 늘 같다** — 고른 칩이 자리를 옮기지 않고 점등만 한다.
+ *
+ * 예전에는 고른 업종을 `전체` 바로 뒤로 끌어올렸다. 그래서 칩을 누르는 순간 그 칩이 손가락
+ * 밑에서 왼쪽으로 튀고, 옆 칩들이 밀려 다음에 누르려던 칩이 딴 자리에 가 있었다. 원본
+ * 프로토타입(`sectorChips`)은 `defs` 를 고정 순서로 만들고 색·굵기만 바꾼다.
+ *
+ * 원본의 `오늘 많이 오른 순` 칩은 여기 없다 — 정렬이 필터 줄에서 빠져나와 헤더 메뉴로
+ * 갔기 때문이다(PR #263). 그 결정은 그대로 두고 자리만 원본처럼 고정한다.
+ */
 export function sectorChips(universe: Universe, filter: ExploreFilter) {
-  const picked = universe.sectors.find((sector) => sector.id === filter);
   return [
     { id: "all", name: "전체", emoji: "" },
-    ...(picked ? [picked] : []),
     { id: "watch", name: "관심 기업", emoji: "" },
-    ...universe.sectors.filter((sector) => sector.id !== filter),
+    ...universe.sectors,
   ].map((sector) => ({
     id: sector.id,
     name: sector.name,
@@ -163,8 +171,8 @@ export function sectorChips(universe: Universe, filter: ExploreFilter) {
       // 고른 칩은 분홍으로 채우고 흰 글자를 얹는다. `background` 선언 하나에 box-shadow 값이
       // 섞여 들어가 있어서 선언 전체가 무효였고, 그래서 **흰 글자만 남아 안 보였다.**
       (sector.id === filter
-        ? "color:#FFFFFF;background:#F5327F;box-shadow:0 2px 8px rgba(245,50,127,0.35)," +
-          "0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)"
+        ? "color:#FFFFFF;background:#F5327F;" +
+          "box-shadow:0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)"
         : "color:#5C6280;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)"),
   }));
 }
