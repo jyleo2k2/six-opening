@@ -15,8 +15,9 @@ export const DEFENSE_EDUCATION: readonly DefenseEducation[] = [
     sources: [{ title: "한화에어로스페이스 2024년 실적 발표", url: "https://m.hanwhaaerospace.com/kor/ir/financial-info/finance02.do", checkedAt }], status: "reviewed",
   },
   {
-    stockId: "KRX:079550", companySummary: "LIG넥스원은 국방·항공·전자 분야의 시스템과 장비를 개발·제조하는 회사예요.", businessModel: "국방과 항공 분야에 필요한 전자·통신·감시 장비와 시스템을 개발하고 공급해 대가를 받아요.", industryRole: "여러 장비가 함께 작동하도록 돕는 국방 전자·통신 시스템을 개발·제조하는 회사예요.",
-    elementaryExplanation: "LIG넥스원은 나라를 지키는 데 쓰이는 여러 전자 장비가 함께 잘 움직이도록 만드는 일을 해요.", middleSchoolExplanation: "LIG넥스원은 통신·감시·전자 기술을 바탕으로 국방과 항공 분야의 시스템을 개발하고 제조해요.",
+    // 회사 이름 표기는 화면과 같은 "LIG D&A"로 맞춘다. 아래 출처 제목은 실제 문서 이름이라 옛 이름 그대로 둔다.
+    stockId: "KRX:079550", companySummary: "LIG D&A는 국방·항공·전자 분야의 시스템과 장비를 개발·제조하는 회사예요.", businessModel: "국방과 항공 분야에 필요한 전자·통신·감시 장비와 시스템을 개발하고 공급해 대가를 받아요.", industryRole: "여러 장비가 함께 작동하도록 돕는 국방 전자·통신 시스템을 개발·제조하는 회사예요.",
+    elementaryExplanation: "LIG D&A는 나라를 지키는 데 쓰이는 여러 전자 장비가 함께 잘 움직이도록 만드는 일을 해요.", middleSchoolExplanation: "LIG D&A는 통신·감시·전자 기술을 바탕으로 국방과 항공 분야의 시스템을 개발하고 제조해요.",
     financialSummary: "2024년 연결 기준 매출은 3조 2,773억원, 영업이익은 2,309억원이에요.", financialSnapshot: { period: "2024", revenueKrwMillion: 3277300, operatingProfitKrwMillion: 230900 },
     sources: [{ title: "2024년 LIG넥스원 영업보고서", url: "https://www.lignex1.co.kr/ir/salesReportView.do?bbs_no=7082", checkedAt }], status: "reviewed",
   },

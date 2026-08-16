@@ -54,6 +54,34 @@ assert.deepEqual(exploreList(universe, live, "game", "엔프", []).map((s) => s.
 // 순서가 뒤집히면 붙어 있어도 찾지 않는다.
 assert.deepEqual(exploreList(universe, live, "game", "프엔", []), []);
 
+// 이름을 줄여 표시하는 종목(079550 = LIG D&A)은 풀네임·영문·옛 이름 어느 쪽으로 쳐도 찾아야 한다.
+// 화면에 뜨는 이름 하나만 보고 검색하면 아이는 아는 이름(풀네임)으로 못 찾는다.
+const defenseUniverse: Universe = {
+  sectors: [{ id: "defense", name: "방산", emoji: "🛡️", accent: "#4E5C78" }],
+  stocks: [
+    { code: "079550", name: "LIG D&A", sector: "defense", desc: "미사일 같은 걸 만들어요", price: 815000, change: -2.63 },
+  ],
+  logos: {},
+};
+const noLive = { quotes: {}, sparks: {} };
+for (const query of [
+  "LIG디펜스앤에어로스페이스",
+  "LIG 디펜스앤에어로스페이스",
+  "LIG Defense&Aerospace",
+  "LIG D&A",
+  "lig d&a",
+  "디펜스",
+  "LIG넥스원",
+  // 이름에 한글이 없어도 별칭 초성으로 걸린다 — 디펜스 = ㄷㅍㅅ.
+  "ㄷㅍㅅ",
+]) {
+  assert.deepEqual(
+    exploreList(defenseUniverse, noLive, "all", query, []).map((s) => s.code),
+    ["079550"],
+    `"${query}" 검색이 079550 을 찾지 못해`,
+  );
+}
+
 // 업종별(기본) — 유니버스 업종 차례로 묶인다. 같은 업종 안에서는 원래 차례가 남는다.
 assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), [
   "259960",

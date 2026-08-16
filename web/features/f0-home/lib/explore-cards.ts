@@ -55,7 +55,10 @@ function isOrderedSubsequence(query: string, text: string): boolean {
  * "ㅅㅅㅈㅈ"로 삼성전자를 찾는 식이다.
  */
 function matchesQuery(name: string, code: string, query: string): boolean {
-  if (isChosungQuery(query)) return chosungString(name).includes(query);
+  // 초성도 별칭까지 훑는다. 이름이 "LIG D&A" 처럼 한글이 없으면 이름만 봐서는 초성으로
+  // 영영 못 찾는데, 아이가 아는 이름은 풀네임("디펜스앤에어로스페이스") 쪽이다.
+  if (isChosungQuery(query))
+    return [name, ...searchAliasesFor(code)].some((text) => chosungString(text).includes(query));
   if (isOrderedSubsequence(query, name.toLowerCase())) return true;
   return searchAliasesFor(code).some((alias) => alias.toLowerCase().includes(query));
 }
