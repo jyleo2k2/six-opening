@@ -12,6 +12,7 @@ import {
   emptyState,
   exploreList,
   hasManySectors,
+  RANK_CHIP,
   sectorChips,
   SORT_LABEL,
   SORT_OPTIONS,
@@ -204,21 +205,28 @@ export function ExploreScreen({
   if (!universe || !wallet) return <PhoneFrame />;
 
   const list = exploreList(universe, { quotes, sparks }, filter, query, wallet.watchlist, sort);
-  const chips = sectorChips(universe, filter);
+  const chips = sectorChips(universe, filter, sort);
   // 업종 구분 헤더는 **업종별로 줄을 세웠을 때만** 뜻이 있다. 예전에는 "전체 보기면 무조건"
   // 이었는데, 그러면 전체를 다른 기준으로 정렬하는 순간 같은 업종이 흩어져 헤더가 곳곳에 선다.
   const showGroups = sort === "sector" && hasManySectors(list);
   const empty = emptyState(query);
   const activeIndex = Math.min(cardIndex, Math.max(0, list.length - 1));
 
-  const pickChip = (id: string) => {
-    setChipsOpen(false);
-    onLeave(explorePath(id));
-  };
   const pickSort = (next: ExploreSort) => {
     setSortOpen(false);
     setSort(next);
     rememberExploreSort(next);
+  };
+  const pickChip = (id: string) => {
+    setChipsOpen(false);
+    // "오늘 많이 오른 순"만 주소를 바꾸지 않는다 — 무엇을 보는지(필터)가 아니라 줄 세우는
+    // 기준을 바꾸는 칩이라, 헤더 메뉴에서 `많이 오른 순`을 고른 것과 같은 일을 한다.
+    // 여기서 `/explore/rank` 로 보내면 골라 둔 업종이 전체로 풀려 정렬과 필터를 함께 못 갖는다.
+    if (id === RANK_CHIP) {
+      pickSort("change");
+      return;
+    }
+    onLeave(explorePath(id));
   };
   const toggleSearch = () => {
     setSearchOpen((open) => !open);
