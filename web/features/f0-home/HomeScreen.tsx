@@ -96,15 +96,24 @@ const GOAL_IMG = styleFromCss(
 );
 /** 남는 세로 공간은 여기가 다 먹는다 — 그림과 카드가 서로를 밀지 않게 하는 자리다. */
 const SPACER = styleFromCss("flex:1;min-height:0");
-/**
- * 카드 **전체**가 위로 미는 손잡이다. 머리줄만 손잡이로 두면 잡을 곳이 15px 남짓이라
- * 목록 위에 손가락을 올린 사람은 아무리 밀어도 열리지 않는다. `touch-action:pan-x` 는
- * 세로 손짓을 브라우저에 뺏기지 않으려고 둔다.
- */
 const HOLD_CARD = styleFromCss(
-  "flex:none;background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);" +
-    "touch-action:pan-x",
+  "flex:none;background:#fff;border-radius:26px;padding:10px 18px 18px;box-shadow:0 12px 28px rgba(35,25,80,0.10)",
 );
+/**
+ * 카드를 위로 미는 손잡이. 시트가 쓰는 `SHEET_GRIP` 과 같은 모양이라 "이 막대를 밀면
+ * 그게 올라온다" 가 눌러 보기 전에 읽힌다.
+ *
+ * 잡는 자리는 5px 막대가 아니라 그 위아래 여백까지다 — 막대만 손잡이면 손가락이 거의
+ * 닿지 않는다. 손잡이를 카드 전체로 넓히지 않는 이유는 포인터를 잡으면 그 안의 click 이
+ * 손잡이로 재타깃되기 때문이다: 카드가 손잡이면 종목 줄과 `전체보기` 가 죽는다.
+ *
+ * `touch-action:none` 은 세로 손짓을 브라우저에 뺏기지 않으려고 둔다. 뺏기면 끌던 중에
+ * `pointercancel` 이 와서 손짓이 통째로 사라진다.
+ */
+const HOLD_GRIP_ZONE = styleFromCss(
+  "display:flex;align-items:center;justify-content:center;padding:2px 0 12px;cursor:grab;touch-action:none",
+);
+const HOLD_GRIP = styleFromCss("width:44px;height:5px;border-radius:999px;background:#DCD8EC");
 const HOLD_HEAD = styleFromCss(
   "display:flex;align-items:center;justify-content:space-between;gap:10px",
 );
@@ -164,8 +173,8 @@ const pctStyle = (holding: HomeHolding, size: number) =>
  * 한 줄을 누르면 그 종목 상세로 간다. 코드를 못 찾은 줄(유니버스에 없는 데모 보유)은
  * 누를 수 없다 — 갈 곳 없는 손짓에 손가락 모양만 뜨는 것을 막는다.
  *
- * 누른 사건은 위로 올리지 않는다. 이 줄이 앉은 카드는 시트를 여는 손잡이라, 줄을 누른
- * 손가락까지 그 길로 흘러가면 상세와 시트가 함께 열릴 여지가 남는다.
+ * 누른 사건은 위로 올리지 않는다. 이 줄은 시트 안에도 그대로 서는데, 거기서 새는 손짓은
+ * 시트 배경까지 닿아 상세로 넘어가면서 시트가 함께 닫힌다.
  */
 function HoldingRow({
   holding,
@@ -234,14 +243,28 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
     if (view.holdings.length > 0) sheet.openSheet();
   };
 
+  /**
+   * 포인터를 **잡아 둔다.** 잡지 않으면 손가락이 손잡이 위로 벗어나는 순간 `pointerup` 이
+   * 그 자리에 있는 다른 요소로 가고, 손잡이는 손을 뗀 사실을 영영 모른다 — 위로 미는
+   * 손짓은 정의상 손잡이를 벗어나므로 이 배선 없이는 한 번도 열리지 않는다.
+   */
   const grabCard = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
     pull.current = { pointerId: event.pointerId, y: event.clientY, at: event.timeStamp };
+  };
+
+  /** 끄는 동안 글자가 선택되거나 브라우저가 손짓을 가져가지 않게 막는다. */
+  const dragCard = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (pull.current?.pointerId === event.pointerId) event.preventDefault();
   };
 
   const releaseCard = (event: ReactPointerEvent<HTMLDivElement>) => {
     const start = pull.current;
     pull.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
     if (!start || start.pointerId !== event.pointerId) return;
     const opened = shouldOpenSheetByPull(
       { startY: start.y, endY: event.clientY, elapsedMs: event.timeStamp - start.at },
@@ -333,14 +356,20 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
 
           <div style={SPACER} />
 
-          <div
-            onPointerCancel={() => {
-              pull.current = null;
-            }}
-            onPointerDown={grabCard}
-            onPointerUp={releaseCard}
-            style={HOLD_CARD}
-          >
+          <div style={HOLD_CARD}>
+            {view.holdings.length > 0 && (
+              <div
+                onPointerCancel={() => {
+                  pull.current = null;
+                }}
+                onPointerDown={grabCard}
+                onPointerMove={dragCard}
+                onPointerUp={releaseCard}
+                style={HOLD_GRIP_ZONE}
+              >
+                <div style={HOLD_GRIP} />
+              </div>
+            )}
             <div style={HOLD_HEAD}>
               <div style={HOLD_TITLE}>내 보유 종목</div>
               {view.holdings.length > 0 && (
