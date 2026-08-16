@@ -8,6 +8,7 @@ import {
   SubScreenHeader,
 } from "./lib/stock-chrome";
 import { styleFromCss } from "./lib/css-style";
+import { buildTradeLegend, type LegendTrade } from "./lib/chart-trade-legend";
 
 const CHART_READY_MESSAGE = "kiwoom:chart-ready";
 const CHART_OPTIONS_MESSAGE = "kiwoom:chart-options";
@@ -56,6 +57,29 @@ const CANDLE_TIP_ARROW = styleFromCss(
   "position:absolute;right:52px;top:-5px;width:12px;height:12px;transform:rotate(45deg);border-radius:3px;background:#FBE4F0;pointer-events:none",
 );
 
+/** 체결 범례 — 차트 아래 얇은 선을 긋고 한 줄씩 쌓는다. 체결이 없으면 아예 그리지 않는다. */
+const LEGEND = styleFromCss(
+  "display:flex;flex-direction:column;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid #F0EEF6",
+);
+const LEGEND_ROW = styleFromCss("display:flex;align-items:center;gap:7px");
+/**
+ * 점은 차트 위 뱃지를 그대로 축소한 모양이다. 색도 마커와 같은 토큰을 쓴다 —
+ * 범례가 있는 이유가 "이 색 핀이 이 사람"이라서 색이 갈리면 안 된다. 글자색도 같이
+ * 토큰(`--color-trade-ink`)에서 받는다 — 파스텔 바탕에 흰 글씨는 읽히지 않는다.
+ */
+const LEGEND_DOT = (member: "child" | "parent") =>
+  styleFromCss(
+    "flex:none;display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:8px;" +
+      "font-size:12px;font-weight:800;color:var(--color-trade-ink);background:" +
+      (member === "child" ? "var(--color-trade-child)" : "var(--color-trade-parent)"),
+  );
+const LEGEND_TEXT = styleFromCss(
+  "display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:#5C6280;white-space:nowrap",
+);
+const LEGEND_WHO = styleFromCss("font-weight:600;color:#3A3F5C");
+const LEGEND_BAR = styleFromCss("color:#D6D3E4");
+const LEGEND_PRICE = styleFromCss("font-variant-numeric:tabular-nums");
+
 type ChartPeriod = "minute" | "daily" | "weekly";
 type ChartType = "line" | "candlestick";
 const TF_OPTIONS: { id: ChartPeriod; label: string }[] = [
@@ -99,6 +123,15 @@ export function ChartScreen({
   const [tfMenuOpen, setTfMenuOpen] = useState(false);
   // 캔들 설명은 캔들차트를 켰을 때만 말풍선으로 뜬다. 닫으면 다시 켤 때까지 숨는다.
   const [candleTipClosed, setCandleTipClosed] = useState(false);
+  /**
+   * 차트 아래 범례가 읽는 이 종목의 가족 체결.
+   *
+   * 차트 위 B/S 핀은 iframe 안의 `TradingViewChart` 가 같은 API 로 따로 그린다.
+   * iframe 이 찍은 마커를 받아 오지 않는 이유는 가드다 — `kiwoom:chart-options` 가
+   * 남은 유일한 `postMessage` 이고 새 메시지 계약을 늘리지 않는다. 두 곳이 같은
+   * `GET /api/trades` 를 보므로 값은 어긋나지 않는다 (F11 SPEC §6.1).
+   */
+  const [trades, setTrades] = useState<LegendTrade[]>([]);
   const optionsRef = useRef({ period, chartType });
   optionsRef.current = { period, chartType };
 
@@ -125,6 +158,23 @@ export function ChartScreen({
     return () => window.removeEventListener("message", receiveChartReady);
   }, []);
 
+  // 로그인 전(401)이나 조회 실패는 빈 목록으로 둔다. 범례 없는 차트는 정상이다.
+  useEffect(() => {
+    let cancelled = false;
+    setTrades([]);
+    fetch(`/api/trades?symbol=${encodeURIComponent(code)}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { trades?: LegendTrade[] } | null) => {
+        if (!cancelled && data) setTrades(data.trades ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setTrades([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [code]);
+
   const pickPeriod = (next: ChartPeriod) => {
     setPeriod(next);
     setTfMenuOpen(false);
@@ -135,6 +185,7 @@ export function ChartScreen({
     postOptions({ chartType: next });
   };
   const tfLabel = TF_OPTIONS.find((option) => option.id === period)?.label ?? "일";
+  const legend = buildTradeLegend(trades);
 
   return (
     <div style={SUB_PAGE}>
@@ -232,6 +283,30 @@ export function ChartScreen({
             title={`${name} TradingView 차트`}
             width={330}
           />
+          {/*
+            차트 위 B/S 핀이 각각 누구의 언제·얼마짜리 매매인지 풀어 쓴다. 핀만으로는
+            체결가를 눈금에서 읽어야 하고, 같은 봉에 두 사람이 사면 누구 것인지도 못 가른다.
+            체결이 없으면 통째로 그리지 않는다 — 빈 줄과 얇은 선만 남으면 기록이 있는데
+            못 불러온 것처럼 보인다.
+          */}
+          {legend.length > 0 && (
+            <div style={LEGEND}>
+              {legend.map((row) => (
+                <div key={row.id} style={LEGEND_ROW}>
+                  <div style={LEGEND_DOT(row.member)}>{row.label}</div>
+                  <div style={LEGEND_TEXT}>
+                    <span style={LEGEND_WHO}>{row.who}</span>
+                    <span style={LEGEND_BAR}>|</span>
+                    <span>{row.date}</span>
+                    <span style={LEGEND_BAR}>|</span>
+                    <span style={LEGEND_PRICE}>{row.price}</span>
+                    <span style={LEGEND_BAR}>|</span>
+                    <span>{row.side}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <StockFooter locked={locked} onLeave={onLeave} onStartBuy={onStartBuy} />

@@ -49,26 +49,35 @@ const MARKER_PERIODS: readonly PrototypeChartPeriod[] = ["minute", "daily"];
 const BADGE = 22;
 
 /**
- * 체결가와 뱃지 사이 간격.
+ * 체결가와 뱃지 사이 간격. 꼬리 길이와 같아서 **꼬리 꼭짓점이 체결가에 정확히 닿는다**.
  *
- * 7px 일 때는 뱃지가 봉에 거의 붙어 캔들 몸통·꼬리를 덮었다. 100px 은 페인 높이(238)의
- * 절반에 가까워 대부분의 마커가 `clampBadgeTop` 에 걸려 천장·바닥에 눌러앉았다 —
- * 간격이 아니라 화면 끝이 위치를 정하는 꼴이었다. 50px 은 뱃지까지 72px 이라 웬만한
- * 체결이 잘리지 않고 이 간격을 그대로 받는다.
+ * 예전에는 50px 이었다. 뱃지가 봉을 덮지 않게 띄운 값인데, 그러면 뱃지가 체결가에서
+ * 5만원 넘게 떨어진 허공에 뜬다 — 시안(`chartTradeLegend` 가 붙은 차트 화면)처럼
+ * "이 가격에 샀다"를 차트에서 읽을 수가 없고, 사용자는 뱃지가 가리키는 눈금을 그대로
+ * 체결가로 오독한다. 실제로 235,000원에 산 크래프톤 뱃지가 258,000원 근처에 떴다.
+ *
+ * 뱃지가 봉을 가리는 문제는 간격이 아니라 **점선 안내선**(아래 `GUIDE`)이 푼다. 뱃지는
+ * 봉 바로 위·아래에 붙고, 어느 봉·어느 가격인지는 점선이 끝까지 이어 준다.
  */
-const GAP = 50;
+const GAP = 10;
 
 /**
- * 꼬리 높이. 뱃지 변에서 체결가 쪽으로 뻗는다.
+ * 꼬리 높이. 뱃지 변에서 체결가 쪽으로 뻗고, `GAP` 과 같으므로 꼭짓점이 체결가에 닿는다.
  *
- * `GAP` 과 갈라져 있다. 예전에는 하나였고 꼬리가 뱃지에서 체결가까지 전 구간을 이었는데,
- * 간격을 50px 로 벌리자 꼬리가 그만큼 길어져 화면을 갈랐다. 꼬리를 짧게 끊으면 어느 봉의
- * 체결인지는 **뱃지의 x** 가 그대로 답하므로 읽는 데 지장이 없다.
- *
- * 대신 꼭짓점이 체결가에 정확히 닿지는 않는다. 꼬리는 이제 정확한 y 를 짚는 바늘이 아니라
- * 어느 쪽 봉을 가리키는지만 알려주는 방향 표시다.
+ * 둘을 같은 값으로 묶어 두면 "간격을 벌렸더니 꼬리가 허공을 가리킨다"가 구조적으로
+ * 생기지 않는다. 꼬리는 다시 정확한 y 를 짚는 바늘이다.
  */
 const TAIL = 10;
+
+/**
+ * 체결 지점에서 시간축까지 내리는 점선. 원본 프로토타입의 `chartTrades` 안내선과 같다.
+ *
+ * 뱃지만으로는 어느 봉인지 눈으로 훑어 내려가야 하고, 뱃지 폭(22px)이 봉 간격보다 넓어
+ * 옆 봉을 가리키는 것처럼 보이기도 한다. 점선이 그 x 를 끝까지 이어 주면 뱃지를 봉에
+ * 바짝 붙여도 어느 날 체결인지 헷갈리지 않는다.
+ */
+const GUIDE_DASH = "2 3";
+const GUIDE_OPACITY = 0.4;
 
 /**
  * 뱃지를 플롯 영역 안에 가둔다.
@@ -559,6 +568,25 @@ export function TradingViewChart({ symbol, period, chartType }: {
             // 뱃지끼리는 여전히 겹치더라도 꼬리는 항상 보인다.
             return (
               <>
+                {/*
+                  안내선을 가장 먼저 깔아 뱃지·꼬리가 그 위에 온다. 체결가(`marker.y`)에서
+                  시간축까지 곧게 내려 어느 봉의 체결인지 못 박는다. 체결가가 지금 보이는
+                  봉의 가격 범위를 벗어나 뱃지가 끝에 눌러앉은 경우에도, 선은 뱃지가 아니라
+                  **체결가**에서 시작해야 거짓말을 하지 않으므로 페인 안으로만 자른다.
+                */}
+                {laid.map(({ marker, fill }) => (
+                  <line
+                    key={`${marker.id}-guide`}
+                    opacity={GUIDE_OPACITY}
+                    stroke={fill}
+                    strokeDasharray={GUIDE_DASH}
+                    strokeWidth={1}
+                    x1={marker.x}
+                    x2={marker.x}
+                    y1={Math.min(Math.max(marker.y, 0), pane.height)}
+                    y2={pane.height}
+                  />
+                ))}
                 {laid.map(({ marker, fill, badgeY }) => (
                   <g key={marker.id}>
                     <title>{marker.label}</title>
@@ -574,8 +602,8 @@ export function TradingViewChart({ symbol, period, chartType }: {
                       x={marker.x}
                       y={badgeY + BADGE / 2}
                       fontSize={12}
-                      fontWeight={700}
-                      fill="#fff"
+                      fontWeight={800}
+                      fill="var(--color-trade-ink)"
                       textAnchor="middle"
                       dominantBaseline="central"
                     >
