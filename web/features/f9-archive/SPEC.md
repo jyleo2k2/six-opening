@@ -30,7 +30,7 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 | 수익률 계산 | `web/features/f0-home/lib/archive-feed.ts` | 달리기 트랙·피드 카드·머리 카드 값 |
 | 서버 조회·쓰기 | `web/features/f0-home/lib/use-archive-data.ts` | 성향·주차 카드·가족·반응 조회와 좋아요·댓글 쓰기 |
 | **계산(정본, 유일)** | `web/shared/engine/behavior-profile.ts` | **능력치 다섯 축, 캐릭터·레벨, 정확 채점** (0~10, §6). `ArchiveScreen` 연결은 §6.11 |
-| 계산(구버전) | `web/shared/engine/archive-profile.js` | **`ArchiveScreen`는 더 이상 쓰지 않는다**(§6.11). `app.html` iframe 사본과 이 파일 자체 테스트에만 남아 있다 (0~100, §3) |
+| 계산(구버전) | `web/shared/engine/archive-profile.js` | **import 하는 실행 코드가 없다**(§3). iframe 사본이 사라져 자기 테스트만 남은 삭제 후보 (0~100) |
 | 레일 드래그 | 브라우저 기본 가로 스크롤 + `scroll-snap` | 카드 모아보기 레일 |
 | 종가 조회 | `lib/use-archive-data.ts` | 사고판 종목 일봉을 한 번에 받아 온다 |
 | 종가 API | `web/app/api/quote/daily-closes/route.ts` | 보관 일봉에서 `{종목: [{date, close}]}` |
@@ -48,9 +48,11 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 
 `web/AGENTS.md`는 수치·스코어링 계산을 `shared/engine`에서만 하도록 정한다. 화면은 결과를 표시만 한다.
 
-> **§3~§5 는 `ArchiveScreen`가 더 이상 쓰지 않는 구버전이다.** 유일한 정본은 §6
-> 신버전(`behavior-profile.ts`)이고 연결은 §6.11 이다. 이 파일이 남아 있는 이유는
-> `app.html` iframe 이 조립 때 복사본을 받기 때문이며(§4), iframe 을 철거할 때 함께 지운다.
+> **§3~§5 는 이제 아무도 쓰지 않는 구버전이다.** 유일한 정본은 §6
+> 신버전(`behavior-profile.ts`)이고 연결은 §6.11 이다. 이 파일을 살려 두던 이유였던
+> `app.html` iframe 사본은 2026-08-16 iframe 철거(PR #296)로 사라졌고, 지금 이 파일을
+> import 하는 실행 코드는 **하나도 없다**(`archive-profile.test.ts` 자기 테스트만 남았다).
+> 삭제할 때 그 테스트도 같은 변경에서 지운다. 되살려 두 벌로 만들지 않는다.
 >
 > **2026-08-16 삭제:** §3.2 의 행동 신호 캐릭터 판정(`resolveCharacterFromBehaviorSignals`,
 > `GET /api/profile/behavior`)과 로컬 `records` 폴백(`localScores`)을 화면에서 끊었다.
@@ -155,20 +157,12 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
   오버라이드(**기간 제한 없이 전체 누적**)에도 함께 영향을 줄 수 있다는 점은 그대로다 — 별개
   경로이지만 같은 원본 테이블을 공유하기 때문이다.
 
-## 4. 엔진 복사본과 드리프트 검출
+## 4. 엔진 복사본 — 폐기됨 [2026-08-16]
 
-`app.html`은 정적 파일이라 TypeScript 모듈을 import 할 수 없다. 그래서 엔진 원본을 **복사본으로 넣는다.**
-
-```text
-shared/engine/archive-profile.js   ← 원본. 테스트도 이 파일을 본다
-   │  ui-build.mjs 가 export 를 떼고 CRLF 로 바꿔
-   ↓
-app.html 안 `// >>> archive-engine` ~ `// <<< archive-engine`
-```
-
-- 조립할 때마다 원본에서 **다시 만들어 넣는다.** 복사본을 직접 고치면 다음 build 에서 사라진다.
-- 원본만 고치고 `build` 를 안 돌리면 `node scripts/ui-build.mjs verify` 가 바이트 차이로 잡아낸다.
-- 계산을 바꾸는 순서: 원본 수정 → 테스트 → `build` → `verify` → 화면 확인.
+정적 `app.html`이 TypeScript 를 import 할 수 없어 `ui-build.mjs`가 `archive-profile.js`를
+`// >>> archive-engine` 블록으로 복사해 넣던 구조였다. **iframe 철거(PR #296)로 조립기·복사본·
+`verify` 가 모두 사라졌다.** 엔진은 이제 그냥 import 하며, 계산을 바꾸는 순서는
+`behavior-profile.ts` 수정 → `npm test` → 화면 확인이다. 복사본 파이프라인을 다시 만들지 않는다.
 
 ## 5. `ArchiveScreen` 산출 계약
 
@@ -363,7 +357,7 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 ## 7. 현재 알려진 불일치·미완료
 
 - 종가 배치가 밀리면 최근 거래가 오래 `pending` 에 남아 정확이 기본값 50에 머문다.
-- `WeekCard.scaleMax`·`Profile.scaleMax`는 이제 항상 10이다. 필드를 지우면 `Radar`·카드 시트 렌더까지 손대야 해서 이번에는 남겼다. `app.html` iframe 을 철거해 0~100 스케일이 완전히 사라질 때 함께 정리한다.
+- `WeekCard.scaleMax`·`Profile.scaleMax`는 이제 항상 10이다. 필드를 지우면 `Radar`·카드 시트 렌더까지 손대야 해서 남겨 뒀다. iframe 이 철거돼 0~100 스케일을 만드는 경로가 사라졌으므로 `archive-profile.js` 를 지울 때 이 필드도 함께 정리한다.
 - 수익률 탭에서 `보유 종목 · 섹터별` 레일을 뺐다. 그 레일에서만 열리던 **섹터 상세 모달(`secModal*`)과 `retSectors` 계산이 화면에서 도달 불가**로 남아 있다. 되살리거나 지우는 판단이 필요하다.
 - 가족 비교의 아빠(`dad`)는 이제 DB 계정이 있다 — `profiles.id=3`, `login_id='dad'`, `guardian_role='dad'`, `family_tag='찬영가족'`. `GET /api/family` 응답에 포함되므로 **로그인 상태 가족 비교에는 아빠가 나온다.** `ArchiveScreen`의 `MEMBERS` 상수는 아직 `dad.acc:null`이지만 이는 비로그인·응답 전 폴백에서만 쓰인다. 그 폴백과 "아빠는 계정이 없다"고 적힌 주변 주석은 정리 대상이다.
 - 부모 단독 화면으로 전환하는 전역 계정 스위처는 **만들지 않기로 확정됐다.** 계정 전환은 로그아웃 후 재로그인이다 (`docs/기능명세.md` §4.2).
@@ -376,11 +370,10 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 - 능력치를 실력 등급으로 표현하지 않는다.
 - 수익률에 예측이나 해석을 붙이지 않는다.
 - 계산을 컴포넌트에 두지 않는다. 산식은 `shared/engine`, 표시값은 `f0-home/lib` 의 순수 함수에 둔다.
-- 엔진(`shared/engine/archive-profile.js`)은 `app.html` 에도 복사되므로 TypeScript 문법과 `import` 를 쓰지 않는다.
+- 사문화된 구버전 엔진(`shared/engine/archive-profile.js`)에 새 산식을 붙이지 않는다. 계산은 `behavior-profile.ts` 한 벌이다(§3).
 
 ## 9. 완료 기준
 
-- 성향·수익률 두 탭과 오버레이 셋이 실제 `app.html` 데이터 흐름과 일치한다.
-- 엔진 산식별 경계 테스트가 통과한다 (`shared/engine/archive-profile.test.ts`).
-- `node scripts/ui-build.mjs verify` 가 바이트 동일로 통과한다.
+- 성향·수익률 두 탭과 오버레이 셋이 실제 `ArchiveScreen` 데이터 흐름과 일치한다.
+- 엔진 산식별 경계 테스트가 통과한다 (`shared/engine/behavior-profile.test.ts`).
 - `web` 의 `npm test` 와 `npm run build` 가 통과한다.
