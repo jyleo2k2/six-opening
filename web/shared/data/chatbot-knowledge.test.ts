@@ -23,6 +23,63 @@ for (const id of DAPIE_SCREEN_TERM_IDS) {
     `term:${id}`,
   );
 }
+
+// ── 설명 문장 예산 (SPEC §3.4.4) ────────────────────────────────────────────
+//
+// T5 게이트(shared/llm/filter.ts)의 최대 3문장은 **상한**이라 초과 0건인 채로
+// 평균이 상한에 붙어 있었다(brief 2.73 · detail 2.98문장). 상한을 내리면 term
+// 9종·업종·meta·rule 고정 응답까지 함께 막히므로 게이트는 그대로 두고 승인
+// 데이터에 예산을 여기서 건다. 이 검사가 없으면 문구가 조용히 다시 길어진다.
+//
+// 세는 방식은 게이트와 같다.
+function countSentences(text: string) {
+  return text
+    .split(/[.!?]+|\n+/)
+    .map((part) => part.trim())
+    .filter((part) => /[\p{L}\p{N}]/u.test(part)).length;
+}
+
+const SCRIPTED = CHATBOT_KNOWLEDGE.filter((entry) => entry.explainScript);
+
+for (const entry of SCRIPTED) {
+  const script = entry.explainScript!;
+  const where = `${entry.id}`;
+
+  // 전 카테고리 상한 — 지금보다 길어지는 것을 막는다.
+  assert.ok(countSentences(script.brief) <= 2, `${where}: brief 2문장 초과`);
+  assert.ok(countSentences(script.detail) <= 2, `${where}: detail 2문장 초과`);
+  assert.ok(countSentences(script.example) <= 2, `${where}: example 2문장 초과`);
+  if (script.adjust) {
+    assert.ok(
+      countSentences(script.adjust.explanation) <= 2,
+      `${where}: adjust.explanation 2문장 초과`,
+    );
+  }
+
+  // detail 은 brief 에 덧붙는 새 내용이어야 한다. 되풀이하면 퀴즈를 맞힌 아이가
+  // 방금 읽은 문장을 다시 읽는다 — screenTermScript 의 `detail: brief` 가 그랬다.
+  assert.notEqual(
+    script.detail.replaceAll(/\s/g, ""),
+    script.brief.replaceAll(/\s/g, ""),
+    `${where}: detail 이 brief 와 같다`,
+  );
+}
+
+// 주문 카테고리의 직접 쓴 스크립트는 1문장 예산을 지킨다 (SPEC §3.4.4).
+//
+// 같은 카테고리라도 faq 3건(기다리는 주문·주문 취소·받게 되는 돈)은 제외한다.
+// 그 셋의 brief 는 screenTermScript 가 `answer` 를 그대로 쓴 것이라 FAQ 단답을
+// 겸하는데, 둘째 문장이 "이미 체결된 주문은 취소할 수 없어요" 처럼 실제 정보를
+// 나른다. 1문장으로 깎으면 길이 대신 정보를 잃는다.
+const ORDER_SCRIPTED = SCRIPTED.filter(
+  (entry) => entry.category === "order" && entry.kind === "glossary",
+);
+assert.equal(ORDER_SCRIPTED.length, 8);
+for (const entry of ORDER_SCRIPTED) {
+  const script = entry.explainScript!;
+  assert.equal(countSentences(script.brief), 1, `${entry.id}: brief 는 1문장이다`);
+  assert.equal(countSentences(script.detail), 1, `${entry.id}: detail 은 1문장이다`);
+}
 assert.equal(findChatbotKnowledge("PER이 뭐야?")?.id, "per");
 assert.equal(findChatbotKnowledge("이 회사 비싼지 어떻게 알아?")?.id, "per");
 assert.equal(findChatbotKnowledge("평가 손익이 뭐야?")?.id, "unrealized-profit");

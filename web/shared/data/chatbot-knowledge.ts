@@ -111,7 +111,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
     example: "도서관에서 책마다 제목과 번호가 있는 것과 비슷해요. 거래 화면도 종목 이름과 코드로 회사를 구분해요.",
   }),
   buy: termScript("buy", {
-    brief: "매수는 주식을 사는 거래예요. 주문이 체결되면 산 만큼 내 보유 주식이 늘어나요.",
+    brief: "매수는 주식을 사서 보유 주식이 늘어나는 거래예요.",
     check: {
       question: "매수 주문이 체결되면 가진 주식은 어떻게 될까요?",
       choices: [
@@ -130,11 +130,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "yes",
     },
-    detail: "매수 주문을 냈다고 바로 주식을 가진 것은 아니에요. 사고파는 조건이 맞아 체결되어야 보유 수량이 늘어나요.",
+    detail: "주문을 냈다고 바로 늘어나지는 않고 조건이 맞아 체결되어야 해요.",
     example: "가게에서 물건을 사겠다고 말한 것은 주문이고, 돈을 내고 물건을 받은 때가 체결이에요. 주식 매수도 체결 뒤에 보유 목록에 들어와요.",
   }),
   sell: termScript("sell", {
-    brief: "매도는 가지고 있던 주식을 파는 거래예요. 주문이 체결되면 판 만큼 보유 주식이 줄어들어요.",
+    brief: "매도는 가지고 있던 주식을 팔아 보유 주식이 줄어드는 거래예요.",
     check: {
       question: "매도 주문이 체결되면 가진 주식은 어떻게 될까요?",
       choices: [
@@ -153,11 +153,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "less",
     },
-    detail: "매도도 주문만으로 끝나지 않고 체결되어야 해요. 체결된 수량만큼 보유 주식이 줄고 거래 결과가 기록돼요.",
+    detail: "체결된 수량만큼 줄어들고 그 거래 결과가 실현손익으로 기록돼요.",
     example: "가지고 있던 카드를 친구에게 팔면 내 카드 수가 줄어드는 것과 비슷해요. 주식도 매도가 체결된 만큼 줄어들어요.",
   }),
   order: termScript("order", {
-    brief: "주문은 주식을 사고팔겠다는 뜻을 거래소에 알리는 과정이에요. 주문을 넣었다고 거래가 바로 끝나는 것은 아니에요.",
+    brief: "주문은 주식을 사고팔겠다고 거래소에 알리는 요청이에요.",
     check: {
       question: "주문을 넣으면 거래가 언제나 바로 끝날까요?",
       choices: [
@@ -176,11 +176,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "request",
     },
-    detail: "주문에는 매수인지 매도인지, 수량과 가격 조건이 담겨요. 조건이 맞아 체결되어야 실제 보유 수량이 바뀌어요.",
+    detail: "주문에 담은 수량과 가격 조건이 맞아야 거래가 체결돼요.",
     example: "식당에서 음식을 부탁한 순간이 주문이고, 음식이 나온 순간이 완료에 가까워요. 주식도 주문과 체결은 다른 단계예요.",
   }),
   execution: termScript("execution", {
-    brief: "체결은 매수와 매도 조건이 맞아 거래가 완료된 상태예요. 체결이 되어야 보유 수량이 실제로 바뀌어요.",
+    brief: "체결은 조건이 맞아 거래가 끝나고 보유 수량이 바뀌는 순간이에요.",
     check: {
       question: "보유 수량은 보통 언제 바뀔까요?",
       choices: [
@@ -199,7 +199,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "execution",
     },
-    detail: "사려는 가격과 팔려는 조건이 맞으면 주문이 체결돼요. 체결 뒤에는 매수·매도 수량이 실제 기록에 반영돼요.",
+    detail: "체결되기 전까지 주문은 기다리는 상태로 남아 있어요.",
     example: "중고 장터에서 사고 싶은 사람과 팔고 싶은 사람이 조건에 동의한 순간과 비슷해요. 약속이 맞아 거래가 끝난 상태가 체결이에요.",
   }),
   "current-price": termScript("current-price", {
@@ -226,7 +226,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
     example: "운동 경기의 현재 점수가 경기 중에 계속 바뀌는 것과 비슷해요. 화면을 본 시각에 따라 표시된 값이 다를 수 있어요.",
   }),
   quantity: termScript("quantity", {
-    brief: "수량은 사고팔 주식의 개수예요. 가격이 아니라 몇 주인지 세는 숫자예요.",
+    brief: "수량은 가격이 아니라 사고팔 주식의 개수를 세는 숫자예요.",
     check: {
       question: "주식 수량은 무엇을 세는 숫자일까요?",
       choices: [
@@ -245,11 +245,11 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "count",
     },
-    detail: "수량과 한 주 가격을 함께 보면 대략 필요한 금액을 계산할 수 있어요. 수량은 돈의 크기가 아니라 주식 개수예요.",
+    detail: "수량에 한 주 가격을 곱하면 대략 필요한 금액을 볼 수 있어요.",
     example: "연필을 몇 자루 살지 정하는 것과 비슷해요. 연필 수가 수량이고, 한 자루 값은 가격이에요.",
   }),
   "estimated-amount": termScript("estimated-amount", {
-    brief: "예상 금액은 주문 수량과 가격으로 미리 계산해 본 돈이에요. 주문을 확정하기 전에 확인하는 값이에요.",
+    brief: "예상 금액은 주문 수량과 가격을 곱해 미리 계산해 본 돈이에요.",
     check: {
       question: "예상 금액을 계산할 때 무엇이 필요할까요?",
       choices: [
@@ -268,7 +268,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "unit-price",
     },
-    detail: "예상 금액은 주문을 확정하기 전에 필요한 돈을 살펴보는 값이에요. 시장가처럼 체결 가격이 달라질 수 있는 주문은 실제 결과와 차이가 날 수 있어요.",
+    detail: "시장가처럼 체결 값이 달라지는 주문은 실제 금액과 차이가 날 수 있어요.",
     example: "연필 한 자루 값에 살 자루 수를 곱해 미리 필요한 돈을 보는 것과 같아요. 주식도 수량과 가격으로 예상 금액을 계산해요.",
   }),
   "evaluation-amount": termScript("evaluation-amount", {
@@ -617,7 +617,9 @@ function screenTermScript(id: string, brief: string): ExplainScript {
       ],
       answerId: "meaning",
     },
-    detail: brief,
+    // brief 를 그대로 넣으면 퀴즈를 맞힌 아이가 방금 읽은 문장을 다시 읽는다.
+    // 정답의 보상이 반복이 되지 않도록 덧붙는 새 한 문장을 준다 (SPEC §3.4.4).
+    detail: "화면에 이미 있는 값을 가리키는 말이라 앞으로의 값을 알려 주지는 않아요.",
     example: "화면에서 이 말을 발견하면, 그 숫자나 기록이 무엇을 보여주는지 차례로 읽어 보면 돼요.",
   });
 }
@@ -770,7 +772,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "market",
         },
         detail:
-          "시장가는 내가 값을 정하지 않고 지금 시장에 나와 있는 값을 그대로 받아요. 그래서 주문을 넣는 순간과 조금 달라질 수 있어요.",
+          "값을 그대로 받는 대신 주문을 넣는 순간과 조금 달라질 수 있어요.",
         example:
           "가게에 붙은 값표를 그대로 보고 고르는 것과 비슷해요. 값을 깎지 않는 대신 기다리지 않아도 돼요.",
       },
@@ -798,7 +800,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "me",
         },
         detail:
-          "지정가는 내가 원하는 값을 미리 적어 두는 방법이에요. 그 값에 거래할 상대가 없으면 주문이 바로 끝나지 않아요.",
+          "그 값에 거래할 상대가 없으면 주문이 바로 끝나지 않아요.",
         example:
           "친구에게 이만큼이면 바꾸겠다고 미리 말해 두는 것과 비슷해요. 친구가 동의해야 바꿀 수 있어요.",
       },
@@ -1029,9 +1031,9 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "trade-lock", kind: "faq", category: "service", termLabel: "주문 잠금", triggers: ["학교 시간엔 매매 쉬기", "주문 잠금"], answer: "주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요.", actionTarget: "home", status: reviewed },
   { id: "ranking", kind: "faq", category: "service", termLabel: "랭킹", triggers: ["랭킹", "이번 주", "시즌 전체"], answer: "랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요.", actionTarget: "home", status: reviewed },
   { id: "family-feed", kind: "faq", category: "service", termLabel: "가족 기록", triggers: ["가족 기록", "거래 가격", "차트에서 이 지점 보기"], answer: "가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요.", status: reviewed },
-  { id: "profile-abilities", kind: "faq", category: "profile", termLabel: "성향 축", triggers: ["정확력", "근거력", "집중력", "분산력", "직관력"], answer: "근거력·직관력은 매수 전 자료를 살펴본 기록을, 집중력·분산력은 보유 섹터와 현금 비중을, 정확력은 거래 뒤 5거래일의 가격 방향을 바탕으로 보여줘요. 어느 방향이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
+  { id: "profile-abilities", kind: "faq", category: "profile", termLabel: "성향 축", triggers: ["정확력", "근거력", "집중력", "분산력", "직관력"], answer: "근거력·직관력은 매수 전 자료를 살펴본 기록을, 집중력·분산력은 보유 섹터와 현금 비중을, 정확력은 거래 뒤 2거래일의 가격 방향을 바탕으로 보여줘요. 어느 방향이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
   { id: "profile-definition", kind: "faq", category: "profile", termLabel: "성향", triggers: ["성향이 뭐", "성향 뜻", "능력치 오각형"], answer: "성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.", actionTarget: "archive", status: reviewed },
-  { id: "profile-status", kind: "faq", category: "profile", termLabel: "관찰 초기", triggers: ["관찰 초기", "별 판정 중", "5거래일"], answer: "관찰 초기에는 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족해요. 별 판정 중은 거래 뒤 5거래일이 지나지 않아 정확력 등급을 아직 계산하지 못한 상태예요.", actionTarget: "archive", status: reviewed },
+  { id: "profile-status", kind: "faq", category: "profile", termLabel: "관찰 중", triggers: ["관찰 중", "관찰 초기", "2거래일"], answer: "관찰 중은 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족한 상태예요. 정확력은 거래 뒤 2거래일이 지나야 계산돼서 그전에는 LV 표기가 붙지 않아요.", actionTarget: "archive", status: reviewed },
   { id: "profile-character", kind: "faq", category: "profile", termLabel: "성향 캐릭터", triggers: ["저격수", "전략가", "승부사", "탐험가", "성향 캐릭터"], answer: "성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
   { id: "season-record", kind: "faq", category: "profile", termLabel: "시즌 기록", triggers: ["시즌 기록이 뭐야", "기록 카드"], answer: "시즌 기록은 이번 시즌의 매수·매도·메모·상세 열람 건수를 모아 보여줘요. 기록 카드는 시즌이 끝난 뒤 받는 요약이며, 현재는 4주차까지 잠겨 있어요.", actionTarget: "archive", status: reviewed },
   // "기록"은 "기록 어디서 봄?" 같은 위치 질문까지 잡으므로 DAPIE 를 붙이지 않는다.
