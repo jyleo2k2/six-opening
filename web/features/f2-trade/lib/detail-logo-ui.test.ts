@@ -39,7 +39,23 @@ for (const stockCode of stockCodes) {
 }
 
 // 로고가 있으면 카드 아트에 이미지를 깔고, 없으면 섹터 이모지로 대신한다.
-assert.match(exploreCards, /logo \? "url\(" \+ logo \+ "\) center\/84px 84px no-repeat," : ""/u);
+// 세로는 `auto` 여야 한다 — `84px 84px` 는 정사각이 아닌 원본을 세로로 늘린다.
+assert.match(exploreCards, /logo \? "url\(" \+ logo \+ "\) center\/84px auto no-repeat," : ""/u);
 assert.match(exploreCards, /hasLogo: !!logo/u);
+
+// `84px auto` 가 안전한 이유는 로고 원본이 전부 가로형이거나 정사각이기 때문이다.
+// 세로가 긴 로고를 넣으면 88px 자리를 넘겨 카드 밖으로 잘린다.
+for (const stockCode of stockCodes) {
+  const logoBytes = readFileSync(
+    new URL(`../../../public/ui/${logoEntries.get(stockCode)}`, import.meta.url),
+  );
+  // PNG IHDR — 8바이트 시그니처 + 8바이트 길이·타입 뒤에 폭·높이가 4바이트씩 온다.
+  const width = logoBytes.readUInt32BE(16);
+  const height = logoBytes.readUInt32BE(20);
+  assert.ok(
+    width >= height,
+    `${stockCode} 로고는 세로가 더 깁니다(${width}x${height}). 카드 아트가 잘립니다`,
+  );
+}
 
 console.log("detail stock logo UI contract tests passed");
