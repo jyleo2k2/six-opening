@@ -6,9 +6,9 @@ import {
   emptyState,
   exploreList,
   hasManySectors,
+  showSectorGroups,
   stackOffset,
   sectorChips,
-  toggleRankSort,
 } from "./explore-cards";
 import type { Universe } from "./use-universe";
 
@@ -27,11 +27,17 @@ const universe: Universe = {
 };
 const live = { quotes: { "005930": { price: 210, rate: 4.0 } }, sparks: { "005930": [10, 90] } };
 
-// 많이 오른 순 — 실시간 등락률 내림차순, 시세는 폴링 값이 픽스처를 덮는다.
-const rank = exploreList(universe, live, "all", "", [], "change");
+// "오늘 많이 오른 순"은 카테고리다 — 전체 종목을 실시간 등락률 내림차순으로 세우고,
+// 시세는 폴링 값이 픽스처를 덮는다(삼성전자 3.2% → 4.0% 라 맨 앞이다).
+const rank = exploreList(universe, live, "rank", "", []);
 assert.deepEqual(rank.map((s) => s.code), ["005930", "259960", "036570"]);
 assert.equal(rank[0].price, 210);
 assert.deepEqual(rank[0].spark, [10, 90]);
+// 보는 종목은 `전체` 와 같다. 다른 것은 줄 세우는 차례뿐이다.
+assert.deepEqual(
+  [...rank.map((s) => s.code)].sort(),
+  [...exploreList(universe, live, "all", "", []).map((s) => s.code)].sort(),
+);
 
 // 섹터 필터 — 업종이 하나뿐이라 업종별 정렬은 유니버스 차례를 그대로 남긴다(안정 정렬).
 assert.deepEqual(exploreList(universe, live, "game", "", []).map((s) => s.code), ["259960", "036570"]);
@@ -90,17 +96,17 @@ assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), 
   "005930",
 ]);
 
-// 정렬은 필터와 다른 축이라 섹터를 골라도 같이 간다.
-assert.deepEqual(exploreList(universe, live, "game", "", [], "change").map((s) => s.name), [
-  "크래프톤",
-  "엔씨소프트",
-]);
-
 // 업종 헤더는 목록에 업종이 둘 이상일 때만 세운다 — 섹터 하나를 고른 화면에서 세우면
 // 이번에 걷어낸 "게임 회사 2곳" 제목이 그대로 되살아난다.
 assert.equal(hasManySectors(exploreList(universe, live, "all", "", [])), true);
 assert.equal(hasManySectors(exploreList(universe, live, "game", "", [])), false);
 assert.equal(hasManySectors([]), false);
+
+// "오늘 많이 오른 순"은 업종이 여럿 섞여 있어도 헤더를 세우지 않는다 — 등락률로 줄을
+// 세운 목록이라 같은 업종이 흩어지고, 헤더가 곳곳에 서면 없는 묶음을 있다고 말한다.
+assert.equal(showSectorGroups("all", exploreList(universe, live, "all", "", [])), true);
+assert.equal(showSectorGroups("rank", rank), false);
+assert.equal(showSectorGroups("game", exploreList(universe, live, "game", "", [])), false);
 
 // 칩 줄 — **무엇을 골라도 순서가 같다.** 원본 프로토타입처럼 고른 칩은 자리를 옮기지 않고
 // 점등만 한다. 끌어올리면 누르는 순간 그 칩이 손가락 밑에서 튀고 옆 칩들이 밀린다.
@@ -119,27 +125,20 @@ assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.active), [
   false,
   true,
 ]);
-// 정렬 칩은 `filter` 가 아니라 `sort` 를 따른다 — 업종을 고른 채로도 함께 켜진다. 그래야
-// 섹터와 정렬을 동시에 가질 수 있다(둘 중 하나만 되던 시절이 PR #263이 고친 문제다).
-assert.deepEqual(sectorChips(universe, "semi", "change").map((chip) => chip.active), [
+// "오늘 많이 오른 순"도 다른 칩과 같은 규칙이다 — 고르면 그 칩만 켜지고 `전체` 는 꺼진다.
+assert.deepEqual(sectorChips(universe, "rank").map((chip) => chip.active), [
   false,
   true,
   false,
   false,
-  true,
+  false,
 ]);
-
-// 정렬 칩은 누를 때마다 켜졌다 꺼진다 — 헤더 정렬 메뉴를 걷어낸 뒤로 이 칩이 정렬을 고르는
-// 유일한 자리라, 되돌릴 길이 없으면 기본 차례로 못 돌아온다.
-assert.equal(toggleRankSort("sector"), "change");
-assert.equal(toggleRankSort("change"), "sector");
-// 꺼진 칩은 흰 배경 위 회색 글자다.
-const rankOff = sectorChips(universe, "all", "sector")[1];
+// 꺼진 칩은 흰 배경 위 회색 글자, 켜진 칩은 분홍 배경 위 흰 글자다.
+const rankOff = sectorChips(universe, "all")[1];
 assert.equal(rankOff.active, false);
 assert.match(rankOff.style, /background:#FFFFFF/u);
 assert.match(rankOff.style, /color:#5C6280/u);
-const rankOn = sectorChips(universe, "all", "change")[1];
-assert.equal(rankOn.active, true);
+const rankOn = sectorChips(universe, "rank")[1];
 assert.match(rankOn.style, /background:#F5327F;/u);
 assert.match(rankOn.style, /color:#FFFFFF/u);
 
