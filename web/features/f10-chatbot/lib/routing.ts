@@ -5224,12 +5224,6 @@ export const PROACTIVE_SCRIPTS: Record<
     label: "주문·상세 화면 5분 초과 체류",
     text: "어디가 헷갈려요?",
   },
-  lossRevisit: {
-    label: "손실 실현 종목 반복 조회",
-    // 감정을 넘겨짚지 않는다. "후회되나요?" 는 아이가 느끼지도 않은 후회를 단정해
-    // 나무라는 것처럼 읽힌다 — 손실 뒤 같은 종목을 다시 봤다는 사실에만 붙는다.
-    text: "이 회사 다시 볼까요?",
-  },
 };
 
 /**
@@ -5250,11 +5244,4 @@ export const PROACTIVE_SUGGESTED_QUESTIONS: Record<ProactiveSignal, readonly str
   ],
   orderMethodConfusion: ["시장가가 뭐예요?", "지정가가 뭐예요?"],
   dwell: ["매수는 어떻게 하나요?", "차트는 어떻게 봐요?", "수익률이 무엇인가요?"],
-  // 손실 자체를 되짚지 않고 회사로 시선을 돌린다. 종목 상세에서만 뜨는 신호라 맥락에
-  // 종목이 있고, 앞의 둘은 승인 종목 사실 조회로 간다.
-  lossRevisit: [
-    "이 회사는 무슨 일을 해요?",
-    "이 회사는 어떻게 돈을 벌어요?",
-    "수익률이 무엇인가요?",
-  ],
 };

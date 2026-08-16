@@ -250,24 +250,6 @@ test("매수 체결 뒤 첫 이탈에는 buyHesitation 신호가 발화하지 �
   assert.equal(detectProactiveSignals(events, NOW + 3).includes("buyHesitation"), false);
 });
 
-test("-12% 매도 체결 후 동일 종목 4회 재진입에서 lossRevisit 신호가 발화한다", () => {
-  const stockId = "KRX:005930";
-  const filled = parsedBehavior(
-    { kind: "trade_filled", stockId, side: "sell", realizedPnlPct: -12 },
-    NOW,
-  );
-  const revisits: ChatBehaviorEvent[] = [1, 2, 3, 4].map((offset) => ({
-    type: "screen_entered",
-    screen: "stock",
-    stockId,
-    at: NOW + offset,
-  }));
-  assert.ok(
-    detectProactiveSignals([filled, ...revisits], NOW + 4).includes("lossRevisit"),
-  );
-});
-
-
 // ── 폰 프레임 안 화면 사각형 ────────────────────────────────────────────────────
 
 test("`PhoneFrame` 이 실측 id 를 그린다 — 없으면 챗봇 시트가 자리를 잃는다", () => {

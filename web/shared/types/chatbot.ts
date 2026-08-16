@@ -188,8 +188,7 @@ export type ReadOnlyChatToolName = (typeof READ_ONLY_CHAT_TOOLS)[number];
 export type ProactiveSignal =
   | "buyHesitation"
   | "orderMethodConfusion"
-  | "dwell"
-  | "lossRevisit";
+  | "dwell";
 
 export type ChatBehaviorEvent =
   | {

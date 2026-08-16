@@ -94,32 +94,6 @@ export function detectProactiveSignals(
     signals.push("dwell");
   }
 
-  const realizedLoss = [...events].reverse().find(
-    (event): event is Extract<ChatBehaviorEvent, { type: "trade_filled" }> =>
-      event.type === "trade_filled" &&
-      event.side === "sell" &&
-      event.realizedPnlPct !== undefined &&
-      event.realizedPnlPct <= -10,
-  );
-
-  if (
-    realizedLoss &&
-    latestEvent?.type === "screen_entered" &&
-    latestEvent.screen === "stock" &&
-    latestEvent.stockId === realizedLoss.stockId &&
-    now >= realizedLoss.at
-  ) {
-    const revisitCount = events.filter(
-      (event) =>
-        event.type === "screen_entered" &&
-        event.screen === "stock" &&
-        event.stockId === realizedLoss.stockId &&
-        event.at >= realizedLoss.at &&
-        event.at <= now,
-    ).length;
-    if (revisitCount >= 2) signals.push("lossRevisit");
-  }
-
   return signals;
 }
 
