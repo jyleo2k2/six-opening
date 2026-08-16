@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { advanceSheetDrag, beginSheetDrag, shouldDismissSheet } from "./sheet-drag";
+import {
+  advanceSheetDrag,
+  beginSheetDrag,
+  SHEET_PULL_REFERENCE,
+  shouldDismissSheet,
+  shouldOpenSheetByPull,
+} from "./sheet-drag";
 
 // 시트를 쓸어내려 닫는 제스처. 브라우저 없이 확인할 수 있어야 해서 계산만 떼어 둔다.
 
@@ -69,3 +75,34 @@ assert.equal(shouldDismissSheet(fling, SHEET_HEIGHT), true);
 // 20% 바로 아래에서 멈춘 손가락은 닫지 않는다.
 const almost = advanceSheetDrag(beginSheetDrag(1, 0, 0), SHEET_HEIGHT * 0.2 - 1, 3_000, full);
 assert.equal(shouldDismissSheet(almost, SHEET_HEIGHT), false);
+
+// 보유 카드를 위로 밀어 여는 손짓. 닫을 때와 같은 규칙을 방향만 뒤집어 쓰되, 기준은
+// 시트가 아니라 손가락이 올라탄 카드 크기다(20% = 32px).
+const threshold = SHEET_PULL_REFERENCE * 0.2;
+const noScale = { scale: 1 };
+// 문턱만큼 천천히 올리면 열린다.
+assert.equal(
+  shouldOpenSheetByPull({ startY: 500, endY: 500 - threshold, elapsedMs: 900 }, noScale),
+  true,
+);
+// 그 아래에서 멈춘 손가락은 열지 않는다 — 카드를 살짝 스친 것과 구별한다.
+assert.equal(
+  shouldOpenSheetByPull({ startY: 500, endY: 500 - threshold + 1, elapsedMs: 900 }, noScale),
+  false,
+);
+// 짧아도 빠르게 튕기면 열린다(12px 이상 + 900px/s 이상).
+assert.equal(shouldOpenSheetByPull({ startY: 500, endY: 486, elapsedMs: 10 }, noScale), true);
+// 아래로 끄는 건 여는 손짓이 아니다.
+assert.equal(shouldOpenSheetByPull({ startY: 500, endY: 900, elapsedMs: 200 }, noScale), false);
+// 배율 보정 — 창을 반으로 줄여 그렸으면 창에서 문턱의 절반만 올려도 화면 안쪽은 문턱이다.
+assert.equal(
+  shouldOpenSheetByPull({ startY: 500, endY: 500 - threshold / 2, elapsedMs: 900 }, { scale: 0.5 }),
+  true,
+);
+// 배율이 0 이면 1 로 본다 — 손을 대기만 해도 열리는 것을 막는다.
+assert.equal(shouldOpenSheetByPull({ startY: 500, endY: 499, elapsedMs: 900 }, { scale: 0 }), false);
+// 같은 시각에 손을 떼도 0 으로 나누지 않는다. 거리만으로 판정한다.
+assert.equal(
+  shouldOpenSheetByPull({ startY: 500, endY: 500 - threshold, elapsedMs: 0 }, noScale),
+  true,
+);

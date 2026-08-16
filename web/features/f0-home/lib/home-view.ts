@@ -13,6 +13,8 @@ export type AccountUser = {
   user_id: number;
   parent_child: string;
   guardian_role: string | null;
+  /** 헤더의 "○○ 총자산" 에 쓰는 이름. 서버가 안 주면 역할별 데모 이름을 쓴다. */
+  name?: string | null;
   /** 총 현금(미체결 주문이 잠근 몫 포함). 총자산 = 이 값 + 보유 평가금액(`route.ts` 규칙과 같다). */
   balance?: number | null;
   holdings: {
@@ -25,13 +27,19 @@ export type AccountUser = {
 
 export type HomeRole = "mom" | "dad" | "child";
 
+/**
+ * 등락 방향. 색이 세 갈래라 `up: boolean` 으로는 모자란다 — 0.0% 는 오른 것도 내린 것도
+ * 아니어서 회색이다. 판정은 **화면에 찍히는 반올림값**으로 한다(`pctTrend`).
+ */
+export type Trend = -1 | 0 | 1;
+
 export type HomeHolding = {
   tick: string;
   name: string;
   qty: string;
   value: string;
   pct: string;
-  up: boolean;
+  trend: Trend;
   /**
    * 종목 상세로 갈 때 쓰는 코드. 실제 계좌 보유는 항상 있고, 데모 보유는 유니버스에서
    * 이름을 찾았을 때만 붙는다(`withStockCodes`). 없으면 그 줄은 눌리지 않는다.
@@ -45,14 +53,17 @@ export type HomeHolding = {
 export type StockCodeRef = { code: string; name: string };
 
 /**
- * 인사말·아바타·목표 아이템은 저장소에 없는 값이라 여기 고정 데모로 남는다.
+ * 이름·아바타·목표 아이템은 저장소에 없는 값이라 여기 고정 데모로 남는다.
  * 보유 종목과 수익은 실제 계좌 값으로 갈아 끼운다(`homeHoldings`).
+ *
+ * `unitPrice` 는 "○개 살 수 있어요" 의 나눗셈 밑이다. 실제 판매가와 다르면 그 문장이
+ * 근거 없는 숫자가 되므로 여기 값이 곧 기준가다 — 향수 14만원·신발 8만원.
  */
 export const HOME_INFO: Record<
   HomeRole,
   {
-    season: string;
-    greeting: string;
+    /** 헤더 "○○ 총자산" 에 쓰는 데모 이름. 서버 계좌 이름이 있으면 그쪽이 이긴다. */
+    name: string;
     avatarImg: string;
     day: string;
     brand: string;
@@ -65,45 +76,42 @@ export const HOME_INFO: Record<
   }
 > = {
   mom: {
-    season: "보호자 계정",
-    greeting: "찬영 어머님, 어서 오세요",
+    name: "찬영 어머님",
     avatarImg: "/ui/assets/profile-mom.png",
     day: "28일째",
     brand: "샤넬",
     unit: "향수",
     img: "/ui/assets/item-mom.png",
     goalImg: "/ui/assets/goal-mom.png",
-    unitPrice: 210000,
+    unitPrice: 140000,
     profit: 211000,
     holdings: [
-      { tick: "삼성", name: "삼성전자", qty: "4주", value: "318,000원", pct: "+2.4%", up: true },
-      { tick: "LG", name: "LG생활건강", qty: "1주", value: "412,000원", pct: "+5.1%", up: true },
-      { tick: "아모", name: "아모레퍼시픽", qty: "2주", value: "246,000원", pct: "-1.2%", up: false },
+      { tick: "삼성", name: "삼성전자", qty: "4주", value: "318,000원", pct: "+2.4%", trend: 1 },
+      { tick: "LG", name: "LG생활건강", qty: "1주", value: "412,000원", pct: "+5.1%", trend: 1 },
+      { tick: "아모", name: "아모레퍼시픽", qty: "2주", value: "246,000원", pct: "-1.2%", trend: -1 },
     ],
   },
   dad: {
-    season: "보호자 계정",
-    greeting: "찬영 아버님, 어서 오세요",
+    name: "찬영 아버님",
     avatarImg: "/ui/assets/profile-dad.png",
     day: "28일째",
     brand: "나이키",
     unit: "신발",
     img: "/ui/assets/item-dad.png",
     goalImg: "/ui/assets/goal-dad.png",
-    unitPrice: 219000,
+    unitPrice: 80000,
     profit: 452000,
     holdings: [
-      { tick: "현대", name: "현대차", qty: "2주", value: "486,000원", pct: "+3.8%", up: true },
-      { tick: "NAV", name: "NAVER", qty: "1주", value: "198,000원", pct: "-0.6%", up: false },
-      { tick: "카카", name: "카카오", qty: "5주", value: "215,000원", pct: "+1.9%", up: true },
-      { tick: "SK", name: "SK하이닉스", qty: "1주", value: "178,000원", pct: "+6.2%", up: true },
+      { tick: "현대", name: "현대차", qty: "2주", value: "486,000원", pct: "+3.8%", trend: 1 },
+      { tick: "NAV", name: "NAVER", qty: "1주", value: "198,000원", pct: "-0.6%", trend: -1 },
+      { tick: "카카", name: "카카오", qty: "5주", value: "215,000원", pct: "+1.9%", trend: 1 },
+      { tick: "SK", name: "SK하이닉스", qty: "1주", value: "178,000원", pct: "+6.2%", trend: 1 },
     ],
   },
   child: {
-    season: "아이 계정",
-    greeting: "찬영아, 어서 와요!",
+    name: "김찬영",
     avatarImg: "/ui/assets/profile-child.png",
-    day: "14일째",
+    day: "28일째",
     brand: "",
     unit: "왁뿌볼",
     img: "/ui/assets/item-child.png",
@@ -111,9 +119,9 @@ export const HOME_INFO: Record<
     unitPrice: 12000,
     profit: 428600,
     holdings: [
-      { tick: "삼성", name: "삼성전자", qty: "3주", value: "238,500원", pct: "+4.3%", up: true },
-      { tick: "롯데", name: "롯데웰푸드", qty: "2주", value: "124,000원", pct: "+2.1%", up: true },
-      { tick: "오리", name: "오리온", qty: "1주", value: "96,500원", pct: "-0.8%", up: false },
+      { tick: "삼성", name: "삼성전자", qty: "3주", value: "238,500원", pct: "+4.3%", trend: 1 },
+      { tick: "롯데", name: "롯데웰푸드", qty: "2주", value: "124,000원", pct: "+2.1%", trend: 1 },
+      { tick: "오리", name: "오리온", qty: "1주", value: "96,500원", pct: "-0.8%", trend: -1 },
     ],
   },
 };
@@ -157,7 +165,7 @@ export function liveHoldings(
           (h.quantity >= 1 ? Math.round(h.quantity * 100) / 100 : h.quantity.toFixed(2)) + "주",
         value: won(h.quantity * price),
         pct: (pc >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + "%",
-        up: pc >= 0,
+        trend: pctTrend(pc),
         profit: (price - h.avg_price) * h.quantity,
       };
     });
@@ -179,11 +187,22 @@ export function withStockCodes(
   });
 }
 
+/**
+ * 홈 카드에 세워 두는 보유 줄 수. 이보다 많으면 `전체보기` 시트에서만 나머지를 본다 —
+ * 카드가 보유 개수만큼 길어지면 그 위의 캐릭터 그림 자리가 계정마다 달라진다.
+ */
+export const HOME_HOLDING_LIMIT = 3;
+
 export type HomeView = {
   role: HomeRole;
   info: (typeof HOME_INFO)[HomeRole];
   loaded: boolean;
+  /** 전체 보유. `전체보기` 시트가 이걸 그대로 그린다. */
   holdings: HomeHolding[];
+  /** 홈 카드에 보이는 앞 세 줄. */
+  topHoldings: HomeHolding[];
+  /** 카드에 못 담은 줄이 있나 — `전체보기` 를 띄울지 정한다. */
+  hasMoreHoldings: boolean;
   /** 목표 아이템을 몇 개 살 수 있나. 수익이 마이너스면 0. */
   goalCount: number;
   dayCount: string;
@@ -191,6 +210,8 @@ export type HomeView = {
   rateText: string;
   profitText: string;
   rateColor: string;
+  /** 헤더 프로필 옆 "○○ 총자산". 총자산 금액이 수익금액처럼 읽히지 않게 이름을 붙인다. */
+  totalAssetsLabel: string;
   /** 현금(`balance`) + 보유 평가금액. 계좌를 못 읽었으면 보유 평가금액만(현금 없이) 보여준다. */
   totalAssetsText: string;
   /** 계좌를 읽었는데 보유가 하나도 없을 때만 참. */
@@ -226,6 +247,8 @@ export function homeView(
     info,
     loaded,
     holdings,
+    topHoldings: holdings.slice(0, HOME_HOLDING_LIMIT),
+    hasMoreHoldings: holdings.length > HOME_HOLDING_LIMIT,
     goalCount,
     dayCount: "시즌 3 · " + info.day,
     itemLine:
@@ -233,13 +256,25 @@ export function homeView(
     // 실제 계좌를 붙이면 손실도 나온다. 부호와 색을 함께 바꾼다.
     rateText: (rate >= 0 ? "+" : "−") + Math.abs(rate).toFixed(1) + "%",
     profitText: (profit >= 0 ? "+" : "−") + won(Math.abs(profit)),
-    rateColor: rate >= 0 ? "#D5327A" : "#2E6BE6",
+    rateColor: trendColor(pctTrend(rate)),
+    totalAssetsLabel: ((loaded && user?.name) || info.name) + " 총자산",
     totalAssetsText: won(cash + total),
     noHoldings: loaded && live.length === 0,
   };
 }
 
-export const holdingPctColor = (up: boolean) => (up ? "#D5327A" : "#2E6BE6");
+/**
+ * 화면에 찍히는 값으로 방향을 정한다. 실제 등락이 +0.04% 여도 화면은 `+0.0%` 라
+ * 적는데, 원값으로 색을 고르면 0.0% 가 핑크로 뜬다 — 숫자와 색이 다른 말을 한다.
+ */
+export function pctTrend(pct: number): Trend {
+  const shown = Math.round(pct * 10) / 10;
+  return shown > 0 ? 1 : shown < 0 ? -1 : 0;
+}
+
+/** 오르면 핑크, 내리면 남색, 그대로면 회색. 총 수익률과 보유 줄이 같은 규칙을 쓴다. */
+export const trendColor = (trend: Trend) =>
+  trend > 0 ? "#D5327A" : trend < 0 ? "#2E6BE6" : "#8E93A8";
 
 /**
  * 목표 그림을 누르면 아이템이 튀어오른다. 자리·각도는 좌표 난수가 아니라 순번 기반이라
