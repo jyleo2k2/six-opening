@@ -32,7 +32,7 @@ const AVATAR = styleFromCss(
  */
 const ASSET_LABEL = styleFromCss("font-size:12px;font-weight:700;color:#8E7BC7");
 const ASSET_TOTAL = styleFromCss(
-  "font-size:25px;font-weight:800;color:#01185A;letter-spacing:-0.02em;line-height:1.2;" +
+  "font-size:18px;font-weight:800;color:#01185A;letter-spacing:-0.02em;line-height:1.2;" +
     "font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
 );
 const MENU_BTN = styleFromCss(
