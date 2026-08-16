@@ -66,6 +66,12 @@ function matchesQuery(name: string, code: string, query: string): boolean {
 export type ExploreFilter = string; // 'all' | 'watch' | 유니버스 섹터 id
 
 /**
+ * 칩 줄에 섞여 있는 정렬 칩의 id. 필터가 아니라 정렬을 바꾸므로 `ExploreFilter` 가 아니다 —
+ * 챗봇의 `/explore/rank` 점프와 같은 말을 쓰려고 이름만 맞춰 둔다.
+ */
+export const RANK_CHIP = "rank";
+
+/**
  * 줄 세우는 기준. **무엇을 보는지(필터)와 다른 축이라** 주소가 아니라 화면이 소유한다.
  *
  * 예전에는 "오늘 많이 오른 순"이 칩 하나로 필터 줄에 섞여 있었다. 그래서 섹터를 고르면
@@ -155,29 +161,38 @@ export function exploreList(
  * 밑에서 왼쪽으로 튀고, 옆 칩들이 밀려 다음에 누르려던 칩이 딴 자리에 가 있었다. 원본
  * 프로토타입(`sectorChips`)은 `defs` 를 고정 순서로 만들고 색·굵기만 바꾼다.
  *
- * 원본의 `오늘 많이 오른 순` 칩은 여기 없다 — 정렬이 필터 줄에서 빠져나와 헤더 메뉴로
- * 갔기 때문이다(PR #263). 그 결정은 그대로 두고 자리만 원본처럼 고정한다.
+ * 원본의 `오늘 많이 오른 순` 칩은 `전체` 와 `관심 기업` 사이에 그대로 선다. 다만 그 칩은
+ * **무엇을 보는지가 아니라 줄 세우는 기준**을 바꾼다 — 켜짐 판정도 `filter` 가 아니라
+ * `sort` 가 한다. 그래서 섹터를 골라 둔 채로 눌러도 섹터를 잃지 않는다(PR #263이 고친 것).
  */
-export function sectorChips(universe: Universe, filter: ExploreFilter) {
+export function sectorChips(
+  universe: Universe,
+  filter: ExploreFilter,
+  sort: ExploreSort = "sector",
+) {
   return [
     { id: "all", name: "전체", emoji: "" },
+    { id: RANK_CHIP, name: "오늘 많이 오른 순", emoji: "" },
     { id: "watch", name: "관심 기업", emoji: "" },
     ...universe.sectors,
-  ].map((sector) => ({
-    id: sector.id,
-    name: sector.name,
-    active: sector.id === filter,
-    style:
-      "display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:" +
-      (sector.id === filter ? "700" : "500") +
-      ";white-space:nowrap;cursor:pointer;" +
-      // 고른 칩은 분홍으로 채우고 흰 글자를 얹는다. `background` 선언 하나에 box-shadow 값이
-      // 섞여 들어가 있어서 선언 전체가 무효였고, 그래서 **흰 글자만 남아 안 보였다.**
-      (sector.id === filter
-        ? "color:#FFFFFF;background:#F5327F;" +
-          "box-shadow:0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)"
-        : "color:#5C6280;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)"),
-  }));
+  ].map((sector) => {
+    const on = sector.id === RANK_CHIP ? sort === "change" : sector.id === filter;
+    return {
+      id: sector.id,
+      name: sector.name,
+      active: on,
+      style:
+        "display:flex;align-items:center;gap:6px;flex:none;padding:11px 16px;border-radius:999px;font-size:13.5px;font-weight:" +
+        (on ? "700" : "500") +
+        ";white-space:nowrap;cursor:pointer;" +
+        // 고른 칩은 분홍으로 채우고 흰 글자를 얹는다. `background` 선언 하나에 box-shadow 값이
+        // 섞여 들어가 있어서 선언 전체가 무효였고, 그래서 **흰 글자만 남아 안 보였다.**
+        (on
+          ? "color:#FFFFFF;background:#F5327F;" +
+            "box-shadow:0 0 16px -4px rgba(245,50,127,0.55),inset 0 1.5px 1px rgba(255,255,255,0.4)"
+          : "color:#5C6280;background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)"),
+    };
+  });
 }
 
 export function emptyState(query: string) {

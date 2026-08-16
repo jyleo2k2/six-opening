@@ -108,13 +108,31 @@ assert.equal(hasManySectors([]), false);
 
 // 칩 줄 — **무엇을 골라도 순서가 같다.** 원본 프로토타입처럼 고른 칩은 자리를 옮기지 않고
 // 점등만 한다. 끌어올리면 누르는 순간 그 칩이 손가락 밑에서 튀고 옆 칩들이 밀린다.
-const ORDER = ["all", "watch", "game", "semi"];
+// "오늘 많이 오른 순"은 `전체` 와 `관심 기업` 사이 둘째 자리에 선다.
+const ORDER = ["all", "rank", "watch", "game", "semi"];
 assert.deepEqual(sectorChips(universe, "all").map((chip) => chip.id), ORDER);
 assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.id), ORDER);
 assert.deepEqual(sectorChips(universe, "game").map((chip) => chip.id), ORDER);
 assert.deepEqual(sectorChips(universe, "watch").map((chip) => chip.id), ORDER);
-// 고른 칩 하나만 켜진다.
-assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.active), [false, false, false, true]);
+assert.equal(sectorChips(universe, "all")[1].name, "오늘 많이 오른 순");
+// 필터 칩은 고른 하나만 켜진다.
+assert.deepEqual(sectorChips(universe, "semi").map((chip) => chip.active), [
+  false,
+  false,
+  false,
+  false,
+  true,
+]);
+// 정렬 칩은 `filter` 가 아니라 `sort` 를 따른다 — 업종을 고른 채로도 함께 켜진다. 그래야
+// 섹터와 정렬을 동시에 가질 수 있다(둘 중 하나만 되던 시절이 PR #263이 고친 문제다).
+assert.deepEqual(sectorChips(universe, "semi", "change").map((chip) => chip.active), [
+  false,
+  true,
+  false,
+  false,
+  true,
+]);
+assert.equal(sectorChips(universe, "all", "name")[1].active, false);
 
 // 고른 칩은 채워진 배경 위 흰 글자다. `background` 선언이 깨져 있으면 흰 글자만 남아 안 보인다.
 const picked = sectorChips(universe, "semi").find((chip) => chip.id === "semi")!;
