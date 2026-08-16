@@ -1,1 +1,0 @@
-class Component extends DCLogic {

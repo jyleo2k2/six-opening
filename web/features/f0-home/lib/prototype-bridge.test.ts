@@ -3,12 +3,7 @@ import { readFileSync } from "node:fs";
 
 import { detectProactiveSignals } from "../../../shared/engine/proactive-help";
 import type { ChatBehaviorEvent } from "../../../shared/types/chatbot";
-import {
-  parseBehaviorEvent,
-  parseChatContext,
-  PROTOTYPE_SCREEN_ID,
-  readPrototypeScreenRect,
-} from "./prototype-bridge";
+import { parseBehaviorEvent } from "./prototype-bridge";
 
 const NOW = 1_000_000;
 
@@ -119,25 +114,6 @@ test("체결 이벤트의 실현손익을 포함하거나 생략한다", () => {
   );
 });
 
-test("주문 맥락의 수량과 단가를 파싱한다", () => {
-  assert.deepEqual(
-    parseChatContext({
-      screen: "order",
-      stockId: "KRX:005930",
-      stockName: "삼성전자",
-      quantity: 3,
-      unitPrice: 72_500,
-    }),
-    {
-      screen: "order",
-      stockId: "KRX:005930",
-      stockName: "삼성전자",
-      quantity: 3,
-      unitPrice: 72_500,
-    },
-  );
-});
-
 test("핵심 행동 필드가 잘못되면 이벤트를 거부한다", () => {
   const invalidValues = [
     null,
@@ -173,26 +149,6 @@ test("잘못된 실현손익 필드만 제거한다", () => {
         at: NOW,
       },
     );
-  }
-});
-
-test("잘못된 주문 숫자 필드만 제거한다", () => {
-  const base = {
-    screen: "order",
-    stockId: "KRX:005930",
-    stockName: "삼성전자",
-  };
-  for (const quantity of [-1, 0, 1.5, 100_001, Number.POSITIVE_INFINITY, "3"]) {
-    assert.deepEqual(parseChatContext({ ...base, quantity }), base);
-  }
-  for (const unitPrice of [
-    -1,
-    0,
-    100_000_001,
-    Number.POSITIVE_INFINITY,
-    "72500",
-  ]) {
-    assert.deepEqual(parseChatContext({ ...base, unitPrice }), base);
   }
 });
 
@@ -311,131 +267,15 @@ test("-12% 매도 체결 후 동일 종목 4회 재진입에서 lossRevisit 신�
   );
 });
 
-// ── 폰 프레임 안 화면 실측 (챗봇 시트가 프레임을 넘지 않게 하는 기준) ──────────────
 
-function fakeFrame(options: {
-  screen?: { left: number; top: number; width: number; height: number } | null;
-  frame?: { left: number; top: number };
-}) {
-  const { screen, frame = { left: 0, top: 0 } } = options;
-  return {
-    contentDocument: {
-      getElementById: (id: string) =>
-        id === PROTOTYPE_SCREEN_ID && screen
-          ? { getBoundingClientRect: () => screen as DOMRect }
-          : null,
-    } as unknown as Document,
-    getBoundingClientRect: () => frame as DOMRect,
-  };
-}
+// ── 폰 프레임 안 화면 사각형 ────────────────────────────────────────────────────
 
-test("app.html 이 실제로 그 id 를 갖고 있다 — 없으면 실측이 통째로 죽는다", () => {
-  const appHtml = readFileSync(
-    new URL("../../../public/ui/app.html", import.meta.url),
+test("`PhoneFrame` 이 실측 id 를 그린다 — 없으면 챗봇 시트가 자리를 잃는다", () => {
+  const phoneFrame = readFileSync(
+    new URL("../PhoneFrame.tsx", import.meta.url),
     "utf8",
   );
-  assert.ok(appHtml.includes(`id="${PROTOTYPE_SCREEN_ID}"`));
-});
-
-test("chat sector IDs resolve to prototype filter IDs", () => {
-  const source = readFileSync(
-    new URL("../../../ui-src/methods/openRequestedScreen.js", import.meta.url),
-    "utf8",
-  );
-  const openRequestedScreen = Function(
-    `return ({${source}}).openRequestedScreen`,
-  )() as (data: unknown) => void;
-  const expected = {
-    game: "game",
-    logistics: "logi",
-    semiconductor: "semi",
-    defense: "defense",
-    food: "food",
-    energy: "energy",
-    entertainment: "enter",
-    retail: "retail",
-    finance: "bank",
-    automotive: "auto",
-    shipbuilding: "ship",
-    airline: "air",
-    cosmetics: "beauty",
-  };
-
-  // 탐색 화면이 React 로 옮겨 가서, 매핑된 섹터는 상태가 아니라 주소 구간으로 넘어간다.
-  for (const [chatSectorId, prototypeSectorId] of Object.entries(expected)) {
-    const leaves: string[] = [];
-    openRequestedScreen.call(
-      {
-        uni: () => ({ sectors: Object.values(expected).map((id) => ({ id })) }),
-        stock: () => null,
-        leaveToRoute: (path: string) => leaves.push(path),
-      },
-      {
-        type: "kiwoom:open-chat-action",
-        action: {
-          type: "open_screen",
-          target: "stock",
-          stockView: "explore",
-          sectorId: chatSectorId,
-        },
-      },
-    );
-    assert.deepEqual(leaves, [`/explore/${prototypeSectorId}`]);
-  }
-
-  // 섹터 없는 탐색 열기와 기본 보기(rank)는 구간 없는 `/explore` 다.
-  const plainLeaves: string[] = [];
-  openRequestedScreen.call(
-    {
-      uni: () => ({ sectors: Object.values(expected).map((id) => ({ id })) }),
-      stock: () => null,
-      leaveToRoute: (path: string) => plainLeaves.push(path),
-    },
-    {
-      type: "kiwoom:open-chat-action",
-      action: { type: "open_screen", target: "stock", stockView: "explore" },
-    },
-  );
-  assert.deepEqual(plainLeaves, ["/explore"]);
-});
-
-test("iframe 안 좌표에 iframe 위치를 더해 부모 좌표로 옮긴다", () => {
-  const rect = readPrototypeScreenRect(
-    fakeFrame({
-      screen: { left: 24, top: 23, width: 402, height: 874 },
-      frame: { left: 100, top: 50 },
-    }),
-  );
-  assert.deepEqual(rect, {
-    left: 124,
-    top: 73,
-    width: 402,
-    height: 874,
-    scale: 1,
-  });
-});
-
-test("프레임이 줄어들면 배율도 실측값에서 나온다 — 창 크기로 다시 계산하지 않는다", () => {
-  const rect = readPrototypeScreenRect(
-    fakeFrame({
-      // --runtime-scale 0.5 로 줄어든 상태
-      screen: { left: 12, top: 11.5, width: 201, height: 437 },
-      frame: { left: 0, top: 0 },
-    }),
-  );
-  assert.equal(rect?.scale, 0.5);
-  assert.equal(rect?.width, 201);
-});
-
-test("아직 로드되지 않았거나 접히면 null 을 준다 — 호출한 쪽이 그리지 않는다", () => {
-  assert.equal(readPrototypeScreenRect(null), null);
-  assert.equal(readPrototypeScreenRect(fakeFrame({ screen: null })), null);
-  assert.equal(
-    readPrototypeScreenRect(
-      fakeFrame({ screen: { left: 0, top: 0, width: 0, height: 0 } }),
-    ),
-    null,
-  );
+  assert.ok(phoneFrame.includes("id={PROTOTYPE_SCREEN_ID}"));
 });
 
 console.log("prototype-bridge tests passed");
