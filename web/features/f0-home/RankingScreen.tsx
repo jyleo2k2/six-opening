@@ -25,11 +25,6 @@ const WRAP = styleFromCss(
     + "background:linear-gradient(180deg,#F1ECFF 0%,#EDE7FC 100%)",
 );
 const HEAD = styleFromCss("flex:none;position:relative;height:366px;overflow:hidden;background:transparent");
-const BACK = styleFromCss(
-  "position:absolute;left:18px;top:60px;width:38px;height:38px;border-radius:999px;background:#FFFFFF;"
-    + "display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#001E5A;line-height:1;padding-bottom:3px;"
-    + "box-sizing:border-box;cursor:pointer;box-shadow:0 2px 6px rgba(60,40,130,0.10)",
-);
 const TITLE = styleFromCss(
   "position:absolute;left:0;right:0;top:60px;height:38px;display:flex;align-items:center;justify-content:center;gap:7px;"
     + "font-size:22.5px;font-weight:700;color:#001E5A;letter-spacing:-0.01em",
@@ -55,9 +50,6 @@ export function RankingScreen({ onLeave }: { onLeave: (path: string) => void }) 
     <PhoneFrame>
     <div style={WRAP}>
       <div style={HEAD}>
-        <div onClick={() => onLeave("/")} style={BACK}>
-          ‹
-        </div>
         <div style={TITLE}>
           <span>랭킹</span>
         </div>
