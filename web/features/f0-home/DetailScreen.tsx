@@ -322,7 +322,6 @@ export function DetailScreen({
         : ""),
   );
   const chart = buildDetailChart({
-    code,
     spark: live.spark,
     price: live.price,
     changePercent: live.change,

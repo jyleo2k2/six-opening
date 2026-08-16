@@ -42,25 +42,6 @@ export const PIN_COLORS = Object.freeze({
 });
 const PIN_CYCLE = [PIN_COLORS.child, PIN_COLORS.mom, PIN_COLORS.dad];
 
-/**
- * 종목코드에서 뽑는 시연용 매매 지점. **프로토타입이 하던 그대로다** — 가족 기록이 아직
- * 없는 종목에서도 B/S 지점을 보여 주려고 원본이 갖고 있던 폴백이고, 51종 전부에 뜬다.
- *
- * 코드만으로 정해지므로 같은 종목은 늘 같은 자리에 같은 사람이 찍힌다. 원본은 여기에
- * `Date.now()` 로 시각도 넣지만 그 값은 정렬에만 쓰이고 이미 순서대로라 결과가 같다.
- */
-export function demoTrades(code: string): DetailTrade[] {
-  let seed = 0;
-  for (let i = 0; i < code.length; i += 1) seed = (seed * 31 + code.charCodeAt(i)) >>> 0;
-  return [0, 1, 2].map((i) => ({
-    id: `demo_${code}_${i}`,
-    name: ["자녀", "엄마", "아빠"][(seed + i) % 3],
-    member: ((seed + i) % 3 === 0 ? "child" : "parent") as FamilyMember,
-    side: (i === 2 ? "sell" : "buy") as TradeSide,
-    tradedAt: `demo-${i}`,
-    color: PIN_CYCLE[(seed + i) % 3],
-  }));
-}
 
 export type DetailChartGeometry = {
   linePoints: string;
@@ -79,10 +60,8 @@ export function buildDetailChart(options: {
   price: number;
   changePercent: number;
   trades: readonly DetailTrade[];
-  /** 가족 기록이 없을 때 세울 시연 지점을 이 코드로 정한다. */
-  code: string;
 }): DetailChartGeometry | null {
-  const { spark: sp, price, changePercent, trades, code } = options;
+  const { spark: sp, price, changePercent, trades } = options;
   const n = sp.length;
   if (n < 2) return null;
 
@@ -111,9 +90,7 @@ export function buildDetailChart(options: {
   const wonText = (v: number) => `최고 ${toWon(v).toLocaleString("ko-KR")}원`;
   const clampX = (px: number) => Math.max(44, Math.min(W - 44, px));
 
-  // 가족 기록이 없으면 원본처럼 시연 지점을 세운다 — 51종 어디서나 B/S 가 보인다.
-  const source = trades.length > 0 ? trades : demoTrades(code);
-  const ordered = [...source].sort((left, right) => left.tradedAt.localeCompare(right.tradedAt)).slice(-3);
+  const ordered = [...trades].sort((left, right) => left.tradedAt.localeCompare(right.tradedAt)).slice(-3);
   const pins: DetailPin[] = ordered.map((trade, i) => {
     const at = Math.round((n - 1) * (0.24 + (0.62 * (i + 1)) / (ordered.length + 1)));
     return {
