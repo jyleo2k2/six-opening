@@ -29,15 +29,13 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 | 성향 계산 | `web/features/f0-home/lib/archive-profile-view.ts` | 오각형 좌표·주차 카드·가족 비교 값 |
 | 수익률 계산 | `web/features/f0-home/lib/archive-feed.ts` | 달리기 트랙·피드 카드·머리 카드 값 |
 | 서버 조회·쓰기 | `web/features/f0-home/lib/use-archive-data.ts` | 성향·주차 카드·가족·반응 조회와 좋아요·댓글 쓰기 |
-| **계산(비로그인 폴백)** | `web/shared/engine/archive-profile.js` | **능력치 다섯 축, 캐릭터·레벨, 정확 채점** (0~100, §3) |
-| **계산(로그인, 정본)** | `web/shared/engine/behavior-profile.ts` | 위와 같은 다섯 값을 0~10 로 계산 (§6). `ArchiveScreen` 연결은 §6.11 |
+| **계산(정본, 유일)** | `web/shared/engine/behavior-profile.ts` | **능력치 다섯 축, 캐릭터·레벨, 정확 채점** (0~10, §6). `ArchiveScreen` 연결은 §6.11 |
+| 계산(구버전) | `web/shared/engine/archive-profile.js` | **`ArchiveScreen`는 더 이상 쓰지 않는다**(§6.11). `app.html` iframe 사본과 이 파일 자체 테스트에만 남아 있다 (0~100, §3) |
 | 레일 드래그 | 브라우저 기본 가로 스크롤 + `scroll-snap` | 카드 모아보기 레일 |
 | 종가 조회 | `lib/use-archive-data.ts` | 사고판 종목 일봉을 한 번에 받아 온다 |
 | 종가 API | `web/app/api/quote/daily-closes/route.ts` | 보관 일봉에서 `{종목: [{date, close}]}` |
 | **수익률 산식** | `web/shared/engine/portfolio-return.ts` | 평가액·원금·수익률. 금액과 비율을 나눠 돌려주므로 서버가 타인에게는 `returnRate`만 넘길 수 있다(가족 달리기 트랙) |
-| 원본 데이터 | `localStorage["kw_proto_v1"]` | `acc`·`records`·`sellRecords`·`events` |
-| 행동 데이터 판정 API | `web/app/api/profile/behavior/route.ts` | 로그인 세션의 `stock_tab_views`·`transactions` 집계 → 캐릭터 키 |
-| 행동 데이터 조회 | `lib/use-archive-data.ts` | 진입 시 위 API를 불러 `useArchiveData()` 의 `behaviorCharacter`에 저장 |
+| 원본 데이터 | `localStorage["kw_proto_v1"]` | `acc`·`records`·`sellRecords`·`events`. **성향 계산은 여기를 읽지 않는다** — 수익률 탭 지갑 표시용이다 |
 | 지난 주차 카드 API | `web/app/api/profile/season-cards/route.ts` | 로그인 세션의 `transactions`·`stock_tab_views`·`holdings`를 §6 신버전 엔진에 넣어 이번 주를 포함한 주차별 `AbilityCard`(0~10)와 누적 `cumulative` 반환 |
 | 지난 주차 카드 조회 | `lib/use-archive-data.ts` | 진입 시 위 API를 불러 `useArchiveData()` 의 `season`에 저장 |
 | 가족 성향 조회 | `lib/use-archive-data.ts` | `/api/family`의 실제 가족 구성원과 누적 성향을 `useArchiveData()` 의 `family`에 저장 |
@@ -46,14 +44,18 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 
 `web/features/f9-archive/`에는 화면 컴포넌트가 없다. UI가 기능 폴더로 이관됐다고 가정하지 않는다.
 
-## 3. 계산(구버전, 비로그인 폴백) — `shared/engine/archive-profile.js`
+## 3. 계산(구버전, 화면 연결 없음) — `shared/engine/archive-profile.js`
 
 `web/AGENTS.md`는 수치·스코어링 계산을 `shared/engine`에서만 하도록 정한다. 화면은 결과를 표시만 한다.
 
-> **§3~§5 는 비로그인(또는 서버 응답 전) 화면이 여전히 쓰는 구버전이다.** 로그인 상태의 정본은
-> §6 신버전(`behavior-profile.ts`)이며, `ArchiveScreen` 연결은 §6.11 이 완료됐다. `archive-profile.js`
-> 는 이 로컬 폴백과 §3.2 행동 신호 캐릭터 판정(`resolveCharacterFromBehaviorSignals`)에 계속
-> 쓰이므로 아직 지우지 않는다.
+> **§3~§5 는 `ArchiveScreen`가 더 이상 쓰지 않는 구버전이다.** 유일한 정본은 §6
+> 신버전(`behavior-profile.ts`)이고 연결은 §6.11 이다. 이 파일이 남아 있는 이유는
+> `app.html` iframe 이 조립 때 복사본을 받기 때문이며(§4), iframe 을 철거할 때 함께 지운다.
+>
+> **2026-08-16 삭제:** §3.2 의 행동 신호 캐릭터 판정(`resolveCharacterFromBehaviorSignals`,
+> `GET /api/profile/behavior`)과 로컬 `records` 폴백(`localScores`)을 화면에서 끊었다.
+> 같은 질문에 답하는 산식이 셋이라 서로 다른 시점에 도착하며 캐릭터가
+> `승부사 LV2 → 저격수 LV2 → 승부사 LV3` 으로 번갈아 떴다. 자세한 규칙은 §6.11.
 
 ### 3.1 능력치 다섯 축
 
@@ -82,16 +84,22 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 탭은 **�
 
 반올림한 퍼센트가 아니라 **반올림 전 비율**로 판정한다. 3건 중 2건(66.67%)이 반올림 때문에 레벨 2로 떨어지지 않게 하기 위해서다.
 
-**근거·집중의 대체 입력 — 로그인 사용자 행동 데이터.** 로컬스토리지 계산과 별개로, 실제 로그인 세션(Supabase)의 다음 두 신호가 있으면 그 값으로 근거·집중 우세만 다시 정하고 위 표에 그대로 대입한다. 정확·레벨과 다섯 축 막대 수치는 이 경로의 영향을 받지 않는다 — **캐릭터 카드(이름·이미지·설명)만 바뀐다.**
+**~~근거·집중의 대체 입력 — 로그인 사용자 행동 데이터.~~ 2026-08-16 삭제.**
 
-| 축 | 산식 | 데이터 |
-|---|---|---|
-| 근거/직관 우세 | `stock_tab_views.tab_count` 합계 — 0~1 → 직관 우세, 2 이상 → 근거 우세 | 로그인 사용자의 `stock_tab_views` 전 행 |
-| 집중/분산 우세 | 거래한 종목 수(매수·매도 통틀어 distinct `stock_id`) — 2개 이하 → 집중 우세, 3개 이상 → 분산 우세 | 로그인 사용자의 `transactions` 전 행 |
+`resolveCharacterFromBehaviorSignals(tabCountTotal, distinctSymbolCount)`와 그 조회 경로
+`GET /api/profile/behavior`는 신버전 엔진이 없던 시기에 "DB에 데이터는 있는데 화면엔 로컬
+값만 나온다"를 급히 막으려고 둔 근사였다. 다음 이유로 화면 연결과 라우트를 함께 지웠다.
 
-- 판정 함수: `web/shared/engine/archive-profile.js`의 `resolveCharacterFromBehaviorSignals(tabCountTotal, distinctSymbolCount)`.
-- 조회·집계: `web/app/api/profile/behavior/route.ts` (GET, 로그인 세션 필요, 기간 제한 없이 전체 누적 집계). **주 단위 등 데이터 리셋은 운영이 `stock_tab_views`·`transactions` 원본을 직접 관리하는 별도 절차이며 이 API·엔진은 리셋을 수행하지 않는다.**
-- 화면 연결: `useArchiveData()` 가 진입 시 이 API를 한 번 불러 `useArchiveData()` 의 `behaviorCharacter`에 저장한다. `ArchiveScreen`는 `dbBehavior.character`가 있으면 그 캐릭터로 표시하고, 없으면(비로그인·표본 없음 등) 기존 로컬스토리지 계산으로 폴백한다.
+- **분모가 없다.** 근거 우세를 `tab_count` **합계**로 정해서, 한 번이라도 찾아보면 매수를
+  아무리 많이 해도 계속 근거형이다. §6.2 신버전은 **매수 대비 비율**로 낸다.
+- **금액을 안 본다.** 집중 우세를 distinct 종목 수로 정해서, 같은 섹터 3종목을 분산으로
+  본다. §6.3 신버전은 섹터별 평가금액 비중과 현금 비중으로 낸다.
+- **보류가 없다.** 표본이 없어도 넷 중 하나를 확신한다. §6.5 신버전은 `TIE_BAND`·
+  `MIN_BUYS_FOR_PROFILE`로 `character: null`을 낼 수 있다.
+
+두 산식이 같은 화면에 동시에 연결돼 있어서, 응답이 도착하는 순서대로 캐릭터가
+`승부사 LV2 → 저격수 LV2 → 승부사 LV3`으로 번갈아 떴다. `resolveCharacterFromBehaviorSignals`
+함수 자체는 `archive-profile.js`에 남지만(그 파일 테스트가 본다) **어느 화면도 부르지 않는다.**
 
 ### 3.3 정확 채점
 
@@ -332,33 +340,34 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 - **`info_detail_opened` 가 화면에서 한 번도 안 찍힌다.** `logEvent` 호출부는 `news_detail_opened`·`chart_detail_opened` 둘뿐이라 로컬 경로의 "3탭 중 2탭" 규칙이 실질 "2탭 중 2탭"이다.
 - `archive-profile.js` 의 `weekStartKstOf` 는 `season-cards` 가 신버전으로 옮겨가며 쓰이지 않게 됐다. 구버전을 지울 때 함께 정리한다.
 - `shared/store/family-trade-seed.ts` 주석이 아직 "5거래일" 기준으로 적혀 있다 (다른 세션 소유 경로).
-- 로그인 전 화면은 §3 구버전 로컬 계산으로 남는다 — §6.11.
 
 ### 6.11 화면 연결 (2026-08-14, `ArchiveScreen`)
 
-성향 탭·카드 모아보기는 이제 **로그인 상태면 신버전(0~10) 값을 그 스케일 그대로** 그린다. 로그인 전이거나 응답이 아직 없으면(§6.10) §3 구버전(0~100)으로 폴백한다. 한 카드 안에서 두 스케일을 섞지 않도록 `ArchiveScreen`가 만드는 모든 성향 카드(`traits`·`weekCards`·`cardSheet`·`famPolys`)는 `scaleMax`(10 또는 100)를 값과 함께 들고 다니며, 오각형 좌표와 막대 폭은 항상 **반올림 전 원값**으로 `score / scaleMax` 비율을 낸다. 반면 **화면에 찍는 숫자는 두 스케일 모두 정수다**(`fmtScore = v => String(Math.round(v))`) — 10점 만점은 `7`, 100점 만점은 `72`. 라벨만 정수로 줄이고 도형은 원값 비율을 쓰므로 오각형 모양은 그대로 부드럽다.
+성향 탭·카드 모아보기는 **신버전(0~10) 값 하나만** 그린다. 성향 카드는 `scaleMax`(항상 10)를 값과 함께 들고 다니며, 오각형 좌표와 막대 폭은 **반올림 전 원값**으로 `score / scaleMax` 비율을 낸다. **화면에 찍는 숫자는 정수다**(`formatScore = v => String(Math.round(v))`) — 10점 만점은 `7`. 라벨만 정수로 줄이고 도형은 원값 비율을 쓰므로 오각형 모양은 그대로 부드럽다.
 
-| 카드 | 값 원본(로그인) | 값 원본(비로그인·응답 전) |
+| 카드 | 값 원본 | 응답이 없을 때 |
 |---|---|---|
-| 성향 탭(오각형·유형) | `GET /api/profile/season-cards` 의 `cumulative` | 로컬 `records` + 구버전 `computeAbilityScores`/`gradeAccuracy` |
-| 카드 모아보기 — 이번 주 | 위와 같은 `cumulative` (성향 탭과 항상 같은 카드) | 위와 같은 로컬 계산 |
-| 카드 모아보기 — 지난 주 | `season-cards` 의 `weeks[]`를 주 시작일로 매칭 — 로컬에 같은 주 기록이 있어도 이 값이 우선한다(실제 채점을 담고 있어서다) | 로컬 `records`를 그 주만 모아 구버전으로 재계산(정확은 §7대로 기본값) |
-| 가족 비교 | `GET /api/family`의 `members[].behavior`(신버전 누적 카드) | 로컬 `records`를 계정별로 구버전 재계산 |
+| 성향 탭(오각형·유형) | `GET /api/profile/season-cards` 의 `cumulative` | 다섯 축 중립 5, 유형은 `관찰 중` |
+| 카드 모아보기 — 이번 주 | 위와 같은 `cumulative` (성향 탭과 항상 같은 카드) | 위와 같음 |
+| 카드 모아보기 — 지난 주 | `season-cards` 의 `weeks[]`를 주 시작일로 매칭 | 카드가 없다 — 로컬 기록으로 주차를 만들지 않는다 |
+| 가족 비교 | `GET /api/family`의 `members[].behavior`(신버전 누적 카드) | 축은 중립 5, 유형은 `관찰 중` |
 
-캐릭터는 신버전 `character`(`challenger`는 화면 키 `fighter`로 맞춘다, §6.5)를 우선 쓰고, `null`이면(표본 부족·동점대) 구버전 `resolveCharacter()`의 상대 비교로 대신 정한다 — 비교 연산이라 스케일에 무관하게 동작한다. 레벨이 `null`이면(§6.4 표본 부족) 화면은 2로 둔다.
+**한 값에 원본은 하나다 (2026-08-16).** 캐릭터는 `cumulative.character`(`challenger`는 화면 키 `fighter`로 맞춘다, §6.5)만 쓴다. 다른 산식으로 되짚지 않는다.
 
-`resolveCharacterFromBehaviorSignals`(§3.2, `GET /api/profile/behavior`)는 신버전 `character`가 있으면 밀려나는 보조 신호로 남는다 — 신버전이 더 정확한 입력(실제 근거·집중 산식)을 쓰기 때문이다. 이 API·화면 연결을 없애는 판단은 이 작업의 범위 밖이다.
+- `character`가 `null`이면(§6.5 표본 부족·동점대) `PENDING_TYPE` — 제목은 `관찰 중`, 캐릭터 그림은 안 그리고 그림 자리만 비워 둔다(오각형이 움직이지 않게). 오각형은 엔진이 준 값을 그대로 그린다.
+- `level`이 `null`이면(§6.4 표본 부족) **레벨을 감춘다.** 2로 채우지 않는다 — 채우면 실제로 판정된 LV2와 화면에서 구별되지 않는다. 유형만 있으면 제목은 `저격수`, 둘 다 있으면 `저격수 LV2`.
+- 응답 자체가 없으면(비로그인·조회 실패) `myProfile(null)`이 축을 중립 5로 두고 유형을 비운다. **로컬 `kw_proto_v1` 기록으로 다시 계산하지 않는다** — 그 값이 서버 응답보다 먼저 도착해 캐릭터가 한 번 떴다가 바뀌었다.
+- `useArchiveData()`는 `data.cumulative`가 있으면 `season`을 세운다. 예전처럼 `weeks.length`를 조건으로 걸면 아직 한 주도 채우지 못한 사용자가 누적 카드까지 못 받아 유형이 영영 `관찰 중`에 머문다.
+- 판정 함수는 `resolveType(key, level)` 하나이고 **판정하지 않는다** — 엔진이 정한 키를 이름·색·설명으로 펴기만 한다.
 
 ## 7. 현재 알려진 불일치·미완료
 
-- **지난 주 카드의 정확은 비로그인(로컬 기록만 있을 때)이면 여전히 기본값이다.** 로그인 상태는 §6.11 대로 `season-cards`(Supabase 경로, §6 신버전 실제 채점)를 그대로 쓴다. 로그인 세션이 없어 로컬 `records` 만으로 그리는 주는 구버전 `computeAbilityScores` 를 채점 없이 부른다 — `archive-profile.js`가 남아있는 동안은 이 폴백도 함께 남는다.
 - 종가 배치가 밀리면 최근 거래가 오래 `pending` 에 남아 정확이 기본값 50에 머문다.
+- `WeekCard.scaleMax`·`Profile.scaleMax`는 이제 항상 10이다. 필드를 지우면 `Radar`·카드 시트 렌더까지 손대야 해서 이번에는 남겼다. `app.html` iframe 을 철거해 0~100 스케일이 완전히 사라질 때 함께 정리한다.
 - 수익률 탭에서 `보유 종목 · 섹터별` 레일을 뺐다. 그 레일에서만 열리던 **섹터 상세 모달(`secModal*`)과 `retSectors` 계산이 화면에서 도달 불가**로 남아 있다. 되살리거나 지우는 판단이 필요하다.
 - 가족 비교의 아빠(`dad`)는 이제 DB 계정이 있다 — `profiles.id=3`, `login_id='dad'`, `guardian_role='dad'`, `family_tag='찬영가족'`. `GET /api/family` 응답에 포함되므로 **로그인 상태 가족 비교에는 아빠가 나온다.** `ArchiveScreen`의 `MEMBERS` 상수는 아직 `dad.acc:null`이지만 이는 비로그인·응답 전 폴백에서만 쓰인다. 그 폴백과 "아빠는 계정이 없다"고 적힌 주변 주석은 정리 대상이다.
 - 부모 단독 화면으로 전환하는 전역 계정 스위처는 **만들지 않기로 확정됐다.** 계정 전환은 로그아웃 후 재로그인이다 (`docs/기능명세.md` §4.2).
-- 시즌 기록 탭은 없다. 주별 누적은 카드 모아보기가 대신하고, 로컬에 없는 지난 주는 §3.5 가 Supabase `transactions` 로 채운다. "시즌" 이라는 이름의 화면·데이터 개념은 여전히 없다 — 카드에는 "이번 주"·"○월 ○주차" 라벨만 있다.
-- §3.5 의 지난 주차 카드와 §3.2 의 이번 주 행동 데이터 오버라이드는 같은 `transactions`·`stock_tab_views` 테이블을 다른 기간으로 읽는다. 한쪽에 더미·과거 행을 넣으면 다른 쪽 표시도 바뀔 수 있다는 점을 잊지 않는다.
-- 매수 기록이 없어도 캐릭터가 나온다. 관찰 초기 상태를 따로 두지 않는다.
+- 시즌 기록 탭은 없다. 주별 누적은 카드 모아보기가 대신하고 주차 목록은 `season-cards`가 준다. "시즌" 이라는 이름의 화면·데이터 개념은 여전히 없다 — 카드에는 "이번 주"·"○월 ○주차" 라벨만 있다.
 - **F9 는 LLM 을 쓰지 않는다.** 캐릭터 카드에 붙일 Luna 서술(`lib/narration.ts` + `POST /api/profile`)은 어느 화면도 부른 적이 없어 PR #221 에서 삭제했다. 다시 붙일 때는 이 SPEC 에 계약부터 적고 화면 연결까지 한 작업으로 처리한다 (`docs/기능명세.md` §7.1).
 
 ## 8. 금지 사항

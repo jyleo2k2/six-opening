@@ -4,13 +4,15 @@ import {
   axesFromCard,
   familyMembers,
   myProfile,
+  NEUTRAL_SCORES,
+  PENDING_TYPE,
   resolveType,
   typeKeyOf,
   weekCards,
   type FamilyRow,
 } from "./archive-profile-view";
 
-// ── 성향: 두 스케일이 섞이면 오각형이 조용히 거짓말을 한다 ────────────────────
+// ── 성향: 원본은 season-cards 누적 카드 하나다 ──────────────────────────────
 const card = {
   scores: { focus: 8, diversification: 3, accuracy: 5, intuition: 2, evidence: 9 },
   character: "sniper",
@@ -19,18 +21,29 @@ const card = {
 };
 assert.deepEqual(axesFromCard(card), [8, 3, 5, 2, 9]);
 
-// season-cards 누적이 있으면 그게 정본이고 0~10 이다.
-const logged = myProfile({ cumulative: card }, { count: 99, scores: [50, 50, 50, 50, 50], level: 1 });
+const logged = myProfile({ cumulative: card });
 assert.deepEqual(logged.scores, [8, 3, 5, 2, 9]);
 assert.equal(logged.scaleMax, 10);
 assert.equal(logged.level, 3);
 assert.equal(logged.characterKey, "sniper");
 assert.equal(logged.sampleCount, 5);
 
-// 없으면 로컬 구버전(0~100) 폴백. 스케일이 함께 바뀐다.
-const fallback = myProfile(null, { count: 2, scores: [70, 20, 50, 10, 90], level: 1 });
-assert.equal(fallback.scaleMax, 100);
-assert.equal(fallback.characterKey, null);
+// 누적 카드가 없으면(비로그인·조회 실패) 축은 중립 5, 유형은 비운다.
+// 로컬 기록으로 다시 계산하면 그 값이 먼저 떠서 캐릭터가 바뀌어 보인다.
+const pending = myProfile(null);
+assert.deepEqual(pending.scores, NEUTRAL_SCORES);
+assert.deepEqual(pending.scores, [5, 5, 5, 5, 5]);
+assert.equal(pending.scaleMax, 10);
+assert.equal(pending.level, null);
+assert.equal(pending.characterKey, null);
+assert.equal(pending.sampleCount, 0);
+
+// 엔진이 표본 부족·동점대로 판정을 보류하면 레벨도 없다. 2로 채우지 않는다 —
+// 채우면 실제로 판정된 LV2 와 화면에서 구별되지 않는다.
+const undecided = myProfile({ cumulative: { ...card, character: null, level: null } });
+assert.deepEqual(undecided.scores, [8, 3, 5, 2, 9]);
+assert.equal(undecided.characterKey, null);
+assert.equal(undecided.level, null);
 
 // 서버가 예전 이름으로 준 캐릭터는 지금 이름에 맞춘다. 모르는 값은 null.
 assert.equal(typeKeyOf("challenger"), "fighter");
@@ -38,23 +51,30 @@ assert.equal(typeKeyOf("sniper"), "sniper");
 assert.equal(typeKeyOf("없는유형"), null);
 assert.equal(typeKeyOf(null), null);
 
-// 행동 데이터가 정한 캐릭터는 축 점수를 이긴다 (F9 SPEC §3.2 대체 입력).
-const overridden = resolveType([9, 1, 5, 1, 9], 2, "explorer");
-assert.equal(overridden.key, "explorer");
-assert.equal(overridden.title, "탐험가 LV2");
-assert.equal(overridden.ink, "#1B3F35");
+// resolveType 은 판정하지 않고 펴기만 한다.
+const explorer = resolveType("explorer", 2);
+assert.equal(explorer.key, "explorer");
+assert.equal(explorer.title, "탐험가 LV2");
+assert.equal(explorer.ink, "#1B3F35");
+assert.equal(explorer.pending, false);
 
-// ── 카드 모아보기: 기록이 있는 주 + 이번 주, 오래된 순 ──────────────────────
+// 유형이 없으면 관찰 중 카드. 축 점수로 유형을 되짚지 않는다.
+const pendingType = resolveType(null, null);
+assert.equal(pendingType.key, null);
+assert.equal(pendingType.title, "관찰 중");
+assert.equal(pendingType.pending, true);
+assert.deepEqual(pendingType, PENDING_TYPE);
+
+// 유형은 정해졌는데 레벨이 없으면 이름만 적는다.
+assert.equal(resolveType("sniper", null).title, "저격수");
+
+// ── 카드 모아보기: 서버가 채점한 주 + 이번 주, 오래된 순 ────────────────────
 const now = new Date("2026-08-15T09:00:00+09:00").getTime(); // 토요일
-const sectorOf = () => "game";
-const myType = resolveType([8, 3, 5, 2, 9], 3, "sniper");
+const myType = resolveType("sniper", 3);
 const cards = weekCards(
   { cumulative: card, weeks: [{ weekStart: "2026-08-03", count: 2, card }] },
   logged,
   myType,
-  [{ user_id: "me", ts: "2026-08-04T01:00:00Z", symbol: "005930", reason_code: "buy_news", qty: 1, amount_krw: 1000, order_status: "filled" }],
-  "me",
-  sectorOf,
   now,
 );
 // 8/3 주와 이번 주(8/10) 두 장.
@@ -63,13 +83,16 @@ assert.equal(cards[1].week, "이번 주");
 // 이번 주 카드는 성향 탭과 같은 유형이어야 한다 — 한 화면에서 갈리면 안 된다.
 assert.equal(cards[1].title, myType.title);
 assert.deepEqual(cards[1].scores, logged.scores);
-// 지난 주는 서버가 채점한 값(0~10)이 로컬 재계산보다 우선한다.
+// 지난 주는 서버가 채점한 값(0~10)이다. 로컬 재계산 카드는 이제 섞이지 않는다.
 assert.equal(cards[0].scaleMax, 10);
 assert.equal(cards[0].date, "8/3 – 8/9");
 
-// 산 게 없는 이번 주는 문구가 다르다.
-const empty = weekCards(null, fallback, myType, [], "me", sectorOf, now);
+// 로컬에만 있는 주는 더 이상 카드가 되지 않는다 — 서버 주차 + 이번 주뿐이다.
+const empty = weekCards(null, pending, pendingType, now);
 assert.equal(empty.length, 1);
+assert.equal(empty[0].week, "이번 주");
+assert.equal(empty[0].title, "관찰 중");
+assert.deepEqual(empty[0].scores, [5, 5, 5, 5, 5]);
 assert.match(empty[0].desc, /아직 산 게 없어요/u);
 
 // ── 가족 비교 ────────────────────────────────────────────────────────────

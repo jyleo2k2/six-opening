@@ -10,7 +10,6 @@ import {
   formatScore,
   gridRings,
   labelAt,
-  localScores,
   myProfile,
   pointAt,
   resolveType,
@@ -18,7 +17,6 @@ import {
   TRAIT_LABELS,
   TRAIT_META,
   typeImage,
-  typeKeyOf,
   weekCards,
   type FamilyMember,
   type ResolvedType,
@@ -228,25 +226,12 @@ export function ArchiveScreen({
       ),
     [universe, quotes],
   );
-  const sectorOf = (code: string) =>
-    universe?.stocks.find((s) => s.code === code)?.sector ?? null;
-
-  // 성향 — 로그인 정본은 season-cards 누적, 없으면 로컬 기록으로 낸 구버전.
-  const records = (wallet?.records ?? []) as never[];
-  const sellRecords = (wallet?.sellRecords ?? []) as never[];
-  const fallback = useMemo(
-    () => localScores(records, sellRecords, {}, "child_minji", sectorOf),
-    [records, sellRecords, universe],
-  );
-  const mine = myProfile(data.season, fallback);
-  const myType = resolveType(
-    mine.scores,
-    mine.level,
-    mine.characterKey ?? typeKeyOf(data.behaviorCharacter),
-  );
+  // 성향 — `season-cards` 누적 카드 하나가 원본이다. 로컬 기록으로 다시 계산하지 않는다.
+  const mine = myProfile(data.season);
+  const myType = resolveType(mine.characterKey, mine.level);
   const cards = useMemo(
-    () => weekCards(data.season, mine, myType, records, "child_minji", sectorOf),
-    [data.season, mine.scores.join(), myType.key, records, universe],
+    () => weekCards(data.season, mine, myType),
+    [data.season, mine.scores.join(), myType.key],
   );
   const activeCard = Math.max(0, Math.min(cardActive ?? cards.length - 1, cards.length - 1));
   // 끌어서 넘기고, 멎은 자리의 가운데 카드를 켠다. 켜는 쪽이 없으면 손가락으로 밀었을 때
@@ -437,7 +422,8 @@ export function ArchiveScreen({
                         <div style={{ position: "relative", textAlign: "center", fontSize: 21, fontWeight: 900, color: ink, marginTop: 5, letterSpacing: "-0.01em", textShadow: "0 1px 0 rgba(255,255,255,0.6)" }}>{card.title}</div>
                         <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 2, marginTop: 6 }}>
                           <div style={{ flex: "none", width: 124, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
-                            <div style={{ width: 158, height: 196, margin: "0 -16px -4px -14px", background: `url(${typeImage(card.type.key)}) center bottom/contain no-repeat`, filter: `drop-shadow(0 12px 14px ${rgba(ink, 0.38)})` }} />
+                            {/* 유형이 정해지기 전에는 그림 자리를 비운다. 자리는 남겨 둬야 오각형이 안 움직인다. */}
+                            <div style={{ width: 158, height: 196, margin: "0 -16px -4px -14px", background: card.type.key ? `url(${typeImage(card.type.key)}) center bottom/contain no-repeat` : "none", filter: card.type.key ? `drop-shadow(0 12px 14px ${rgba(ink, 0.38)})` : "none" }} />
                             <div style={{ width: 82, height: 18, marginTop: -8, borderRadius: "50%", background: `radial-gradient(ellipse at center,${rgba(ink, 0.22)} 0%,${rgba(ink, 0.06)} 46%,rgba(0,0,0,0) 72%)` }} />
                           </div>
                           <Radar ink={ink} scaleMax={card.scaleMax} scores={card.scores} />
@@ -477,7 +463,8 @@ export function ArchiveScreen({
                 <div style={{ position: "relative", textAlign: "center", fontSize: 24, fontWeight: 900, color: myType.ink, marginTop: 5, letterSpacing: "-0.01em", textShadow: "0 1px 0 rgba(255,255,255,0.6)" }}>{myType.title}</div>
                 <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
                   <div style={{ flex: "none", width: 142, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
-                    <div style={{ width: 168, height: 208, margin: "0 -14px -4px -12px", background: `url(${typeImage(myType.key)}) center bottom/contain no-repeat`, filter: `drop-shadow(0 12px 14px ${rgba(myType.ink, 0.38)})` }} />
+                    {/* 유형이 정해지기 전에는 그림 자리를 비운다. 자리는 남겨 둬야 오각형이 안 움직인다. */}
+                    <div style={{ width: 168, height: 208, margin: "0 -14px -4px -12px", background: myType.key ? `url(${typeImage(myType.key)}) center bottom/contain no-repeat` : "none", filter: myType.key ? `drop-shadow(0 12px 14px ${rgba(myType.ink, 0.38)})` : "none" }} />
                     <div style={{ width: 90, height: 20, marginTop: -8, borderRadius: "50%", background: `radial-gradient(ellipse at center,${rgba(myType.ink, 0.22)} 0%,${rgba(myType.ink, 0.06)} 46%,rgba(0,0,0,0) 72%)` }} />
                   </div>
                   <Radar

@@ -7,11 +7,14 @@ import type { FamilyRow, SeasonCards } from "./archive-profile-view";
 /**
  * 아카이브가 서버에서 읽는 것 전부. `ui-src/methods/load*.js` 넷을 한 훅으로 모았다.
  *
- * 네 경로는 서로 기다리지 않는다 — 성향 카드가 가족 응답을 기다리면 화면이 늦게 뜬다.
+ * 세 경로는 서로 기다리지 않는다 — 성향 카드가 가족 응답을 기다리면 화면이 늦게 뜬다.
  * 다만 반응(댓글·좋아요)만은 가족 체결 id 를 알아야 부를 수 있어 그 뒤에 이어 붙인다.
+ *
+ * **성향 캐릭터는 `season-cards` 하나만 읽는다.** 예전에는 `GET /api/profile/behavior` 도
+ * 함께 불러 그 캐릭터를 먼저 표시했는데, 두 응답이 순서대로 도착하며 캐릭터 이름이
+ * 바뀌어 보였다. 그 API 는 신버전 엔진이 없던 시절의 근사라 F9 SPEC §3.2 에서 삭제했다.
  */
 export type ArchiveData = {
-  behaviorCharacter: string | null;
   season: SeasonCards;
   family: { viewer?: { id: number }; members: FamilyRow[]; trades: FamilyTrade[] } | null;
   comments: Record<string, FeedComment[]>;
@@ -21,7 +24,6 @@ export type ArchiveData = {
 const json = (response: Response) => (response.ok ? response.json() : null);
 
 export function useArchiveData() {
-  const [behaviorCharacter, setBehaviorCharacter] = useState<string | null>(null);
   const [season, setSeason] = useState<SeasonCards>(null);
   const [family, setFamily] = useState<ArchiveData["family"]>(null);
   const [comments, setComments] = useState<Record<string, FeedComment[]>>({});
@@ -59,18 +61,12 @@ export function useArchiveData() {
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/profile/behavior", { cache: "no-store" })
-      .then(json)
-      .then((data) => {
-        if (alive && data?.character) setBehaviorCharacter(data.character);
-      })
-      .catch(() => {});
     fetch("/api/profile/season-cards", { cache: "no-store" })
       .then(json)
       .then((data) => {
-        // 주차가 하나도 없으면 없는 것으로 본다 — 빈 목록으로 카드 모아보기를 덮으면
-        // 로컬 기록으로 그리던 주차가 통째로 사라진다.
-        if (alive && Array.isArray(data?.weeks) && data.weeks.length) setSeason(data);
+        // 누적 카드가 있으면 받는다. 주차 수를 조건으로 걸면 아직 한 주도 채우지 못한
+        // 사용자가 누적 카드까지 못 받아, 유형이 영영 `관찰 중` 에 머문다.
+        if (alive && data?.cumulative) setSeason(data);
       })
       .catch(() => {});
     fetch("/api/family", { cache: "no-store" })
@@ -131,7 +127,6 @@ export function useArchiveData() {
   }, []);
 
   return {
-    behaviorCharacter,
     season,
     family,
     comments,
