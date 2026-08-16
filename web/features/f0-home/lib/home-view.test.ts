@@ -68,9 +68,10 @@ assert.equal(dadDemo.totalAssetsLabel, "찬영 아버님 총자산");
 assert.equal(HOME_HOLDING_LIMIT, 3);
 assert.equal(dadDemo.holdings.length, 4);
 assert.equal(dadDemo.topHoldings.length, 3);
-assert.equal(dadDemo.hasMoreHoldings, true);
 assert.deepEqual(demo.topHoldings, demo.holdings);
-assert.equal(demo.hasMoreHoldings, false);
+// 시트는 카드에 다 담긴 계정에서도 연다 — `전체보기` 는 "넘친 나머지" 가 아니라
+// "가진 전부" 를 보여 주는 자리다. 세 줄뿐인 아이 계정에서도 버튼이 서야 한다.
+assert.ok(demo.holdings.length > 0);
 
 // 실제 계좌 — 평가금액과 수익률은 현재가·평단가로 낸다.
 const held: AccountUser = {

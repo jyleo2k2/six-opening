@@ -201,8 +201,6 @@ export type HomeView = {
   holdings: HomeHolding[];
   /** 홈 카드에 보이는 앞 세 줄. */
   topHoldings: HomeHolding[];
-  /** 카드에 못 담은 줄이 있나 — `전체보기` 를 띄울지 정한다. */
-  hasMoreHoldings: boolean;
   /** 목표 아이템을 몇 개 살 수 있나. 수익이 마이너스면 0. */
   goalCount: number;
   dayCount: string;
@@ -248,7 +246,6 @@ export function homeView(
     loaded,
     holdings,
     topHoldings: holdings.slice(0, HOME_HOLDING_LIMIT),
-    hasMoreHoldings: holdings.length > HOME_HOLDING_LIMIT,
     goalCount,
     dayCount: "시즌 3 · " + info.day,
     itemLine:

@@ -32,7 +32,7 @@ const AVATAR = styleFromCss(
  */
 const ASSET_LABEL = styleFromCss("font-size:12px;font-weight:700;color:#8E7BC7");
 const ASSET_TOTAL = styleFromCss(
-  "font-size:22px;font-weight:800;color:#01185A;letter-spacing:-0.02em;line-height:1.2;" +
+  "font-size:25px;font-weight:800;color:#01185A;letter-spacing:-0.02em;line-height:1.2;" +
     "font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
 );
 const MENU_BTN = styleFromCss(
@@ -75,9 +75,12 @@ const ITEM_LINE = styleFromCss(
  * 크기는 이 자리에 있던 총자산과 같은 `23px` 다. 총자산이 헤더로 올라가면서 가운데의
  * 주인공이 수익으로 바뀌었으므로, 자리만 물려받고 크기를 줄이면 목표 문장보다 작아져
  * 무엇이 주인공인지 흐려진다.
+ *
+ * 바로 위 목표 문장과는 **붙여 둔다**. "○개 살 수 있어요" 와 그 근거인 수익은 한 덩어리로
+ * 읽혀야 하는데, 사이가 뜨면 따로 선 두 문장이 된다.
  */
 const PROFIT_LINE = styleFromCss(
-  "font-size:23px;font-weight:800;letter-spacing:-0.02em;margin-top:7px;font-variant-numeric:tabular-nums",
+  "font-size:23px;font-weight:800;letter-spacing:-0.02em;margin-top:2px;font-variant-numeric:tabular-nums",
 );
 /**
  * 캐릭터 그림 자리는 **높이가 고정**이다. 원본 그림의 비율이 서로 달라(아빠 368×655,
@@ -93,11 +96,17 @@ const GOAL_IMG = styleFromCss(
 );
 /** 남는 세로 공간은 여기가 다 먹는다 — 그림과 카드가 서로를 밀지 않게 하는 자리다. */
 const SPACER = styleFromCss("flex:1;min-height:0");
+/**
+ * 카드 **전체**가 위로 미는 손잡이다. 머리줄만 손잡이로 두면 잡을 곳이 15px 남짓이라
+ * 목록 위에 손가락을 올린 사람은 아무리 밀어도 열리지 않는다. `touch-action:pan-x` 는
+ * 세로 손짓을 브라우저에 뺏기지 않으려고 둔다.
+ */
 const HOLD_CARD = styleFromCss(
-  "flex:none;background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10)",
+  "flex:none;background:#fff;border-radius:26px;padding:18px;box-shadow:0 12px 28px rgba(35,25,80,0.10);" +
+    "touch-action:pan-x",
 );
 const HOLD_HEAD = styleFromCss(
-  "display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;touch-action:pan-x",
+  "display:flex;align-items:center;justify-content:space-between;gap:10px",
 );
 const HOLD_TITLE = styleFromCss(
   "font-size:15.5px;font-weight:800;color:#01185A;white-space:nowrap",
@@ -155,8 +164,8 @@ const pctStyle = (holding: HomeHolding, size: number) =>
  * 한 줄을 누르면 그 종목 상세로 간다. 코드를 못 찾은 줄(유니버스에 없는 데모 보유)은
  * 누를 수 없다 — 갈 곳 없는 손짓에 손가락 모양만 뜨는 것을 막는다.
  *
- * 누른 사건은 위로 올리지 않는다. 카드를 누르면 전체보기 시트가 열리는데, 줄을 누른
- * 손가락까지 그 길로 가면 상세로 넘어가면서 시트가 함께 열린다.
+ * 누른 사건은 위로 올리지 않는다. 이 줄이 앉은 카드는 시트를 여는 손잡이라, 줄을 누른
+ * 손가락까지 그 길로 흘러가면 상세와 시트가 함께 열릴 여지가 남는다.
  */
 function HoldingRow({
   holding,
@@ -324,17 +333,21 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
 
           <div style={SPACER} />
 
-          <div onClick={openHoldings} style={HOLD_CARD}>
-            <div
-              onPointerCancel={() => {
-                pull.current = null;
-              }}
-              onPointerDown={grabCard}
-              onPointerUp={releaseCard}
-              style={HOLD_HEAD}
-            >
+          <div
+            onPointerCancel={() => {
+              pull.current = null;
+            }}
+            onPointerDown={grabCard}
+            onPointerUp={releaseCard}
+            style={HOLD_CARD}
+          >
+            <div style={HOLD_HEAD}>
               <div style={HOLD_TITLE}>내 보유 종목</div>
-              {view.hasMoreHoldings && <div style={HOLD_MORE}>전체보기</div>}
+              {view.holdings.length > 0 && (
+                <div onClick={openHoldings} style={HOLD_MORE}>
+                  전체보기
+                </div>
+              )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 12 }}>
               {view.noHoldings && (
