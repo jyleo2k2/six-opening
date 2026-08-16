@@ -13,6 +13,8 @@ export type AccountUser = {
   user_id: number;
   parent_child: string;
   guardian_role: string | null;
+  /** 총 현금(미체결 주문이 잠근 몫 포함). 총자산 = 이 값 + 보유 평가금액(`route.ts` 규칙과 같다). */
+  balance?: number | null;
   holdings: {
     stock_code: string | null;
     stock_name: string | null;
@@ -189,6 +191,8 @@ export type HomeView = {
   rateText: string;
   profitText: string;
   rateColor: string;
+  /** 현금(`balance`) + 보유 평가금액. 계좌를 못 읽었으면 보유 평가금액만(현금 없이) 보여준다. */
+  totalAssetsText: string;
   /** 계좌를 읽었는데 보유가 하나도 없을 때만 참. */
   noHoldings: boolean;
 };
@@ -214,6 +218,8 @@ export function homeView(
     0,
   );
   const rate = total ? (profit / total) * 100 : 0;
+  // 계좌를 못 읽은 동안은 현금을 모른다 — 0으로 두어 보유 평가금액만 보여준다.
+  const cash = loaded ? user?.balance ?? 0 : 0;
 
   return {
     role: role ?? "child",
@@ -228,6 +234,7 @@ export function homeView(
     rateText: (rate >= 0 ? "+" : "−") + Math.abs(rate).toFixed(1) + "%",
     profitText: (profit >= 0 ? "+" : "−") + won(Math.abs(profit)),
     rateColor: rate >= 0 ? "#D5327A" : "#2E6BE6",
+    totalAssetsText: won(cash + total),
     noHoldings: loaded && live.length === 0,
   };
 }
