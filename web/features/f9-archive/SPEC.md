@@ -46,7 +46,7 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 **자리�
 | 원본 데이터 | `localStorage["kw_proto_v1"]` | `acc`·`records`·`sellRecords`·`events`. **성향 계산은 여기를 읽지 않는다** — 수익률 탭 지갑 표시용이다 |
 | 지난 주차 카드 API | `web/app/api/profile/season-cards/route.ts` | 로그인 세션의 `transactions`·`stock_tab_views`·`holdings`를 §6 신버전 엔진에 넣어 이번 주를 포함한 주차별 `AbilityCard`(0~10)와 누적 `cumulative` 반환 |
 | 지난 주차 카드 조회 | `lib/use-archive-data.ts` | 진입 시 위 API를 불러 `useArchiveData()` 의 `season`에 저장 |
-| 가족 성향 조회 | `lib/use-archive-data.ts` | `/api/family`의 실제 가족 구성원과 누적 성향을 `useArchiveData()` 의 `family`에 저장 |
+| 가족 성향 조회 | `lib/use-archive-data.ts` | `/api/family`의 실제 가족 구성원·누적 성향·**자산 합계(`total`)**를 `useArchiveData()` 의 `family`에 저장 |
 | 가족 피드 반응 조회 | `lib/use-archive-data.ts` | 실제 가족 거래 ID별 댓글·좋아요를 일괄 조회 |
 | 가족 피드 반응 변경 | `lib/use-archive-data.ts` | 좋아요 토글, 댓글 저장, 본인 댓글 수정(`PATCH /api/comments`)·삭제를 서버 API로 처리 |
 
@@ -379,7 +379,8 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 - 가족 비교의 아빠(`dad`)는 이제 DB 계정이 있다 — `profiles.id=3`, `login_id='dad'`, `guardian_role='dad'`, `family_tag='찬영가족'`. `GET /api/family` 응답에 포함되므로 **로그인 상태 가족 비교에는 아빠가 나온다.** `ArchiveScreen`의 `MEMBERS` 상수는 아직 `dad.acc:null`이지만 이는 비로그인·응답 전 폴백에서만 쓰인다. 그 폴백과 "아빠는 계정이 없다"고 적힌 주변 주석은 정리 대상이다.
 - 부모 단독 화면으로 전환하는 전역 계정 스위처는 **만들지 않기로 확정됐다.** 계정 전환은 로그아웃 후 재로그인이다 (`docs/기능명세.md` §4.2).
 - **`지난시즌` 자리는 화면만 있고 데이터가 없다.** 우리가족투자 탭의 시즌 줄로 들어가지만 내용은 `archive-season.ts` 픽스처다(§5.2). 서버에는 시즌 경계도, 지난 시즌 주차 기록도 없다 — `season-cards` 는 이번 시즌 주차만 준다. **로그인한 사람이 누구든 같은 표본이 보인다.** API 를 붙이기 전에는 시연용으로만 쓴다.
-- **첫 화면 제목 옆 `우리 가족 자산` 은 라벨과 값이 어긋나 있다.** 값은 로그인한 사람 **계좌 하나**의 총자산·손익이다. `/api/family` 는 자산 규모를 마스킹해 구성원의 평가금액·원금·현금을 **주지 않고 `returnRate` 만** 준다(F11 SPEC §5·`app/api/family/route.ts` 주석). 라벨은 2026-08-16 유저 지시로 `우리 가족 자산` 이 됐고, 진짜 합계를 채우려면 서버가 합계를 새로 내려야 한다. 그때 **2인 가족이면 합계에서 내 것을 빼 상대 자산이 그대로 드러난다** — 마스킹 규칙을 바꾸는 결정이 먼저다.
+- **첫 화면 제목 옆 `우리 가족 자산` 은 이제 진짜 가족 합계다 (2026-08-16).** `GET /api/family` 가 같은 `family_tag` 구성원의 평가금액+예수금을 더한 `total` 을 내려주고, 화면은 `familySummary` 로 편다. 구성원 줄에는 여전히 금액을 싣지 않는다. **다만 구성원이 둘이면 합계에서 자기 것을 빼 상대 자산을 알 수 있다** — 가리려면 `memberCount < 3` 일 때 합계를 빼야 한다(F11 SPEC §7-4). 비로그인·조회 실패 때는 내 계좌 요약으로 되돌아간다.
+- 합계 수익률은 **합계 원금 대비 합계 손익**이라 구성원 수익률의 평균이 아니다. 많이 넣은 사람 쪽으로 기운다 — 달리기 트랙의 개인 비율과 숫자가 다른 것이 정상이다.
 - 가족 달리기 트랙에 **등수 배지(1·2·3)** 가 붙었다. 아직 산 게 없는 구성원은 등수를 매기지 않는다(`rank: null`) — 수익률 0으로 세면 마이너스인 사람보다 앞선다. §8 의 "우열·등수 금지" 는 캐릭터·능력치에 대한 규칙이고 이 배지는 수익률 순서다. 표현을 더 눌러야 한다는 판단이 서면 배지부터 뗀다.
 - **F9 는 LLM 을 쓰지 않는다.** 캐릭터 카드에 붙일 Luna 서술(`lib/narration.ts` + `POST /api/profile`)은 어느 화면도 부른 적이 없어 PR #221 에서 삭제했다. 다시 붙일 때는 이 SPEC 에 계약부터 적고 화면 연결까지 한 작업으로 처리한다 (`docs/기능명세.md` §7.1).
 

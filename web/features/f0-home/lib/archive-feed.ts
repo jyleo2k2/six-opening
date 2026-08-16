@@ -268,6 +268,42 @@ export function feedCards(
     });
 }
 
+/**
+ * 같은 `family_tag` 사람들의 자산 **합계**. `GET /api/family` 의 `total` 이다.
+ * 누가 얼마인지는 오지 않는다 — 서버가 합계만 낸다.
+ */
+export type FamilyTotal = {
+  assets: number;
+  cost: number;
+  profit: number;
+  /** 아직 아무도 안 샀으면 `null` 이다. 0% 로 오지 않는다. */
+  returnRate: number | null;
+  memberCount: number;
+};
+
+/**
+ * 첫 화면 제목 옆 지갑 — 가족 자산 합계를 `returnSummary` 와 **같은 모양**으로 편다.
+ * 두 값이 같은 자리에 번갈아 들어가므로 화면이 갈라 쓰지 않게 한다.
+ *
+ * 합계가 없으면(비로그인·조회 실패) `null` 이고, 화면은 내 계좌 요약으로 되돌아간다.
+ */
+export function familySummary(total: FamilyTotal | null | undefined) {
+  if (!total) return null;
+  const pnl = total.profit;
+  return {
+    positive: pnl >= 0,
+    totalText: won(total.assets),
+    pnlText: (pnl > 0 ? "▲ " : pnl < 0 ? "▼ " : "") + won(Math.abs(pnl)),
+    // 원금이 0이면 잰 것이 없다. `0.00%` 로 적으면 본전인 가족처럼 읽힌다.
+    pctText:
+      total.returnRate === null
+        ? "아직"
+        : (total.returnRate > 0 ? "+" : total.returnRate < 0 ? "−" : "") +
+          Math.abs(total.returnRate).toFixed(2) + "%",
+    pctColor: total.returnRate === null ? "#9CA1B4" : pnl > 0 ? UP : pnl < 0 ? DOWN : "#9CA1B4",
+  };
+}
+
 export type Holding = { code: string; qty: number; avg: number };
 
 /**

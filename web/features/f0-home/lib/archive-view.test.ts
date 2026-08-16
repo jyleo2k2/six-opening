@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { feedCards, returnSummary, runners, type FamilyTrade } from "./archive-feed";
+import { familySummary, feedCards, returnSummary, runners, type FamilyTrade } from "./archive-feed";
 import {
   axesFromCard,
   familyMembers,
@@ -240,5 +240,23 @@ assert.equal(
 assert.equal(report.members[0].weeks[0].note, "거래 2건");
 // 오각형은 가족 비교와 같은 0~10 스케일이다 — 두 화면을 겹쳐 볼 수 있어야 한다.
 assert.deepEqual(report.members.map((m) => m.scaleMax), [10, 10, 10]);
+
+// ── 첫 화면 제목 옆 지갑: 가족 자산 합계 ────────────────────────────────────
+// `returnSummary` 와 같은 모양으로 편다 — 두 값이 같은 자리에 번갈아 들어간다.
+const famWallet = familySummary({
+  assets: 4_500_006, cost: 3_000_000, profit: 6, returnRate: 0.0002, memberCount: 3,
+});
+assert.equal(famWallet?.totalText, "4,500,006원");
+assert.equal(famWallet?.pnlText, "▲ 6원");
+assert.equal(famWallet?.pctText, "+0.00%");
+// 아직 아무도 안 샀으면 수익률 자리에 `아직` 을 적는다. `0.00%` 는 본전으로 읽힌다.
+const idleWallet = familySummary({
+  assets: 10_000_000, cost: 0, profit: 0, returnRate: null, memberCount: 2,
+});
+assert.equal(idleWallet?.pctText, "아직");
+assert.equal(idleWallet?.pctColor, "#9CA1B4");
+// 합계가 없으면 화면이 내 계좌 요약으로 되돌아갈 수 있게 `null` 을 낸다.
+assert.equal(familySummary(null), null);
+assert.equal(familySummary(undefined), null);
 
 console.log("archive view tests passed");

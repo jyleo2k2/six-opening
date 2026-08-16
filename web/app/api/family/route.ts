@@ -63,12 +63,13 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
       return {
         userId: member.id,
         behavior: profile.cumulative,
-        // 비율만 꺼낸다. 평가금액·원금·현금은 자산 규모라 여기서 버린다 (§ members 아래 주석).
         // 원금이 0이면 잰 것이 없다는 뜻이라 0% 가 아니라 null 이다 — 화면은 이걸 "아직" 으로
         // 그린다. 0% 로 내려보내면 본전인 사람과 아직 안 산 사람이 같아 보인다.
         returnRate: profile.valuation && profile.valuation.cost > 0
           ? profile.valuation.returnRate
           : null,
+        // 금액은 **합계를 내는 데만** 쓰고 구성원 줄에는 싣지 않는다 (아래 `total` 주석).
+        valuation: profile.valuation ?? null,
       };
     })),
   ]);
@@ -76,7 +77,34 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
   const returnRateByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.returnRate]));
   const memberById = new Map(members.map((member) => [member.id, member]));
 
+  /**
+   * 같은 `family_tag` 인 사람들의 자산을 **합쳐서만** 내려보낸다 (2026-08-16 유저 확정).
+   *
+   * 구성원 줄에는 여전히 금액을 싣지 않는다 — 누가 얼마인지는 가린 채 "우리 가족이 얼마"
+   * 만 낸다. **다만 구성원이 둘뿐이면 합계에서 자기 것을 빼 상대 자산을 알 수 있다.**
+   * 셋 이상이면 개별 값까지는 못 가른다. 이 한계는 F11 SPEC §5 에 적어 뒀다.
+   *
+   * `cost` 가 0인 사람(아직 안 산 사람)의 현금도 합계에는 넣는다 — 지갑에 든 돈은 든 돈이다.
+   * 수익률은 합계 원금 대비 합계 손익이라 **구성원 수익률의 평균이 아니다**. 많이 넣은
+   * 사람 쪽으로 기운 값이 맞다.
+   */
+  const valuations = behaviorProfiles.map((item) => item.valuation).filter((v) => v !== null);
+  const assets = valuations.reduce((sum, v) => sum + v.marketValue + v.cash, 0);
+  const cost = valuations.reduce((sum, v) => sum + v.cost, 0);
+  const profit = valuations.reduce((sum, v) => sum + v.profit, 0);
+  const total = {
+    /** 평가금액 + 예수금 합계 */
+    assets,
+    cost,
+    profit,
+    /** 원금이 0이면 잰 것이 없다 — 0% 가 아니라 null 이다. */
+    returnRate: cost > 0 ? (profit / cost) * 100 : null,
+    /** 합계에 든 사람 수. 둘이면 뺄셈으로 상대가 드러난다는 걸 화면이 알 수 있게 준다. */
+    memberCount: valuations.length,
+  };
+
   return {
+    total,
     viewer: {
       id: viewer.id,
       name: viewer.name,

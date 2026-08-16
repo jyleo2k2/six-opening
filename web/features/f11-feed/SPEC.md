@@ -21,7 +21,7 @@
 | `web/features/f0-home/ArchiveScreen.tsx` 수익률 탭 | 피드 카드, 구성원 필터, 코멘트·좋아요 입력 |
 | `web/features/f0-home/lib/archive-feed.ts` | 카드 값 계산 — 마스킹된 체결가를 화면에서 되살리지 않는다 |
 | `web/features/f0-home/lib/use-archive-data.ts` | `/api/family` 조회, 거래 id 일괄 반응 조회, 좋아요 토글·코멘트 작성·본인 삭제 |
-| `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 구성원별 수익률, 전체 체결 조회와 타인 수량·체결가 마스킹 |
+| `web/app/api/family/route.ts` | 가족 범위, 구성원 성향, 구성원별 수익률, **가족 자산 합계(`total`)**, 전체 체결 조회와 타인 수량·체결가 마스킹 |
 | `web/shared/engine/comment-filter.ts` | 서버 저장 전 코멘트 문구 게이트 |
 | `web/shared/engine/trade-markers.ts` | 차트 마커 데이터 변환 |
 | `web/app/api/trades/route.ts` | 세션 가족의 종목별 체결 조회와 타인 수량 마스킹 |
@@ -127,6 +127,7 @@ type FeedComment = {
 1. 구성원 필터는 메인 앱 계정이나 `kw_uid`를 바꾸지 않는다. 계정 전환이 아니라 열람 필터다.
 2. **본인 카드의 원 표시는 총 거래금액이 아니라 주당 체결가인데 라벨이 그 구분을 하지 않는다.** 매수·매도 양쪽 모두 해당한다. 남의 카드는 서버가 가격을 `null`로 마스킹해 `비공개`로 나오므로 본인 카드에서만 보인다. 라벨을 주당 단가로 명시하거나 `price × quantity`를 찍으면 해소된다.
 3. 좋아요를 누른 사람 목록은 제공하지 않는다. 코멘트 수정 이력도 남기지 않는다 — 고친 뒤에는 마지막 문장만 있다.
+4. **가족 자산 합계(`total`)는 마스킹 규칙의 예외다 (2026-08-16 유저 확정).** `/api/family`는 구성원 줄에 여전히 평가금액·원금·현금을 싣지 않지만, 같은 `family_tag` 전체를 더한 `{ assets, cost, profit, returnRate, memberCount }`를 내려준다. **구성원이 둘뿐이면 합계에서 자기 것을 빼 상대 자산을 그대로 알 수 있다** — 셋 이상에서만 개별 값이 가려진다. 가리려면 `memberCount < 3`일 때 합계를 빼는 판단이 필요하다.
 
 ## 8. 현재 완료 기준
 

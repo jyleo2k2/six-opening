@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { FeedComment, FeedLike, FamilyTrade } from "./archive-feed";
+import type { FeedComment, FeedLike, FamilyTotal, FamilyTrade } from "./archive-feed";
 import type { FamilyRow, SeasonCards } from "./archive-profile-view";
 
 /**
@@ -16,7 +16,12 @@ import type { FamilyRow, SeasonCards } from "./archive-profile-view";
  */
 export type ArchiveData = {
   season: SeasonCards;
-  family: { viewer?: { id: number }; members: FamilyRow[]; trades: FamilyTrade[] } | null;
+  family: {
+    viewer?: { id: number };
+    members: FamilyRow[];
+    trades: FamilyTrade[];
+    total?: FamilyTotal;
+  } | null;
   comments: Record<string, FeedComment[]>;
   likes: Record<string, FeedLike>;
 };

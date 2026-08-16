@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
-import { ACCENT, feedCards, LANE_HEIGHT, returnSummary, runners, RUN_START } from "./lib/archive-feed";
+import { ACCENT, familySummary, feedCards, LANE_HEIGHT, returnSummary, runners, RUN_START } from "./lib/archive-feed";
 import {
   familyMembers,
   formatScore,
@@ -351,6 +351,11 @@ export function ArchiveScreen({
   const lanes = runners(data.family?.members ?? []);
   const me = wallet?.acc[account];
   const summary = returnSummary(me?.cash ?? 0, me?.holdings ?? [], prices);
+  /**
+   * 제목 옆 지갑 — 같은 `family_tag` 사람들의 자산 합계다. 서버가 합계를 못 줄 때만
+   * (비로그인·조회 실패) 내 계좌 요약으로 되돌아가므로 자리가 비지 않는다.
+   */
+  const walletHead = familySummary(data.family?.total) ?? summary;
   const feed = feedCards(
     data.family?.trades ?? [],
     data.family?.members ?? [],
@@ -398,18 +403,17 @@ export function ArchiveScreen({
         <div style={{ flex: "none", display: "flex", alignItems: "flex-end", gap: 10, padding: "10px 20px 0" }}>
           <div style={{ ...TITLE, flex: 1, minWidth: 0 }}>{screenTitle}</div>
           {/*
-            첫 화면 제목 옆의 지갑. 라벨은 `우리 가족 자산` 이지만 **값은 로그인한 사람 계좌
-            하나다** — `/api/family` 는 자산 규모를 마스킹해 남의 평가금액·현금을 주지 않아
-            가족 합계를 낼 수가 없다(F9 SPEC §7). 눌러서 `우리 가족 수익` 자리로 들어간다.
+            첫 화면 제목 옆의 지갑. 같은 `family_tag` 사람들의 자산 합계이고, 서버가 합계를
+            못 줄 때만 내 계좌로 되돌아간다. 눌러서 `우리 가족 수익` 자리로 들어간다.
           */}
           {view === "cards" && (
             <div onClick={() => setView("return")} style={{ flex: "none", textAlign: "right", paddingBottom: 3, cursor: "pointer" }}>
               <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9095AA", whiteSpace: "nowrap" }}>우리 가족 자산</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "#001E5A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 2 }}>{summary.totalText}</div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5, marginTop: 2, fontSize: 11.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: summary.pctColor }}>
-                <span>{summary.pnlText}</span>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "#001E5A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 2 }}>{walletHead.totalText}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5, marginTop: 2, fontSize: 11.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: walletHead.pctColor }}>
+                <span>{walletHead.pnlText}</span>
                 <span style={{ width: 1, height: 9, background: "#DFE1EB" }} />
-                <span>{summary.pctText}</span>
+                <span>{walletHead.pctText}</span>
               </div>
             </div>
           )}
