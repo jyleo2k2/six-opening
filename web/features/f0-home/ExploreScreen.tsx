@@ -28,8 +28,9 @@ import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
 
 const PAGE = styleFromCss(
-  // 프로토타입 exploreBgStyle 과 같은 값 — 홈과 같은 연회보라 한 색. 카드 영역과 경계를 만들지 않는다.
-  "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden;background:#F4F0FF",
+  // 배경은 두지 않는다 — 원본과 같이 `PhoneFrame` 의 화면 컨테이너 색(`SCREEN_BG`)을 그대로
+  // 비쳐 보인다. 여기 색을 다시 박아 두던 시절에는 이 화면만 맞고 상세·주문은 딴 색이었다.
+  "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;overflow:hidden",
 );
 const HEADER = styleFromCss("flex:none;display:flex;align-items:center;gap:12px;padding:6px 18px 10px");
 const TITLE = styleFromCss(

@@ -7,6 +7,7 @@ import {
 } from "../f10-chatbot/lib/bottom-sheet";
 import { PROTOTYPE_SCREEN_ID } from "./lib/prototype-bridge";
 import { PHONE_SCREEN, PROTOTYPE_PHONE } from "./lib/phone-frame";
+import { SCREEN_BG } from "./lib/prototype-theme";
 import "./phone-frame.css";
 
 /**
@@ -70,9 +71,13 @@ export function PhoneFrame({
           transformOrigin: "center center",
         }}
       >
+        {/*
+         * 바탕색은 여기 하나가 정한다 — 원본의 폰 화면 컨테이너가 하던 일이다. 화면들은
+         * 투명하게 얹히므로 화면 루트에 배경을 다시 적으면 그 화면만 따로 논다.
+         */}
         <div
           id={PROTOTYPE_SCREEN_ID}
-          style={{ ...screenBox, overflow: "hidden", background: "#F5F2F8" }}
+          style={{ ...screenBox, overflow: "hidden", background: SCREEN_BG }}
         >
           {children}
           <img

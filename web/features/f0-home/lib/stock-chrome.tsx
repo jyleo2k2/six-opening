@@ -3,6 +3,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { BottomNav } from "../BottomNav";
 import { styleFromCss } from "./css-style";
+import { CTA_OFF_CSS, CTA_ON_CSS, DETAIL_BUY_CSS } from "./prototype-theme";
 
 /**
  * 상세·차트·뉴스 세 화면이 함께 쓰는 틀. `ui-src` 의 세 화면이 같은 마크업을
@@ -22,10 +23,14 @@ const BACK = styleFromCss(
 const TITLE = styleFromCss(
   "flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em",
 );
-// 아래에 탭바가 붙으므로 바닥 여백은 탭바가 갖는다. 예전의 26px 을 그대로 두면 CTA 와
-// 알약 사이가 두 겹으로 벌어져 상세만 CTA 가 위로 뜬 것처럼 보인다. 남은 6px 은 탭바 자체의
-// 위 여백 6px 과 합쳐 CTA ↔ 알약 12px 이 된다.
-const FOOTER = styleFromCss("flex:none;padding:12px 16px 6px");
+// 원본 상세·차트의 푸터 여백이다 (`padding:14px 16px 12px`). 탭바(`BottomNav`)는 원본
+// `navStyleX` 와 같이 `margin:0 12px 12px` 로 **위 여백이 없으므로**, CTA ↔ 알약 사이는 이
+// 12px 하나가 만든다. 한때 `12px 16px 6px` 로 줄여 둔 적이 있는데, 그 근거였던 "탭바가 위
+// 여백 6px 을 갖는다"는 사실이 아니어서 CTA 가 원본보다 6px 아래에 붙어 있었다.
+//
+// 원본 뉴스 화면만 바닥이 26px 인데, 그 화면에는 탭바가 없어서다. 여기서는 세 화면 모두
+// 탭바를 두므로 26px 을 따라가지 않는다.
+const FOOTER = styleFromCss("flex:none;padding:14px 16px 12px");
 const LOCK = styleFromCss(
   "display:flex;align-items:center;gap:11px;background:#FFF6FA;border-radius:20px;padding:14px 16px;margin-bottom:11px;" +
     "box-shadow:inset 0 0 0 1.5px rgba(245,50,127,0.22)",
@@ -33,17 +38,10 @@ const LOCK = styleFromCss(
 const LOCK_TEXT = styleFromCss(
   "font-size:14px;font-weight:600;color:#D5327A;line-height:1.55;text-wrap:pretty",
 );
-// `logic/constants.js` 의 CTA_ON·CTA_OFF 와 같은 값이다.
-const CTA_ON = styleFromCss(
-  "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;" +
-    "background:radial-gradient(ellipse 56% 48% at 46% -8%,rgba(255,251,248,0.94) 0%,rgba(255,238,245,0.42) 38%,rgba(255,255,255,0.06) 70%,rgba(255,255,255,0) 92%)," +
-    "radial-gradient(ellipse 94% 48% at 50% 120%,rgba(255,202,226,0.6) 0%,rgba(255,202,226,0) 78%)," +
-    "linear-gradient(180deg,#FFA0C6 0%,#FC7DAF 34%,#F663A1 66%,#EE4A8E 100%);" +
-    "box-shadow:5px 16px 26px -9px rgba(214,54,124,0.4),8px 34px 48px -20px rgba(214,54,124,0.24),inset 0 -24px 32px -16px rgba(255,255,255,0.42),inset 0 4px 6px rgba(255,255,255,0.5)",
-);
-const CTA_OFF = styleFromCss(
-  "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:#C6C9D8",
-);
+// 원본에는 분홍 CTA 가 둘이고 화면마다 쓰는 것이 다르다. 값은 `prototype-theme` 이 갖는다.
+const DETAIL_CTA = styleFromCss(DETAIL_BUY_CSS);
+const CTA_ON = styleFromCss(CTA_ON_CSS);
+const CTA_OFF = styleFromCss(CTA_OFF_CSS);
 
 export function SubScreenHeader({
   title,
@@ -75,16 +73,26 @@ export function SubScreenHeader({
  *
  * 탭은 `모의투자` 를 켠다 — 종목 화면은 모의투자 탭 안쪽 자리다. 다만 그 탭의 첫 화면
  * (`/explore`)은 아니므로 `atTabRoot={false}` 로 켜진 탭도 눌리게 둔다.
+ *
+ * 버튼만은 세 화면이 같지 않다. 원본에서 상세·차트는 전용 `detailBuyStyle` 에 "주문하기",
+ * 뉴스는 범용 `CTA_ON` 에 "살래(매수)" 다. 틀을 합치되 그 차이는 `cta` 로 남긴다 — 셋을
+ * 한 버튼으로 뭉쳤던 것이 상세의 버튼이 진해진 원인이었다.
  */
 export function StockFooter({
   locked,
   onStartBuy,
   onLeave,
+  cta = "detail",
 }: {
   locked: boolean;
   onStartBuy: () => void;
   onLeave: (path: string) => void;
+  /** 기본은 상세·차트가 쓰는 전용 버튼. 뉴스만 범용 CTA 로 바꾼다. */
+  cta?: "detail" | "news";
 }) {
+  // 상세·차트 버튼은 잠금일 때도 색이 그대로다. 원본이 손잡이를 죽이는 대신 위에 배너를
+  // 띄우고 누름만 막는 쪽을 골랐다 — 누름은 화면의 `startBuy` 가 이미 막고 있다.
+  const news = cta === "news";
   return (
     <>
       <div style={FOOTER}>
@@ -93,9 +101,9 @@ export function StockFooter({
             <span style={LOCK_TEXT}>지금은 학교에서 공부할 시간! 매매는 하교하고 해요</span>
           </div>
         )}
-        <div onClick={onStartBuy} style={locked ? CTA_OFF : CTA_ON}>
+        <div onClick={onStartBuy} style={news ? (locked ? CTA_OFF : CTA_ON) : DETAIL_CTA}>
           <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" } as CSSProperties}>
-            주문하기
+            {news ? "살래(매수)" : "주문하기"}
           </span>
         </div>
       </div>
