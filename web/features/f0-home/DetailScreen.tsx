@@ -102,13 +102,11 @@ export function DetailScreen({
   account,
   onLeave,
   onChatContext,
-  postToPrototype,
 }: {
   code: string;
   account: WalletAccountId;
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
-  postToPrototype: (message: Record<string, unknown>) => void;
 }) {
   const { wallet, update } = useWallet();
   const live = useStockLive(code);
@@ -200,11 +198,22 @@ export function DetailScreen({
   }, [code, stockName, account, wallet, live.price, onChatContext]);
   useEffect(() => () => onChatContext(null), [onChatContext]);
 
-  // 행동 이벤트 — 아카이브 성향 탭의 열람 수(`detailViewCount`)가 읽는다.
-  // 지갑 상태의 기록자는 `app.html` 하나다. 여기서 localStorage 에 직접 쓰면
-  // iframe 메모리가 그 값을 모른 채 다음 저장 때 덮어쓴다. 메시지로 보낸다.
+  // 행동 이벤트 — 지갑 `events` 에 남긴다. 기록자가 `app.html` 하나였을 때는 여기서
+  // 직접 쓰면 iframe 메모리가 그 값을 모른 채 덮어썼으므로 메시지로 보냈다. iframe 을
+  // 걷어낸 지금은 `update()` 가 유일한 기록자라 그 왕복이 필요 없다.
+  // 모양은 `app.html` 이 쓰던 것 그대로다 — `kw_proto_v1` 을 읽는 쪽이 갈리면 안 된다.
   const recordViewEvent = (name: "chart_detail_opened" | "news_detail_opened") => {
-    postToPrototype({ type: "kiwoom:view-event", event: name, code });
+    update((current) => ({
+      events: [
+        ...current.events,
+        {
+          event: name,
+          symbol: code,
+          user_id: account === "child" ? "child_minji" : "parent_mom",
+          ts: new Date().toISOString(),
+        },
+      ],
+    }));
   };
 
   if (!wallet || !live.stock) return <PhoneFrame />;
@@ -224,14 +233,12 @@ export function DetailScreen({
     if (!locked) onLeave(`/buy/${code}`);
   };
   const toggleWatch = () => {
-    // 하트는 즉시 바뀌어야 하니 내 지갑 사본도 갱신하고, 탐색의 관심 필터가 읽는
-    // iframe 메모리에도 같은 결과를 알린다 — 저장은 iframe 의 `persist` 가 한다.
+    // 탐색의 관심 기업 필터가 같은 저장소를 읽는다. `update()` 가 곧 저장이다.
     update((current) => ({
       watchlist: watched
         ? current.watchlist.filter((entry) => entry !== code)
         : [...current.watchlist, code],
     }));
-    postToPrototype({ type: "kiwoom:watch-toggle", code, on: !watched });
   };
 
   const openChart = () => {
