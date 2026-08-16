@@ -52,4 +52,59 @@ assert.equal(mom.color, PIN_COLORS.mom);
 assert.equal(dad.color, PIN_COLORS.dad);
 assert.notEqual(mom.color, dad.color);
 
+// 최고·최저 글씨는 B/S 핀과 겹치면 안 된다. `DetailScreen` 이 그리는 상자를 여기서 다시
+// 세워 확인한다 — 계산이 상자를 잘못 알면 화면에서 글씨 위에 핀이 얹힌다.
+function labelBox(label: { x: number; labelY: number; text: string }) {
+  let em = 0;
+  for (const ch of label.text) {
+    if (ch === " ") em += 0.3;
+    else if (ch === ",") em += 0.32;
+    else if (ch >= "0" && ch <= "9") em += 0.6;
+    else em += 1;
+  }
+  const half = (em * 11.5) / 2;
+  return { left: label.x - half, right: label.x + half, top: label.labelY, bottom: label.labelY + 14 };
+}
+// 핀은 `translate(-50%,-100%)` 로 `(x, y-7)` 에 붙고 몸통 23 + 꼬리 7 − 겹침 1 = 29 높이다.
+const pinBox = (pin: { x: number; y: number }) => ({
+  left: pin.x - 11.5,
+  right: pin.x + 11.5,
+  top: pin.y - 36,
+  bottom: pin.y - 7,
+});
+
+function assertLabelsClearOfPins(geometry: NonNullable<ReturnType<typeof buildDetailChart>>, note: string) {
+  for (const label of [geometry.hi, geometry.lo]) {
+    if (!label.visible) continue;
+    const box = labelBox(label);
+    for (const pin of geometry.pins) {
+      const other = pinBox(pin);
+      const apart = box.right <= other.left || box.left >= other.right || box.bottom <= other.top || box.top >= other.bottom;
+      assert.ok(apart, `${note}: "${label.text}" 가 핀(${pin.label})과 겹친다`);
+    }
+  }
+}
+
+// 이 fixture 는 세 번째 핀이 최저점(인덱스 4)에 정확히 얹히는 자리다 — 겹침이 나던 경우.
+assert.equal(withTrades!.pins[2].y, withTrades!.lo.y);
+assertLabelsClearOfPins(withTrades!, "핀이 최저점에 얹힌 경우");
+// 최저 글씨는 핀을 피해 선 아래에 남는다. 위로 올리면 핀 몸통 자리로 들어간다.
+assert.ok(withTrades!.lo.labelY > withTrades!.lo.y, "최저 글씨가 선 위로 올라갔다");
+
+// 값 모양·핀 개수를 바꿔 가며 훑어도 겹치지 않는다.
+const shapes = [
+  [40, 60, 30, 80, 20, 55, 45],
+  [100, 10, 100, 10, 100, 10, 100, 10],
+  [5, 4, 3, 2, 1, 2, 3, 4, 9],
+  [1, 2, 3, 4, 5, 4, 3, 2, 1, 2],
+];
+for (const shape of shapes)
+  for (let count = 1; count <= 3; count++) {
+    const some = trades.slice(0, count);
+    for (const price of [1_200, 87_500, 1_450_000]) {
+      const g = buildDetailChart({ spark: shape, price, changePercent: 2.5, trades: some });
+      assertLabelsClearOfPins(g!, `spark=${shape.length} 핀=${count} 가격=${price}`);
+    }
+  }
+
 console.log("detail chart tests passed");

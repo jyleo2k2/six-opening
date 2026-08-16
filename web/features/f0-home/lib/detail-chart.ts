@@ -56,6 +56,37 @@ const H = 164;
 const TOP = 26;
 const BOT = 30;
 
+// 아래 값들은 `DetailScreen` 의 `HI_LO_LABEL`·`PIN`·`PIN_BODY`·`PIN_TAIL` 이 실제로
+// 그리는 상자다. 겹침 판정은 그 상자를 그대로 재현해야만 맞으므로 한쪽을 고치면
+// 반드시 함께 고친다. svg 는 `viewBox="0 0 336 164"` 를 같은 크기로 그리니 1:1 이다.
+const LABEL_FONT = 11.5;
+/** `HI_LO_LABEL` 의 `line-height` 와 같은 값. 라벨은 `top` 기준으로 아래로 자란다. */
+const LABEL_H = 14;
+/** 핀은 `translate(-50%,-100%)` 로 `(x, y-7)` 에 붙는다. 몸통 23 + 꼬리 7 − 겹침 1 = 29. */
+const PIN_HALF_W = 11.5;
+const PIN_TOP = 36;
+const PIN_BOT = 7;
+/** 딱 붙기만 해도 읽기 어렵다 — 상자 사이에 이만큼은 띄운다. */
+const GAP = 3;
+/** 최고 라벨 자리 후보: 선 위 → 선 아래 → 더 위. 최저는 선 아래를 가장 먼저 본다. */
+const HI_OFFSETS = [-22, 22, -40] as const;
+const LO_OFFSETS = [9, 25, -34] as const;
+
+/**
+ * 폰트를 실측할 수 없는 순수 계산이라 글자 폭을 어림한다. 한글은 정사각, 숫자와 쉼표는
+ * 좁다. 좁게 잡으면 겹치므로 넉넉한 쪽으로 반올림한다.
+ */
+function labelHalfWidth(text: string): number {
+  let em = 0;
+  for (const ch of text) {
+    if (ch === " ") em += 0.3;
+    else if (ch === ",") em += 0.32;
+    else if (ch >= "0" && ch <= "9") em += 0.6;
+    else em += 1;
+  }
+  return (em * LABEL_FONT) / 2;
+}
+
 export function buildDetailChart(options: {
   spark: readonly number[];
   price: number;
@@ -105,27 +136,42 @@ export function buildDetailChart(options: {
     };
   });
 
-  // 최고·최저 글씨가 B/S 핀과 겹치면 선 반대쪽으로 옮긴다.
-  const pinNear = (px: number, py: number) =>
-    pins.some((pin) => Math.abs(pin.x - px) < 46 && pin.y - py > -34 && pin.y - py < 26);
-  const hiFlip = pinNear(x(hiI), y(hi));
-  const loFlip = pinNear(x(loI), y(lo));
+  // 최고·최저 글씨가 B/S 핀과 겹치는지는 **그려지는 자리**로 판정한다. 라벨은 가장자리에서
+  // `clampX` 로 끌려 들어오므로 점(`x(hiI)`)이 아니라 끌려온 뒤 좌표로 재야 한다.
+  const hits = (lx: number, ly: number, halfW: number) =>
+    pins.some(
+      (pin) =>
+        Math.abs(pin.x - lx) < halfW + PIN_HALF_W + GAP &&
+        pin.y - PIN_TOP - GAP < ly + LABEL_H &&
+        pin.y - PIN_BOT + GAP > ly,
+    );
+  /** 후보 자리를 순서대로 재 보고 처음으로 핀을 비켜 가는 자리를 쓴다. 다 막히면 첫 후보. */
+  const labelY = (lx: number, dotY: number, text: string, offsets: readonly number[]) => {
+    const halfW = labelHalfWidth(text);
+    const free = offsets.find((d) => !hits(lx, dotY + d, halfW));
+    return dotY + (free ?? offsets[0]);
+  };
+
+  const hiX = clampX(x(hiI));
+  const loX = clampX(x(loI));
+  const hiText = wonText(hi);
+  const loText = `최저 ${toWon(lo).toLocaleString("ko-KR")}원`;
 
   return {
     linePoints: sp.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" "),
     hi: {
-      x: clampX(x(hiI)),
+      x: hiX,
       y: y(hi),
-      text: wonText(hi),
+      text: hiText,
       visible: hiI !== n - 1,
-      labelY: y(hi) + (hiFlip ? 22 : -22),
+      labelY: labelY(hiX, y(hi), hiText, HI_OFFSETS),
     },
     lo: {
-      x: clampX(x(loI)),
+      x: loX,
       y: y(lo),
-      text: `최저 ${toWon(lo).toLocaleString("ko-KR")}원`,
+      text: loText,
       visible: loI !== n - 1,
-      labelY: y(lo) + (loFlip ? -34 : 9),
+      labelY: labelY(loX, y(lo), loText, LO_OFFSETS),
     },
     pins,
   };

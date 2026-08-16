@@ -30,8 +30,10 @@ const PRICE_CARD = styleFromCss(
   "background:#FFFFFF;border-radius:30px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)",
 );
 const CHART_WRAP = styleFromCss("position:relative;margin-top:14px");
+// `line-height` 를 못 박아 둔다 — `detail-chart` 의 겹침 판정이 이 높이(LABEL_H)를 그대로 쓴다.
 const HI_LO_LABEL = styleFromCss(
-  "position:absolute;transform:translate(-50%,0);font-size:11.5px;font-weight:600;white-space:nowrap;pointer-events:none",
+  "position:absolute;transform:translate(-50%,0);font-size:11.5px;line-height:14px;font-weight:600;" +
+    "white-space:nowrap;pointer-events:none",
 );
 const PIN = styleFromCss(
   "position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;" +
