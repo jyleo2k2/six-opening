@@ -1089,31 +1089,42 @@ export function OrderScreen({
           paddingBottom: 6,
         }}
       >
-        {/* 풍선·색종이. app.html 과 같은 마크업이고 kw* keyframes 는 `phone-frame.css` 가
-            정의한다 — 유실돼 죽어 있던 연출을 이관하면서 복원했다. zIndex 를 마스코트·카드보다
-            높여서 뒤로 지나가지 않고 앞으로 지나가게 한다. */}
+        {/* 풍선·색종이가 가운데에서 펑 터지듯 사방으로 퍼진다. kwBurst keyframe 은
+            `phone-frame.css` 가 정의한다. zIndex 를 마스코트·카드보다 높여서 뒤로
+            지나가지 않고 앞으로 지나가게 한다. */}
         <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 100 }}>
-          {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => (
-            <div
-              key={i}
-              style={styleFromCss(
-                `position:absolute;left:${8 + i * 21}%;bottom:-40px;font-size:${26 + (i % 3) * 7}px;` +
-                  `--kwx:${i % 2 ? "" : "-"}${10 + i * 6}px;` +
-                  `animation:kwRise ${2.6 + i * 0.35}s ease-in ${i * 0.18}s forwards`,
-              )}
-            >
-              {emoji}
-            </div>
-          ))}
+          {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => {
+            const angle = (i / 5) * Math.PI * 2 - Math.PI / 2;
+            const radius = 120 + (i % 3) * 26;
+            const kwx = Math.round(Math.cos(angle) * radius);
+            const kwy = Math.round(Math.sin(angle) * radius);
+            return (
+              <div
+                key={i}
+                style={styleFromCss(
+                  `position:absolute;left:50%;top:50%;font-size:${26 + (i % 3) * 7}px;` +
+                    `--kwx:${kwx}px;--kwy:${kwy}px;` +
+                    `animation:kwBurst ${0.85 + i * 0.08}s cubic-bezier(0.16,0.84,0.32,1) ${i * 0.05}s forwards`,
+                )}
+              >
+                {emoji}
+              </div>
+            );
+          })}
           {Array.from({ length: 14 }, (_, i) => {
             const col = ["#F5327F", "#FFC53D", "#4FC3F7", "#7BE3A0", "#9B8CFF", "#FF8AD0"][i % 6];
+            const angle = (i / 14) * Math.PI * 2;
+            const radius = 100 + (i % 5) * 24;
+            const kwx = Math.round(Math.cos(angle) * radius);
+            const kwy = Math.round(Math.sin(angle) * radius);
+            const kwr = (i % 2 ? 1 : -1) * (240 + (i % 5) * 36);
             return (
               <div
                 key={`c${i}`}
                 style={styleFromCss(
-                  `position:absolute;top:-20px;left:${4 + i * 6.8}%;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
-                    `border-radius:2px;background:${col};--kwx:${i % 2 ? "" : "-"}${14 + (i % 5) * 12}px;` +
-                    `animation:kwFall ${2 + (i % 5) * 0.3}s linear ${i * 0.09}s forwards`,
+                  `position:absolute;left:50%;top:50%;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
+                    `border-radius:2px;background:${col};--kwx:${kwx}px;--kwy:${kwy}px;--kwr:${kwr}deg;` +
+                    `animation:kwBurst ${0.9 + (i % 5) * 0.12}s cubic-bezier(0.16,0.84,0.32,1) ${i * 0.03}s forwards`,
                 )}
               />
             );
@@ -1752,7 +1763,6 @@ export function OrderScreen({
     const step3 = done && (
       <div
         style={{
-          position: "relative",
           flex: 1,
           display: "flex",
           flexDirection: "column",
@@ -1761,44 +1771,10 @@ export function OrderScreen({
           paddingBottom: 6,
         }}
       >
-        {/* 풍선·색종이 — 매수 완료와 같은 연출이다. 원래 프로토타입에는 매도 완료에 이
-            연출이 없었지만 사용자 요청으로 매수와 맞춘다. */}
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 100 }}>
-          {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => (
-            <div
-              key={i}
-              style={styleFromCss(
-                `position:absolute;left:${8 + i * 21}%;bottom:-40px;font-size:${26 + (i % 3) * 7}px;` +
-                  `--kwx:${i % 2 ? "" : "-"}${10 + i * 6}px;` +
-                  `animation:kwRise ${2.6 + i * 0.35}s ease-in ${i * 0.18}s forwards`,
-              )}
-            >
-              {emoji}
-            </div>
-          ))}
-          {Array.from({ length: 14 }, (_, i) => {
-            const col = ["#F5327F", "#FFC53D", "#4FC3F7", "#7BE3A0", "#9B8CFF", "#FF8AD0"][i % 6];
-            return (
-              <div
-                key={`c${i}`}
-                style={styleFromCss(
-                  `position:absolute;top:-20px;left:${4 + i * 6.8}%;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
-                    `border-radius:2px;background:${col};--kwx:${i % 2 ? "" : "-"}${14 + (i % 5) * 12}px;` +
-                    `animation:kwFall ${2 + (i % 5) * 0.3}s linear ${i * 0.09}s forwards`,
-                )}
-              />
-            );
-          })}
-        </div>
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
         <img
           alt="키웅이"
           src="/ui/assets/mascot-bear.png"
-          style={{
-            display: "block",
-            animation: "kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both",
-            filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))",
-          }}
+          style={{ display: "block", filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))" }}
           width={150}
         />
         <div style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", letterSpacing: "0.08em", marginTop: 14 }}>
@@ -1876,7 +1852,6 @@ export function OrderScreen({
               {memoSaved ? "저장됐어요 ✓" : "저장하기"}
             </div>
           </div>
-        </div>
         </div>
       </div>
     );
