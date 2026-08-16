@@ -57,22 +57,20 @@ test("구버전 지정가 매도는 한 번만 보유 수량으로 복구해 자
   assert.deepEqual(migrateLegacyAccount(migrated, []).holdings, migrated.holdings);
 });
 
-test("생성된 프로토타입은 예약 엔진과 접수·체결 구분 문구를 포함하고 문법이 유효하다", () => {
-  const html = readFileSync("public/ui/app.html", "utf8");
-  assert.match(html, /GENERATED from features\/f2-trade\/lib\/scheduled-orders\.js/);
-  assert.match(html, /주문 접수와 체결은 달라/);
-  const start = html.indexOf('<script type="text/x-dc"');
-  const body = html.indexOf(">", start) + 1;
-  const end = html.indexOf("</script>", body);
-  assert.ok(start >= 0 && body > start && end > body);
-  assert.doesNotThrow(() => new Function(html.slice(body, end)));
-});
-
-// 화면이 예약을 스스로 만들지 않는다는 것은 조립 결과로 확인한다 — 로컬 pending 을 만드는
-// 코드가 되살아나면 서버와 브라우저에 같은 주문이 둘 생긴다.
-test("생성된 프로토타입은 예약을 로컬에 만들거나 스스로 정산하지 않는다", () => {
-  const html = readFileSync("public/ui/app.html", "utf8");
-  assert.doesNotMatch(html, /settleScheduledOrder|cancelPendingOrder|processScheduledOrders\(/);
-  assert.match(html, /pendingFromServerOrders/);
-  assert.match(html, /loadOpenOrders/);
+// 화면이 예약을 스스로 만들거나 정산하지 않는다는 계약은 실제 소비자로 확인한다 — 로컬
+// pending 을 만드는 코드가 되살아나면 서버와 브라우저에 같은 주문이 둘 생긴다. 정산 흐름은
+// `app/api/orders/settle.test.ts`, 목록 변환은 `features/f0-home/lib/pending-orders.test.ts`가
+// 이미 실제 함수로 검증하므로 여기서는 화면 쪽 소비자만 확인한다.
+test("주문 화면은 예약을 로컬에 만들거나 스스로 정산하지 않는다", () => {
+  const orderScreen = readFileSync(
+    new URL("../../f0-home/OrderScreen.tsx", import.meta.url),
+    "utf8",
+  );
+  const useWallet = readFileSync(
+    new URL("../../f0-home/lib/use-wallet.ts", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(orderScreen, /settleScheduledOrder|cancelPendingOrder|processScheduledOrders\(/);
+  assert.doesNotMatch(useWallet, /settleScheduledOrder|cancelPendingOrder|processScheduledOrders\(/);
+  assert.match(useWallet, /pendingFromServerOrders/);
 });

@@ -151,36 +151,10 @@ assert.deepEqual(
   [],
 );
 
-const lossEvents: ChatBehaviorEvent[] = [
-  {
-    type: "trade_filled",
-    stockId: "KRX:005930",
-    side: "sell",
-    realizedPnlPct: -10,
-    at: now - 6 * 60 * 1000,
-  },
-  ...Array.from({ length: 2 }, (_, index) => ({
-    type: "screen_entered" as const,
-    screen: "stock" as const,
-    stockId: "KRX:005930",
-    at: now - 2 + index,
-  })),
-];
-assert.deepEqual(detectProactiveSignals(lossEvents, now), ["lossRevisit"]);
-assert.deepEqual(detectProactiveSignals(lossEvents.slice(0, 2), now), []);
-assert.deepEqual(
-  detectProactiveSignals([
-    ...lossEvents,
-    { type: "screen_entered", screen: "home", at: now + 1 },
-  ], now + 1),
-  [],
-);
-
 let session = createProactiveSession(now);
 assert.equal(selectProactiveSignal(["buyHesitation"]), "buyHesitation");
 assert.equal(selectProactiveSignal(["buyHesitation"]), "buyHesitation");
 assert.equal(selectProactiveSignal(["dwell"]), "dwell");
-assert.equal(selectProactiveSignal(["lossRevisit"]), "lossRevisit");
 assert.equal(selectProactiveSignal([]), null);
 
 const reset = refreshProactiveSession(session, session.lastActivityAt + PROACTIVE_LIMITS.sessionIdleMs);
@@ -193,7 +167,7 @@ assert.deepEqual(reset, {
 const once = declineProactive(createProactiveMute(), "dwell");
 assert.equal(once.off, false);
 assert.equal(isProactiveSilenced(once, "dwell"), true);
-assert.equal(isProactiveSilenced(once, "lossRevisit"), false);
+assert.equal(isProactiveSilenced(once, "orderMethodConfusion"), false);
 
 // 같은 신호를 또 거절해도 목록이 불어나지 않는다.
 const twiceSame = declineProactive(once, "dwell");
@@ -202,12 +176,12 @@ assert.equal(twiceSame.declines, 2);
 
 // 3회째 거절이면 전체가 꺼진다. 누적과 목록은 함께 비운다 —
 // 다시 켠 아이가 한 번 거절했다고 곧바로 또 꺼지면 안 된다.
-const off = declineProactive(twiceSame, "lossRevisit");
+const off = declineProactive(twiceSame, "buyHesitation");
 assert.equal(twiceSame.declines + 1, PROACTIVE_OFF_DECLINES);
 assert.equal(off.declines, 0);
 assert.equal(off.off, true);
 assert.deepEqual(off.mutedSignals, []);
-for (const signal of ["buyHesitation", "orderMethodConfusion", "dwell", "lossRevisit"] as const) {
+for (const signal of ["buyHesitation", "orderMethodConfusion", "dwell"] as const) {
   assert.equal(isProactiveSilenced(off, signal), true, `꺼진 뒤에도 ${signal} 이 뜬다`);
 }
 assert.equal(declineProactive(enableProactive(), "dwell").off, false);

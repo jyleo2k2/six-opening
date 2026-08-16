@@ -747,8 +747,9 @@ function commandServe() {
     // 실제로 그렇게 죽어서 "화면은 멀쩡한데 요청만 실패하는" 상태가 만들어졌다. node 를
     // 직접 띄우면 셸이 끼지 않아 그 고리가 끊긴다.
     //
-    // 두 단계는 `web/package.json` 의 `predev`·`dev` 와 짝이다. 그쪽이 바뀌면 여기도 바꾼다.
-    run(process.execPath, [path.join(web, "scripts", "ui-build.mjs"), "build"], { cwd: web });
+    // 예전에는 여기서 `web/scripts/ui-build.mjs build` 를 먼저 돌려 iframe 문서를 조립했다.
+    // iframe 을 걷어내며(PR #296) 그 조립기와 `web/package.json` 의 `predev` 가 함께 사라져,
+    // 없는 파일을 부르다 **모든 세션의 개발 서버가 안 떴다.** 이제 `next dev` 만 띄운다.
     const child = spawn(
       process.execPath,
       [

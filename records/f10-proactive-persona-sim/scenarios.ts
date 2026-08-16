@@ -42,25 +42,6 @@ function dwellEvents(now: number, durationMs: number): ChatBehaviorEvent[] {
   ];
 }
 
-function lossRevisitEvents(now: number, revisitCount: number): ChatBehaviorEvent[] {
-  const lossAt = now - 4 * 60 * 1_000;
-  return [
-    {
-      type: "trade_filled",
-      stockId: STOCK_ID,
-      side: "sell",
-      realizedPnlPct: -12,
-      at: lossAt,
-    },
-    ...Array.from({ length: revisitCount }, (_, index) => ({
-      type: "screen_entered" as const,
-      screen: "stock" as const,
-      stockId: STOCK_ID,
-      at: lossAt + 30_000 + index * 60_000,
-    })),
-  ];
-}
-
 /**
  * 신호마다 도움 필요 2건과 의도적 행동 2건을 둔다.
  * 각 쌍은 임계값 통과 1건과 바로 아래 1건으로 구성해 오탐·미탐을 함께 본다.
@@ -153,49 +134,5 @@ export const PERSONA_EVALUATION_SCENARIOS: readonly PersonaEvaluationScenario[] 
     personaEvidence: ["learning_style", "cog_attention_span", "trait_self_regulation"],
     now: scenarioNow(8),
     events: dwellEvents(scenarioNow(8), PROACTIVE_LIMITS.dwellMs - 1),
-  },
-  {
-    id: "loss-help-cross",
-    personaId: "0189",
-    signal: "lossRevisit",
-    oracleNeedsHelp: true,
-    thresholdRelation: "crosses",
-    situation: "-12% 손실 실현 뒤 불안해서 같은 종목을 5분 안에 네 번 다시 연다.",
-    personaEvidence: ["risk_tolerance", "big5_anxiety", "health_stress_level", "trait_self_regulation"],
-    now: scenarioNow(9),
-    events: lossRevisitEvents(scenarioNow(9), 4),
-  },
-  {
-    id: "loss-help-near",
-    personaId: "0196",
-    signal: "lossRevisit",
-    oracleNeedsHelp: true,
-    thresholdRelation: "below",
-    situation: "-12% 손실 뒤 계속 신경 쓰여 세 번 재진입하지만 현재 네 번 기준에는 못 미친다.",
-    personaEvidence: ["big5_anxiety", "health_stress_level", "cog_confidence_calibration"],
-    now: scenarioNow(10),
-    events: lossRevisitEvents(scenarioNow(10), 3),
-  },
-  {
-    id: "loss-control-cross",
-    personaId: "0185",
-    signal: "lossRevisit",
-    oracleNeedsHelp: false,
-    thresholdRelation: "crosses",
-    situation: "미리 만든 사후 검토표에 따라 손실 종목의 네 화면 항목을 차례로 확인한다.",
-    personaEvidence: ["skill_investing", "risk_tolerance", "trait_self_regulation"],
-    now: scenarioNow(11),
-    events: lossRevisitEvents(scenarioNow(11), 4),
-  },
-  {
-    id: "loss-control-near",
-    personaId: "0190",
-    signal: "lossRevisit",
-    oracleNeedsHelp: false,
-    thresholdRelation: "below",
-    situation: "보호자와 정한 세 항목만 확인하고 손실 종목 검토를 계획대로 끝낸다.",
-    personaEvidence: ["decision_style", "cog_patience", "cog_attention_span"],
-    now: scenarioNow(12),
-    events: lossRevisitEvents(scenarioNow(12), 3),
   },
 ];
