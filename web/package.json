@@ -6,6 +6,7 @@
     "build": "next build",
     "start": "next start",
     "seed:candles": "tsx scripts/seed-candles.ts",
+    "news:audit": "tsx scripts/audit-news-summaries.ts",
     "seed:news:export": "tsx scripts/export-news-seed.ts",
     "test": "tsx --test \"app/**/*.test.ts\" \"features/**/*.test.ts\" \"scripts/**/*.test.ts\" \"shared/**/*.test.ts\""
   },
