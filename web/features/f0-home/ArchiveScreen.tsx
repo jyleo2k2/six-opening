@@ -34,9 +34,12 @@ import { PhoneFrame } from "./PhoneFrame";
  * 성장 아카이브. `ui-src/screens/archive.html` 과 `methods/buildArchive.js` 를 옮겨 왔다.
  *
  * 값 계산은 `lib/archive-profile-view.ts`(성향)·`lib/archive-feed.ts`(수익률)·
- * `lib/archive-season.ts`(지난 시즌)가 하고 여기는 붙이기만 한다. 화면 안에 다섯 자리가
- * 있다 — 성향 탭, 수익률 탭, 카드 모아보기, 가족 비교, 지난 시즌. 뒤 셋은 탭을 덮는
- * **자리**이지 시트가 아니다(원본과 같다).
+ * `lib/archive-season.ts`(지난 시즌)가 하고 여기는 붙이기만 한다.
+ *
+ * **자리는 셋이고 첫 화면만 개인 것이다.** 들어오면 로그인한 사람의 주차 성향 카드가
+ * 레일로 깔리고(`cards`), 머리의 탭 둘은 가족 것이다 — `우리가족투자`(`family`)가 가족
+ * 성향을 현시즌·지난시즌으로 갈아 끼우고, `우리가족 수익`(`return`)이 수익률 자리다.
+ * 첫 화면에서는 두 탭 중 어느 것도 켜지지 않는다. 돌아오는 길은 머리의 `‹` 다.
  *
  * **`보유 종목 · 섹터별` 레일은 2026-08-16 지웠다.** 그 레일에서만 열리던 섹터 상세 모달은
  * 이관 때 이미 빠져 도달 불가로 남아 있었고(F9 SPEC §7), 디자인 목업에도 레일이 없다.
@@ -60,6 +63,16 @@ const tabStyle = (on: boolean) =>
     "flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;" +
       "white-space:nowrap;transition:all 0.18s;" +
       (on ? "color:#fff;background:#001E5A" : "color:#7C819A;background:#EAEBF3"),
+  );
+/**
+ * 시즌 전환 줄. 메인 탭과 같은 모양이되 글자가 길어(`지난시즌 우리가족 투자성향`) 한 줄에
+ * 안 들어가므로 크기만 줄인다 — 두 줄로 접히면 탭 높이가 자리마다 달라진다.
+ */
+const seasonTabStyle = (on: boolean) =>
+  styleFromCss(
+    "flex:1;text-align:center;padding:9px 4px;border-radius:12px;font-size:11.5px;font-weight:700;cursor:pointer;" +
+      "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all 0.18s;" +
+      (on ? "color:#fff;background:#D70082" : "color:#7C819A;background:#EAEBF3"),
   );
 const BODY = styleFromCss(
   "flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 16px;display:flex;flex-direction:column",
@@ -301,13 +314,16 @@ export function ArchiveScreen({
   const { wallet } = useWallet();
   const { universe, quotes } = useUniverseLive();
   const data = useArchiveData();
-  const [tab, setTab] = useState<"report" | "return">(
-    requested === "return" ? "return" : "report",
+  /**
+   * 자리 셋. **첫 화면(`cards`)은 로그인한 사람 개인의 주차 성향 카드**이고, 두 탭은 가족
+   * 것이다 — `family` 가 가족 성향, `return` 이 가족 수익이다. `last` 주소는 가족 성향의
+   * 지난 시즌 자리를 가리키므로 `family` + `season: "last"` 로 편다.
+   */
+  const [view, setView] = useState<"cards" | "family" | "return">(
+    requested === "return" ? "return" : requested === "family" || requested === "last" ? "family" : "cards",
   );
-  const [view, setView] = useState<"tabs" | "cards" | "family" | "last">(
-    requested === "cards" || requested === "family" || requested === "last" ? requested : "tabs",
-  );
-  const [traitPick, setTraitPick] = useState<number | null>(null);
+  /** 가족 성향 탭 안에서 보고 있는 시즌. 주소 `/archive/last` 로 바로 들어올 수 있다. */
+  const [season, setSeason] = useState<"now" | "last">(requested === "last" ? "last" : "now");
   const [cardActive, setCardActive] = useState<number | null>(null);
   const [sheetIndex, setSheetIndex] = useState<number | null>(null);
   const [famPick, setFamPick] = useState("all");
@@ -374,19 +390,18 @@ export function ArchiveScreen({
 
   const weekLabel = `${now.getMonth() + 1}월 ${Math.ceil(now.getDate() / 7)}주차`;
   const crumbLabel =
-    view === "family" ? "성향 > 이번시즌" : view === "last" ? "성향 > 지난시즌" : weekLabel;
-  const toTabs = (next: "report" | "return") => {
-    setTab(next);
-    setView("tabs");
-  };
+    view === "return"
+      ? "우리가족 수익"
+      : view === "family"
+        ? `우리가족투자 > ${season === "last" ? "지난시즌" : "현시즌"}`
+        : `내 투자 성향 · ${weekLabel}`;
   /**
-   * 뒤로 — 덮은 자리는 한 겹씩 벗기고, 맨 아래 성향 탭에서는 화면을 뜬다.
-   * 목업의 뒤로가기는 성향 탭에서 아무 일도 하지 않지만, 그건 나갈 곳이 없는 단독
+   * 뒤로 — 가족 탭에서는 내 카드(첫 화면)로 돌아오고, 첫 화면에서는 화면을 뜬다.
+   * 목업의 뒤로가기는 첫 화면에서 아무 일도 하지 않지만, 그건 나갈 곳이 없는 단독
    * 페이지라서다. 여기서는 홈으로 보낸다 — 눌러도 안 움직이는 단추를 두지 않는다.
    */
   const goBack = () => {
-    if (view === "last") return setView("cards");
-    if (view !== "tabs" || tab === "return") return toTabs("report");
+    if (view !== "cards") return setView("cards");
     onLeave("/");
   };
 
@@ -402,23 +417,22 @@ export function ArchiveScreen({
           <div style={TITLE}>성장 아카이브</div>
         </div>
         {/*
-          탭 줄은 자리마다 다른 것을 켠다 — 탭 자리에서는 성향·수익률, 카드 모아보기와 지난
-          시즌에서는 이번시즌·지난시즌. 가족 비교에는 탭 줄이 없다(디자인 원본과 같다).
+          탭 줄은 **가족 것 둘**이다. 첫 화면은 내 카드라 어느 쪽도 켜지지 않는다 —
+          탭을 누르면 가족 자리로 들어가고, 머리의 `‹` 로 내 카드로 돌아온다.
         */}
-        {view === "tabs" && (
-          <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => toTabs("report")} style={tabStyle(tab === "report")}>성향</div>
-            <div onClick={() => toTabs("return")} style={tabStyle(tab === "return")}>수익률</div>
-          </div>
-        )}
-        {(view === "cards" || view === "last") && (
-          <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => setView("cards")} style={tabStyle(view === "cards")}>이번시즌</div>
-            <div onClick={() => setView("last")} style={tabStyle(view === "last")}>지난시즌</div>
+        <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
+          <div onClick={() => setView("family")} style={tabStyle(view === "family")}>우리가족투자</div>
+          <div onClick={() => setView("return")} style={tabStyle(view === "return")}>우리가족 수익</div>
+        </div>
+        {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
+        {view === "family" && (
+          <div style={{ flex: "none", display: "flex", gap: 8, padding: "0 20px 12px" }}>
+            <div onClick={() => setSeason("now")} style={seasonTabStyle(season === "now")}>현시즌 우리가족 투자성향</div>
+            <div onClick={() => setSeason("last")} style={seasonTabStyle(season === "last")}>지난시즌 우리가족 투자성향</div>
           </div>
         )}
 
-        {view === "family" && (
+        {view === "family" && season === "now" && (
           <>
             <div style={{ ...BODY, gap: 12 }}>
               <div style={{ flex: "none", display: "flex", gap: 7, flexWrap: "wrap" }}>
@@ -460,13 +474,12 @@ export function ArchiveScreen({
               </div>
             </div>
             <div style={CTA_ROW}>
-              <div onClick={() => toTabs("report")} style={{ ...ctaStyle(true), flex: "none", width: 96 }}>성향</div>
-              <div onClick={() => setView("last")} style={{ ...ctaStyle(false), flex: 1 }}>지난시즌 투자성향 보러가기</div>
+              <div onClick={() => setView("cards")} style={{ ...ctaStyle(false), flex: 1 }}>내 투자 성향 카드 보기</div>
             </div>
           </>
         )}
 
-        {view === "last" && (
+        {view === "family" && season === "last" && (
           <>
             <div style={{ ...BODY, gap: 12 }}>
               {/* 시즌 종합 카드. 겉면 색과 캐릭터는 가족의 최빈 시즌 성향에서 나온다. */}
@@ -532,11 +545,11 @@ export function ArchiveScreen({
               })}
 
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
-                지난 시즌 기록은 그대로 보관돼요. 이번 시즌과 비교해 보세요.
+                지난 시즌 기록은 그대로 보관돼요. 위 단추로 현시즌과 견줘 보세요.
               </div>
             </div>
             <div style={CTA_ROW}>
-              <div onClick={() => setView("family")} style={{ ...ctaStyle(true), flex: 1 }}>이번시즌 가족 투자성향 비교하기</div>
+              <div onClick={() => setView("cards")} style={{ ...ctaStyle(false), flex: 1 }}>내 투자 성향 카드 보기</div>
             </div>
           </>
         )}
@@ -605,61 +618,14 @@ export function ArchiveScreen({
               </div>
               <div style={{ flex: "none", textAlign: "center", padding: "14px 26px 0" }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#8E93A8", lineHeight: 1.6, textWrap: "pretty" }}>
-                  한 주에 한 장씩 쌓여요. 옆으로 넘겨서 지난 주의 나를 볼 수 있어요.
+                  한 주에 한 장씩 쌓여요. 옆으로 넘겨 지난 주의 나를 보고, 가운데 카드를 누르면 다섯 축을 펼쳐 봐요.
                 </div>
               </div>
-            </div>
-            <div style={{ ...CTA_ROW, padding: "0 16px 18px" }}>
-              <div onClick={() => toTabs("report")} style={{ ...ctaStyle(true), flex: 1 }}>성향</div>
-              <div onClick={() => toTabs("return")} style={{ ...ctaStyle(false), flex: 1 }}>수익률</div>
             </div>
           </>
         )}
 
-        {view === "tabs" && tab === "report" && (
-          <div style={BODY}>
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: 11, paddingBottom: 6 }}>
-              <CardShell type={myType}>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: rgba(myType.ink, 0.9), letterSpacing: "0.12em" }}>나의 투자 성향</span>
-                </div>
-                <div style={{ position: "relative", textAlign: "center", fontSize: 24, fontWeight: 900, color: myType.ink, marginTop: 5, letterSpacing: "-0.01em", textShadow: "0 1px 0 rgba(255,255,255,0.6)" }}>{myType.title}</div>
-                <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-                  <div style={{ flex: "none", width: 142, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
-                    {/* 유형이 정해지기 전에는 그림 자리를 비운다. 자리는 남겨 둬야 오각형이 안 움직인다. */}
-                    <div style={{ width: 168, height: 208, margin: "0 -14px -4px -12px", background: myType.key ? `url(${typeImage(myType.key)}) center bottom/contain no-repeat` : "none", filter: myType.key ? `drop-shadow(0 12px 14px ${rgba(myType.ink, 0.38)})` : "none" }} />
-                    <div style={{ width: 90, height: 20, marginTop: -8, borderRadius: "50%", background: `radial-gradient(ellipse at center,${rgba(myType.ink, 0.22)} 0%,${rgba(myType.ink, 0.06)} 46%,rgba(0,0,0,0) 72%)` }} />
-                  </div>
-                  <Radar
-                    ink={myType.ink}
-                    labelSize={11}
-                    onPick={(i) => setTraitPick(traitPick === i ? null : i)}
-                    picked={traitPick}
-                    scaleMax={mine.scaleMax}
-                    scores={mine.scores}
-                  />
-                </div>
-                <div style={{ position: "relative", marginTop: 10, borderRadius: 14, padding: "11px 13px", background: "rgba(255,255,255,0.5)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75),inset 0 0 0 1px rgba(255,255,255,0.45)" }}>
-                  {traitPick !== null && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: myType.ink }}>{TRAIT_LABELS[traitPick]}</span>
-                      <span style={{ fontSize: 16, fontWeight: 900, color: myType.ink, fontVariantNumeric: "tabular-nums" }}>{formatScore(mine.scores[traitPick])}</span>
-                    </div>
-                  )}
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: rgba(myType.ink, 0.9), lineHeight: 1.65, marginTop: traitPick !== null ? 6 : 0, textWrap: "pretty", whiteSpace: "pre-line" }}>
-                    {traitPick !== null ? TRAIT_META[traitPick].desc : myType.desc}
-                  </div>
-                </div>
-              </CardShell>
-            </div>
-            <div style={{ display: "flex", gap: 10, paddingBottom: 2, marginTop: 14 }}>
-              <div onClick={() => { setCardActive(null); setView("cards"); }} style={{ flex: 1, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: "#fff", borderRadius: 16, padding: "14px 0", cursor: "pointer", background: ACCENT }}>카드 모아보기</div>
-              <div onClick={() => setView("family")} style={{ flex: 1, textAlign: "center", fontSize: 14.5, fontWeight: 700, color: "#001E5A", borderRadius: 16, padding: "14px 0", cursor: "pointer", background: "#fff", boxShadow: "0 2px 10px rgba(30,25,60,0.06)" }}>가족 투자 성향 비교</div>
-            </div>
-          </div>
-        )}
-
-        {view === "tabs" && tab === "return" && (
+        {view === "return" && (
           <div style={BODY}>
             <div style={{ display: "flex", flexDirection: "column", gap: 13, paddingBottom: 10 }}>
               {/*
