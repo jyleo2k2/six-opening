@@ -59,9 +59,8 @@ const DAY_CHIP = styleFromCss(
 const ITEM_LINE = styleFromCss(
   "font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:10px",
 );
-const TOTAL_ASSETS = styleFromCss(
-  "font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;margin-top:6px;" +
-    "font-variant-numeric:tabular-nums",
+const TOTAL_ASSETS_TEXT = styleFromCss(
+  "font-size:23px;font-weight:800;color:#01185A;letter-spacing:-0.02em;font-variant-numeric:tabular-nums",
 );
 const GOAL_IMG = styleFromCss(
   "display:block;width:228px;height:auto;margin:-6px auto 0;filter:drop-shadow(0 14px 22px rgba(35,25,80,0.18))",
@@ -205,19 +204,22 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
           <div style={{ textAlign: "center", padding: "6px 0 2px" }}>
             <div style={DAY_CHIP}>{view.dayCount}</div>
             <div style={ITEM_LINE}>{view.itemLine}</div>
-            <div style={TOTAL_ASSETS}>{view.totalAssetsText}</div>
-            <div
-              style={{
-                fontSize: 19,
-                fontWeight: 800,
-                letterSpacing: "-0.02em",
-                marginTop: 8,
-                color: view.rateColor,
-              }}
-            >
-              {view.profitText}
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", marginLeft: 6 }}>
-                {view.rateText}
+            <div style={{ marginTop: 6, lineHeight: 1 }}>
+              <span style={TOTAL_ASSETS_TEXT}>{view.totalAssetsText}</span>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                  marginTop: 5,
+                  color: view.rateColor,
+                }}
+              >
+                {view.profitText}
+                <span style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", marginLeft: 6 }}>
+                  ({view.rateText})
+                </span>
               </span>
             </div>
           </div>
