@@ -65,6 +65,35 @@ for (const entry of SCRIPTED) {
   );
 }
 
+// 진단 질문은 용어마다 달라야 한다 (SPEC §3.4).
+//
+// 화면 용어 22종이 `screenTermScript` 하나에서 똑같은 껍데기 질문을 받던 자리다
+// ("이 말은 화면의 무엇을 확인하는 데 쓰일까요?"). 용어가 무엇이든 질문이 같아
+// "전체 자산이 뭐야?" 에 그 메타 질문으로 되물었다. 질문이 겹치면 그 용어를
+// 묻지 않고 있다는 뜻이므로 여기서 막는다.
+const questions = SCRIPTED.map((entry) => entry.explainScript!.check.question);
+assert.equal(new Set(questions).size, questions.length, "check.question 이 서로 겹친다");
+
+const adjustQuestions = SCRIPTED.filter((e) => e.explainScript!.adjust).map(
+  (e) => e.explainScript!.adjust!.question,
+);
+assert.equal(
+  new Set(adjustQuestions).size,
+  adjustQuestions.length,
+  "adjust.question 이 서로 겹친다",
+);
+
+// 조정 설명은 정답 근거를 담아야 한다 (SPEC §3.4). 예전 화면 용어의 조정 설명은
+// "이건 맞히는 시험이 아니에요" 라 근거가 하나도 없었다.
+for (const entry of SCRIPTED) {
+  const adjust = entry.explainScript!.adjust;
+  if (!adjust) continue;
+  assert.ok(
+    !adjust.explanation.includes("맞히는 시험이 아니에요"),
+    `${entry.id}: 조정 설명에 정답 근거가 없다`,
+  );
+}
+
 // 주문 카테고리의 직접 쓴 스크립트는 1문장 예산을 지킨다 (SPEC §3.4.4).
 //
 // 같은 카테고리라도 faq 3건(기다리는 주문·주문 취소·받게 되는 돈)은 제외한다.

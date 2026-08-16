@@ -595,28 +595,430 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
   }),
 } satisfies Record<string, ExplainScript>;
 
+/**
+ * 화면 용어의 진단 퀴즈 (SPEC §3.4).
+ *
+ * 예전에는 22개 용어가 `screenTermScript` 하나에서 **똑같은 껍데기 질문**을 받았다
+ * ("이 말은 화면의 무엇을 확인하는 데 쓰일까요?"). 용어가 무엇이든 질문이 같아
+ * "전체 자산이 뭐야?" 에 그 메타 질문으로 되물었고, 조정 설명은 "이건 맞히는
+ * 시험이 아니에요" 라 **정답 근거가 하나도 없었다**(§3.4가 요구하는 것과 정반대).
+ *
+ * 각 용어의 `brief` 는 대부분 "A 이지 B 는 아니다" 꼴이라 그 대조가 곧 진단
+ * 질문이다. 오답 선택지는 아이가 실제로 할 만한 오해로 채운다.
+ */
+type ScreenTermQuiz = ExplainScript["check"] & {
+  adjust: NonNullable<ExplainScript["adjust"]>;
+};
+
+const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
+  "mock-investing": {
+    question: "모의투자에서는 어떤 돈을 쓸까요?",
+    choices: [
+      { id: "virtual", label: "연습용 가상 돈" },
+      { id: "real", label: "내 통장의 진짜 돈" },
+      { id: "prize", label: "받은 상금" },
+    ],
+    answerId: "virtual",
+    adjust: {
+      explanation: "모의투자는 연습이라 실제 돈이 빠져나가지 않아요. 화면에 보이는 금액은 모두 연습용 가상 돈이에요.",
+      question: "모의투자로 산 주식은 실제로 갖게 될까요?",
+      choices: [
+        { id: "no", label: "실제로는 갖지 않아요" },
+        { id: "yes", label: "실제로 갖게 돼요" },
+      ],
+      answerId: "no",
+    },
+  },
+  "total-assets": {
+    question: "전체 자산에는 무엇이 함께 들어갈까요?",
+    choices: [
+      { id: "both", label: "현금과 주식 값어치를 합친 값" },
+      { id: "cash", label: "쓸 수 있는 현금만" },
+      { id: "stock", label: "가진 주식만" },
+    ],
+    answerId: "both",
+    adjust: {
+      explanation: "전체 자산은 쓸 수 있는 현금과 가진 주식의 값어치, 기다리는 주문에 맡겨 둔 금액을 모두 더한 값이에요. 한 가지만 보는 값이 아니에요.",
+      question: "전체 자산은 한 가지만 볼까요, 모두 더할까요?",
+      choices: [
+        { id: "sum", label: "모두 더해요" },
+        { id: "one", label: "현금만 봐요" },
+      ],
+      answerId: "sum",
+    },
+  },
+  "available-cash": {
+    question: "기다리는 주문에 맡겨 둔 돈도 쓸 수 있는 돈에 들어 있을까요?",
+    choices: [
+      { id: "excluded", label: "빠져 있어요" },
+      { id: "included", label: "그대로 들어 있어요" },
+      { id: "double", label: "두 번 들어가요" },
+    ],
+    answerId: "excluded",
+    adjust: {
+      explanation: "기다리는 주문에 맡긴 돈은 체결되거나 취소되기 전까지 잠겨 있어요. 그래서 지금 쓸 수 있는 돈에서는 빠져 있어요.",
+      question: "그 주문을 취소하면 맡긴 돈은 어떻게 될까요?",
+      choices: [
+        { id: "back", label: "다시 쓸 수 있게 돌아와요" },
+        { id: "gone", label: "그대로 없어져요" },
+      ],
+      answerId: "back",
+    },
+  },
+  holdings: {
+    question: "아직 체결되지 않은 주문도 가진 회사에 들어갈까요?",
+    choices: [
+      { id: "no", label: "들어가지 않아요" },
+      { id: "yes", label: "들어가요" },
+      { id: "half", label: "절반만 들어가요" },
+    ],
+    answerId: "no",
+    adjust: {
+      explanation: "가진 회사는 체결이 끝나 실제로 주식을 갖게 된 회사만 세요. 기다리는 주문은 아직 체결 전이라 여기에 없어요.",
+      question: "가진 회사에 들어가려면 무엇이 끝나야 할까요?",
+      choices: [
+        { id: "filled", label: "주문이 체결되어야 해요" },
+        { id: "placed", label: "주문만 넣으면 돼요" },
+      ],
+      answerId: "filled",
+    },
+  },
+  "pending-order": {
+    question: "기다리는 주문은 어떤 상태일까요?",
+    choices: [
+      { id: "waiting", label: "아직 체결되지 않은 상태" },
+      { id: "done", label: "이미 체결이 끝난 상태" },
+      { id: "cancelled", label: "취소가 끝난 상태" },
+    ],
+    answerId: "waiting",
+    adjust: {
+      explanation: "기다리는 주문은 정한 조건이 아직 맞지 않아 체결되지 않았어요. 기다리는 동안 금액이나 수량이 잠시 예약돼요.",
+      question: "기다리는 동안 그 금액이나 수량은 어떻게 될까요?",
+      choices: [
+        { id: "reserved", label: "잠시 예약돼요" },
+        { id: "gone", label: "그냥 없어져요" },
+      ],
+      answerId: "reserved",
+    },
+  },
+  "order-cancel": {
+    question: "이미 체결된 주문도 취소할 수 있을까요?",
+    choices: [
+      { id: "no", label: "취소할 수 없어요" },
+      { id: "yes", label: "언제든 취소할 수 있어요" },
+      { id: "later", label: "다음 날 취소돼요" },
+    ],
+    answerId: "no",
+    adjust: {
+      explanation: "체결은 거래가 이미 끝난 상태라 되돌릴 수 없어요. 취소는 아직 기다리는 주문에만 할 수 있어요.",
+      question: "그럼 취소할 수 있는 주문은 어떤 것일까요?",
+      choices: [
+        { id: "pending", label: "아직 기다리는 주문" },
+        { id: "filled", label: "이미 체결된 주문" },
+      ],
+      answerId: "pending",
+    },
+  },
+  "sell-proceeds": {
+    question: "받게 되는 돈은 무엇을 곱해 계산할까요?",
+    choices: [
+      { id: "qty-price", label: "팔 수량과 예상 체결 가격" },
+      { id: "cash-count", label: "남은 현금과 가진 회사 수" },
+      { id: "date-name", label: "산 날짜와 회사 이름" },
+    ],
+    answerId: "qty-price",
+    adjust: {
+      explanation: "받게 되는 돈은 몇 주를 얼마에 파는지로 계산해요. 그래서 팔 수량과 예상 체결 가격이 함께 필요해요.",
+      question: "계산에 꼭 필요한 두 가지는 무엇일까요?",
+      choices: [
+        { id: "qty-price", label: "팔 수량과 가격" },
+        { id: "date-name", label: "산 날짜와 회사 이름" },
+      ],
+      answerId: "qty-price",
+    },
+  },
+  "goal-price": {
+    question: "이 값을 적어 두면 그 값이 됐을 때 자동으로 팔릴까요?",
+    choices: [
+      { id: "no", label: "자동으로 팔리지 않아요" },
+      { id: "yes", label: "그 값이 되면 자동으로 팔려요" },
+      { id: "now", label: "적는 순간 바로 팔려요" },
+    ],
+    answerId: "no",
+    adjust: {
+      explanation: "이 값은 나중에 다시 보려고 스스로 적어 두는 기록이에요. 주문이 아니라서 저절로 거래되지 않아요.",
+      question: "그럼 이 값은 주문일까요, 나를 위한 기록일까요?",
+      choices: [
+        { id: "note", label: "나를 위한 기록" },
+        { id: "order", label: "저절로 도는 주문" },
+      ],
+      answerId: "note",
+    },
+  },
+  "holding-period": {
+    question: "적어 둔 보유 기간이 지나면 자동으로 팔릴까요?",
+    choices: [
+      { id: "no", label: "자동으로 팔리지 않아요" },
+      { id: "yes", label: "그날 자동으로 팔려요" },
+      { id: "cancel", label: "주문이 취소돼요" },
+    ],
+    answerId: "no",
+    adjust: {
+      explanation: "보유 기간은 얼마나 오래 가질지 스스로 생각해 둔 계획이에요. 꼭 지켜야 하는 약속도, 자동으로 파는 조건도 아니에요.",
+      question: "그럼 보유 기간은 약속일까요, 내 계획일까요?",
+      choices: [
+        { id: "plan", label: "내 계획" },
+        { id: "promise", label: "꼭 지켜야 하는 약속" },
+      ],
+      answerId: "plan",
+    },
+  },
+  "buy-day-record": {
+    question: "사던 날의 나는 무엇을 다시 보여줄까요?",
+    choices: [
+      { id: "my-note", label: "처음 주문할 때 남긴 내 기록" },
+      { id: "future", label: "앞으로의 가격" },
+      { id: "others", label: "다른 사람의 기록" },
+    ],
+    answerId: "my-note",
+    adjust: {
+      explanation: "사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간을 그대로 다시 보여줘요. 지금 생각과 무엇이 달라졌는지 돌아보는 화면이에요.",
+      question: "여기 보이는 것은 누구의 기록일까요?",
+      choices: [
+        { id: "mine", label: "처음 주문할 때의 내 기록" },
+        { id: "others", label: "다른 사람의 기록" },
+      ],
+      answerId: "mine",
+    },
+  },
+  "plan-badge": {
+    question: "계획 실천 배지는 무엇을 보고 줄까요?",
+    choices: [
+      { id: "plan", label: "처음 계획대로 팔았는지" },
+      { id: "profit", label: "얼마나 많이 벌었는지" },
+      { id: "speed", label: "얼마나 빨리 팔았는지" },
+    ],
+    answerId: "plan",
+    adjust: {
+      explanation: "이 배지는 처음 남긴 매도 계획과 맞게 팔았는지만 봐요. 얼마를 벌었는지는 배지와 상관없어요.",
+      question: "그럼 많이 벌면 배지를 받을 수 있을까요?",
+      choices: [
+        { id: "plan", label: "계획대로 팔아야 받아요" },
+        { id: "profit", label: "많이 벌면 받아요" },
+      ],
+      answerId: "plan",
+    },
+  },
+  "delayed-price": {
+    question: "화면에 보이는 값은 지금 시장 값과 같을까요?",
+    choices: [
+      { id: "late", label: "약 15분 늦어서 다를 수 있어요" },
+      { id: "same", label: "언제나 똑같아요" },
+      { id: "early", label: "15분 빨라요" },
+    ],
+    answerId: "late",
+    adjust: {
+      explanation: "화면의 값은 실제 시장보다 약 15분 늦게 도착해요. 그래서 지금 시장에서 거래되는 값과 다를 수 있어요.",
+      question: "그럼 화면의 값은 시장보다 빠를까요, 늦을까요?",
+      choices: [
+        { id: "late", label: "약 15분 늦어요" },
+        { id: "early", label: "약 15분 빨라요" },
+      ],
+      answerId: "late",
+    },
+  },
+  "child-news": {
+    question: "어린이 뉴스는 무엇을 알려 줄까요?",
+    choices: [
+      { id: "events", label: "회사와 시장에서 있었던 일" },
+      { id: "price", label: "앞으로의 가격" },
+      { id: "advice", label: "사고파는 답" },
+    ],
+    answerId: "events",
+    adjust: {
+      explanation: "어린이 뉴스는 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 자료도 직접 확인할 수 있어요.",
+      question: "뉴스에서 확인할 수 있는 것은 무엇일까요?",
+      choices: [
+        { id: "events", label: "있었던 일과 참고한 자료" },
+        { id: "advice", label: "사고파는 답" },
+      ],
+      answerId: "events",
+    },
+  },
+  season: {
+    question: "지금 한 시즌은 얼마 동안일까요?",
+    choices: [
+      { id: "four-weeks", label: "4주" },
+      { id: "one-day", label: "하루" },
+      { id: "one-year", label: "1년" },
+    ],
+    answerId: "four-weeks",
+    adjust: {
+      explanation: "지금 한 시즌은 4주 동안 이어져요. 남은 기간은 홈의 시즌 진행 표시에서 볼 수 있어요.",
+      question: "남은 기간은 어디에서 볼 수 있을까요?",
+      choices: [
+        { id: "home", label: "홈의 시즌 진행 표시" },
+        { id: "order", label: "주문 화면" },
+      ],
+      answerId: "home",
+    },
+  },
+  "trade-lock": {
+    question: "주문 잠금 동안에도 할 수 있는 것은 무엇일까요?",
+    choices: [
+      { id: "browse", label: "회사와 차트, 뉴스 보기" },
+      { id: "order", label: "새 주문 넣기" },
+      { id: "nothing", label: "아무것도 못 해요" },
+    ],
+    answerId: "browse",
+    adjust: {
+      explanation: "주문 잠금은 정해진 시간 동안 새 주문만 잠시 막아요. 회사와 차트, 뉴스를 보는 것은 그대로 할 수 있어요.",
+      question: "그럼 주문 잠금이 막는 것은 무엇일까요?",
+      choices: [
+        { id: "order", label: "새 주문" },
+        { id: "all", label: "화면 보기 전부" },
+      ],
+      answerId: "order",
+    },
+  },
+  ranking: {
+    question: "랭킹에서 높은 순위는 무엇을 뜻할까요?",
+    choices: [
+      { id: "return", label: "그 기간 수익률이 높았다는 것" },
+      { id: "habit", label: "더 좋은 투자 습관" },
+      { id: "profile", label: "더 좋은 성향" },
+    ],
+    answerId: "return",
+    adjust: {
+      explanation: "랭킹은 그 기간의 수익률을 순서대로 늘어놓은 것뿐이에요. 순위가 높다고 습관이나 성향이 더 좋다는 뜻은 아니에요.",
+      question: "그럼 순위가 높으면 습관도 더 좋은 걸까요?",
+      choices: [
+        { id: "no", label: "그런 뜻은 아니에요" },
+        { id: "yes", label: "습관도 더 좋아요" },
+      ],
+      answerId: "no",
+    },
+  },
+  "family-feed": {
+    question: "가족 기록에 보이는 거래 가격은 무엇일까요?",
+    choices: [
+      { id: "per-share", label: "주식 한 주당 가격" },
+      { id: "total", label: "전체 거래 금액" },
+      { id: "cash", label: "남은 현금" },
+    ],
+    answerId: "per-share",
+    adjust: {
+      explanation: "가족 기록의 거래 가격은 한 주에 얼마였는지를 보여줘요. 수량까지 곱한 전체 거래 금액과는 다른 값이에요.",
+      question: "그럼 그 값은 한 주 값일까요, 전체 금액일까요?",
+      choices: [
+        { id: "per-share", label: "한 주 값" },
+        { id: "total", label: "전체 금액" },
+      ],
+      answerId: "per-share",
+    },
+  },
+  "profile-abilities": {
+    question: "정확력은 무엇을 바탕으로 볼까요?",
+    choices: [
+      { id: "direction", label: "거래 뒤 2거래일의 가격 방향" },
+      { id: "profit", label: "번 돈의 크기" },
+      { id: "count", label: "거래한 횟수" },
+    ],
+    answerId: "direction",
+    adjust: {
+      explanation: "정확력은 거래하고 2거래일이 지난 뒤 가격이 어느 쪽으로 갔는지를 봐요. 얼마를 벌었는지로 매기는 값이 아니에요.",
+      question: "그럼 정확력은 번 돈으로 정해질까요?",
+      choices: [
+        { id: "direction", label: "가격 방향으로 봐요" },
+        { id: "profit", label: "번 돈으로 정해요" },
+      ],
+      answerId: "direction",
+    },
+  },
+  "profile-definition": {
+    question: "성향은 실력을 재는 검사일까요?",
+    choices: [
+      { id: "record", label: "검사가 아니라 행동 기록이에요" },
+      { id: "skill", label: "실력을 재는 검사예요" },
+      { id: "personality", label: "성격을 재는 검사예요" },
+    ],
+    answerId: "record",
+    adjust: {
+      explanation: "성향은 이번 시즌에 어떻게 행동했는지를 몇 가지 특징으로 나눈 결과예요. 실력이나 성격을 채점하는 검사가 아니에요.",
+      question: "그럼 기록이 더 쌓이면 성향은 어떻게 될까요?",
+      choices: [
+        { id: "change", label: "바뀔 수 있어요" },
+        { id: "fixed", label: "한 번 정해지면 그대로예요" },
+      ],
+      answerId: "change",
+    },
+  },
+  "profile-status": {
+    question: "관찰 중은 어떤 상태를 뜻할까요?",
+    choices: [
+      { id: "few", label: "아직 매수 기록이 부족한 상태" },
+      { id: "bad", label: "성향이 나쁘다는 뜻" },
+      { id: "locked", label: "계정이 잠긴 상태" },
+    ],
+    answerId: "few",
+    adjust: {
+      explanation: "관찰 중은 성향을 정할 만큼 체결된 매수 기록이 아직 쌓이지 않았다는 뜻이에요. 잘못했다는 표시가 아니에요.",
+      question: "그럼 관찰 중은 무엇이 부족하다는 뜻일까요?",
+      choices: [
+        { id: "record", label: "쌓인 기록" },
+        { id: "skill", label: "투자 실력" },
+      ],
+      answerId: "record",
+    },
+  },
+  "profile-character": {
+    question: "네 가지 성향 캐릭터 중에 더 좋은 것이 있을까요?",
+    choices: [
+      { id: "none", label: "더 좋은 것은 없어요" },
+      { id: "last", label: "마지막 것이 가장 좋아요" },
+      { id: "first", label: "첫 번째가 가장 좋아요" },
+    ],
+    answerId: "none",
+    adjust: {
+      explanation: "성향 캐릭터는 이번 시즌 행동을 근거·직관과 집중·분산의 조합으로 표현한 모습이에요. 네 모습 사이에 더 좋고 나쁨은 없어요.",
+      question: "그럼 캐릭터는 시즌마다 어떻게 될까요?",
+      choices: [
+        { id: "change", label: "달라질 수 있어요" },
+        { id: "fixed", label: "한 번 정해지면 그대로예요" },
+      ],
+      answerId: "change",
+    },
+  },
+  "season-record": {
+    question: "시즌 기록은 무엇을 모아 보여줄까요?",
+    choices: [
+      { id: "counts", label: "이번 시즌의 매수·매도와 열람 건수" },
+      { id: "future", label: "앞으로의 수익률" },
+      { id: "others", label: "다른 가족의 기록" },
+    ],
+    answerId: "counts",
+    adjust: {
+      explanation: "시즌 기록은 이번 시즌에 남긴 매수·매도와 메모, 상세 열람 건수를 모아요. 기록 카드는 시즌이 끝난 뒤에 받아요.",
+      question: "그럼 기록 카드는 언제 받을까요?",
+      choices: [
+        { id: "after", label: "시즌이 끝난 뒤" },
+        { id: "first", label: "시즌 첫날" },
+      ],
+      answerId: "after",
+    },
+  },
+};
+
 // 8월 14일에 추가한 화면 용어도 용어별 DAPIE 흐름으로 설명한다.
 function screenTermScript(id: string, brief: string): ExplainScript {
+  const quiz = SCREEN_TERM_QUIZZES[id];
+  // 퀴즈 없이 화면 용어를 늘리면 예전의 껍데기 질문으로 되돌아간다. 조용히
+  // 넘기지 않고 조립 단계에서 멈춘다 — 정적 테스트가 이 목록을 함께 지킨다.
+  if (!quiz) throw new Error(`screen term quiz missing: ${id}`);
   return termScript(id, {
     brief,
-    check: {
-      question: "이 말은 화면의 무엇을 확인하는 데 쓰일까요?",
-      choices: [
-        { id: "screen-meaning", label: "화면에 보이는 뜻" },
-        { id: "price-prediction", label: "앞으로의 가격" },
-        { id: "trade-advice", label: "사고파는 답" },
-      ],
-      answerId: "screen-meaning",
-    },
-    adjust: {
-      explanation: "이건 맞히는 시험이 아니에요. 화면에 적힌 이 말이 어떤 정보를 가리키는지 함께 확인하는 거예요.",
-      question: "이 용어를 볼 때 먼저 확인할 것은 무엇일까요?",
-      choices: [
-        { id: "meaning", label: "그 말이 가리키는 화면 정보" },
-        { id: "prediction", label: "미래 가격을 맞히는 법" },
-      ],
-      answerId: "meaning",
-    },
+    check: { question: quiz.question, choices: quiz.choices, answerId: quiz.answerId },
+    adjust: quiz.adjust,
     // brief 를 그대로 넣으면 퀴즈를 맞힌 아이가 방금 읽은 문장을 다시 읽는다.
     // 정답의 보상이 반복이 되지 않도록 덧붙는 새 한 문장을 준다 (SPEC §3.4.4).
     detail: "화면에 이미 있는 값을 가리키는 말이라 앞으로의 값을 알려 주지는 않아요.",
