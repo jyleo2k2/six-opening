@@ -1147,9 +1147,11 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   // 트리거를 `실적` 홑낱말로 두면 **`2024년 실적 알려줘` 를 가로챈다** — 그건 승인 종목
   // 사실 Tool 의 네 주제 중 하나다(§8). `questionForms` 로는 못 막는다. 형태가 안 잡힌
   // 입력을 정의형으로 보기 때문이다. 그래서 뜻을 묻는 꼴만 트리거로 잡는다.
-  { id: "earnings", kind: "faq", triggers: ["실적이 뭐", "실적 뜻", "실적이란", "실적은 뭐"], answer: "실적은 회사가 정해진 기간 동안 얼마를 벌고 얼마가 남았는지 정리한 결과예요.", status: reviewed },
+  { id: "earnings", kind: "faq", triggers: ["실적이 뭐", "실적 뭐", "실적 뜻", "실적이란", "실적은 뭐"], answer: "실적은 회사가 정해진 기간 동안 얼마를 벌고 얼마가 남았는지 정리한 결과예요.", status: reviewed },
   { id: "treasury-stock", kind: "faq", triggers: ["자사주"], answer: "자사주는 회사가 자기 회사의 주식을 사서 가지고 있는 것을 말해요.", status: reviewed },
-  { id: "year-over-year", kind: "faq", triggers: ["전년비", "전년 대비"], answer: "전년비는 작년 같은 기간과 견줘 얼마나 늘거나 줄었는지 나타내요.", status: reviewed },
+  // 뉴스가 실제로 쓰는 표기는 `전년 동기 대비` 쪽이 더 많다(발행 101건에서 7회 대 2회).
+  // 같은 뜻이므로 항목을 늘리지 않고 트리거만 붙인다.
+  { id: "year-over-year", kind: "faq", triggers: ["전년비", "전년 대비", "전년 동기 대비", "전년동기 대비", "전년 동기", "전년동기"], answer: "전년비는 작년 같은 기간과 견줘 얼마나 늘거나 줄었는지 나타내요.", status: reviewed },
   { id: "merger", kind: "faq", triggers: ["인수합병", "합병"], answer: "인수합병은 한 회사가 다른 회사를 사거나, 두 회사가 하나로 합치는 것이에요.", status: reviewed },
   { id: "new-product", kind: "faq", triggers: ["신제품"], answer: "신제품은 회사가 새로 만들어 내놓은 물건이나 서비스예요.", status: reviewed },
   { id: "recall", kind: "faq", triggers: ["리콜"], answer: "리콜은 팔았던 물건에 문제가 있어서 회사가 다시 거둬들여 고쳐 주는 것이에요.", status: reviewed },
@@ -1175,6 +1177,38 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "crypto-asset", kind: "faq", triggers: ["가상자산", "비트코인"], answer: "가상자산은 비트코인처럼 인터넷에서만 오가는 자산이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
   { id: "pension", kind: "faq", triggers: ["연금"], answer: "연금은 일을 그만둔 뒤에 받을 돈을 미리 조금씩 모아 두는 것이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
   { id: "insurance", kind: "faq", triggers: ["보험"], answer: "보험은 여럿이 조금씩 돈을 모아 두었다가 누가 사고를 당하면 도와주는 것이에요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
+
+  // ── 3차 추가 [2026-08-16] ──────────────────────────────────────────────
+  // 근거는 추측이 아니라 **발행된 뉴스 101건의 `term_treatments` 전수 집계**다(§9.1).
+  // 용어 230종 중 사전에 없던 160종을 세어, 2회 이상 반복되거나 기업 활동을 읽는 데
+  // 계속 걸리는 말만 골랐다. 기사 고유명사(세포라)와 생활·연예 낱말(편의점·월드투어)은
+  // 넣지 않는다 — 그 낱말의 답은 그 기사에 붙은 쉬운 말 풀이지 사전 문장이 아니다.
+  // 재집계: `npx tsx features/f2-trade/prototypes/child-news-role-pipeline/term-frequency.ts --missing`
+
+  // 기업이 하는 일 — 실적·공시 기사의 뼈대가 되는 말이다.
+  { id: "contract", kind: "faq", triggers: ["계약"], answer: "계약은 무엇을 언제까지 해 주기로 서로 약속하고 문서로 남기는 것이에요. 회사끼리 맺은 계약은 정해진 기간 동안 지켜야 해요.", status: reviewed },
+  { id: "factory", kind: "faq", triggers: ["공장"], answer: "공장은 물건을 많이 만들어 내는 큰 건물이에요. 공장을 새로 지으면 만들 수 있는 양이 늘어나요.", status: reviewed },
+  { id: "stake", kind: "faq", triggers: ["지분"], answer: "지분은 회사 전체 주식 가운데 어떤 사람이나 회사가 가진 몫이에요. 지분이 많을수록 회사 일을 정할 때 낼 수 있는 목소리도 커져요.", status: reviewed },
+  { id: "disclosure", kind: "faq", triggers: ["공시"], answer: "공시는 회사가 투자자에게 알려야 할 중요한 일을 공개하는 것이에요. 실적이나 큰 계약이 정해지면 정해진 곳에 올려 누구나 볼 수 있게 해요.", status: reviewed },
+  { id: "acquisition", kind: "faq", triggers: ["인수"], answer: "인수는 다른 회사나 사업을 사서 넘겨받는 것이에요.", status: reviewed },
+  { id: "divestiture", kind: "faq", triggers: ["매각"], answer: "매각은 가지고 있던 회사나 사업, 재산을 파는 것이에요.", status: reviewed },
+  { id: "board-of-directors", kind: "faq", triggers: ["이사회"], answer: "이사회는 회사의 중요한 일을 모여서 정하는 모임이에요.", status: reviewed },
+  { id: "holding-company", kind: "faq", triggers: ["지주사", "지주회사"], answer: "지주사는 다른 회사들의 주식을 가지고 그 회사들을 거느리는 회사예요.", status: reviewed },
+  { id: "corporation", kind: "faq", triggers: ["법인"], answer: "법인은 사람처럼 계약을 맺고 재산을 가질 수 있게 만든 회사나 단체예요.", status: reviewed },
+  { id: "share-cancellation", kind: "faq", triggers: ["자사주 소각", "주식 소각", "소각"], answer: "소각은 회사가 사 둔 자기 주식을 아예 없애는 것이에요. 없앤 만큼 남은 주식 수가 줄어들어요.", status: reviewed },
+
+  // 실적 기사를 읽을 때 걸리는 말 — 숫자 옆에 늘 붙어 있다.
+  { id: "consolidated-basis", kind: "faq", triggers: ["연결 기준", "연결기준", "연결 실적"], answer: "연결 기준은 본사와 본사가 거느린 회사들의 실적을 하나로 합쳐 계산하는 방법이에요. 본사만 따로 계산한 것은 별도 기준이라고 해요.", status: reviewed },
+  { id: "profitability", kind: "faq", triggers: ["수익성"], answer: "수익성은 번 돈에서 비용을 빼고 얼마나 남는지를 보여주는 정도예요.", status: reviewed },
+  { id: "growth-rate", kind: "faq", triggers: ["성장률"], answer: "성장률은 매출이나 이익이 지난 기간보다 얼마나 늘었는지 비율로 나타낸 값이에요.", status: reviewed },
+  { id: "rebound", kind: "faq", triggers: ["반등"], answer: "반등은 내려가던 값이 다시 올라간 것을 뒤에서 부르는 말이에요.", status: reviewed },
+  { id: "supply-chain", kind: "faq", triggers: ["공급망"], answer: "공급망은 재료를 구해 물건을 만들고 파는 곳까지 이어진 회사와 과정이에요.", status: reviewed },
+  { id: "fuel-cost", kind: "faq", triggers: ["연료비"], answer: "연료비는 배나 자동차, 발전소를 움직이는 연료에 드는 돈이에요.", status: reviewed },
+  { id: "funding", kind: "faq", triggers: ["조달"], answer: "조달은 사업에 필요한 돈이나 재료를 마련하는 것이에요.", status: reviewed },
+
+  // 사람과 돈을 모으는 곳 — 뉴스에 이름만 나오고 뜻은 안 나온다.
+  { id: "chief-executive", kind: "faq", triggers: ["최고경영자", "ceo"], answer: "최고경영자는 회사의 일을 가장 크게 책임지고 결정하는 사람이에요. 영어 약자로 CEO라고 불러요.", status: reviewed },
+  { id: "private-equity", kind: "faq", triggers: ["사모펀드", "pef"], answer: "사모펀드는 정해진 소수의 투자자에게만 돈을 모아 굴리는 펀드예요. 이 서비스에서는 주식만 다뤄요.", status: reviewed },
 ] satisfies readonly ChatbotKnowledgeEntry[]).map((entry) =>
   entry.kind === "faq" && DAPIE_SCREEN_TERM_IDS.has(entry.id)
     ? {
@@ -1227,7 +1261,43 @@ function answersQuestionForm(
   return entry.questionForms.includes(questionForm ?? "definition");
 }
 
-export function findChatbotKnowledge(query: string) {
+/**
+ * 공백을 지운 문자열에서 트리거를 찾되, **원문의 낱말 경계는 기억한다.**
+ *
+ * `normalize` 가 공백을 지우는 순간 낱말 경계도 함께 사라진다. 그래서 두 글자
+ * 트리거가 남의 낱말 가운데에 걸렸다 — `공[시가] 뭐야?` 는 `시가`(그날 첫 가격),
+ * `수주잔[고가] 뭐야?` 는 `고가`(그날 가장 높은 가격) 로 답이 나갔다(실측 2026-08-16).
+ * 사전이 커질수록 두 글자 항목이 늘어 이 사고도 같이 늘어난다.
+ *
+ * 두 글자 트리거는 **원문에서 바로 앞 글자가 한글이면 버린다.** 세 글자 이상은
+ * 우연히 겹칠 확률이 낮고, 겹쳐도 길이 정렬이 긴 쪽을 고른다.
+ * 공백은 경계로 남으므로 `오늘 시가가 뭐야?` 의 `시가` 는 그대로 걸린다.
+ */
+const WORD_BOUNDARY_TRIGGER_LENGTH = 2;
+
+/**
+ * 두 글자 트리거가 **원문에서 낱말 첫머리에 있었는지**. 앞 글자가 한글이면 남의 낱말을
+ * 가운데서 자른 것이라 버린다. 공백은 경계로 남으므로 `오늘 시가가` 의 `시가` 는 살아남는다.
+ *
+ * 라우터는 공백을 지운 문자열로 조회하므로(`normalizeChatInput`) 원문을 따로 받는다.
+ * 원문에 그 낱말이 통째로 없으면(띄어 쓴 두 글자 등) 경계를 확인할 수 없어 버린다 —
+ * 두 글자 낱말을 굳이 쪼개 쓰는 입력은 없고, 놓치는 쪽이 엉뚱한 답보다 낫다.
+ */
+function startsWordIn(rawQuery: string, trigger: string) {
+  const source = rawQuery.toLowerCase();
+  // 트리거는 공백을 지운 꼴이라 원문에서는 사이가 벌어져 있을 수 있다(`번 돈`).
+  const spaced = new RegExp(
+    [...trigger].map((letter) => letter.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("\\s*"),
+    "gu",
+  );
+  for (const match of source.matchAll(spaced)) {
+    const before = source[match.index - 1];
+    if (before === undefined || !/[가-힣]/u.test(before)) return true;
+  }
+  return false;
+}
+
+export function findChatbotKnowledge(query: string, rawQuery: string = query) {
   const normalized = normalize(query);
   const questionForm = findChatbotQuestionForm(query);
   return CHATBOT_KNOWLEDGE.filter((entry) => entry.status === "reviewed")
@@ -1238,7 +1308,11 @@ export function findChatbotKnowledge(query: string) {
         0,
         ...entry.triggers
           .map(normalize)
-          .filter((trigger) => normalized.includes(trigger))
+          .filter(
+            (trigger) =>
+              normalized.includes(trigger) &&
+              (trigger.length > WORD_BOUNDARY_TRIGGER_LENGTH || startsWordIn(rawQuery, trigger)),
+          )
           .map((trigger) => trigger.length),
       ),
     }))

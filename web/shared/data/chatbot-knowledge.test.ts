@@ -117,6 +117,52 @@ for (const question of [
   assert.equal(findChatbotKnowledge(question)?.id, "orderbook-unsupported", question);
 }
 
+// 발행된 어린이 뉴스가 실제로 풀어 쓴 말을 사전이 받는다(§9.1 — 3차 추가).
+// 근거는 뉴스 101건의 `term_treatments` 전수 집계다.
+for (const [question, id] of [
+  ["계약이 뭐야?", "contract"],
+  ["공장이 뭐야?", "factory"],
+  ["지분이 뭐야?", "stake"],
+  ["공시가 뭐야?", "disclosure"],
+  ["연결 기준이 뭐야?", "consolidated-basis"],
+  ["매각이 뭐야?", "divestiture"],
+  ["인수가 뭐야?", "acquisition"],
+  ["공급망이 뭐야?", "supply-chain"],
+  ["수익성이 뭐야?", "profitability"],
+  ["자사주 소각이 뭐야?", "share-cancellation"],
+  ["최고경영자가 뭐야?", "chief-executive"],
+  // 표기가 흔들리는 말은 항목을 늘리지 않고 트리거만 붙인다.
+  ["전년 동기 대비가 뭐야?", "year-over-year"],
+  ["전년비가 뭐야?", "year-over-year"],
+  // 조사가 빠진 꼴도 받는다. 예전에는 이 형태만 LLM 으로 흘렀다.
+  ["실적 뭐야?", "earnings"],
+] as const) {
+  assert.equal(findChatbotKnowledge(question)?.id, id, question);
+}
+
+// 두 글자 트리거는 남의 낱말을 가운데서 자르지 않는다.
+//
+// 공백을 지우고 부분 문자열로 찾으면 `공[시가]` 가 `시가`(그날 첫 가격), `수주잔[고가]`
+// 가 `고가`(그날 최고가)로 걸려 **엉뚱한 답이 나갔다**(실측 2026-08-16). 사전이 커질수록
+// 두 글자 항목이 늘어 이 사고도 함께 늘어난다.
+for (const [question, id] of [
+  ["공시가 뭐야?", "disclosure"],
+  ["수주잔고가 뭐야?", "order-received"],
+  ["오늘 시가가 뭐야?", "open-price"],
+  ["시가가 뭐야?", "open-price"],
+  ["고가가 뭐야?", "high-price"],
+] as const) {
+  assert.equal(findChatbotKnowledge(question)?.id, id, question);
+}
+for (const question of ["출시가 뭐야?", "자체 결제 시스템이 뭐야?", "운임지수가 뭐야?"]) {
+  assert.equal(findChatbotKnowledge(question), undefined, question);
+}
+
+// 라우터는 공백을 지운 문자열로 조회하므로 원문을 함께 넘긴다. 원문이 없으면 경계를
+// 볼 수 없어 `공시가` 가 다시 `시가` 로 걸린다 — 그 연결이 끊기면 이 검사가 실패한다.
+assert.equal(findChatbotKnowledge("공시가뭐야", "공시가 뭐야?")?.id, "disclosure");
+assert.equal(findChatbotKnowledge("오늘시가가뭐야", "오늘 시가가 뭐야?")?.id, "open-price");
+
 // 답변을 선언한 형태 밖으로 내보내지 않는다.
 for (const entry of CHATBOT_KNOWLEDGE) {
   if (!entry.questionForms) continue;
