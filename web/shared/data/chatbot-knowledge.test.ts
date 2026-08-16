@@ -65,6 +65,23 @@ for (const entry of SCRIPTED) {
   );
 }
 
+// 정답 id 는 실제 선택지를 가리켜야 하고 선택지 id 는 서로 달라야 한다.
+// 어긋나면 아이가 정답을 골라도 오답 경로로 빠지는데, 화면에서는 그냥 "틀렸다"로
+// 보여 조용히 넘어간다.
+for (const entry of SCRIPTED) {
+  const script = entry.explainScript!;
+  for (const [where, choices, answerId] of [
+    ["check", script.check.choices, script.check.answerId],
+    ...(script.adjust
+      ? [["adjust", script.adjust.choices, script.adjust.answerId] as const]
+      : []),
+  ] as const) {
+    const ids = choices.map((c) => c.id);
+    assert.equal(new Set(ids).size, ids.length, `${entry.id}.${where}: 선택지 id 가 겹친다`);
+    assert.ok(ids.includes(answerId), `${entry.id}.${where}: answerId 가 선택지에 없다`);
+  }
+}
+
 // 진단 질문은 용어마다 달라야 한다 (SPEC §3.4).
 //
 // 화면 용어 22종이 `screenTermScript` 하나에서 똑같은 껍데기 질문을 받던 자리다

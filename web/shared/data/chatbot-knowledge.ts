@@ -47,8 +47,8 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "주식 한 주는 무엇을 뜻할까요?",
       choices: [
         { id: "company-piece", label: "회사의 작은 조각" },
-        { id: "employee-name", label: "직원의 이름" },
-        { id: "order-paper", label: "주문서 한 장" },
+        { id: "loan", label: "회사에 빌려준 돈" },
+        { id: "product", label: "회사가 파는 물건" },
       ],
       answerId: "company-piece",
     },
@@ -94,7 +94,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       choices: [
         { id: "one-company", label: "회사나 상품 하나" },
         { id: "all-market", label: "주식시장 전체" },
-        { id: "one-button", label: "주문 버튼 하나" },
+        { id: "one-sector", label: "같은 업종 묶음" },
       ],
       answerId: "one-company",
     },
@@ -195,7 +195,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "사고파는 거래가 실제로 끝난 상태를 무엇이라고 할까요?",
       choices: [
         { id: "execution", label: "체결" },
-        { id: "search", label: "검색" },
+        { id: "order", label: "주문" },
       ],
       answerId: "execution",
     },
@@ -231,8 +231,8 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "주식 수량은 무엇을 세는 숫자일까요?",
       choices: [
         { id: "share-count", label: "사고팔 주식의 개수" },
-        { id: "company-age", label: "회사의 나이" },
-        { id: "price-change", label: "가격이 변한 폭" },
+        { id: "unit-price", label: "한 주의 가격" },
+        { id: "total-amount", label: "전체 주문 금액" },
       ],
       answerId: "share-count",
     },
@@ -254,8 +254,8 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "예상 금액을 계산할 때 무엇이 필요할까요?",
       choices: [
         { id: "quantity-price", label: "수량과 주문 가격" },
-        { id: "company-age", label: "회사의 나이" },
-        { id: "employee-count", label: "직원 수" },
+        { id: "quantity-only", label: "수량만" },
+        { id: "cash", label: "쓸 수 있는 현금" },
       ],
       answerId: "quantity-price",
     },
@@ -264,7 +264,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "전체 금액을 알려면 개수와 무엇이 필요할까요?",
       choices: [
         { id: "unit-price", label: "한 개의 가격" },
-        { id: "company-name", label: "회사 이름의 길이" },
+        { id: "cash", label: "쓸 수 있는 현금" },
       ],
       answerId: "unit-price",
     },
@@ -278,7 +278,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       choices: [
         { id: "holding", label: "지금 가진 주식" },
         { id: "future-order", label: "내일 넣을 주문" },
-        { id: "employee", label: "회사의 직원 수" },
+        { id: "cash", label: "쓸 수 있는 현금" },
       ],
       answerId: "holding",
     },
@@ -300,8 +300,8 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "수익률은 무엇을 비교할까요?",
       choices: [
         { id: "start-now", label: "처음 금액과 지금 금액" },
-        { id: "staff-store", label: "직원 수와 가게 수" },
-        { id: "name-length", label: "회사 이름의 길이" },
+        { id: "cash-now", label: "지금 금액과 남은 현금" },
+        { id: "buy-sell", label: "산 주식 수와 판 주식 수" },
       ],
       answerId: "start-now",
     },
@@ -333,7 +333,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "여러 번 산 가격을 한 주당 평균으로 나타낸 값은 무엇일까요?",
       choices: [
         { id: "average-price", label: "평균 매수가" },
-        { id: "volume", label: "거래량" },
+        { id: "current", label: "지금의 현재가" },
       ],
       answerId: "average-price",
     },
@@ -346,8 +346,8 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "같은 업종의 회사들은 무엇이 비슷할까요?",
       choices: [
         { id: "business", label: "주로 하는 일" },
-        { id: "name-length", label: "회사 이름의 길이" },
-        { id: "logo-color", label: "로고 색깔" },
+        { id: "size", label: "회사의 크기" },
+        { id: "price-level", label: "주가의 높낮이" },
       ],
       answerId: "business",
     },
@@ -369,8 +369,8 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "시가총액을 계산할 때 무엇을 함께 볼까요?",
       choices: [
         { id: "price-shares", label: "현재가와 전체 주식 수" },
-        { id: "staff-age", label: "직원 수와 회사 나이" },
-        { id: "stores-logo", label: "가게 수와 로고 색" },
+        { id: "price-volume", label: "현재가와 거래량" },
+        { id: "revenue-staff", label: "매출과 직원 수" },
       ],
       answerId: "price-shares",
     },
@@ -379,7 +379,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "모든 조각의 현재 값을 합치면 무엇을 볼 수 있을까요?",
       choices: [
         { id: "company-size", label: "시장에서 본 회사의 전체 크기" },
-        { id: "employee-pay", label: "직원 한 명의 월급" },
+        { id: "one-share", label: "주식 한 주의 값" },
       ],
       answerId: "company-size",
     },
@@ -416,7 +416,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       choices: [
         { id: "business-cost", label: "본업에 든 비용" },
         { id: "stock-count", label: "전체 주식 수" },
-        { id: "company-age", label: "회사의 나이" },
+        { id: "sold-count", label: "판 물건의 개수" },
       ],
       answerId: "business-cost",
     },
@@ -425,7 +425,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "본업으로 번 돈에서 본업 비용을 빼고 남은 결과는 무엇일까요?",
       choices: [
         { id: "operating-profit", label: "영업이익" },
-        { id: "volume", label: "거래량" },
+        { id: "revenue", label: "매출" },
       ],
       answerId: "operating-profit",
     },
@@ -439,7 +439,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       choices: [
         { id: "shareholder", label: "회사의 주주" },
         { id: "all-customer", label: "물건을 산 모든 손님" },
-        { id: "all-people", label: "세상의 모든 사람" },
+        { id: "worker", label: "회사에서 일하는 사람" },
       ],
       answerId: "shareholder",
     },
@@ -448,7 +448,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "회사가 이익 일부를 주주에게 나누어 주는 일을 무엇이라고 할까요?",
       choices: [
         { id: "dividend", label: "배당" },
-        { id: "order", label: "주문" },
+        { id: "revenue", label: "매출" },
       ],
       answerId: "dividend",
     },
@@ -461,7 +461,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "ETF 한 상품 안에는 무엇이 담길 수 있을까요?",
       choices: [
         { id: "many-assets", label: "여러 주식이나 자산" },
-        { id: "employee-list", label: "회사 직원 명단" },
+        { id: "one-stock", label: "한 회사의 주식만" },
         { id: "future-price", label: "미래 가격의 정답" },
       ],
       answerId: "many-assets",
@@ -471,7 +471,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "ETF는 하나만 담은 물건일까요, 여러 자산을 묶은 상품일까요?",
       choices: [
         { id: "bundle", label: "여러 자산을 묶은 상품" },
-        { id: "one-employee", label: "직원 한 명" },
+        { id: "one-stock", label: "한 회사의 주식" },
       ],
       answerId: "bundle",
     },
@@ -485,7 +485,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       choices: [
         { id: "stock-group", label: "여러 주식의 가격" },
         { id: "one-person", label: "한 사람의 수익률" },
-        { id: "employee-age", label: "직원의 나이" },
+        { id: "one-price", label: "한 종목의 가격" },
       ],
       answerId: "stock-group",
     },
@@ -508,7 +508,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       choices: [
         { id: "past-movement", label: "지나간 가격 움직임" },
         { id: "future-answer", label: "미래 가격의 정답" },
-        { id: "company-rule", label: "회사의 사내 규칙" },
+        { id: "earnings", label: "회사가 번 돈" },
       ],
       answerId: "past-movement",
     },
@@ -586,7 +586,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "생각과 다른 결과가 생길 가능성을 무엇이라고 할까요?",
       choices: [
         { id: "risk", label: "위험" },
-        { id: "execution", label: "체결" },
+        { id: "return", label: "수익률" },
       ],
       answerId: "risk",
     },
@@ -724,7 +724,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
     choices: [
       { id: "qty-price", label: "팔 수량과 예상 체결 가격" },
       { id: "cash-count", label: "남은 현금과 가진 회사 수" },
-      { id: "date-name", label: "산 날짜와 회사 이름" },
+      { id: "buy-now", label: "처음 산 가격과 지금 가격" },
     ],
     answerId: "qty-price",
     adjust: {
@@ -732,7 +732,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       question: "계산에 꼭 필요한 두 가지는 무엇일까요?",
       choices: [
         { id: "qty-price", label: "팔 수량과 가격" },
-        { id: "date-name", label: "산 날짜와 회사 이름" },
+        { id: "buy-now", label: "처음 산 가격과 지금 가격" },
       ],
       answerId: "qty-price",
     },
@@ -1027,8 +1027,8 @@ function screenTermScript(id: string, brief: string): ExplainScript {
 }
 
 const CHART_EXPLAIN_SCRIPTS: Record<string, ExplainScript> = {
-  "line-chart": termScript("line-chart", { brief: "선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요.", check: { question: "선차트에서 이어지는 것은 무엇일까요?", choices: [{ id: "price", label: "가격의 흐름" }, { id: "company", label: "회사 이름" }, { id: "news", label: "뉴스 제목" }], answerId: "price" }, adjust: { explanation: "선차트는 시간마다의 가격 점을 선으로 이은 그림이에요. 선을 따라가면 가격이 어떻게 움직였는지 흐름을 읽기 쉬워요.", question: "선차트의 선은 무엇의 흐름을 보여줄까요?", choices: [{ id: "price", label: "가격" }, { id: "advice", label: "매수 조언" }], answerId: "price" }, detail: "선차트는 가격이 어떻게 움직였는지 보기 위한 그림이에요. 다음 가격을 알려 주는 그림은 아니에요.", example: "점들을 연필로 이어 그린 선처럼, 시간마다의 가격 점을 연결한 모습이에요." }),
-  "candle-chart": termScript("candle-chart", { brief: "캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요.", check: { question: "캔들 하나는 무엇을 함께 보여줄까요?", choices: [{ id: "four-prices", label: "시작·끝·높음·낮음" }, { id: "future", label: "미래 가격" }, { id: "company", label: "회사 소개" }], answerId: "four-prices" }, adjust: { explanation: "캔들 하나에는 한 기간 안에서 가격이 어디서 시작해 어디까지 움직였는지 담겨요. 그 기간의 가격 움직임을 막대 하나로 보는 거예요.", question: "캔들 하나가 담는 것은 무엇일까요?", choices: [{ id: "range", label: "그 기간의 가격 움직임" }, { id: "recommendation", label: "매매 추천" }], answerId: "range" }, detail: "캔들의 몸통과 꼬리는 과거 한 기간 안의 가격 범위를 보여줘요. 다음 가격을 알려 주지는 않아요.", example: "하루 동안 가장 높았던 곳과 낮았던 곳을 표시한 막대라고 보면 돼요." }),
+  "line-chart": termScript("line-chart", { brief: "선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요.", check: { question: "선차트에서 이어지는 것은 무엇일까요?", choices: [{ id: "price", label: "가격의 흐름" }, { id: "volume", label: "거래량의 흐름" }, { id: "news", label: "뉴스가 나온 때" }], answerId: "price" }, adjust: { explanation: "선차트는 시간마다의 가격 점을 선으로 이은 그림이에요. 선을 따라가면 가격이 어떻게 움직였는지 흐름을 읽기 쉬워요.", question: "선차트의 선은 무엇의 흐름을 보여줄까요?", choices: [{ id: "price", label: "가격" }, { id: "volume", label: "거래량" }], answerId: "price" }, detail: "선차트는 가격이 어떻게 움직였는지 보기 위한 그림이에요. 다음 가격을 알려 주는 그림은 아니에요.", example: "점들을 연필로 이어 그린 선처럼, 시간마다의 가격 점을 연결한 모습이에요." }),
+  "candle-chart": termScript("candle-chart", { brief: "캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요.", check: { question: "캔들 하나는 무엇을 함께 보여줄까요?", choices: [{ id: "four-prices", label: "시작·끝·높음·낮음" }, { id: "open-close", label: "시작값과 끝값만" }, { id: "volume", label: "그 기간의 거래량" }], answerId: "four-prices" }, adjust: { explanation: "캔들 하나에는 한 기간 안에서 가격이 어디서 시작해 어디까지 움직였는지 담겨요. 그 기간의 가격 움직임을 막대 하나로 보는 거예요.", question: "캔들 하나가 담는 것은 무엇일까요?", choices: [{ id: "range", label: "그 기간의 가격 움직임" }, { id: "volume", label: "그 기간의 거래량" }], answerId: "range" }, detail: "캔들의 몸통과 꼬리는 과거 한 기간 안의 가격 범위를 보여줘요. 다음 가격을 알려 주지는 않아요.", example: "하루 동안 가장 높았던 곳과 낮았던 곳을 표시한 막대라고 보면 돼요." }),
   "minute-chart": termScript("minute-chart", { brief: "분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요.", check: { question: "분봉 한 개는 어느 기간을 나타낼까요?", choices: [{ id: "minutes", label: "몇 분" }, { id: "day", label: "하루" }, { id: "week", label: "한 주" }], answerId: "minutes" }, adjust: { explanation: "분봉의 '분'은 시계의 분처럼 짧은 시간을 뜻해요. 그래서 분봉은 시간을 짧은 몇 분 단위로 나눠서 봐요.", question: "분봉은 시간을 어떻게 나눌까요?", choices: [{ id: "short", label: "짧은 몇 분" }, { id: "long", label: "몇 달" }], answerId: "short" }, detail: "몇 분으로 나누는 방법만 다를 뿐, 과거 가격을 보는 차트라는 점은 같아요.", example: "수업 시간을 몇 분 단위로 나눠 보는 시간표와 비슷해요." }),
   "daily-chart": termScript("daily-chart", { brief: "일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요.", check: { question: "일봉 한 개는 어느 기간을 나타낼까요?", choices: [{ id: "day", label: "하루" }, { id: "minutes", label: "몇 분" }, { id: "week", label: "한 주" }], answerId: "day" }, adjust: { explanation: "일봉의 '일'은 하루를 뜻해요. 그래서 일봉은 하루의 가격 움직임을 막대 하나로 묶어서 봐요.", question: "일봉은 무엇을 한 묶음으로 볼까요?", choices: [{ id: "day", label: "하루" }, { id: "month", label: "한 달" }], answerId: "day" }, detail: "하루 안의 시작값과 끝값, 높고 낮은 값을 한 막대에 담아요. 지나간 하루의 흐름을 보는 그림이에요.", example: "하루 일기를 한 장으로 정리하듯, 하루 가격 움직임을 막대 하나로 보는 거예요." }),
   "weekly-chart": termScript("weekly-chart", { brief: "주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요.", check: { question: "주봉 한 개는 어느 기간을 나타낼까요?", choices: [{ id: "week", label: "한 주" }, { id: "day", label: "하루" }, { id: "minutes", label: "몇 분" }], answerId: "week" }, adjust: { explanation: "주봉의 '주'는 한 주를 뜻해요. 그래서 주봉은 한 주의 가격 움직임을 막대 하나로 묶어서 봐요.", question: "주봉은 무엇을 한 묶음으로 볼까요?", choices: [{ id: "week", label: "한 주" }, { id: "hour", label: "한 시간" }], answerId: "week" }, detail: "한 주의 가격 움직임을 한 막대에 담아요. 더 긴 과거 흐름을 살펴볼 때 써요.", example: "한 주 동안의 기록을 한 칸에 모아 보는 달력과 비슷해요." }),
@@ -1092,7 +1092,7 @@ const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
       question: "예대마진은 무엇의 차이일까요?",
       choices: [
         { id: "interest", label: "받은 이자와 준 이자" },
-        { id: "staff", label: "직원 수와 지점 수" },
+        { id: "total-earn", label: "은행이 번 돈 전체" },
         { id: "amount", label: "예금과 대출의 크기" },
       ],
       answerId: "interest",
@@ -1116,7 +1116,7 @@ const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
       // 오답 보기에도 금지표현 규칙이 걸린다. "오를 가능성"은 예측 패턴이라 쓸 수 없다.
       choices: [
         { id: "why", label: "고른 이유" },
-        { id: "name", label: "회사 이름" },
+        { id: "future", label: "앞으로의 가격" },
         { id: "date", label: "산 날짜" },
       ],
       answerId: "why",
@@ -1287,13 +1287,14 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
         question: "PER은 무엇을 비교하는 숫자일까요?",
         choices: [
           { id: "profit-and-price", label: "회사가 번 이익과 주가" },
+          { id: "assets-and-price", label: "회사가 가진 재산과 주가" },
           { id: "employee-count", label: "회사의 직원 수와 주가" },
         ],
         answerId: "profit-and-price",
       },
       adjust: {
-        explanation: "PER이 비교하는 것은 딱 두 가지, 회사가 번 이익과 주가예요. 직원 수 같은 다른 숫자는 PER 계산에 들어가지 않아요.",
-        question: "그럼 직원 수는 PER 비교에 들어갈까요?",
+        explanation: "PER이 비교하는 것은 딱 두 가지, 회사가 번 이익과 주가예요. 가진 재산을 주가와 견주는 것은 PBR 이라 서로 다른 숫자예요.",
+        question: "그럼 PER 은 주가를 무엇과 견줄까요?",
         choices: [
           { id: "no", label: "들어가지 않아요" },
           { id: "yes", label: "들어가요" },
@@ -1313,8 +1314,8 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           question: "PBR은 회사 값을 무엇과 비교할까요?",
           choices: [
             { id: "asset", label: "회사가 가진 재산" },
-            { id: "staff", label: "직원 수" },
-            { id: "age", label: "회사 나이" },
+            { id: "earnings", label: "회사가 번 이익" },
+            { id: "staff", label: "회사의 직원 수" },
           ],
           answerId: "asset",
         },
@@ -1323,7 +1324,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           question: "건물과 기계, 남은 돈을 모은 이 묶음은 무엇일까요?",
           choices: [
             { id: "asset", label: "회사가 가진 재산" },
-            { id: "staff", label: "직원 수" },
+            { id: "earnings", label: "회사가 번 이익" },
           ],
           answerId: "asset",
         },
@@ -1341,8 +1342,8 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           question: "EPS는 회사가 번 돈을 무엇으로 나눌까요?",
           choices: [
             { id: "shares", label: "전체 주식 수" },
-            { id: "staff", label: "직원 수" },
-            { id: "stores", label: "가게 수" },
+            { id: "holders", label: "주주의 수" },
+            { id: "staff", label: "회사의 직원 수" },
           ],
           answerId: "shares",
         },
@@ -1351,7 +1352,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           question: "번 돈을 조각마다 나눌 때 무엇의 수가 필요할까요?",
           choices: [
             { id: "shares", label: "전체 주식 수" },
-            { id: "stores", label: "가게 수" },
+            { id: "holders", label: "주주의 수" },
           ],
           answerId: "shares",
         },
