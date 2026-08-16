@@ -2208,15 +2208,24 @@ function findTermByBareDefinition(message: string) {
   return undefined;
 }
 
-/** 승인 사전 조회. 구어체 어미와 조사 생략을 함께 흡수한다. */
-function findApprovedKnowledge(message: string) {
+/**
+ * 승인 사전 조회. 구어체 어미와 조사 생략을 함께 흡수한다.
+ *
+ * `rawQuery` 는 정규화 전 원문이다. 두 글자 트리거가 남의 낱말 가운데에 걸리는 것을
+ * 막는 데만 쓴다 — `message` 는 이미 공백이 지워져 `공[시가]` 와 `오늘 시가` 를
+ * 구분할 수 없다(`chatbot-knowledge.startsWordIn`).
+ */
+function findApprovedKnowledge(message: string, rawQuery: string = message) {
   const standard = toStandardQuestionForm(message);
-  return findChatbotKnowledge(standard) ?? findTermByBareDefinition(normalizeChatInput(standard));
+  return (
+    findChatbotKnowledge(standard, rawQuery) ??
+    findTermByBareDefinition(normalizeChatInput(standard))
+  );
 }
 
-function findScriptedTerm(message: string) {
+function findScriptedTerm(message: string, rawQuery: string = message) {
   const standard = toStandardQuestionForm(message);
-  const entry = findApprovedKnowledge(message);
+  const entry = findApprovedKnowledge(message, rawQuery);
   if (!entry?.explainScript) return undefined;
   // "PER이랑 PBR 뭐가 더 정확함"은 "뭐" 때문에 정의형으로 보이지만 두 개념 비교다.
   // 한 용어의 DAPIE 로 답할 수 없으므로 고정 응답에 맡긴다.
@@ -5026,7 +5035,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // 추천·예측 거절로 보내지 않고 화면의 실제 뜻을 알려 준다.
   // 다만 대신 정해 달라는 요구는 용어 질문이 아니다 — "목표가 좀 정해줘"가
   // `목표 가격` 설명으로 새던 자리다.
-  const earlyKnowledge = recommendationKind ? undefined : findChatbotKnowledge(message);
+  const earlyKnowledge = recommendationKind ? undefined : findChatbotKnowledge(message, input);
   if (
     earlyKnowledge &&
     EARLY_SCREEN_TERM_IDS.has(earlyKnowledge.id) &&
@@ -5067,7 +5076,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // 이미 결정 요구를 스스로 걸러 내지만(`asksForDecision`), 사전 스크립트에는 그
   // 가드가 없어 "목표가 좀 정해줘 손절가도" 가 손절 설명으로 새 나갔다.
   const scriptedTerm =
-    personalData || recommendationKind ? undefined : findScriptedTerm(message);
+    personalData || recommendationKind ? undefined : findScriptedTerm(message, input);
   const termKind = personalData || scriptedTerm ? null : findTermKind(message);
   const termTakesPriorityOverCompany =
     termKind === "causality" ||
@@ -5142,7 +5151,7 @@ export function routeMessage(input: string, context: ChatContext): ChatReply {
   // (실측 term 98%). 다만 정의형 퀴즈를 붙일지는 `explainScriptFor` 가 정한다 —
   // 예전에는 `knowledge.explainScript` 를 형태와 무관하게 그대로 붙여서
   // "차트는 어떻게 봐요?" 에 "차트가 직접 보여주는 것은 무엇일까요?" 로 되물었다.
-  const knowledge = findApprovedKnowledge(message);
+  const knowledge = findApprovedKnowledge(message, input);
   if (knowledge) {
     const knowledgeExplainScript = explainScriptFor(knowledge, message);
     return reply(

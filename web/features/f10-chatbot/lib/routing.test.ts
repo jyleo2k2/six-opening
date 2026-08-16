@@ -2262,4 +2262,26 @@ for (const question of [
   assert.notEqual(routed.intent, "financial_concept", "glossary captured protected question: " + question);
 }
 
+// 뉴스에서 읽고 온 낱말은 라우터를 지나 승인 사전 답으로 나가야 한다.
+// 라우터가 원문 대신 공백 지운 문자열만 넘기면 `공시가 뭐야?` 가 다시 `시가` 로 샌다.
+for (const [question, expected] of [
+  ["공시가 뭐야?", "공시는"],
+  ["계약이 뭐야?", "계약은"],
+  ["지분이 뭐야?", "지분은"],
+  ["오늘 시가가 뭐야?", "시가는"],
+] as const) {
+  const routed = routeMessage(question, { screen: "stock" });
+  assert.equal(routed.route, "faq", "news term route mismatch: " + question);
+  assert.ok(
+    routed.text.startsWith(expected),
+    "news term answer mismatch: " + question + " -> " + routed.text,
+  );
+}
+
+// 사전이 넓어져도 안전 게이트가 먼저다. `계약`·`공장` 이 추천·예측 질문을 가로채면 안 된다.
+for (const question of ["계약하면 주가 오를까?", "공장 새로 짓는 회사 사줘"] as const) {
+  const routed = routeMessage(question, { screen: "stock" });
+  assert.equal(routed.route, "refusal", "safety priority mismatch: " + question);
+}
+
 console.log("routing tests passed");
