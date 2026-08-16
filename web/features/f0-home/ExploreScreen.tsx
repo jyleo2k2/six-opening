@@ -26,6 +26,7 @@ import {
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
+import { useWatchlist } from "./lib/use-watchlist";
 
 const PAGE = styleFromCss(
   // 배경은 두지 않는다 — 원본과 같이 `PhoneFrame` 의 화면 컨테이너 색(`SCREEN_BG`)을 그대로
@@ -108,6 +109,7 @@ export function ExploreScreen({
   onChatContext: (context: ChatContext | null) => void;
 }) {
   const { wallet } = useWallet();
+  const { codes: watchCodes } = useWatchlist();
   const { universe, quotes, sparks } = useUniverseLive();
   const [query, setQuery] = useState("");
   const [cardIndex, setCardIndex] = useState(0);
@@ -183,7 +185,7 @@ export function ExploreScreen({
 
   if (!universe || !wallet) return <PhoneFrame />;
 
-  const list = exploreList(universe, { quotes, sparks }, filter, query, wallet.watchlist, sort);
+  const list = exploreList(universe, { quotes, sparks }, filter, query, watchCodes, sort);
   const chips = sectorChips(universe, filter, sort);
   // 업종 구분 헤더는 **업종별로 줄을 세웠을 때만** 뜻이 있다. 예전에는 "전체 보기면 무조건"
   // 이었는데, 그러면 전체를 다른 기준으로 정렬하는 순간 같은 업종이 흩어져 헤더가 곳곳에 선다.

@@ -19,6 +19,7 @@ import { validNewsItem, type NewsItem } from "./lib/stock-news";
 import { recordTabView } from "./lib/tab-views";
 import { useStockLive } from "./lib/use-universe";
 import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
+import { useWatchlist } from "./lib/use-watchlist";
 
 const UP = "#E8322E";
 const DOWN = "#1668DC";
@@ -121,11 +122,13 @@ type NewsStatus = "loading" | "ready" | "empty" | "error";
  * 차트·뉴스는 상세에서만 열리는 하위 화면이라 여기서 함께 소유한다 — 주소는 셋 다
  * `/stock/{code}` 하나다(`screen-route` 의 기존 결정 그대로).
  *
- * `app.html` 이 하던 세 가지 기록을 그대로 잇는다.
+ * 기록은 두 가지다.
  * - 챗봇 맥락: 지금 보는 종목·내 지갑 값을 부모(`ConnectedPrototype`)에 올린다.
  * - 상세 탭 유효 열람(10초): `lib/tab-views` 버퍼에 쌓는다. 매수 체결 때
  *   `OrderScreen` 이 서버로 보낸다 — 매수도 React 로 옮겨 와 버퍼와 방아쇠가 한 집에 산다.
- * - 행동 이벤트: 차트·뉴스 열람을 지갑 `events` 에 남긴다(아카이브 열람 수가 읽는다).
+ *
+ * 차트·뉴스 열람을 지갑 `events` 에 남기던 세 번째 기록은 걷어냈다. 아무도 읽지 않았고,
+ * 열람 수를 세는 것은 `/api/tab-view` 하나다.
  */
 export function DetailScreen({
   code,
@@ -138,7 +141,8 @@ export function DetailScreen({
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
 }) {
-  const { wallet, update } = useWallet();
+  const { wallet } = useWallet();
+  const { codes: watchCodes, toggle: watchToggle } = useWatchlist();
   const live = useStockLive(code);
   const [view, setView] = useState<"detail" | "chart" | "news">("detail");
   const [newsStatus, setNewsStatus] = useState<NewsStatus>("loading");
@@ -228,24 +232,6 @@ export function DetailScreen({
   }, [code, stockName, account, wallet, live.price, onChatContext]);
   useEffect(() => () => onChatContext(null), [onChatContext]);
 
-  // 행동 이벤트 — 지갑 `events` 에 남긴다. 기록자가 `app.html` 하나였을 때는 여기서
-  // 직접 쓰면 iframe 메모리가 그 값을 모른 채 덮어썼으므로 메시지로 보냈다. iframe 을
-  // 걷어낸 지금은 `update()` 가 유일한 기록자라 그 왕복이 필요 없다.
-  // 모양은 `app.html` 이 쓰던 것 그대로다 — `kw_proto_v1` 을 읽는 쪽이 갈리면 안 된다.
-  const recordViewEvent = (name: "chart_detail_opened" | "news_detail_opened") => {
-    update((current) => ({
-      events: [
-        ...current.events,
-        {
-          event: name,
-          symbol: code,
-          user_id: account === "child" ? "child_minji" : "parent_mom",
-          ts: new Date().toISOString(),
-        },
-      ],
-    }));
-  };
-
   if (!wallet || !live.stock) return <PhoneFrame />;
 
   const me = wallet.acc[account];
@@ -266,27 +252,19 @@ export function DetailScreen({
     "font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;" +
       `padding-left:9px;border-left:1px solid ${changeUp ? UP : DOWN}59;color:${changeUp ? UP : DOWN}`,
   );
-  const watched = wallet.watchlist.includes(code);
+  const watched = watchCodes.includes(code);
   const startBuy = () => {
     if (!locked) onLeave(`/buy/${code}`);
   };
+  // 서버가 원본이다 — 응답이 와야 하트가 바뀐다. 탐색의 관심 기업 필터가 같은 목록을 읽는다.
   const toggleWatch = () => {
-    // 탐색의 관심 기업 필터가 같은 저장소를 읽는다. `update()` 가 곧 저장이다.
-    update((current) => ({
-      watchlist: watched
-        ? current.watchlist.filter((entry) => entry !== code)
-        : [...current.watchlist, code],
-    }));
+    void watchToggle(code);
   };
 
-  const openChart = () => {
-    recordViewEvent("chart_detail_opened");
-    setView("chart");
-  };
+  const openChart = () => setView("chart");
   const openNews = () => {
     if (newsItem) {
       setActiveNews(newsItem);
-      recordViewEvent("news_detail_opened");
       setView("news");
     } else if (newsStatus === "error") {
       loadNews(code);
