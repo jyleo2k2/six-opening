@@ -227,11 +227,31 @@ assert.deepEqual(
   { holdings: [], cash: 950 },
 );
 
-// ── 카드 한 장: 표본이 모자라면 캐릭터를 주지 않는다 ────────────────────────
+// ── 카드 한 장: 표본이 모자라면 캐릭터도 점수도 주지 않는다 ─────────────────
+// 매수 1건. 보유가 한 종목뿐이라 집중력은 10 이 나올 표본이지만, 판정을 보류했으므로
+// 축을 계산해 내보내지 않는다 — 또렷한 숫자 옆의 `관찰 중` 이 모순으로 읽히기 때문이다.
 const lowCard = buildCard({ ...emptySample, buys: [b1], holdings: [holding("A")], cash: 0 });
 assert.equal(lowCard.observation, "low");
 assert.equal(lowCard.character, null);
 assert.equal(lowCard.level, null);
+assert.deepEqual(lowCard.scores, {
+  evidence: 5,
+  intuition: 5,
+  focus: 5,
+  diversification: 5,
+  accuracy: 5,
+});
+// 표본 수는 감추지 않는다 — 화면이 "매수 1건" 이라고 이유를 말할 수 있어야 한다
+assert.equal(lowCard.samples.buys, 1);
+// 매수 2건이면 문턱을 넘어 점수와 캐릭터가 함께 나온다
+const readyCard = buildCard({
+  ...emptySample,
+  buys: [b1, buy({ id: "b2", symbol: "A", tradedAt: "2026-08-06T02:00:00.000Z" })],
+  holdings: [holding("A")],
+  cash: 0,
+});
+assert.equal(readyCard.observation, "ready");
+assert.notDeepEqual(readyCard.scores, lowCard.scores);
 const noneCard = buildCard({ ...emptySample, buys: [], holdings: [], cash: 1000 });
 assert.equal(noneCard.observation, "none");
 assert.deepEqual(noneCard.scores, {
@@ -300,23 +320,28 @@ assert.deepEqual(weekly.cumulative.scores, {
 assert.equal(weekly.cumulative.character, "sniper");
 assert.equal(weekly.cumulative.level, 2);
 
-// 지난 주 카드 — 그 주 매수 2건, 그 주에 채점이 끝난 거래 2건 모두 적중
+// 지난 주 카드 — **그 주까지 누적**이다. 08-09 까지 매수 2건, 채점이 끝난 거래 2건 모두 적중.
+// 08-11 매수와 그 채점(08-13)은 아직 오지 않았으므로 들어오지 않는다.
 const [lastWeek, thisWeek] = weekly.weeks;
 assert.deepEqual(lastWeek.samples, { buys: 2, sells: 0, graded: 2, pending: 0, hits: 2 });
 assert.equal(lastWeek.scores.accuracy, 6.7);
 assert.equal(lastWeek.scores.evidence, 6.7);
 // 집중력은 그 주 마지막 날 보유로 낸다 — 08-11 매수를 되돌려 2주 보유·현금 800
 assert.equal(lastWeek.scores.focus, 6);
-// 매수 2건은 아직 표본 부족이라 캐릭터를 주지 않는다
-assert.equal(lastWeek.observation, "low");
-assert.equal(lastWeek.character, null);
+// 매수 2건이면 문턱을 넘는다
+assert.equal(lastWeek.observation, "ready");
+assert.equal(lastWeek.character, "sniper");
+assert.equal(lastWeek.level, 3);
 
-// 이번 주 카드 — 08-11 매수는 08-13 에 채점이 끝나 이번 주에 귀속된다
-assert.deepEqual(thisWeek.samples, { buys: 1, sells: 0, graded: 1, pending: 0, hits: 0 });
-assert.equal(thisWeek.scores.accuracy, 4);
-assert.equal(thisWeek.scores.evidence, 6);
-// 이번 주 집중력은 오늘 보유 기준이라 누적과 같다
-assert.equal(thisWeek.scores.focus, weekly.cumulative.scores.focus);
+// 이번 주 카드 = 오늘까지 누적이므로 `cumulative` 와 같은 값이다
+assert.deepEqual(thisWeek.samples, weekly.cumulative.samples);
+assert.deepEqual(thisWeek.scores, weekly.cumulative.scores);
+assert.equal(thisWeek.character, weekly.cumulative.character);
+assert.equal(thisWeek.level, weekly.cumulative.level);
+
+// 끝난 주 카드는 나중에 흔들리지 않는다 — 정확력을 체결일이 아니라 채점이 끝난 날로 자른다.
+// 08-11 매수는 08-13 에 판정이 나므로 08-09 까지 누적인 지난 주 카드에 들어오지 않는다.
+assert.ok(lastWeek.samples.graded < weekly.cumulative.samples.graded);
 
 // 기록이 하나도 없어도 이번 주 카드 한 장은 나오고 전 축이 중립이다
 const blank = computeBehaviorProfile({
