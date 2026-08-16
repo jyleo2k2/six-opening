@@ -64,16 +64,6 @@ const tabStyle = (on: boolean) =>
       "white-space:nowrap;transition:all 0.18s;" +
       (on ? "color:#fff;background:#001E5A" : "color:#7C819A;background:#EAEBF3"),
   );
-/**
- * 시즌 전환 줄. 메인 탭과 같은 모양이되 글자가 길어(`지난시즌 우리가족 투자성향`) 한 줄에
- * 안 들어가므로 크기만 줄인다 — 두 줄로 접히면 탭 높이가 자리마다 달라진다.
- */
-const seasonTabStyle = (on: boolean) =>
-  styleFromCss(
-    "flex:1;text-align:center;padding:9px 4px;border-radius:12px;font-size:11.5px;font-weight:700;cursor:pointer;" +
-      "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all 0.18s;" +
-      (on ? "color:#fff;background:#D70082" : "color:#7C819A;background:#EAEBF3"),
-  );
 const BODY = styleFromCss(
   "flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:0 16px;display:flex;flex-direction:column",
 );
@@ -393,7 +383,7 @@ export function ArchiveScreen({
     view === "return"
       ? "우리가족 수익"
       : view === "family"
-        ? `우리가족투자 > ${season === "last" ? "지난시즌" : "현시즌"}`
+        ? `우리가족투자 > ${season === "last" ? "전시즌" : "현시즌"}`
         : `내 투자 성향 · ${weekLabel}`;
   /**
    * 뒤로 — 가족 탭에서는 내 카드(첫 화면)로 돌아오고, 첫 화면에서는 화면을 뜬다.
@@ -417,18 +407,21 @@ export function ArchiveScreen({
           <div style={TITLE}>성장 아카이브</div>
         </div>
         {/*
-          탭 줄은 **가족 것 둘**이다. 첫 화면은 내 카드라 어느 쪽도 켜지지 않는다 —
-          탭을 누르면 가족 자리로 들어가고, 머리의 `‹` 로 내 카드로 돌아온다.
+          가족 단추 둘은 **첫 화면에만** 있다. 누르면 그 자리로 들어가고 단추는 사라진다 —
+          켜진 탭으로 남지 않으므로 어디에 있는지는 머리말(`crumbLabel`)이 말하고, 돌아오는
+          길은 머리의 `‹` 하나다.
         */}
-        <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-          <div onClick={() => setView("family")} style={tabStyle(view === "family")}>우리가족투자</div>
-          <div onClick={() => setView("return")} style={tabStyle(view === "return")}>우리가족 수익</div>
-        </div>
+        {view === "cards" && (
+          <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
+            <div onClick={() => setView("family")} style={tabStyle(false)}>우리가족투자</div>
+            <div onClick={() => setView("return")} style={tabStyle(false)}>우리가족 수익</div>
+          </div>
+        )}
         {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
         {view === "family" && (
-          <div style={{ flex: "none", display: "flex", gap: 8, padding: "0 20px 12px" }}>
-            <div onClick={() => setSeason("now")} style={seasonTabStyle(season === "now")}>현시즌 우리가족 투자성향</div>
-            <div onClick={() => setSeason("last")} style={seasonTabStyle(season === "last")}>지난시즌 우리가족 투자성향</div>
+          <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
+            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>현시즌</div>
+            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>전시즌</div>
           </div>
         )}
 
