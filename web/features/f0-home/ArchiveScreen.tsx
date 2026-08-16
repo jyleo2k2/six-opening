@@ -37,8 +37,8 @@ import { PhoneFrame } from "./PhoneFrame";
  * `lib/archive-season.ts`(지난 시즌)가 하고 여기는 붙이기만 한다.
  *
  * **자리는 셋이고 첫 화면만 개인 것이다.** 들어오면 로그인한 사람의 주차 성향 카드가
- * 레일로 깔리고(`cards`), 머리의 탭 둘은 가족 것이다 — `우리가족투자`(`family`)가 가족
- * 성향을 현재 시즌·과거 시즌으로 갈아 끼우고, `우리가족 수익`(`return`)이 수익률 자리다.
+ * 레일로 깔리고(`cards`), 머리의 단추 둘은 가족 것이다 — `우리 가족 투자`(`family`)가 가족
+ * 성향을 현재 시즌·과거 시즌으로 갈아 끼우고, `우리 가족 수익`(`return`)이 수익률 자리다.
  * 가족 단추 둘은 첫 화면에만 있고 들어가면 사라진다. 돌아오는 길은 머리의 `‹` 다.
  *
  * **`보유 종목 · 섹터별` 레일은 2026-08-16 지웠다.** 그 레일에서만 열리던 섹터 상세 모달은
@@ -79,15 +79,6 @@ const BACK = styleFromCss(
     "font-size:22px;font-weight:800;line-height:1;padding-bottom:2px;color:#001E5A;cursor:pointer;" +
     "background:#FFFFFF;box-shadow:0 2px 8px rgba(30,25,60,0.14),inset 0 0 0 1px #E4E6F1",
 );
-/** 자리를 덮는 화면 아래에 깔리는 이동 단추. 분홍이 주 동작, 흰색이 곁 동작이다. */
-const ctaStyle = (primary: boolean) =>
-  styleFromCss(
-    "text-align:center;font-size:14px;font-weight:800;border-radius:18px;padding:13px 0;cursor:pointer;" +
-      (primary
-        ? `color:#fff;background:${ACCENT}`
-        : "color:#001E5A;background:#fff;box-shadow:0 2px 10px rgba(30,25,60,0.06)"),
-  );
-const CTA_ROW = styleFromCss("flex:none;display:flex;gap:10px;padding:6px 16px 18px");
 const SHEET_RATIO = 0.82;
 const SHEET_HEIGHT = PROTOTYPE_PHONE.screenHeight * SHEET_RATIO;
 
@@ -386,7 +377,7 @@ export function ArchiveScreen({
 
   /** 제목이 곧 현재 자리다 — 머리말 줄을 없앴으므로 여기 말고 어디인지 적는 곳이 없다. */
   const screenTitle =
-    view === "return" ? "우리가족 수익" : view === "family" ? "우리가족투자" : "성장 아카이브";
+    view === "return" ? "우리 가족 수익" : view === "family" ? "우리 가족 투자" : "성장 아카이브";
   /**
    * 뒤로 — 가족 탭에서는 내 카드(첫 화면)로 돌아오고, 첫 화면에서는 화면을 뜬다.
    * 목업의 뒤로가기는 첫 화면에서 아무 일도 하지 않지만, 그건 나갈 곳이 없는 단독
@@ -407,13 +398,13 @@ export function ArchiveScreen({
         <div style={{ flex: "none", display: "flex", alignItems: "flex-end", gap: 10, padding: "10px 20px 0" }}>
           <div style={{ ...TITLE, flex: 1, minWidth: 0 }}>{screenTitle}</div>
           {/*
-            첫 화면 제목 옆의 지갑. **내 계좌 하나의 금액이다** — `/api/family` 는 자산 규모를
-            마스킹해 남의 평가금액·현금을 주지 않으므로 가족 합계는 화면에서 낼 수 없다.
-            라벨을 `내 총자산` 으로 적는 이유가 이것이다(F9 SPEC §7).
+            첫 화면 제목 옆의 지갑. 라벨은 `우리 가족 자산` 이지만 **값은 로그인한 사람 계좌
+            하나다** — `/api/family` 는 자산 규모를 마스킹해 남의 평가금액·현금을 주지 않아
+            가족 합계를 낼 수가 없다(F9 SPEC §7). 눌러서 `우리 가족 수익` 자리로 들어간다.
           */}
           {view === "cards" && (
-            <div style={{ flex: "none", textAlign: "right", paddingBottom: 3 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9095AA", whiteSpace: "nowrap" }}>내 총자산</div>
+            <div onClick={() => setView("return")} style={{ flex: "none", textAlign: "right", paddingBottom: 3, cursor: "pointer" }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9095AA", whiteSpace: "nowrap" }}>우리 가족 자산</div>
               <div style={{ fontSize: 16, fontWeight: 800, color: "#001E5A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 2 }}>{summary.totalText}</div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5, marginTop: 2, fontSize: 11.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: summary.pctColor }}>
                 <span>{summary.pnlText}</span>
@@ -430,8 +421,8 @@ export function ArchiveScreen({
         */}
         {view === "cards" && (
           <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => setView("family")} style={ENTER}>우리가족투자</div>
-            <div onClick={() => setView("return")} style={ENTER}>우리가족 수익</div>
+            <div onClick={() => setView("family")} style={ENTER}>우리 가족 투자</div>
+            <div onClick={() => setView("return")} style={ENTER}>우리 가족 수익</div>
           </div>
         )}
         {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
@@ -482,9 +473,6 @@ export function ArchiveScreen({
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
                 누가 더 좋다는 뜻은 아니에요. 서로 왜 그렇게 했는지 이야기해 보세요.
               </div>
-            </div>
-            <div style={CTA_ROW}>
-              <div onClick={() => setView("cards")} style={{ ...ctaStyle(false), flex: 1 }}>내 투자 성향 카드 보기</div>
             </div>
           </>
         )}
@@ -557,9 +545,6 @@ export function ArchiveScreen({
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
                 지난 시즌 기록은 그대로 보관돼요. 위 단추로 현재 시즌과 견줘 보세요.
               </div>
-            </div>
-            <div style={CTA_ROW}>
-              <div onClick={() => setView("cards")} style={{ ...ctaStyle(false), flex: 1 }}>내 투자 성향 카드 보기</div>
             </div>
           </>
         )}
