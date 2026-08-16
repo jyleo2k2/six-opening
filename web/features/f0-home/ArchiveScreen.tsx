@@ -38,8 +38,8 @@ import { PhoneFrame } from "./PhoneFrame";
  *
  * **자리는 셋이고 첫 화면만 개인 것이다.** 들어오면 로그인한 사람의 주차 성향 카드가
  * 레일로 깔리고(`cards`), 머리의 탭 둘은 가족 것이다 — `우리가족투자`(`family`)가 가족
- * 성향을 현시즌·지난시즌으로 갈아 끼우고, `우리가족 수익`(`return`)이 수익률 자리다.
- * 첫 화면에서는 두 탭 중 어느 것도 켜지지 않는다. 돌아오는 길은 머리의 `‹` 다.
+ * 성향을 현재 시즌·과거 시즌으로 갈아 끼우고, `우리가족 수익`(`return`)이 수익률 자리다.
+ * 가족 단추 둘은 첫 화면에만 있고 들어가면 사라진다. 돌아오는 길은 머리의 `‹` 다.
  *
  * **`보유 종목 · 섹터별` 레일은 2026-08-16 지웠다.** 그 레일에서만 열리던 섹터 상세 모달은
  * 이관 때 이미 빠져 도달 불가로 남아 있었고(F9 SPEC §7), 디자인 목업에도 레일이 없다.
@@ -54,9 +54,16 @@ import { PhoneFrame } from "./PhoneFrame";
 const PAGE = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:#F7F6FB",
 );
-const WEEK_LABEL = styleFromCss("font-size:14px;font-weight:600;color:#9095AA");
 const TITLE = styleFromCss(
   "font-size:27px;font-weight:800;color:#001E5A;letter-spacing:-0.025em;margin-top:2px",
+);
+/**
+ * 첫 화면의 가족 자리 단추. 탭이 아니라 문이라 **켜짐·꺼짐이 없다** — 들어가면 줄째로
+ * 사라지므로 늘 같은 분홍이다.
+ */
+const ENTER = styleFromCss(
+  "flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;" +
+    `white-space:nowrap;color:#fff;background:${ACCENT};box-shadow:0 3px 10px -2px rgba(215,0,130,0.4)`,
 );
 const tabStyle = (on: boolean) =>
   styleFromCss(
@@ -372,19 +379,14 @@ export function ArchiveScreen({
   };
 
   const sheetCard: WeekCard | undefined = cards[sheetIndex ?? activeCard] ?? cards[cards.length - 1];
-  const now = new Date();
 
   // 지난 시즌 — 아직 서버 값이 없어 `archive-season` 픽스처를 그대로 쓴다(그 파일 머리말).
   const last = useMemo(() => lastSeasonReport(), []);
   const lastShown = last.members.filter((m) => lastPick === "all" || m.key === lastPick);
 
-  const weekLabel = `${now.getMonth() + 1}월 ${Math.ceil(now.getDate() / 7)}주차`;
-  const crumbLabel =
-    view === "return"
-      ? "우리가족 수익"
-      : view === "family"
-        ? `우리가족투자 > ${season === "last" ? "전시즌" : "현시즌"}`
-        : `내 투자 성향 · ${weekLabel}`;
+  /** 제목이 곧 현재 자리다 — 머리말 줄을 없앴으므로 여기 말고 어디인지 적는 곳이 없다. */
+  const screenTitle =
+    view === "return" ? "우리가족 수익" : view === "family" ? "우리가족투자" : "성장 아카이브";
   /**
    * 뒤로 — 가족 탭에서는 내 카드(첫 화면)로 돌아오고, 첫 화면에서는 화면을 뜬다.
    * 목업의 뒤로가기는 첫 화면에서 아무 일도 하지 않지만, 그건 나갈 곳이 없는 단독
@@ -402,26 +404,41 @@ export function ArchiveScreen({
           <div onClick={goBack} style={BACK}>‹</div>
           <div style={{ flex: 1 }} />
         </div>
-        <div style={{ flex: "none", padding: "10px 20px 0" }}>
-          <div style={WEEK_LABEL}>{crumbLabel}</div>
-          <div style={TITLE}>성장 아카이브</div>
+        <div style={{ flex: "none", display: "flex", alignItems: "flex-end", gap: 10, padding: "10px 20px 0" }}>
+          <div style={{ ...TITLE, flex: 1, minWidth: 0 }}>{screenTitle}</div>
+          {/*
+            첫 화면 제목 옆의 지갑. **내 계좌 하나의 금액이다** — `/api/family` 는 자산 규모를
+            마스킹해 남의 평가금액·현금을 주지 않으므로 가족 합계는 화면에서 낼 수 없다.
+            라벨을 `내 총자산` 으로 적는 이유가 이것이다(F9 SPEC §7).
+          */}
+          {view === "cards" && (
+            <div style={{ flex: "none", textAlign: "right", paddingBottom: 3 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9095AA", whiteSpace: "nowrap" }}>내 총자산</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "#001E5A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 2 }}>{summary.totalText}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5, marginTop: 2, fontSize: 11.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: summary.pctColor }}>
+                <span>{summary.pnlText}</span>
+                <span style={{ width: 1, height: 9, background: "#DFE1EB" }} />
+                <span>{summary.pctText}</span>
+              </div>
+            </div>
+          )}
         </div>
         {/*
           가족 단추 둘은 **첫 화면에만** 있다. 누르면 그 자리로 들어가고 단추는 사라진다 —
-          켜진 탭으로 남지 않으므로 어디에 있는지는 머리말(`crumbLabel`)이 말하고, 돌아오는
+          켜진 탭으로 남지 않으므로 어디에 있는지는 제목(`screenTitle`)이 말하고, 돌아오는
           길은 머리의 `‹` 하나다.
         */}
         {view === "cards" && (
           <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => setView("family")} style={tabStyle(false)}>우리가족투자</div>
-            <div onClick={() => setView("return")} style={tabStyle(false)}>우리가족 수익</div>
+            <div onClick={() => setView("family")} style={ENTER}>우리가족투자</div>
+            <div onClick={() => setView("return")} style={ENTER}>우리가족 수익</div>
           </div>
         )}
         {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
         {view === "family" && (
           <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>현시즌</div>
-            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>전시즌</div>
+            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>현재 시즌</div>
+            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>과거 시즌</div>
           </div>
         )}
 
@@ -538,7 +555,7 @@ export function ArchiveScreen({
               })}
 
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
-                지난 시즌 기록은 그대로 보관돼요. 위 단추로 현시즌과 견줘 보세요.
+                지난 시즌 기록은 그대로 보관돼요. 위 단추로 현재 시즌과 견줘 보세요.
               </div>
             </div>
             <div style={CTA_ROW}>
