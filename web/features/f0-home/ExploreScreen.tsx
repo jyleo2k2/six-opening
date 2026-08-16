@@ -14,8 +14,7 @@ import {
   hasManySectors,
   RANK_CHIP,
   sectorChips,
-  SORT_LABEL,
-  SORT_OPTIONS,
+  toggleRankSort,
   type ExploreSort,
 } from "./lib/explore-cards";
 import {
@@ -54,28 +53,9 @@ const CHIPS_TOGGLE = (open: boolean) =>
     "flex:none;width:36px;height:40px;margin-right:8px;display:flex;align-items:center;justify-content:center;" +
       `cursor:pointer;transition:transform 0.2s ease;transform:rotate(${open ? "180deg" : "0deg"})`,
   );
-const SORT_BTN = styleFromCss(
-  "flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:transparent",
-);
-// 헤더 오른쪽에 버튼이 둘이라, 왼쪽도 같은 폭을 비워야 제목이 가운데에 선다.
-// 왼쪽 88+12 = 오른쪽 12+38+12+38.
-const HEADER_SPACER = styleFromCss("flex:none;width:88px");
-// 헤더 버튼 바로 아래(59 패딩 + 6 + 38 = 103px). PAGE 가 `overflow:hidden` 이라 이 안을 벗어나지 않는다.
-const SORT_MENU = styleFromCss(
-  "position:absolute;right:16px;top:108px;z-index:2;min-width:148px;padding:6px;border-radius:16px;" +
-    "background:#FFFFFF;box-shadow:0 10px 28px rgba(30,25,60,0.18)",
-);
-const SORT_ITEM = (on: boolean) =>
-  styleFromCss(
-    "display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-radius:11px;" +
-      "font-size:14px;cursor:pointer;font-weight:" +
-      (on ? "700" : "500") +
-      ";color:" +
-      (on ? "#F5327F" : "#5C6280") +
-      (on ? ";background:#FDF0F6" : ""),
-  );
-// 메뉴 밖을 누르면 닫힌다. 화면 전체를 덮되 보이지는 않는다.
-const SORT_BACKDROP = styleFromCss("position:absolute;left:0;top:0;right:0;bottom:0;z-index:1");
+// 헤더 오른쪽에 남은 버튼은 돋보기 하나라, 왼쪽도 같은 폭을 비워야 제목이 가운데에 선다.
+// 왼쪽 38+12 = 오른쪽 12+38. 정렬 버튼이 있던 시절의 88 을 그대로 두면 제목이 왼쪽으로 밀린다.
+const HEADER_SPACER = styleFromCss("flex:none;width:38px");
 const STAGE = styleFromCss(
   "position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:transparent",
 );
@@ -100,7 +80,7 @@ const GROUP_NAME = styleFromCss("font-size:22px;font-weight:800;color:#141B22;le
  * 라우트의 섹터 구간이 아는 값이 아니면 전체로 되돌린다.
  *
  * `rank` 는 챗봇의 "오늘 뭐가 많이 올랐어" 점프가 보내는 값이다(`f10-chatbot/lib/routing.ts`).
- * 정렬이 필터 줄에서 빠져나왔으므로 목록은 전체로 보내고, 등락순 정렬은 아래 effect 가 맞춘다.
+ * 정렬은 필터가 아니므로 목록은 전체로 보내고, 등락순 정렬은 아래 effect 가 칩을 켜서 맞춘다.
  */
 const knownFilter = (sector: string | undefined, sectorIds: string[]) =>
   sector && (sector === "all" || sector === "watch" || sectorIds.includes(sector)) ? sector : "all";
@@ -133,7 +113,6 @@ export function ExploreScreen({
   const [cardIndex, setCardIndex] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [chipsOpen, setChipsOpen] = useState(false);
-  const [sortOpen, setSortOpen] = useState(false);
   // 정렬은 섹터를 옮겨도 따라간다. 화면을 떠났다 와도 마찬가지라 초기값을 기억에서 읽는다.
   const [sort, setSort] = useState<ExploreSort>(lastExploreSort);
   // 끄는 손과 **켜진 카드 판정**을 함께 이 훅에 맡긴다. 카드가 위아래로 넘어가는 세로
@@ -212,18 +191,15 @@ export function ExploreScreen({
   const empty = emptyState(query);
   const activeIndex = Math.min(cardIndex, Math.max(0, list.length - 1));
 
-  const pickSort = (next: ExploreSort) => {
-    setSortOpen(false);
-    setSort(next);
-    rememberExploreSort(next);
-  };
   const pickChip = (id: string) => {
     setChipsOpen(false);
     // "오늘 많이 오른 순"만 주소를 바꾸지 않는다 — 무엇을 보는지(필터)가 아니라 줄 세우는
-    // 기준을 바꾸는 칩이라, 헤더 메뉴에서 `많이 오른 순`을 고른 것과 같은 일을 한다.
+    // 기준을 바꾸는 칩이라, **누를 때마다 켜졌다 꺼진다.** 꺼진 자리는 기본 차례다.
     // 여기서 `/explore/rank` 로 보내면 골라 둔 업종이 전체로 풀려 정렬과 필터를 함께 못 갖는다.
     if (id === RANK_CHIP) {
-      pickSort("change");
+      const next = toggleRankSort(sort);
+      setSort(next);
+      rememberExploreSort(next);
       return;
     }
     onLeave(explorePath(id));
@@ -239,18 +215,6 @@ export function ExploreScreen({
         <div style={HEADER}>
           <div style={HEADER_SPACER} />
           <div style={TITLE}>어떤 회사를 살까요?</div>
-          <div onClick={() => setSortOpen((open) => !open)} style={SORT_BTN}>
-            {/* 정렬 아이콘 — 긴 줄과 짧은 줄로 "줄 세우기"를 보여 준다. 글자로 쓰면 폭이
-                라벨마다 달라져 헤더가 흔들린다. */}
-            <svg fill="none" height="19" viewBox="0 0 19 19" width="19">
-              <path
-                d="M3 5.5 H16 M3 9.5 H11.5 M3 13.5 H7.5"
-                stroke="#01185A"
-                strokeLinecap="round"
-                strokeWidth="2"
-              />
-            </svg>
-          </div>
           <div onClick={toggleSearch} style={SEARCH_BTN}>
             <svg fill="none" height="21" viewBox="0 0 21 21" width="21">
               <circle cx="9" cy="9" r="6.2" stroke="#01185A" strokeWidth="2" />
@@ -258,30 +222,6 @@ export function ExploreScreen({
             </svg>
           </div>
         </div>
-
-        {sortOpen && (
-          <>
-            <div onClick={() => setSortOpen(false)} style={SORT_BACKDROP} />
-            <div style={SORT_MENU}>
-              {SORT_OPTIONS.map((option) => (
-                <div key={option} onClick={() => pickSort(option)} style={SORT_ITEM(option === sort)}>
-                  <span>{SORT_LABEL[option]}</span>
-                  {option === sort && (
-                    <svg fill="none" height="13" viewBox="0 0 13 13" width="13">
-                      <path
-                        d="M2 7 L5 10 L11 3"
-                        stroke="#F5327F"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2.2"
-                      />
-                    </svg>
-                  )}
-                </div>
-              ))}
-            </div>
-          </>
-        )}
 
         {searchOpen && (
           <div style={SEARCH_ROW}>

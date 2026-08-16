@@ -8,6 +8,7 @@ import {
   hasManySectors,
   stackOffset,
   sectorChips,
+  toggleRankSort,
 } from "./explore-cards";
 import type { Universe } from "./use-universe";
 
@@ -89,15 +90,10 @@ assert.deepEqual(exploreList(universe, live, "all", "", []).map((s) => s.code), 
   "005930",
 ]);
 
-// 가나다순 — 정렬은 필터와 다른 축이라 섹터를 골라도 같이 간다.
-assert.deepEqual(exploreList(universe, live, "all", "", [], "name").map((s) => s.name), [
-  "삼성전자",
-  "엔씨소프트",
+// 정렬은 필터와 다른 축이라 섹터를 골라도 같이 간다.
+assert.deepEqual(exploreList(universe, live, "game", "", [], "change").map((s) => s.name), [
   "크래프톤",
-]);
-assert.deepEqual(exploreList(universe, live, "game", "", [], "name").map((s) => s.name), [
   "엔씨소프트",
-  "크래프톤",
 ]);
 
 // 업종 헤더는 목록에 업종이 둘 이상일 때만 세운다 — 섹터 하나를 고른 화면에서 세우면
@@ -132,7 +128,20 @@ assert.deepEqual(sectorChips(universe, "semi", "change").map((chip) => chip.acti
   false,
   true,
 ]);
-assert.equal(sectorChips(universe, "all", "name")[1].active, false);
+
+// 정렬 칩은 누를 때마다 켜졌다 꺼진다 — 헤더 정렬 메뉴를 걷어낸 뒤로 이 칩이 정렬을 고르는
+// 유일한 자리라, 되돌릴 길이 없으면 기본 차례로 못 돌아온다.
+assert.equal(toggleRankSort("sector"), "change");
+assert.equal(toggleRankSort("change"), "sector");
+// 꺼진 칩은 흰 배경 위 회색 글자다.
+const rankOff = sectorChips(universe, "all", "sector")[1];
+assert.equal(rankOff.active, false);
+assert.match(rankOff.style, /background:#FFFFFF/u);
+assert.match(rankOff.style, /color:#5C6280/u);
+const rankOn = sectorChips(universe, "all", "change")[1];
+assert.equal(rankOn.active, true);
+assert.match(rankOn.style, /background:#F5327F;/u);
+assert.match(rankOn.style, /color:#FFFFFF/u);
 
 // 고른 칩은 채워진 배경 위 흰 글자다. `background` 선언이 깨져 있으면 흰 글자만 남아 안 보인다.
 const picked = sectorChips(universe, "semi").find((chip) => chip.id === "semi")!;

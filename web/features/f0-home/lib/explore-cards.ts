@@ -74,27 +74,20 @@ export const RANK_CHIP = "rank";
 /**
  * 줄 세우는 기준. **무엇을 보는지(필터)와 다른 축이라** 주소가 아니라 화면이 소유한다.
  *
- * 예전에는 "오늘 많이 오른 순"이 칩 하나로 필터 줄에 섞여 있었다. 그래서 섹터를 고르면
- * 정렬을 잃고 정렬을 고르면 섹터를 잃었다 — 둘을 동시에 가질 수 없었다.
- *
- * `sector` 는 업종끼리 묶는 차례이고 기본값이다. 카드 사이 업종 구분 헤더는 이 차례로
- * 줄을 세웠을 때만 뜻이 있으므로, **숨은 규칙으로 두지 않고 정렬의 한 항목으로 드러낸다.**
+ * 고를 수 있는 값은 둘뿐이다 — 고르는 자리가 `오늘 많이 오른 순` 칩 하나이기 때문이다.
+ * 헤더의 정렬 메뉴(`업종별`·`많이 오른 순`·`가나다순`)는 걷어냈고 `가나다순` 은 부를 길이
+ * 없어져 함께 지웠다. `sector` 는 그 칩이 꺼진 기본 차례이고 이름이 곧 규칙이다 —
+ * 업종끼리 묶으므로 카드 사이 업종 구분 헤더가 이때만 뜻이 있다.
  */
-export type ExploreSort = "sector" | "change" | "name";
+export type ExploreSort = "sector" | "change";
 
-export const SORT_LABEL: Record<ExploreSort, string> = {
-  sector: "업종별",
-  change: "많이 오른 순",
-  name: "가나다순",
-};
-
-export const SORT_OPTIONS = Object.keys(SORT_LABEL) as ExploreSort[];
+/** 칩을 누를 때마다 오가는 두 상태. 켜면 등락순, 다시 누르면 기본 차례로 돌아간다. */
+export const toggleRankSort = (sort: ExploreSort): ExploreSort =>
+  sort === "change" ? "sector" : "change";
 
 /** 업종 차례는 유니버스가 정한 순서다 — 그래야 같은 업종이 한 덩어리로 붙어 헤더가 한 번만 선다. */
 function comparator(sort: ExploreSort, universe: Universe) {
   if (sort === "change") return (a: ExploreStockRow, b: ExploreStockRow) => b.change - a.change;
-  if (sort === "name")
-    return (a: ExploreStockRow, b: ExploreStockRow) => a.name.localeCompare(b.name, "ko");
   const order = universe.sectors.map((sector) => sector.id);
   return (a: ExploreStockRow, b: ExploreStockRow) =>
     order.indexOf(a.sector) - order.indexOf(b.sector);
