@@ -217,11 +217,12 @@ test("시작 지연과 조기 종료는 한국어 해결 방법을 출력한다"
   assert.match(output, /npm run dev/);
 });
 
-test("서버가 준비되면 ui 조립 감시를 켜고 서버 종료 시 함께 끈다", async () => {
+// iframe 시절에는 여기서 `npm run ui:watch` 조립 감시를 함께 띄웠다. 그 스크립트가
+// 사라졌으므로(PR #296) 개발 서버는 서버 프로세스 하나만 띄운다 — 없는 npm 스크립트를
+// 부르면 세션마다 `Missing script` 프로세스가 따라붙는다.
+test("개발 서버는 서버 프로세스 하나만 띄운다", async () => {
   const server = new EventEmitter();
-  const watcher = new EventEmitter();
-  const stoppedWith = [];
-  let watcherSpawns = 0;
+  const spawned = [];
   setTimeout(() => server.emit("exit", 0, null), 30);
   const code = await runDevServer("unused", 3100, {
     error: () => {},
@@ -229,33 +230,19 @@ test("서버가 준비되면 ui 조립 감시를 켜고 서버 종료 시 함께
     intervalMs: 1,
     log: () => {},
     open: () => {},
-    spawnServer: () => server,
-    spawnWatcher: () => {
-      watcherSpawns += 1;
-      return watcher;
+    spawnServer: () => {
+      spawned.push("server");
+      return server;
     },
-    stopWatcher: (child) => stoppedWith.push(child),
   });
   assert.equal(code, 0);
-  assert.equal(watcherSpawns, 1);
-  assert.deepEqual(stoppedWith, [watcher]);
+  assert.deepEqual(spawned, ["server"]);
 });
 
-test("서버가 준비되기 전에 죽으면 ui 조립 감시를 켜지 않는다", async () => {
-  const server = new EventEmitter();
-  setTimeout(() => server.emit("exit", 1, null), 20);
-  await runDevServer("unused", 3100, {
-    error: () => {},
-    inspect: async () => "unavailable",
-    intervalMs: 1,
-    log: () => {},
-    open: () => {},
-    spawnServer: () => server,
-    spawnWatcher: () => {
-      throw new Error("watcher must not start before the server is ready");
-    },
-    startupWarningMs: 10_000,
-  });
+test("dev-runner 는 ui 조립 스크립트를 부르지 않는다", () => {
+  const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
+  const source = fs.readFileSync(path.join(scriptsDir, "dev-runner.mjs"), "utf8");
+  assert.equal(/spawnNpm\(\[[^\]]*"ui:/.test(source), false);
 });
 
 test("dev.bat은 Node 런처 하나만 호출한다", () => {

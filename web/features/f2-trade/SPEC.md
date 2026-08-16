@@ -1,6 +1,6 @@
 # F2·F3 — 모의투자·질문식 매매 기능 명세
 
-> **현재 구현 단일 원본** · 2026-08-15 · 기준: PR #223까지 병합된 `main`
+> **현재 구현 단일 원본** · 2026-08-16 · 기준: PR #305까지 병합된 `main` (iframe 철거 반영)
 >
 > 현행 동작을 설명할 때는 **프론트 실제 동작 → 프론트가 호출하는 백엔드 계약 → 문서** 순으로 판단한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따르되, 이 문서에 구현 완료라고 적으려면 실제 소비 코드가 있어야 한다.
 
@@ -8,42 +8,38 @@
 
 | 영역 | 실제 위치 | 현재 책임 |
 |---|---|---|
-| 탐색·상세·매수·매도·질문식 기록·계좌 | `web/ui-src/`(조립 결과 `web/public/ui/app.html`) | 화면과 `kw_proto_v1` 즉시 상태의 정본. **화면 원본은 `ui-src`이고 `app.html`은 생성물이라 직접 고치지 않는다** |
-| 지갑 시드·복원·총자산 | `web/shared/store/prototype-account.js` | `app.html`과 옮겨 온 React 화면이 같이 쓰는 단일 원본. 빌드가 `app.html` 안으로 복사한다 |
-| iframe 호스트 | `web/features/f0-home/ConnectedPrototype.tsx` | 정적 화면과 F10·F11 오버레이 조립, 메시지 중계 |
+| 탐색·상세·매수·매도·질문식 기록·계좌 | `web/features/f0-home/`(`ExploreScreen`·`DetailScreen`·`OrderScreen`·`PortfolioScreen`과 `lib/`) | 화면과 `kw_proto_v1` 즉시 상태의 정본. 값 계산은 `lib/`의 순수 함수가 하고 컴포넌트는 붙이기만 한다 |
+| 지갑 시드·복원·총자산 | `web/shared/store/prototype-account.js` | 화면과 서버 경로가 같이 쓰는 단일 원본. `.js`인 것은 옛 iframe 사본 때문이었고 지금은 그냥 공용 모듈이다 |
+| 화면 호스트 | `web/features/f0-home/ConnectedPrototype.tsx` | 화면 선택과 F10 오버레이 조립. iframe은 철거했다 |
 | 상세 차트 | `web/features/f2-trade/TradingViewChart.tsx` | 분·일·주, 선·캔들 전환과 가족 체결 마커 |
-| 차트 라우트 | `web/app/tradingview-chart/page.tsx` | `app.html` 안에 들어가는 차트 iframe |
+| 차트 라우트 | `web/app/tradingview-chart/page.tsx` | `ChartScreen`이 iframe으로 여는 차트 문서. 앱에 남은 유일한 iframe이다 |
 | 유니버스·시세 | `web/app/api/universe/`, `web/app/api/quote/` | 51종 데이터, 현재가·캔들, 키움/캐시/픽스처 폴백 |
 | 공개 뉴스 | `web/features/f2-trade/lib/news/`, `web/app/api/news/` | 저장된 게시 뉴스의 런타임 계약과 공개 조회 |
 | 서버 거래·행동 저장 | `web/app/api/trade/`, `web/app/api/tab-view/` | 로그인 세션과 화면 계정이 맞을 때 Supabase에 후행 저장 |
 | F9 계산 | `web/app/api/profile/`, `web/shared/engine/behavior-profile.ts` | 화면이 보낸 로컬 상태와 시드를 엔진 입력으로 변환 |
 | F3 폴더 | `web/features/f3-reason/` | 현재 가드만 존재. 런타임 컴포넌트 없음 |
 
-`app.html`에 있는 주문·기록 폼을 `f2-trade`나 `f3-reason`에 이미 분리했다고 가정하지 않는다. 이관 작업을 할 때는 화면, 상태, 이벤트 생산자와 소비자를 한 계약으로 옮긴다.
+주문·기록 폼은 `f2-trade`나 `f3-reason`이 아니라 `f0-home/OrderScreen.tsx`에 있다. 폼을 옮길 때는 화면, 상태, 이벤트 생산자와 소비자를 한 계약으로 옮긴다.
 
 ## 2. 런타임 구조
 
 ```text
-GET / · /explore · /portfolio · /archive · /stock/{code} · /buy|sell/{code}
-  → ConnectedPrototype
-    → /ui/app.html?runtime=1
-      ├─ 홈·탐색·상세·차트·뉴스·매수·매도·계좌·아카이브
+GET / · /explore · /portfolio · /ranking · /archive · /stock/{code} · /buy|sell/{code}
+  → [[...screen]]/page.tsx  (로그인 없으면 LoginGate)
+    → ConnectedPrototype → f0-home 의 React 화면
+      ├─ 홈·탐색·상세·차트·뉴스·매수·매도·계좌·랭킹·아카이브
       ├─ localStorage["kw_proto_v1"] 즉시 저장
-      ├─ sessionStorage["kw_proto_ui_v1"] 화면 임시값 (앱 안 이동 때만 복원)
       ├─ /api/universe + /api/universe/data
       ├─ /api/news + /api/news/{newsId}
-      ├─ /api/account → 서버 동기화 가능 사용자 확인
+      ├─ /api/account · /api/orders → 서버 계좌·미체결 주문
       └─ /api/trade · /api/tab-view → 조건부 후행 저장
-    → /tradingview-chart iframe
+    → ChartScreen 안 /tradingview-chart iframe
       ├─ /api/quote/{symbol}/chart
       └─ /api/trades?symbol={symbol}
-
-GET /ranking
-  → RankingScreen (React가 직접 그린다. app.html iframe 없음)
 ```
 
 - **주소가 화면을 가리킨다.** 아는 주소는 `features/f0-home/screen-route.ts`의 `routeFromPath`가 정하고 모르는 주소는 404다. `/stocks`·`/trade/[symbol]` 라우트는 없다.
-- 화면 전환은 아직 대부분 `app.html`의 `screen` 상태 변경이고, 주소는 `kiwoom:screen` 메시지를 받아 뒤따라간다. 옮겨 온 화면(`/ranking`)으로 나갈 때만 `leaveToRoute()`로 문서를 갈아끼운다.
+- 화면 전환은 라우터가 소유한다. 컴포넌트는 `onLeave(path)`로 올리고 `ConnectedPrototype`이 처리한다 — 예전의 `kiwoom:screen`·`leaveToRoute()` 메시지 왕복은 iframe과 함께 사라졌다.
 - 화면은 `/api/universe/data`를 5초마다 다시 읽어 현재가와 스파크라인을 갱신한다.
 - 차트 기간·유형은 iframe을 다시 열지 않고 `kiwoom:chart-options` 메시지로 바꾼다.
 - 화면 즉시 상태는 로컬 저장이 우선이다. 서버 저장 실패가 화면 거래를 롤백하지 않으므로 두 저장소가 항상 같다고 가정할 수 없다.
@@ -52,7 +48,7 @@ GET /ranking
 
 - 국내주식 화이트리스트 51종을 검색·13개 업종 칩·카드 덱으로 탐색한다.
 - 부모와 자녀 상태는 각각 가상 **1,000만원**으로 시작한다. 메인 화면의 자녀 이름은 `김찬영`, 부모 이름은 `엄마`다.
-- 메인 `app.html`에는 전역 계정 전환 UI가 연결돼 있지 않아 초기 `child` 계정으로 시작한다. 부모 시드 상태는 존재하지만 메인 화면에서 전환할 수 없다.
+- 메인 화면에는 전역 계정 전환 UI가 연결돼 있지 않아 초기 `child` 계정으로 시작한다. 부모 시드 상태는 존재하지만 메인 화면에서 전환할 수 없다.
 - 자녀 거래 잠금은 거래일 09:00 이상 15:30 미만이며 부모는 잠기지 않는다. 개발 패널에서 자동·학교시간·하교후를 강제할 수 있다.
 - 정규장 시장가는 화면에서 즉시 체결한다. 장외 시장가는 다음 거래일 시가 예약으로 접수한다. 지정가는 대기 주문으로만 기록하며 가격 도달 자동 체결은 없다.
 - 매수는 금액 또는 주 수로 입력한다. 금액 입력은 소수점 주식을 허용하고, 주 수 입력은 주문가격 기준 예상 금액과 최대 주 수를 표시한다.
@@ -215,8 +211,8 @@ type PrototypeSellRecord = {
 | `POST /api/trade` | 조건부 연결 | 정규장 시장가와 장외 예약 시장가의 실제 체결만 best-effort 전송. 응답 실패 시 로컬 거래는 유지되고 서버 재조회는 하지 않음 |
 | `POST /api/tab-view` | 조건부 연결 | 종목별 기업정보·차트·뉴스 방문 중 10초 이상인 것만 서버가 다시 세어 매수 체결 시 최종 개수 저장 |
 | `GET /api/profile/season-cards` | 연결 | 아카이브 진입 시 캐릭터 카드와 지난 주차 카드를 조회. **성향 값의 유일한 원본이다** — `GET /api/profile/behavior`는 2026-08-16 삭제됐다 (F9 SPEC §3.2·§6.11) |
-| `GET·POST·DELETE /api/orders` | 연결 | 미체결 주문의 유일한 원본(§6.3). `POST`는 지정가·장외 예약 접수, `GET`은 목록 조회 겸 만기 예약 정산, `DELETE`는 취소. `app.html`은 `loadOpenOrders()`, 옮겨 온 화면은 `useWallet()`이 부른다 |
-| `POST·DELETE /api/auth/login` | 연결 | 로그인은 `LoginGate`, 로그아웃은 `app.html` 메뉴 |
+| `GET·POST·DELETE /api/orders` | 연결 | 미체결 주문의 유일한 원본(§6.3). `POST`는 지정가·장외 예약 접수, `GET`은 목록 조회 겸 만기 예약 정산, `DELETE`는 취소. 화면은 `useWallet()`으로만 부른다 |
+| `POST·DELETE /api/auth/login` | 연결 | 로그인은 `LoginGate`, 로그아웃은 `HomeScreen`의 메뉴 |
 
 `POST /api/trade`는 `dbUser`가 있고 메인 화면의 `account`가 서버 프로필 역할과 같을 때만 보낸다. 화면 계정 스위처가 없으므로 부모 역할 거래의 실제 서버 생산 경로는 현재 사용자 UI에 없다. 같은 조건에서 응답이 200이면 `loadDbUser()`를 다시 호출해 홈 화면 보유종목을 서버 값으로 재동기화한다.
 
@@ -283,7 +279,7 @@ type PrototypeSellRecord = {
 
 ## 10. 완료 기준
 
-- `탐색 → 상세 → 매수/매도 → 질문식 기록 → 정규장 시장가 체결 또는 장외 시장가 예약`이 `app.html`에서 동작한다.
+- `탐색 → 상세 → 매수/매도 → 질문식 기록 → 정규장 시장가 체결 또는 장외 시장가 예약`이 React 화면에서 동작한다.
 - 1,000만원 지갑, 이유·계획 코드, 로컬 저장 모양이 이 문서와 일치한다.
 - 지정가는 대기 상태로 표시되고 자동 체결된 것처럼 설명하지 않는다.
 - 주말·휴장·시가 데이터 없음·가격 갭·취소·새로고침·중복 처리에서 예약 현금과 수량이 보존된다.

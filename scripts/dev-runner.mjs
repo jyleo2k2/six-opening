@@ -305,8 +305,6 @@ export async function runDevServer(
     error = console.error,
     spawnServer = () =>
       spawnNpm(["run", "dev", "--", "-p", String(port)], webDir),
-    spawnWatcher = () => spawnNpm(["run", "ui:watch"], webDir),
-    stopWatcher = stopProcessTree,
     inspect = inspectProject,
     open = openBrowser,
     startupWarningMs = 90_000,
@@ -318,7 +316,6 @@ export async function runDevServer(
   let exited = false;
   let opened = false;
   let warned = false;
-  let watcher = null;
   const startedAt = Date.now();
   const exit = waitForExit(child).then((result) => {
     exited = true;
@@ -334,9 +331,9 @@ export async function runDevServer(
         log(`[준비 완료] ${url}`);
         open(url);
         opened = true;
-        // 서버가 켜진 채 pull 로 ui-src 가 바뀌면 predev 조립본이 낡는다. 죽은 조립본을
-        // 계속 서빙하다 iframe 화면 전체가 먹통이 된 적이 있어 감시 조립을 같이 돌린다.
-        watcher = spawnWatcher();
+        // 예전에는 여기서 `npm run ui:watch` 를 함께 띄웠다. iframe 시절 `ui-src` 조립본이
+        // pull 로 낡는 것을 막던 감시인데, iframe 철거(PR #296)로 그 스크립트가 사라져
+        // 매번 `Missing script` 로 죽는 프로세스만 남았다. Next 개발 서버가 직접 다시 그린다.
         return;
       }
       if (!warned && Date.now() - startedAt >= startupWarningMs) {
@@ -351,19 +348,15 @@ export async function runDevServer(
     }
   })();
 
-  try {
-    const result = await exit;
-    await monitor;
-    if (!opened && result.code !== 0) {
-      error("\n[실행 실패] 개발 서버가 준비되기 전에 종료됐습니다.");
-      error(`- 종료 코드: ${result.code ?? result.signal ?? "알 수 없음"}`);
-      error("- 포트 충돌, 패키지 오류, 환경 변수 오류를 위 로그에서 확인하세요.");
-      error("- 해결되지 않으면 web 폴더에서 npm run dev를 실행해 상세 로그를 확인하세요.\n");
-    }
-    return result.code ?? (result.signal ? 1 : 0);
-  } finally {
-    if (watcher) stopWatcher(watcher);
+  const result = await exit;
+  await monitor;
+  if (!opened && result.code !== 0) {
+    error("\n[실행 실패] 개발 서버가 준비되기 전에 종료됐습니다.");
+    error(`- 종료 코드: ${result.code ?? result.signal ?? "알 수 없음"}`);
+    error("- 포트 충돌, 패키지 오류, 환경 변수 오류를 위 로그에서 확인하세요.");
+    error("- 해결되지 않으면 web 폴더에서 npm run dev를 실행해 상세 로그를 확인하세요.\n");
   }
+  return result.code ?? (result.signal ? 1 : 0);
 }
 
 export async function runDevLauncher(root, { log = console.log } = {}) {
