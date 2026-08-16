@@ -1,2 +1,3 @@
-# ui-build.mjs export 산출물 — 디자이너에게 넘길 때마다 다시 만든다
+# ui-dist/ 는 iframe 시절 `ui-build.mjs export` 산출물이었다. 조립기가 사라져 이제
+# 만들어지지 않지만, 예전 worktree 에 남아 있던 폴더가 다시 커밋되지 않게 남겨 둔다.
 ui-dist/

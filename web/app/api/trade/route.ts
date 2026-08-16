@@ -11,7 +11,7 @@ const isSide = (value: unknown): value is "buy" | "sell" => value === "buy" || v
 const positiveNumber = (value: unknown) =>
   typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
 
-/** F2 SPEC §5.2 보유 계획. 화면 상수(`ui-src/logic/constants.js`)의 `PLANS` 와 같은 목록이다. */
+/** F2 SPEC §5.2 보유 계획. 문구 원본(`shared/data/trade-copy.js`)의 `PLANS` 와 같은 목록이다. */
 const PLAN_CODES = ["plan_short", "plan_season", "plan_target", "plan_none"];
 /** F2 SPEC §5.3 계획 변경 이유. 같은 파일의 `CHANGES` 와 같은 목록이다. */
 const PLAN_CHANGED_REASONS = [
