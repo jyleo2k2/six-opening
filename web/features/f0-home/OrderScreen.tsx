@@ -23,13 +23,13 @@ import {
   buyMath,
   buyStepOk,
   judgePlanMatch,
-  lastBuyRecord,
   orderChatContext,
   sellMath,
+  sellRetrospect,
   shuffledIndexes,
   type BuyDraft,
-  type BuyRecordRow,
   type SellDraft,
+  type TradeHistoryRow,
 } from "./lib/order-view";
 import { useStockLive } from "./lib/use-universe";
 import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
@@ -282,6 +282,13 @@ export function OrderScreen({
    */
   const [submitting, setSubmitting] = useState(false);
   const [memoSaved, setMemoSaved] = useState(false);
+  /**
+   * 회고 판정의 재료. **서버가 원본이다** — 예전에는 지갑 `records` 를 읽어서 이 브라우저에서
+   * 산 것만 판정됐고, DB 시드 보유를 팔면 카드가 통째로 안 떴다.
+   */
+  const [history, setHistory] = useState<TradeHistoryRow[]>([]);
+  /** 방금 남긴 기록의 id. 완료 화면의 메모가 이 기록에 붙는다. */
+  const [doneTxId, setDoneTxId] = useState<string | null>(null);
   // 대기 목록 시트. `ui-src` 의 orderSheet 상태와 같다 — 매수·매도 어느 쪽에서든 연다.
   const [orderSheet, setOrderSheet] = useState(false);
   const retroAtRef = useRef(0);
@@ -304,6 +311,24 @@ export function OrderScreen({
     setSellDraftState(blankSellDraft(available));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [side, sellDraft, me === null]);
+
+  // 회고 재료는 매도에서만 읽는다. 못 읽으면 판정 없이(카드 없이) 진행한다 — 조회 실패로
+  // 매도 자체를 막을 이유가 없다.
+  useEffect(() => {
+    if (side !== "sell") return;
+    let cancelled = false;
+    fetch(`/api/trades?symbol=${encodeURIComponent(code)}`, { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { trades?: TradeHistoryRow[] } | null) => {
+        if (!cancelled) setHistory(data?.trades ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setHistory([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [side, code]);
 
   // 유니버스에 없는 코드는 탐색으로 보낸다 — 상세 화면과 같은 규칙.
   useEffect(() => {
@@ -341,8 +366,6 @@ export function OrderScreen({
   const locked = !canTrade(account);
   const marketOpen = isRegularMarketOpen(new Date());
   const scheduledFor = nextOpeningDate(new Date());
-  const userId = account === "child" ? "child_minji" : "parent_mom";
-  const seq = wallet.seq ?? 1;
   // `app.html` 의 `dbSyncable()` — 서버 저장은 로그인 역할이 맞을 때만 뒤따른다.
   const syncable = Boolean(user) && user?.parent_child === account;
 
@@ -363,15 +386,15 @@ export function OrderScreen({
    * 세운 뒤에야 그려지므로(`if (!wallet) return <PhoneFrame/>`), 주문 버튼을 누를 수 있는
    * 시점에 `syncable` 이 거짓이면 응답을 기다리는 중이 아니라 **저장할 수 없는 계정**이다.
    */
-  const postTrade = (body: Record<string, unknown>): Promise<boolean> => {
-    if (!syncable) return Promise.resolve(false);
+  const postTrade = (body: Record<string, unknown>): Promise<{ transaction_id?: string } | null> => {
+    if (!syncable) return Promise.resolve(null);
     return fetch("/api/trade", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
-      .then((response) => response.ok)
-      .catch(() => false);
+      .then((response) => (response.ok ? response.json() : null))
+      .catch(() => null);
   };
   // 예약 접수. **접수가 곧 주문이다** — null 이면 주문은 없던 일이고 거절 문구를 보여 준다.
   const postReserve = (body: Record<string, unknown>): Promise<{ order_id?: string } | null> => {
@@ -620,14 +643,15 @@ export function OrderScreen({
       });
     };
 
-    const finishBuy = (rec: BuyRecordRow, fill: boolean) => {
-      update((current) => ({
-        ...(fill
-          ? { acc: { ...current.acc, [account]: applyBuyFill(current.acc[account], code, price, math.qty, math.amount) } }
-          : {}),
-        records: current.records.concat([rec]),
-        seq: seq + 1,
-      }));
+    // 체결분만 지갑을 미리 움직인다 — 완료 화면의 `남은 지갑` 이 `refresh()` 를 기다리지
+    // 않게 하는 화면용 값이고, 곧 서버 응답이 덮는다.
+    const finishBuy = (transactionId: string | null, fill: boolean) => {
+      if (fill) {
+        update((current) => ({
+          acc: { ...current.acc, [account]: applyBuyFill(current.acc[account], code, price, math.qty, math.amount) },
+        }));
+      }
+      setDoneTxId(transactionId);
       setDone({
         name: stock.name,
         qty: math.qty,
@@ -651,24 +675,10 @@ export function OrderScreen({
       }
       const isLimit = draft.orderType === "limit";
       const isScheduled = !isLimit && !marketOpen;
-      const rec: BuyRecordRow & Record<string, unknown> = {
-        order_id: `ord_${String(seq).padStart(4, "0")}`,
-        user_id: userId,
-        symbol: code,
-        amount_krw: math.amount,
-        qty: Math.round(math.qty * 10000) / 10000,
-        order_type: isLimit ? "limit" : "market",
-        limit_price: isLimit ? math.limPrice : null,
-        order_status: isLimit ? "pending" : isScheduled ? "scheduled" : "filled",
-        scheduled_for: isScheduled ? scheduledFor : null,
-        reason_code: draft.reason,
-        plan_code: draft.plan,
-        // 원본과 같이 `null` 만 비운다 — 지금 값 그대로(0%)를 적었어도 적은 값은 남긴다.
-        plan_target_price:
-          draft.targetPct !== null ? Math.round(price * (1 + draft.targetPct / 100)) : null,
-        memo: (draft.memo || "").trim() || null,
-        ts: new Date().toISOString(),
-      };
+      // 원본과 같이 `null` 만 비운다 — 지금 값 그대로(0%)를 적었어도 적은 값은 남긴다.
+      const planTargetPrice =
+        draft.targetPct !== null ? Math.round(price * (1 + draft.targetPct / 100)) : null;
+      const memo = (draft.memo || "").trim() || null;
       if (isLimit || isScheduled) {
         // 미체결 주문은 서버 주문 잔고가 원본이다 — 화면은 예약을 만들지 않고 현금도 직접
         // 빼지 않는다. 접수가 끝나야 주문이 성립하므로 완료 화면도 그때 띄운다.
@@ -683,16 +693,16 @@ export function OrderScreen({
           requested_quantity: math.byQty ? math.qty : null,
           scheduled_for: isScheduled ? scheduledFor : null,
           reason: draft.reason,
-          plan_code: rec.plan_code,
-          plan_target_price: rec.plan_target_price,
-          memo: rec.memo,
+          plan_code: draft.plan,
+          plan_target_price: planTargetPrice,
+          memo,
         }).then((result) => {
           setSubmitting(false);
           if (!result?.order_id) {
             setOrderError(ORDER_REJECTED);
             return;
           }
-          finishBuy(rec, false);
+          finishBuy(result.order_id, false);
           // 접수가 잠근 현금은 서버가 안다. 계좌·주문 목록을 다시 읽어 화면을 맞춘다.
           refresh();
         });
@@ -707,16 +717,16 @@ export function OrderScreen({
         price,
         quantity: math.qty,
         reason: draft.reason,
-        plan_code: rec.plan_code,
-        plan_target_price: rec.plan_target_price,
-        memo: rec.memo,
+        plan_code: draft.plan,
+        plan_target_price: planTargetPrice,
+        memo,
       }).then((saved) => {
         setSubmitting(false);
-        if (!saved) {
+        if (!saved?.transaction_id) {
           setOrderError(ORDER_REJECTED);
           return;
         }
-        finishBuy(rec, true);
+        finishBuy(saved.transaction_id, true);
         // 상세·차트·뉴스에서 쌓인 유효 열람을 이 매수와 묶어 보낸다 (`app.html` 과 같은 시점).
         // 거절된 주문에는 붙이지 않는다 — 버퍼는 다음 체결까지 남는다.
         flushTabViews(code, syncable);
@@ -1222,16 +1232,13 @@ export function OrderScreen({
     const heldPct = held && heldAvg > 0 ? ((price - heldAvg) / heldAvg) * 100 : 0;
     const reserved = reservedSellQty(me.pending || [], code);
     const math = sellMath(sellDraft, price, heldQty, reserved);
-    const records = wallet.records as BuyRecordRow[];
-    const buyRec = lastBuyRecord(records, code, userId);
-    const heldDays = buyRec ? Math.max(0, Math.floor((Date.now() - new Date(buyRec.ts).getTime()) / 86400000)) : 0;
+    // 회고 재료는 서버 체결 기록이다. 조회 전이거나 실패하면 `buy` 가 없어 판정도 없다.
+    const { buy: buyRec, firstSell } = sellRetrospect(history);
+    const heldDays = buyRec
+      ? Math.max(0, Math.floor((Date.now() - new Date(buyRec.tradedAt).getTime()) / 86400000))
+      : 0;
     const planMatch = judgePlanMatch(buyRec, price);
-    const isFirstSell = buyRec
-      ? !(wallet.sellRecords as { linked_buy_order_id?: string | null }[]).some(
-          (r) => r.linked_buy_order_id === buyRec.order_id,
-        )
-      : true;
-    const showJudge = isFirstSell && planMatch !== null;
+    const showJudge = firstSell && planMatch !== null;
     const sellOk =
       step === 1
         ? math.canConfirm
@@ -1239,14 +1246,13 @@ export function OrderScreen({
           ? !!sellDraft.reason && (!showJudge || planMatch === true || !!sellDraft.change)
           : true;
 
-    const finishSell = (rec: Record<string, unknown>, fill: boolean) => {
-      update((current) => ({
-        ...(fill
-          ? { acc: { ...current.acc, [account]: applySellFill(current.acc[account], code, math.qty, math.proceeds) } }
-          : {}),
-        sellRecords: current.sellRecords.concat([rec]),
-        seq: seq + 1,
-      }));
+    const finishSell = (transactionId: string | null, fill: boolean) => {
+      if (fill) {
+        update((current) => ({
+          acc: { ...current.acc, [account]: applySellFill(current.acc[account], code, math.qty, math.proceeds) },
+        }));
+      }
+      setDoneTxId(transactionId);
       setDone({
         name: stock.name,
         qty: math.qty,
@@ -1275,27 +1281,8 @@ export function OrderScreen({
       retroMsRef.current = retroAtRef.current ? Date.now() - retroAtRef.current : 0;
       const isLimit = sellDraft.orderType === "limit";
       const isScheduled = !isLimit && !marketOpen;
-      const rec = {
-        order_id: `ord_${String(seq).padStart(4, "0")}`,
-        user_id: userId,
-        symbol: code,
-        qty: Math.round(math.qty * 10000) / 10000,
-        linked_buy_order_id: buyRec ? buyRec.order_id : null,
-        order_type: isLimit ? "limit" : "market",
-        limit_price: isLimit ? math.limPrice : null,
-        order_status: isLimit ? "pending" : isScheduled ? "scheduled" : "filled",
-        amount_krw: !isLimit && !isScheduled ? math.proceeds : null,
-        scheduled_for: isScheduled ? scheduledFor : null,
-        sell_reason_code: sellDraft.reason,
-        plan_match: planMatch,
-        change_reason_code: showJudge && planMatch === false ? sellDraft.change : null,
-        retro_card_viewed_ms: retroMsRef.current || 0,
-        pnl_pct_at_sell: Math.round(heldPct * 10) / 10,
-        held_days: heldDays,
-        avg: heldAvg,
-        memo: null,
-        ts: new Date().toISOString(),
-      };
+      // 계획을 지켰거나 판정 자체가 없으면 변경 이유는 남기지 않는다.
+      const changeReason = showJudge && planMatch === false ? sellDraft.change : null;
       if (isLimit || isScheduled) {
         // 미체결 매도도 서버가 원본이다. 매도는 보유에서 빼지 않고 수량만 잠근다.
         setSubmitting(true);
@@ -1308,15 +1295,15 @@ export function OrderScreen({
           requested_quantity: math.qty,
           scheduled_for: isScheduled ? scheduledFor : null,
           reason: sellDraft.reason,
-          plan_match: rec.plan_match,
-          plan_changed_reason: rec.change_reason_code,
+          plan_match: planMatch,
+          plan_changed_reason: changeReason,
         }).then((result) => {
           setSubmitting(false);
           if (!result?.order_id) {
             setOrderError(ORDER_REJECTED);
             return;
           }
-          finishSell(rec, false);
+          finishSell(result.order_id, false);
           refresh();
         });
         return;
@@ -1329,15 +1316,15 @@ export function OrderScreen({
         price,
         quantity: math.qty,
         reason: sellDraft.reason,
-        plan_match: rec.plan_match,
-        plan_changed_reason: rec.change_reason_code,
+        plan_match: planMatch,
+        plan_changed_reason: changeReason,
       }).then((saved) => {
         setSubmitting(false);
-        if (!saved) {
+        if (!saved?.transaction_id) {
           setOrderError(ORDER_REJECTED);
           return;
         }
-        finishSell(rec, true);
+        finishSell(saved.transaction_id, true);
         const behavior: Record<string, unknown> = { kind: "trade_filled", stockId: `KRX:${code}`, side: "sell" };
         if (held && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
           behavior.realizedPnlPct = ((price - heldAvg) / heldAvg) * 100;
@@ -1554,17 +1541,21 @@ export function OrderScreen({
       </div>
     );
 
+    const boughtQty = buyRec?.quantity ?? 0;
     const retroRows = buyRec
       ? [
           {
             label: "산 날",
-            value: ((d: Date) => `${d.getMonth() + 1}월 ${d.getDate()}일`)(new Date(buyRec.ts)),
+            value: ((d: Date) => `${d.getMonth() + 1}월 ${d.getDate()}일`)(new Date(buyRec.tradedAt)),
           },
-          { label: "산 만큼", value: `${Math.round(buyRec.qty * 100) / 100}주 · ${won(buyRec.amount_krw)}` },
-          { label: "왜 샀는지", value: choiceOf(REASONS, buyRec.reason_code)?.label ?? "기록 없음" },
-          { label: "언제까지", value: choiceOf(PLANS, buyRec.plan_code)?.label ?? "기록 없음" },
+          {
+            label: "산 만큼",
+            value: `${Math.round(boughtQty * 100) / 100}주 · ${won(buyRec.price * boughtQty)}`,
+          },
+          { label: "왜 샀는지", value: choiceOf(REASONS, buyRec.reasonCode)?.label ?? "기록 없음" },
+          { label: "언제까지", value: choiceOf(PLANS, buyRec.planCode)?.label ?? "기록 없음" },
         ]
-          .concat(buyRec.plan_target_price ? [{ label: "목표 가격", value: won(buyRec.plan_target_price) }] : [])
+          .concat(buyRec.planTargetPrice ? [{ label: "목표 가격", value: won(buyRec.planTargetPrice) }] : [])
           .concat(buyRec.memo ? [{ label: "그때 한 말", value: buyRec.memo }] : [])
       : [];
 
@@ -1594,7 +1585,7 @@ export function OrderScreen({
             <span style={{ fontSize: 26, fontWeight: 800, color: "#F5327F", lineHeight: 0.85 }}>“</span>
             <div style={{ flex: 1, fontSize: 20, fontWeight: 800, color: "#01185A", lineHeight: 1.5, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
               {buyRec
-                ? `${[choiceOf(REASONS, buyRec.reason_code)?.short, choiceOf(PLANS, buyRec.plan_code)?.short]
+                ? `${[choiceOf(REASONS, buyRec.reasonCode)?.short, choiceOf(PLANS, buyRec.planCode)?.short]
                     .filter(Boolean)
                     .join(",\n")} 샀어요.`
                 : "기록이 없어요."}
@@ -1694,7 +1685,7 @@ export function OrderScreen({
               }}
             >
               {buyRec
-                ? `처음에는 ${choiceOf(PLANS, buyRec.plan_code)?.short ?? ""} 가지려고 했었네요.\n무엇이 달라졌나요?`
+                ? `처음에는 ${choiceOf(PLANS, buyRec.planCode)?.short ?? ""} 가지려고 했었네요.\n무엇이 달라졌나요?`
                 : "무엇이 달라졌나요?"}
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
@@ -1735,17 +1726,28 @@ export function OrderScreen({
       </div>
     );
 
+    /**
+     * 완료 화면의 한 줄 메모를 방금 남긴 기록에 붙인다.
+     *
+     * 예전에는 지갑 `sellRecords` 의 마지막 줄에 적었고 다시 읽는 곳이 없었다 — 화면이
+     * 적어 둔 "나중에 다시 보여줄게요" 가 지켜진 적이 없었다. 이제 서버가 들고 있고
+     * 아카이브 피드가 그 메모를 그린다.
+     *
+     * 저장에 실패하면 버튼을 되돌린다. `저장됐어요 ✓` 를 띄워 놓고 아무것도 안 남기면
+     * 그게 예전과 같은 거짓말이다.
+     */
     const saveMemo = () => {
-      if (memoSaved) return;
-      const value = (sellDraft.memo || "").trim();
-      update((current) => {
-        const sellRecords = current.sellRecords.slice() as Record<string, unknown>[];
-        if (sellRecords.length) {
-          sellRecords[sellRecords.length - 1] = { ...sellRecords[sellRecords.length - 1], memo: value || null };
-        }
-        return { sellRecords };
-      });
+      if (memoSaved || !doneTxId) return;
       setMemoSaved(true);
+      fetch("/api/trade", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transaction_id: doneTxId, memo: (sellDraft.memo || "").trim() }),
+      })
+        .then((response) => {
+          if (!response.ok) setMemoSaved(false);
+        })
+        .catch(() => setMemoSaved(false));
     };
 
     const sdQty = done ? `${Math.round(done.qty * 100) / 100}주` : "";

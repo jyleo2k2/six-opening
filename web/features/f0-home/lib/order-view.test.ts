@@ -9,11 +9,11 @@ import {
   buyMath,
   buyStepOk,
   judgePlanMatch,
-  lastBuyRecord,
   orderChatContext,
   sellMath,
+  sellRetrospect,
   shuffledIndexes,
-  type BuyRecordRow,
+  type TradeHistoryRow,
 } from "./order-view";
 
 const account = (): Account => ({
@@ -215,39 +215,65 @@ test("즉시 체결은 평균단가를 섞고, 잔량 0.005 미만이면 보유�
   assert.equal(soldAll.cash, 100_000 + 479_760);
 });
 
+const row = (patch: Partial<TradeHistoryRow> = {}): TradeHistoryRow => ({
+  side: "buy",
+  tradedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
+  price: 240_000,
+  quantity: 1,
+  reasonCode: "buy_news",
+  planCode: "plan_short",
+  planTargetPrice: null,
+  memo: null,
+  mine: true,
+  ...patch,
+});
+
 test("계획 실천 판정: 단기는 7일, 시즌은 항상 어긋남, 목표가는 도달 여부", () => {
-  const rec = (patch: Partial<BuyRecordRow>): BuyRecordRow => ({
-    order_id: "ord_0001",
-    symbol: "259960",
-    qty: 1,
-    amount_krw: 240_000,
-    reason_code: "buy_news",
-    plan_code: "plan_short",
-    plan_target_price: null,
-    memo: null,
-    ts: new Date(Date.now() - 3 * 86_400_000).toISOString(),
-    ...patch,
-  });
-  assert.equal(judgePlanMatch(rec({}), 240_000), true);
+  assert.equal(judgePlanMatch(row(), 240_000), true);
   assert.equal(
-    judgePlanMatch(rec({ ts: new Date(Date.now() - 9 * 86_400_000).toISOString() }), 240_000),
+    judgePlanMatch(row({ tradedAt: new Date(Date.now() - 9 * 86_400_000).toISOString() }), 240_000),
     false,
   );
-  assert.equal(judgePlanMatch(rec({ plan_code: "plan_season" }), 240_000), false);
-  assert.equal(judgePlanMatch(rec({ plan_code: "plan_target", plan_target_price: 250_000 }), 260_000), true);
-  assert.equal(judgePlanMatch(rec({ plan_code: "plan_target", plan_target_price: 250_000 }), 240_000), false);
-  assert.equal(judgePlanMatch(rec({ plan_code: "plan_none" }), 240_000), null);
+  assert.equal(judgePlanMatch(row({ planCode: "plan_season" }), 240_000), false);
+  assert.equal(judgePlanMatch(row({ planCode: "plan_target", planTargetPrice: 250_000 }), 260_000), true);
+  assert.equal(judgePlanMatch(row({ planCode: "plan_target", planTargetPrice: 250_000 }), 240_000), false);
+  assert.equal(judgePlanMatch(row({ planCode: "plan_none" }), 240_000), null);
   assert.equal(judgePlanMatch(null, 240_000), null);
 });
 
-test("마지막 매수 기록은 같은 역할·같은 종목에서 최신 것을 준다", () => {
-  const records = [
-    { order_id: "a", symbol: "259960", user_id: "child_minji", ts: "2026-08-01" },
-    { order_id: "b", symbol: "259960", user_id: "parent_mom", ts: "2026-08-02" },
-    { order_id: "c", symbol: "259960", user_id: "child_minji", ts: "2026-08-03" },
-  ] as unknown as BuyRecordRow[];
-  assert.equal(lastBuyRecord(records, "259960", "child_minji")?.order_id, "c");
-  assert.equal(lastBuyRecord(records, "005930", "child_minji"), null);
+test("회고 재료는 내 마지막 매수다 — 가족 체결이 섞여 있어도 남의 것은 안 본다", () => {
+  const trades = [
+    row({ tradedAt: "2026-08-01T00:00:00Z", planCode: "plan_short" }),
+    // 같은 종목을 가족이 더 최근에 샀어도 내 회고는 내 기록으로 한다.
+    row({ tradedAt: "2026-08-05T00:00:00Z", mine: false, planCode: "plan_season" }),
+    row({ tradedAt: "2026-08-03T00:00:00Z", planCode: "plan_target" }),
+  ];
+  const { buy, firstSell } = sellRetrospect(trades);
+  assert.equal(buy?.planCode, "plan_target");
+  assert.equal(firstSell, true);
+});
+
+test("내 매수 뒤에 내 매도가 있으면 첫 매도가 아니다", () => {
+  const buy = row({ tradedAt: "2026-08-03T00:00:00Z" });
+  // 그 매수 **이전**의 매도는 판정을 뒤집지 않는다. 이번에 파는 몫과 무관한 거래다.
+  assert.equal(
+    sellRetrospect([row({ tradedAt: "2026-08-01T00:00:00Z", side: "sell" }), buy]).firstSell,
+    true,
+  );
+  assert.equal(
+    sellRetrospect([buy, row({ tradedAt: "2026-08-04T00:00:00Z", side: "sell" })]).firstSell,
+    false,
+  );
+  // 남의 매도도 내 판정을 뒤집지 않는다.
+  assert.equal(
+    sellRetrospect([buy, row({ tradedAt: "2026-08-04T00:00:00Z", side: "sell", mine: false })]).firstSell,
+    true,
+  );
+});
+
+test("내 매수 기록이 없으면 판정도 카드도 없다", () => {
+  assert.deepEqual(sellRetrospect([]), { buy: null, firstSell: true });
+  assert.deepEqual(sellRetrospect([row({ mine: false })]), { buy: null, firstSell: true });
 });
 
 test("이유 섞기는 자리만 바꾸고 전부 남긴다", () => {

@@ -11,13 +11,17 @@ import { readFileSync } from "node:fs";
  * iframe 을 걷어낸 지금 화면은 전부 React 이고 이동은 `history.replaceState` 뿐이다.
  * 그래도 이 계약이 조용히 깨지는 방향은 그대로 둘이다.
  *   - 화면 이동을 `location.href`·`location.assign` 으로 되돌린다 → 문서가 다시 뜬다
- *   - 오래 남는 값(acc·records)을 sessionStorage 로 옮긴다 → 탭을 닫으면 거래가 사라진다
+ *   - 서버가 원본인 값을 다시 브라우저 저장소에 담는다 → 기기마다 다른 잔고·기록이 생긴다
  * 둘 다 화면만 봐서는 한참 뒤에나 드러난다.
+ *
+ * `kw_proto_v1` 은 이제 **없다.** 현금·보유는 `/api/account`, 매매 기록은 `GET /api/trades`,
+ * 관심 종목은 `/api/watchlist` 가 원본이다. 되살리기 쉬운 자리라 여기서 못을 박는다.
  */
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), "utf8");
 
 const host = read("../ConnectedPrototype.tsx");
 const walletStore = read("../../../shared/store/prototype-account.js");
+const walletHook = read("./use-wallet.ts");
 
 function main() {
   // 이동은 주소만 바꾼다. 문서를 새로 받지 않는다.
@@ -32,16 +36,22 @@ function main() {
     "화면 이동은 `onLeave` → `openRoute` 하나로만 흐른다",
   );
 
-  // 지갑은 localStorage 그대로다. sessionStorage 로 새면 탭을 닫을 때 거래가 사라진다.
-  assert.match(walletStore, /localStorage\.setItem\('kw_proto_v1'/u);
-  assert.doesNotMatch(walletStore, /sessionStorage/u);
+  // 지갑은 브라우저 저장소를 건드리지 않는다. 다시 담기 시작하면 같은 계정이 기기마다
+  // 다른 잔고를 보이고, 서버 응답과 어긋난 쪽이 화면에 남는다.
+  for (const source of [walletStore, walletHook]) {
+    assert.doesNotMatch(source, /localStorage|sessionStorage/u);
+  }
 
   // 문서를 갈아끼우지 않으므로 화면 임시값을 넘겨받는 장치는 없어야 한다.
-  for (const gone of ["kw_proto_ui_v1", "kw_proto_nav_v1"]) {
+  // `kw_proto_v1` 도 같은 목록에 들어왔다 — 서버로 다 옮겼다.
+  //
+  // 따옴표로 감싼 것만 본다. 이 파일들의 주석은 백틱으로 옛 칸 이름을 인용하는데, 그 설명이
+  // 있어야 다음 사람이 왜 없앴는지 안다 — 설명을 지우게 만드는 가드는 가드가 아니다.
+  for (const gone of ["kw_proto_v1", "kw_proto_ui_v1", "kw_proto_nav_v1"]) {
     assert.doesNotMatch(
-      host + walletStore,
-      new RegExp(gone, "u"),
-      `${gone} 은 문서 교체 시절의 백업이다. 이동이 문서를 안 바꾸면 남아 있을 이유가 없다`,
+      host + walletHook + walletStore,
+      new RegExp(`['"]${gone}['"]`, "u"),
+      `${gone} 은 서버 없이 돌던 시절의 칸이다. 원본이 서버로 간 뒤에는 남아 있을 이유가 없다`,
     );
   }
 

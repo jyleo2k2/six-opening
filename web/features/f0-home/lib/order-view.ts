@@ -171,41 +171,71 @@ export function orderChatContext(input: {
   return context;
 }
 
-export type BuyRecordRow = {
-  order_id: string;
-  symbol: string;
-  qty: number;
-  amount_krw: number;
-  reason_code: string | null;
-  plan_code: string | null;
-  plan_target_price: number | null;
+/**
+ * `GET /api/trades?symbol=` 한 줄 중 회고 판정이 읽는 부분.
+ *
+ * 예전에는 같은 값을 지갑(`kw_proto_v1.records`)에서 읽었다. 그러면 **이 브라우저에서 산
+ * 것만** 기록이 있어서, DB 시드로 심어진 보유를 팔거나 기기를 바꾸면 판정이 통째로
+ * `null` 이 됐다 — 회고 카드가 안 뜨고 `plan_match` 도 빈 채로 저장돼 F9 계획 준수
+ * 표본에서 조용히 빠졌다.
+ */
+export type TradeHistoryRow = {
+  side: "buy" | "sell";
+  tradedAt: string;
+  price: number;
+  /** 남의 체결은 서버가 지운다. 내 기록만 쓰므로 회고 카드에서는 항상 숫자다. */
+  quantity: number | null;
+  reasonCode: string | null;
+  planCode: string | null;
+  planTargetPrice: number | null;
   memo: string | null;
-  ts: string;
-  user_id?: string;
-  order_status?: string;
+  mine: boolean;
 };
 
-/** 이 종목의 마지막 매수 기록 — 매도 2단계 "사던 날의 나" 카드가 읽는다. */
-export function lastBuyRecord(records: BuyRecordRow[], code: string, userId: string) {
-  const mine = (records || []).filter((r) => r.symbol === code && r.user_id === userId);
-  return mine.length ? mine[mine.length - 1] : null;
+export type SellRetrospect = {
+  /** 이 종목에서 내가 마지막으로 산 기록. 매도 2단계 "사던 날의 나" 카드가 읽는다. */
+  buy: TradeHistoryRow | null;
+  /** 그 매수 뒤로 아직 판 적이 없는지. 회고 카드는 첫 매도에만 뜬다. */
+  firstSell: boolean;
+};
+
+/**
+ * 종목 하나의 가족 체결 목록에서 내 회고 재료를 뽑는다.
+ *
+ * 응답은 `created_at.asc` 라 뒤로 갈수록 최신이다. 첫 매도 판정은 예전 로컬 기록의
+ * `linked_buy_order_id` 대신 **그 매수 이후에 내 매도가 있었는지**로 본다 — 서버에는
+ * 매수·매도를 잇는 칸이 없고, 같은 종목을 여러 번 사고판 사람에게는 "마지막 매수 뒤에
+ * 팔았나" 가 화면이 물으려던 것과 같은 질문이다.
+ */
+export function sellRetrospect(trades: readonly TradeHistoryRow[]): SellRetrospect {
+  let buy: TradeHistoryRow | null = null;
+  for (const trade of trades) {
+    if (trade.mine && trade.side === "buy") buy = trade;
+  }
+  if (!buy) return { buy: null, firstSell: true };
+  // `let` 은 클로저 안에서 다시 넓어진다 — 좁힌 값을 그대로 넘긴다.
+  const lastBuy = buy;
+  const sold = trades.some(
+    (trade) => trade.mine && trade.side === "sell" && trade.tradedAt > lastBuy.tradedAt,
+  );
+  return { buy: lastBuy, firstSell: !sold };
 }
 
 /** 계획 실천 판정. `plan_season` 은 시즌 중 매도이므로 항상 어긋남이다. */
 export function judgePlanMatch(
-  buyRec: BuyRecordRow | null,
+  buy: TradeHistoryRow | null,
   price: number,
   now = Date.now(),
 ): boolean | null {
-  if (!buyRec) return null;
-  const days = Math.floor((now - new Date(buyRec.ts).getTime()) / 86400000);
-  switch (buyRec.plan_code) {
+  if (!buy) return null;
+  const days = Math.floor((now - new Date(buy.tradedAt).getTime()) / 86400000);
+  switch (buy.planCode) {
     case "plan_short":
       return days <= SHORT_TERM_DAYS;
     case "plan_season":
       return false;
     case "plan_target":
-      return buyRec.plan_target_price ? price >= buyRec.plan_target_price : false;
+      return buy.planTargetPrice ? price >= buy.planTargetPrice : false;
     default:
       return null;
   }
