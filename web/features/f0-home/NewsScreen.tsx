@@ -163,7 +163,8 @@ export function NewsScreen({
           </div>
         </div>
       </div>
-      <StockFooter locked={locked} onLeave={onLeave} onStartBuy={onStartBuy} />
+      {/* 뉴스만 원본에서 범용 CTA 에 "살래(매수)" 다. 상세·차트는 전용 버튼을 쓴다. */}
+      <StockFooter cta="news" locked={locked} onLeave={onLeave} onStartBuy={onStartBuy} />
     </div>
   );
 }
