@@ -50,6 +50,12 @@ assert.equal(samsung.symbol, "005930");
 assert.equal(findStock("우리은행")?.symbol, "316140");
 assert.equal(findStock("영웅문")?.symbol, "039490");
 
+// 표시 이름은 약칭 하나지만, 풀네임 한글·영문과 옛 이름도 같은 종목으로 이어져야 한다.
+assert.equal(findStock("LIG D&A")?.symbol, "079550");
+assert.equal(findStock("LIG디펜스앤에어로스페이스")?.symbol, "079550");
+assert.equal(findStock("LIG Defense&Aerospace")?.symbol, "079550");
+assert.equal(findStock("LIG넥스원")?.symbol, "079550");
+
 const stockReferenceOwners = new Map<string, Set<string>>();
 for (const stock of STOCKS) {
   for (const reference of [stock.name, ...stock.searchAliases]) {
