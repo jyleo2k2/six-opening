@@ -2,15 +2,10 @@
   "name": "kiwoom-family-league",
   "private": true,
   "scripts": {
-    "predev": "node scripts/ui-build.mjs build",
     "dev": "next dev",
-    "prebuild": "node scripts/ui-build.mjs build",
     "build": "next build",
     "start": "next start",
-    "ui:build": "node scripts/ui-build.mjs build",
-    "ui:watch": "node --watch-path=ui-src scripts/ui-build.mjs build",
     "seed:candles": "tsx scripts/seed-candles.ts",
-    "pretest": "node scripts/ui-build.mjs build",
     "test": "tsx --test \"app/**/*.test.ts\" \"features/**/*.test.ts\" \"shared/**/*.test.ts\""
   },
   "dependencies": {
