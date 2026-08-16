@@ -494,13 +494,13 @@ export function OrderScreen({
   const flowTabs = step === 1 && (
     <div style={TAB_ROW}>
       <div onClick={pickTabBuy} style={sheetTabStyle(side === "buy")}>
-        구매
+        살래
       </div>
       <div onClick={pickTabSell} style={sheetTabStyle(side === "sell")}>
-        판매
+        팔래
       </div>
       <div onClick={() => setOrderSheet(true)} style={sheetTabStyle(false)}>
-        대기
+        예약
       </div>
     </div>
   );
