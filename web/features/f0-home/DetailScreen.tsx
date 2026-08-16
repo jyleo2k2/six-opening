@@ -9,7 +9,6 @@ import { lastExplorePath } from "./lib/explore-memo";
 import { NewsScreen } from "./NewsScreen";
 import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
-import { won } from "./lib/portfolio-view";
 import {
   StockFooter,
   SUB_PAGE,
@@ -31,8 +30,10 @@ const PRICE_CARD = styleFromCss(
   "background:#FFFFFF;border-radius:30px;padding:18px 20px;box-shadow:0 2px 10px rgba(30,25,60,0.05)",
 );
 const CHART_WRAP = styleFromCss("position:relative;margin-top:14px");
+// `line-height` 를 못 박아 둔다 — `detail-chart` 의 겹침 판정이 이 높이(LABEL_H)를 그대로 쓴다.
 const HI_LO_LABEL = styleFromCss(
-  "position:absolute;transform:translate(-50%,0);font-size:11.5px;font-weight:600;white-space:nowrap;pointer-events:none",
+  "position:absolute;transform:translate(-50%,0);font-size:11.5px;line-height:14px;font-weight:600;" +
+    "white-space:nowrap;pointer-events:none",
 );
 const PIN = styleFromCss(
   "position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;" +
@@ -63,14 +64,6 @@ const WATCH_BTN = styleFromCss(
 );
 const MORE_BTN = styleFromCss(
   "font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F1F2F8",
-);
-// 매수 화면의 "내 지갑" 알약과 같은 값 — 종목에 들어오자마자 쓸 수 있는 돈을 본다.
-const WALLET_PILL = styleFromCss(
-  "display:flex;align-items:center;gap:9px;background:#ECEDF7;border-radius:20px;padding:12px 15px;box-shadow:inset 0 0 0 1px #E4E6F1",
-);
-const WALLET_LABEL = styleFromCss("font-size:14px;font-weight:600;color:#5C6280;white-space:nowrap");
-const WALLET_CASH = styleFromCss(
-  "flex:1;text-align:right;font-size:16px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap",
 );
 // 가격 카드 머리 — 원본 그대로. 종목명이 왼쪽, 업종 배지가 오른쪽 끝, 그 아래 큰 가격,
 // 그 아래 변동액과 등락률 한 줄이다.
@@ -234,7 +227,6 @@ export function DetailScreen({
 
   if (!wallet || !live.stock) return <PhoneFrame />;
 
-  const me = wallet.acc[account];
   const stock = live.stock;
   const locked = !canTrade(account);
   const changeUp = live.change >= 0;
@@ -351,10 +343,6 @@ export function DetailScreen({
           title="종목 상세"
         />
         <div style={SCROLL}>
-          <div style={WALLET_PILL}>
-            <span style={WALLET_LABEL}>내 지갑</span>
-            <span style={WALLET_CASH}>{won(me.cash)}</span>
-          </div>
           <div style={PRICE_CARD}>
             <div style={NAME_ROW}>
               <div style={NAME_TEXT}>{stock.name}</div>
