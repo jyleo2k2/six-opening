@@ -9,6 +9,7 @@ import {
   stepRailFling,
   type RailDrag,
 } from "./rail-drag";
+import { lockSwipeAxis } from "./sector-swipe";
 
 /** 관성 한 프레임. `requestAnimationFrame` 을 쓰지 않는 건 배경 탭에서 멈춰 스냅이 안 돌아오기 때문이다. */
 const FLING_FRAME_MS = 16;
@@ -31,10 +32,27 @@ const FLING_MAX_MS = 1_200;
  * 따로 기억하지 않는 이유는, 쓰는 쪽이 다른 길로 값을 되돌렸을 때(카드 모아보기를
  * 다시 열며 `null` 로 두는 것처럼) 그 기억이 정당한 갱신까지 삼키기 때문이다.
  */
+/**
+ * 레일과 **직각으로** 쓸었을 때 받을 손짓. 세로 레일(`axis:'y'`) 위의 가로 스와이프처럼
+ * 레일이 아닌 다른 것을 넘기는 데 쓴다 — 탐색 화면은 이것으로 섹터를 넘긴다.
+ *
+ * 축은 손짓 하나에 **한 번만** 잠긴다(`lockSwipeAxis`). 레일과 별도로 포인터를 또 받으면
+ * 같은 손짓을 둘이 나눠 갖고, 카드가 넘어가면서 섹터까지 바뀐다.
+ */
+export type RailCrossSwipe = {
+  /** 가로로 잠긴 손이 움직였다. `dx` 는 창 좌표 이동량이다. */
+  onMove: (dx: number) => void;
+  /** 손을 뗐다. `velocity` 는 창 좌표 px/ms 다. */
+  onEnd: (dx: number, velocity: number) => void;
+  /** 손짓이 끊겼다 — 브라우저가 스크롤을 가져갔거나 창을 벗어났다. 제자리로 되돌린다. */
+  onCancel: () => void;
+};
+
 export function useRailDrag(
   onActiveChange?: (index: number) => void,
   activeIndex?: number | null,
   axis: "x" | "y" = "x",
+  cross?: RailCrossSwipe,
 ) {
   const rail = useRef<HTMLDivElement>(null);
   const drag = useRef<RailDrag | null>(null);
@@ -49,6 +67,8 @@ export function useRailDrag(
     else el.scrollLeft = value;
   };
   const clientPos = (ev: { clientX: number; clientY: number }) => (axis === "y" ? ev.clientY : ev.clientX);
+  /** 레일과 직각인 좌표. 세로 레일이면 가로다. */
+  const crossPos = (ev: { clientX: number; clientY: number }) => (axis === "y" ? ev.clientX : ev.clientY);
 
   const stopFling = () => {
     if (timer.current) clearInterval(timer.current);
@@ -60,16 +80,52 @@ export function useRailDrag(
   useEffect(() => stopFling, []);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    // 손가락에는 브라우저 기본 스크롤이 이미 붙어 있다. 여기서 또 끌면 두 배로 움직인다.
-    if (event.pointerType === "touch" || !event.isPrimary || event.button !== 0) return;
+    if (!event.isPrimary || event.button !== 0) return;
+    // 손가락에는 브라우저 기본 스크롤이 이미 붙어 있다. 주축을 여기서 또 끌면 두 배로
+    // 움직이므로, 손가락은 **교차축 손짓을 받을 때만** 따라간다. 그 손짓은 브라우저가
+    // 가져가지 않게 레일이 `touch-action:pan-y` 로 세로만 넘겨 주어야 한다.
+    const touch = event.pointerType === "touch";
+    if (touch && !cross) return;
     const el = event.currentTarget;
     stopFling();
-    drag.current = beginRailDrag(clientPos(event), scrollPos(el), event.timeStamp);
+    // 주축 상태는 잠기기 전에 만들어 둔다 — **누른 자리**에서 다시 재야 잠기는 순간에 튀지 않는다.
+    const main = beginRailDrag(clientPos(event), scrollPos(el), event.timeStamp);
+    const startMain = clientPos(event);
+    const startCross = crossPos(event);
+    drag.current = null;
     dragged.current = false;
-    el.style.scrollSnapType = "none";
-    el.style.cursor = "grabbing";
+    /** 이 손짓이 어느 축인지. `native` 는 손가락 주축 — 브라우저 스크롤에 맡긴 것이다. */
+    let lock: "main" | "cross" | "native" | null = null;
+    let crossDrag: RailDrag | null = null;
 
     const move = (ev: PointerEvent) => {
+      if (!lock) {
+        const axisLock = lockSwipeAxis(clientPos(ev) - startMain, crossPos(ev) - startCross);
+        if (!axisLock) return;
+        if (axisLock === "cross" && cross) {
+          lock = "cross";
+          crossDrag = beginRailDrag(crossPos(ev), 0, ev.timeStamp);
+        } else if (touch) {
+          lock = "native";
+          return;
+        } else {
+          lock = "main";
+          drag.current = main;
+          // 끄는 동안 스냅을 꺼 둔다. 켠 채로 끌면 스냅이 매 프레임 제자리로 되돌린다.
+          el.style.scrollSnapType = "none";
+          el.style.cursor = "grabbing";
+        }
+      }
+      if (lock === "native") return;
+      if (lock === "cross") {
+        if (!crossDrag) return;
+        crossDrag = advanceRailDrag(crossDrag, crossPos(ev), ev.timeStamp);
+        // 가로로 잠긴 손짓 뒤의 click 도 삼킨다 — 안 그러면 섹터가 바뀌며 카드가 열린다.
+        dragged.current = true;
+        cross?.onMove(-crossDrag.scrollLeft);
+        ev.preventDefault();
+        return;
+      }
       const current = drag.current;
       if (!current) return;
       const next = advanceRailDrag(current, clientPos(ev), ev.timeStamp);
@@ -80,11 +136,40 @@ export function useRailDrag(
       if (next.dragged) ev.preventDefault();
     };
 
-    const up = () => {
+    const detach = () => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", up);
+      window.removeEventListener("pointercancel", abort);
+    };
+
+    /** 손짓이 끊겼다. 가로로 잠긴 손짓은 넘기지 않고 제자리로 되돌린다. */
+    function abort() {
+      if (lock !== "cross") {
+        up();
+        return;
+      }
+      detach();
       el.style.cursor = "grab";
+      crossDrag = null;
+      cross?.onCancel();
+      setTimeout(() => {
+        dragged.current = false;
+      }, 0);
+    }
+
+    function up() {
+      detach();
+      el.style.cursor = "grab";
+      if (lock === "cross") {
+        const finished = crossDrag;
+        crossDrag = null;
+        if (finished) cross?.onEnd(-finished.scrollLeft, finished.velocity);
+        else cross?.onCancel();
+        setTimeout(() => {
+          dragged.current = false;
+        }, 0);
+        return;
+      }
       const current = drag.current;
       drag.current = null;
       let fling = current ? railFling(current) : 0;
@@ -105,13 +190,13 @@ export function useRailDrag(
       setTimeout(() => {
         dragged.current = false;
       }, 0);
-    };
+    }
 
     // setPointerCapture 를 쓰면 click 이 컨테이너로 재타깃돼 카드 진입이 죽는다.
     // 대신 window 리스너로 컨테이너 밖 이동까지 받는다.
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", up);
+    window.addEventListener("pointercancel", abort);
   };
 
   /**
