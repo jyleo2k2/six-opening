@@ -58,6 +58,21 @@ export type TutorialStep = {
   concept: string;
   /** 접혔을 때 미니바에 남는 말. 방금 읽은 제목이 아니라 **다음에 뭘 할지**를 적는다. */
   hint: string;
+  /**
+   * 이 자리로 **들어가는 방법**. `다음` 을 누르면 다음 장의 이것을 실행한다.
+   *
+   * 장이 아니라 자리에 매어 둔 이유는 길이(5·8·13)에 따라 다음 장이 달라지기 때문이다 —
+   * 8장에서는 주문 다음이 계좌지만 13장에서는 예약이다. 목적지가 제 진입로를 들고 있으면
+   * 어느 길이에서도 맞는다.
+   *
+   * - `path` — 주소로 바로 간다.
+   * - `anchor` — 그 자리의 **이동 버튼**을 대신 누른다. 종목 코드처럼 화면만 아는 값이
+   *   주소에 필요할 때 쓴다. 누르는 것은 이동 버튼뿐이고 금액·이유 같은 **고르는 자리는
+   *   건드리지 않는다** — 그건 아이 대신 투자 결정을 고르는 짓이다.
+   *
+   * 없으면 데려가지 않는다. 아이가 직접 골라야 넘어가는 자리(주문 2단계)가 그렇다.
+   */
+  enter?: { path: string } | { anchor: string };
   /** 이 장이 처음 들어오는 길이. */
   from: TutorialLength;
 };
@@ -73,6 +88,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "지갑에 남은 현금과 지금 갖고 있는 주식 값을 더한 게 총자산이에요. 주식 값은 매일 바뀌니까 이 숫자도 같이 움직여요. 빨간색은 어제보다 올랐다는 뜻이고, 파란색은 내렸다는 뜻이에요.",
     hint: "아래 모의투자를 누르면 회사를 구경할 수 있어요",
+    enter: { path: "/" },
     from: 5,
   },
   {
@@ -85,6 +101,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "비슷한 일을 하는 회사끼리 묶은 걸 섹터라고 해요. 게임 만드는 회사는 게임 섹터, 라면 만드는 회사는 식품 섹터예요. 한 섹터가 통째로 오르거나 내릴 때가 있어서, 여러 섹터를 나눠 가지면 한쪽이 흔들려도 덜 휘청여요.",
     hint: "마음에 드는 종류를 눌러 봐요",
+    enter: { path: "/explore" },
     from: 13,
   },
   {
@@ -97,6 +114,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "주식은 회사를 아주 잘게 나눈 조각이에요. 한 조각을 사면 나도 그 회사의 주인 중 한 명이 돼요. 그 조각 하나의 값이 주가예요. 빨간색은 어제보다 오른 거고, 파란색은 내린 거예요.",
     hint: "카드를 눌러서 회사를 자세히 봐요",
+    enter: { path: "/explore" },
     from: 5,
   },
   {
@@ -110,6 +128,8 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "주식을 사는 걸 매수라고 해요. 가게에서 물건 사는 거랑 비슷한데 다른 게 하나 있어요. 값이 계속 바뀌어서, 내가 산 뒤에 오를 수도 내릴 수도 있다는 거예요. 그래서 사기 전에 왜 사는지 한 번 생각해 보면 좋아요.",
     hint: "주문하기를 눌러 봐요",
+    // 종목 코드는 화면만 안다. 지금 보고 있는 카드를 눌러 그 종목으로 들어간다.
+    enter: { anchor: "tut-explore-cards" },
     from: 8,
   },
   {
@@ -123,6 +143,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "회사에 좋은 일이 생기면 사려는 사람이 늘고, 걱정되는 일이 생기면 팔려는 사람이 늘어요. 그래서 뉴스가 나오면 값이 움직이곤 해요. 다만 뉴스 하나만 보고 다음에 오를지 내릴지는 아무도 알 수 없어요.",
     hint: "이 말은 무슨 뜻이야 칸을 읽어 봐요",
+    enter: { anchor: "tut-detail-news" },
     from: 8,
   },
   {
@@ -136,6 +157,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "가진 돈을 한 회사에 몽땅 넣으면 그 회사가 흔들릴 때 내 돈도 전부 같이 흔들려요. 여러 곳에 나눠 담으면 한 곳이 내려가도 다른 곳이 버텨 줘요. 이걸 분산이라고 해요.",
     hint: "금액이나 주 수를 고르고 다음을 눌러요",
+    enter: { anchor: "tut-detail-buy" },
     from: 5,
   },
   {
@@ -176,6 +198,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "내가 지금 갖고 있는 회사들을 보유 종목이라고 해요. 산 값보다 지금 값이 높으면 빨간색, 낮으면 파란색이에요. 팔기 전까지는 아직 정해진 게 아니에요 — 숫자는 계속 움직이거든요.",
     hint: "종목을 누르면 자세히 볼 수 있어요",
+    enter: { path: "/portfolio" },
     from: 5,
   },
   {
@@ -188,6 +211,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "아직 거래가 이뤄지지 않은 주문을 미체결이라고 해요. 사겠다는 사람과 팔겠다는 사람의 값이 맞아야 거래가 되거든요. 값이 맞으면 그때 체결되고, 그제야 주식이 진짜 내 것이 돼요.",
     hint: "취소를 누르면 맡아 둔 돈을 돌려줘요",
+    enter: { path: "/portfolio" },
     from: 13,
   },
   {
@@ -200,6 +224,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "주식을 파는 걸 매도라고 해요. 팔면 그만큼 다시 돈으로 바뀌어서 지갑에 들어와요. 한꺼번에 다 팔지 않고 나눠서 파는 것도 할 수 있어요.",
     hint: "팔러 가기를 누르면 얼마나 팔지 고를 수 있어요",
+    enter: { path: "/portfolio" },
     from: 13,
   },
   {
@@ -212,6 +237,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "처음 가진 돈에서 얼마나 늘거나 줄었는지를 퍼센트로 나타낸 게 수익률이에요. 금액이 아니라 비율이라서 시작한 돈이 서로 달라도 견줄 수 있어요. 순위는 지금 이 순간의 모습이라 매일 바뀌어요.",
     hint: "아카이브에서 내 기록을 볼 수 있어요",
+    enter: { path: "/ranking" },
     from: 8,
   },
   {
@@ -224,6 +250,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "언제 사서 언제 팔았는지, 그때 무슨 생각이었는지가 남아요. 가족끼리 서로 어떻게 골랐는지 견줘 보면 나는 어떤 쪽인지 알게 돼요. 이게 이 앱에서 제일 중요한 부분이에요.",
     hint: "우리 가족 수익을 누르면 가족 피드가 나와요",
+    enter: { path: "/archive" },
     from: 5,
   },
 ];

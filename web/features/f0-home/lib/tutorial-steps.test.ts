@@ -133,3 +133,53 @@ assert.equal(isSamePlace(steps[holdings], steps[holdings + 2]), true);
 // 마지막 장 다음은 없다.
 assert.equal(nextStepIndex(steps, steps.length - 1), -1);
 assert.equal(nextStepIndex(steps, -1), -1);
+
+// ── 진입로 ──────────────────────────────────────────────────────────────────
+
+// `다음` 이 자리를 옮겨야 하는데 진입로가 없으면 데려갈 수가 없다. 아이가 직접 골라야
+// 넘어가는 자리(주문 2단계)만 예외로 둔다 — 대신 골라 주는 것이 원본의 문제였다.
+const NEEDS_CHOICE = new Set(["order-reason"]);
+for (const [length, list] of TUTORIAL_LENGTHS.map(
+  (n) => [n, tutorialSteps(n)] as const,
+)) {
+  for (let i = 0; i + 1 < list.length; i += 1) {
+    if (isSamePlace(list[i], list[i + 1])) continue;
+    const target = list[i + 1];
+    const has = target.enter !== undefined;
+    assert.equal(has, !NEEDS_CHOICE.has(target.id), `${length}장: ${target.id} 진입로`);
+  }
+}
+
+// 진입로는 목적지가 들고 있다 — 길이가 달라도 같은 자리로는 같은 길로 들어간다.
+// (8장에서 주문 다음은 계좌, 13장에서는 예약이다. 장에 매달면 둘이 어긋난다.)
+const enterOf = (id: string) => TUTORIAL_STEPS.find((step) => step.id === id)?.enter;
+assert.deepEqual(enterOf("home"), { path: "/" });
+assert.deepEqual(enterOf("portfolio"), { path: "/portfolio" });
+assert.deepEqual(enterOf("archive"), { path: "/archive" });
+
+// 종목 코드는 주소에 필요한데 화면만 안다. 그런 자리는 이동 버튼을 눌러 들어간다.
+assert.deepEqual(enterOf("detail"), { anchor: "tut-explore-cards" });
+assert.deepEqual(enterOf("news"), { anchor: "tut-detail-news" });
+assert.deepEqual(enterOf("order-amount"), { anchor: "tut-detail-buy" });
+
+// 진입로가 가리키는 앵커는 **그 자리로 데려가는 버튼**이고, 어느 장이든 짚는 앵커
+// 목록에 실재하는 id 여야 한다 — 오타면 `다음` 이 조용히 아무 일도 안 한다.
+const KNOWN_ANCHORS = new Set(TUTORIAL_STEPS.flatMap((step) => step.anchors));
+KNOWN_ANCHORS.add("tut-detail-news");
+for (const step of TUTORIAL_STEPS) {
+  if (!step.enter || !("anchor" in step.enter)) continue;
+  assert.equal(KNOWN_ANCHORS.has(step.enter.anchor), true, step.id);
+}
+
+// 주소로 들어가는 자리는 그 화면의 실제 주소여야 한다.
+const PATH_OF: Record<string, string> = {
+  home: "/",
+  explore: "/explore",
+  portfolio: "/portfolio",
+  ranking: "/ranking",
+  archive: "/archive",
+};
+for (const step of TUTORIAL_STEPS) {
+  if (!step.enter || !("path" in step.enter)) continue;
+  assert.equal(step.enter.path, PATH_OF[step.screen], step.id);
+}
