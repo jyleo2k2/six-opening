@@ -4,7 +4,7 @@
 - 단일 스펙: `web/features/f9-archive/SPEC.md`. 화면은 이 폴더가 아니라 `web/features/f0-home/ArchiveScreen.tsx`와 그 계산 함수(`lib/archive-profile-view.ts`·`lib/archive-feed.ts`·`lib/archive-season.ts`·`lib/use-archive-data.ts`)에 있다. 이 폴더에는 `SPEC.md`와 화면 계약 가드(`lib/archive-feed-db-ui.test.ts`)만 둔다.
 - **`지난시즌` 자리에 보이는 값은 서버 값이 아니라 `lib/archive-season.ts`의 픽스처다**(SPEC §5.2). 시즌 경계를 아는 API가 없다. 화면이 픽스처를 직접 읽게 만들지 말고, API가 생기면 `LAST_SEASON` 자리에만 응답을 꽂는다.
 - **카드 시트는 성향별 종목 세 개다**(2026-08-17, SPEC §1.1). 다섯 축 막대는 지웠다. 목록은 `archive-profile-view.ts`의 `TYPE_PICKS` 고정 표본이고 이름·로고·시세는 유니버스가 원본이다. 한 줄을 누르면 `/buy/{code}`로 나가고 주문은 F2 화면이 이어받는다 — 시트 안에 주문 흐름을 다시 만들지 않는다.
-- **그 시트에 목표가·수익률 전망·매매 시점을 붙이지 않는다.** 종목을 말하는 주체는 화면의 고정 목록뿐이고 **LLM이 종목을 말하는 길은 여전히 막혀 있다**(루트 가드). 통합문서 v2의 레드라인은 아직 이 변경을 반영하지 못했다(이재용 세션 몫).
+- **그 시트에 목표가·수익률 전망·매매 시점을 붙이지 않는다.** 종목을 말하는 주체는 화면의 고정 목록뿐이고 **LLM이 종목을 말하는 길은 여전히 막혀 있다**(루트 가드). 통합문서 v2 §21의 레드라인은 `AI의 종목 추천`으로 AI 출력을 겨누므로 이 목록에는 걸리지 않는다 — 통합문서는 고치지 않았다(SPEC §1.1).
 - 수익률 탭의 가족 피드는 `/api/family` 거래와 `/api/comments`, `/api/likes` 반응을 사용한다. `arcCmts`·`arcLikes`만 바꾸는 로컬 전용 동작을 다시 만들지 않는다.
 - 능력치·캐릭터·레벨 계산은 `shared/engine`에만 둔다. 화면은 표시만 한다.
 - **엔진 정본은 `shared/engine/behavior-profile.ts` 한 벌이다**(전 축 0~10·5가 중립, 정확은 체결 2거래일 뒤 종가 채점, 주간 결산 카드 포함, SPEC §6). 화면은 `GET /api/profile/season-cards` 응답을 그대로 읽는다(§6.11).
