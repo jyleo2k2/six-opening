@@ -37,22 +37,51 @@ export type WalletAccountId = "child" | "parent";
  * 이 조회가 곧 예약 체결 트리거다 — 화면이 따로 시가를 확인하지 않는다. 정산은 잔액을
  * 바꾸므로 그때는 계좌 캐시를 비우고 한 번 더 읽는다.
  */
-type OpenOrders = { orders?: Record<string, unknown>[]; settled?: unknown[] };
+export type OpenOrders = { orders?: Record<string, unknown>[]; settled?: unknown[] };
 
-const readOpenOrders = (): Promise<OpenOrders | null> =>
-  fetch("/api/orders", { cache: "no-store" })
-    .then((response) => (response.ok ? response.json() : null))
-    .catch(() => null);
+/**
+ * 열린 주문도 계좌처럼 모듈에 한 번만 담아 둔다.
+ *
+ * 이 조회는 목록을 읽는 김에 **만기 지난 예약을 정산**한다. 화면을 오갈 때마다 다시
+ * 부르면 정산할 것이 없는데도 그 왕복을 매번 기다리게 되고, 지갑을 기다리는 화면은
+ * 그만큼 늦게 뜬다.
+ *
+ * 예약이 만기가 되는 것은 하루에 한 번 장이 열릴 때고, 화면을 옮기는 것은 그보다 훨씬
+ * 잦다. 그래서 **정산은 페이지를 열 때 한 번**으로 두고, 주문을 넣거나 취소한 쪽이
+ * `refresh()` 로 이 캐시까지 비워 다시 돌게 한다. 접수(`POST`)·취소(`DELETE`)는 전부
+ * `refresh()` 를 거치므로 목록이 낡은 채 남을 자리가 없다.
+ *
+ * 못 읽었으면 담아 두지 않는다 — 다음 화면이 다시 시도한다. `loadAccount` 와 같다.
+ */
+let ordersPromise: Promise<OpenOrders | null> | null = null;
+
+export function invalidateOpenOrders() {
+  ordersPromise = null;
+}
+
+export function loadOpenOrders(): Promise<OpenOrders | null> {
+  if (!ordersPromise) {
+    ordersPromise = fetch("/api/orders", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .catch(() => null)
+      .then((data: OpenOrders | null) => {
+        if (!data) ordersPromise = null;
+        return data;
+      });
+  }
+  return ordersPromise;
+}
 
 export function useWallet() {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [reload, setReload] = useState(0);
   /**
    * 주문을 취소한 뒤처럼 서버 상태가 바뀐 것을 아는 쪽에서 다시 읽게 한다.
-   * 예약은 잔액도 함께 움직이므로 계좌 캐시를 비우고 시작한다.
+   * 예약은 잔액도 함께 움직이므로 계좌·주문 캐시를 둘 다 비우고 시작한다.
    */
   const refresh = useCallback(() => {
     invalidateAccount();
+    invalidateOpenOrders();
     setReload((n) => n + 1);
   }, []);
 
@@ -60,7 +89,7 @@ export function useWallet() {
     let alive = true;
     const seeded = seedAccounts();
     // 계좌나 주문을 못 읽어도 화면은 떠야 한다. 그때는 시드 지갑 그대로다.
-    Promise.all([loadAccount(), readOpenOrders()]).then(([user, open]) => {
+    Promise.all([loadAccount(), loadOpenOrders()]).then(([user, open]) => {
       if (!alive) return;
       const pending = open?.orders ? pendingFromServerOrders(open.orders) : null;
       setWallet({ acc: applyServerAccount(seeded, user, pending) });
