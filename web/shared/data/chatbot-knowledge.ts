@@ -781,7 +781,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "note",
     },
-    detail: "적어 둔 값은 나만 보고, 그 값이 되어도 알림이 오거나 주문이 나가지 않아요.",
+    detail: "적어 둔 값은 가족 기록에도 함께 보이고, 그 값이 되어도 알림이 오거나 주문이 나가지 않아요.",
     example: "공책에 '여기까지 오면 다시 생각해 보자'고 적어 두는 것과 비슷해요. 적었다고 저절로 무슨 일이 생기지는 않아요.",
   },
   "holding-period": {
@@ -981,7 +981,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "direction",
     },
-    detail: "다섯 가지 모두 이번 시즌에 남긴 기록으로만 계산해서, 기록이 없으면 아직 표시되지 않아요.",
+    detail: "다섯 가지 모두 이번 시즌에 남긴 기록으로만 계산해서, 기록이 없으면 한가운데에 머물러 있어요.",
     example: "운동회 기록표에 달리기·던지기를 따로 적어 두는 것과 비슷해요. 항목마다 보는 것이 달라서 하나로 합쳐 순위를 매기지 않아요.",
   },
   "profile-definition": {
