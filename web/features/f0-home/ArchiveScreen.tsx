@@ -105,6 +105,12 @@ const BACK = styleFromCss(
     "font-size:22px;font-weight:800;line-height:1;padding-bottom:2px;color:#001E5A;cursor:pointer;" +
     "background:#FFFFFF;box-shadow:0 2px 8px rgba(30,25,60,0.14),inset 0 0 0 1px #E4E6F1",
 );
+/**
+ * ⓘ 안내가 서는 층. **카드 레일(`2`)보다 위**여야 한다 — 아래에 두면 확대된 가운데
+ * 카드가 안내를 덮어 무슨 말인지 보이지 않는다. 시트(`6`·`7`)보다는 낮게 둔다:
+ * 시트가 올라오면 안내는 그 뒤로 가려지는 것이 맞다.
+ */
+const INFO_Z = 5;
 const SHEET_RATIO = 0.82;
 const SHEET_HEIGHT = PROTOTYPE_PHONE.screenHeight * SHEET_RATIO;
 /**
@@ -353,10 +359,6 @@ export function ArchiveScreen({
   const [pickedAxis, setPickedAxis] = useState<number | null>(null);
   /** 제목 옆 ⓘ 로 여는 안내. 처음 들어온 사람은 카드를 넘길 수 있는 줄 모르므로 펴 둔다. */
   const [infoOpen, setInfoOpen] = useState(true);
-  /** 말꼬리가 설 자리. ⓘ 를 실제로 재서 넣는다 — 제목 글자수가 바뀌어도 따라간다. */
-  const [infoAnchor, setInfoAnchor] = useState(150);
-  const infoBtn = useRef<HTMLDivElement | null>(null);
-  const pageRef = useRef<HTMLDivElement | null>(null);
   const [famDetailOpen, setFamDetailOpen] = useState(false);
   /** 글쓰기 시트에서 고른 거래와 적고 있는 글. 시트를 닫으면 둘 다 버린다. */
   const [pickedTrade, setPickedTrade] = useState<string | null>(null);
@@ -384,22 +386,6 @@ export function ArchiveScreen({
   useEffect(() => {
     if (view === "return") returnScrollTop.current = 0;
   }, [view]);
-
-  /**
-   * ⓘ 의 실제 가운데를 재서 말꼬리를 그 아래 세운다. 안내가 열릴 때만 재면 된다.
-   *
-   * **`getBoundingClientRect` 가 아니라 `offsetLeft` 로 잰다** — 폰은 통째로 배율이
-   * 걸려 있어 화면 좌표는 그 배율만큼 줄어든 값이 나오는데, 넣을 자리(`left:…px`)는
-   * 배율 안쪽 좌표라 섞으면 창 크기에 따라 말꼬리가 어긋난다. `offsetLeft` 는 자리를
-   * 잡아 주는 `PAGE`(`position:absolute`) 기준의 배율 없는 값이고, 안내 상자가
-   * `left:20px` 이라 그만큼 뺀다.
-   */
-  useEffect(() => {
-    if (!infoOpen) return;
-    const btn = infoBtn.current;
-    if (!btn) return;
-    setInfoAnchor(btn.offsetLeft + btn.offsetWidth / 2 - 20);
-  }, [infoOpen, view]);
 
   const prices = useMemo(
     () =>
@@ -503,7 +489,7 @@ export function ArchiveScreen({
 
   return (
     <PhoneFrame>
-      <div ref={pageRef} style={PAGE}>
+      <div style={PAGE}>
         <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 12, padding: "6px 20px 0" }}>
           <div onClick={goBack} style={BACK}>‹</div>
           <div style={{ flex: 1 }} />
@@ -517,7 +503,6 @@ export function ArchiveScreen({
               {view === "cards" && (
                 <div
                   onClick={() => setInfoOpen(!infoOpen)}
-                  ref={infoBtn}
                   style={{ flex: "none", display: "flex", alignItems: "center", cursor: "pointer", paddingBottom: 3 }}
                 >
                   <svg fill="none" height="24" stroke="#9095AA" style={{ display: "block" }} viewBox="0 0 24 24" width="24">
@@ -536,8 +521,13 @@ export function ArchiveScreen({
           아래에 두면 카드 레일이 그만큼 눌려 가운데 카드가 작아진다.
         */}
         {view === "cards" && infoOpen && (
-          <div style={{ position: "absolute", left: 20, right: 20, top: 112, zIndex: 1, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
-            <div style={{ position: "absolute", left: infoAnchor, top: -7, width: 14, height: 14, transform: "translateX(-50%) rotate(45deg)", background: "#FDE7F1" }} />
+          <div style={{ position: "absolute", left: 20, right: 20, top: 112, zIndex: INFO_Z, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
+            {/*
+              꼬리는 **아래로** 내려 가운데 성향 카드를 가리킨다. 안내가 말하는 대상이
+              ⓘ 가 아니라 그 아래 카드이기 때문이다. 카드는 레일 한가운데에 서므로
+              꼬리도 가운데다 — ⓘ 를 재서 맞추던 코드는 그래서 지웠다.
+            */}
+            <div style={{ position: "absolute", left: "50%", bottom: -7, width: 14, height: 14, transform: "translateX(-50%) rotate(45deg)", background: "#FDE7F1" }} />
             <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 10 }}>
               <div style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 800, color: ACCENT, letterSpacing: "-0.02em" }}>매주 새로운 카드가 쌓여요</div>
               <div onClick={() => setInfoOpen(false)} style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1, cursor: "pointer", padding: "0 2px" }}>✕</div>
