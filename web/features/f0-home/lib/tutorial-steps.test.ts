@@ -8,6 +8,7 @@ import {
   TUTORIAL_STEPS,
   type TutorialPlace,
   type TutorialStage,
+  backPath,
   enterPath,
   isSamePlace,
   nextStepIndex,
@@ -188,6 +189,28 @@ assert.deepEqual(routeFromPath(enterPath("/sell/:code", "005930")), {
   side: "sell",
 });
 assert.equal(routeFromPath(enterPath("/sell/:code", null)), null);
+
+// ── 되돌아가기 ──────────────────────────────────────────────────────────────
+
+// `이전` 은 화면 주소로만 되돌아간다. `enter.anchors` 를 되감으면 주문이 한 번 더 나간다.
+const stepOf = (id: string) => TUTORIAL_STEPS.find((step) => step.id === id)!;
+assert.equal(backPath(stepOf("home-goal"), "259960"), "/");
+assert.equal(backPath(stepOf("explore-cards"), "259960"), "/explore");
+assert.equal(backPath(stepOf("detail-news"), "259960"), "/stock/259960");
+
+// 주문 화면으로는 되돌아가지 않는다 — 주문은 이미 서버로 나갔다.
+for (const step of TUTORIAL_STEPS.filter((step) => step.screen === "order")) {
+  assert.equal(backPath(step, "259960"), null, step.id);
+}
+// 종목을 모르면 상세로도 못 간다. 빈 주소로 보내느니 버튼을 흐리게 둔다.
+assert.equal(backPath(stepOf("detail-chart"), null), null);
+
+// 되돌아갈 주소는 앱이 아는 주소여야 한다.
+for (const step of TUTORIAL_STEPS) {
+  const back = backPath(step, FALLBACK_STOCK);
+  if (back === null) continue;
+  assert.notEqual(routeFromPath(back), null, step.id);
+}
 
 // ── 앵커가 화면에 실재하는가 ────────────────────────────────────────────────
 

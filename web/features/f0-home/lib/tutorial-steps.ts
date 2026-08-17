@@ -418,3 +418,21 @@ export function isSamePlace(a: TutorialStep, b: TutorialStep) {
 export function enterPath(path: string, code: string | null) {
   return path.replace(":code", code ?? "");
 }
+
+/**
+ * 이전 장으로 **되돌아갈** 주소. 되돌릴 수 없으면 `null` 이고 `이전` 버튼이 흐려진다.
+ *
+ * 앞으로 갈 때 쓰는 `enter` 를 그대로 되감을 수는 없다. `enter` 는 **누르는 순서**라
+ * 되돌리려고 다시 실행하면 주문이 한 번 더 나간다. 그래서 뒤로 가는 길은 따로 둔다 —
+ * 화면 주소로만 가고, 아무것도 누르지 않는다.
+ *
+ * **주문 화면으로는 되돌아가지 않는다.** 주문은 이미 서버로 나갔고 단계를 되감을 수
+ * 없다. 주문 화면 안에서 자리가 같은 장끼리는 주소를 옮길 일 없이 설명만 되돌리므로
+ * 이 함수를 타지 않는다.
+ */
+export function backPath(step: TutorialStep, code: string | null) {
+  if (step.screen === "home") return "/";
+  if (step.screen === "explore") return "/explore";
+  if (step.screen === "stock" && code) return `/stock/${code}`;
+  return null;
+}
