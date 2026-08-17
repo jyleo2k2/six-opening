@@ -69,12 +69,17 @@ export type TutorialStep = {
    *
    * - `path` — 주소로 바로 간다. `:code` 는 지금 보고 있는 종목 코드로 바꾼다(방금 산
    *   회사를 그대로 팔러 갈 때 쓴다 — 코드는 화면만 안다).
-   * - `anchor` — 그 자리의 **이동 버튼**을 대신 누른다.
+   * - `anchors` — 그 자리로 가는 데 필요한 것을 **적힌 순서대로 한 프레임에 하나씩**
+   *   누른다. 화면이 다시 그려져야 다음 버튼이 열리는 자리가 있어서다(금액을 골라야
+   *   `다음` 이 켜진다).
    *
-   * 없으면 데려가지 않는다. 아이가 직접 골라야 넘어가는 자리(주문 단계 사이)가 그렇다 —
-   * 금액·이유 같은 고르는 자리를 대신 눌러 주는 것은 아이 대신 투자 결정을 고르는 짓이다.
+   * **모든 장에 진입로가 있다** [2026-08-17 확정]. 예전에는 주문 단계 사이를 비워 두고
+   * 아이가 직접 고르기를 기다렸다 — 대신 고르는 것이 원본 튜토리얼의 문제였기 때문이다.
+   * 그런데 그러면 `다음` 이 아무 일도 안 하는 장이 넷이나 생겨 안내가 거기서 끊겼다.
+   * 지금은 튜토리얼이 **보기 좋은 기본값**(1만원·첫 이유·첫 계획)을 눌러 끝까지 데려가고,
+   * 아이는 설명을 읽은 뒤 그 자리에서 직접 바꾸면 된다.
    */
-  enter?: { path: string } | { anchor: string };
+  enter?: { path: string } | { anchors: string[] };
 };
 
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
@@ -111,7 +116,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "비슷한 일을 하는 회사끼리 묶은 걸 섹터라고 해요. 게임 만드는 회사는 게임 섹터, 라면 만드는 회사는 식품 섹터예요. 한 섹터가 통째로 오르거나 내릴 때가 있어서, 여러 섹터를 나눠 가지면 한쪽이 흔들려도 덜 휘청여요.",
     hint: "마음에 드는 종류를 눌러 봐요",
-    enter: { anchor: "tut-nav-trade" },
+    enter: { anchors: ["tut-nav-trade"] },
   },
   {
     id: "explore-cards",
@@ -136,7 +141,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
       "값이 오르내린 길을 선으로 이어 그린 그림이에요. 선이 위로 가면 그동안 오른 거고 아래로 가면 내린 거예요. 지나온 길은 알려 주지만 앞으로 어디로 갈지는 알려 주지 않아요.",
     hint: "차트 자세히 보기를 눌러도 돼요",
     // 종목 코드는 화면만 안다. 지금 보고 있는 카드를 눌러 그 종목으로 들어간다.
-    enter: { anchor: "tut-explore-cards" },
+    enter: { anchors: ["tut-explore-cards"] },
   },
   {
     id: "detail-about",
@@ -186,7 +191,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "사겠다 또는 팔겠다고 내는 신청이 주문이에요. 주문을 넣었다고 바로 거래가 되는 건 아니에요. 사겠다는 사람과 팔겠다는 사람의 값이 맞아야 그때 거래가 이뤄져요.",
     hint: "얼마나 살지 골라 봐요",
-    enter: { anchor: "tut-detail-buy" },
+    enter: { anchors: ["tut-detail-buy"] },
   },
   {
     id: "buy-amount",
@@ -225,7 +230,9 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     term: "투자 이유",
     concept:
       "이유를 남겨 두면 나중에 다시 볼 수 있어요. 잘됐을 때도 아쉬웠을 때도 “그때 나는 이렇게 생각했구나” 하고 알 수 있거든요. 언제까지 가질지 미리 정해 두면 값이 흔들릴 때 덜 놀라요.",
-    hint: "다 고르면 주문하기를 눌러요",
+    hint: "이유와 목표를 골라 봐요",
+    // 금액을 골라야 `다음` 이 켜진다. 1만원을 눌러 두고 넘긴다 — 아이는 여기서 바꿀 수 있다.
+    enter: { anchors: ["tut-order-amount-preset", "tut-order-next"] },
   },
   {
     id: "buy-done",
@@ -239,6 +246,8 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "주문이 실제 거래로 바뀌는 걸 체결이라고 해요. 장이 열려 있을 때 지금 값으로 사면 바로 체결되고, 장이 닫혔거나 값을 정해 뒀으면 그 조건이 될 때까지 기다렸다 체결돼요.",
     hint: "다음을 누르면 파는 화면으로 가요",
+    // 이유와 계획을 고른 뒤라야 `주문하기` 가 켜진다. 첫 칸을 눌러 두고 주문을 넣는다.
+    enter: { anchors: ["tut-order-reason-first", "tut-order-plan-first", "tut-order-next"] },
   },
   {
     id: "sell-amount",
@@ -280,6 +289,8 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "살 때 “언제까지 갖고 있겠다”고 정한 것과 지금 파는 것이 같은지 견줘 보는 자리예요. 계획대로 팔았는지 마음이 바뀌어 팔았는지는 둘 다 괜찮아요. 다만 어느 쪽이었는지 알아 두면 다음에 더 나은 결정을 할 수 있어요.",
     hint: "그때 마음과 지금 마음을 견줘 봐요",
+    // 팔 수량은 기본이 전부라 그대로 넘어간다.
+    enter: { anchors: ["tut-order-next"] },
   },
   {
     id: "sell-reason",
@@ -306,6 +317,8 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "팔기 전까지 오르내리던 숫자는 아직 정해진 게 아니에요. 팔아야 그때 값으로 정해지고, 그걸 실현 수익이라고 해요. 사고판 기록은 아카이브에 모여서 내가 어떤 투자자인지 보여줘요.",
     hint: "여기까지예요. 이제 직접 해 봐요!",
+    // 계획을 지켰으면 변경 이유 칸이 아예 없다. 없는 앵커는 조용히 건너뛴다.
+    enter: { anchors: ["tut-sell-reason-first", "tut-sell-change-first", "tut-order-next"] },
   },
 ];
 
