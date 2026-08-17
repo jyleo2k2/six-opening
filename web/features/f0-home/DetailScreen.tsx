@@ -399,8 +399,15 @@ export function DetailScreen({
                         y2={164}
                       />
                     ))}
-                    <circle cx={chart.hi.x} cy={chart.hi.y} fill={changeUp ? UP : DOWN} r={2.6} />
-                    <circle cx={chart.lo.x} cy={chart.lo.y} fill={changeUp ? UP : DOWN} r={2.6} />
+                    {/*
+                      최고·최저에 점을 찍지 않는다. `hi.x`·`lo.x` 는 **이름표 자리**라
+                      카드 밖으로 잘리지 않게 안쪽으로 끌려 들어온 값인데, 여기에 안 끌린
+                      `hi.y` 를 짝지어 점을 찍으면 최고·최저가 좌우 끝에 있을 때만 점이
+                      옆으로 미끄러져 선에서 떨어진 허공에 뜬다. 이름표가 숨는 경우
+                      (최고가 곧 지금 가격일 때)에도 점은 남아 글자 없는 점만 떠 있었다.
+                      값은 이름표가 이미 말하므로 점 없이 선만 둔다 — 차트 화면
+                      (`ChartScreen`)은 점용 x 와 이름표용 x 가 갈려 있어 그대로 찍는다.
+                    */}
                   </>
                 )}
               </svg>
