@@ -82,6 +82,19 @@ export type TutorialStep = {
   enter?: { path: string } | { anchors: string[] };
 };
 
+/**
+ * 튜토리얼이 사고파는 회사. **삼성전자로 고정한다.**
+ *
+ * 원래는 아이가 보고 있던 카드를 대신 눌러 그 종목으로 들어갔는데, `id="tut-explore-cards"`
+ * 가 붙은 것은 카드를 감싼 슬라이드이고 `onClick` 은 그 **안쪽** 카드에 있어 눌러도
+ * 아무 일이 없었다 — 흐름이 카드에서 끊겼다. 아이가 어디까지 밀어 놨든 같은 자리로
+ * 들어가야 뒤따르는 설명(차트·회사·뉴스·주문)이 맞으므로 종목을 고정한다.
+ *
+ * 여기 한 곳만 원본이다. 매도는 `:code` 로 지금 보고 있는 종목을 따라가므로 자동으로
+ * 같은 회사가 된다.
+ */
+export const TUTORIAL_STOCK = "005930";
+
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: "home-goal",
@@ -127,7 +140,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     term: "주식과 주가",
     concept:
       "주식은 회사를 아주 잘게 나눈 조각이에요. 한 조각을 사면 나도 그 회사의 주인 중 한 명이 돼요. 그 조각 하나의 값이 주가예요. 빨간색은 어제보다 오른 거고, 파란색은 내린 거예요.",
-    hint: "카드를 눌러서 회사를 자세히 봐요",
+    hint: "다음을 누르면 회사를 자세히 봐요",
   },
   {
     id: "detail-chart",
@@ -140,8 +153,8 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "값이 오르내린 길을 선으로 이어 그린 그림이에요. 선이 위로 가면 그동안 오른 거고 아래로 가면 내린 거예요. 지나온 길은 알려 주지만 앞으로 어디로 갈지는 알려 주지 않아요.",
     hint: "차트 자세히 보기를 눌러도 돼요",
-    // 종목 코드는 화면만 안다. 지금 보고 있는 카드를 눌러 그 종목으로 들어간다.
-    enter: { anchors: ["tut-explore-cards"] },
+    // 어느 카드를 보고 있든 같은 회사로 들어간다 — `TUTORIAL_STOCK` 참고.
+    enter: { path: `/stock/${TUTORIAL_STOCK}` },
   },
   {
     id: "detail-about",

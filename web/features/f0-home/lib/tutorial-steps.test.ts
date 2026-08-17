@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { STOCKS } from "../../../shared/data/stocks";
 import { routeFromPath } from "../screen-route";
 import {
   TUTORIAL_STEPS,
+  TUTORIAL_STOCK,
   type TutorialPlace,
   type TutorialStage,
   enterPath,
@@ -78,8 +80,22 @@ assert.equal(steps[9].enter, undefined);
 const enterOf = (id: string) => steps.find((step) => step.id === id)?.enter;
 assert.deepEqual(enterOf("home-goal"), { path: "/" });
 assert.deepEqual(enterOf("explore-chips"), { anchors: ["tut-nav-trade"] });
-assert.deepEqual(enterOf("detail-chart"), { anchors: ["tut-explore-cards"] });
 assert.deepEqual(enterOf("buy-tabs"), { anchors: ["tut-detail-buy"] });
+
+// 종목은 고정이다. 아이가 카드를 어디까지 밀어 놨든 같은 회사로 들어가야 뒤따르는
+// 설명이 맞는다 — 카드를 대신 누르던 예전 길은 `id` 가 붙은 슬라이드에 `onClick` 이
+// 없어 흐름이 거기서 끊겼다.
+assert.deepEqual(enterOf("detail-chart"), { path: `/stock/${TUTORIAL_STOCK}` });
+assert.deepEqual(routeFromPath(`/stock/${TUTORIAL_STOCK}`), {
+  screen: "stock",
+  code: TUTORIAL_STOCK,
+});
+// 유니버스에 있는 회사여야 한다. 없는 코드는 화면이 탐색으로 되돌려 보낸다.
+assert.equal(
+  STOCKS.some((stock) => stock.symbol === TUTORIAL_STOCK),
+  true,
+  TUTORIAL_STOCK,
+);
 // 방금 산 그 회사를 그대로 팔러 간다.
 assert.deepEqual(enterOf("sell-amount"), { path: "/sell/:code" });
 
@@ -115,6 +131,7 @@ const PATH_OF: Record<string, string> = {
   portfolio: "/portfolio",
   ranking: "/ranking",
   archive: "/archive",
+  stock: `/stock/${TUTORIAL_STOCK}`,
 };
 for (const step of steps) {
   if (!step.enter || !("path" in step.enter)) continue;
