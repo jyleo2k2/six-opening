@@ -34,5 +34,15 @@ assert.match(
   /chipStyle\(draft\.amountSource === "preset" && draft\.amount === v\)/u,
 );
 assert.match(orderScreen, /chipStyle\(draft\.amountSource === "custom"\)/u);
+assert.match(
+  orderScreen,
+  /patchDraft\(\{ buyBy, amount: 0, shares: 0, amountSource: null \}\)/u,
+);
+assert.match(
+  orderScreen,
+  /const selectSellMode = \(sellBy: SellDraft\["sellBy"\]\)/u,
+);
+assert.match(orderScreen, /qty: math\.maxQty, amountInput: 0/u);
+assert.match(orderScreen, /\{ sellBy, qty: 0, amountInput: 0 \}/u);
 
 console.log("buy amount prototype UI contract tests passed");
