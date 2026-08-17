@@ -1,6 +1,6 @@
 # F9 — 가족 아카이브 기능 명세
 
-> **현재 구현 단일 원본** · 2026-08-16 · 기준: 디자인 목업 반영 이후
+> **현재 구현 단일 원본** · 2026-08-17 · 기준: 디자인 목업 반영 이후
 >
 > 현행 동작은 **`features/f0-home/ArchiveScreen.tsx` 렌더링 → `lib/archive-profile-view.ts`·`lib/archive-feed.ts`·`lib/archive-season.ts` → `shared/engine/` → 이 문서** 순으로 확인한다. 제품 목표·법무·전역 레드라인은 `docs/영웅키움_기획_통합문서_v2.md`를 따른다.
 
@@ -176,7 +176,7 @@ F9 사용자 화면은 `/archive` 라우트의 `ArchiveScreen` 이며 **자리�
 
 ```ts
 {
-  weekLabel: string;                  // "8월 2주차"
+  weekLabel: string;                  // "8월 1주차"
   traits: Trait[];                    // 다섯 축 라벨·점수·좌표·선택 핸들러
   radarPoly: string;                  // 오각형 폴리곤 좌표
   type: { key; name; desc; img; pal; lv; title };
@@ -301,7 +301,8 @@ invested = 주식 평가액 ÷ (현금 + 주식 평가액)
 
 정확력을 체결 주가 아니라 **채점 주**에 귀속하는 게 핵심이다. 그래야 끝난 주 카드가 나중에 바뀌지 않는다 — 결산의 조건이다.
 
-- 주 경계는 **월요일 00:00 ~ 일요일 24:00 KST** (`weekBucketsKST`). 라벨은 `8/10 – 8/16`.
+- 주 경계는 **월요일 00:00 ~ 일요일 24:00 KST** (`weekBucketsKST`). 날짜 라벨은 `8/10 – 8/16`.
+- 화면 주차명은 그 달의 **첫 월요일~일요일 묶음을 1주차**로 센다. 2026년 8월은 `8/3~8/9 = 8월 1주차`, `8/10~8/16 = 8월 2주차`, `8/17~8/23 = 8월 3주차`다. 현재 카드도 `이번 주`로 바꾸지 않고 같은 주차명을 표시한다.
 - 첫 거래가 있는 주부터 오늘이 속한 주까지 만든다. 거래가 하나도 없어도 이번 주 한 장은 나온다.
 - 과거 보유는 `replayPortfolio` 가 **현재 보유·현금에서 그 이후 거래를 최신순으로 되돌려** 복원한다.
 - 주간 `pending` 은 반대로 **그 주에 한 거래 중 아직 판정 안 난 것**을 센다.
@@ -358,7 +359,7 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 
 | 카드 | 값 원본 | 응답이 없을 때 |
 |---|---|---|
-| 첫 화면 레일 — 이번 주(맨 오른쪽, 기본으로 켜짐) | `GET /api/profile/season-cards` 의 `cumulative` | 다섯 축 중립 5, 유형은 `관찰 중` |
+| 첫 화면 레일 — 이번 주(맨 오른쪽, 기본으로 켜짐, `8월 3주차` 같은 주차명 표시) | `GET /api/profile/season-cards` 의 `cumulative` | 다섯 축 중립 5, 유형은 `관찰 중` |
 | 첫 화면 레일 — 지난 주 | `season-cards` 의 `weeks[]`를 주 시작일로 매칭 | 카드가 없다 — 로컬 기록으로 주차를 만들지 않는다 |
 | 우리가족투자 — 현시즌 | `GET /api/family`의 `members[].behavior`(신버전 누적 카드) | 축은 중립 5, 유형은 `관찰 중` |
 | 우리가족투자 — 지난시즌 | `lib/archive-season.ts` 픽스처(§5.2) | 해당 없음 — 서버를 부르지 않는다 |
