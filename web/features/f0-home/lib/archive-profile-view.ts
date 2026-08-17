@@ -11,15 +11,10 @@
  * 신버전 값을 화면 모양으로 펴는 코드만 있고 판정 산식은 없다.
  */
 
-export const TRAIT_LABELS = ["집중", "분산", "정확", "직관", "근거"] as const;
+import { pathFromRoute } from "../screen-route";
+import type { Universe, UniverseLive } from "./use-universe";
 
-export const TRAIT_META = [
-  { color: "#FFC53D", desc: "확신한 곳에 몰아 담은 정도예요. 담은 섹터가 적고 현금이 적을수록 높아요." },
-  { color: "#4FC3F7", desc: "여러 곳에 나눠 담은 정도예요. 집중의 반대쪽 축이에요." },
-  { color: "#7BE3A0", desc: "사고판 시점이 맞았는지예요. 산 뒤 오르거나 판 뒤 내리면 올라가요." },
-  { color: "#FF8AD0", desc: "느낌으로 빠르게 결정한 비율이에요. 근거의 반대쪽 축이에요." },
-  { color: "#9B8CFF", desc: "사기 전에 뉴스·기업정보·차트를 확인하고 결정한 비율이에요." },
-] as const;
+export const TRAIT_LABELS = ["집중", "분산", "정확", "직관", "근거"] as const;
 
 export type TypeKey = "sniper" | "strategist" | "fighter" | "explorer";
 
@@ -63,6 +58,97 @@ export const TYPES: Record<
     sectors: "식품·엔터처럼 생활에서 아는 회사",
   },
 };
+
+/** 등락색. 다른 화면(`explore-cards`·`portfolio-view`)과 같은 두 색이다. */
+const UP = "#E8322E";
+const DOWN = "#1668DC";
+
+/**
+ * 성향 카드를 눌렀을 때 여는 시트가 보여 주는 **성향별 종목 세 개**.
+ *
+ * 목록은 사람이 정한 고정 표본이다 — 서버에 "이 성향이 무엇을 담았는지" 를 집계하는
+ * 경로가 아직 없다. 집계 API 가 생기면 이 표를 지우고 응답을 그 자리에 꽂는다.
+ *
+ * `sub` 는 업종·시장 표기라 유니버스에서 뽑지 않고 여기 적는다 — `universe.js` 에는
+ * 시장(코스피·코스닥) 칸이 없고, 이름·시세·로고만 유니버스에서 온다. `name` 은 유니버스가
+ * 아직 안 실린 첫 프레임에 쓰는 대체 이름이다.
+ */
+export type TypePick = { code: string; name: string; sub: string };
+
+export const TYPE_PICKS: Record<TypeKey, readonly TypePick[]> = {
+  sniper: [
+    { code: "005930", name: "삼성전자", sub: "반도체 · 코스피" },
+    { code: "000660", name: "SK하이닉스", sub: "반도체 · 코스피" },
+    { code: "066570", name: "LG전자", sub: "가전 · 코스피" },
+  ],
+  strategist: [
+    { code: "105560", name: "KB금융", sub: "금융 · 코스피" },
+    { code: "055550", name: "신한지주", sub: "금융 · 코스피" },
+    { code: "005380", name: "현대차", sub: "자동차 · 코스피" },
+  ],
+  fighter: [
+    { code: "012450", name: "한화에어로스페이스", sub: "방산 · 코스피" },
+    { code: "329180", name: "HD현대중공업", sub: "조선 · 코스피" },
+    { code: "259960", name: "크래프톤", sub: "게임 · 코스피" },
+  ],
+  explorer: [
+    { code: "352820", name: "하이브", sub: "엔터 · 코스피" },
+    { code: "271560", name: "오리온", sub: "식품 · 코스피" },
+    { code: "278470", name: "에이피알", sub: "화장품 · 코스피" },
+  ],
+};
+
+export const PICKS_LEAD = "같은 성향 투자자들이 많이 담은 종목이에요.";
+/** 목록 아래 각주. 고르는 사람은 아이라 "참고용" 이라고 분명히 적는다. */
+export const PICKS_NOTE = "추천은 참고용이에요. 왜 오를 것 같은지 이유를 적고 담아보세요.";
+/** 유형이 아직 없을 때. 없는 성향의 종목을 지어내지 않는다. */
+export const PICKS_PENDING = "아직 투자 유형이 정해지지 않아 보여 줄 종목이 없어요.\n조금 더 사고팔면 여기에 나타나요.";
+
+export type PickRow = {
+  code: string;
+  name: string;
+  sub: string;
+  /** 로고 파일이 없으면 빈 문자열. 화면은 그때 동그라미만 그린다. */
+  logo: string;
+  priceText: string;
+  changeText: string;
+  changeColor: string;
+  /** 누르면 갈 곳. 주소 만들기는 `screen-route` 하나가 안다. */
+  path: string;
+};
+
+/**
+ * 시트에 그릴 세 줄. 이름·로고·시세는 **유니버스와 5초 시세가 원본**이고 이 파일은
+ * 코드와 업종 표기만 갖는다 — 같은 종목이 탐색 화면과 다른 값으로 보이면 안 된다.
+ */
+export function buildTypePicks(
+  key: TypeKey | null,
+  universe: Universe | null,
+  quotes: UniverseLive["quotes"],
+): PickRow[] {
+  if (!key) return [];
+  return TYPE_PICKS[key].map((pick) => {
+    const stock = universe?.stocks.find((entry) => entry.code === pick.code) ?? null;
+    const price = quotes[pick.code]?.price ?? stock?.price ?? 0;
+    const rate = quotes[pick.code]?.rate ?? stock?.change ?? 0;
+    // 등락률만으로 원화 변동폭을 되짚는다: price = prevClose * (1 + rate/100).
+    // 탐색 카드(`explore-cards`)와 같은 식이라 두 화면의 변동폭이 어긋나지 않는다.
+    const base = 100 + rate;
+    const changeWon = base === 0 ? 0 : Math.abs(Math.round((price * rate) / base));
+    const up = rate >= 0;
+    const sign = up ? "+" : "−";
+    return {
+      code: pick.code,
+      name: stock?.name ?? pick.name,
+      sub: pick.sub,
+      logo: universe?.logos?.[pick.code] ? `/ui/${universe.logos[pick.code]}` : "",
+      priceText: `${Math.round(price).toLocaleString("ko-KR")}원`,
+      changeText: `${sign}${changeWon.toLocaleString("ko-KR")} (${sign}${Math.abs(rate).toFixed(1)}%)`,
+      changeColor: up ? UP : DOWN,
+      path: pathFromRoute({ screen: "order", code: pick.code, side: "buy" }),
+    };
+  });
+}
 
 /**
  * 모든 축의 중립값. 엔진의 `NEUTRAL`(`behavior-profile.ts`)과 같은 값이어야 한다 —

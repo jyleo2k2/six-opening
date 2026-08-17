@@ -6,16 +6,19 @@ import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
 import { ACCENT, familySummary, feedCards, FEED_LIMIT, LANE_HEIGHT, returnSummary, runners, RUN_START } from "./lib/archive-feed";
 import {
+  buildTypePicks,
   familyMembers,
   formatScore,
   gridRings,
   labelAt,
   myProfile,
+  PICKS_LEAD,
+  PICKS_NOTE,
+  PICKS_PENDING,
   pointAt,
   resolveType,
   rgba,
   TRAIT_LABELS,
-  TRAIT_META,
   typeImage,
   weekCards,
   type FamilyMember,
@@ -46,10 +49,11 @@ import { PhoneFrame } from "./PhoneFrame";
  * 계산하던 `lib/archive-sectors.ts` 와 그 테스트도 같은 변경에서 지웠다 — 되살리려면
  * 레일부터 다시 설계한다.
  *
- * **축 상세 시트는 다섯 축 막대 그대로다.** 2026-08-16 디자인 목업은 이 시트를 "같은 성향
- * 투자자들이 많이 담은 종목" 목록과 3단계 주문 흐름으로 바꿔 놨지만, 루트 가드가 종목
- * 추천·목표가를 금지하므로 그 자리는 옮기지 않았다. 되살리자는 요청이 오면 통합문서 v2
- * 부터 고쳐야 한다.
+ * **카드 시트는 성향별 종목 세 개다**(2026-08-17). 다섯 축 막대를 지우고 디자인 목업의
+ * "같은 성향 투자자들이 많이 담은 종목" 자리로 바꿨다. 목록·문구는
+ * `archive-profile-view.ts` 의 `TYPE_PICKS` 가 갖고, 한 줄을 누르면 `/buy/{code}` 로 나가
+ * 주문 화면이 이어받는다 — 목업이 시트 안에 넣은 3단계 주문 흐름은 옮기지 않았다.
+ * **목표가·수익률 전망·"지금 사라" 는 여기에 넣지 않는다.**
  */
 const PAGE = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column;background:#F7F6FB",
@@ -403,6 +407,8 @@ export function ArchiveScreen({
   };
 
   const sheetCard: WeekCard | undefined = cards[sheetIndex ?? activeCard] ?? cards[cards.length - 1];
+  /** 그 주 유형의 종목 세 개. 유형이 아직 없는 주(`관찰 중`)면 빈 배열이다. */
+  const sheetPicks = buildTypePicks(sheetCard?.type.key ?? null, universe, quotes);
 
   // 지난 시즌 — 아직 서버 값이 없어 `archive-season` 픽스처를 그대로 쓴다(그 파일 머리말).
   const last = useMemo(() => lastSeasonReport(), []);
@@ -935,20 +941,33 @@ export function ArchiveScreen({
                   <div data-sheet-static onClick={sheet.closeSheet} style={{ flex: "none", whiteSpace: "nowrap", fontSize: 14, fontWeight: 700, color: rgba(sheetCard.type.ink, 0.6), cursor: "pointer", padding: "6px 4px" }}>닫기</div>
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 20 }}>
-                {sheetCard.scores.map((score, i) => (
-                  <div key={TRAIT_LABELS[i]}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <div style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 800, color: sheetCard.type.ink }}>{TRAIT_LABELS[i]}</div>
-                      <div style={{ fontSize: 18, fontWeight: 900, color: sheetCard.type.ink, fontVariantNumeric: "tabular-nums" }}>{formatScore(score)}</div>
-                    </div>
-                    <div style={{ height: 9, borderRadius: 999, background: rgba(sheetCard.type.ink, 0.1), boxShadow: `inset 0 1px 2px ${rgba(sheetCard.type.ink, 0.2)}`, overflow: "hidden", marginTop: 8 }}>
-                      <div style={{ width: `${(score / sheetCard.scaleMax) * 100}%`, height: "100%", borderRadius: 999, background: TRAIT_META[i].color }} />
-                    </div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: rgba(sheetCard.type.ink, 0.82), lineHeight: 1.6, marginTop: 7, textWrap: "pretty", whiteSpace: "pre-line" }}>{TRAIT_META[i].desc}</div>
-                  </div>
-                ))}
+              <div style={{ fontSize: 14, fontWeight: 600, color: rgba(sheetCard.type.ink, 0.85), lineHeight: 1.6, marginTop: 8, textWrap: "pretty", whiteSpace: "pre-line" }}>
+                {sheetPicks.length ? PICKS_LEAD : PICKS_PENDING}
               </div>
+              {sheetPicks.length > 0 && (
+                <>
+                  <div style={{ background: "rgba(255,255,255,0.72)", borderRadius: 20, padding: "5px 3px", marginTop: 14, boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.6)" }}>
+                    {sheetPicks.map((pick) => (
+                      <div
+                        key={pick.code}
+                        onClick={() => onLeave(pick.path)}
+                        style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 13px", borderRadius: 17, cursor: "pointer" }}
+                      >
+                        <div style={{ flex: "none", width: 40, height: 40, borderRadius: 999, backgroundColor: "#FFFFFF", backgroundImage: pick.logo ? `url(${pick.logo})` : undefined, backgroundSize: "30px auto", backgroundPosition: "center", backgroundRepeat: "no-repeat", boxShadow: "0 1px 3px rgba(30,25,60,0.14)" }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 15.5, fontWeight: 700, color: "#171B2B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{pick.name}</div>
+                          <div style={{ fontSize: 12.5, fontWeight: 500, color: "#8A8F9F", marginTop: 2, whiteSpace: "nowrap" }}>{pick.sub}</div>
+                        </div>
+                        <div style={{ flex: "none", textAlign: "right" }}>
+                          <div style={{ fontSize: 15.5, fontWeight: 800, color: "#171B2B", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{pick.priceText}</div>
+                          <div style={{ fontSize: 12.5, fontWeight: 700, color: pick.changeColor, fontVariantNumeric: "tabular-nums", marginTop: 2, whiteSpace: "nowrap" }}>{pick.changeText}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: rgba(sheetCard.type.ink, 0.6), lineHeight: 1.6, textAlign: "center", padding: "12px 8px 2px", textWrap: "pretty" }}>{PICKS_NOTE}</div>
+                </>
+              )}
             </div>
           </>
         )}
