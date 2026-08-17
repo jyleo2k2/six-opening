@@ -212,6 +212,8 @@ export type HomeView = {
   rateText: string;
   profitText: string;
   rateColor: string;
+  /** 가운데 큰 그림. 수익률 방향에 따라 목표 그림과 무드 그림이 갈린다(`moodImg`). */
+  moodImg: string;
   /** 헤더 프로필 옆 "○○ 총자산". 총자산 금액이 수익금액처럼 읽히지 않게 이름을 붙인다. */
   totalAssetsLabel: string;
   /** 현금(`balance`) + 보유 평가금액. 계좌를 못 읽었으면 보유 평가금액만(현금 없이) 보여준다. */
@@ -219,6 +221,22 @@ export type HomeView = {
   /** 계좌를 읽었는데 보유가 하나도 없을 때만 참. */
   noHoldings: boolean;
 };
+
+/**
+ * 홈 가운데 큰 그림. 올랐을 때만 역할별 목표 그림(향수·신발·왁뿌볼을 든 황소)을 보여 주고,
+ * 그대로면 시무룩한 황소, 내렸으면 우는 황소와 곰으로 바꾼다.
+ *
+ * 방향은 `rate` 원값이 아니라 `Trend` 로 받는다 — 화면이 `+0.0%` 를 회색으로 적는 순간
+ * 그림만 웃고 있으면 숫자·색·그림이 서로 다른 말을 한다(`pctTrend`).
+ *
+ * 그림을 하나 더 얹지 않고 이 자리를 갈아 끼우는 이유는, 오른 상태에서 목표 그림과
+ * 같은 황소가 크게 한 번 작게 한 번 두 번 나왔던 적이 있기 때문이다(2026-08-16 되돌림).
+ */
+export function moodImg(trend: Trend, goalImg: string): string {
+  if (trend > 0) return goalImg;
+  if (trend < 0) return "/ui/assets/mascot-bull-bear-sad.png";
+  return "/ui/assets/mascot-bull-flat.png";
+}
 
 /**
  * 수익도 실제 보유에서 낸다. 데모 상수(`info.profit`)를 실제 평가금액으로 나누면
@@ -243,6 +261,8 @@ export function homeView(
     0,
   );
   const rate = total ? (profit / total) * 100 : 0;
+  // 색과 그림이 같은 판정을 쓰도록 방향은 한 번만 낸다.
+  const trend = pctTrend(rate);
   // 계좌를 못 읽은 동안은 현금을 모른다 — 0으로 두어 보유 평가금액만 보여준다.
   const cash = loaded ? user?.balance ?? 0 : 0;
 
@@ -259,7 +279,8 @@ export function homeView(
     // 실제 계좌를 붙이면 손실도 나온다. 부호와 색을 함께 바꾼다.
     rateText: (rate >= 0 ? "+" : "−") + Math.abs(rate).toFixed(1) + "%",
     profitText: (profit >= 0 ? "+" : "−") + won(Math.abs(profit)),
-    rateColor: trendColor(pctTrend(rate)),
+    rateColor: trendColor(trend),
+    moodImg: moodImg(trend, info.goalImg),
     totalAssetsLabel: ((loaded && user?.name) || info.name) + " 총자산",
     totalAssetsText: won(cash + total),
     noHoldings: loaded && live.length === 0,
