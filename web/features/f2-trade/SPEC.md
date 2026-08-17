@@ -8,7 +8,7 @@
 
 | 영역 | 실제 위치 | 현재 책임 |
 |---|---|---|
-| 탐색·상세·매수·매도·질문식 기록·계좌 | `web/features/f0-home/`(`ExploreScreen`·`DetailScreen`·`OrderScreen`·`PortfolioScreen`과 `lib/`) | 화면의 정본. 즉시 상태는 서버 응답으로 세우고 저장하지 않는다(§6.2). 값 계산은 `lib/`의 순수 함수가 하고 컴포넌트는 붙이기만 한다 |
+| 탐색·상세·매수·매도·질문식 기록 | `web/features/f0-home/`(`ExploreScreen`·`DetailScreen`·`OrderScreen`과 `lib/`) | 화면의 정본. 가진 회사·쓸 수 있는 돈은 `HomeScreen`, 기다리는 주문은 `OrderScreen`의 `예약`이 맡는다 — 별도 `내 계좌` 화면은 없다. 즉시 상태는 서버 응답으로 세우고 저장하지 않는다(§6.2). 값 계산은 `lib/`의 순수 함수가 하고 컴포넌트는 붙이기만 한다 |
 | 지갑 시드·복원·총자산 | `web/shared/store/prototype-account.js` | 화면과 서버 경로가 같이 쓰는 단일 원본. `.js`인 것은 옛 iframe 사본 때문이었고 지금은 그냥 공용 모듈이다 |
 | 화면 호스트 | `web/features/f0-home/ConnectedPrototype.tsx` | 화면 선택과 F10 오버레이 조립. iframe은 철거했다 |
 | 상세 차트 | `web/features/f0-home/ChartScreen.tsx`와 `web/features/f0-home/lib/chart-view.ts` | 시안대로 화면이 직접 그리는 인라인 SVG. 분·일·주, 선·캔들 전환과 가족 체결 핀 |

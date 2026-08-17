@@ -19,7 +19,6 @@ export type ScreenRoute =
   /** `sector` 는 탐색의 필터 칩 — `rank`(기본)·`watch`·유니버스 섹터 id. 챗봇의 섹터 점프가 쓴다. */
   | { screen: "explore"; sector?: string }
   | { screen: "ranking" }
-  | { screen: "portfolio" }
   /**
    * `view` 는 아카이브 안에서 어디를 보고 있는지 — `report`(기본)·`return`·`cards`·`family`·`last`.
    * 챗봇이 "내 성향 카드 보여줘" 로 바로 뛰어드는 자리라 주소로 표현한다.
@@ -32,7 +31,6 @@ export type ScreenRoute =
 export const SCREEN_SEGMENTS = [
   "explore",
   "ranking",
-  "portfolio",
   "archive",
   "stock",
   "buy",
@@ -48,7 +46,6 @@ export function routeFromPath(pathname: string): ScreenRoute | null {
   if (parts.length === 1) {
     if (head === "explore") return { screen: "explore" };
     if (head === "ranking") return { screen: "ranking" };
-    if (head === "portfolio") return { screen: "portfolio" };
     if (head === "archive") return { screen: "archive" };
     return null;
   }
@@ -123,8 +120,11 @@ export function routeFromChatAction(
       return { screen: "home" };
     case "ranking":
       return { screen: "ranking" };
+    // `내 계좌` 화면은 걷어냈다. 서버 계약(`CHAT_ACTION_TARGETS`)에는 아직 `portfolio` 가
+    // 남아 있으므로 **여기서 홈으로 받는다** — 총자산·쓸 수 있는 돈·가진 회사는 홈이
+    // 보여 준다. 지난 답변이 이 타깃을 들고 와도 없는 화면으로 보내지 않기 위해서다.
     case "portfolio":
-      return { screen: "portfolio" };
+      return { screen: "home" };
     case "archive":
       return action.archiveOverlay === "cards"
         ? { screen: "archive", view: "cards" }

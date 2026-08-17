@@ -663,7 +663,10 @@ export function OrderScreen({
   );
   const pending = pendingCards(me);
   const cancelPending = (order: (typeof pending)[number]["order"]) => {
-    // `PortfolioScreen` 의 취소와 같은 흐름 — 서버 주문을 지우고 계좌·주문 목록을 다시 읽는다.
+    // 기다리는 주문을 취소하는 자리는 이제 여기 하나다(`내 계좌` 화면을 걷어냈다).
+    // 서버 주문을 지우고 계좌·주문 목록을 다시 읽는다 — 예약이 잡아 둔 현금·수량을 푸는 것은
+    // `cancel_order` 한 트랜잭션이라, 화면이 미리 지우면 서버가 거절했을 때 없는 주문이
+    // 사라진 것처럼 보인다.
     if (order.id) {
       fetch(`/api/orders?id=${encodeURIComponent(order.id)}`, { method: "DELETE" })
         .catch(() => {})
@@ -883,8 +886,10 @@ export function OrderScreen({
     const goBack = () => {
       setOrderError(null);
       if (step === 2) notifyBehavior({ kind: "order_confirmation_cancelled", stockId: `KRX:${code}`, side: "buy" });
+      // 완료 화면에서 물러나는 곳은 홈이다. 예전에는 `내 계좌` 였는데 그 화면을 걷어냈고,
+      // 가진 회사와 남은 돈은 이제 홈이 보여 준다. 이 화면의 큰 버튼도 `홈으로` 다.
       if (step === 3) {
-        onLeave("/portfolio");
+        onLeave("/");
         return;
       }
       if (step === 1) onLeave(`/stock/${code}`);
@@ -1477,8 +1482,14 @@ export function OrderScreen({
     const goBack = () => {
       setOrderError(null);
       if (step === 2) notifyBehavior({ kind: "order_confirmation_cancelled", stockId: `KRX:${code}`, side: "sell" });
-      if (step === 3 || step === 1) {
-        onLeave("/portfolio");
+      // 1단계는 매수와 대칭으로 그 회사 상세로 물러난다 — 여기만 `내 계좌` 로 갔던 탓에
+      // 걷어낸 화면이 뒤로가기로 되살아나 보였다. 완료 화면은 매수와 같이 홈이다.
+      if (step === 3) {
+        onLeave("/");
+        return;
+      }
+      if (step === 1) {
+        onLeave(`/stock/${code}`);
         return;
       }
       setStep(step - 1);
