@@ -420,11 +420,18 @@ assert.equal(
 // ── 첫 화면 제목 옆 지갑: 가족 자산 합계 ────────────────────────────────────
 // `returnSummary` 와 같은 모양으로 편다 — 두 값이 같은 자리에 번갈아 들어간다.
 const famWallet = familySummary({
-  assets: 4_500_006, cost: 3_000_000, profit: 6, returnRate: 0.0002, memberCount: 3,
+  assets: 4_500_006, cost: 3_000_000, profit: 6, returnRate: 0.0002, memberCount: 3, cash: 1_500_006,
 });
 assert.equal(famWallet?.totalText, "4,500,006원");
 assert.equal(famWallet?.pnlText, "▲ 6원");
 assert.equal(famWallet?.pctText, "+0.00%");
+// 투자 현황·가족 시트의 `투자 가능 금액` — 가족 예수금 합계다.
+assert.equal(famWallet?.cashText, "1,500,006원");
+// 구버전 응답에는 `cash` 가 없다. 그때는 null 을 내고 화면이 내 계좌로 되돌아간다.
+const noCashWallet = familySummary({
+  assets: 4_500_006, cost: 3_000_000, profit: 6, returnRate: 0.0002, memberCount: 3,
+});
+assert.equal(noCashWallet?.cashText, null);
 // 아직 아무도 안 샀으면 수익률 자리에 `아직` 을 적는다. `0.00%` 는 본전으로 읽힌다.
 const idleWallet = familySummary({
   assets: 10_000_000, cost: 0, profit: 0, returnRate: null, memberCount: 2,

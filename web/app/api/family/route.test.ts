@@ -148,6 +148,8 @@ async function main() {
   assert.equal(family.total.cost, 3_000_000);
   assert.equal(family.total.profit, 6);
   assert.equal(family.total.memberCount, 3);
+  // 가족 예수금 합계 — 투자 현황의 `투자 가능 금액` 이 이 값이다. 구성원 3명 × 50만원.
+  assert.equal(family.total.cash, 1_500_000);
   // 합계 수익률은 구성원 수익률(1.5·3·4.5)의 평균이 아니라 합계 원금 대비 합계 손익이다.
   assert.equal(family.total.returnRate, (6 / 3_000_000) * 100);
 

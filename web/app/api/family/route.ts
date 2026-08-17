@@ -155,11 +155,18 @@ export async function buildFamilyData(
   const assets = valuations.reduce((sum, v) => sum + v.marketValue + v.cash, 0);
   const cost = valuations.reduce((sum, v) => sum + v.cost, 0);
   const profit = valuations.reduce((sum, v) => sum + v.profit, 0);
+  const cash = valuations.reduce((sum, v) => sum + v.cash, 0);
   const total = {
     /** 평가금액 + 예수금 합계 */
     assets,
     cost,
     profit,
+    /**
+     * 가족 예수금 합계 (2026-08-17). 투자 현황의 `투자 가능 금액` 이 가족 전체가 쓸 수
+     * 있는 현금을 보여 준다. 합계라 개별 자산 마스킹 규칙은 그대로다 — 누가 얼마 들고
+     * 있는지는 여기서도 안 갈린다.
+     */
+    cash,
     /** 원금이 0이면 잰 것이 없다 — 0% 가 아니라 null 이다. */
     returnRate: cost > 0 ? (profit / cost) * 100 : null,
     /** 합계에 든 사람 수. 둘이면 뺄셈으로 상대가 드러난다는 걸 화면이 알 수 있게 준다. */

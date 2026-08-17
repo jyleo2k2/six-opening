@@ -359,6 +359,8 @@ export type FamilyTotal = {
   /** 아직 아무도 안 샀으면 `null` 이다. 0% 로 오지 않는다. */
   returnRate: number | null;
   memberCount: number;
+  /** 가족 예수금 합계. 투자 현황의 `투자 가능 금액` 이 이 값이다. */
+  cash?: number;
 };
 
 /**
@@ -376,6 +378,8 @@ export function familySummary(total: FamilyTotal | null | undefined) {
     // 작게 붙이고, 좁은 자리는 단위까지 붙은 한 덩어리를 쓴다.
     totalNumber: Math.round(total.assets).toLocaleString("ko-KR"),
     totalText: won(total.assets),
+    // 구버전 응답에는 `cash` 가 없다. 그때는 화면이 값을 비우는 것보다 없다고 아는 게 낫다.
+    cashText: typeof total.cash === "number" ? won(total.cash) : null,
     pnlText: (pnl > 0 ? "▲ " : pnl < 0 ? "▼ " : "") + won(Math.abs(pnl)),
     // 원금이 0이면 잰 것이 없다. `0.00%` 로 적으면 본전인 가족처럼 읽힌다.
     pctText:

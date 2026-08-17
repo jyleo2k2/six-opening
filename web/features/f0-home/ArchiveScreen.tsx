@@ -792,13 +792,15 @@ export function ArchiveScreen({
           <div onScroll={loadMoreOnScroll} style={BODY}>
             <div style={{ display: "flex", flexDirection: "column", gap: 13, padding: "20px 0 10px" }}>
               {/*
-                머리 카드 — 내 계좌 하나의 총액·손익이다. `상세` 를 켜야 투자 가능 금액과
-                결제 기준이 나온다. 접어 두는 이유는 아이가 먼저 볼 숫자가 총액과 수익률이기
-                때문이다.
+                머리 카드 — **가족 합계**의 총액·손익이다(2026-08-17 유저 확정). 화면
+                이름이 `우리 가족 투자 현황` 인데 내 계좌 숫자가 서 있으면 제목과 숫자가
+                다른 말을 한다. 서버가 합계를 못 줄 때만(비로그인·조회 실패) 내 계좌로
+                되돌아간다(`walletHead`). `상세` 를 켜야 투자 가능 금액과 결제 기준이
+                나온다 — 아이가 먼저 볼 숫자는 총액과 수익률이다.
               */}
               <div style={{ background: "#FFFFFF", borderRadius: 22, padding: "18px 19px 16px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em" }}>총자산</div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em" }}>우리 가족 총자산</div>
                   <div onClick={() => setDetailOpen(!detailOpen)} style={{ flex: "none", display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: detailOpen ? "#3D4460" : "#9CA1B4" }}>상세</span>
                     <div style={{ width: 40, height: 23, borderRadius: 999, padding: 2, display: "flex", transition: "background 0.2s ease", background: detailOpen ? ACCENT : "#DFE1EB", justifyContent: detailOpen ? "flex-end" : "flex-start" }}>
@@ -807,18 +809,21 @@ export function ArchiveScreen({
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 8 }}>
-                  <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "#111524" }}>{summary.totalNumber}</div>
+                  <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "#111524" }}>{walletHead.totalNumber}</div>
                   <div style={{ fontSize: 19, fontWeight: 700, color: "#111524" }}>원</div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 7, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: summary.pctColor }}>
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{summary.pnlText}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 7, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: walletHead.pctColor }}>
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pnlText}</span>
                   <span style={{ width: 1, height: 13, background: "#DFE1EB" }} />
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{summary.pctText}</span>
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pctText}</span>
                 </div>
                 {detailOpen && (
                   <div style={{ marginTop: 15, paddingTop: 14, borderTop: "1px solid #EFF0F6", display: "flex", flexDirection: "column", gap: 11 }}>
-                    {/* 아이가 읽을 말로 한 줄만 둔다 — `예수금`·`출금가능금액` 은 목업에서 빠졌다. */}
-                    {[{ label: "투자 가능 금액", value: summary.cashText }].map((row) => (
+                    {/*
+                      가족 예수금 합계다. 총자산이 가족 것인데 이 줄만 내 현금이면 한 카드
+                      안에서 기준이 갈린다. 합계가 없으면(구버전 응답) 내 것으로 되돌아간다.
+                    */}
+                    {[{ label: "투자 가능 금액", value: walletHead.cashText ?? summary.cashText }].map((row) => (
                       <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 600, color: "#8E93A8" }}>{row.label}</div>
                         <div style={{ flex: "none", fontSize: 15, fontWeight: 700, color: "#2C3245", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{row.value}</div>
@@ -1078,9 +1083,9 @@ export function ArchiveScreen({
         <BottomNav active="archive" onLeave={onLeave} />
 
         {/*
-          가족 시트. 머리의 총자산은 같은 `family_tag` 사람들의 합계(`walletHead`)이고,
-          펼치면 나오는 투자 가능 금액은 **내 계좌**(`summary`)다 — 합계에는 남의 예수금이
-          섞여 있어 내가 지금 쓸 수 있는 돈이 아니다.
+          가족 시트. 총자산도 투자 가능 금액도 같은 `family_tag` 사람들의 **합계**다
+          (2026-08-17 유저 확정) — 투자 현황 머리 카드와 같은 값이라 두 자리의 숫자가
+          늘 같다. 서버가 합계를 못 줄 때만 내 계좌로 되돌아간다.
         */}
         {famSheet.open && (
           <>
@@ -1118,7 +1123,7 @@ export function ArchiveScreen({
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16, paddingTop: 15, borderTop: "1px solid #EFF0F6" }}>
                     <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 600, color: "#8E93A8" }}>투자 가능 금액</div>
-                    <div style={{ flex: "none", fontSize: 15.5, fontWeight: 700, color: "#2C3245", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{summary.cashText}</div>
+                    <div style={{ flex: "none", fontSize: 15.5, fontWeight: 700, color: "#2C3245", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{walletHead.cashText ?? summary.cashText}</div>
                   </div>
                   <div style={{ textAlign: "right", fontSize: 12, fontWeight: 600, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}>{summary.settleText}</div>
                 </>
