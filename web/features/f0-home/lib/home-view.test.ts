@@ -45,12 +45,17 @@ assert.equal(demo.totalAssetsText, "459,000원");
 // 총자산은 헤더 프로필 옆에 이름과 함께 선다 — 가운데 두면 바로 아래 수익금액과 헷갈린다.
 assert.equal(demo.totalAssetsLabel, "김찬영 총자산");
 
-// 시즌 일수는 세 계정이 같다. 아이만 14일째로 남아 있던 적이 있다.
+// 시즌 칩은 오늘 날짜에서 나온다(`season-day.ts`) — 예전에는 역할별 데모 상수라 날이 가도
+// "시즌 3 · 28일째" 로 굳어 있었고, 아이만 14일째로 남아 있던 적도 있다. 계정이 아니라
+// 시각만 값을 바꾸므로 세 계정을 같은 시각으로 물어 같은 답이 나오는지 본다.
+const chipAt = Date.parse("2026-08-17T09:30:00+09:00");
+assert.equal(homeView(null, {}, [], chipAt).dayCount, "시즌 3 · 15일째");
 assert.deepEqual(
-  [HOME_INFO.child.day, HOME_INFO.mom.day, HOME_INFO.dad.day],
-  ["28일째", "28일째", "28일째"],
+  [child, mom, dad].map((u) => homeView(u, {}, [], chipAt).dayCount),
+  ["시즌 3 · 15일째", "시즌 3 · 15일째", "시즌 3 · 15일째"],
 );
-assert.equal(demo.dayCount, "시즌 3 · 28일째");
+// 다음 시즌으로 넘어가는 것도 화면 값에서 확인한다.
+assert.equal(homeView(null, {}, [], Date.parse("2026-08-31T00:00:00+09:00")).dayCount, "시즌 4 · 1일째");
 
 // 부모 목표 아이템의 기준가 — 향수 14만원, 신발 8만원.
 assert.equal(HOME_INFO.mom.unitPrice, 140_000);
