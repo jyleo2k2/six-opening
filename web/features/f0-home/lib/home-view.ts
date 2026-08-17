@@ -1,4 +1,5 @@
 import { won } from "./portfolio-view";
+import { seasonDayText } from "./season-day";
 
 /**
  * 홈 화면이 그릴 값. `ui-src/methods/renderVals-compute.js` 의 홈 블록과
@@ -65,7 +66,6 @@ export const HOME_INFO: Record<
     /** 헤더 "○○ 총자산" 에 쓰는 데모 이름. 서버 계좌 이름이 있으면 그쪽이 이긴다. */
     name: string;
     avatarImg: string;
-    day: string;
     brand: string;
     unit: string;
     img: string;
@@ -78,7 +78,6 @@ export const HOME_INFO: Record<
   mom: {
     name: "찬영 어머님",
     avatarImg: "/ui/assets/profile-mom.png",
-    day: "28일째",
     brand: "샤넬",
     unit: "향수",
     img: "/ui/assets/item-mom.png",
@@ -94,7 +93,6 @@ export const HOME_INFO: Record<
   dad: {
     name: "찬영 아버님",
     avatarImg: "/ui/assets/profile-dad.png",
-    day: "28일째",
     brand: "나이키",
     unit: "신발",
     img: "/ui/assets/item-dad.png",
@@ -111,7 +109,6 @@ export const HOME_INFO: Record<
   child: {
     name: "김찬영",
     avatarImg: "/ui/assets/profile-child.png",
-    day: "28일째",
     brand: "",
     unit: "왁뿌볼",
     img: "/ui/assets/item-child.png",
@@ -203,6 +200,7 @@ export type HomeView = {
   topHoldings: HomeHolding[];
   /** 목표 아이템을 몇 개 살 수 있나. 수익이 마이너스면 0. */
   goalCount: number;
+  /** 헤더 칩 "시즌 3 · 15일째". 오늘 날짜에서 나온다(`season-day.ts`). */
   dayCount: string;
   itemLine: string;
   rateText: string;
@@ -224,6 +222,8 @@ export function homeView(
   user: AccountUser | null,
   prices: Record<string, number>,
   stocks: StockCodeRef[] = [],
+  /** 시즌 칩이 볼 시각. 인자를 비우면 지금이고, 테스트만 고정 시각을 넣는다. */
+  now: number = Date.now(),
 ): HomeView {
   const role = homeRole(user);
   const info = HOME_INFO[role ?? "child"];
@@ -247,7 +247,7 @@ export function homeView(
     holdings,
     topHoldings: holdings.slice(0, HOME_HOLDING_LIMIT),
     goalCount,
-    dayCount: "시즌 3 · " + info.day,
+    dayCount: seasonDayText(now),
     itemLine:
       (info.brand ? info.brand + " " : "") + info.unit + " " + goalCount + "개 살 수 있어요",
     // 실제 계좌를 붙이면 손실도 나온다. 부호와 색을 함께 바꾼다.
