@@ -82,6 +82,35 @@ export type TutorialStep = {
   enter?: { path: string } | { anchors: string[] };
 };
 
+/**
+ * 팔 게 없을 때 대신 보여 줄 회사. 크래프톤이다.
+ *
+ * 여기까지 오는 것은 보유가 하나도 없을 때뿐이고, 그때는 매수까지만 보여 준다(아래
+ * `tutorialSteps`). 게임 회사라 아이에게 설명하기 쉬워 골랐다.
+ */
+export const FALLBACK_STOCK = "259960";
+
+/** 지갑에서 읽는 보유 한 줄. `lib/server-account.ts` 의 `Holding` 중 여기 필요한 것만. */
+export type TutorialHolding = { code: string; qty: number; availableQty?: number };
+
+/**
+ * 튜토리얼이 사고팔 회사. **아이가 지금 갖고 있는 것 중 팔 수 있는 첫 종목**이다.
+ *
+ * 아이가 보고 있던 카드를 대신 누르던 예전 길은 `id="tut-explore-cards"` 가 카드를 감싼
+ * 슬라이드에 붙어 있고 `onClick` 은 그 **안쪽** 카드에 있어 눌러도 아무 일이 없었다 —
+ * 흐름이 카드에서 끊겼다. 그렇다고 한 회사로 못 박으면 그 회사가 없는 계정은 매도에서
+ * 막힌다. 그래서 **지갑을 보고 정한다.**
+ *
+ * 갖고 있는 회사로 사고팔면 얻는 것이 하나 더 있다. 매도 2단계의 `살 때 쓴 일기` 가
+ * **방금 아이가 매수 장에서 남긴 이유**를 그대로 보여 준다 — 남의 시드 기록이나
+ * `기록이 없어요` 가 아니라.
+ *
+ * 예약에 묶인 수량은 팔 수 없으므로 `availableQty` 를 먼저 본다.
+ */
+export function pickTutorialStock(holdings: readonly TutorialHolding[]) {
+  return holdings.find((holding) => (holding.availableQty ?? holding.qty) > 0)?.code ?? null;
+}
+
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
     id: "home-goal",
@@ -127,7 +156,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     term: "주식과 주가",
     concept:
       "주식은 회사를 아주 잘게 나눈 조각이에요. 한 조각을 사면 나도 그 회사의 주인 중 한 명이 돼요. 그 조각 하나의 값이 주가예요. 빨간색은 어제보다 오른 거고, 파란색은 내린 거예요.",
-    hint: "카드를 눌러서 회사를 자세히 봐요",
+    hint: "다음을 누르면 회사를 자세히 봐요",
   },
   {
     id: "detail-chart",
@@ -140,8 +169,8 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     concept:
       "값이 오르내린 길을 선으로 이어 그린 그림이에요. 선이 위로 가면 그동안 오른 거고 아래로 가면 내린 거예요. 지나온 길은 알려 주지만 앞으로 어디로 갈지는 알려 주지 않아요.",
     hint: "차트 자세히 보기를 눌러도 돼요",
-    // 종목 코드는 화면만 안다. 지금 보고 있는 카드를 눌러 그 종목으로 들어간다.
-    enter: { anchors: ["tut-explore-cards"] },
+    // 어느 카드를 보고 있든 튜토리얼이 정한 회사로 들어간다 — `pickTutorialStock` 참고.
+    enter: { path: "/stock/:code" },
   },
   {
     id: "detail-about",
@@ -241,7 +270,9 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     side: "buy",
     anchors: ["tut-order-done"],
     title: "샀어요!",
-    what: "짠, 사기로 결정했어요! 얼마에 몇 개를 샀는지 여기서 볼 수 있어요. 이제 파는 단계도 볼까요?",
+    // 팔 게 없으면 여기가 마지막 장이다. "이제 파는 단계도 볼까요" 를 여기 두면 그때
+    // 어색해지므로 그 말은 매도 첫 장이 한다.
+    what: "짠, 사기로 결정했어요! 얼마에 몇 개를 샀는지 여기서 볼 수 있어요.",
     term: "체결",
     concept:
       "주문이 실제 거래로 바뀌는 걸 체결이라고 해요. 장이 열려 있을 때 지금 값으로 사면 바로 체결되고, 장이 닫혔거나 값을 정해 뒀으면 그 조건이 될 때까지 기다렸다 체결돼요.",
@@ -256,7 +287,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     side: "sell",
     anchors: ["tut-order-amount"],
     title: "얼마나 팔까",
-    what: "갖고 있는 것 중에 얼마나 팔 건지 정할 수 있어요. 전부 팔 수도 있고 절반만 팔 수도 있어요.",
+    what: "이번엔 파는 차례예요. 갖고 있는 것 중 얼마나 팔 건지 정할 수 있어요. 전부 팔 수도 있고 절반만 팔 수도 있어요.",
     term: "매도",
     concept:
       "주식을 파는 걸 매도라고 해요. 팔면 그만큼 다시 돈으로 바뀌어서 지갑에 들어와요. 한꺼번에 다 팔지 않고 나눠서 파는 것도 할 수 있어요.",
@@ -326,9 +357,21 @@ export type TutorialPlace = {
   screen: ScreenRoute["screen"];
   stage?: TutorialStage;
   side?: "buy" | "sell";
-  /** 지금 보고 있는 종목. `enter.path` 의 `:code` 를 채운다. */
-  code?: string;
 };
+
+/**
+ * 이번 튜토리얼이 보여 줄 장.
+ *
+ * **팔 게 없으면 파는 과정을 빼고 매수까지만 보여 준다.** 매도 화면은 보유가 없으면
+ * `판매할 주식이 없어요` 로 막히므로, 데려가 놓고 막히느니 사는 것까지만 끝내는 편이 낫다.
+ * 시드 보유가 있는 계정은 언제나 전부 보게 된다.
+ *
+ * 예전의 길이 선택(5·8·13)과 다르다. 그건 고를 화면이 없어 아무도 못 고르던 죽은
+ * 갈래였고, 이건 지갑이 정하는 갈래 하나다.
+ */
+export function tutorialSteps(canSell: boolean) {
+  return canSell ? TUTORIAL_STEPS : TUTORIAL_STEPS.filter((step) => step.side !== "sell");
+}
 
 /** 장이 `side` 를 적었으면 그 방향에서만 이 장이다. 안 적었으면 어느 쪽이든 맞다. */
 function sideMatches(step: TutorialStep, at: TutorialPlace) {
@@ -371,7 +414,7 @@ export function isSamePlace(a: TutorialStep, b: TutorialStep) {
   return a.screen === b.screen && a.stage === b.stage && a.side === b.side;
 }
 
-/** `enter.path` 의 `:code` 를 지금 보고 있는 종목으로 바꾼다. 모르면 빈 문자열이라 404 다. */
-export function enterPath(path: string, at: TutorialPlace) {
-  return path.replace(":code", at.code ?? "");
+/** `enter.path` 의 `:code` 를 이번 튜토리얼의 종목으로 바꾼다. 모르면 빈 문자열이라 404 다. */
+export function enterPath(path: string, code: string | null) {
+  return path.replace(":code", code ?? "");
 }
