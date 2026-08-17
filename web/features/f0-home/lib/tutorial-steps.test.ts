@@ -4,14 +4,16 @@ import path from "node:path";
 import { STOCKS } from "../../../shared/data/stocks";
 import { routeFromPath } from "../screen-route";
 import {
+  FALLBACK_STOCK,
   TUTORIAL_STEPS,
-  TUTORIAL_STOCK,
   type TutorialPlace,
   type TutorialStage,
   enterPath,
   isSamePlace,
   nextStepIndex,
+  pickTutorialStock,
   stepIndexAt,
+  tutorialSteps,
 } from "./tutorial-steps";
 
 // 튜토리얼 단계 데이터와 "지금 어느 장인가" 판정.
@@ -82,19 +84,51 @@ assert.deepEqual(enterOf("home-goal"), { path: "/" });
 assert.deepEqual(enterOf("explore-chips"), { anchors: ["tut-nav-trade"] });
 assert.deepEqual(enterOf("buy-tabs"), { anchors: ["tut-detail-buy"] });
 
-// 종목은 고정이다. 아이가 카드를 어디까지 밀어 놨든 같은 회사로 들어가야 뒤따르는
-// 설명이 맞는다 — 카드를 대신 누르던 예전 길은 `id` 가 붙은 슬라이드에 `onClick` 이
-// 없어 흐름이 거기서 끊겼다.
-assert.deepEqual(enterOf("detail-chart"), { path: `/stock/${TUTORIAL_STOCK}` });
-assert.deepEqual(routeFromPath(`/stock/${TUTORIAL_STOCK}`), {
-  screen: "stock",
-  code: TUTORIAL_STOCK,
-});
-// 유니버스에 있는 회사여야 한다. 없는 코드는 화면이 탐색으로 되돌려 보낸다.
+// 어느 카드를 보고 있든 튜토리얼이 정한 회사로 들어간다 — 카드를 대신 누르던 예전
+// 길은 `id` 가 붙은 슬라이드에 `onClick` 이 없어 흐름이 거기서 끊겼다.
+assert.deepEqual(enterOf("detail-chart"), { path: "/stock/:code" });
+
+// ── 어느 회사로 갈까 ────────────────────────────────────────────────────────
+
+// 갖고 있는 것 중 **팔 수 있는 수량이 있는 첫 종목**이다. 사고파는 과정을 한 회사로
+// 묶어야 매도 2단계의 `살 때 쓴 일기` 가 방금 남긴 자기 기록을 보여 준다.
+assert.equal(pickTutorialStock([{ code: "259960", qty: 23 }]), "259960");
 assert.equal(
-  STOCKS.some((stock) => stock.symbol === TUTORIAL_STOCK),
+  pickTutorialStock([
+    { code: "005930", qty: 6, availableQty: 0 },
+    { code: "259960", qty: 23, availableQty: 23 },
+  ]),
+  "259960",
+  "예약에 다 묶인 종목은 팔 수 없다",
+);
+assert.equal(pickTutorialStock([]), null);
+assert.equal(pickTutorialStock([{ code: "005930", qty: 0 }]), null);
+
+// 팔 게 없으면 파는 과정을 뺀다. 데려가 놓고 `판매할 주식이 없어요` 로 막히느니
+// 사는 것까지만 끝낸다.
+assert.deepEqual(tutorialSteps(true), TUTORIAL_STEPS);
+const buyOnly = tutorialSteps(false);
+assert.equal(buyOnly.at(-1)?.id, "buy-done");
+assert.equal(
+  buyOnly.some((step) => step.side === "sell"),
+  false,
+);
+// 앞부분은 그대로다 — 갈래가 뒤쪽 장만 자른다.
+assert.deepEqual(
+  buyOnly.map((step) => step.id),
+  TUTORIAL_STEPS.filter((step) => step.side !== "sell").map((step) => step.id),
+);
+
+// 매수까지만 볼 때도 마지막 장이 "이제 파는 단계도 볼까요" 로 끝나면 안 된다 —
+// 그 말은 매도 첫 장이 한다.
+assert.equal(buyOnly.at(-1)?.what.includes("파는"), false);
+assert.equal(TUTORIAL_STEPS.find((step) => step.id === "sell-amount")?.what.includes("파는"), true);
+
+// 팔 게 없을 때 쓰는 회사는 유니버스에 있어야 한다. 없는 코드는 화면이 탐색으로 되돌린다.
+assert.equal(
+  STOCKS.some((stock) => stock.symbol === FALLBACK_STOCK),
   true,
-  TUTORIAL_STOCK,
+  FALLBACK_STOCK,
 );
 // 방금 산 그 회사를 그대로 팔러 간다.
 assert.deepEqual(enterOf("sell-amount"), { path: "/sell/:code" });
@@ -131,7 +165,7 @@ const PATH_OF: Record<string, string> = {
   portfolio: "/portfolio",
   ranking: "/ranking",
   archive: "/archive",
-  stock: `/stock/${TUTORIAL_STOCK}`,
+  stock: "/stock/:code",
 };
 for (const step of steps) {
   if (!step.enter || !("path" in step.enter)) continue;
@@ -142,14 +176,18 @@ for (const step of steps) {
   assert.equal(step.enter.path, PATH_OF[step.screen], step.id);
 }
 
-// `:code` 는 지금 보고 있는 종목으로 채운다. 모르면 앱이 아는 주소가 아니라 404 다 —
+// `:code` 는 이번 튜토리얼의 종목으로 채운다. 모르면 앱이 아는 주소가 아니라 404 다 —
 // 엉뚱한 화면으로 데려가느니 그 자리에 머무는 편이 낫다.
-assert.deepEqual(routeFromPath(enterPath("/sell/:code", { screen: "order", code: "005930" })), {
+assert.deepEqual(routeFromPath(enterPath("/stock/:code", FALLBACK_STOCK)), {
+  screen: "stock",
+  code: FALLBACK_STOCK,
+});
+assert.deepEqual(routeFromPath(enterPath("/sell/:code", "005930")), {
   screen: "order",
   code: "005930",
   side: "sell",
 });
-assert.equal(routeFromPath(enterPath("/sell/:code", { screen: "order" })), null);
+assert.equal(routeFromPath(enterPath("/sell/:code", null)), null);
 
 // ── 앵커가 화면에 실재하는가 ────────────────────────────────────────────────
 

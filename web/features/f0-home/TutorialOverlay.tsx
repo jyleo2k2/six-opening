@@ -17,12 +17,15 @@ import {
   tailLeft,
   toScreenRect,
 } from "./lib/tutorial-anchor";
+import { loadAccount } from "./lib/use-account";
 import {
   enterPath,
+  FALLBACK_STOCK,
   isSamePlace,
   nextStepIndex,
+  pickTutorialStock,
   stepIndexAt,
-  TUTORIAL_STEPS,
+  tutorialSteps,
   type TutorialPlace,
 } from "./lib/tutorial-steps";
 
@@ -109,7 +112,37 @@ export function TutorialOverlay({
   onGo: (path: string) => void;
   onClose: () => void;
 }) {
-  const steps = TUTORIAL_STEPS;
+  /**
+   * 이번 튜토리얼이 사고팔 회사. 아이가 갖고 있는 것 중 팔 수 있는 첫 종목이다.
+   *
+   * 없으면 `null` 이고, 그때는 파는 과정을 빼고 매수까지만 보여 준다 — 매도 화면은
+   * 보유가 없으면 막히므로 데려가 놓고 막히느니 사는 것까지만 끝낸다.
+   *
+   * `loadAccount()` 는 세션당 한 번만 서버를 읽고 그 뒤로는 담아 둔 값을 준다. 홈이 이미
+   * 불렀으므로 대개 즉시 온다. 응답 전에는 팔 게 없는 것으로 보는데, 종목이 필요한
+   * 자리(상세)까지는 `다음` 을 네 번 눌러야 해서 그 사이에 도착한다.
+   */
+  const [stock, setStock] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void loadAccount().then((user) => {
+      if (!alive) return;
+      const holdings = (user?.holdings ?? [])
+        .filter((row) => row.stock_code)
+        .map((row) => ({
+          code: row.stock_code as string,
+          qty: row.quantity,
+          availableQty:
+            typeof row.available_quantity === "number" ? row.available_quantity : undefined,
+        }));
+      setStock(pickTutorialStock(holdings));
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const steps = tutorialSteps(stock !== null);
   const [index, setIndex] = useState(() => Math.max(0, stepIndexAt(steps, place)));
   /** 읽고 나면 접는다. 딤과 설명이 계속 떠 있으면 정작 버튼을 누를 수가 없다. */
   const [read, setRead] = useState(false);
@@ -252,7 +285,8 @@ export function TutorialOverlay({
     setRead(true);
     const enter = steps[next].enter;
     if (!enter) return;
-    if ("path" in enter) return onGo(enterPath(enter.path, place));
+    // 팔 게 없으면 매도 장 자체가 없으므로 여기 `:code` 는 상세로 들어가는 길뿐이다.
+    if ("path" in enter) return onGo(enterPath(enter.path, stock ?? FALLBACK_STOCK));
     clickThrough(enter.anchors);
   };
 

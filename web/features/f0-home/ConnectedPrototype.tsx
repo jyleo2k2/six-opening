@@ -188,12 +188,11 @@ export function ConnectedPrototype({
           onClose={() => setTutorialOn(false)}
           onGo={leaveToPath}
           // 매수·매도는 화면도 단계도 같아서 `side` 가 없으면 팔러 간 화면에 사는 설명이
-          // 뜬다. 종목 코드는 매수 완료에서 그 회사를 그대로 팔러 갈 때 쓴다.
+          // 뜬다. 어느 종목인지는 튜토리얼이 지갑을 보고 스스로 정한다.
           place={{
             screen: overlay.screen,
             stage,
             side: overlay.screen === "order" ? overlay.side : undefined,
-            code: overlay.screen === "order" || overlay.screen === "stock" ? overlay.code : undefined,
           }}
         />
       )}
