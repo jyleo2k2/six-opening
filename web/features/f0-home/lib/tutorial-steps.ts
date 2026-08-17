@@ -120,8 +120,8 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     screen: "home",
     // 짚을 곳이 없다 — 인사만 하고 넘어가는 장이라 구멍 없이 화면 아래에 뜬다.
     anchors: [],
-    title: "영웅키움에 어서 왔어요!",
-    what: "영웅키움은 회사를 골라 연습 투자를 해 보며 돈 감각을 키우는 곳이에요. 이제 기능을 하나씩 알아볼까요?",
+    title: "영웅키움에 어서오세요!",
+    what: "영웅키움은 회사를 골라 정보를 얻고, 직접 투자 체험도 할 수 있는 곳이에요. 이제 기능을 하나씩 알아볼까요?",
   },
   {
     id: "home-goal",

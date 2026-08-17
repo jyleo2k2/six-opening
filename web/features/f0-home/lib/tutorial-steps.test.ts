@@ -22,6 +22,16 @@ import {
 
 const steps = TUTORIAL_STEPS;
 
+const welcome = steps.find((step) => step.id === "welcome");
+assert.equal(welcome?.title, "영웅키움에 어서오세요!");
+assert.equal(
+  welcome?.what,
+  "영웅키움은 회사를 골라 정보를 얻고, 직접 투자 체험도 할 수 있는 곳이에요. 이제 기능을 하나씩 알아볼까요?",
+);
+
+const tutorialOverlaySource = readFileSync(path.resolve("features/f0-home/TutorialOverlay.tsx"), "utf8");
+assert.match(tutorialOverlaySource, /pointerEvents: "auto"/u);
+
 // ── 순서 ────────────────────────────────────────────────────────────────────
 
 // 사러 가는 길 하나를 끝까지 따라간다. 환영 인사로 시작해 매수 3단계, 매도 3단계로 끝난다.
