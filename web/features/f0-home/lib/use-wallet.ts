@@ -2,29 +2,23 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { pendingFromServerOrders } from "../../f2-trade/lib/scheduled-orders.js";
-import {
-  persistWallet,
-  readPersistedWallet,
-  seedAccounts,
-} from "../../../shared/store/prototype-account.js";
+import { seedAccounts } from "../../../shared/store/prototype-account.js";
 import type { Account } from "./portfolio-view";
 import { applyServerAccount } from "./server-account";
 import { invalidateAccount, loadAccount } from "./use-account";
 
 /**
- * 화면이 읽는 지갑.
+ * 화면이 읽는 지갑. **브라우저 저장소를 쓰지 않는다.**
  *
- * **`acc` 는 서버가 원본이다** — 마운트마다 `/api/account` 와 `GET /api/orders` 로 다시
- * 세우고 저장소에는 남기지 않는다. 저장소(`kw_proto_v1`)에 남는 것은 매수·매도 기록뿐이고,
- * 그것을 읽는 곳은 매도 화면의 회고 판정 하나다.
+ * 마운트마다 `/api/account` 와 `GET /api/orders` 로 세우고, 화면을 떠나면 사라진다.
+ * `kw_proto_v1` 은 프로토타입이 서버 없이 돌던 시절의 칸이었고 이제 남은 것이 없다 —
+ * 매매 기록은 `GET /api/trades`, 관심 종목은 `/api/watchlist` 가 원본이다.
  *
- * 관심 종목은 여기 없다 — `use-watchlist.ts` 가 `/api/watchlist` 에서 읽는다.
+ * `update()` 는 체결 직후 완료 화면이 잔액을 바로 보여 주기 위한 **메모리 전용** 갱신이다.
+ * 곧 `refresh()` 가 서버 값으로 덮으므로 여기 남은 값을 원본으로 믿으면 안 된다.
  */
 export type Wallet = {
   acc: Record<string, Account>;
-  records: unknown[];
-  sellRecords: unknown[];
-  seq?: number;
 };
 
 export type WalletAccountId = "child" | "parent";
@@ -64,17 +58,12 @@ export function useWallet() {
 
   useEffect(() => {
     let alive = true;
-    const seeded: Wallet = {
-      acc: seedAccounts(),
-      records: [],
-      sellRecords: [],
-    };
-    const local: Wallet = { ...seeded, ...readPersistedWallet() };
+    const seeded = seedAccounts();
     // 계좌나 주문을 못 읽어도 화면은 떠야 한다. 그때는 시드 지갑 그대로다.
     Promise.all([loadAccount(), readOpenOrders()]).then(([user, open]) => {
       if (!alive) return;
       const pending = open?.orders ? pendingFromServerOrders(open.orders) : null;
-      setWallet({ ...local, acc: applyServerAccount(local.acc, user, pending) });
+      setWallet({ acc: applyServerAccount(seeded, user, pending) });
       // 조회가 만기 예약을 정산했으면 방금 읽은 계좌는 이미 낡았다. 한 번 더 돈다 —
       // 두 번째에는 정산할 것이 없으므로 여기서 멈춘다.
       if (open?.settled?.length) refresh();
@@ -84,13 +73,9 @@ export function useWallet() {
     };
   }, [reload, refresh]);
 
+  /** 메모리만 바꾼다 — 저장하지 않는다. 다음 `refresh()` 가 서버 값으로 덮는다. */
   const update = useCallback((change: (current: Wallet) => Partial<Wallet>) => {
-    setWallet((current) => {
-      if (!current) return current;
-      const next = { ...current, ...change(current) };
-      persistWallet(next);
-      return next;
-    });
+    setWallet((current) => (current ? { ...current, ...change(current) } : current));
   }, []);
 
   return { wallet, update, refresh };

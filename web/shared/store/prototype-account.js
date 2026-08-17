@@ -1,12 +1,12 @@
-// 시드 지갑과 총자산 산식, 그리고 저장소에 남는 매매 기록.
+// 시드 지갑과 총자산 산식.
 //
 // **현금·보유의 원본은 서버다**(`/api/account` + `GET /api/orders`). 여기 있는
 // `seedAccounts()` 는 로그인 응답이 오기 전과 서버를 못 읽었을 때의 자리이고,
 // `accountTotalAsset()` 은 그 값을 총자산으로 접는 산식 한 벌이다. 산식이 화면마다
 // 갈라지면 같은 지갑이 다른 값을 보이므로 여기 하나만 둔다.
 //
-// 저장소(`kw_proto_v1`)에 남기는 것은 매수·매도 기록과 그 시퀀스뿐이다. 매도 화면의
-// 회고 판정(계획 대비·보유일수)이 이것을 읽는다.
+// **브라우저 저장소는 쓰지 않는다.** `kw_proto_v1` 에 지갑·매매 기록·관심 종목을 담던
+// 경로는 전부 서버로 옮겼다 — `/api/account`·`GET /api/trades`·`/api/watchlist`.
 
 /**
  * 타입은 JSDoc 으로 단다 — 이 파일은 `.js` 이고 `.ts` 쪽에서 그대로 import 한다.
@@ -51,67 +51,6 @@ export function seedAccounts() {
       pending: [],
     },
   };
-}
-
-/**
- * 저장된 **매매 기록**만 읽는다. 부수효과가 없어 아무 화면에서나 불러도 된다.
- *
- * 저장소에서 읽기만 하고 아무것도 지우지 않는다. 옛 칸(`acc`·`events`·`watchlist`)이
- * 남아 있어도 무시한다 — 지우려 들면 저장소를 건드리는 부수효과가 생긴다.
- *
- * @returns {Record<string, any>}
- */
-export function readPersistedWallet() {
-  /** @type {Record<string, any>} */
-  const wallet = {};
-  try {
-    const saved = JSON.parse(localStorage.getItem('kw_proto_v1') || "null");
-    if (saved) {
-      wallet.records = saved.records || [];
-      wallet.sellRecords = saved.sellRecords || [];
-      if (saved.seq !== undefined && saved.seq !== null) wallet.seq = saved.seq;
-    }
-  } catch (e) {}
-  return wallet;
-}
-
-/**
- * 매매 기록을 저장한다.
- *
- * **현금·보유·미체결 주문은 저장하지 않는다.** 화면은 마운트마다 `/api/account` 와
- * `GET /api/orders` 로 그 값을 다시 세우므로(`use-wallet.ts`), 저장해 봐야 다음 렌더에
- * 통째로 덮인다. 저장소에 남겨 두면 "여기에도 잔고가 있다" 는 착각만 남는다.
- *
- * **관심 종목도 저장하지 않는다** — `/api/watchlist` 가 원본이다.
- *
- * 화면 상태는 저장하지 않는다 — 화면을 옮겨도 문서가 그대로라 메모리에 남아 있다.
- *
- * @param {Record<string, any>} wallet
- */
-export function persistWallet(wallet) {
-  try {
-    localStorage.setItem('kw_proto_v1', JSON.stringify({
-      records: wallet.records || [],
-      sellRecords: wallet.sellRecords || [],
-      seq: wallet.seq,
-    }));
-  } catch (e) {}
-}
-
-/**
- * 저장된 상태를 읽어 초기 상태에 덮을 조각으로 준다.
- *
- * **첫 렌더 전에** 불러야 한다. 예전에는 `componentDidMount` 에서 되살렸는데, 그러면 시드
- * 지갑이 한 프레임 먼저 그려졌다가 바뀐다.
- *
- * 화면 임시값은 더 이상 저장하지도 되살리지도 않는다 — 화면을 옮겨도 문서가 그대로라
- * 메모리 상태가 살아 있다. "F5 하면 처음부터"(F2 SPEC §6.2)는 진짜 새로고침에만 걸리는데,
- * 그때는 이 함수가 매매 기록만 되살리므로 화면은 홈에서 시작한다.
- *
- * @returns {Record<string, any>}
- */
-export function restorePrototypeState() {
-  return readPersistedWallet();
 }
 
 /**

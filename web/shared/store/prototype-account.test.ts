@@ -1,12 +1,6 @@
 import assert from "node:assert/strict";
 import { FAMILY_SEED_TRADES } from "./family-trade-seed";
-import {
-  SEED,
-  accountTotalAsset,
-  persistWallet,
-  restorePrototypeState,
-  seedAccounts,
-} from "./prototype-account.js";
+import { SEED, accountTotalAsset, seedAccounts } from "./prototype-account.js";
 
 /**
  * 시드 잔고는 `seedAccounts()` 에 손으로 적혀 있고, 그 값이 나온 거래는
@@ -39,82 +33,6 @@ function walletFromSeedTrades(member: "child" | "parent"): Wallet {
     else wallet.holdings[at] = { ...wallet.holdings[at], qty: left };
   }
   return wallet;
-}
-
-/** 브라우저 저장소 흉내. 노드에는 없다. */
-function fakeStorage(seed: Record<string, string> = {}) {
-  const box = new Map(Object.entries(seed));
-  return {
-    box,
-    getItem: (k: string) => box.get(k) ?? null,
-    setItem: (k: string, v: string) => void box.set(k, v),
-    removeItem: (k: string) => void box.delete(k),
-  };
-}
-
-/**
- * 복원은 **첫 렌더 전에** 돈다. 여기가 조용히 깨지면 화면을 열 때 시드 지갑이 한 프레임
- * 보이거나(복원 실패), 저장값이 깨졌을 때 화면이 통째로 안 뜬다(예외).
- *
- * 저장소가 들고 있는 것은 매매 기록뿐이다. 현금·보유·미체결 주문은 `/api/account` 와
- * `GET /api/orders`, 관심 종목은 `/api/watchlist` 가 원본이다.
- */
-function restoreTests() {
-  const store = {
-    acc: { child: { cash: 7, holdings: [], pending: [] } },
-    records: [{ id: "r" }],
-    sellRecords: [{ id: "s" }],
-    watchlist: ["005930"],
-    events: [{ event: "chart_detail_opened" }],
-    seq: 9,
-  };
-
-  Object.assign(globalThis, {
-    localStorage: fakeStorage({ kw_proto_v1: JSON.stringify(store) }),
-    sessionStorage: fakeStorage(),
-  });
-  const restored = restorePrototypeState();
-  assert.equal(restored.seq, 9);
-  assert.deepEqual(restored.records, [{ id: "r" }]);
-  assert.deepEqual(restored.sellRecords, [{ id: "s" }]);
-  // 서버가 원본인 칸은 옛 저장값이 남아 있어도 되살리지 않는다. 되살리면 로그인 계정과
-  // 무관한 잔고·하트가 화면에 잠깐 뜬다.
-  assert.ok(!("acc" in restored), "현금·보유는 서버가 원본이다");
-  assert.ok(!("watchlist" in restored), "관심 종목은 /api/watchlist 가 원본이다");
-  assert.ok(!("events" in restored), "행동 이벤트는 아무도 읽지 않는다");
-  // 화면 상태는 저장하지도 되살리지도 않는다.
-  assert.ok(!("screen" in restored));
-  assert.ok(!("draft" in restored));
-
-  // 저장값이 깨졌어도 죽지 않는다. 첫 렌더 전에 도는 코드라 던지면 화면이 통째로 안 뜬다.
-  Object.assign(globalThis, {
-    localStorage: fakeStorage({ kw_proto_v1: "{oops" }),
-    sessionStorage: fakeStorage(),
-  });
-  assert.deepEqual(restorePrototypeState(), {});
-
-  // seq 가 없는 옛 저장값이 초기 seq 를 undefined 로 덮으면 안 된다.
-  Object.assign(globalThis, {
-    localStorage: fakeStorage({ kw_proto_v1: JSON.stringify({ records: [] }) }),
-    sessionStorage: fakeStorage(),
-  });
-  assert.ok(!("seq" in restorePrototypeState()));
-
-  // 저장 → 읽기 왕복. 서버가 원본인 칸은 **저장 자체를 하지 않는다** — 넘겨도 버린다.
-  const box = fakeStorage();
-  Object.assign(globalThis, { localStorage: box, sessionStorage: fakeStorage() });
-  persistWallet({
-    acc: { child: { cash: 5, holdings: [], pending: [] } },
-    records: [{ id: "r2" }],
-    sellRecords: [],
-    watchlist: ["005930"],
-    events: [{ event: "chart_detail_opened" }],
-    seq: 3,
-  });
-  const saved = JSON.parse(box.getItem("kw_proto_v1") ?? "null");
-  assert.deepEqual(Object.keys(saved).sort(), ["records", "sellRecords", "seq"]);
-  assert.deepEqual(restorePrototypeState().records, [{ id: "r2" }]);
-  assert.equal(restorePrototypeState().seq, 3);
 }
 
 function main() {
@@ -163,7 +81,6 @@ function main() {
 
   assert.equal(accountTotalAsset(null, () => 0), 0);
 
-  restoreTests();
   console.log("prototype account tests passed");
 }
 

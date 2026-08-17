@@ -54,6 +54,12 @@ function pinRole(profile: TransactionRow["profiles"]): PinRole {
 type TradeResponseRow = ChartTrade & {
   /** 핀 색. `member` 와 달리 엄마·아빠를 가른다 (F11 SPEC §5.1). */
   role: PinRole;
+  /**
+   * 로그인한 사람의 체결인지. 매도 화면의 회고 판정이 **내 매수만** 골라야 해서 싣는다
+   * (F2 SPEC §5.3). `quantity !== null` 로도 갈리지만 그건 마스킹의 부산물이라
+   * 마스킹 규칙이 바뀌면 조용히 어긋난다.
+   */
+  mine: boolean;
   reasonCode: string | null;
   planCode: string | null;
   planTargetPrice: number | null;
@@ -97,6 +103,7 @@ export async function GET(request: NextRequest) {
       name: row.profiles?.name ?? "가족",
       member: row.profiles?.parent_child === "parent" ? "parent" : "child",
       role: pinRole(row.profiles),
+      mine: row.user_id === userId,
       side: row.side,
       price: Number(row.trade_price),
       // 남의 체결 수량은 지운다 — 자산 규모 비노출 (SPEC §6).
