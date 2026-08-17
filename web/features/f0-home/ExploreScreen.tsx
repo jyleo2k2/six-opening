@@ -232,7 +232,10 @@ export function ExploreScreen({
     if (shownFilter.current === filter) return;
     const step = sectorStepBetween(swipeOrder, shownFilter.current, filter);
     shownFilter.current = filter;
-    if (!step) {
+    // 유니버스가 늦게 와 첫 필터가 잡히는 것은 **넘어온 것이 아니다.** 그때는 레일이 아직
+    // 없으므로(유니버스 전에는 프레임만 그린다) 자리만 맞추고 연출은 걸지 않는다 —
+    // 그러지 않으면 `/explore/game` 을 주소로 바로 열 때마다 화면이 옆에서 밀려 들어온다.
+    if (!step || !rail.ref.current) {
       sliding.current = false;
       setSlide((prev) => ({ ...prev, offsetPx: 0, animated: false }));
       return;
