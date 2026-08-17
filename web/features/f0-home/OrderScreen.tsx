@@ -695,6 +695,13 @@ export function OrderScreen({
     const math = buyMath(draft, price, me.cash);
     const nextOk = buyStepOk(step, draft, math);
 
+    const selectBuyMode = (buyBy: BuyDraft["buyBy"]) => {
+      if (draft.buyBy === buyBy) return;
+      patchDraft({ buyBy, amount: 0, shares: 0, amountSource: null });
+      setShowPad(false);
+      setBuyQtyStr("");
+    };
+
     const pickOrderType = (orderType: "market" | "limit") => {
       if (draft.orderType === orderType) return;
       patchDraft({ orderType });
@@ -868,21 +875,13 @@ export function OrderScreen({
           <div style={CARD_TITLE}>얼마나 살까요?</div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <div
-              onClick={() => {
-                patchDraft({ buyBy: "amount" });
-                setShowPad(false);
-                setBuyQtyStr("");
-              }}
+              onClick={() => selectBuyMode("amount")}
               style={chipStyle(!math.byQty)}
             >
               금액으로
             </div>
             <div
-              onClick={() => {
-                patchDraft({ buyBy: "qty" });
-                setShowPad(false);
-                setBuyQtyStr("");
-              }}
+              onClick={() => selectBuyMode("qty")}
               style={chipStyle(math.byQty)}
             >
               주 수로
@@ -1312,6 +1311,17 @@ export function OrderScreen({
     const heldPct = held && heldAvg > 0 ? ((price - heldAvg) / heldAvg) * 100 : 0;
     const reserved = reservedHoldingQty(me, code);
     const math = sellMath(sellDraft, price, heldQty, reserved);
+    const selectSellMode = (sellBy: SellDraft["sellBy"]) => {
+      if (sellDraft.sellBy === sellBy) return;
+      patchSell(
+        sellBy === "qty"
+          ? { sellBy, qty: math.maxQty, amountInput: 0 }
+          : { sellBy, qty: 0, amountInput: 0 },
+      );
+      setSellPick(sellBy === "qty" ? "all" : "");
+      setShowPad(false);
+      setSellQtyStr("");
+    };
     // 회고 재료는 서버 체결 기록이다. 조회 전이거나 실패하면 `buy` 가 없어 판정도 없다.
     const { buy: buyRec, firstSell } = sellRetrospect(history);
     const heldDays = buyRec
@@ -1511,21 +1521,13 @@ export function OrderScreen({
           <div style={CARD_TITLE}>얼마나 팔까요?</div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <div
-              onClick={() => {
-                patchSell({ sellBy: "qty" });
-                setShowPad(false);
-                setSellQtyStr("");
-              }}
+              onClick={() => selectSellMode("qty")}
               style={chipStyle(math.byQty)}
             >
               주 수로
             </div>
             <div
-              onClick={() => {
-                patchSell({ sellBy: "amount" });
-                setShowPad(false);
-                setSellQtyStr("");
-              }}
+              onClick={() => selectSellMode("amount")}
               style={chipStyle(!math.byQty)}
             >
               금액으로
