@@ -70,15 +70,36 @@ for (const entry of SCRIPTED) {
 // 보여 조용히 넘어간다.
 for (const entry of SCRIPTED) {
   const script = entry.explainScript!;
-  for (const [where, choices, answerId] of [
-    ["check", script.check.choices, script.check.answerId],
+  for (const [where, choices, answerId, question] of [
+    ["check", script.check.choices, script.check.answerId, script.check.question],
     ...(script.adjust
-      ? [["adjust", script.adjust.choices, script.adjust.answerId] as const]
+      ? [
+          [
+            "adjust",
+            script.adjust.choices,
+            script.adjust.answerId,
+            script.adjust.question,
+          ] as const,
+        ]
       : []),
   ] as const) {
     const ids = choices.map((c) => c.id);
     assert.equal(new Set(ids).size, ids.length, `${entry.id}.${where}: 선택지 id 가 겹친다`);
     assert.ok(ids.includes(answerId), `${entry.id}.${where}: answerId 가 선택지에 없다`);
+
+    // 명사를 묻는 질문에 예/아니오 선택지가 붙으면 아이는 답할 수가 없다.
+    //
+    // `term:per` 의 조정이 그랬다 — "그럼 PER 은 주가를 무엇과 견줄까요?" 에 선택지가
+    // "들어가요 / 들어가지 않아요" 였다. 질문만 새로 쓰고 선택지와 answerId 를 옛
+    // 예/아니오 그대로 둔 흔적이다. 질문과 선택지는 따로 떨어진 자리에 있어 눈으로는
+    // 잘 안 보이고, 화면에서는 그냥 이상한 질문으로만 보인다.
+    if (/무엇|뭐|어느|누구|누가|어디|언제|얼마|몇/.test(question)) {
+      assert.notDeepEqual(
+        [...ids].sort(),
+        ["no", "yes"],
+        `${entry.id}.${where}: 명사를 묻는데 선택지가 예/아니오다`,
+      );
+    }
   }
 }
 

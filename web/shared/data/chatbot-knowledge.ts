@@ -1296,10 +1296,10 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
         explanation: "PER이 비교하는 것은 딱 두 가지, 회사가 번 이익과 주가예요. 가진 재산을 주가와 견주는 것은 PBR 이라 서로 다른 숫자예요.",
         question: "그럼 PER 은 주가를 무엇과 견줄까요?",
         choices: [
-          { id: "no", label: "들어가지 않아요" },
-          { id: "yes", label: "들어가요" },
+          { id: "profit", label: "회사가 번 이익" },
+          { id: "assets", label: "회사가 가진 재산" },
         ],
-        answerId: "no",
+        answerId: "profit",
       },
       detail: "같은 업종 회사끼리 함께 보면 이익에 비해 주가가 어떻게 보이는지 견줄 수 있어요.",
       example: "같은 업종의 두 회사가 비슷한 이익을 냈다고 해 봐요. 한 회사의 주가가 더 높다면 두 회사의 PER은 다르게 보여요.",
