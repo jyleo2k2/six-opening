@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ChatContext } from "../../shared/types/chatbot";
 import { accountTotalAsset, SEED } from "../../shared/store/prototype-account.js";
 import { BottomNav } from "./BottomNav";
@@ -16,6 +16,19 @@ import {
   showSectorGroups,
 } from "./lib/explore-cards";
 import { exploreSpotFor, rememberExploreSpot } from "./lib/explore-memo";
+import { PROTOTYPE_PHONE } from "./lib/phone-frame";
+import {
+  nextSectorFilter,
+  SECTOR_SLIDE_MS,
+  sectorDragOffset,
+  sectorRailStyle,
+  sectorStepBetween,
+  sectorSwipeOrder,
+  sectorSwipeStep,
+  shouldCommitSectorSwipe,
+  type SectorSlide,
+  type SectorStep,
+} from "./lib/sector-swipe";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
@@ -54,11 +67,12 @@ const STAGE = styleFromCss(
   "position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:transparent",
 );
 // 카드가 위아래로 넘어가는 세로 레일. `scroll-snap-stop:always` 를 카드 쪽에서 이미 준다.
-const RAIL = styleFromCss(
+// `touch-action:pan-y` — 손가락 세로는 브라우저 기본 스크롤에 맡기고 **가로만** 우리가 받는다.
+// `none` 이던 시절에는 브라우저가 세로도 넘겨주지 않아 손가락으로는 카드가 아예 안 넘어갔다.
+const RAIL_CSS =
   "position:relative;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overflow-anchor:none;display:flex;" +
-    "flex-direction:column;align-items:center;gap:26px;padding:16px 0 20px;scroll-snap-type:y mandatory;" +
-    "cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none",
-);
+  "flex-direction:column;align-items:center;gap:26px;padding:16px 0 20px;scroll-snap-type:y mandatory;" +
+  "cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none";
 const DOTS_COL = styleFromCss(
   "position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;" +
     "align-items:center;gap:5px;pointer-events:none",
@@ -111,15 +125,139 @@ export function ExploreScreen({
   const [cardIndex, setCardIndex] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [chipsOpen, setChipsOpen] = useState(false);
+  /**
+   * 섹터 전환 중 레일이 밀려 있는 자리. `animated` 가 거짓이면 손가락을 그대로 따라간다.
+   *
+   * `width` 를 함께 담는 이유는 옅어지는 정도가 **한 폭에 대한 비율**이라서다. 그리는
+   * 동안 DOM 을 다시 재지 않으려면 자리를 정한 순간의 폭이 자리와 같이 있어야 한다.
+   */
+  const [slide, setSlide] = useState<SectorSlide>({
+    offsetPx: 0,
+    animated: false,
+    width: PROTOTYPE_PHONE.screenWidth,
+  });
+  /** 제자리로 되돌린다. 넘길 만큼 못 쓸었거나 손짓이 끊겼을 때다. */
+  const restSlide = () => setSlide((prev) => ({ ...prev, offsetPx: 0, animated: true }));
   // 끄는 손과 **켜진 카드 판정**을 함께 이 훅에 맡긴다. 카드가 위아래로 넘어가는 세로
   // 레일이라 축은 'y'. 견주는 값은 `activeIndex` 가 아니라 `cardIndex` 다 — 목록이 줄어
   // 범위를 벗어난 `cardIndex` 가 남았을 때, 잰 값과 달라야 다음 스크롤에서 제자리를 찾는다.
-  const rail = useRailDrag(setCardIndex, cardIndex, "y");
+  //
+  // 가로로 쓸면 섹터를 넘긴다. 레일과 **같은 손짓**으로 받는 이유는 축을 한 번만 잠그기
+  // 위해서다 — 포인터를 따로 받으면 카드가 넘어가면서 섹터까지 바뀐다.
+  const rail = useRailDrag(setCardIndex, cardIndex, "y", {
+    onMove: (dx) => dragSector(dx),
+    onEnd: (dx, velocity) => releaseSector(dx, velocity),
+    onCancel: () => restSlide(),
+  });
 
   // 유니버스가 오기 전에는 섹터 id 목록이 비어 있어 무엇이든 전체로 떨어진다. 도착하면
   // 같은 렌더에서 제 필터가 잡히고, 아래 effect 들이 그 값으로 한 번 더 돈다.
   const filter = knownFilter(sector, universe?.sectors.map((entry) => entry.id) ?? []);
   const path = explorePath(filter);
+  // 쓸어 가는 차례. 칩 줄과 같은 순서다(`sectorSwipeOrder`).
+  const swipeOrder = universe ? sectorSwipeOrder(universe) : [];
+
+  /** 섹터가 밀려 나가는 동안인가. 그 사이에 들어온 손짓은 무시한다. */
+  const sliding = useRef(false);
+  /** 밀어낸 끝에서 주소를 바꾸는 타이머. 화면을 떠나면 끊는다. */
+  const slideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (slideTimer.current) clearTimeout(slideTimer.current);
+    },
+    [],
+  );
+
+  /**
+   * 레일이 실제로 그려진 폭과 배율. 폭은 넘기는 문턱의 기준이고, 배율은 창 좌표를 화면
+   * 안쪽 좌표로 고치는 데 쓴다 — `PhoneFrame` 이 화면 전체를 `scale()` 로 줄여 놓았으므로
+   * 그대로 쓰면 손가락보다 레일이 더 많이 움직인다(`lib/sheet-drag.ts` 와 같은 이유다).
+   *
+   * 배율을 잰 사각형에서 되짚는 이유는 이 값이 **레일이 실제로 받은 배율**이기 때문이다.
+   * 창 크기로 다시 계산하면 같은 값이어야 하는 두 식이 조용히 갈릴 수 있다.
+   */
+  const railBox = () => {
+    const el = rail.ref.current;
+    if (!el || el.offsetWidth === 0) return { width: PROTOTYPE_PHONE.screenWidth, scale: 1 };
+    return { width: el.offsetWidth, scale: el.getBoundingClientRect().width / el.offsetWidth };
+  };
+
+  /** 끄는 동안 레일을 손가락만큼 옮긴다. 넘어갈 섹터가 없으면 눌러서 벽이 있다고 알린다. */
+  function dragSector(dx: number) {
+    if (sliding.current) return;
+    const box = railBox();
+    const atEdge = nextSectorFilter(swipeOrder, filter, sectorSwipeStep(dx)) === null;
+    setSlide({
+      offsetPx: sectorDragOffset({ dx, ...box }, atEdge),
+      animated: false,
+      width: box.width,
+    });
+  }
+
+  /** 손을 뗀 자리에서 섹터를 넘기거나 제자리로 되돌린다. */
+  function releaseSector(dx: number, velocity: number) {
+    if (sliding.current) return;
+    const box = railBox();
+    const next = nextSectorFilter(swipeOrder, filter, sectorSwipeStep(dx));
+    if (next && shouldCommitSectorSwipe({ dx, velocity, ...box })) {
+      slideToSector(next, sectorSwipeStep(dx));
+      return;
+    }
+    restSlide();
+  }
+
+  /**
+   * 지금 목록을 쓸어 낸 쪽으로 밀어내고, 다 밀린 자리에서 주소를 바꾼다. **들어오는 연출은
+   * 여기서 하지 않는다** — 새 목록은 주소가 바뀐 뒤에 오므로 아래 layout effect 가 잇는다.
+   */
+  function slideToSector(next: string, step: SectorStep) {
+    const width = railBox().width;
+    sliding.current = true;
+    setSlide({ offsetPx: -step * width, animated: true, width });
+    slideTimer.current = setTimeout(() => {
+      slideTimer.current = null;
+      onLeave(explorePath(next));
+    }, SECTOR_SLIDE_MS);
+  }
+
+  /**
+   * 새 섹터가 반대편에서 들어오는 연출. **`useLayoutEffect` 여야 한다** — 그리기 전에 자리를
+   * 잡지 않으면 새 목록이 밀려 나간 쪽에 한 프레임 그려지고, 그러면 반대 방향으로 튄다.
+   *
+   * 칩을 눌러 들어와도, 챗봇이 "게임 회사 보여줘"로 뛰어들어와도 같은 길이다 — 방향은
+   * 쓸어 온 방향이 아니라 **차례 위의 두 자리**로 정한다(`sectorStepBetween`).
+   */
+  const shownFilter = useRef(filter);
+  useLayoutEffect(() => {
+    if (shownFilter.current === filter) return;
+    const step = sectorStepBetween(swipeOrder, shownFilter.current, filter);
+    shownFilter.current = filter;
+    // 유니버스가 늦게 와 첫 필터가 잡히는 것은 **넘어온 것이 아니다.** 그때는 레일이 아직
+    // 없으므로(유니버스 전에는 프레임만 그린다) 자리만 맞추고 연출은 걸지 않는다 —
+    // 그러지 않으면 `/explore/game` 을 주소로 바로 열 때마다 화면이 옆에서 밀려 들어온다.
+    if (!step || !rail.ref.current) {
+      sliding.current = false;
+      setSlide((prev) => ({ ...prev, offsetPx: 0, animated: false }));
+      return;
+    }
+    const width = railBox().width;
+    setSlide({ offsetPx: step * width, animated: false, width });
+    // 자리를 **한 번 그린 뒤에** 켠다. 한 프레임(rAF 한 번)만 두면 그 갱신이 같은 프레임의
+    // 그리기에 합쳐질 수 있고, 그러면 시작 자리가 없던 셈이 되어 전환이 붙지 않는다.
+    let settle = 0;
+    const frame = requestAnimationFrame(() => {
+      settle = requestAnimationFrame(() => restSlide());
+    });
+    const settled = setTimeout(() => {
+      sliding.current = false;
+    }, SECTOR_SLIDE_MS);
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(settle);
+      clearTimeout(settled);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
   /**
    * 카드 자리를 되살리고 적어 둘 준비. **유니버스만 있으면 된다.**
    *
@@ -194,9 +332,17 @@ export function ExploreScreen({
   const activeIndex = Math.min(cardIndex, Math.max(0, list.length - 1));
 
   // 칩은 모두 같은 규칙이다 — 무엇을 보는지는 주소가 소유하므로 누르면 주소만 바꾼다.
+  // 넘어가는 연출은 쓸어 넘길 때와 같은 길을 태운다(`slideToSector`) — 같은 곳으로 가는
+  // 두 손짓이 다르게 보이면 안 된다. 방향은 칩 줄 위의 두 자리로 정한다.
   const pickChip = (id: string) => {
     setChipsOpen(false);
-    onLeave(explorePath(id));
+    if (id === filter || sliding.current) return;
+    const step = sectorStepBetween(swipeOrder, filter, id);
+    if (!step) {
+      onLeave(explorePath(id));
+      return;
+    }
+    slideToSector(id, step);
   };
   const toggleSearch = () => {
     setSearchOpen((open) => !open);
@@ -270,9 +416,15 @@ export function ExploreScreen({
         </div>
 
         {list.length === 0 ? (
+          // 빈 목록에도 같은 손짓을 붙인다 — 관심 기업이 0개인 자리에서 쓸어 나갈 수 없으면
+          // 손가락만으로는 갇힌다. 넘길 것이 없으니 세로 판정은 하지 않고 가로만 받는다.
           <div
+            onPointerDown={rail.onPointerDown}
+            ref={rail.ref}
             style={styleFromCss(
-              "flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;gap:9px",
+              "flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;gap:9px;" +
+                "touch-action:pan-y;user-select:none;-webkit-user-select:none;" +
+                sectorRailStyle(slide),
             )}
           >
             <div style={styleFromCss("font-size:16px;font-weight:800;color:#01185A;text-align:center")}>
@@ -288,7 +440,14 @@ export function ExploreScreen({
           </div>
         ) : (
           <div style={STAGE}>
-            <div onPointerDown={rail.onPointerDown} onScroll={rail.onScroll} ref={rail.ref} style={RAIL}>
+            <div
+              onPointerDown={rail.onPointerDown}
+              onScroll={rail.onScroll}
+              ref={rail.ref}
+              // 섹터가 넘어갈 때 레일 전체가 가로로 밀린다. 오른쪽 도트는 함께 밀지 않는다 —
+              // 그것은 목록 안 자리를 가리키는 표시라 목록과 같이 나갈 것이 아니다.
+              style={styleFromCss(RAIL_CSS + ";" + sectorRailStyle(slide))}
+            >
               {list.map((stock, index) => {
                 const card = buildExploreCard(list, index, universe, activeIndex, showGroups);
                 return (
