@@ -57,12 +57,12 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "주식 한 조각을 가진 사람은 회사의 일부를 가진 걸까요?",
       choices: [
         { id: "yes", label: "회사의 일부를 가져요" },
-        { id: "no", label: "회사와 관계없어요" },
+        { id: "no", label: "회사에 돈을 빌려준 거예요" },
       ],
       answerId: "yes",
     },
     detail: "회사는 필요한 돈을 모으려고 주식을 만들고, 그 조각을 가진 사람을 주주라고 불러요.",
-    example: "피자 한 판을 여러 조각으로 나눈 모습을 떠올려 봐요. 주식 한 주는 그중 한 조각처럼 회사의 일부를 나타내요.",
+    example: "반 친구 스무 명이 돈을 모아 축구공 하나를 샀다고 해 봐요. 돈을 낸 사람마다 그 공의 일부를 가진 셈이에요.",
   }),
   shareholder: termScript("shareholder", {
     brief: "주주는 그 회사의 주식을 가진 사람이에요.",
@@ -80,7 +80,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "주주가 되려면 무엇을 가지고 있어야 할까요?",
       choices: [
         { id: "stock", label: "그 회사의 주식" },
-        { id: "receipt", label: "그 회사의 영수증" },
+        { id: "receipt", label: "그 회사에서 일한 경력" },
       ],
       answerId: "stock",
     },
@@ -126,7 +126,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       question: "주식을 사면 내 보유 목록에 들어올까요?",
       choices: [
         { id: "yes", label: "체결되면 들어와요" },
-        { id: "no", label: "가지고 있던 것도 없어져요" },
+        { id: "no", label: "주문을 넣는 순간 바로 들어와요" },
       ],
       answerId: "yes",
     },
@@ -309,10 +309,10 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       explanation: "수익률의 기준은 처음 출발한 금액이에요. 지금 금액이 처음 금액에서 얼마나 달라졌는지를 비율로 나타내요.",
       question: "수익률은 지금 금액을 무엇과 비교할까요?",
       choices: [
-        { id: "compare", label: "처음 금액과 비교해요" },
-        { id: "not-compare", label: "처음 금액은 보지 않아요" },
+        { id: "start", label: "처음 출발한 금액" },
+        { id: "cash", label: "지갑에 남은 현금" },
       ],
-      answerId: "compare",
+      answerId: "start",
     },
     detail: "크기가 다른 투자도 비율로 견줄 수 있지만 앞으로의 결과를 알려주지는 않아요.",
     example: "서로 다른 길이의 달리기에서 출발점부터 얼마나 이동했는지 비율로 비교하는 것과 비슷해요. 출발한 금액이 기준이 돼요.",
@@ -399,10 +399,10 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
     },
     adjust: {
       explanation: "매출은 물건을 팔아 들어온 돈을 먼저 모두 더한 값이에요. 재료비나 월급 같은 비용은 아직 빼지 않은 상태예요.",
-      question: "매출은 어느 쪽을 먼저 셀까요?",
+      question: "매출은 둘 중 무엇을 가리킬까요?",
       choices: [
-        { id: "sales-money", label: "팔아서 들어온 돈" },
-        { id: "remaining-profit", label: "비용을 빼고 남은 돈만" },
+        { id: "sales-money", label: "팔아서 들어온 돈 전체" },
+        { id: "remaining-profit", label: "비용을 빼고 남은 돈" },
       ],
       answerId: "sales-money",
     },
@@ -410,7 +410,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
     example: "학교 장터에서 물건을 팔아 받은 돈을 모두 더한 것이 매출과 비슷해요. 재료를 산 돈을 빼기 전의 값이에요.",
   }),
   "operating-profit": termScript("operating-profit", {
-    brief: "영업이익은 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요.",
+    brief: "영업이익은 회사가 원래 하는 일, 곧 본업으로 번 돈에서 그 일에 든 비용을 뺀 결과예요.",
     check: {
       question: "영업이익을 볼 때 매출에서 무엇을 뺄까요?",
       choices: [
@@ -475,7 +475,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "bundle",
     },
-    detail: "어떤 자산이 얼마나 담겼는지는 상품 설명에서 확인해야 해요.",
+    detail: "여기서 자산은 주식이나 금처럼 값을 매길 수 있는 것을 뜻하고, 무엇이 얼마나 담겼는지는 상품 설명에서 확인해요.",
     example: "여러 맛 과자가 함께 든 묶음 상자와 비슷해요. 상자마다 들어 있는 과자의 종류와 비율이 다를 수 있어요.",
   }),
   index: termScript("index", {
@@ -499,7 +499,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       answerId: "many",
     },
     detail: "시장이나 업종의 흐름을 요약할 뿐 한 회사의 값이나 방향을 정해 주지는 않아요.",
-    example: "반 친구들의 기록을 모아 반 평균을 보는 것과 비슷해요. 한 친구가 아니라 여러 주식의 흐름을 묶어 보여줘요.",
+    example: "여러 과일의 값을 한 숫자로 묶어 이번 달 과일값이 올랐는지 보는 것과 비슷해요. 사과 한 알의 값이 얼마인지는 따로 봐야 해요.",
   }),
   chart: termScript("chart", {
     brief: "차트는 가격이 어떻게 움직였는지 그림으로 보여주는 지나간 기록이에요.",
@@ -608,6 +608,19 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
  */
 type ScreenTermQuiz = ExplainScript["check"] & {
   adjust: NonNullable<ExplainScript["adjust"]>;
+  /**
+   * 정답을 맞힌 아이가 받는 한 문장. 22개 용어가 "화면에 이미 있는 값을 가리키는
+   * 말이라…" 하나를 함께 쓰던 자리다. `detail` 은 **정답 경로**라 거의 모든 아이가
+   * 지나가는데, 용어가 무엇이든 같은 말이 나오니 맞힌 보상이 남의 이야기가 됐다.
+   * 모의투자·시즌·주문 잠금·어린이 뉴스·성향처럼 "화면의 값"이 아닌 용어에는
+   * 사실도 맞지 않았다. 용어마다 `brief` 에 **덧붙는 새 내용**을 쓴다.
+   */
+  detail: string;
+  /**
+   * 두 번 틀린 아이가 마지막에 받는 비유. 조정 설명에서 이미 쓴 비유를 되풀이하지
+   * 않는다 — 가장 헤맨 아이에게 방금 실패한 그림을 다시 내미는 셈이 된다.
+   */
+  example: string;
 };
 
 const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
@@ -628,6 +641,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "no",
     },
+    detail: "돈은 연습용이지만 사고판 기록은 그대로 남아서 나중에 내가 어떻게 했는지 다시 볼 수 있어요.",
+    example: "체육 시간에 진짜 경기 전에 연습 경기를 해 보는 것과 비슷해요. 점수는 남지만 진짜 대회 기록이 되지는 않아요.",
   },
   "total-assets": {
     question: "전체 자산에는 무엇이 함께 들어갈까요?",
@@ -646,6 +661,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "sum",
     },
+    detail: "주식을 사고팔지 않아도 가진 주식의 값이 움직이면 이 숫자는 달라져요.",
+    example: "지갑 속 돈만 세지 않고 책장에 둔 카드까지 오늘 값으로 함께 세어 보는 것과 비슷해요. 둘을 합쳐야 지금 가진 전부가 보여요.",
   },
   "available-cash": {
     question: "기다리는 주문에 맡겨 둔 돈도 쓸 수 있는 돈에 들어 있을까요?",
@@ -664,6 +681,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "back",
     },
+    detail: "그래서 전체 자산보다 작을 수 있고, 새 주문을 넣을 수 있는지는 이 숫자로 확인해요.",
+    example: "용돈 중에 이미 친구와 쓰기로 약속한 몫을 빼고 남은 돈만 오늘 쓸 수 있는 것과 비슷해요.",
   },
   holdings: {
     question: "아직 체결되지 않은 주문도 가진 회사에 들어갈까요?",
@@ -682,6 +701,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "filled",
     },
+    detail: "같은 회사를 여러 번 나눠 사도 가진 회사에는 하나로 모여서 보여요.",
+    example: "도서관에서 빌리겠다고 신청만 한 책과 실제로 받아 온 책은 달라요. 지금 손에 있는 것은 받아 온 책뿐이에요.",
   },
   "pending-order": {
     question: "기다리는 주문은 어떤 상태일까요?",
@@ -700,6 +721,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "reserved",
     },
+    detail: "정한 값에 거래할 상대가 나타나지 않으면 계속 기다리는 상태로 남아 있어요.",
+    example: "빈자리가 날 때까지 이름을 적어 두고 기다리는 것과 비슷해요. 차례가 와야 자리에 앉을 수 있어요.",
   },
   "order-cancel": {
     question: "이미 체결된 주문도 취소할 수 있을까요?",
@@ -718,6 +741,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "pending",
     },
+    detail: "취소는 기다리는 주문 목록에서 하고, 돌아온 돈은 다시 쓸 수 있는 돈에 더해져요.",
+    example: "아직 만들기 전인 음식은 주문을 무르고 돈을 돌려받을 수 있어요. 이미 나온 음식은 무를 수 없는 것과 비슷해요.",
   },
   "sell-proceeds": {
     question: "받게 되는 돈은 무엇을 곱해 계산할까요?",
@@ -736,6 +761,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "qty-price",
     },
+    detail: "예상해 본 값이라 실제로 체결된 가격이 다르면 받는 돈도 달라져요.",
+    example: "장터에서 팔기 전에 개수와 값을 곱해 얼마 받을지 미리 세어 보는 것과 비슷해요. 막상 팔 때 값이 달라지기도 해요.",
   },
   "goal-price": {
     question: "이 값을 적어 두면 그 값이 됐을 때 자동으로 팔릴까요?",
@@ -754,6 +781,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "note",
     },
+    detail: "적어 둔 값은 나만 보고, 그 값이 되어도 알림이 오거나 주문이 나가지 않아요.",
+    example: "공책에 '여기까지 오면 다시 생각해 보자'고 적어 두는 것과 비슷해요. 적었다고 저절로 무슨 일이 생기지는 않아요.",
   },
   "holding-period": {
     question: "적어 둔 보유 기간이 지나면 자동으로 팔릴까요?",
@@ -772,6 +801,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "plan",
     },
+    detail: "기간이 지나도 알림이 오지 않고, 생각이 바뀌면 언제든 다시 정할 수 있어요.",
+    example: "방학 계획표에 며칠 동안 무엇을 할지 적어 두는 것과 비슷해요. 계획이라서 바꿔도 괜찮아요.",
   },
   "buy-day-record": {
     question: "사던 날의 나는 무엇을 다시 보여줄까요?",
@@ -790,6 +821,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "mine",
     },
+    detail: "그때 적은 내용은 고쳐 쓰지 않고 그대로 두기 때문에 지금 생각과 나란히 견줄 수 있어요.",
+    example: "학기 초에 쓴 목표 쪽지를 학기 말에 다시 꺼내 읽는 것과 비슷해요. 그때와 지금이 얼마나 달라졌는지 보여요.",
   },
   "plan-badge": {
     question: "계획 실천 배지는 무엇을 보고 줄까요?",
@@ -808,6 +841,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "plan",
     },
+    detail: "손해가 난 거래여도 처음 계획대로 팔았다면 이 배지를 받을 수 있어요.",
+    example: "정해 둔 시간에 맞춰 숙제를 끝냈는지만 확인하는 표와 비슷해요. 몇 점을 받았는지는 따로예요.",
   },
   "delayed-price": {
     question: "화면에 보이는 값은 지금 시장 값과 같을까요?",
@@ -826,6 +861,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "late",
     },
+    detail: "그래서 화면을 새로 고쳐도 방금 시장에서 정해진 값이 바로 보이지는 않아요.",
+    example: "멀리서 오는 편지처럼 소식이 도착하는 데 시간이 걸리는 것과 비슷해요. 읽는 순간에는 이미 조금 지난 이야기예요.",
   },
   "child-news": {
     question: "어린이 뉴스는 무엇을 알려 줄까요?",
@@ -844,6 +881,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "events",
     },
+    detail: "같은 일이라도 뉴스마다 다루는 부분이 달라서 원문까지 보면 더 자세히 알 수 있어요.",
+    example: "학교 소식지가 지난주에 있었던 행사를 알려 주는 것과 비슷해요. 무엇을 할지까지 정해 주지는 않아요.",
   },
   season: {
     question: "지금 한 시즌은 얼마 동안일까요?",
@@ -862,6 +901,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "home",
     },
+    detail: "시즌이 끝나면 그동안 쌓인 기록을 모아 한 번에 다시 볼 수 있어요.",
+    example: "한 학기처럼 시작과 끝이 정해진 기간과 비슷해요. 그 사이의 기록이 모여 하나로 남아요.",
   },
   "trade-lock": {
     question: "주문 잠금 동안에도 할 수 있는 것은 무엇일까요?",
@@ -880,6 +921,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "order",
     },
+    detail: "정한 시간이 지나면 잠금이 풀리고 새 주문을 다시 넣을 수 있어요.",
+    example: "도서관에서 책은 계속 읽을 수 있지만 대출 창구만 잠시 닫아 두는 것과 비슷해요.",
   },
   ranking: {
     question: "랭킹에서 높은 순위는 무엇을 뜻할까요?",
@@ -898,6 +941,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "no",
     },
+    detail: "보는 기간을 바꾸면 순서도 달라져서 한 번의 순위가 끝을 뜻하지 않아요.",
+    example: "달리기 한 번의 등수와 비슷해요. 그날의 결과일 뿐 다음에는 달라질 수 있어요.",
   },
   "family-feed": {
     question: "가족 기록에 보이는 거래 가격은 무엇일까요?",
@@ -916,17 +961,19 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "per-share",
     },
+    detail: "가격만이 아니라 가족이 그때 남긴 생각도 함께 보여서 같은 회사를 왜 다르게 봤는지 알 수 있어요.",
+    example: "같은 영화를 본 가족이 각자 감상을 적어 둔 공책과 비슷해요. 같은 것을 봐도 남긴 말은 서로 달라요.",
   },
   "profile-abilities": {
     question: "정확력은 무엇을 바탕으로 볼까요?",
     choices: [
-      { id: "direction", label: "거래 뒤 2거래일의 가격 방향" },
+      { id: "direction", label: "거래 뒤 가격이 간 방향" },
       { id: "profit", label: "번 돈의 크기" },
       { id: "count", label: "거래한 횟수" },
     ],
     answerId: "direction",
     adjust: {
-      explanation: "정확력은 거래하고 2거래일이 지난 뒤 가격이 어느 쪽으로 갔는지를 봐요. 얼마를 벌었는지로 매기는 값이 아니에요.",
+      explanation: "정확력은 거래하고 장이 두 번 열린 뒤 가격이 어느 쪽으로 갔는지를 봐요. 얼마를 벌었는지로 매기는 값이 아니에요.",
       question: "그럼 정확력은 번 돈으로 정해질까요?",
       choices: [
         { id: "direction", label: "가격 방향으로 봐요" },
@@ -934,6 +981,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "direction",
     },
+    detail: "다섯 가지 모두 이번 시즌에 남긴 기록으로만 계산해서, 기록이 없으면 아직 표시되지 않아요.",
+    example: "운동회 기록표에 달리기·던지기를 따로 적어 두는 것과 비슷해요. 항목마다 보는 것이 달라서 하나로 합쳐 순위를 매기지 않아요.",
   },
   "profile-definition": {
     question: "성향은 실력을 재는 검사일까요?",
@@ -952,6 +1001,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "change",
     },
+    detail: "다음 시즌에 다르게 움직이면 결과도 다르게 나와요.",
+    example: "이번 달에 어떤 책을 많이 읽었는지 정리해 둔 표와 비슷해요. 다음 달에 다른 책을 읽으면 표도 달라져요.",
   },
   "profile-status": {
     question: "관찰 중은 어떤 상태를 뜻할까요?",
@@ -970,6 +1021,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "record",
     },
+    detail: "2거래일은 장이 열리는 날로 이틀이라는 뜻이라, 사이에 주말이나 쉬는 날이 끼면 더 걸려요.",
+    example: "사진이 몇 장 모여야 앨범을 만들 수 있는 것과 비슷해요. 장수가 차면 앨범이 만들어져요.",
   },
   "profile-character": {
     question: "네 가지 성향 캐릭터 중에 더 좋은 것이 있을까요?",
@@ -988,6 +1041,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "change",
     },
+    detail: "두 축을 각각 어느 쪽으로 많이 움직였는지에 따라 네 모습 가운데 하나가 정해져요.",
+    example: "좋아하는 색과 좋아하는 계절을 짝지어 이름을 붙이는 것과 비슷해요. 짝이 다르면 이름이 다를 뿐 더 좋은 짝은 없어요.",
   },
   "season-record": {
     question: "시즌 기록은 무엇을 모아 보여줄까요?",
@@ -1006,6 +1061,8 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "after",
     },
+    detail: "몇 번 했는지를 세는 곳이라 얼마를 벌거나 잃었는지는 여기에 나오지 않아요.",
+    example: "한 달 동안 도서관에 몇 번 갔는지 세어 둔 표와 비슷해요. 무슨 책을 읽었는지까지는 따로 봐요.",
   },
 };
 
@@ -1019,10 +1076,10 @@ function screenTermScript(id: string, brief: string): ExplainScript {
     brief,
     check: { question: quiz.question, choices: quiz.choices, answerId: quiz.answerId },
     adjust: quiz.adjust,
-    // brief 를 그대로 넣으면 퀴즈를 맞힌 아이가 방금 읽은 문장을 다시 읽는다.
-    // 정답의 보상이 반복이 되지 않도록 덧붙는 새 한 문장을 준다 (SPEC §3.4.4).
-    detail: "화면에 이미 있는 값을 가리키는 말이라 앞으로의 값을 알려 주지는 않아요.",
-    example: "화면에서 이 말을 발견하면, 그 숫자나 기록이 무엇을 보여주는지 차례로 읽어 보면 돼요.",
+    // 용어마다 따로 쓴다. 공용 한 문장을 두면 맞힌 아이가 받는 보상이 22개 용어에서
+    // 같아지고, 화면의 값이 아닌 용어에는 사실도 어긋난다 (SPEC §3.4.4).
+    detail: quiz.detail,
+    example: quiz.example,
   });
 }
 
@@ -1296,10 +1353,10 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
         explanation: "PER이 비교하는 것은 딱 두 가지, 회사가 번 이익과 주가예요. 가진 재산을 주가와 견주는 것은 PBR 이라 서로 다른 숫자예요.",
         question: "그럼 PER 은 주가를 무엇과 견줄까요?",
         choices: [
-          { id: "no", label: "들어가지 않아요" },
-          { id: "yes", label: "들어가요" },
+          { id: "profit", label: "회사가 번 이익" },
+          { id: "assets", label: "회사가 가진 재산" },
         ],
-        answerId: "no",
+        answerId: "profit",
       },
       detail: "같은 업종 회사끼리 함께 보면 이익에 비해 주가가 어떻게 보이는지 견줄 수 있어요.",
       example: "같은 업종의 두 회사가 비슷한 이익을 냈다고 해 봐요. 한 회사의 주가가 더 높다면 두 회사의 PER은 다르게 보여요.",
@@ -1320,8 +1377,8 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "asset",
         },
         adjust: {
-          explanation: "회사가 가진 건물, 기계, 남은 돈을 한 묶음으로 모아 봐요. 이 묶음을 회사가 가진 재산이라고 불러요.",
-          question: "건물과 기계, 남은 돈을 모은 이 묶음은 무엇일까요?",
+          explanation: "회사가 가진 건물과 기계, 남은 돈을 모두 모은 것이 회사의 재산이에요. PBR은 회사 값을 이 재산과 견주는 숫자예요.",
+          question: "그럼 PBR은 회사 값을 무엇과 견줄까요?",
           choices: [
             { id: "asset", label: "회사가 가진 재산" },
             { id: "earnings", label: "회사가 번 이익" },
@@ -1329,9 +1386,9 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
           answerId: "asset",
         },
         detail:
-          "여기서 재산에는 건물과 기계, 남아 있는 돈이 함께 들어가요.",
+          "회사 값이 재산보다 크면 PBR은 1보다 커지고, 재산보다 작으면 1보다 작아져요.",
         example:
-          "가진 물건이 똑같은 가게가 두 곳 있다고 해 봐요. 한 곳이 세 배 비싸면 그 가게의 PBR이 더 커요.",
+          "가진 물건이 똑같은 가게가 두 곳 있는데 한 곳의 값이 세 배라고 해 봐요. 값이 비싼 쪽의 PBR이 더 커요.",
       },
     status: reviewed },
   { id: "eps", kind: "glossary", category: "indicator", termLabel: "EPS", triggers: ["eps", "주당순이익"], answer: "EPS는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자예요. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자예요.",
@@ -1389,7 +1446,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
         detail:
           "대신 한 곳이 아주 잘돼도 전체는 그만큼 크게 달라지지 않아요.",
         example:
-          "달걀을 한 바구니에 다 담지 않는 것과 같아요. 바구니 하나를 떨어뜨려도 남은 달걀은 무사해요.",
+          "소풍 갈 때 간식을 가방 한 칸에만 넣지 않고 여러 칸에 나눠 담는 것과 비슷해요. 한 칸이 젖어도 다른 칸은 남아요.",
       },
     status: reviewed },
   // "차트는 어떻게 봐요?"(절차)에 이 정의 항목이 답하고 정의형 DAPIE 퀴즈까지 열던 자리다.
@@ -1434,7 +1491,7 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "trade-lock", kind: "faq", category: "service", termLabel: "주문 잠금", triggers: ["학교 시간엔 매매 쉬기", "주문 잠금"], answer: "주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요.", actionTarget: "home", status: reviewed },
   { id: "ranking", kind: "faq", category: "service", termLabel: "랭킹", triggers: ["랭킹", "이번 주", "시즌 전체"], answer: "랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요.", actionTarget: "home", status: reviewed },
   { id: "family-feed", kind: "faq", category: "service", termLabel: "가족 기록", triggers: ["가족 기록", "거래 가격", "차트에서 이 지점 보기"], answer: "가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요.", status: reviewed },
-  { id: "profile-abilities", kind: "faq", category: "profile", termLabel: "성향 축", triggers: ["정확력", "근거력", "집중력", "분산력", "직관력"], answer: "근거력·직관력은 매수 전 자료를 살펴본 기록을, 집중력·분산력은 보유 섹터와 현금 비중을, 정확력은 거래 뒤 2거래일의 가격 방향을 바탕으로 보여줘요. 어느 방향이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
+  { id: "profile-abilities", kind: "faq", category: "profile", termLabel: "성향 축", triggers: ["정확력", "근거력", "집중력", "분산력", "직관력"], answer: "근거력·직관력은 살 회사를 정하기 전에 자료를 얼마나 살펴봤는지, 집중력·분산력은 어떤 업종에 나눠 담고 현금을 얼마나 남겼는지 보여줘요. 정확력은 거래한 뒤 장이 두 번 열리는 동안 가격이 어느 쪽으로 갔는지 보며, 어느 방향이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
   { id: "profile-definition", kind: "faq", category: "profile", termLabel: "성향", triggers: ["성향이 뭐", "성향 뜻", "능력치 오각형"], answer: "성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.", actionTarget: "archive", status: reviewed },
   { id: "profile-status", kind: "faq", category: "profile", termLabel: "관찰 중", triggers: ["관찰 중", "관찰 초기", "2거래일"], answer: "관찰 중은 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족한 상태예요. 정확력은 거래 뒤 2거래일이 지나야 계산돼서 그전에는 LV 표기가 붙지 않아요.", actionTarget: "archive", status: reviewed },
   { id: "profile-character", kind: "faq", category: "profile", termLabel: "성향 캐릭터", triggers: ["저격수", "전략가", "승부사", "탐험가", "성향 캐릭터"], answer: "성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },

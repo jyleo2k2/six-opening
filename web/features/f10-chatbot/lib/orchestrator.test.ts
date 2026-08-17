@@ -77,20 +77,20 @@ async function main() {
   assert.equal(modelCalls, 0);
 
   // 버튼 대신 작은 질문의 선택지 라벨을 타이핑해도 알아듣는다.
-  const typedYes = await createChatOutcome(
+  const typedAnswer = await createChatOutcome(
     {
-      message: "들어가지 않아",
+      message: "회사가 번 이익",
       context,
       explain: { scriptId: "term:per", stage: "detail" },
     },
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(typedYes.response.text.includes("맞아요!"), true);
-  assert.equal(typedYes.response.text.includes("같은 업종"), true);
-  assert.equal(isExplainAction(typedYes.action), true);
-  if (isExplainAction(typedYes.action)) {
-    assert.equal(typedYes.action.turn.stage, "followup");
+  assert.equal(typedAnswer.response.text.includes("맞아요!"), true);
+  assert.equal(typedAnswer.response.text.includes("같은 업종"), true);
+  assert.equal(isExplainAction(typedAnswer.action), true);
+  if (isExplainAction(typedAnswer.action)) {
+    assert.equal(typedAnswer.action.turn.stage, "followup");
   }
   assert.equal(modelCalls, 0);
 

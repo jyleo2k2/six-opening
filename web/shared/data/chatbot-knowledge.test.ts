@@ -63,6 +63,40 @@ for (const entry of SCRIPTED) {
     script.brief.replaceAll(/\s/g, ""),
     `${where}: detail 이 brief 와 같다`,
   );
+
+  // example 은 조정 설명에서 이미 쓴 비유를 되풀이하지 않는다. example 까지 온
+  // 아이는 두 번 틀린 아이인데, 방금 실패한 그림을 그대로 다시 내밀면 새로 쥘
+  // 것이 없다. term:stock(피자)·term:index(반 평균)·term:diversification(달걀
+  // 바구니)이 그랬다.
+  if (script.adjust) {
+    assert.notEqual(
+      script.example.replaceAll(/\s/g, ""),
+      script.adjust.explanation.replaceAll(/\s/g, ""),
+      `${where}: example 이 adjust.explanation 과 같다`,
+    );
+  }
+}
+
+// detail·example 은 용어마다 달라야 한다 (SPEC §3.4.4).
+//
+// 화면 용어 22종이 `screenTermScript` 에서 공용 한 문장을 함께 받던 자리다
+// ("화면에 이미 있는 값을 가리키는 말이라…"). `detail` 은 **정답 경로**라 맞힌
+// 아이가 거의 모두 지나가는데 용어가 무엇이든 같은 말이 나왔고, 모의투자·시즌·
+// 주문 잠금처럼 화면의 값이 아닌 용어에는 사실도 어긋났다. 겹치면 그 용어를
+// 설명하지 않고 있다는 뜻이므로 여기서 막는다.
+for (const field of ["detail", "example"] as const) {
+  const texts = SCRIPTED.map((entry) => entry.explainScript![field]);
+  const seen = new Map<string, string>();
+  for (const [i, text] of texts.entries()) {
+    const key = text.replaceAll(/\s/g, "");
+    const owner = seen.get(key);
+    assert.equal(
+      owner,
+      undefined,
+      `${field} 이 겹친다: ${owner} 와 ${SCRIPTED[i]!.id}`,
+    );
+    seen.set(key, SCRIPTED[i]!.id);
+  }
 }
 
 // 정답 id 는 실제 선택지를 가리켜야 하고 선택지 id 는 서로 달라야 한다.
@@ -70,15 +104,36 @@ for (const entry of SCRIPTED) {
 // 보여 조용히 넘어간다.
 for (const entry of SCRIPTED) {
   const script = entry.explainScript!;
-  for (const [where, choices, answerId] of [
-    ["check", script.check.choices, script.check.answerId],
+  for (const [where, choices, answerId, question] of [
+    ["check", script.check.choices, script.check.answerId, script.check.question],
     ...(script.adjust
-      ? [["adjust", script.adjust.choices, script.adjust.answerId] as const]
+      ? [
+          [
+            "adjust",
+            script.adjust.choices,
+            script.adjust.answerId,
+            script.adjust.question,
+          ] as const,
+        ]
       : []),
   ] as const) {
     const ids = choices.map((c) => c.id);
     assert.equal(new Set(ids).size, ids.length, `${entry.id}.${where}: 선택지 id 가 겹친다`);
     assert.ok(ids.includes(answerId), `${entry.id}.${where}: answerId 가 선택지에 없다`);
+
+    // 명사를 묻는 질문에 예/아니오 선택지가 붙으면 아이는 답할 수가 없다.
+    //
+    // `term:per` 의 조정이 그랬다 — "그럼 PER 은 주가를 무엇과 견줄까요?" 에 선택지가
+    // "들어가요 / 들어가지 않아요" 였다. 질문만 새로 쓰고 선택지와 answerId 를 옛
+    // 예/아니오 그대로 둔 흔적이다. 질문과 선택지는 따로 떨어진 자리에 있어 눈으로는
+    // 잘 안 보이고, 화면에서는 그냥 이상한 질문으로만 보인다.
+    if (/무엇|뭐|어느|누구|누가|어디|언제|얼마|몇/.test(question)) {
+      assert.notDeepEqual(
+        [...ids].sort(),
+        ["no", "yes"],
+        `${entry.id}.${where}: 명사를 묻는데 선택지가 예/아니오다`,
+      );
+    }
   }
 }
 
