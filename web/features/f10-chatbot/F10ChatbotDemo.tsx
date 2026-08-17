@@ -3,6 +3,7 @@
 import {
   FormEvent,
   PointerEvent as ReactPointerEvent,
+  ReactNode,
   useEffect,
   useMemo,
   useRef,
@@ -270,6 +271,27 @@ const SCREENS: Record<
   },
 };
 
+/**
+ * 확인 질문 말풍선과 그 아래 선택지 칩 줄.
+ *
+ * 질문 문장(`turn.prompt`)은 SPEC §3.3.2 에서 🤖 키웅이 발화라 답변과 같은 `bg-bg` 말풍선을
+ * 받는다(§3.2). 칩과 같은 컨테이너에 채움 없는 회색 글씨로 두면 흰 시트 위에서 말풍선을 떠나
+ * 칩에 붙어 버튼 그룹의 제목표로 읽힌다. 굵기는 주지 않는다 — 이 시트에서 `font-medium` 은
+ * 칩이 쓰는 "누를 수 있다"는 신호다.
+ *
+ * DAPIE·종목 탐색·섹터 탐색이 같은 모양이라 한 조각으로 모은다. 따로 두면 한 곳만 고쳐진다.
+ */
+function TurnPrompt({ prompt, children }: { prompt: string; children: ReactNode }) {
+  return (
+    <>
+      <p className="mt-1 rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink">
+        {prompt}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">{children}</div>
+    </>
+  );
+}
+
 function MessageBubble({
   message,
   onQuestion,
@@ -330,8 +352,7 @@ function MessageBubble({
           </div>
         )}
         {!userMessage && message.explainTurn && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-sm text-ink/70">{message.explainTurn.prompt}</p>
+          <TurnPrompt prompt={message.explainTurn.prompt}>
             {message.explainTurn.choices.map((choice) => (
               <button
                 className={CHOICE_CHIP_CLASS}
@@ -343,13 +364,10 @@ function MessageBubble({
                 {choice.label}
               </button>
             ))}
-          </div>
+          </TurnPrompt>
         )}
         {!userMessage && message.stockExploreTurn && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-sm text-ink/70">
-              {message.stockExploreTurn.prompt}
-            </p>
+          <TurnPrompt prompt={message.stockExploreTurn.prompt}>
             {message.stockExploreTurn.choices.map((choice) => (
               <button
                 className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
@@ -361,11 +379,10 @@ function MessageBubble({
                 {choice.label}
               </button>
             ))}
-          </div>
+          </TurnPrompt>
         )}
         {!userMessage && message.sectorExploreTurn && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            <p className="w-full text-sm text-ink/70">{message.sectorExploreTurn.prompt}</p>
+          <TurnPrompt prompt={message.sectorExploreTurn.prompt}>
             {message.sectorExploreTurn.choices.map((choice) => (
               <button
                 className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
@@ -377,7 +394,7 @@ function MessageBubble({
                 {choice.label}
               </button>
             ))}
-          </div>
+          </TurnPrompt>
         )}
       </div>
     </div>
