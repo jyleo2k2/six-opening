@@ -84,9 +84,6 @@ const STEP_BTN = {
   padding: "10px 20px",
 } as const;
 
-/** 미니바가 하단 탭 위에 앉는 높이. */
-const MINIBAR_BOTTOM = 76;
-
 const HOLE_RADIUS = 16;
 
 /** 같은 id 가 화면 분기에 여러 개 남아 있을 수 있다. 실제로 그려진 것만 고른다. */
@@ -156,14 +153,11 @@ export function TutorialOverlay({
 
   const steps = tutorialSteps(stock !== null);
   const [index, setIndex] = useState(() => Math.max(0, stepIndexAt(steps, place)));
-  /** 읽고 나면 접는다. 딤과 설명이 계속 떠 있으면 정작 버튼을 누를 수가 없다. */
-  const [read, setRead] = useState(false);
   const [openConcept, setOpenConcept] = useState(false);
   const [screen, setScreen] = useState<PrototypeScreenRect | null>(null);
   const [boxes, setBoxes] = useState<AnchorRect[]>([]);
   const [bubbleHeight, setBubbleHeight] = useState(240);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
-  const minibarRef = useRef<HTMLDivElement | null>(null);
 
   /**
    * 말풍선 밖을 누르면 그만 보겠다는 뜻이다 — 어느 화면이든, 무엇을 누르든.
@@ -176,7 +170,7 @@ export function TutorialOverlay({
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node | null;
       if (!target) return;
-      if (bubbleRef.current?.contains(target) || minibarRef.current?.contains(target)) return;
+      if (bubbleRef.current?.contains(target)) return;
       onClose();
     };
     // 캡처 단계라야 그 클릭으로 화면이 갈아치워져도 놓치지 않는다.
@@ -195,14 +189,13 @@ export function TutorialOverlay({
     lastPlace.current = placeKey;
 
     const found = stepIndexAt(steps, place);
-    // 같은 자리면 그대로 둔다. 여기서 다시 펼치면 방금 읽은 설명이 또 뜬다.
+    // 이미 이 자리를 가리키고 있으면 그대로 둔다.
     if (found >= 0 && isSamePlace(steps[found], steps[index])) return;
 
     // 순서상 다음 자리면 따라가 펼친다.
     const next = nextStepIndex(steps, index);
     if (found >= 0 && next >= 0 && isSamePlace(steps[found], steps[next])) {
       setIndex(next);
-      setRead(false);
       setOpenConcept(false);
       return;
     }
@@ -264,7 +257,7 @@ export function TutorialOverlay({
     if (!node) return;
     const next = node.offsetHeight;
     setBubbleHeight((current) => (current === next ? current : next));
-  }, [step, openConcept, read]);
+  }, [step, openConcept]);
 
   if (!step || !screen) return null;
 
@@ -279,10 +272,8 @@ export function TutorialOverlay({
   const last = nextStepIndex(steps, index) < 0;
 
   /**
-   * `다음`. 같은 자리면 그 자리에서 이어지고, 자리를 옮겨야 하면 **데려간다**.
-   *
-   * 데려가기 전에 먼저 접는 이유는 화면이 바뀌는 동안 말풍선이 옛 자리를 짚고 있으면
-   * 안 되기 때문이다. 새 자리에 닿으면 `place` 가 바뀌면서 다시 펼친다.
+   * `다음`. 같은 자리면 그 자리에서 이어지고, 자리를 옮겨야 하면 그 자리의 진입로
+   * (`enter`)를 실행해 **데려간다**. 새 자리에 닿으면 `place` 가 바뀌면서 그 장을 편다.
    */
   const advance = () => {
     const next = nextStepIndex(steps, index);
@@ -294,7 +285,6 @@ export function TutorialOverlay({
       return;
     }
 
-    setRead(true);
     const enter = steps[next].enter;
     if (!enter) return;
     // 팔 게 없으면 매도 장 자체가 없으므로 여기 `:code` 는 상세로 들어가는 길뿐이다.
@@ -325,7 +315,6 @@ export function TutorialOverlay({
     // 자리를 먼저 되돌려 놔야 화면이 바뀔 때 `place` 를 읽는 쪽이 "순서에 없는 화면" 으로
     // 보고 튜토리얼을 닫아 버리지 않는다.
     setIndex(index - 1);
-    setRead(true);
     onGo(prevPath);
   };
 
@@ -352,45 +341,43 @@ export function TutorialOverlay({
           transformOrigin: "top left",
         }}
       >
-        {!read && (
-          <svg
-            height={SCREEN_H}
-            style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}
-            width={SCREEN_W}
-          >
-            <defs>
-              <mask id="tut-mask">
-                <rect fill="#fff" height={SCREEN_H} width={SCREEN_W} />
-                {holes.map((hole, at) => (
-                  <rect
-                    fill="#000"
-                    height={hole.h}
-                    key={at}
-                    rx={HOLE_RADIUS}
-                    width={hole.w}
-                    x={hole.x}
-                    y={hole.y}
-                  />
-                ))}
-              </mask>
-            </defs>
-            <rect fill={DIM} height={SCREEN_H} mask="url(#tut-mask)" width={SCREEN_W} />
-            {holes.map((hole, at) => (
-              <rect
-                fill="none"
-                height={hole.h}
-                key={at}
-                opacity={0.9}
-                rx={HOLE_RADIUS}
-                stroke={RING}
-                strokeWidth={2.5}
-                width={hole.w}
-                x={hole.x}
-                y={hole.y}
-              />
-            ))}
-          </svg>
-        )}
+        <svg
+          height={SCREEN_H}
+          style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}
+          width={SCREEN_W}
+        >
+          <defs>
+            <mask id="tut-mask">
+              <rect fill="#fff" height={SCREEN_H} width={SCREEN_W} />
+              {holes.map((hole, at) => (
+                <rect
+                  fill="#000"
+                  height={hole.h}
+                  key={at}
+                  rx={HOLE_RADIUS}
+                  width={hole.w}
+                  x={hole.x}
+                  y={hole.y}
+                />
+              ))}
+            </mask>
+          </defs>
+          <rect fill={DIM} height={SCREEN_H} mask="url(#tut-mask)" width={SCREEN_W} />
+          {holes.map((hole, at) => (
+            <rect
+              fill="none"
+              height={hole.h}
+              key={at}
+              opacity={0.9}
+              rx={HOLE_RADIUS}
+              stroke={RING}
+              strokeWidth={2.5}
+              width={hole.w}
+              x={hole.x}
+              y={hole.y}
+            />
+          ))}
+        </svg>
 
         <div
           ref={bubbleRef}
@@ -399,9 +386,6 @@ export function TutorialOverlay({
             left: BUBBLE_MARGIN,
             right: BUBBLE_MARGIN,
             top: placement.top,
-            // 접혔을 때도 높이를 재야 다시 펼칠 자리를 알 수 있다. 보이지만 않게 둔다.
-            visibility: read ? "hidden" : "visible",
-            pointerEvents: read ? "none" : "auto",
             background: BUBBLE_BG,
             borderRadius: 24,
             padding: "17px 19px",
@@ -449,50 +433,53 @@ export function TutorialOverlay({
           </div>
 
           {/*
-            개념은 접어 둔다. 짚어 주는 말과 개념 설명을 한꺼번에 펼치면 말풍선이 화면
-            절반을 먹고, 정작 짚은 곳이 그 아래로 밀려 안 보인다. 궁금한 아이만 편다.
+            어려운 낱말이 화면에 실제로 보일 때만 단다(`tutorial-steps.ts` 의 `term` 참고).
+            개념은 접어 둔다. 짚어 주는 말과 한꺼번에 펼치면 말풍선이 화면 절반을 먹고,
+            정작 짚은 곳이 그 아래로 밀려 안 보인다. 궁금한 아이만 편다.
           */}
-          <div
-            style={{
-              position: "relative",
-              marginTop: 12,
-              paddingTop: 12,
-              borderTop: "1px solid rgba(0,30,90,0.10)",
-            }}
-          >
+          {step.term && (
             <div
-              onClick={() => setOpenConcept((open) => !open)}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                cursor: "pointer",
-                fontSize: 13,
-                fontWeight: 800,
-                color: TERM_INK,
+                position: "relative",
+                marginTop: 12,
+                paddingTop: 12,
+                borderTop: "1px solid rgba(0,30,90,0.10)",
               }}
             >
-              <span style={{ fontSize: 14 }}>💡</span>
-              <span>{step.term}</span>
-              <span style={{ fontWeight: 600, color: MUTED }}>
-                {openConcept ? "· 접기" : "· 이게 뭐예요?"}
-              </span>
-            </div>
-            {openConcept && (
               <div
+                onClick={() => setOpenConcept((open) => !open)}
                 style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  cursor: "pointer",
                   fontSize: 13,
-                  fontWeight: 500,
-                  color: SUB_INK,
-                  lineHeight: 1.7,
-                  marginTop: 6,
-                  textWrap: "pretty",
+                  fontWeight: 800,
+                  color: TERM_INK,
                 }}
               >
-                {step.concept}
+                <span style={{ fontSize: 14 }}>💡</span>
+                <span>{step.term}</span>
+                <span style={{ fontWeight: 600, color: MUTED }}>
+                  {openConcept ? "· 접기" : "· 이게 뭐예요?"}
+                </span>
               </div>
-            )}
-          </div>
+              {openConcept && (
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: SUB_INK,
+                    lineHeight: 1.7,
+                    marginTop: 6,
+                    textWrap: "pretty",
+                  }}
+                >
+                  {step.concept}
+                </div>
+              )}
+            </div>
+          )}
 
           <div
             style={{
@@ -537,71 +524,6 @@ export function TutorialOverlay({
             </div>
           </div>
         </div>
-
-        {read && (
-          <div
-            ref={minibarRef}
-            style={{
-              position: "absolute",
-              left: BUBBLE_MARGIN,
-              right: BUBBLE_MARGIN,
-              bottom: MINIBAR_BOTTOM,
-              display: "flex",
-              alignItems: "center",
-              gap: 9,
-              pointerEvents: "auto",
-              background: NAVY,
-              borderRadius: 999,
-              padding: "9px 10px 9px 16px",
-              boxShadow: "0 12px 26px rgba(0,30,90,0.34)",
-            }}
-          >
-            <span style={{ fontSize: 13 }}>💡</span>
-            {/* 방금 읽은 제목을 다시 띄우면 "끝났나?" 싶다. 다음에 뭘 할지를 적는다. */}
-            <span
-              style={{
-                flex: 1,
-                minWidth: 0,
-                fontSize: 12.5,
-                fontWeight: 600,
-                color: "#fff",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {step.hint}
-            </span>
-            <span
-              onClick={() => setRead(false)}
-              style={{
-                flex: "none",
-                fontSize: 12,
-                fontWeight: 800,
-                color: NAVY,
-                background: "#fff",
-                borderRadius: 999,
-                padding: "6px 12px",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-            >
-              다시 보기
-            </span>
-            <span
-              onClick={onClose}
-              style={{
-                flex: "none",
-                fontSize: 15,
-                color: "rgba(255,255,255,0.66)",
-                cursor: "pointer",
-                padding: "0 6px",
-              }}
-            >
-              ✕
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
