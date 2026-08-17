@@ -17,12 +17,15 @@ import {
   tailLeft,
   toScreenRect,
 } from "./lib/tutorial-anchor";
+import { loadAccount } from "./lib/use-account";
 import {
   enterPath,
+  FALLBACK_STOCK,
   isSamePlace,
   nextStepIndex,
+  pickTutorialStock,
   stepIndexAt,
-  TUTORIAL_STEPS,
+  tutorialSteps,
   type TutorialPlace,
 } from "./lib/tutorial-steps";
 
@@ -109,7 +112,37 @@ export function TutorialOverlay({
   onGo: (path: string) => void;
   onClose: () => void;
 }) {
-  const steps = TUTORIAL_STEPS;
+  /**
+   * 이번 튜토리얼이 사고팔 회사. 아이가 갖고 있는 것 중 팔 수 있는 첫 종목이다.
+   *
+   * 없으면 `null` 이고, 그때는 파는 과정을 빼고 매수까지만 보여 준다 — 매도 화면은
+   * 보유가 없으면 막히므로 데려가 놓고 막히느니 사는 것까지만 끝낸다.
+   *
+   * `loadAccount()` 는 세션당 한 번만 서버를 읽고 그 뒤로는 담아 둔 값을 준다. 홈이 이미
+   * 불렀으므로 대개 즉시 온다. 응답 전에는 팔 게 없는 것으로 보는데, 종목이 필요한
+   * 자리(상세)까지는 `다음` 을 네 번 눌러야 해서 그 사이에 도착한다.
+   */
+  const [stock, setStock] = useState<string | null>(null);
+  useEffect(() => {
+    let alive = true;
+    void loadAccount().then((user) => {
+      if (!alive) return;
+      const holdings = (user?.holdings ?? [])
+        .filter((row) => row.stock_code)
+        .map((row) => ({
+          code: row.stock_code as string,
+          qty: row.quantity,
+          availableQty:
+            typeof row.available_quantity === "number" ? row.available_quantity : undefined,
+        }));
+      setStock(pickTutorialStock(holdings));
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const steps = tutorialSteps(stock !== null);
   const [index, setIndex] = useState(() => Math.max(0, stepIndexAt(steps, place)));
   /** 읽고 나면 접는다. 딤과 설명이 계속 떠 있으면 정작 버튼을 누를 수가 없다. */
   const [read, setRead] = useState(false);
@@ -177,6 +210,21 @@ export function TutorialOverlay({
     setBoxes(found);
   }, [step]);
 
+  /**
+   * 장이 바뀌면 짚을 자리를 **화면 안으로 끌어온다.**
+   *
+   * 상세 화면처럼 세로로 긴 곳은 회사 소개·요즘 소식 카드가 스크롤 아래에 있어, 그냥
+   * 재면 구멍이 화면 밖에 뚫리고 말풍선만 덩그러니 뜬다. 종목이 바뀌면 카드 높이도
+   * 달라지므로 좌표를 미리 정해 둘 수도 없다 — 그때그때 그 자리로 옮긴다.
+   *
+   * 스크롤이 움직이는 동안은 아래 `scroll` 리스너가 계속 다시 재므로 구멍이 따라온다.
+   */
+  useEffect(() => {
+    const id = step?.anchors[0];
+    if (!id) return;
+    visibleNode(id)?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [step]);
+
   // 원본은 200ms 마다 DOM 을 전수 검색했다. 화면이 React 로 넘어온 지금은 장이 바뀔 때와
   // 화면이 실제로 움직였을 때만 다시 재면 된다. 안쪽 스크롤 컨테이너까지 잡으려면
   // 스크롤은 캡처 단계에서 받아야 한다.
@@ -237,7 +285,8 @@ export function TutorialOverlay({
     setRead(true);
     const enter = steps[next].enter;
     if (!enter) return;
-    if ("path" in enter) return onGo(enterPath(enter.path, place));
+    // 팔 게 없으면 매도 장 자체가 없으므로 여기 `:code` 는 상세로 들어가는 길뿐이다.
+    if ("path" in enter) return onGo(enterPath(enter.path, stock ?? FALLBACK_STOCK));
     clickThrough(enter.anchors);
   };
 
