@@ -12,6 +12,7 @@
 | `20260815002039_seed_family_portfolios.sql` | 찬영 가족 3계정의 보유·매수 이력·잔액을 데모 포트폴리오로 교체. **계정(`profiles`+`account`)이 없으면 먼저 만든다** — 파일 순서상 `seed_family_profiles` 보다 앞이라(아래 "순서 문제" 참고) 직접 만들어야 한다 |
 | `20260815033156_seed_family_profiles.sql` | 찬영 가족 3계정(`profiles`+`account`)을 저장소에서 재현 가능하게 함(위 파일과 같은 insert, `on conflict do nothing` 이라 중복 무해). 비밀번호는 자리표시자(`CHANGE_ME`) |
 | `20260815033308_order_lifecycle_db_ownership.sql` | 주문 생애주기(체결·대기·예약·취소·거절)를 DB가 소유. `transactions`에 상태 컬럼, `account`·`holdings`에 예약 잠금 컬럼 추가. `apply_trade` 갱신, `reserve_order`·`settle_order`·`cancel_order` 신설 |
+| `20260817045325_reshape_child_weekly_behavior.sql` | 김찬영(1) 데모 거래·탭 열람·보유·잔액을 주차마다 성향이 갈리도록(탐험가 → 저격수 → 승부사) 다시 깐다. 스키마는 건드리지 않는 **데이터 보정**이고 `profiles` 1번이 없으면 조용히 아무것도 하지 않는다. **2026-08-17 라이브 적용 완료**(MCP, 기록 버전 `20260817045325`) |
 
 베이스 파일은 **뒤의 ALTER 2건이 아직 적용되지 않은 모양**이다. 즉 `stock_tab_views` 에는
 `duration_seconds`·`opened_at`·`closed_at` 만 있고 `stock_id`·`created_at` 은 없으며,
