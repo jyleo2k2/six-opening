@@ -58,7 +58,8 @@ import {
 const UP = "#E8322E";
 const DOWN = "#1668DC";
 
-// `ui-src/logic/constants.js` 의 CTA_ON·CTA_OFF·SUB_CTA·glass 와 같은 값이다.
+// `ui-src/logic/constants.js` 의 CTA_ON·CTA_OFF·glass 와 같은 값이다. 회색 보조 단추
+// (`SUB_CTA`) 는 마지막으로 쓰던 완료 화면 `홈으로` 가 `CTA_ON` 으로 옮겨 가며 사라졌다.
 const GLASS = "background:#FFFFFF;box-shadow:0 2px 10px rgba(30,25,60,0.05)";
 const CTA_ON = styleFromCss(
   "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#fff;letter-spacing:-0.01em;cursor:pointer;" +
@@ -69,9 +70,6 @@ const CTA_ON = styleFromCss(
 );
 const CTA_OFF = styleFromCss(
   "position:relative;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#FFFFFF;letter-spacing:-0.01em;cursor:not-allowed;background:#C6C9D8",
-);
-const SUB_CTA = styleFromCss(
-  "flex:1;border-radius:999px;padding:19px;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em;cursor:pointer;background:#EFEFF5",
 );
 const PAGE = styleFromCss(
   "position:absolute;left:0;top:0;right:0;bottom:0;padding-top:59px;display:flex;flex-direction:column",
@@ -207,12 +205,59 @@ function chipStyle(on: boolean) {
   );
 }
 
+/**
+ * 고르는 카드. 두 칸짜리(`grid`)는 **왼쪽 정렬**이다 — 글이 두 줄로 넘어가면 가운데 정렬은
+ * 줄마다 시작점이 달라져 여섯 장이 들쭉날쭉해 보인다. 한 줄짜리(`row`)와도 같은 선에 선다.
+ */
 function pickCardStyle(on: boolean, kind: "grid" | "row") {
   const base =
     kind === "grid"
-      ? "display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 10px;border-radius:20px;cursor:pointer;min-height:64px;justify-content:center;"
+      ? "display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:16px 14px;border-radius:20px;cursor:pointer;min-height:64px;justify-content:center;"
       : "display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;cursor:pointer;";
   return styleFromCss(base + (on ? "background:#FFF4F9;box-shadow:inset 0 0 0 2px #F5327F" : GLASS));
+}
+
+/**
+ * 완료 화면 폭죽. **마스코트 한가운데에서 한 번에 터진다** — 예전에는 🎈 이모지가 아래에서
+ * 위로, 색종이가 위에서 아래로 지나가 축하가 아니라 배경이 흐르는 것처럼 보였다.
+ *
+ * 자리 잡는 점은 마스코트 그림 높이의 절반이라 그림 중심에 정확히 맞는다 — 원본이 330×356
+ * 이므로 그린 너비에서 높이를 얻는다. 매수(128)와 매도(150)가 서로 다른 너비로 그린다.
+ * 크기 없는 점이므로 아래 글줄을 밀지 않는다.
+ *
+ * 조각 값은 **인덱스로만** 정한다. `Math.random()` 을 쓰면 서버가 그린 값과 브라우저가 그린
+ * 값이 달라 하이드레이션이 어긋난다.
+ *
+ * 날아가는 거리는 120px 를 넘기지 않는다. 가로로 넘친 조각은 `SCROLL` 의 `overflow-x:hidden`
+ * 이 자르고, 세로는 이 거리 안에서 가운데 정렬된 칸을 벗어나지 않아 스크롤이 늘어나지 않는다.
+ * 매수·매도 완료가 같은 연출을 쓰므로 두 곳이 이 한 조각을 부른다.
+ */
+function Burst({ mascotWidth }: { mascotWidth: number }) {
+  const count = 18;
+  const center = Math.round((mascotWidth * 356) / 330 / 2);
+  return (
+    <div style={{ position: "absolute", left: "50%", top: center, width: 0, height: 0, pointerEvents: "none", zIndex: 3 }}>
+      {Array.from({ length: count }, (_, i) => {
+        const color = ["#F5327F", "#FFC53D", "#4FC3F7", "#7BE3A0", "#9B8CFF", "#FF8AD0"][i % 6];
+        // 한 바퀴를 고르게 나누고 홀수 번째만 살짝 틀어 줄지어 선 것처럼 보이지 않게 한다.
+        const radian = (((i * 360) / count + (i % 2 ? 9 : 0)) * Math.PI) / 180;
+        const distance = 78 + (i % 4) * 14;
+        return (
+          <div
+            key={i}
+            style={styleFromCss(
+              `position:absolute;left:0;top:0;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
+                `border-radius:2px;background:${color};` +
+                `--kwdx:${Math.round(Math.cos(radian) * distance)}px;` +
+                `--kwdy:${Math.round(Math.sin(radian) * distance)}px;` +
+                `--kwspin:${(i % 2 ? 1 : -1) * (200 + (i % 5) * 60)}deg;` +
+                `animation:kwBurst ${1.15 + (i % 4) * 0.12}s cubic-bezier(0.12,0.72,0.3,1) ${i * 0.012}s forwards`,
+            )}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 function ProgressBars({ step }: { step: number }) {
@@ -683,9 +728,11 @@ export function OrderScreen({
         </div>
       </div>
     ) : (
-      <div style={{ flex: "none", padding: "8px 16px 10px", display: "flex", justifyContent: "center" }}>
-        <div onClick={() => onLeave("/")} style={{ ...SUB_CTA, flex: "none", minWidth: 200 }}>
-          홈으로
+      // 완료 화면의 유일한 단추라 **1·2단계 `주문하기` 와 같은 모습**이다. 회색 보조 단추로
+      // 두면 마지막 자리에서 눌러야 할 곳이 눌러도 되는 곳처럼 보인다.
+      <div style={{ flex: "none", padding: "8px 16px 10px" }}>
+        <div onClick={() => onLeave("/")} style={CTA_ON}>
+          <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" }}>홈으로</span>
         </div>
       </div>
     );
@@ -1178,37 +1225,9 @@ export function OrderScreen({
           paddingBottom: 6,
         }}
       >
-        {/* 풍선·색종이. app.html 과 같은 마크업이고 kw* keyframes 는 `phone-frame.css` 가
-            정의한다 — 유실돼 죽어 있던 연출을 이관하면서 복원했다. zIndex 를 마스코트·카드보다
-            높여서 뒤로 지나가지 않고 앞으로 지나가게 한다. */}
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 100 }}>
-          {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => (
-            <div
-              key={i}
-              style={styleFromCss(
-                `position:absolute;left:${8 + i * 21}%;bottom:-40px;font-size:${26 + (i % 3) * 7}px;` +
-                  `--kwx:${i % 2 ? "" : "-"}${10 + i * 6}px;` +
-                  `animation:kwRise ${2.6 + i * 0.35}s ease-in ${i * 0.18}s forwards`,
-              )}
-            >
-              {emoji}
-            </div>
-          ))}
-          {Array.from({ length: 14 }, (_, i) => {
-            const col = ["#F5327F", "#FFC53D", "#4FC3F7", "#7BE3A0", "#9B8CFF", "#FF8AD0"][i % 6];
-            return (
-              <div
-                key={`c${i}`}
-                style={styleFromCss(
-                  `position:absolute;top:-20px;left:${4 + i * 6.8}%;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
-                    `border-radius:2px;background:${col};--kwx:${i % 2 ? "" : "-"}${14 + (i % 5) * 12}px;` +
-                    `animation:kwFall ${2 + (i % 5) * 0.3}s linear ${i * 0.09}s forwards`,
-                )}
-              />
-            );
-          })}
-        </div>
         <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+          {/* 폭죽은 마스코트 자리를 기준으로 터지므로 마스코트와 같은 칸 안에 둔다. */}
+          <Burst mascotWidth={128} />
           <img
             alt="키웅이"
             src="/ui/assets/mascot-bear.png"
@@ -1251,11 +1270,18 @@ export function OrderScreen({
               whiteSpace: "pre-line",
             }}
           >
+            {/*
+              세 갈래 모두 **지금 있는 자리만** 약속한다. 남긴 이유·메모를 다시 보여 주는 곳은
+              파는 2단계의 회고 카드(`그때 마음과 지금 마음을 견줘 봐요`)다 — 아카이브에는
+              그 기록을 혼자 다시 보는 자리가 없고, 가족 피드도 아카이브에서 직접 올려야만
+              생긴다(`/api/family` 는 `feed_body` 가 있는 거래만 읽는다). 예전 문구는
+              "아카이브에서 오늘의 나를 다시 만나요" 라고 없는 자리를 가리켰다.
+            */}
             {done.limit
               ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 돈은 잠깐 맡아둘게요!"
               : done.scheduled
-                ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 돈을 그대로 맡아둘게요."
-                : "왜 샀는지까지 남긴 건 정말 잘한 거예요.\n나중에 아카이브에서 오늘의 나를 다시 만나요!"}
+                ? "지금은 장이 닫혀 있어서 자리만 맡아뒀어요.\n주문과 체결은 달라요 — 거래가 열리는 첫날 시가로 사고, 안 열리면 돈은 그대로 있어요."
+                : "왜 샀는지까지 남긴 건 정말 잘한 거예요.\n나중에 팔 때 오늘의 마음을 다시 보여줄게요!"}
           </div>
           <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 22 }}>
             <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>
@@ -1856,36 +1882,10 @@ export function OrderScreen({
           paddingBottom: 6,
         }}
       >
-        {/* 풍선·색종이 — 매수 완료와 같은 연출이다. 원래 프로토타입에는 매도 완료에 이
-            연출이 없었지만 사용자 요청으로 매수와 맞춘다. */}
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 100 }}>
-          {["🎈", "🎈", "🎈", "🎉", "🎊"].map((emoji, i) => (
-            <div
-              key={i}
-              style={styleFromCss(
-                `position:absolute;left:${8 + i * 21}%;bottom:-40px;font-size:${26 + (i % 3) * 7}px;` +
-                  `--kwx:${i % 2 ? "" : "-"}${10 + i * 6}px;` +
-                  `animation:kwRise ${2.6 + i * 0.35}s ease-in ${i * 0.18}s forwards`,
-              )}
-            >
-              {emoji}
-            </div>
-          ))}
-          {Array.from({ length: 14 }, (_, i) => {
-            const col = ["#F5327F", "#FFC53D", "#4FC3F7", "#7BE3A0", "#9B8CFF", "#FF8AD0"][i % 6];
-            return (
-              <div
-                key={`c${i}`}
-                style={styleFromCss(
-                  `position:absolute;top:-20px;left:${4 + i * 6.8}%;width:${7 + (i % 3) * 3}px;height:${11 + (i % 4) * 3}px;` +
-                    `border-radius:2px;background:${col};--kwx:${i % 2 ? "" : "-"}${14 + (i % 5) * 12}px;` +
-                    `animation:kwFall ${2 + (i % 5) * 0.3}s linear ${i * 0.09}s forwards`,
-                )}
-              />
-            );
-          })}
-        </div>
         <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+        {/* 폭죽 — 매수 완료와 같은 연출이다. 원래 프로토타입에는 매도 완료에 이 연출이
+            없었지만 사용자 요청으로 매수와 맞춘다. */}
+        <Burst mascotWidth={150} />
         <img
           alt="키웅이"
           src="/ui/assets/mascot-bear.png"
