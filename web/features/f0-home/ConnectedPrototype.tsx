@@ -169,6 +169,7 @@ export function ConnectedPrototype({
               onLeave={leaveToPath}
               onStage={setStage}
               side={overlay.side}
+              tutorialMode={tutorialOn}
             />
           )}
         </div>

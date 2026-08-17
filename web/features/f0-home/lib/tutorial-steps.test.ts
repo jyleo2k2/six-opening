@@ -197,7 +197,7 @@ assert.equal(backPath(stepOf("home-goal"), "259960"), "/");
 assert.equal(backPath(stepOf("explore-cards"), "259960"), "/explore");
 assert.equal(backPath(stepOf("detail-news"), "259960"), "/stock/259960");
 
-// 주문 화면으로는 되돌아가지 않는다 — 주문은 이미 서버로 나갔다.
+// 주문 화면으로는 되돌아가지 않는다 — 지나간 입력을 되감아 다시 누르게 하지 않는다.
 for (const step of TUTORIAL_STEPS.filter((step) => step.screen === "order")) {
   assert.equal(backPath(step, "259960"), null, step.id);
 }

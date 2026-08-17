@@ -320,6 +320,7 @@ export function OrderScreen({
   onLeave,
   onChatContext,
   onStage,
+  tutorialMode = false,
 }: {
   code: string;
   side: "buy" | "sell";
@@ -330,8 +331,10 @@ export function OrderScreen({
   /**
    * 주문 1/2/3 단계는 주소가 안 바뀌어(`useState`) 밖에서는 어디에 있는지 안 보인다.
    * 튜토리얼은 그 자리를 알아야 맞는 설명을 띄우므로 `onLeave` 와 같은 패턴으로 올린다.
-   */
+  */
   onStage?: (stage: TutorialStage) => void;
+  /** 튜토리얼에서는 완료 화면만 보여 주고 실제 주문·거래 기록은 만들지 않는다. */
+  tutorialMode?: boolean;
 }) {
   const { wallet, update, refresh } = useWallet();
   const live = useStockLive(code);
@@ -812,7 +815,7 @@ export function OrderScreen({
 
     // 체결분만 지갑을 미리 움직인다 — 완료 화면의 `남은 지갑` 이 `refresh()` 를 기다리지
     // 않게 하는 화면용 값이고, 곧 서버 응답이 덮는다.
-    const finishBuy = (transactionId: string | null, fill: boolean) => {
+    const finishBuy = (transactionId: string | null, fill: boolean, fake = false) => {
       if (fill) {
         update((current) => ({
           acc: { ...current.acc, [account]: applyBuyFill(current.acc[account], code, price, math.qty, math.amount) },
@@ -823,9 +826,9 @@ export function OrderScreen({
         name: stock.name,
         qty: math.qty,
         amount: math.amount,
-        limit: draft.orderType === "limit" ? math.limPrice : null,
-        scheduled: !fill && draft.orderType !== "limit",
-        scheduledFor: !fill && draft.orderType !== "limit" ? scheduledFor : null,
+        limit: fake ? null : draft.orderType === "limit" ? math.limPrice : null,
+        scheduled: fake ? false : !fill && draft.orderType !== "limit",
+        scheduledFor: fake ? null : !fill && draft.orderType !== "limit" ? scheduledFor : null,
         requestMode: math.byQty ? "qty" : "amount",
       });
       setOrderError(null);
@@ -842,6 +845,11 @@ export function OrderScreen({
         setStep(step + 1);
         setShowPad(false);
         setOrderError(null);
+        return;
+      }
+      if (tutorialMode) {
+        // 튜토리얼의 `다음`은 실제 주문 CTA를 누르지만, 서버·지갑·거래내역에는 남기지 않는다.
+        finishBuy(null, false, true);
         return;
       }
       const isLimit = draft.orderType === "limit";
@@ -1431,7 +1439,7 @@ export function OrderScreen({
           ? !!sellDraft.reason && (!showJudge || planMatch === true || !!sellDraft.change)
           : true;
 
-    const finishSell = (transactionId: string | null, fill: boolean) => {
+    const finishSell = (transactionId: string | null, fill: boolean, fake = false) => {
       if (fill) {
         update((current) => ({
           acc: { ...current.acc, [account]: applySellFill(current.acc[account], code, math.qty, math.proceeds) },
@@ -1442,9 +1450,9 @@ export function OrderScreen({
         name: stock.name,
         qty: math.qty,
         proceeds: math.proceeds,
-        limit: sellDraft.orderType === "limit" ? math.limPrice : null,
-        scheduled: !fill && sellDraft.orderType !== "limit",
-        scheduledFor: !fill && sellDraft.orderType !== "limit" ? scheduledFor : null,
+        limit: fake ? null : sellDraft.orderType === "limit" ? math.limPrice : null,
+        scheduled: fake ? false : !fill && sellDraft.orderType !== "limit",
+        scheduledFor: fake ? null : !fill && sellDraft.orderType !== "limit" ? scheduledFor : null,
       });
       patchSell({ memo: "" });
       setMemoSaved(false);
@@ -1462,6 +1470,11 @@ export function OrderScreen({
         retroAtRef.current = Date.now();
         setOrderError(null);
         setStep(2);
+        return;
+      }
+      if (tutorialMode) {
+        // 매수와 같은 규칙이다. 완료 모양만 보여 주고 서버 주문·거래내역은 만들지 않는다.
+        finishSell(null, false, true);
         return;
       }
       retroMsRef.current = retroAtRef.current ? Date.now() - retroAtRef.current : 0;
@@ -1963,7 +1976,6 @@ export function OrderScreen({
           src="/ui/assets/mascot-bear.png"
           style={{
             display: "block",
-            animation: "kwPop 0.5s cubic-bezier(0.2,1.2,0.4,1) both",
             filter: "drop-shadow(0 12px 20px rgba(35,25,80,0.18))",
           }}
           width={150}
