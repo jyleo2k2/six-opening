@@ -477,23 +477,21 @@ export function ArchiveScreen({
   const screenTitle =
     view === "return" ? "우리 가족 투자 현황" : view === "family" ? "우리 가족 성향 리포트" : "내 투자 성향";
   const thisWeek = weekLabel(mondayOf(Date.now()));
-  /**
-   * 뒤로 — 가족 탭에서는 내 카드(첫 화면)로 돌아오고, 첫 화면에서는 화면을 뜬다.
-   * 목업의 뒤로가기는 첫 화면에서 아무 일도 하지 않지만, 그건 나갈 곳이 없는 단독
-   * 페이지라서다. 여기서는 홈으로 보낸다 — 눌러도 안 움직이는 단추를 두지 않는다.
-   */
-  const goBack = () => {
-    if (view !== "cards") return setView("cards");
-    onLeave("/");
-  };
-
   return (
     <PhoneFrame>
       <div style={PAGE}>
-        <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 12, padding: "6px 20px 0" }}>
-          <div onClick={goBack} style={BACK}>‹</div>
-          <div style={{ flex: 1 }} />
-        </div>
+        {/*
+          뒤로는 **가족 자리에만** 있다 — 내 카드(첫 화면)로 돌아오는 길이다.
+          첫 화면에는 단추 자체를 두지 않는다(2026-08-17 유저 확정). 아카이브는 하단
+          탭으로 드나드는 곳이라 나갈 문이 이미 있고, 목업의 뒤로가기도 첫 화면에서는
+          아무 일도 하지 않았다. 줄째로 접어야 제목이 그만큼 올라와 카드 자리가 넓다.
+        */}
+        {view !== "cards" && (
+          <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 12, padding: "6px 20px 0" }}>
+            <div onClick={() => setView("cards")} style={BACK}>‹</div>
+            <div style={{ flex: 1 }} />
+          </div>
+        )}
         <div style={{ flex: "none", display: "flex", alignItems: "flex-end", gap: 10, padding: "10px 20px 4px" }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 16, fontWeight: 800, color: "#9095AA", letterSpacing: "-0.01em" }}>{thisWeek}</div>
@@ -522,7 +520,8 @@ export function ArchiveScreen({
         */}
         {/* 안내도 카드가 선 뒤에 띄운다 — 가리킬 카드가 아직 없는데 꼬리만 서면 이상하다. */}
         {view === "cards" && infoOpen && !data.seasonLoading && (
-          <div style={{ position: "absolute", left: 20, right: 20, top: 112, zIndex: INFO_Z, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
+          // `top` 은 제목 줄 바로 아래다 — 첫 화면은 뒤로가기 줄이 없어 제목이 위에 붙는다.
+          <div style={{ position: "absolute", left: 20, right: 20, top: 136, zIndex: INFO_Z, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
             {/*
               꼬리는 **아래로** 내려 가운데 성향 카드를 가리킨다. 안내가 말하는 대상이
               ⓘ 가 아니라 그 아래 카드이기 때문이다. 카드는 레일 한가운데에 서므로
