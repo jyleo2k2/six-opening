@@ -6,10 +6,9 @@ import { Jua } from "next/font/google";
 import iconChild from "./front UI/assets/icon-child.png";
 import iconParents from "./front UI/assets/icon-parents.png";
 import splashHero from "./front UI/assets/splash-hero.png";
-// 폰 프레임의 배율·기하는 로그인도 로그인 뒤 화면과 같은 것을 쓴다. `usePhoneScreenRect`
-// 를 들여오면 무대(`.phone-stage`) 스타일도 함께 딸려 온다.
-import { usePhoneScreenRect } from "../features/f0-home/PhoneFrame";
-import { PHONE_SCREEN, PROTOTYPE_PHONE } from "../features/f0-home/lib/phone-frame";
+// 폰 프레임은 로그인도 로그인 뒤 화면과 같은 것을 쓴다. 무대(`.phone-stage`)·배율·상태바·
+// 홈 막대가 전부 딸려 오므로 이 파일은 화면 안쪽만 그린다.
+import { PhoneFrame } from "../features/f0-home/PhoneFrame";
 import { SignupWizard } from "./SignupWizard";
 
 const jua = Jua({ weight: "400", subsets: ["latin"], preload: false });
@@ -106,44 +105,25 @@ export function LoginGate() {
     }
   }
 
-  // 로그인 뒤 화면(`PhoneFrame`)과 **같은 함수**가 배율을 정한다. 예전에는 여기서 CSS 로
-  // 따로 계산했는데 `calc((100vw - 16px) / 450)` 이 길이라 숫자를 받는 `scale()` 과 타입이
-  // 맞지 않아 선언이 통째로 버려졌고, 폰이 창 크기와 무관하게 원본 450×920 으로 그려졌다.
-  // 창 높이가 928 미만이면 로그인에서 홈으로 넘어갈 때 폰이 눈에 띄게 작아졌다.
-  const scale = usePhoneScreenRect()?.scale ?? 1;
-
+  // 프레임·배율·상태바·홈 막대는 로그인 뒤 화면과 **같은 컴포넌트**가 그린다. 예전에는 이
+  // 파일이 프레임을 통째로 다시 그리면서 상태바와 홈 막대만 빠뜨렸다. 그래서 로그인에서
+  // 홈으로 넘어가는 순간 시계·배터리와 아래 막대가 갑자기 생겼고, 배율도 여기서 CSS 로
+  // 따로 계산하다 `calc((100vw - 16px) / 450)` 이 숫자를 받는 `scale()` 과 타입이 맞지 않아
+  // 선언이 통째로 버려진 적이 있다. 다시 그리지 않으면 어긋날 자리도 없다.
   return (
-    <div
-      className="phone-stage"
-      style={{
-        fontFamily: "'Pretendard','Segoe UI','Malgun Gothic',sans-serif",
-        color: "#1A2233",
-      }}
-    >
+    <PhoneFrame>
+      {/* 로그인만 배경이 보라 그라데이션이라 화면 색 위에 한 겹 덮는다. */}
       <div
         style={{
-          position: "relative",
-          width: PROTOTYPE_PHONE.frameWidth,
-          height: PROTOTYPE_PHONE.frameHeight,
-          flex: "none",
-          transform: `scale(${scale})`,
-          transformOrigin: "center center",
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          flexDirection: "column",
+          fontFamily: "'Pretendard','Segoe UI','Malgun Gothic',sans-serif",
+          color: "#1A2233",
+          background: "linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            left: PHONE_SCREEN.left,
-            top: PHONE_SCREEN.top,
-            width: PROTOTYPE_PHONE.screenWidth,
-            height: PROTOTYPE_PHONE.screenHeight,
-            borderRadius: PHONE_SCREEN.borderRadius,
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            background: "linear-gradient(180deg,#F2EDFC 0%,#EFEAFA 55%,#EDE8F9 100%)",
-          }}
-        >
           {screen === "splash" && (
             <SplashScreen
               onSignin={() => setScreen("signin")}
@@ -172,16 +152,8 @@ export function LoginGate() {
           {screen === "soon" && (
             <SignupWizard kind={soonKind} onExit={() => setScreen("splash")} />
           )}
-        </div>
-        <img
-          src="/ui/assets/iphone-frame.png"
-          width={PROTOTYPE_PHONE.frameWidth}
-          height={PROTOTYPE_PHONE.frameHeight}
-          alt=""
-          style={{ position: "absolute", left: 0, top: 0, display: "block", zIndex: 5, pointerEvents: "none" }}
-        />
       </div>
-    </div>
+    </PhoneFrame>
   );
 }
 
