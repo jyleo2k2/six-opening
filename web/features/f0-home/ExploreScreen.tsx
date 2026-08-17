@@ -120,7 +120,14 @@ export function ExploreScreen({
   // 같은 렌더에서 제 필터가 잡히고, 아래 effect 들이 그 값으로 한 번 더 돈다.
   const filter = knownFilter(sector, universe?.sectors.map((entry) => entry.id) ?? []);
   const path = explorePath(filter);
-  const ready = universe !== null && wallet !== null;
+  /**
+   * 카드 자리를 되살리고 적어 둘 준비. **유니버스만 있으면 된다.**
+   *
+   * 예전에는 지갑까지 기다렸는데, 지갑은 `/api/account` 와 `GET /api/orders` 를 둘 다
+   * 받아야 서고 그 조회는 만기 예약 정산까지 겸한다 — 카드 목록과 아무 상관이 없는
+   * 왕복을 기다린 셈이다.
+   */
+  const ready = universe !== null;
 
   // 필터·검색이 바뀌면 처음 카드부터 다시 본다 — `componentDidUpdate` 의 scrollLeft 리셋과 같다.
   useEffect(() => {
@@ -170,7 +177,13 @@ export function ExploreScreen({
   }, [walletLoaded, account, universe, onChatContext]);
   useEffect(() => () => onChatContext(null), [onChatContext]);
 
-  if (!universe || !wallet) return <PhoneFrame />;
+  /**
+   * **지갑을 기다리지 않는다.** 이 화면에서 지갑을 쓰는 곳은 위의 챗봇 맥락 하나뿐이고,
+   * 카드 목록·칩·검색은 전부 유니버스와 시세로 그려진다. 지갑을 첫 페인트에 묶어 두면
+   * `/api/account` + `GET /api/orders`(만기 예약 정산 포함)가 끝날 때까지 빈 폰이 보인다 —
+   * 탐색으로 돌아올 때마다 그랬다. 맥락은 늦게 도착해도 그 effect 가 알아서 올린다.
+   */
+  if (!universe) return <PhoneFrame />;
 
   const list = exploreList(universe, { quotes, sparks }, filter, query, watchCodes);
   const chips = sectorChips(universe, filter);
