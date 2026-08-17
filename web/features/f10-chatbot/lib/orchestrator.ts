@@ -305,7 +305,7 @@ function actionPrompts(action: ChatActionPayload | undefined): string[] {
 }
 
 /**
- * 2단 — 지시어 후속 질문 되살리기 (SPEC §3.5).
+ * 2단 — 지시어 후속 질문 되살리기 (SPEC §3.6).
  *
  * 1단이 어떤 허용 목적도 판정하지 못했을 때만 돈다. 위기·추천·개인정보처럼 1단이
  * 이미 잡은 입력은 여기에 오지 않으므로 재작성이 차단을 우회하는 통로가 되지
