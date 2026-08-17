@@ -356,6 +356,9 @@ export function familySummary(total: FamilyTotal | null | undefined) {
   const pnl = total.profit;
   return {
     positive: pnl >= 0,
+    // `returnSummary` 와 같은 두 짝을 낸다 — 가족 시트는 단위를 뗀 숫자에 `원` 을 따로
+    // 작게 붙이고, 좁은 자리는 단위까지 붙은 한 덩어리를 쓴다.
+    totalNumber: Math.round(total.assets).toLocaleString("ko-KR"),
     totalText: won(total.assets),
     pnlText: (pnl > 0 ? "▲ " : pnl < 0 ? "▼ " : "") + won(Math.abs(pnl)),
     // 원금이 0이면 잰 것이 없다. `0.00%` 로 적으면 본전인 가족처럼 읽힌다.

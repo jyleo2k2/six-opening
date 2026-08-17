@@ -16,6 +16,20 @@ import type { Universe, UniverseLive } from "./use-universe";
 
 export const TRAIT_LABELS = ["집중", "분산", "정확", "직관", "근거"] as const;
 
+/**
+ * 축 이름표를 눌렀을 때 카드 설명칸이 보여 주는 한 줄. `TRAIT_LABELS` 와 같은 순서다.
+ *
+ * **무엇을 재는지만 적는다** — 점수가 높으면 좋다·낮으면 나쁘다는 말도, 다음에 무엇을
+ * 하라는 말도 넣지 않는다. 다섯 축은 지난 한 주의 행동을 되짚는 눈금이다.
+ */
+export const TRAIT_DESCS: readonly string[] = [
+  "확신한 곳에 몰아 담은 정도예요. 담은 섹터가 적고 현금이 적을수록 높아요.",
+  "여러 곳에 나눠 담은 정도예요. 집중의 반대쪽 축이에요.",
+  "사고판 시점이 맞았는지예요. 산 뒤 오르거나 판 뒤 내리면 올라가요.",
+  "느낌으로 빠르게 결정한 비율이에요. 근거의 반대쪽 축이에요.",
+  "사기 전에 뉴스·기업정보·차트를 확인하고 결정한 비율이에요.",
+];
+
 export type TypeKey = "sniper" | "strategist" | "fighter" | "explorer";
 
 /**
@@ -326,6 +340,14 @@ export function mondayOf(ts: number | string) {
 
 const monthDay = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`;
 
+/**
+ * `8월 3주차`. 카드 레일의 주차 표기와 머리말 주차가 **같은 식으로** 세야 한다 —
+ * 머리말이 4주차인데 가운데 카드가 3주차면 어느 쪽이 지금인지 알 수 없다.
+ */
+export function weekLabel(monday: Date) {
+  return `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차`;
+}
+
 export type WeekCard = {
   key: number;
   week: string;
@@ -374,7 +396,7 @@ export function weekCards(
     const sunday = new Date(k + 6 * 86400000);
     return {
       key: k,
-      week: `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차`,
+      week: weekLabel(monday),
       date: `${monthDay(monday)} – ${monthDay(sunday)}`,
       title: type.title,
       type,
