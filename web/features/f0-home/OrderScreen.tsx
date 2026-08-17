@@ -287,6 +287,30 @@ function NumPad({ keys, onTap }: { keys: string[]; onTap: (key: string) => void 
 
 const ORDER_REJECTED = "주문을 넣지 못했어. 잠깐 뒤에 다시 해볼까?";
 
+/**
+ * 거절 사유별 문구. 사유 코드의 원본은 서버(`api/trade` 의 `rejectionReason`)다.
+ *
+ * 예전에는 무엇이 막았든 `ORDER_REJECTED` 한 줄이었다. 그래서 "예약해 둔 매도가 수량을
+ * 잠가서 더 팔 수 없는 상태" 와 "서버가 잠깐 죽은 상태" 가 화면에서 똑같이 보였고, 아이도
+ * 어른도 다시 눌러 보는 것 말고는 할 수 있는 게 없었다. 무엇을 바꾸면 되는지 말해 준다.
+ *
+ * `not_syncable` 은 요청이 나가지도 않은 경우다 — 이것까지 같은 문구로 덮으면 서버에 물어본
+ * 적조차 없다는 사실이 가려진다.
+ */
+const REJECTION_TEXT: Record<string, string> = {
+  insufficient_balance: "지갑에 있는 돈보다 많아서 못 넣었어. 금액을 줄여서 다시 해볼까?",
+  insufficient_quantity: "지금 팔 수 있는 주식이 모자라. 예약해 둔 매도가 있으면 그만큼은 잠겨 있어.",
+  unknown_stock: "이 회사는 아직 주문을 받을 수 없어.",
+  invalid_amount: "주문할 수량이나 금액을 다시 확인해 볼까?",
+  not_syncable: "지금 계정으로는 주문을 저장할 수 없어. 다시 로그인해 볼까?",
+  network: "연결이 잠깐 끊겼어. 잠깐 뒤에 다시 해볼까?",
+};
+
+const rejectionText = (reason?: string) => (reason && REJECTION_TEXT[reason]) || ORDER_REJECTED;
+
+/** 주문 두 경로의 공통 응답. 성공이면 주문 번호가, 실패면 `reason` 만 담긴다. */
+type OrderResponse = { transaction_id?: string; order_id?: string; reason?: string };
+
 export function OrderScreen({
   code,
   side,
@@ -339,7 +363,6 @@ export function OrderScreen({
     scheduled: boolean;
     scheduledFor: string | null;
     requestMode?: "qty" | "amount";
-    badge?: boolean;
   } | null>(null);
   /**
    * 접수 왕복이 도는 동안 참이다. 서버 확정을 기다리게 되면서 **버튼이 한 박자 늦게**
@@ -493,27 +516,31 @@ export function OrderScreen({
    * 세운 뒤에야 그려지므로(`if (!wallet) return <PhoneFrame/>`), 주문 버튼을 누를 수 있는
    * 시점에 `syncable` 이 거짓이면 응답을 기다리는 중이 아니라 **저장할 수 없는 계정**이다.
    */
-  const postTrade = (body: Record<string, unknown>): Promise<{ transaction_id?: string } | null> => {
-    if (!syncable) return Promise.resolve(null);
-    return fetch("/api/trade", {
+  const postTrade = (body: Record<string, unknown>): Promise<OrderResponse> => postOrder("/api/trade", body);
+  // 예약 접수. **접수가 곧 주문이다** — 주문 번호가 없으면 주문은 없던 일이고 거절 문구를 보여 준다.
+  const postReserve = (body: Record<string, unknown>): Promise<OrderResponse> => postOrder("/api/orders", body);
+
+  /**
+   * 주문 두 경로가 같은 모양으로 답하게 한다 — 성공이면 서버 응답, 실패면 `reason` 하나다.
+   *
+   * 예전에는 실패를 전부 `null` 로 뭉갰다. 그래서 화면은 "서버가 거절했다" 와 "보내지도
+   * 않았다" 를 구분할 수 없었고 문구도 하나뿐이었다. 사유는 화면이 만들지 않고 서버가 준
+   * 것만 쓴다 — 화면이 짐작해 적으면 서버가 실제로 막은 이유와 갈라진다.
+   */
+  function postOrder(path: string, body: Record<string, unknown>): Promise<OrderResponse> {
+    if (!syncable) return Promise.resolve({ reason: "not_syncable" });
+    return fetch(path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
-      .then((response) => (response.ok ? response.json() : null))
-      .catch(() => null);
-  };
-  // 예약 접수. **접수가 곧 주문이다** — null 이면 주문은 없던 일이고 거절 문구를 보여 준다.
-  const postReserve = (body: Record<string, unknown>): Promise<{ order_id?: string } | null> => {
-    if (!syncable) return Promise.resolve(null);
-    return fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
-      .then((response) => (response.ok ? response.json() : null))
-      .catch(() => null);
-  };
+      .then(async (response) => {
+        const payload: OrderResponse | null = await response.json().catch(() => null);
+        if (response.ok && payload) return payload;
+        return { reason: payload?.reason ?? "server_error" };
+      })
+      .catch(() => ({ reason: "network" }));
+  }
 
   const badgeStyle = (size: number, radius: number, font: number) =>
     styleFromCss(
@@ -816,7 +843,7 @@ export function OrderScreen({
         }).then((result) => {
           setSubmitting(false);
           if (!result?.order_id) {
-            setOrderError(ORDER_REJECTED);
+            setOrderError(rejectionText(result?.reason));
             return;
           }
           finishBuy(result.order_id, false);
@@ -840,7 +867,7 @@ export function OrderScreen({
       }).then((saved) => {
         setSubmitting(false);
         if (!saved?.transaction_id) {
-          setOrderError(ORDER_REJECTED);
+          setOrderError(rejectionText(saved?.reason));
           return;
         }
         finishBuy(saved.transaction_id, true);
@@ -1376,9 +1403,6 @@ export function OrderScreen({
         limit: sellDraft.orderType === "limit" ? math.limPrice : null,
         scheduled: !fill && sellDraft.orderType !== "limit",
         scheduledFor: !fill && sellDraft.orderType !== "limit" ? scheduledFor : null,
-        // 완료 화면에서도 배지를 다시 보여준다(PR #252) — 기록이 추가되면 isFirstSell 이
-        // 뒤집히므로 판정은 지금 잡아 둔다.
-        badge: showJudge && planMatch === true,
       });
       patchSell({ memo: "" });
       setMemoSaved(false);
@@ -1416,7 +1440,7 @@ export function OrderScreen({
         }).then((result) => {
           setSubmitting(false);
           if (!result?.order_id) {
-            setOrderError(ORDER_REJECTED);
+            setOrderError(rejectionText(result?.reason));
             return;
           }
           finishSell(result.order_id, false);
@@ -1437,7 +1461,7 @@ export function OrderScreen({
       }).then((saved) => {
         setSubmitting(false);
         if (!saved?.transaction_id) {
-          setOrderError(ORDER_REJECTED);
+          setOrderError(rejectionText(saved?.reason));
           return;
         }
         finishSell(saved.transaction_id, true);
@@ -1772,21 +1796,11 @@ export function OrderScreen({
             })}
           </div>
 
-          {showJudge && planMatch === true && (
-            <div
-              style={styleFromCss(
-                "display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:20px;padding:15px 17px;box-shadow:0 1px 3px rgba(120,90,20,0.08)",
-              )}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A" }}>계획 실천 배지</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#8A6B1F", marginTop: 4, lineHeight: 1.5 }}>
-                  처음 세운 생각을 기억하고 실천했네요! 아카이브에 모아둘게요.
-                </div>
-              </div>
-            </div>
-          )}
-
+          {/*
+            계획을 지킨 매도에는 아무것도 덧붙이지 않는다. 예전에는 `계획 실천 배지` 카드가
+            여기 섰는데, 판정(`planMatch`)은 남기고 **칭찬 카드만** 걷어냈다 — 판정은 바로
+            아래 `무엇이 달라졌나요?` 를 물을지 정하는 데 여전히 쓰인다.
+          */}
           {showJudge && planMatch === false && (
             <>
               {/* 원본은 두 문장을 줄로 나눈다 — `\n` 이 살려면 `pre-line` 이 함께 있어야 한다. */}
@@ -1913,19 +1927,6 @@ export function OrderScreen({
               ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게요."
               : "왜 팔았는지까지 남겨뒀어요.\n아카이브에서 산 날과 판 날을 같이 볼 수 있어요."}
         </div>
-
-        {done.badge && (
-          <div
-            style={styleFromCss(
-              "display:flex;align-items:center;gap:11px;background:#FFF8E4;border-radius:20px;padding:13px 16px;margin-top:16px;" +
-                "width:100%;box-sizing:border-box;box-shadow:inset 0 0 0 1.5px rgba(190,150,50,0.28)",
-            )}
-          >
-            <span style={{ fontSize: 14.5, fontWeight: 700, color: "#8A6B1F", lineHeight: 1.5 }}>
-              계획 실천 배지를 받았어요!
-            </span>
-          </div>
-        )}
 
         <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 20 }}>
           <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>

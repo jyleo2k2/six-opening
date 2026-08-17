@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { planFields } from "./route";
+import { planFields, rejectionReason } from "./route";
 
 // F2 SPEC §7.1 — 질문식 기록의 부가 필드를 apply_trade 인자로 옮기는 규칙.
 function main() {
@@ -85,6 +85,18 @@ function main() {
   const fields = planFields("buy", { confidence: 5, conviction: 3, 확신도: 4 });
   assert.equal(Object.keys(fields).length, 5);
   assert.equal(JSON.stringify(fields).includes("5"), false);
+
+  // 거절 사유 — `apply_trade`·`reserve_order` 가 던지는 문구를 화면이 아는 코드로 옮긴다.
+  // 실제 오류는 `Supabase HTTP 400: {"code":"P0001","message":"..."}` 모양으로 감싸여 온다.
+  const dbError = (message: string) =>
+    new Error(`Supabase HTTP 400: {"code":"P0001","message":"${message}"}`);
+  assert.equal(rejectionReason(dbError("잔액이 부족합니다.")), "insufficient_balance");
+  assert.equal(rejectionReason(dbError("보유 수량이 부족합니다.")), "insufficient_quantity");
+  assert.equal(rejectionReason(dbError("등록되지 않은 종목입니다: 999999")), "unknown_stock");
+  assert.equal(rejectionReason(dbError("가격과 수량은 0보다 커야 합니다.")), "invalid_amount");
+  assert.equal(rejectionReason(dbError("예약 수량은 0보다 커야 합니다.")), "invalid_amount");
+  // 모르는 예외를 억지로 분류하지 않는다 — 화면이 기존 문구를 쓴다.
+  assert.equal(rejectionReason(new Error("fetch failed")), "server_error");
 
   console.log("trade plan field tests passed");
 }

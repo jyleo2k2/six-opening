@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { callRpc, selectRows, sessionUserId } from "../supabase";
 import { chartRetentionCutoff, readStoredCandles } from "../quote/stock-candles";
-import { planFields } from "../trade/route";
+import { planFields, rejectionReason } from "../trade/route";
 import { settleDueOrders, type ScheduledOrder } from "./settle";
 
 export const runtime = "nodejs";
@@ -166,14 +166,17 @@ export async function POST(request: NextRequest) {
   const requestMode = payload.request_mode === "quantity" ? "quantity" : "amount";
 
   if (orderType === "limit" && !limitPrice) {
-    return Response.json({ error: "지정가는 한도가격이 필요합니다." }, { status: 400 });
+    return Response.json({ error: "지정가는 한도가격이 필요합니다.", reason: "invalid_amount" }, { status: 400 });
   }
   if (orderType === "market" && !scheduledFor) {
-    return Response.json({ error: "예약 시장가는 체결 예정일이 필요합니다." }, { status: 400 });
+    return Response.json(
+      { error: "예약 시장가는 체결 예정일이 필요합니다.", reason: "invalid_amount" },
+      { status: 400 },
+    );
   }
   // 매수는 잠글 금액이, 매도는 잠글 수량이 있어야 예약을 되돌릴 수 있다 (DB 제약과 같은 판단).
   if (side === "buy" ? !reservedAmount : !requestedQuantity) {
-    return Response.json({ error: "예약할 금액이나 수량이 없습니다." }, { status: 400 });
+    return Response.json({ error: "예약할 금액이나 수량이 없습니다.", reason: "invalid_amount" }, { status: 400 });
   }
 
   const plan = planFields(side, payload);
@@ -195,8 +198,10 @@ export async function POST(request: NextRequest) {
     console.info(JSON.stringify({ event: "order_reserved", userId, stockCode, side, ...result }));
     return Response.json(result);
   } catch (error) {
-    console.error(JSON.stringify({ event: "order_reserved", result: "error", message: String(error) }));
-    return Response.json({ error: "주문을 접수하지 못했습니다." }, { status: 502 });
+    // 예약도 즉시 체결과 같은 사유를 낸다 — 매도 예약은 `보유 수량이 부족합니다` 로 막힌다.
+    const reason = rejectionReason(error);
+    console.error(JSON.stringify({ event: "order_reserved", result: "error", reason, message: String(error) }));
+    return Response.json({ error: "주문을 접수하지 못했습니다.", reason }, { status: 502 });
   }
 }
 
