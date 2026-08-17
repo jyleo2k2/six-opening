@@ -10,6 +10,15 @@ const neutral: AbilityCard = {
   samples: { buys: 0, sells: 0, graded: 0, pending: 0, hits: 0 },
   observation: "none",
 };
+/** 주차 카드 한 장. 서버는 `WeekCard`(= 능력치 카드 + 주차 정보)를 그대로 싣는다. */
+const weekOf = (
+  weekStart: string,
+  weekEnd: string,
+  label: string,
+  status: "closed" | "current",
+  count: number,
+) => ({ weekStart, weekEnd, label, status, count, card: { ...neutral, weekStart, weekEnd, label, status } });
+
 const profiles: Profile[] = [
   { id: 1, name: "찬영", login_id: "child", parent_child: "child", family_tag: "찬영가족", guardian_role: null },
   { id: 2, name: "찬영엄마", login_id: "mom", parent_child: "parent", family_tag: "찬영가족", guardian_role: "mom" },
@@ -21,6 +30,7 @@ let transactionFilter = "";
 let holdingFilter = "";
 let transactionOffset = "";
 let transactionLimit = "";
+let transactionFeedFilter = "";
 const deps: FamilyDataDeps = {
   findProfileById: async (id) => profiles.find((profile) => profile.id === id) ?? null,
   selectProfiles: async (params) => {
@@ -31,18 +41,19 @@ const deps: FamilyDataDeps = {
     transactionFilter = params.user_id;
     transactionOffset = params.offset;
     transactionLimit = params.limit;
+    transactionFeedFilter = params.feed_body;
     return [
       {
         id: "mine", user_id: 1, stock_id: 7, side: "buy", trade_price: 70000, trade_quantity: 2,
         trade_reason: "buy_news", plan_code: "plan_target", plan_target_price: "84000",
-        memo: " 목표 오면 팔기 ", plan_match: null, plan_changed_reason: null,
+        memo: " 목표 오면 팔기 ", plan_match: null, plan_changed_reason: null, feed_body: "목표 오면 팔기",
         created_at: "2026-08-14T00:00:00.000Z",
         stocks: { stock_code: "005930", stock_name: "삼성전자" },
       },
       {
         id: "dad", user_id: 3, stock_id: 11, side: "sell", trade_price: 120000, trade_quantity: 4,
         trade_reason: null, plan_code: null, plan_target_price: null, memo: null,
-        plan_match: false, plan_changed_reason: "change_price_emotion",
+        plan_match: false, plan_changed_reason: "change_price_emotion", feed_body: "정리했어",
         created_at: "2026-08-13T00:00:00.000Z",
         stocks: { stock_code: "035420", stock_name: "NAVER" },
       },
@@ -50,7 +61,7 @@ const deps: FamilyDataDeps = {
       {
         id: "sold-out", user_id: 1, stock_id: 3, side: "sell", trade_price: 137500,
         trade_quantity: 17, trade_reason: null, plan_code: null, plan_target_price: null,
-        memo: null, plan_match: null, plan_changed_reason: null,
+        memo: null, plan_match: null, plan_changed_reason: null, feed_body: "다 팔았어",
         created_at: "2026-08-15T00:00:00.000Z",
         stocks: { stock_code: "271560", stock_name: "오리온" },
       },
@@ -66,7 +77,12 @@ const deps: FamilyDataDeps = {
     ];
   },
   buildProfile: async (userId) => ({
-    weeks: [], cumulative: { ...neutral, samples: { ...neutral.samples, buys: userId } },
+    // 주차 카드도 구성원마다 다르게 줘서 어느 사람 것이 어디로 가는지 구분한다.
+    weeks: [
+      weekOf("2026-08-03", "2026-08-09", "8/3 – 8/9", "closed", userId),
+      weekOf("2026-08-10", "2026-08-16", "8/10 – 8/16", "current", 0),
+    ],
+    cumulative: { ...neutral, samples: { ...neutral.samples, buys: userId } },
     // 구성원마다 다른 수익률을 줘서 어느 값이 어디로 가는지 구분한다.
     valuation: {
       marketValue: 1_000_000 + userId, cost: 1_000_000, cash: 500_000,
@@ -82,8 +98,26 @@ async function main() {
   assert.equal(transactionFilter, "in.(1,2,3)");
   assert.equal(transactionOffset, "0");
   assert.equal(transactionLimit, "51");
+  /**
+   * **피드에 올린 거래만 읽는다.** 이 필터가 빠지면 한 번 살 때마다 카드가 저절로 생겨,
+   * 시험 삼아 눌러 본 매수까지 가족 피드로 간다 — 2026-08-17 에 그래서 고친 자리다.
+   */
+  assert.equal(transactionFeedFilter, "not.is.null");
   assert.deepEqual(family.members.map((member) => member.name), ["찬영", "찬영엄마", "찬영아빠"]);
   assert.equal(family.members[2].behavior?.samples.buys, 3);
+
+  /**
+   * 주차 카드도 구성원마다 내려간다. 지난 주차 리포트가 이 값으로 끝난 주를 되짚는다 —
+   * 예전에는 여기서 계산해 놓고 버려서 화면이 사람이 적어 둔 표본을 그리고 있었다.
+   */
+  assert.deepEqual(family.members.map((member) => member.weeks.length), [2, 2, 2]);
+  assert.deepEqual(family.members.map((member) => member.weeks[0].count), [1, 2, 3]);
+  assert.deepEqual(family.members[0].weeks.map((week) => week.status), ["closed", "current"]);
+  // 주차 카드에 금액이 실리면 안 된다 — 자산 규모는 계속 `total` 합계로만 나간다.
+  const weekKeys = new Set(family.members.flatMap((m) => m.weeks.flatMap((w) => Object.keys(w))));
+  for (const banned of ["marketValue", "cost", "cash", "profit", "valuation"]) {
+    assert.equal(weekKeys.has(banned), false, `주차 카드에 ${banned} 가 실렸다`);
+  }
 
   // 수익률은 타인 것도 내려간다 — 트랙이 구성원을 나란히 세우는 화면이라 필요하다.
   assert.deepEqual(family.members.map((member) => member.returnRate), [1.5, 3, 4.5]);
@@ -114,6 +148,8 @@ async function main() {
   assert.equal(family.total.cost, 3_000_000);
   assert.equal(family.total.profit, 6);
   assert.equal(family.total.memberCount, 3);
+  // 가족 예수금 합계 — 투자 현황의 `투자 가능 금액` 이 이 값이다. 구성원 3명 × 50만원.
+  assert.equal(family.total.cash, 1_500_000);
   // 합계 수익률은 구성원 수익률(1.5·3·4.5)의 평균이 아니라 합계 원금 대비 합계 손익이다.
   assert.equal(family.total.returnRate, (6 / 3_000_000) * 100);
 
@@ -139,6 +175,9 @@ async function main() {
   assert.equal(family.trades[0].planCode, "plan_target");
   assert.equal(family.trades[0].planTargetPrice, 84000);
   assert.equal(family.trades[0].memo, "목표 오면 팔기");
+  // 카드 본문은 피드에 올린 글이다. 메모와 별개 컬럼이라 둘이 달라도 각자 나간다.
+  assert.equal(family.trades[0].feedBody, "목표 오면 팔기");
+  assert.equal(family.trades[1].feedBody, "정리했어");
   assert.equal(family.trades[0].planMatch, null);
   assert.equal(family.trades[1].planMatch, false);
   assert.equal(family.trades[1].planChangedReason, "change_price_emotion");
@@ -161,6 +200,7 @@ async function main() {
     memo: null,
     plan_match: null,
     plan_changed_reason: null,
+    feed_body: "올린 글",
     created_at: `2026-08-14T00:${String(index).padStart(2, "0")}:00.000Z`,
     stocks: { stock_code: "005930", stock_name: "삼성전자" },
   }));
@@ -205,7 +245,7 @@ async function main() {
       id: "old", user_id: 2, stock_id: 7, side: "sell", trade_price: null as unknown as number,
       trade_quantity: null as unknown as number, trade_reason: null, plan_code: null,
       plan_target_price: null, memo: null, plan_match: null, plan_changed_reason: null,
-      created_at: "2026-08-12T00:00:00.000Z",
+      feed_body: "올린 글", created_at: "2026-08-12T00:00:00.000Z",
       stocks: { stock_code: "005930", stock_name: "삼성전자" },
     }],
     selectHoldings: async () => [{ user_id: 2, stock_id: 7, quantity: 1, avg_price: "270000" }],

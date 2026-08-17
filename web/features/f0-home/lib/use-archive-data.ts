@@ -32,14 +32,33 @@ export type ArchiveData = {
   likes: Record<string, FeedLike>;
 };
 
+/** 아직 피드에 안 올린 내 체결 기록. 글쓰기 시트가 고를 목록이다. */
+export type FeedCandidate = {
+  id: string;
+  symbol: string;
+  stockName: string;
+  side: "buy" | "sell";
+  price: number | null;
+  quantity: number | null;
+  reasonCode: string | null;
+  tradedAt: string;
+};
+
 const json = (response: Response) => (response.ok ? response.json() : null);
 
 export function useArchiveData() {
   const [season, setSeason] = useState<SeasonCards>(null);
+  /**
+   * `season` 조회가 아직 안 끝났는지. 화면이 이걸로 "아직 안 왔다"와 "정말 없다"를
+   * 가른다 — 없이는 응답을 기다리는 1초 동안 중립 카드(`관찰 중` · 전부 5)가 먼저
+   * 떴다가 진짜 카드로 바뀌어 화면이 깜빡인다.
+   */
+  const [seasonLoading, setSeasonLoading] = useState(true);
   const [family, setFamily] = useState<ArchiveData["family"]>(null);
   const [comments, setComments] = useState<Record<string, FeedComment[]>>({});
   const [likes, setLikes] = useState<Record<string, FeedLike>>({});
   const [loadingMore, setLoadingMore] = useState(false);
+  const [candidates, setCandidates] = useState<FeedCandidate[]>([]);
   const familyRef = useRef<ArchiveData["family"]>(null);
   const loadingMoreRef = useRef(false);
 
@@ -70,6 +89,26 @@ export function useArchiveData() {
       .catch(() => {});
   }, []);
 
+  /**
+   * 피드 첫 페이지를 다시 읽는다. 글을 올리거나 내린 직후에 부른다 — 화면에서 카드를
+   * 만들어 끼우지 않는 이유는 서버가 거른 뒤라야 그 거래가 정말 피드에 올랐는지 알기
+   * 때문이다(`feed_body` 가 빈 거래는 애초에 안 내려온다).
+   */
+  const refreshFamily = useCallback(async () => {
+    const data = await fetch("/api/family?offset=0", { cache: "no-store" }).then(json);
+    if (!data?.viewer || !Array.isArray(data.members)) return;
+    const next = { ...data, trades: Array.isArray(data.trades) ? data.trades : [] };
+    familyRef.current = next;
+    setFamily(next);
+    await loadReactions(next.trades);
+  }, [loadReactions]);
+
+  /** 글쓰기 시트가 열릴 때 부른다. 이미 올린 거래는 서버가 빼고 준다. */
+  const loadCandidates = useCallback(async () => {
+    const data = await fetch("/api/feed", { cache: "no-store" }).then(json);
+    setCandidates(Array.isArray(data?.trades) ? (data.trades as FeedCandidate[]) : []);
+  }, []);
+
   useEffect(() => {
     let alive = true;
     fetch("/api/profile/season-cards", { cache: "no-store" })
@@ -79,7 +118,9 @@ export function useArchiveData() {
         // 사용자가 누적 카드까지 못 받아, 유형이 영영 `관찰 중` 에 머문다.
         if (alive && data?.cumulative) setSeason(data);
       })
-      .catch(() => {});
+      .catch(() => {})
+      // 실패해도 기다림은 끝났다 — 그때는 중립 카드가 맞다(비로그인·조회 실패).
+      .finally(() => { if (alive) setSeasonLoading(false); });
     fetch("/api/family?offset=0", { cache: "no-store" })
       .then(json)
       .then((data) => {
@@ -190,12 +231,48 @@ export function useArchiveData() {
       });
   }, []);
 
+  /** 피드에 올린다. 올린 뒤 첫 페이지와 후보 목록을 함께 다시 읽는다. */
+  const postFeed = useCallback(
+    (transactionId: string, body: string) => {
+      return fetch("/api/feed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transaction_id: transactionId, body }),
+      })
+        .then((response) => response.json().then((payload) => ({ response, payload })))
+        .then(async ({ response, payload }) => {
+          if (!response.ok) throw new Error(payload.error || "피드에 올리지 못했습니다.");
+          await Promise.all([refreshFamily(), loadCandidates()]);
+        });
+    },
+    [refreshFamily, loadCandidates],
+  );
+
+  /** 피드에서 내린다. 거래 기록은 남고 다시 후보 목록으로 돌아간다. */
+  const removeFeed = useCallback(
+    (transactionId: string) => {
+      return fetch(`/api/feed?transaction_id=${encodeURIComponent(transactionId)}`, { method: "DELETE" })
+        .then((response) => response.json().then((payload) => ({ response, payload })))
+        .then(async ({ response, payload }) => {
+          if (!response.ok) throw new Error(payload.error || "피드에서 내리지 못했습니다.");
+          await Promise.all([refreshFamily(), loadCandidates()]);
+        });
+    },
+    [refreshFamily, loadCandidates],
+  );
+
   return {
     season,
+    seasonLoading,
     family,
     comments,
     likes,
     loadingMore,
+    candidates,
+    loadCandidates,
+    postFeed,
+    removeFeed,
+    viewerId: family?.viewer?.id ?? null,
     hasMore: family?.page?.hasMore ?? false,
     loadMoreFamily,
     toggleLike,

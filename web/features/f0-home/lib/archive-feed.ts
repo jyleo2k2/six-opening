@@ -112,6 +112,11 @@ export type FamilyTrade = {
   planMatch?: boolean | null;
   planChangedReason?: string | null;
   memo?: string | null;
+  /**
+   * 피드에 올린 글. **이것이 있어야 피드에 뜬다** — 서버가 `feed_body` 가 빈 거래를
+   * 아예 안 내려보낸다(`/api/family`). 카드 본문이 이 글이다.
+   */
+  feedBody?: string | null;
 };
 
 export type FeedComment = {
@@ -127,6 +132,8 @@ export type FeedLike = { transactionId: string; liked?: boolean; count?: number 
 
 export type FeedCard = {
   id: string;
+  /** 올린 사람. 내 카드에만 `내리기` 가 붙으므로 화면이 이 값으로 가른다. */
+  userId: string;
   name: string;
   face: string;
   pose: string;
@@ -265,6 +272,7 @@ export function feedCards(
 
       return {
         id: trade.id,
+        userId: String(trade.userId),
         name: member.name,
         face: faceOf(member.role, member.name),
         pose: POSES[poseKey],
@@ -313,11 +321,19 @@ export function feedCards(
               }%)`,
         pnlColor: pnl === null || pnl === 0 ? "#9CA1B4" : pnl > 0 ? UP : DOWN,
         shortMent: reason ? reason.short : sell ? "팔았어" : "담았어",
-        // 본문은 **쓴 사람의 말로 시작한다** — 메모(없으면 고른 이유), 그 뒤에 계획 문장.
-        // 예전에는 앞에 `담았어. `·`팔았어. ` 를 붙였는데, 바로 위 날짜 라벨이 이미 매수·매도를
-        // 말하고 있어 같은 말을 두 번 하는 데다 아이가 쓴 첫 문장이 뒤로 밀렸다.
-        // 빈 조각이 이어 붙어 생기는 앞뒤 공백은 여기서 턴다 — 카드가 한 칸 들여 쓴 것처럼 보였다.
-        text: `${trade.memo || (reason ? `${reason.short} 결정했어.` : "")}${planText}`.trim(),
+        /**
+         * 본문은 **피드에 올린 글로 시작하고**, 그 뒤에 계획 문장이 붙는다.
+         *
+         * 예전에는 메모(없으면 고른 이유)를 그 자리에 넣었다. 이제는 `feed_body` 하나가
+         * 원본이다 — 거래가 저절로 피드가 되지 않으므로 여기 설 글은 사람이 쓴 것뿐이고,
+         * 옮겨 오기 전 기록에는 그때 보이던 문장을 그대로 담아 뒀다(2026-08-17 마이그레이션).
+         * 옛 응답이 섞여 들어올 때만 메모·이유로 되돌아간다.
+         *
+         * 빈 조각이 이어 붙어 생기는 앞뒤 공백은 여기서 턴다 — 카드가 한 칸 들여 쓴 것처럼 보였다.
+         */
+        text: `${
+          trade.feedBody || trade.memo || (reason ? `${reason.short} 결정했어.` : "")
+        }${planText}`.trim(),
         liked: Boolean(like?.liked),
         likeCount: Number(like?.count ?? 0),
         comments: (comments[trade.id] ?? []).map((comment) => ({
@@ -343,6 +359,8 @@ export type FamilyTotal = {
   /** 아직 아무도 안 샀으면 `null` 이다. 0% 로 오지 않는다. */
   returnRate: number | null;
   memberCount: number;
+  /** 가족 예수금 합계. 투자 현황의 `투자 가능 금액` 이 이 값이다. */
+  cash?: number;
 };
 
 /**
@@ -356,7 +374,12 @@ export function familySummary(total: FamilyTotal | null | undefined) {
   const pnl = total.profit;
   return {
     positive: pnl >= 0,
+    // `returnSummary` 와 같은 두 짝을 낸다 — 가족 시트는 단위를 뗀 숫자에 `원` 을 따로
+    // 작게 붙이고, 좁은 자리는 단위까지 붙은 한 덩어리를 쓴다.
+    totalNumber: Math.round(total.assets).toLocaleString("ko-KR"),
     totalText: won(total.assets),
+    // 구버전 응답에는 `cash` 가 없다. 그때는 화면이 값을 비우는 것보다 없다고 아는 게 낫다.
+    cashText: typeof total.cash === "number" ? won(total.cash) : null,
     pnlText: (pnl > 0 ? "▲ " : pnl < 0 ? "▼ " : "") + won(Math.abs(pnl)),
     // 원금이 0이면 잰 것이 없다. `0.00%` 로 적으면 본전인 가족처럼 읽힌다.
     pctText:
