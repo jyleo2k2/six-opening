@@ -8,7 +8,7 @@
 
 | 영역 | 실제 위치 | 현재 책임 |
 |---|---|---|
-| 탐색·상세·매수·매도·질문식 기록·계좌 | `web/features/f0-home/`(`ExploreScreen`·`DetailScreen`·`OrderScreen`·`PortfolioScreen`과 `lib/`) | 화면과 `kw_proto_v1` 즉시 상태의 정본. 값 계산은 `lib/`의 순수 함수가 하고 컴포넌트는 붙이기만 한다 |
+| 탐색·상세·매수·매도·질문식 기록·계좌 | `web/features/f0-home/`(`ExploreScreen`·`DetailScreen`·`OrderScreen`·`PortfolioScreen`과 `lib/`) | 화면의 정본. 즉시 상태는 서버 응답으로 세우고 저장하지 않는다(§6.2). 값 계산은 `lib/`의 순수 함수가 하고 컴포넌트는 붙이기만 한다 |
 | 지갑 시드·복원·총자산 | `web/shared/store/prototype-account.js` | 화면과 서버 경로가 같이 쓰는 단일 원본. `.js`인 것은 옛 iframe 사본 때문이었고 지금은 그냥 공용 모듈이다 |
 | 화면 호스트 | `web/features/f0-home/ConnectedPrototype.tsx` | 화면 선택과 F10 오버레이 조립. iframe은 철거했다 |
 | 상세 차트 | `web/features/f2-trade/TradingViewChart.tsx` | 분·일·주, 선·캔들 전환과 가족 체결 마커 |
@@ -28,11 +28,12 @@ GET / · /explore · /portfolio · /ranking · /archive · /stock/{code} · /buy
   → [[...screen]]/page.tsx  (로그인 없으면 LoginGate)
     → ConnectedPrototype → f0-home 의 React 화면
       ├─ 홈·탐색·상세·차트·뉴스·매수·매도·계좌·랭킹·아카이브
-      ├─ localStorage["kw_proto_v1"] 즉시 저장
       ├─ /api/universe + /api/universe/data
       ├─ /api/news + /api/news/{newsId}
       ├─ /api/account · /api/orders → 서버 계좌·미체결 주문
-      └─ /api/trade · /api/tab-view → 조건부 후행 저장
+      ├─ /api/trades?symbol={symbol} → 매도 회고 재료
+      ├─ /api/watchlist → 관심 종목
+      └─ /api/trade · /api/tab-view → 체결·열람 저장
     → ChartScreen 안 /tradingview-chart iframe
       ├─ /api/quote/{symbol}/chart
       └─ /api/trades?symbol={symbol}
@@ -42,7 +43,7 @@ GET / · /explore · /portfolio · /ranking · /archive · /stock/{code} · /buy
 - 화면 전환은 라우터가 소유한다. 컴포넌트는 `onLeave(path)`로 올리고 `ConnectedPrototype`이 처리한다 — 예전의 `kiwoom:screen`·`leaveToRoute()` 메시지 왕복은 iframe과 함께 사라졌다.
 - 화면은 `/api/universe/data`를 5초마다 다시 읽어 현재가와 스파크라인을 갱신한다.
 - 차트 기간·유형은 iframe을 다시 열지 않고 `kiwoom:chart-options` 메시지로 바꾼다.
-- 화면 즉시 상태는 로컬 저장이 우선이다. 서버 저장 실패가 화면 거래를 롤백하지 않으므로 두 저장소가 항상 같다고 가정할 수 없다.
+- **접수가 곧 주문이다.** 즉시 체결도 예약도 서버가 확정한 뒤에야 완료 화면을 띄운다. 저장에 실패하면 거절 문구를 보여 주고 화면 상태를 바꾸지 않는다.
 
 ## 3. 확정된 현재 동작
 
@@ -78,8 +79,8 @@ GET / · /explore · /portfolio · /ranking · /archive · /stock/{code} · /buy
 ### 4.3 매도 — 3단계
 
 1. **얼마나 팔까**: 주 수/금액, 시장가/지정가를 고른다.
-2. **사던 날의 나**: 연결된 최근 매수 기록과 수익률을 보여 주고 매도 이유를 고른다. 처음 계획과 다르면 변경 이유도 필수다.
-3. **매도 완료**: 정규장 시장가는 체결, 장외 시장가는 다음 거래일 시가 예약, 지정가는 대기 주문으로 표시한다. 한 줄 메모는 별도 저장한다.
+2. **사던 날의 나**: 연결된 최근 매수 기록과 수익률을 보여 주고 매도 이유를 고른다. 처음 계획과 다르면 변경 이유도 필수다. 매수 기록의 원본은 **`GET /api/trades?symbol=` 응답 중 `mine` 인 체결**이고 그 가운데 가장 최근 매수를 쓴다. 첫 매도 판정은 **그 매수 이후에 내 매도가 있었는지**로 본다 — 서버에는 매수·매도를 잇는 칸이 없다.
+3. **매도 완료**: 정규장 시장가는 체결, 장외 시장가는 다음 거래일 시가 예약, 지정가는 대기 주문으로 표시한다. 한 줄 메모는 체결이 끝난 **뒤에** 적으므로 `PATCH /api/trade` 로 그 기록에 붙인다(§7.2).
 
 ## 5. 질문식 기록 계약
 
@@ -122,70 +123,47 @@ GET / · /explore · /portfolio · /ranking · /archive · /stock/{code} · /buy
 
 ### 5.4 제외된 입력
 
-- 확신도·자신감 수치는 화면, `kw_proto_v1`, 서버 거래 요청 어디에도 없다.
+- 확신도·자신감 수치는 화면에도 서버 거래 요청에도 없다.
 - AI가 제안하는 목표가·손절가·매매시점·수익률 전망은 금지한다.
 - 질문식 답변으로 주문을 허용하거나 차단하지 않는다.
 
-## 6. 로컬 데이터 계약
+## 6. 기록 데이터 계약
 
-### 6.1 매수 기록
+### 6.1 회고 판정이 읽는 체결 기록
+
+매도 2단계 `사던 날의 나` 카드는 `GET /api/trades?symbol=` 응답을 읽는다. 카드가 쓰는 부분은 이만큼이다(`f0-home/lib/order-view.ts`의 `TradeHistoryRow`).
 
 ```ts
-type PrototypeBuyRecord = {
-  order_id: string;
-  user_id: "child_minji" | "parent_mom";
-  symbol: string;
-  amount_krw: number;
-  qty: number;
-  order_type: "market" | "limit";
-  limit_price: number | null;
-  order_status: "filled" | "pending" | "scheduled" | "rejected" | "cancelled";
-  scheduled_for?: string;
-  filled_at?: string;
-  filled_price?: number;
-  rejection_reason?: "opening_price_exceeds_reserved_cash";
-  reason_code: string;
-  plan_code: string;
-  plan_target_price: number | null;
+type TradeHistoryRow = {
+  side: "buy" | "sell";
+  tradedAt: string;
+  price: number;
+  /** 남의 체결은 서버가 지운다. 내 기록만 쓰므로 카드에서는 항상 숫자다. */
+  quantity: number | null;
+  reasonCode: string | null;
+  planCode: string | null;
+  planTargetPrice: number | null;
   memo: string | null;
-  ts: string;
+  /** 로그인한 사람의 체결인지. 회고는 내 매수만 본다 */
+  mine: boolean;
 };
 ```
 
-### 6.2 매도 기록
+`sellRetrospect()`가 이 목록에서 **내 마지막 매수**와 **그 뒤 내 매도 여부**를 뽑고, `judgePlanMatch()`가 `planCode`·`planTargetPrice`·`tradedAt`으로 계획 준수를 판정한다. 판정 결과는 매도할 때 `plan_match`로 서버에 다시 저장된다(§7.1) — 즉 이 경로가 끊기면 F9 계획 준수 표본도 함께 빈다.
 
-```ts
-type PrototypeSellRecord = {
-  order_id: string;
-  user_id: "child_minji" | "parent_mom";
-  symbol: string;
-  qty: number;
-  linked_buy_order_id: string | null;
-  order_type: "market" | "limit";
-  limit_price: number | null;
-  order_status: "filled" | "pending" | "scheduled" | "rejected" | "cancelled";
-  amount_krw?: number;
-  scheduled_for?: string;
-  filled_at?: string;
-  filled_price?: number;
-  sell_reason_code: string;
-  plan_match: boolean | null;
-  change_reason_code: string | null;
-  badge_awarded: boolean;
-  retro_card_viewed_ms: number;
-  pnl_pct_at_sell: number;
-  held_days: number;
-  avg: number;
-  memo: string | null;
-  ts: string;
-};
-```
+`order_id`·`linked_buy_order_id`·`retro_card_viewed_ms`·`pnl_pct_at_sell`·`held_days`처럼 로컬 기록에만 있던 칸은 **없앴다.** 아무도 읽지 않았고, 서버에 대응하는 자리도 없다.
 
-저장은 두 덩어리다. `localStorage["kw_proto_v1"]`에는 오래 남는 `acc`, `records`, `sellRecords`, `events`, `seq`, `watchlist`만 저장한다(배지는 폐기돼 더 저장하지 않는다). 화면 임시값 `screen`·`account`·`code`·`draft`·`sellDraft`·`buyStep`·`sellStep`·`arcTab`은 `sessionStorage["kw_proto_ui_v1"]`에 따로 둔다.
+### 6.2 브라우저 저장소
 
-화면 임시값은 **앱 안에서 화면을 옮길 때만** 되살린다. `leaveToRoute()`가 `sessionStorage["kw_proto_nav_v1"]` 표시를 남기고, 복원한 쪽이 그 표시를 바로 지운다. 표시가 없는 진입(F5·새 탭·주소 직접 입력)에서는 임시값을 버려 **새로고침하면 처음부터** 동작을 지킨다. 학교시간 개발 설정은 어느 쪽에도 저장하지 않는다.
+**브라우저 저장소는 쓰지 않는다.** `localStorage["kw_proto_v1"]`과 `sessionStorage["kw_proto_ui_v1"]`·`["kw_proto_nav_v1"]`은 전부 철거했다. 화면이 문서를 갈아끼우지 않으므로 임시값은 메모리에 그대로 남고, 오래 남아야 하는 값은 계정에 붙는 값이라 서버가 들고 있다.
 
-읽는 쪽은 `shared/store/prototype-account.js`의 `restorePrototypeState()` 하나이고 **첫 렌더 전에** 부른다. `componentDidMount`에서 되살리면 화면을 옮길 때마다 시드 지갑이 한 프레임 먼저 보였다 바뀐다.
+| 값 | 원본 |
+|---|---|
+| 현금·보유·미체결 주문 | `GET /api/account` + `GET /api/orders` |
+| 매수·매도 기록(회고 판정 재료) | `GET /api/trades?symbol=` |
+| 관심 종목 | `GET /api/watchlist` |
+
+`use-wallet`의 `update()`는 체결 직후 완료 화면이 잔액을 바로 보여 주기 위한 **메모리 전용** 갱신이고, 곧 `refresh()`가 서버 값으로 덮는다. 학교시간 개발 설정은 어디에도 저장하지 않는다. 이 계약은 `features/f0-home/lib/screen-state-handoff.test.ts`가 소스에서 직접 확인한다.
 
 ### 6.3 대기 주문 — 원본은 서버다
 
@@ -218,7 +196,7 @@ type PrototypeSellRecord = {
 
 ### 7.1 서버 거래 저장 계약
 
-`POST /api/trade` 요청 본문. §5의 질문식 기록을 로컬(`kw_proto_v1`)과 서버에 **같이** 남긴다. 이전에는 `reason`만 서버로 갔고 계획·목표가·메모·계획 변경 이유는 로컬에만 있어서, 서버 `transactions`로 카드를 다시 만드는 경로(F9 지난 주차 카드 `GET /api/profile/season-cards`)에서 그 값들이 비어 있었다.
+`POST /api/trade` 요청 본문. §5의 질문식 기록은 **서버에만** 남는다. 예전에는 로컬(`kw_proto_v1`)과 서버에 같이 남겼는데, 그러면 이 브라우저에서 산 것만 회고 판정에 잡혀 DB 시드 보유를 팔거나 기기를 바꾸면 카드가 통째로 사라졌다. `kw_proto_v1`은 철거했다.
 
 | 필드 | 타입 | 매수 | 매도 | 저장 위치 |
 |---|---|---|---|---|
@@ -234,10 +212,25 @@ type PrototypeSellRecord = {
 | `plan_changed_reason` | `string \| null` | 항상 `null` | `plan_match === false`일 때 §5.3 변경 코드 | `transactions.plan_changed_reason` |
 
 - 계획 코드는 §5.2와 같은 `plan_short`·`plan_season`·`plan_target`·`plan_none` 네 개다. 변경 코드는 §5.3의 `change_*` 다섯 개다.
-- 값 검증은 Route Handler가 한다. 목록에 없는 `plan_code`·`plan_changed_reason`, 0 이하 `plan_target_price`, 200자 초과 `memo`는 **주문 전체를 거절하지 않고 그 필드만 `null`로 떨어뜨린다.** 서버 저장은 best-effort이고 로컬 체결이 이미 끝났으므로 부가 필드 하나 때문에 체결 기록을 통째로 잃지 않는다.
+- 값 검증은 Route Handler가 한다. 목록에 없는 `plan_code`·`plan_changed_reason`, 0 이하 `plan_target_price`, 200자 초과 `memo`는 **주문 전체를 거절하지 않고 그 필드만 `null`로 떨어뜨린다.** 이유 하나가 형식에 안 맞는다고 체결까지 막을 이유는 없다.
 - 매수 전용 필드를 매도가 보내거나 그 반대인 경우도 같은 방식으로 무시한다.
 - `apply_trade` RPC가 이 값들을 한 트랜잭션에서 함께 넣는다. 새 파라미터는 모두 `default null`이라 옛 여섯 인자 호출도 그대로 동작한다.
+- 응답의 `transaction_id`는 방금 남긴 기록의 id다. 매도 완료 화면의 메모(§7.2)가 이 값을 쓴다.
 - **확신도·자신감 수치는 이 요청 본문에도 없다** (§5.4).
+
+### 7.2 완료 화면 메모 계약
+
+`PATCH /api/trade` — 이미 남긴 기록에 한 줄 메모를 붙인다.
+
+| 필드 | 타입 | 규칙 |
+|---|---|---|
+| `transaction_id` | `string` UUID | 필수. `POST /api/trade`의 `transaction_id` 또는 `POST /api/orders`의 `order_id` |
+| `memo` | `string` | 앞뒤 공백을 지운 뒤 200자 이하. 빈 문자열이면 `transactions.memo`를 `null`로 되돌린다 |
+
+- 매도 메모는 **체결이 끝난 뒤** 완료 화면에서 적으므로 `apply_trade`로는 들어올 수 없다(그 함수는 메모를 매수 전용으로 막는다 — §7.1). 그래서 체결과 분리된 `set_trade_memo` RPC를 따로 둔다.
+- **남의 기록은 고칠 수 없다.** 판정은 `set_trade_memo` 안의 `user_id` 대조가 하며, 없는 기록이면 예외다.
+- 200자를 넘으면 `400`으로 거절한다. 주문 본문의 부가 필드와 달리 **잘라서 저장하지 않는다** — 메모가 곧 요청의 전부라, 조용히 자르면 사용자가 적은 것과 다른 문장이 남는다.
+- 저장에 실패하면 화면은 `저장됐어요 ✓` 표시를 되돌린다. 예전에는 로컬에만 적고 성공 표시를 띄웠는데, 그 값을 다시 읽는 곳이 없어 "나중에 다시 보여줄게요"가 지켜진 적이 없었다.
 
 소비자는 다음과 같다.
 
@@ -249,7 +242,7 @@ type PrototypeSellRecord = {
 
 타인의 `price`·`quantity`를 가리는 규칙은 그대로다. 이유·계획·메모는 자산 규모를 드러내지 않으므로 가리지 않는다.
 
-### 7.2 어린이 뉴스 공개 계약
+### 7.3 어린이 뉴스 공개 계약
 
 - 원문 후보와 어린이용 노출문은 하나의 `news_id` 묶음으로 저장한다.
 - 종목 화면의 짧은 뉴스 카드와 자세히보기 제목은 같은 `news_id`의 동일한 `headline`을 사용한다. 자세히보기는 여기에 정확히 3개의 요약 줄을 붙이며, 종목명으로 상세 기사를 다시 조회하지 않는다.

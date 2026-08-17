@@ -34,7 +34,7 @@ async function main() {
   assert.equal(faq.route, "faq");
   assert.equal(modelCalls, 0);
   assert.equal(isExplainAction(faq.action), true);
-  assert.equal(faq.response.text.startsWith("궁금한 걸 잘 짚었어요 —"), true);
+  assert.equal(faq.response.text.startsWith("좋은 질문이에요!"), true);
   if (!isExplainAction(faq.action)) throw new Error("explain action missing");
 
   const outOfScope = await createChatOutcome(
@@ -86,7 +86,7 @@ async function main() {
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(typedYes.response.text.includes("맞아요, 그 단서를 잘 연결했어요."), true);
+  assert.equal(typedYes.response.text.includes("맞아요!"), true);
   assert.equal(typedYes.response.text.includes("같은 업종"), true);
   assert.equal(isExplainAction(typedYes.action), true);
   if (isExplainAction(typedYes.action)) {
@@ -100,7 +100,7 @@ async function main() {
     session,
     { generateAnswer: noModel },
   );
-  assert.equal(typedNo.response.text.startsWith("그럼 예를 들어볼게요."), true);
+  assert.equal(typedNo.response.text.startsWith("예를 들면요,"), true);
 
   // 알아듣지 못하면 추측하지 않고 선택지를 다시 보여준다.
   const unclear = await createChatOutcome(

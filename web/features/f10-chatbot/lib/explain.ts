@@ -70,7 +70,7 @@ export const GUIDED_SCRIPT_ID = "flow:guided";
 
 const GUIDED_SCRIPT: ExplainScript = {
   id: GUIDED_SCRIPT_ID,
-  feedback: "궁금한 지점을 잘 짚었어요",
+  feedback: "좋은 질문이에요!",
   brief: "함께 한 조각씩 살펴볼까요.",
   check: {
     kind: "guiding",
@@ -83,17 +83,24 @@ const GUIDED_SCRIPT: ExplainScript = {
   example: "궁금한 말을 그대로 적어 주셔도 돼요.",
 };
 
-/** 논문 §3.2.2의 Feedback 서브턴. 각 전이의 첫 고정 문장이며 3문장 예산에 포함된다. */
+/**
+ * 논문 §3.2.2의 Feedback 서브턴. **문장이 아니라 머리말이다** (SPEC §3.4.4).
+ *
+ * 예전에는 각 전이의 첫 고정 문장이라 3문장 예산의 1문장을 정보 0으로 먹었다
+ * ("맞아요, 그 단서를 잘 연결했어요." + 본문 2문장 = 3문장). 서브턴 계약은
+ * 살리고 길이만 한 마디로 내려, 본문이 예산을 온전히 쓰게 한다.
+ */
 const FEEDBACK = {
-  correct: "맞아요, 그 단서를 잘 연결했어요.",
+  correct: "맞아요!",
   /** 오답을 판정하지 않는다. 아이의 생각을 인정하고 다음 단계로 넘긴다. */
-  wrong: "그렇게 생각할 수 있어요.",
-  understood: "좋아요, 이제 알겠네요!",
-  example: "그럼 예를 들어볼게요.",
+  wrong: "그렇게 볼 수도 있어요.",
+  understood: "좋아요!",
+  /** 뒤에 오는 예시와 한 문장으로 이어지도록 종결부호를 두지 않는다. */
+  example: "예를 들면요,",
   /** 정답·오답이 아니라 "모르겠어요"에 쓴다. 틀렸다고 말하지 않는다. */
-  unsure: "괜찮아요, 같이 찾아봐요.",
+  unsure: "괜찮아요!",
   /** 되묻기 상한(MAX_REASK_COUNT)에 닿아 정답을 바로 보여줄 때 쓴다. */
-  giveUp: "그럼 답을 같이 확인해 볼게요.",
+  giveUp: "답을 같이 볼게요.",
 } as const;
 
 /** 타이핑을 알아듣지 못했을 때. 추측하지 않고 선택지를 다시 보여준다. */
@@ -144,12 +151,17 @@ function stageChoices(script: ExplainScript, stage: ExplainReply["stage"]) {
     : script.adjust?.choices ?? CONFIRM_CHOICES;
 }
 
-/** ① 구체적 피드백 + ② 한 조각 설명 + ③ 이해 확인 재질문. */
+/**
+ * ① 피드백 머리말 + ② 한 조각 설명 + ③ 이해 확인 재질문.
+ *
+ * 머리말은 종결부호를 갖고 공백으로 이어 붙인다. 예전의 ` — ` 이음새는 머리말을
+ * 본문과 같은 무게로 읽히게 해 첫 답이 늘 두 마디로 시작했다 (SPEC §3.4.4).
+ */
 export function startExplain(script: ExplainScript): ExplainStep {
   return turnStep(
     script,
     "brief",
-    `${script.feedback ?? "궁금한 걸 잘 짚었어요"} — ${script.brief}`,
+    `${script.feedback ?? "좋은 질문이에요!"} ${script.brief}`,
     script.check.question,
     stageChoices(script, "brief"),
   );

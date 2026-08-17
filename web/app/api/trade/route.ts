@@ -102,3 +102,50 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "주문을 저장하지 못했습니다." }, { status: 502 });
   }
 }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
+
+/**
+ * 이미 남긴 기록에 한 줄 메모를 단다 (F2 SPEC §5.3 매도 완료).
+ *
+ * 매도 메모는 **체결이 끝난 뒤** 완료 화면에서 적으므로 `apply_trade` 로는 들어올 수 없다
+ * (그 함수는 메모를 매수 전용으로 막는다 — §7.1). 예전에는 `kw_proto_v1.sellRecords` 에만
+ * 쌓였고 다시 읽는 곳이 없어, 화면이 적어 둔 "나중에 다시 보여줄게요" 가 지켜진 적이 없었다.
+ *
+ * 남의 기록은 고칠 수 없다 — 판정은 `set_trade_memo` 안의 `user_id` 대조가 한다.
+ */
+export async function PATCH(request: NextRequest) {
+  const userId = sessionUserId(request);
+  if (!userId) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  }
+  const payload = (body ?? {}) as Record<string, unknown>;
+  const transactionId = payload.transaction_id;
+  if (typeof transactionId !== "string" || !UUID.test(transactionId)) {
+    return Response.json({ error: "기록을 찾을 수 없습니다." }, { status: 400 });
+  }
+  const memo = typeof payload.memo === "string" ? payload.memo.trim() : "";
+  // 길이는 여기서 잘라 저장하지 않고 거절한다. 주문 본문의 부가 필드와 달리 메모가 곧
+  // 요청의 전부라, 조용히 자르면 사용자가 적은 것과 다른 문장이 남는다.
+  if (memo.length > MEMO_MAX_LENGTH) {
+    return Response.json({ error: "메모가 너무 깁니다." }, { status: 400 });
+  }
+
+  try {
+    await callRpc("set_trade_memo", {
+      p_user_id: userId,
+      p_transaction_id: transactionId,
+      p_memo: memo || null,
+    });
+    console.info(JSON.stringify({ event: "trade_memo_saved", userId, transactionId }));
+    return Response.json({ transaction_id: transactionId });
+  } catch (error) {
+    console.error(JSON.stringify({ event: "trade_memo_saved", result: "error", message: String(error) }));
+    return Response.json({ error: "메모를 저장하지 못했습니다." }, { status: 502 });
+  }
+}

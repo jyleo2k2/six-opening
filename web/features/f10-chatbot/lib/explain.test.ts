@@ -44,7 +44,7 @@ const per: ExplainScript = {
 // "잘 모르겠어요"가 항상 따라붙는다(guiding 아닌 진단형 스크립트).
 const first = startExplain(per);
 assert.equal(first.kind, "turn");
-assert.equal(first.text, toPoliteKorean(`궁금한 걸 잘 짚었어요 — ${per.brief}`));
+assert.equal(first.text, toPoliteKorean(`좋은 질문이에요! ${per.brief}`));
 assert.deepEqual(first.kind === "turn" ? first.turn : null, {
   scriptId: "term:per",
   stage: "brief",
@@ -60,7 +60,7 @@ const correct = advanceExplain(per, {
   choiceId: "expensive",
 });
 assert.equal(correct?.kind, "turn");
-assert.equal(correct?.text, toPoliteKorean(`맞아요, 그 단서를 잘 연결했어요. ${per.detail}`));
+assert.equal(correct?.text, toPoliteKorean(`맞아요! ${per.detail}`));
 assert.equal(correct?.kind === "turn" ? correct.turn.stage : null, "followup");
 
 // ③ 오답이면 추가 설명과 확인 질문으로 내려간다.
@@ -70,7 +70,7 @@ const wrong = advanceExplain(per, {
   choiceId: "cheap",
 });
 assert.equal(wrong?.kind, "turn");
-assert.equal(wrong?.text, toPoliteKorean(`그렇게 생각할 수 있어요. ${per.adjust?.explanation}`));
+assert.equal(wrong?.text, toPoliteKorean(`그렇게 볼 수도 있어요. ${per.adjust?.explanation}`));
 assert.deepEqual(wrong?.kind === "turn" ? wrong.turn.choices : null, per.adjust?.choices);
 assert.equal(wrong?.kind === "turn" ? wrong.turn.stage : null, "detail");
 
@@ -89,7 +89,7 @@ const example = advanceExplain(per, {
   choiceId: "yes",
 });
 assert.equal(example?.kind, "turn");
-assert.equal(example?.text, toPoliteKorean(`그럼 예를 들어볼게요. ${per.example}`));
+assert.equal(example?.text, toPoliteKorean(`예를 들면요, ${per.example}`));
 assert.equal(example?.kind === "turn" ? example.turn.stage : null, "detail");
 // 예시 재질문 턴에는 되묻기 횟수가 실린다 — 클라이언트가 다음 응답에 돌려보낸다.
 assert.equal(example?.kind === "turn" ? example.turn.reaskCount : null, 1);
@@ -105,7 +105,7 @@ const revealed = advanceExplain(per, {
 assert.equal(revealed?.kind, "turn");
 assert.equal(
   revealed?.text,
-  toPoliteKorean(`그럼 답을 같이 확인해 볼게요. ${per.detail}`),
+  toPoliteKorean(`답을 같이 볼게요. ${per.detail}`),
 );
 assert.equal(revealed?.kind === "turn" ? revealed.turn.stage : null, "followup");
 
@@ -205,7 +205,7 @@ const unsureAtBrief = advanceExplain(per, {
 assert.equal(unsureAtBrief?.kind, "turn");
 assert.equal(
   unsureAtBrief?.text,
-  toPoliteKorean(`괜찮아요, 같이 찾아봐요. ${per.adjust?.explanation}`),
+  toPoliteKorean(`괜찮아요! ${per.adjust?.explanation}`),
 );
 assert.equal(unsureAtBrief?.kind === "turn" ? unsureAtBrief.turn.stage : null, "detail");
 assert.equal(gateChatOutput({ text: unsureAtBrief!.text, source: "fixed" }).ok, true);
@@ -223,14 +223,14 @@ assert.equal(reask.kind === "turn" ? reask.turn.reaskCount : null, 1);
 // followup으로 넘긴다 — 어떤 입력이든 무한 루프가 되지 않는다.
 const gaveUp = reaskExplain(per, "detail", 2);
 assert.equal(gaveUp.kind, "turn");
-assert.equal(gaveUp.text, toPoliteKorean(`그럼 답을 같이 확인해 볼게요. ${per.detail}`));
+assert.equal(gaveUp.text, toPoliteKorean(`답을 같이 볼게요. ${per.detail}`));
 assert.equal(gaveUp.kind === "turn" ? gaveUp.turn.stage : null, "followup");
 assert.equal(gateChatOutput({ text: gaveUp.text, source: "fixed" }).ok, true);
 
 // 전용 스크립트가 없는 답변도 공통 유도형 DAPIE 턴을 사용한다.
 const guided = startGuidedExplain("주식은 회사의 작은 조각이야.");
 assert.equal(guided.kind, "turn");
-assert.equal(guided.text.includes("궁금한 지점을 잘 짚었어요"), true);
+assert.equal(guided.text.includes("좋은 질문이에요!"), true);
 assert.equal(guided.kind === "turn" ? guided.turn.scriptId : null, "flow:guided");
 const guidedScript = findCommonExplainScript("flow:guided");
 assert.ok(guidedScript);

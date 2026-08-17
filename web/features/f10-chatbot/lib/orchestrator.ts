@@ -283,11 +283,12 @@ function dapieFeedback(
   intent: ChatIntent,
   source: ChatOutputSource,
 ) {
-  if (source === "tool") return "볼 수 있는 자료를 확인했어요";
-  if (route === "context") return "지금 화면을 잘 살펴봤네요";
-  if (intent === "service_help") return "어디서 확인할지 잘 물어봤어요";
-  if (intent === "financial_concept") return "궁금한 개념을 잘 찾았어요";
-  return "궁금한 지점을 잘 짚었어요";
+  // 머리말이라 짧고 종결부호를 갖는다 (SPEC §3.4.4). 문장으로 쓰면 본문 예산을 먹는다.
+  if (source === "tool") return "자료를 봤어요!";
+  if (route === "context") return "화면을 잘 봤네요!";
+  if (intent === "service_help") return "잘 물어봤어요!";
+  if (intent === "financial_concept") return "좋은 개념이에요!";
+  return "좋은 질문이에요!";
 }
 
 /**

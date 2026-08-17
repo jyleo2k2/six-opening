@@ -40,3 +40,10 @@ Thumbs.db
 .agents/skills/*
 !.agents/skills/git-session-manager/
 !.agents/skills/git-session-manager/**
+
+# codex CLI. hooks.json은 .claude/settings.json의 짝이고 agents는 어린이 뉴스 역할 정의라
+# 팀이 함께 쓴다. config.toml 같은 개인 설정은 사람마다 달라 추적하지 않는다.
+.codex/*
+!.codex/hooks.json
+!.codex/agents/
+!.codex/agents/**
