@@ -57,6 +57,26 @@ export function planFields(side: "buy" | "sell", payload: Record<string, unknown
 }
 
 /**
+ * DB 예외를 화면이 구분할 수 있는 사유 코드로 옮긴다.
+ *
+ * 예전에는 어떤 이유로 거절됐든 502 한 덩어리였고 화면도 `주문을 넣지 못했어` 하나만
+ * 띄웠다. 잔액이 모자란 건지, 매도 예약이 수량을 잠근 건지, 아예 요청이 나가지도 않은
+ * 건지 **화면에서 구분할 방법이 없어서** 매도가 막혔을 때 원인을 서버 로그 없이는 댈 수
+ * 없었다.
+ *
+ * 문구는 `apply_trade`·`reserve_order` 의 `raise exception` 과 짝이다 — 그쪽을 고치면
+ * 여기도 함께 고친다. 모르는 예외는 `server_error` 로 두고 화면이 기존 문구를 쓴다.
+ */
+export function rejectionReason(error: unknown): string {
+  const message = String(error);
+  if (message.includes("잔액이 부족합니다")) return "insufficient_balance";
+  if (message.includes("보유 수량이 부족합니다")) return "insufficient_quantity";
+  if (message.includes("등록되지 않은 종목입니다")) return "unknown_stock";
+  if (message.includes("0보다 커야 합니다")) return "invalid_amount";
+  return "server_error";
+}
+
+/**
  * 체결된 주문 하나를 저장한다.
  * 잔액 차감·보유수량 갱신·transactions 기록은 apply_trade 함수 한 트랜잭션에서 처리하므로
  * 같은 주문을 두 번 눌러도 잔액이 어긋나지 않는다. 지정가 대기 주문은 체결 시점에 보낸다.
@@ -78,7 +98,7 @@ export async function POST(request: NextRequest) {
   const quantity = positiveNumber(payload.quantity);
 
   if (!isSide(side) || typeof stockCode !== "string" || !stockCode || !price || !quantity) {
-    return Response.json({ error: "주문 정보가 올바르지 않습니다." }, { status: 400 });
+    return Response.json({ error: "주문 정보가 올바르지 않습니다.", reason: "invalid_amount" }, { status: 400 });
   }
   const reason = typeof payload.reason === "string" ? payload.reason : null;
 
@@ -97,9 +117,10 @@ export async function POST(request: NextRequest) {
     );
     return Response.json(result);
   } catch (error) {
-    // 잔액 부족·수량 부족·미등록 종목은 함수가 예외로 막는다.
-    console.error(JSON.stringify({ event: "trade_saved", result: "error", message: String(error) }));
-    return Response.json({ error: "주문을 저장하지 못했습니다." }, { status: 502 });
+    // 잔액 부족·수량 부족·미등록 종목은 함수가 예외로 막는다. 어느 쪽이었는지 화면도 알아야 한다.
+    const reason = rejectionReason(error);
+    console.error(JSON.stringify({ event: "trade_saved", result: "error", reason, message: String(error) }));
+    return Response.json({ error: "주문을 저장하지 못했습니다.", reason }, { status: 502 });
   }
 }
 
