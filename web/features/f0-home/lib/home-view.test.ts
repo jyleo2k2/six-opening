@@ -5,7 +5,9 @@ import {
   homeRole,
   homeView,
   liveHoldings,
-  moodImg,
+  moodArt,
+  MOOD_FLAT_IMG,
+  MOOD_SAD_IMG,
   pctTrend,
   popItems,
   trendColor,
@@ -112,8 +114,9 @@ assert.equal(view.goalCount, Math.floor(20000 / 12000)); // 1개
 assert.equal(view.rateText, "+4.8%");
 assert.equal(view.rateColor, "#D5327A");
 assert.equal(view.profitText, "+20,000원");
-// 올랐으면 가운데 그림은 역할별 목표 그림 그대로다.
+// 올랐으면 가운데 그림은 역할별 목표 그림 그대로고 배율도 건드리지 않는다.
 assert.equal(view.moodImg, "/ui/assets/goal-child.png");
+assert.equal(view.moodScale, 1);
 // 총자산 = 현금(balance) + 보유 평가금액(240,000+180,000). 현금이 없으면(undefined) 0으로 본다.
 assert.equal(homeView(held, prices).totalAssetsText, "420,000원");
 assert.equal(
@@ -129,7 +132,7 @@ assert.equal(losing.goalCount, 0);
 assert.ok(losing.profitText.startsWith("−"));
 // 내렸으면 목표 그림 대신 우는 황소·곰이다. 살 수 있는 개수가 0인데 목표를 든 그림이
 // 웃고 있으면 화면이 앞뒤가 다른 말을 한다 — 2026-08-16 에 이 분기가 통째로 지워진 적 있다.
-assert.equal(losing.moodImg, "/ui/assets/mascot-bull-bear-sad.png");
+assert.equal(losing.moodImg, MOOD_SAD_IMG);
 
 // 시세를 못 받은 종목은 평단가를 현재가로 본다 — 0원으로 그리지 않는다.
 assert.equal(liveHoldings(held, {})[0].value, "200,000원");
@@ -144,7 +147,7 @@ assert.equal(empty.rateText, "+0.0%");
 assert.equal(empty.profitText, "+0원");
 // 오르지도 내리지도 않았으면 회색이다 — `+0.0%` 를 핑크로 적으면 숫자와 색이 다른 말을 한다.
 assert.equal(empty.rateColor, "#8E93A8");
-assert.equal(empty.moodImg, "/ui/assets/mascot-bull-flat.png");
+assert.equal(empty.moodImg, MOOD_FLAT_IMG);
 
 // 방향은 **화면에 찍히는 값**으로 정한다. 원값 +0.04% 는 화면에 `+0.0%` 로 적히므로 회색이다.
 assert.deepEqual([pctTrend(0.4), pctTrend(0.04), pctTrend(0), pctTrend(-0.04), pctTrend(-0.4)], [1, 0, 0, 0, -1]);
@@ -155,16 +158,52 @@ assert.deepEqual(
 // 가운데 그림도 색과 같은 방향을 쓴다 — 올랐으면 역할별 목표 그림, 보합이면 시무룩,
 // 내렸으면 우는 황소·곰이다.
 assert.deepEqual(
-  [1, 0, -1].map((t) => moodImg(t as Trend, "/ui/assets/goal-dad.png")),
-  ["/ui/assets/goal-dad.png", "/ui/assets/mascot-bull-flat.png", "/ui/assets/mascot-bull-bear-sad.png"],
+  [1, 0, -1].map((t) => moodArt(t as Trend, "/ui/assets/goal-dad.png").src),
+  ["/ui/assets/goal-dad.png", MOOD_FLAT_IMG, MOOD_SAD_IMG],
 );
 // 세 계정 모두 같은 규칙이다. 보합·손실에서는 역할별 목표 아이템이 아니라 무드 그림이 선다.
 const flatAll = [child, mom, dad].map((u) => homeView({ ...u, holdings: [] }, prices).moodImg);
-assert.deepEqual(flatAll, Array(3).fill("/ui/assets/mascot-bull-flat.png"));
+assert.deepEqual(flatAll, Array(3).fill(MOOD_FLAT_IMG));
 const losingAll = [child, mom, dad].map(
   (u) => homeView({ ...held, ...u, holdings: held.holdings }, { "005930": 50000, "259960": 100000 }).moodImg,
 );
-assert.deepEqual(losingAll, Array(3).fill("/ui/assets/mascot-bull-bear-sad.png"));
+assert.deepEqual(losingAll, Array(3).fill(MOOD_SAD_IMG));
+
+// 무드 그림은 **캐릭터가 목표 그림 캐릭터와 같은 높이**로 서야 한다. 배율을 안 걸면
+// 손실 그림 캐릭터가 아이 목표 그림의 63% 로 쪼그라든다 — 여백이 넓은 캔버스를 상자에
+// 맞추기 때문이다. 아래는 그 배율이 실제로 높이를 맞추는지 원본 픽셀로 되짚는 검산이다.
+const GOAL_BOX_H = 240; // HomeScreen 의 `GOAL_BOX` 높이
+const CANVAS = {
+  "/ui/assets/goal-child.png": { w: 524, h: 654, art: 509 },
+  "/ui/assets/goal-mom.png": { w: 524, h: 654, art: 479 },
+  "/ui/assets/goal-dad.png": { w: 368, h: 655, art: 411 },
+  [MOOD_FLAT_IMG]: { w: 722, h: 722, art: 499 },
+  [MOOD_SAD_IMG]: { w: 542, h: 722, art: 356 },
+} as const;
+/** `contain` 으로 상자에 맞춘 뒤 배율을 건 캐릭터의 실제 세로 픽셀. */
+const artHeight = (src: keyof typeof CANVAS, scale: number) =>
+  (CANVAS[src].art / CANVAS[src].h) * GOAL_BOX_H * scale;
+
+for (const goalImg of ["/ui/assets/goal-child.png", "/ui/assets/goal-mom.png", "/ui/assets/goal-dad.png"] as const) {
+  const target = artHeight(goalImg, 1);
+  for (const trend of [0, -1] as Trend[]) {
+    const art = moodArt(trend, goalImg);
+    // 반올림한 배율이라 정확히 같지는 않다. 1px 안이면 눈으로는 같은 크기다.
+    assert.ok(
+      Math.abs(artHeight(art.src as keyof typeof CANVAS, art.scale) - target) < 1,
+      `${goalImg} ${trend} 캐릭터 높이가 어긋난다`,
+    );
+    // 키운 그림이 화면 밖으로 나가면 `max-width` 가 조용히 되돌린다(폰 화면 402 − 좌우 여백 16×2).
+    const width = (CANVAS[art.src as keyof typeof CANVAS].w / CANVAS[art.src as keyof typeof CANVAS].h) * GOAL_BOX_H * art.scale;
+    assert.ok(width <= 402 - 32, `${goalImg} ${trend} 그림이 상자보다 넓다: ${width}`);
+  }
+}
+// 아빠는 목표 그림 캐릭터가 셋 중 가장 작아 배율이 1 아래로 내려간다 — 상자가 아니라
+// 그림을 맞추는 값이므로 방향이 반대로 나오는 계정도 있는 게 맞다.
+assert.ok(moodArt(0, "/ui/assets/goal-dad.png").scale < 1);
+assert.ok(moodArt(-1, "/ui/assets/goal-child.png").scale > 1.5);
+// 재 두지 않은 그림에는 배율을 지어내지 않는다.
+assert.equal(moodArt(0, "/ui/assets/goal-unknown.png").scale, 1);
 // 원값 +0.04% 는 화면에 `+0.0%` 로 적히므로 그림도 보합이다 — 숫자가 0인데 웃는 그림이
 // 서면 안 된다. 이 어긋남이 `rate` 원값 부호로 그림을 고르던 첫 구현의 결함이었다.
 const nearZero = homeView(
