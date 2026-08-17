@@ -44,7 +44,13 @@ export type RailCrossSwipe = {
   onMove: (dx: number) => void;
   /** 손을 뗐다. `velocity` 는 창 좌표 px/ms 다. */
   onEnd: (dx: number, velocity: number) => void;
-  /** 손짓이 끊겼다 — 브라우저가 스크롤을 가져갔거나 창을 벗어났다. 제자리로 되돌린다. */
+  /**
+   * 잰 것이 없이 손짓이 끝났다. 제자리로 되돌린다.
+   *
+   * 끊긴 손짓(`pointercancel`)은 여기로 오지 않는다 — 끊겨도 움직인 만큼은 `onEnd` 가
+   * 판정한다(`endCross` 주석). 브라우저가 스크롤을 가져갔다고 해서 다 쓴 손짓을 무르면
+   * 손가락으로는 섹터가 영영 안 넘어간다.
+   */
   onCancel: () => void;
 };
 
@@ -136,40 +142,56 @@ export function useRailDrag(
       if (next.dragged) ev.preventDefault();
     };
 
+    /**
+     * 가로로 잠긴 뒤에는 브라우저가 세로 스크롤을 시작하지 못하게 막는다.
+     *
+     * `touch-action:pan-y` 는 **가로 스크롤만** 막는다. 사람 손은 똑바로 가로로 긋지 못하므로
+     * 비스듬히 쓸면 브라우저가 그 세로 성분으로 스크롤을 시작하고, 시작한 순간 포인터가
+     * 취소된다(`pointercancel`) — 마우스로는 넘어가는데 손가락으로는 안 넘어가던 이유가
+     * 이것이다. `touchmove` 는 같은 손짓의 `pointermove` **뒤에** 오므로 여기 올 때는 축이
+     * 이미 잠겨 있고, 스크롤이 시작되기 전이라 아직 막을 수 있다.
+     */
+    const holdTouch = (ev: TouchEvent) => {
+      if (lock === "cross" && ev.cancelable) ev.preventDefault();
+    };
+
     const detach = () => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", abort);
+      el.removeEventListener("touchmove", holdTouch);
     };
 
-    /** 손짓이 끊겼다. 가로로 잠긴 손짓은 넘기지 않고 제자리로 되돌린다. */
-    function abort() {
-      if (lock !== "cross") {
-        up();
-        return;
-      }
+    /**
+     * 가로로 잠긴 손짓을 끝낸다. **끊겨서 왔든 손을 떼서 왔든 같은 판정을 쓴다** — 브라우저가
+     * 스크롤을 가져가며 포인터를 취소해도 이미 넘길 만큼 쓸었다면 넘어가야 한다. 그때마다
+     * 제자리로 되돌리면 손가락으로는 아무리 쓸어도 섹터가 안 바뀐다.
+     */
+    function endCross() {
       detach();
       el.style.cursor = "grab";
+      const finished = crossDrag;
       crossDrag = null;
-      cross?.onCancel();
+      if (finished) cross?.onEnd(-finished.scrollLeft, finished.velocity);
+      else cross?.onCancel();
       setTimeout(() => {
         dragged.current = false;
       }, 0);
     }
 
+    /** 손짓이 끊겼다 — 브라우저가 스크롤을 가져갔거나 창을 벗어났다. */
+    function abort() {
+      if (lock === "cross") endCross();
+      else up();
+    }
+
     function up() {
-      detach();
-      el.style.cursor = "grab";
       if (lock === "cross") {
-        const finished = crossDrag;
-        crossDrag = null;
-        if (finished) cross?.onEnd(-finished.scrollLeft, finished.velocity);
-        else cross?.onCancel();
-        setTimeout(() => {
-          dragged.current = false;
-        }, 0);
+        endCross();
         return;
       }
+      detach();
+      el.style.cursor = "grab";
       const current = drag.current;
       drag.current = null;
       let fling = current ? railFling(current) : 0;
@@ -197,6 +219,9 @@ export function useRailDrag(
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
     window.addEventListener("pointercancel", abort);
+    // 손가락일 때만 붙인다. `passive:false` 여야 `preventDefault` 가 산다 — 브라우저는
+    // touchmove 리스너를 기본으로 passive 로 보고, 그러면 막아 달라는 말을 무시한다.
+    if (touch) el.addEventListener("touchmove", holdTouch, { passive: false });
   };
 
   /**
