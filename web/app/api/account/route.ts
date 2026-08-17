@@ -29,6 +29,17 @@ const amount = (value: number | string | null | undefined) =>
  * 보유 수량도 같다. `quantity` 는 총 보유이고 매도에 쓸 수 있는 몫은
  * `available_quantity` 다 — 매도 예약이 잡은 수량은 총 보유에 남아 있어 평가액에는
  * 들어가지만 다시 팔 수는 없다.
+ *
+ * **보유 목록은 마지막으로 움직인 순서(`updated_at.desc`)로 준다.** 홈의 `내 보유 종목`
+ * 카드는 이 응답의 앞 세 줄만 세우므로(`home-view` 의 `HOME_HOLDING_LIMIT`) 순서가 곧
+ * 무엇이 보이느냐다. 정렬을 비워 두면 PostgREST 가 힙 순서로 돌려주는데, Postgres 는
+ * 행을 UPDATE 할 때 새 튜플을 힙 끝에 쓴다 — 즉 **방금 매매한 종목일수록 뒤로 밀려**
+ * 카드 밖으로 나간다. 매수하고 홈에 와도 목록이 그대로라 "주문이 반영되지 않는다" 로
+ * 보였던 자리가 여기다(차트는 `GET /api/trades` 를 새로 읽어 핀이 바로 떴다).
+ *
+ * `holdings.updated_at` 은 `apply_trade`·`reserve_order`·`settle_order` 가 모두
+ * 갱신하므로 체결뿐 아니라 예약을 걸어도 그 종목이 맨 위로 온다 — 방금 손댄 종목이
+ * 먼저 보이는 것이 이 자리에서 원하는 바다.
  */
 export async function GET(request: NextRequest) {
   const userId = sessionUserId(request);
@@ -45,6 +56,7 @@ export async function GET(request: NextRequest) {
       selectRows<HoldingRow>("holdings", {
         select: "stock_id,quantity,reserved_quantity,avg_price,stocks(stock_code,stock_name)",
         user_id: `eq.${userId}`,
+        order: "updated_at.desc",
       }),
     ]);
     if (!profile) return Response.json({ error: "사용자를 찾을 수 없습니다." }, { status: 404 });
