@@ -288,9 +288,7 @@ export function weekCards(
     const sunday = new Date(k + 6 * 86400000);
     return {
       key: k,
-      week: isNow
-        ? "이번 주"
-        : `${monday.getMonth() + 1}월 ${Math.ceil((monday.getDate() + 6) / 7)}주차`,
+      week: `${monday.getMonth() + 1}월 ${Math.ceil(monday.getDate() / 7)}주차`,
       date: `${monthDay(monday)} – ${monthDay(sunday)}`,
       title: type.title,
       type,

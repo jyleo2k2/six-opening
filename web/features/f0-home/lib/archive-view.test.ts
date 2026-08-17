@@ -70,20 +70,27 @@ assert.deepEqual(pendingType, PENDING_TYPE);
 assert.equal(resolveType("sniper", null).title, "저격수");
 
 // ── 카드 모아보기: 서버가 채점한 주 + 이번 주, 오래된 순 ────────────────────
-const now = new Date("2026-08-15T09:00:00+09:00").getTime(); // 토요일
+const now = new Date("2026-08-17T09:00:00+09:00").getTime(); // 월요일
 const myType = resolveType("sniper", 3);
 const cards = weekCards(
-  { cumulative: card, weeks: [{ weekStart: "2026-08-03", count: 2, card }] },
+  {
+    cumulative: card,
+    weeks: [
+      { weekStart: "2026-08-03", count: 2, card },
+      { weekStart: "2026-08-10", count: 1, card },
+    ],
+  },
   logged,
   myType,
   now,
 );
-// 8/3 주와 이번 주(8/10) 두 장.
-assert.equal(cards.length, 2);
-assert.equal(cards[1].week, "이번 주");
+// 첫 월요일부터 주차를 센다: 8/3~8/9는 1주차, 현재 8/17~8/23은 3주차다.
+assert.equal(cards.length, 3);
+assert.deepEqual(cards.map((item) => item.week), ["8월 1주차", "8월 2주차", "8월 3주차"]);
+assert.deepEqual(cards.map((item) => item.date), ["8/3 – 8/9", "8/10 – 8/16", "8/17 – 8/23"]);
 // 이번 주 카드는 성향 탭과 같은 유형이어야 한다 — 한 화면에서 갈리면 안 된다.
-assert.equal(cards[1].title, myType.title);
-assert.deepEqual(cards[1].scores, logged.scores);
+assert.equal(cards[2].title, myType.title);
+assert.deepEqual(cards[2].scores, logged.scores);
 // 지난 주는 서버가 채점한 값(0~10)이다. 로컬 재계산 카드는 이제 섞이지 않는다.
 assert.equal(cards[0].scaleMax, 10);
 assert.equal(cards[0].date, "8/3 – 8/9");
@@ -91,7 +98,7 @@ assert.equal(cards[0].date, "8/3 – 8/9");
 // 로컬에만 있는 주는 더 이상 카드가 되지 않는다 — 서버 주차 + 이번 주뿐이다.
 const empty = weekCards(null, pending, pendingType, now);
 assert.equal(empty.length, 1);
-assert.equal(empty[0].week, "이번 주");
+assert.equal(empty[0].week, "8월 3주차");
 assert.equal(empty[0].title, "관찰 중");
 assert.deepEqual(empty[0].scores, [5, 5, 5, 5, 5]);
 assert.match(empty[0].desc, /아직 산 게 없어요/u);
