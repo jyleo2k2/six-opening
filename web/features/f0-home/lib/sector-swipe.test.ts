@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   AXIS_LOCK_PX,
+  chipScrollLeft,
   isHorizontalWheel,
   lockSwipeAxis,
   nextSectorFilter,
@@ -13,6 +14,7 @@ import {
   sectorSwipeStep,
   sectorTrackStyle,
   shouldCommitSectorSwipe,
+  shouldCommitWheelSwipe,
   wheelDragDelta,
   SECTOR_SLIDE_MS,
   WHEEL_IDLE_MS,
@@ -51,8 +53,26 @@ assert.equal(wheelDragDelta(-2, 1), 32);
 // 그래서 두 손가락을 왼쪽으로 밀면(deltaX 양수) 손가락으로 왼쪽으로 쓴 것과 같은 쪽으로 간다.
 assert.equal(sectorSwipeStep(wheelDragDelta(30, 0)), 1);
 assert.equal(sectorSwipeStep(wheelDragDelta(-30, 0)), -1);
-// 멎었다고 보는 시간은 관성 꼬리보다 길어야 한 번 쓴 것이 두 손짓으로 갈리지 않는다.
-assert.ok(WHEEL_IDLE_MS >= 60);
+// 멎었다고 보는 시간은 트랙패드가 이벤트를 끊어 보내는 사이보다 길어야 한 손짓이 둘로
+// 갈리지 않는다. 짧게 잡았더니 "트랙패드로는 잘 안 넘어간다" 가 됐다.
+assert.ok(WHEEL_IDLE_MS >= 150);
+
+// 트랙패드 문턱은 폭의 12% 다. 휠 델타는 화면 거리와 1:1 이 아니라서 손가락과 같은 자를
+// 들이대면 천천히 쓸 때마다 못 넘는다 — 아래 두 줄이 그 차이다.
+assert.equal(shouldCommitWheelSwipe({ dx: -40, width: 402, scale: 1 }), false);
+assert.equal(shouldCommitWheelSwipe({ dx: -50, width: 402, scale: 1 }), true);
+assert.equal(shouldCommitSectorSwipe({ dx: -50, velocity: 0, width: 402, scale: 1 }), false);
+// 방향은 문턱과 무관하고, 배율은 손가락과 같은 자로 고친다.
+assert.equal(shouldCommitWheelSwipe({ dx: 50, width: 402, scale: 1 }), true);
+assert.equal(shouldCommitWheelSwipe({ dx: -25, width: 402, scale: 0.5 }), true);
+assert.equal(shouldCommitWheelSwipe({ dx: -1, width: 402, scale: 0 }), false);
+
+// 켜진 칩을 줄 왼쪽에 세우는 자리. 창 좌표로 잰 거리를 배율로 고쳐 레이아웃 px 로 돌려준다.
+assert.equal(chipScrollLeft({ scrollLeft: 0, chipLeft: 216, rowLeft: 100, inset: 16, scale: 1 }), 100);
+assert.equal(chipScrollLeft({ scrollLeft: 40, chipLeft: 200, rowLeft: 100, inset: 16, scale: 0.5 }), 224);
+// 이미 왼쪽에 서 있으면 움직이지 않는다. 배율 0 은 1 로 본다.
+assert.equal(chipScrollLeft({ scrollLeft: 80, chipLeft: 116, rowLeft: 100, inset: 16, scale: 1 }), 80);
+assert.equal(chipScrollLeft({ scrollLeft: 0, chipLeft: 116, rowLeft: 100, inset: 16, scale: 0 }), 0);
 
 assert.equal(nextSectorFilter(order, "all", 1), "rank");
 assert.equal(nextSectorFilter(order, "game", -1), "watch");

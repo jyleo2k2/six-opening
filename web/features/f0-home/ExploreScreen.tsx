@@ -30,7 +30,9 @@ import {
   sectorSwipeStep,
   sectorTrackStyle,
   shouldCommitSectorSwipe,
+  shouldCommitWheelSwipe,
   wheelDragDelta,
+  chipScrollLeft,
   WHEEL_IDLE_MS,
   type SectorStep,
 } from "./lib/sector-swipe";
@@ -60,6 +62,11 @@ const SEARCH_INPUT = styleFromCss(
     "font-family:'Pretendard',sans-serif;font-size:14.5px;font-weight:600;color:#01185A",
 );
 const CHIPS_ROW = styleFromCss("flex:none;display:flex;align-items:flex-start;gap:4px;padding:2px 0 12px");
+/**
+ * 칩 줄 왼쪽 여백. 켜진 칩을 왼쪽에 세울 때 **같은 값만큼 남겨야** 첫 칩(`전체`)이 켜졌을
+ * 때와 자리가 같다. 그래서 여기 한 곳에 두고 스타일과 계산이 같이 읽는다.
+ */
+const CHIPS_LEFT_PAD = 16;
 const CHIPS_TOGGLE = (open: boolean) =>
   styleFromCss(
     "flex:none;width:36px;height:40px;margin-right:8px;display:flex;align-items:center;justify-content:center;" +
@@ -284,6 +291,8 @@ export function ExploreScreen({
   const trackRef = useRef<HTMLDivElement>(null);
   /** 트랙을 담은 무대. 트랙패드 휠을 여기서 받는다(아래 effect). */
   const stageRef = useRef<HTMLDivElement>(null);
+  /** 가로로 흐르는 칩 줄. 켜진 칩을 왼쪽에 세우려면 이 줄을 민다(아래 effect). */
+  const chipsRowRef = useRef<HTMLDivElement>(null);
 
   // 유니버스가 오기 전에는 섹터 id 목록이 비어 있어 무엇이든 전체로 떨어진다. 도착하면
   // 같은 렌더에서 제 필터가 잡히고, 아래 effect 들이 그 값으로 한 번 더 돈다.
@@ -327,12 +336,21 @@ export function ExploreScreen({
     applyTrack(sectorDragOffset({ dx, ...box }, atEdge), false);
   }
 
-  /** 손을 뗀 자리에서 옆 칸으로 넘기거나 제자리로 되돌린다. */
-  function releaseTrack(dx: number, velocity: number) {
+  /**
+   * 손을 뗀 자리에서 옆 칸으로 넘기거나 제자리로 되돌린다.
+   *
+   * 트랙패드(`byWheel`)는 자가 다르다 — 휠 델타는 화면 거리와 1:1 이 아니라서 손가락과 같은
+   * 문턱을 들이대면 넘어가지 않는다(`shouldCommitWheelSwipe`).
+   */
+  function releaseTrack(dx: number, velocity: number, byWheel = false) {
     if (sliding.current) return;
     const step = sectorSwipeStep(dx);
     const next = nextSectorFilter(swipeOrder, filter, step);
-    if (next && shouldCommitSectorSwipe({ dx, velocity, ...trackBox() })) {
+    const box = trackBox();
+    const passed = byWheel
+      ? shouldCommitWheelSwipe({ dx, ...box })
+      : shouldCommitSectorSwipe({ dx, velocity, ...box });
+    if (next && passed) {
       sliding.current = true;
       setPending({ filter: next, step });
       return;
@@ -348,27 +366,39 @@ export function ExploreScreen({
    * 자리로 본다. 매 렌더 다시 붙이는 이유는 아래 두 함수가 **지금** 섹터·목록을 보고
    * 판단하기 때문이다 — 처음 붙인 것을 붙들고 있으면 첫 섹터에서 굳는다.
    */
-  const wheel = useRef({ dx: 0, timer: 0 });
+  const wheel = useRef({ dx: 0, timer: 0, locked: false });
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
     const onWheel = (event: WheelEvent) => {
-      if (!isHorizontalWheel(event.deltaX, event.deltaY)) return;
+      const state = wheel.current;
+      // 축은 손짓 하나에 **한 번만** 잠근다. 트랙패드는 가로로 밀어도 세로가 더 큰 이벤트를
+      // 사이사이 섞어 보내는데, 그때마다 판정을 다시 하면 한 손짓이 가로·세로로 쪼개진다.
+      if (!state.locked && !isHorizontalWheel(event.deltaX, event.deltaY)) return;
+      state.locked = true;
       // 가로로 남는 스크롤은 브라우저의 뒤로 가기 손짓이 가져간다. 막지 않으면 섹터를
       // 넘기려다 앱에서 나가 버린다. 그래서 `passive:false` 로 붙인다.
       event.preventDefault();
-      if (sliding.current) return;
-      const state = wheel.current;
-      state.dx += wheelDragDelta(event.deltaX, event.deltaMode);
-      dragTrack(state.dx);
+      // 멎으면 손짓이 끝난 것이다. 넘어가는 중이든 아니든 이 시계는 늘 다시 감는다 —
+      // 관성 꼬리가 다 지나간 뒤에 축 잠금이 풀려야 다음 손짓을 처음부터 잰다.
       window.clearTimeout(state.timer);
       state.timer = window.setTimeout(() => {
         const { dx } = state;
         state.dx = 0;
-        // 넘길지는 **쓴 거리로만** 정한다(속도 0). 휠 한 번의 델타는 손가락 한 프레임보다
-        // 훨씬 커서 속도로 재면 살짝 튕긴 것도 문턱을 넘는다.
-        releaseTrack(dx, 0);
+        state.locked = false;
+        // 여기까지 왔다는 것은 문턱을 못 넘었다는 뜻이다. 제자리로 되돌린다.
+        if (dx !== 0) releaseTrack(dx, 0, true);
       }, WHEEL_IDLE_MS);
+      if (sliding.current) return;
+      state.dx += wheelDragDelta(event.deltaX, event.deltaMode);
+      // **넘는 순간 넘긴다.** 손 떼기를 기다리면 그 사이에 손짓이 끊겨 판정을 놓친다.
+      if (shouldCommitWheelSwipe({ dx: state.dx, ...trackBox() })) {
+        const { dx } = state;
+        state.dx = 0;
+        releaseTrack(dx, 0, true);
+        return;
+      }
+      dragTrack(state.dx);
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     return () => {
@@ -436,6 +466,39 @@ export function ExploreScreen({
     setPending(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
+
+  /**
+   * 켜진 칩을 칩 줄 왼쪽에 세운다. **칩의 차례는 그대로 두고 줄만 민다.**
+   *
+   * 지금 무엇을 보고 있는지 말해 주는 것은 켜진 칩 하나인데, 섹터가 스무 개 넘게 가로로
+   * 흐르는 줄이라 그 칩이 화면 밖이나 오른쪽 끝에 잘려 있으면 아무 단서도 남지 않는다.
+   * 오른쪽 끝이라 더 못 밀면 브라우저가 끝에서 멈추고, 그 자리는 그대로 둔다.
+   *
+   * 첫 그림은 전환 없이 세운다 — `/explore/beauty` 를 주소로 바로 열었을 때 칩 줄이 옆에서
+   * 스르륵 밀려 오면 넘어온 것처럼 보인다. 칩을 접어 여러 줄로 편 동안(`chipsOpen`)에는
+   * 가로로 흐르지 않으므로 아무 일도 하지 않는다.
+   */
+  const chipSettled = useRef(false);
+  useLayoutEffect(() => {
+    const row = chipsRowRef.current;
+    if (!row || chipsOpen) return;
+    const chip = row.querySelector<HTMLElement>(`[data-chip="${filter}"]`);
+    if (!chip) return;
+    const rowBox = row.getBoundingClientRect();
+    const smooth = chipSettled.current;
+    chipSettled.current = true;
+    row.scrollTo({
+      left: chipScrollLeft({
+        scrollLeft: row.scrollLeft,
+        chipLeft: chip.getBoundingClientRect().left,
+        rowLeft: rowBox.left,
+        inset: CHIPS_LEFT_PAD,
+        scale: row.offsetWidth > 0 ? rowBox.width / row.offsetWidth : 1,
+      }),
+      behavior: smooth ? "smooth" : "auto",
+    });
+  }, [filter, chipsOpen]);
+
   /**
    * 카드 자리를 되살리고 적어 둘 준비. **유니버스만 있으면 된다.**
    *
@@ -588,6 +651,7 @@ export function ExploreScreen({
 
         <div id="tut-explore-chips" style={CHIPS_ROW}>
           <div
+            ref={chipsRowRef}
             style={styleFromCss(
               "flex:1;min-width:0;overflow-y:hidden;overflow-anchor:none;" +
                 (chipsOpen ? "overflow-x:hidden" : "overflow-x:auto"),
@@ -596,12 +660,17 @@ export function ExploreScreen({
             <div
               style={styleFromCss(
                 chipsOpen
-                  ? "display:flex;flex-wrap:wrap;gap:8px;padding:0 4px 0 16px"
-                  : "display:flex;gap:8px;padding:0 12px 0 16px;width:max-content",
+                  ? `display:flex;flex-wrap:wrap;gap:8px;padding:0 4px 0 ${CHIPS_LEFT_PAD}px`
+                  : `display:flex;gap:8px;padding:0 12px 0 ${CHIPS_LEFT_PAD}px;width:max-content`,
               )}
             >
               {chips.map((chip) => (
-                <div key={chip.id} onClick={() => pickChip(chip.id)} style={styleFromCss(chip.style)}>
+                <div
+                  data-chip={chip.id}
+                  key={chip.id}
+                  onClick={() => pickChip(chip.id)}
+                  style={styleFromCss(chip.style)}
+                >
                   <span>{chip.name}</span>
                 </div>
               ))}

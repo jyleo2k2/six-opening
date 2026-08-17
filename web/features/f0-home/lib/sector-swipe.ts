@@ -45,10 +45,11 @@ export function sectorPreviewList<T>(list: readonly T[]): T[] {
 /**
  * 트랙패드 두 손가락 가로 스와이프가 멎었다고 보는 시간.
  *
- * 휠에는 **손을 뗀 순간이 없다** — 이벤트가 잠깐 멎으면 그것이 끝이다. 관성 꼬리가 이어지는
- * 동안에도 계속 오므로, 너무 짧게 잡으면 한 번 쓴 것이 두 손짓으로 갈린다.
+ * 휠에는 **손을 뗀 순간이 없다** — 이벤트가 잠깐 멎으면 그것이 끝이다. 트랙패드는 한 번
+ * 쓸어도 이벤트를 몇 덩이로 끊어 보내고 그 사이가 100ms 를 넘기도 한다. 짧게 잡으면 한
+ * 손짓이 둘로 갈려 어느 쪽도 문턱을 못 넘는다 — 90ms 로 두었더니 "잘 안 넘어간다"가 됐다.
  */
-export const WHEEL_IDLE_MS = 90;
+export const WHEEL_IDLE_MS = 200;
 
 /** 줄 단위(`deltaMode:1`)로 오는 장치의 한 줄. 픽셀로 펴야 다른 손짓과 같은 자로 잰다. */
 const WHEEL_LINE_PX = 16;
@@ -168,6 +169,27 @@ export function shouldCommitSectorSwipe({ dx, velocity, width, scale }: SectorSw
  * 끄는 동안 레일이 밀려 있는 거리(화면 안쪽 px). 창 좌표를 배율로 고치고 한 폭을 넘지
  * 않게 자른다. 넘어갈 섹터가 없으면(`atEdge`) 눌러서 벽이 있다고 알린다.
  */
+/**
+ * 트랙패드 손짓이 넘어가는 거리(한 폭에 대한 비율).
+ *
+ * 손가락 문턱(폭의 20%, `shouldCommitSectorSwipe`)보다 낮다. 휠 델타는 화면 거리와 1:1 이
+ * 아니라 장치와 사용자 설정이 정하는 값이고, 손을 뗀 순간이 없어 한 손짓이 몇 덩이로 끊겨
+ * 들어온다. 손가락과 같은 자를 들이대면 천천히 쓸 때마다 반씩 나뉘어 아무것도 안 넘어간다.
+ */
+const WHEEL_COMMIT_RATIO = 0.12;
+
+/**
+ * 트랙패드로 이만큼 밀었으면 넘긴다. **손을 떼기를 기다리지 않고 넘는 순간 넘긴다** —
+ * 기다리면 그 사이에 손짓이 끊겨 판정을 놓친다(`WHEEL_IDLE_MS` 주석).
+ *
+ * 속도를 보지 않는 이유는 휠 한 번의 델타가 손가락 한 프레임보다 훨씬 커서, 속도로 재면
+ * 살짝 튕긴 것도 문턱을 넘기 때문이다.
+ */
+export function shouldCommitWheelSwipe({ dx, width, scale }: Omit<SectorSwipeGesture, "velocity">) {
+  const safeScale = scale > 0 ? scale : 1;
+  return Math.abs(dx) / safeScale >= Math.max(1, width) * WHEEL_COMMIT_RATIO;
+}
+
 export function sectorDragOffset(
   { dx, width, scale }: Omit<SectorSwipeGesture, "velocity">,
   atEdge: boolean,
@@ -176,6 +198,39 @@ export function sectorDragOffset(
   const moved = dx / safeScale;
   if (atEdge) return moved * EDGE_RESIST;
   return Math.max(-width, Math.min(width, moved));
+}
+
+/**
+ * 켜진 칩을 칩 줄 **왼쪽에 세우기 위한** 새 `scrollLeft`.
+ *
+ * 칩의 차례는 건드리지 않는다 — 줄이 움직여 켜진 칩이 왼쪽에 오는 것이다. 한때 켜진 칩을
+ * 목록 앞으로 끌어올린 적이 있는데, 그러면 누르는 순간 그 칩이 손가락 밑에서 튀고 옆 칩들이
+ * 밀려 다음에 누르려던 칩이 딴 자리에 가 있었다(`explore-cards` 의 `sectorChips` 주석).
+ *
+ * 창 좌표로 잰 거리를 배율로 고쳐 레이아웃 px 로 돌려준다 — `PhoneFrame` 이 화면을 줄여
+ * 그리므로 잰 값을 그대로 밀면 덜 움직인다. **오른쪽 끝이라 더 못 미는 경우는 여기서 따로
+ * 자르지 않는다**: 브라우저가 끝에서 멈추고, 그 자리는 그대로 두는 것이 이 줄의 규칙이다.
+ */
+export function chipScrollLeft({
+  scrollLeft,
+  chipLeft,
+  rowLeft,
+  inset,
+  scale,
+}: {
+  /** 지금 줄이 밀려 있는 자리. */
+  scrollLeft: number;
+  /** 켜진 칩의 창 좌표 왼쪽 변. */
+  chipLeft: number;
+  /** 줄의 창 좌표 왼쪽 변. */
+  rowLeft: number;
+  /** 왼쪽에 남길 여백(레이아웃 px). 줄 첫 칩이 평소 갖는 여백과 같아야 한다. */
+  inset: number;
+  /** `PhoneFrame` 이 화면에 건 배율. */
+  scale: number;
+}) {
+  const safeScale = scale > 0 ? scale : 1;
+  return scrollLeft + (chipLeft - rowLeft) / safeScale - inset;
 }
 
 export type SectorTrack = {
