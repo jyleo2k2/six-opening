@@ -38,6 +38,13 @@ const ASSET_TOTAL = styleFromCss(
 const MENU_BTN = styleFromCss(
   "flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer",
 );
+/** 햄버거와 같은 손잡이 크기. 원본 튜토리얼 버튼의 분홍을 그대로 쓴다. */
+const HELP_BTN = styleFromCss(
+  "flex:none;width:30px;height:30px;border-radius:999px;display:flex;align-items:center;justify-content:center;" +
+    "font-size:16px;font-weight:800;color:#fff;cursor:pointer;" +
+    "background:linear-gradient(180deg,#FFA0C6 0%,#F663A1 62%,#EE4A8E 100%);" +
+    "box-shadow:0 6px 12px -5px rgba(214,54,124,0.5),inset 0 1.5px 2px rgba(255,255,255,0.45)",
+);
 const MENU_SCRIM = styleFromCss("position:absolute;left:0;top:0;right:0;bottom:0;z-index:1");
 const MENU = styleFromCss(
   "position:absolute;right:16px;top:104px;z-index:2;width:184px;border-radius:20px;padding:6px;background:#fff;" +
@@ -209,7 +216,14 @@ function HoldingRow({
   );
 }
 
-export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
+export function HomeScreen({
+  onLeave,
+  onStartTutorial,
+}: {
+  onLeave: (path: string) => void;
+  /** 튜토리얼 `?`. 오버레이는 `ConnectedPrototype` 이 갖는다 — 화면 하나에 매이면 안 된다. */
+  onStartTutorial?: () => void;
+}) {
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -278,10 +292,20 @@ export function HomeScreen({ onLeave }: { onLeave: (path: string) => void }) {
       <div style={PAGE}>
         <div style={HEADER}>
           <img alt="" height={42} src={view.info.avatarImg} style={AVATAR} width={42} />
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div id="tut-home-total" style={{ flex: 1, minWidth: 0 }}>
             <div style={ASSET_LABEL}>{view.totalAssetsLabel}</div>
             <div style={ASSET_TOTAL}>{view.totalAssetsText}</div>
           </div>
+          {/*
+            튜토리얼 `?` 는 햄버거 **왼쪽**이다. 우하단은 키웅이가 쓰고 드래그로 움직이니
+            거기 두면 서로 가린다. 튜토리얼이 켜져 있는 동안은 감춘다 — 오버레이가 이미
+            화면을 덮고 있어서 다시 눌러야 할 이유가 없다.
+          */}
+          {onStartTutorial && (
+            <div onClick={onStartTutorial} style={HELP_BTN} title="튜토리얼">
+              ?
+            </div>
+          )}
           <div onClick={() => setMenuOpen((open) => !open)} style={MENU_BTN}>
             <svg aria-hidden="true" height="16" viewBox="0 0 22 16" width="22">
               <g stroke="#3B3F60" strokeLinecap="round" strokeWidth="2.2">

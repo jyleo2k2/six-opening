@@ -118,11 +118,11 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     stage: "news",
     anchors: ["tut-news-easy"],
     title: "어려운 말 풀어 보기",
-    what: "이 회사에 무슨 일이 있었는지 뉴스로 볼 수 있어요. 어려운 말에는 쉬운 풀이가 붙어 있어요.",
+    what: "이 회사에 무슨 일이 있었는지 3줄로 알려줘요. 기사에 나온 어려운 말은 아래에 쉬운 말로 풀어 놨어요.",
     term: "뉴스와 주가",
     concept:
       "회사에 좋은 일이 생기면 사려는 사람이 늘고, 걱정되는 일이 생기면 팔려는 사람이 늘어요. 그래서 뉴스가 나오면 값이 움직이곤 해요. 다만 뉴스 하나만 보고 다음에 오를지 내릴지는 아무도 알 수 없어요.",
-    hint: "밑줄 친 말을 누르면 풀이가 나와요",
+    hint: "이 말은 무슨 뜻이야 칸을 읽어 봐요",
     from: 8,
   },
   {
@@ -195,11 +195,11 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     screen: "portfolio",
     anchors: ["tut-portfolio-sell"],
     title: "팔러 가기",
-    what: "갖고 있는 걸 팔 수도 있어요. 종목을 열고 팔래를 누르면 돼요.",
+    what: "갖고 있는 걸 팔 수도 있어요. 종목 카드 아래 팔러 가기를 누르면 돼요.",
     term: "매도",
     concept:
       "주식을 파는 걸 매도라고 해요. 팔면 그만큼 다시 돈으로 바뀌어서 지갑에 들어와요. 한꺼번에 다 팔지 않고 나눠서 파는 것도 할 수 있어요.",
-    hint: "팔래를 누르면 얼마나 팔지 고를 수 있어요",
+    hint: "팔러 가기를 누르면 얼마나 팔지 고를 수 있어요",
     from: 13,
   },
   {
@@ -223,7 +223,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     term: "기록",
     concept:
       "언제 사서 언제 팔았는지, 그때 무슨 생각이었는지가 남아요. 가족끼리 서로 어떻게 골랐는지 견줘 보면 나는 어떤 쪽인지 알게 돼요. 이게 이 앱에서 제일 중요한 부분이에요.",
-    hint: "수익률 탭에서 가족 피드를 볼 수 있어요",
+    hint: "우리 가족 수익을 누르면 가족 피드가 나와요",
     from: 5,
   },
 ];

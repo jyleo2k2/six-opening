@@ -14,4 +14,6 @@
 - **폰 화면 위에 겹치는 오버레이는 `phoneScreenClipPath`로 화면 사각형에 가둔다.** 오버레이는 iframe·`PhoneFrame` 밖에 있어 프레임 이미지와 스태킹 컨텍스트가 갈리므로 z-index로는 순서를 정할 수 없다. 좌표가 어긋나도 프레임 밖으로 나가지 않게 하는 수단은 자르기뿐이다.
 - 화면 사각형은 `ConnectedPrototype`과 `usePhoneScreenRect`가 **같은 `getPrototypeScreenRect(창너비, 창높이)`** 로 잡는다. 기하 상수의 원본은 `f10-chatbot/lib/bottom-sheet`의 `PROTOTYPE_PHONE` 하나다.
 - **가족 피드는 `ArchiveScreen` 수익률 탭이 소유한다.** 별도 F11 화면이나 진입 버튼을 다시 만들지 않는다. 반응(댓글·좋아요)은 서버가 원본이고 화면에서 개수를 세지 않는다.
+- **튜토리얼은 `TutorialOverlay`가 소유하고 `ConnectedPrototype`이 띄운다.** 화면을 건너다니며 따라와야 해서 화면 컴포넌트에 매달지 않는다. 짚을 자리는 화면이 `id="tut-*"` 하나만 달고 위치는 실행 시점에 잰다 — 문안·순서는 `lib/tutorial-steps.ts`, 구멍·말풍선 자리는 `lib/tutorial-anchor.ts`다. **`id="tut-*"`를 지우기 전에 그 두 파일을 먼저 본다**: 이 기능은 2026-08-13 병합에서 `<script src>` 한 줄이 유실돼 죽은 뒤 "참조 0건"으로 오해받아 지워진 적이 있다.
+- 주문 1/2/3 단계와 상세→뉴스처럼 **주소가 안 바뀌는 자리**는 `onStage`로 올린다. `onLeave`와 같은 패턴이고, 밖에서 지금 어디인지 알아야 하는 것은 이 경로로만 안다.
 - 현재 메인 프로토타입에는 전역 부모↔자녀 스위처가 연결되지 않았다.

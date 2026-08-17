@@ -17,6 +17,8 @@ import { OrderScreen } from "./OrderScreen";
 import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
 import { pathFromRoute, routeFromPath, type ScreenRoute } from "./screen-route";
+import { TutorialOverlay } from "./TutorialOverlay";
+import type { TutorialStage } from "./lib/tutorial-steps";
 
 /** 화면이 맥락을 올리기 전의 기본값. 상세·탐색·주문만 자기 맥락을 올린다. */
 const HOME_CONTEXT: ChatContext = { screen: "home" };
@@ -37,6 +39,16 @@ export function ConnectedPrototype({
   /** 종목·탐색·주문 화면이 올리는 맥락. 없으면 홈으로 본다. */
   const [overlayContext, setOverlayContext] = useState<ChatContext | null>(null);
   const [screenRect, setScreenRect] = useState<PrototypeScreenRect | null>(null);
+  /**
+   * 튜토리얼. 오버레이를 화면 컴포넌트가 아니라 여기서 갖는 이유는 **화면을 건너다녀야**
+   * 하기 때문이다 — 홈에서 켜고 탐색으로 넘어가도 설명이 따라와야 한다.
+   *
+   * `stage` 는 주문 1/2/3 단계와 상세→뉴스처럼 **주소가 안 바뀌는 자리**다. 화면이
+   * `onStage` 로 올려 준다. 화면을 옮길 때 비우는 이유는, 남겨 두면 다음 화면이 자기
+   * 자리를 올리기 전 한 프레임 동안 `order-2` 같은 지난 자리로 설명을 고르기 때문이다.
+   */
+  const [tutorialOn, setTutorialOn] = useState(false);
+  const [stage, setStage] = useState<TutorialStage | undefined>(undefined);
 
   // 챗봇 시트와 폰 프레임은 화면 사각형에 딱 맞아야 한다. 기하의 원본은 `PROTOTYPE_PHONE`
   // 상수 하나이고, 옮겨 온 화면(`PhoneFrame`)도 같은 함수로 자기 자리를 잡는다.
@@ -70,6 +82,7 @@ export function ConnectedPrototype({
 
   const openRoute = (next: ScreenRoute) => {
     setOverlay(next);
+    setStage(undefined);
     writePath(next);
   };
 
@@ -96,7 +109,9 @@ export function ConnectedPrototype({
     <div className="h-dvh min-h-[640px] overflow-hidden bg-bg text-ink">
       {overlay && (
         <div style={{ position: "fixed", inset: 0, zIndex: 5 }}>
-          {overlay.screen === "home" && <HomeScreen onLeave={leaveToPath} />}
+          {overlay.screen === "home" && (
+            <HomeScreen onLeave={leaveToPath} onStartTutorial={() => setTutorialOn(true)} />
+          )}
           {overlay.screen === "archive" && (
             <ArchiveScreen account={account} onLeave={leaveToPath} view={overlay.view} />
           )}
@@ -110,6 +125,7 @@ export function ConnectedPrototype({
               code={overlay.code}
               onChatContext={setOverlayContext}
               onLeave={leaveToPath}
+              onStage={setStage}
             />
           )}
           {overlay.screen === "explore" && (
@@ -128,6 +144,7 @@ export function ConnectedPrototype({
               key={`${overlay.side}-${overlay.code}`}
               onChatContext={setOverlayContext}
               onLeave={leaveToPath}
+              onStage={setStage}
               side={overlay.side}
             />
           )}
@@ -139,6 +156,16 @@ export function ConnectedPrototype({
       >
         <F10ChatbotDemo context={overlayContext ?? HOME_CONTEXT} screenRect={screenRect} />
       </div>
+      {/*
+        튜토리얼은 챗봇 오버레이 위, 프레임 아래다. 역할이 갈린다 — 코치마크는 지금 이
+        버튼이 뭘 하는지 짚어 주고, 깊은 설명은 키웅이가 맡는다.
+      */}
+      {tutorialOn && overlay && (
+        <TutorialOverlay
+          onClose={() => setTutorialOn(false)}
+          place={{ screen: overlay.screen, stage }}
+        />
+      )}
       {/*
         폰 프레임을 맨 위에 한 겹 더 깐다. 챗봇 시트처럼 화면 위로 올라오는 것들은
         `PhoneFrame` **밖**에 있어서 프레임 이미지보다 위에 그려진다. 화면 사각형으로

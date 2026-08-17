@@ -222,7 +222,7 @@ export function ExploreScreen({
           </div>
         )}
 
-        <div style={CHIPS_ROW}>
+        <div id="tut-explore-chips" style={CHIPS_ROW}>
           <div
             style={styleFromCss(
               "flex:1;min-width:0;overflow-y:hidden;overflow-anchor:none;" +
@@ -279,7 +279,13 @@ export function ExploreScreen({
               {list.map((stock, index) => {
                 const card = buildExploreCard(list, index, universe, activeIndex, showGroups);
                 return (
-                  <div key={card.code} style={styleFromCss(card.slideStyle)}>
+                  <div
+                    // 튜토리얼은 레일 전체가 아니라 **지금 보고 있는 카드**만 짚는다.
+                    // 레일을 통째로 뚫으면 카드가 놓인 배경까지 밝아져 카드가 묻힌다.
+                    id={index === activeIndex ? "tut-explore-cards" : undefined}
+                    key={card.code}
+                    style={styleFromCss(card.slideStyle)}
+                  >
                     {card.groupShow && (
                       <div style={GROUP_WRAP}>
                         {card.groupShowLine && <div style={GROUP_LINE} />}

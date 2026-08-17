@@ -64,7 +64,7 @@ export function RankingScreen({ onLeave }: { onLeave: (path: string) => void }) 
             학교별
           </div>
         </div>
-        <div style={POD_ROW}>
+        <div id="tut-ranking" style={POD_ROW}>
           {podium.map((p) => (
             <div key={p.rank} style={styleFromCss(p.colStyle)}>
               <div style={styleFromCss(p.crownStyle)} />

@@ -101,7 +101,11 @@ export function StockFooter({
             <span style={LOCK_TEXT}>지금은 학교에서 공부할 시간! 매매는 하교하고 해요</span>
           </div>
         )}
-        <div onClick={onStartBuy} style={news ? (locked ? CTA_OFF : CTA_ON) : DETAIL_CTA}>
+        <div
+          id="tut-detail-buy"
+          onClick={onStartBuy}
+          style={news ? (locked ? CTA_OFF : CTA_ON) : DETAIL_CTA}
+        >
           <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" } as CSSProperties}>
             {news ? "살래(매수)" : "주문하기"}
           </span>

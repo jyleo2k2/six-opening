@@ -123,7 +123,7 @@ export function NewsScreen({
         </div>
 
         {terms.length > 0 ? (
-          <div style={TERM_CARD}>
+          <div id="tut-news-easy" style={TERM_CARD}>
             <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A" }}>이 말은 무슨 뜻이야?</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 11, marginTop: 13 }}>
               {terms.map((treatment) => (
