@@ -30,8 +30,17 @@ export const AXIS_LOCK_PX = 6;
 /** 끝 섹터에서 더 밀 때 남기는 저항. 0 이면 벽이 없는 것처럼 보이고, 1 이면 끝인 줄 모른다. */
 const EDGE_RESIST = 0.3;
 
-/** 들어오는 목록이 켜지는 정도. 자리만 움직이면 같은 목록이 미끄러진 것처럼 보인다. */
-const SLIDE_FADE = 0.35;
+/**
+ * 옆 칸에 미리 그려 두는 카드 수. 레일은 한 화면에 카드 한 장 반을 보이고 옆 칸은 언제나
+ * 맨 위에서 시작하므로, 51장을 다 그려도 보이는 것은 앞의 몇 장뿐이다. 세 칸을 통째로
+ * 그리면 스와이프 한 번에 카드 150장이 다시 그려진다.
+ */
+export const PREVIEW_CARDS = 4;
+
+/** 옆 칸이 그릴 목록. 보이는 만큼만 자른다. */
+export function sectorPreviewList<T>(list: readonly T[]): T[] {
+  return list.slice(0, PREVIEW_CARDS);
+}
 
 /** 목록을 넘기는 방향. `1` 은 다음 섹터(왼쪽으로 쓸었다), `-1` 은 이전 섹터다. */
 export type SectorStep = 1 | -1;
@@ -63,6 +72,17 @@ export function nextSectorFilter(
   if (at < 0) return null;
   const next = at + step;
   return next >= 0 && next < order.length ? order[next] : null;
+}
+
+/**
+ * 지금 섹터의 양옆. **옆 칸에 미리 그려 둘 목록**을 정한다 — 이것이 있어야 손가락을 따라
+ * 옆 목록이 들어온다. 끝이면 그쪽은 `null` 이고 밀어도 벽이 있다.
+ */
+export function sectorNeighbors(order: readonly string[], current: string) {
+  return {
+    prev: nextSectorFilter(order, current, -1),
+    next: nextSectorFilter(order, current, 1),
+  };
 }
 
 /**
@@ -130,29 +150,26 @@ export function sectorDragOffset(
   return Math.max(-width, Math.min(width, moved));
 }
 
-/**
- * 레일에 얹는 가로 이동. `animated` 가 거짓이면 손가락을 그대로 따라가고(전환 없음),
- * 참이면 밀려 나가거나 들어오는 연출이 된다.
- *
- * 문자열로 돌려주는 것은 이 폴더의 다른 그리기 값과 같은 이유다 — 화면은 `styleFromCss`
- * 로 붙이기만 한다.
- */
-export type SectorSlide = {
-  /** 레일이 밀려 있는 거리(화면 안쪽 px). 음수면 왼쪽이다. */
+export type SectorTrack = {
+  /** 트랙이 밀려 있는 거리(화면 안쪽 px). 음수면 왼쪽이다. 제자리는 0 이다. */
   offsetPx: number;
-  /** 자리를 정한 순간의 레일 폭. 옅어지는 정도가 한 폭에 대한 비율이라 함께 다닌다. */
-  width: number;
+  /** 손가락을 따라가는 동안에는 거짓이어야 한다. 참이면 미끄러지는 연출이 붙는다. */
   animated: boolean;
 };
 
-export function sectorRailStyle({ offsetPx, width, animated }: SectorSlide) {
-  const away = width > 0 ? Math.min(1, Math.abs(offsetPx) / width) : 0;
-  return (
-    `transform:translate3d(${offsetPx.toFixed(1)}px,0,0)` +
-    `;opacity:${(1 - SLIDE_FADE * away).toFixed(3)}` +
-    ";transition:" +
-    (animated
-      ? `transform ${SECTOR_SLIDE_MS}ms ${SLIDE_EASE},opacity ${SECTOR_SLIDE_MS}ms ease`
-      : "none")
-  );
+/**
+ * 세 칸 트랙(이전·현재·다음)에 얹는 가로 이동.
+ *
+ * **옅어지게 하지 않는다.** 한 칸만 밀어낼 때는 빈 화면을 덮으려고 페이드를 넣었지만,
+ * 옆 목록이 실제로 들어오는 지금은 두 목록이 같이 흐려져 어색하다. 세로 넘김도 카드가
+ * 눕기만 하고 목록이 흐려지지는 않는다.
+ *
+ * 값을 객체로 돌려주는 이유는 이 스타일의 **주인이 DOM 이기 때문**이다 — 끄는 동안에는
+ * React 를 거치지 않고 트랙 노드에 직접 쓴다(카드 51장을 매 프레임 다시 그리지 않는다).
+ */
+export function sectorTrackStyle({ offsetPx, animated }: SectorTrack) {
+  return {
+    transform: `translate3d(${offsetPx.toFixed(1)}px,0,0)`,
+    transition: animated ? `transform ${SECTOR_SLIDE_MS}ms ${SLIDE_EASE}` : "none",
+  };
 }

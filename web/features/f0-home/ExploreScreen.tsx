@@ -14,6 +14,7 @@ import {
   RANK_CHIP,
   sectorChips,
   showSectorGroups,
+  type ExploreStockRow,
 } from "./lib/explore-cards";
 import { exploreSpotFor, rememberExploreSpot } from "./lib/explore-memo";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
@@ -21,16 +22,17 @@ import {
   nextSectorFilter,
   SECTOR_SLIDE_MS,
   sectorDragOffset,
-  sectorRailStyle,
+  sectorNeighbors,
+  sectorPreviewList,
   sectorStepBetween,
   sectorSwipeOrder,
   sectorSwipeStep,
+  sectorTrackStyle,
   shouldCommitSectorSwipe,
-  type SectorSlide,
   type SectorStep,
 } from "./lib/sector-swipe";
 import { useRailDrag } from "./lib/use-rail-drag";
-import { useUniverseLive } from "./lib/use-universe";
+import { useUniverseLive, type Universe } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
 import { useWatchlist } from "./lib/use-watchlist";
 
@@ -63,16 +65,42 @@ const CHIPS_TOGGLE = (open: boolean) =>
 // 헤더 오른쪽에 남은 버튼은 돋보기 하나라, 왼쪽도 같은 폭을 비워야 제목이 가운데에 선다.
 // 왼쪽 38+12 = 오른쪽 12+38. 정렬 버튼이 있던 시절의 88 을 그대로 두면 제목이 왼쪽으로 밀린다.
 const HEADER_SPACER = styleFromCss("flex:none;width:38px");
+// 옆 섹터 칸이 무대 밖으로 나가는 것은 폰 화면(`PAGE`)이 이미 자르지만, 무대 안에서 한 번
+// 더 자른다 — 트랙이 도트 열 밑을 지나간다.
 const STAGE = styleFromCss(
-  "position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:transparent",
+  "position:relative;flex:1;min-height:0;overflow:hidden;background:transparent",
 );
-// 카드가 위아래로 넘어가는 세로 레일. `scroll-snap-stop:always` 를 카드 쪽에서 이미 준다.
+/**
+ * 이전·현재·다음 섹터 칸을 담는 트랙. **가로 이동의 주인은 이 노드의 인라인 스타일**이고
+ * React 는 손대지 않는다(`trackRef`) — 끄는 동안 상태를 바꾸면 카드 51장이 매 프레임 다시
+ * 그려진다. 자리 되돌리기는 `filter` 가 바뀔 때 layout effect 가 한다.
+ */
+const TRACK = styleFromCss("position:absolute;left:0;top:0;right:0;bottom:0");
+// 카드가 위아래로 넘어가는 세로 레일 한 칸. `scroll-snap-stop:always` 를 카드 쪽에서 이미 준다.
 // `touch-action:pan-y` — 손가락 세로는 브라우저 기본 스크롤에 맡기고 **가로만** 우리가 받는다.
 // `none` 이던 시절에는 브라우저가 세로도 넘겨주지 않아 손가락으로는 카드가 아예 안 넘어갔다.
-const RAIL_CSS =
-  "position:relative;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overflow-anchor:none;display:flex;" +
-  "flex-direction:column;align-items:center;gap:26px;padding:16px 0 20px;scroll-snap-type:y mandatory;" +
-  "cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none";
+const PANE_BOX =
+  "position:absolute;left:0;top:0;right:0;bottom:0;overflow-x:hidden;overflow-anchor:none;" +
+  "display:flex;flex-direction:column;align-items:center;touch-action:pan-y;" +
+  "user-select:none;-webkit-user-select:none;";
+/**
+ * 섹터 한 칸의 스타일. `step` 이 0 이면 가운데 칸(손짓을 받고 스크롤한다)이고, `±1` 이면
+ * 손가락을 따라 들어오는 옆 칸이다 — 옆 칸은 **실제 목록**이지만 넘어가 가운데가 되기
+ * 전에는 스크롤하거나 카드를 열 수 없다.
+ */
+const paneStyle = (step: SectorStep | 0, empty: boolean) =>
+  styleFromCss(
+    PANE_BOX +
+      (empty
+        ? "justify-content:center;padding:0 32px;gap:9px;overflow-y:hidden"
+        : "gap:26px;padding:16px 0 20px;scroll-snap-type:y mandatory;" +
+          (step === 0 ? "overflow-y:auto;cursor:grab" : "overflow-y:hidden")) +
+      (step === 0 ? "" : `;pointer-events:none;transform:translateX(${step * 100}%)`),
+  );
+const EMPTY_TITLE = styleFromCss("font-size:16px;font-weight:800;color:#01185A;text-align:center");
+const EMPTY_HINT = styleFromCss(
+  "font-size:13.5px;font-weight:500;color:#8E93A8;line-height:1.6;text-align:center;text-wrap:pretty",
+);
 const DOTS_COL = styleFromCss(
   "position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;" +
     "align-items:center;gap:5px;pointer-events:none",
@@ -83,6 +111,112 @@ const GROUP_WRAP = styleFromCss(
 );
 const GROUP_LINE = styleFromCss("position:absolute;left:0;right:0;top:0;height:1px;background:#E5E2EE");
 const GROUP_NAME = styleFromCss("font-size:22px;font-weight:800;color:#141B22;letter-spacing:-0.03em;padding-bottom:14px");
+
+/**
+ * 섹터 한 칸의 카드 목록. **가운데 칸과 옆 칸이 같은 컴포넌트여야** 넘어간 뒤 화면이 그대로
+ * 이어진다 — 옆 칸을 따로 그리면 안착하는 순간 카드가 미묘하게 튀고, 그것이 곧 "빈 화면이
+ * 보였다 바뀐다"는 말이 된다.
+ *
+ * `rail`·`onOpen` 이 없으면 옆 칸이다: 스크롤하지 않고 카드를 열 수도 없다.
+ */
+function SectorPane({
+  universe,
+  list,
+  empty,
+  activeIndex,
+  showGroups,
+  step,
+  paneKey,
+  rail,
+  onOpen,
+}: {
+  universe: Universe;
+  list: ExploreStockRow[];
+  empty: { title: string; hint: string };
+  activeIndex: number;
+  showGroups: boolean;
+  /** 0 이면 가운데 칸, `±1` 이면 그만큼 옆 칸이다. */
+  step: SectorStep | 0;
+  /**
+   * SVG 그러데이션 id 는 문서에서 유일해야 한다. 같은 종목이 두 칸에 함께 놓일 수 있어
+   * (`전체` 와 `반도체` 는 삼성전자를 같이 갖는다) 칸 이름을 뒤에 붙인다.
+   */
+  paneKey: string;
+  rail?: ReturnType<typeof useRailDrag>;
+  onOpen?: (code: string) => void;
+}) {
+  if (list.length === 0) {
+    // 빈 목록에도 같은 손짓을 붙인다 — 관심 기업이 0개인 자리에서 쓸어 나갈 수 없으면
+    // 손가락만으로는 갇힌다.
+    return (
+      <div onPointerDown={rail?.onPointerDown} ref={rail?.ref} style={paneStyle(step, true)}>
+        <div style={EMPTY_TITLE}>{empty.title}</div>
+        <div style={EMPTY_HINT}>{empty.hint}</div>
+      </div>
+    );
+  }
+  return (
+    <div
+      onPointerDown={rail?.onPointerDown}
+      onScroll={rail?.onScroll}
+      ref={rail?.ref}
+      style={paneStyle(step, false)}
+    >
+      {list.map((stock, index) => {
+        const card = buildExploreCard(list, index, universe, activeIndex, showGroups);
+        const gradId = card.gradId + paneKey;
+        return (
+          <div
+            // 튜토리얼은 레일 전체가 아니라 **지금 보고 있는 카드**만 짚는다. 레일을 통째로
+            // 뚫으면 카드가 놓인 배경까지 밝아져 카드가 묻힌다. 옆 칸은 짚지 않는다.
+            id={onOpen && index === activeIndex ? "tut-explore-cards" : undefined}
+            key={card.code}
+            style={styleFromCss(card.slideStyle)}
+          >
+            {card.groupShow && (
+              <div style={GROUP_WRAP}>
+                {card.groupShowLine && <div style={GROUP_LINE} />}
+                <div style={GROUP_NAME}>{card.groupName}</div>
+              </div>
+            )}
+            <div onClick={() => onOpen?.(card.code)} style={styleFromCss(card.cardStyle)}>
+              <div style={styleFromCss(card.artStyle)}>
+                {!card.hasLogo && <span style={{ fontSize: 40 }}>{card.emoji}</span>}
+              </div>
+              <div style={styleFromCss(card.catStyle)}>{card.category}</div>
+              <div style={styleFromCss(card.nameStyle)}>
+                <div style={styleFromCss(card.nameTextStyle)}>{card.name}</div>
+                <div style={styleFromCss(card.codeStyle)}>{card.codeText}</div>
+              </div>
+              <div style={styleFromCss(card.priceStyle)}>
+                <span>{card.priceText}</span>
+                <span style={styleFromCss(card.wonStyle)}>원</span>
+              </div>
+              <div style={styleFromCss(card.changeStyle)}>
+                {card.changeText}
+                <span style={styleFromCss(card.changePctStyle)}>{card.changePctText}</span>
+              </div>
+              <svg height={104} style={styleFromCss(card.chartStyle)} viewBox="0 0 310 104" width={310}>
+                <defs>
+                  <linearGradient id={gradId} x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stopColor={card.lineColor} stopOpacity="0.16" />
+                    <stop offset="1" stopColor={card.lineColor} stopOpacity="0.16" />
+                  </linearGradient>
+                </defs>
+                <path d={card.sparkArea} fill={`url(#${gradId})`} />
+                <polyline fill="none" points={card.sparkLine} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8" strokeWidth="6" />
+                <polyline fill="none" points={card.sparkLine} stroke={card.lineColor} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.6" />
+                <circle cx={card.endX} cy={card.endY} fill="#FFFFFF" fillOpacity="0.9" r="6.5" />
+                <circle cx={card.endX} cy={card.endY} fill={card.lineColor} r="3.6" />
+              </svg>
+              <div style={styleFromCss(card.glintStyle)} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 /**
  * 라우트의 섹터 구간이 아는 값이 아니면 전체로 되돌린다.
@@ -126,18 +260,12 @@ export function ExploreScreen({
   const [searchOpen, setSearchOpen] = useState(false);
   const [chipsOpen, setChipsOpen] = useState(false);
   /**
-   * 섹터 전환 중 레일이 밀려 있는 자리. `animated` 가 거짓이면 손가락을 그대로 따라간다.
+   * 옆 칸이 아닌 섹터로 갈 때(칩 탭·챗봇 점프) 그쪽에 임시로 끼워 넣는 칸.
    *
-   * `width` 를 함께 담는 이유는 옅어지는 정도가 **한 폭에 대한 비율**이라서다. 그리는
-   * 동안 DOM 을 다시 재지 않으려면 자리를 정한 순간의 폭이 자리와 같이 있어야 한다.
+   * 쓸어서 넘어갈 때는 그 칸이 이미 옆에 그려져 있으므로 값이 같고, 그림도 바뀌지 않는다 —
+   * 그래서 두 길이 **같은 연출 하나**를 쓴다.
    */
-  const [slide, setSlide] = useState<SectorSlide>({
-    offsetPx: 0,
-    animated: false,
-    width: PROTOTYPE_PHONE.screenWidth,
-  });
-  /** 제자리로 되돌린다. 넘길 만큼 못 쓸었거나 손짓이 끊겼을 때다. */
-  const restSlide = () => setSlide((prev) => ({ ...prev, offsetPx: 0, animated: true }));
+  const [pending, setPending] = useState<{ filter: string; step: SectorStep } | null>(null);
   // 끄는 손과 **켜진 카드 판정**을 함께 이 훅에 맡긴다. 카드가 위아래로 넘어가는 세로
   // 레일이라 축은 'y'. 견주는 값은 `activeIndex` 가 아니라 `cardIndex` 다 — 목록이 줄어
   // 범위를 벗어난 `cardIndex` 가 남았을 때, 잰 값과 달라야 다음 스크롤에서 제자리를 찾는다.
@@ -145,117 +273,120 @@ export function ExploreScreen({
   // 가로로 쓸면 섹터를 넘긴다. 레일과 **같은 손짓**으로 받는 이유는 축을 한 번만 잠그기
   // 위해서다 — 포인터를 따로 받으면 카드가 넘어가면서 섹터까지 바뀐다.
   const rail = useRailDrag(setCardIndex, cardIndex, "y", {
-    onMove: (dx) => dragSector(dx),
-    onEnd: (dx, velocity) => releaseSector(dx, velocity),
-    onCancel: () => restSlide(),
+    onMove: (dx) => dragTrack(dx),
+    onEnd: (dx, velocity) => releaseTrack(dx, velocity),
+    onCancel: () => applyTrack(0, true),
   });
+  /** 세 칸 트랙. 가로 이동은 이 노드의 인라인 스타일이 소유한다(위 `TRACK` 주석). */
+  const trackRef = useRef<HTMLDivElement>(null);
 
   // 유니버스가 오기 전에는 섹터 id 목록이 비어 있어 무엇이든 전체로 떨어진다. 도착하면
   // 같은 렌더에서 제 필터가 잡히고, 아래 effect 들이 그 값으로 한 번 더 돈다.
   const filter = knownFilter(sector, universe?.sectors.map((entry) => entry.id) ?? []);
   const path = explorePath(filter);
-  // 쓸어 가는 차례. 칩 줄과 같은 순서다(`sectorSwipeOrder`).
+  // 쓸어 가는 차례와 지금 섹터의 양옆. 차례는 칩 줄과 같다(`sectorSwipeOrder`).
   const swipeOrder = universe ? sectorSwipeOrder(universe) : [];
+  const neighbors = sectorNeighbors(swipeOrder, filter);
 
-  /** 섹터가 밀려 나가는 동안인가. 그 사이에 들어온 손짓은 무시한다. */
+  /** 트랙이 미끄러지는 중인가. 그 사이에 들어온 손짓은 무시한다. */
   const sliding = useRef(false);
-  /** 밀어낸 끝에서 주소를 바꾸는 타이머. 화면을 떠나면 끊는다. */
-  const slideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (slideTimer.current) clearTimeout(slideTimer.current);
-    },
-    [],
-  );
 
   /**
-   * 레일이 실제로 그려진 폭과 배율. 폭은 넘기는 문턱의 기준이고, 배율은 창 좌표를 화면
-   * 안쪽 좌표로 고치는 데 쓴다 — `PhoneFrame` 이 화면 전체를 `scale()` 로 줄여 놓았으므로
-   * 그대로 쓰면 손가락보다 레일이 더 많이 움직인다(`lib/sheet-drag.ts` 와 같은 이유다).
-   *
-   * 배율을 잰 사각형에서 되짚는 이유는 이 값이 **레일이 실제로 받은 배율**이기 때문이다.
-   * 창 크기로 다시 계산하면 같은 값이어야 하는 두 식이 조용히 갈릴 수 있다.
+   * 트랙 자리를 쓴다. **React 를 거치지 않는다** — 끄는 동안 상태를 바꾸면 카드 51장이 매
+   * 프레임 다시 그려진다. 세로 레일이 네이티브 스크롤이라 렌더 없이 부드러운 것과 같다.
    */
-  const railBox = () => {
-    const el = rail.ref.current;
+  const applyTrack = (offsetPx: number, animated: boolean) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const style = sectorTrackStyle({ offsetPx, animated });
+    el.style.transition = style.transition;
+    el.style.transform = style.transform;
+  };
+
+  /**
+   * 트랙이 실제로 그려진 폭과 배율. 폭은 한 칸을 넘기는 거리이자 문턱의 기준이고, 배율은
+   * 창 좌표를 화면 안쪽 좌표로 고치는 데 쓴다 — `PhoneFrame` 이 화면 전체를 `scale()` 로
+   * 줄여 놓았으므로 그대로 쓰면 손가락보다 트랙이 더 많이 움직인다(`lib/sheet-drag.ts`).
+   */
+  const trackBox = () => {
+    const el = trackRef.current;
     if (!el || el.offsetWidth === 0) return { width: PROTOTYPE_PHONE.screenWidth, scale: 1 };
     return { width: el.offsetWidth, scale: el.getBoundingClientRect().width / el.offsetWidth };
   };
 
-  /** 끄는 동안 레일을 손가락만큼 옮긴다. 넘어갈 섹터가 없으면 눌러서 벽이 있다고 알린다. */
-  function dragSector(dx: number) {
+  /** 끄는 동안 트랙을 손가락만큼 옮긴다. 넘어갈 섹터가 없으면 눌러서 벽이 있다고 알린다. */
+  function dragTrack(dx: number) {
     if (sliding.current) return;
-    const box = railBox();
+    const box = trackBox();
     const atEdge = nextSectorFilter(swipeOrder, filter, sectorSwipeStep(dx)) === null;
-    setSlide({
-      offsetPx: sectorDragOffset({ dx, ...box }, atEdge),
-      animated: false,
-      width: box.width,
-    });
+    applyTrack(sectorDragOffset({ dx, ...box }, atEdge), false);
   }
 
-  /** 손을 뗀 자리에서 섹터를 넘기거나 제자리로 되돌린다. */
-  function releaseSector(dx: number, velocity: number) {
+  /** 손을 뗀 자리에서 옆 칸으로 넘기거나 제자리로 되돌린다. */
+  function releaseTrack(dx: number, velocity: number) {
     if (sliding.current) return;
-    const box = railBox();
-    const next = nextSectorFilter(swipeOrder, filter, sectorSwipeStep(dx));
-    if (next && shouldCommitSectorSwipe({ dx, velocity, ...box })) {
-      slideToSector(next, sectorSwipeStep(dx));
+    const step = sectorSwipeStep(dx);
+    const next = nextSectorFilter(swipeOrder, filter, step);
+    if (next && shouldCommitSectorSwipe({ dx, velocity, ...trackBox() })) {
+      sliding.current = true;
+      setPending({ filter: next, step });
       return;
     }
-    restSlide();
+    applyTrack(0, true);
   }
 
   /**
-   * 지금 목록을 쓸어 낸 쪽으로 밀어내고, 다 밀린 자리에서 주소를 바꾼다. **들어오는 연출은
-   * 여기서 하지 않는다** — 새 목록은 주소가 바뀐 뒤에 오므로 아래 layout effect 가 잇는다.
-   */
-  function slideToSector(next: string, step: SectorStep) {
-    const width = railBox().width;
-    sliding.current = true;
-    setSlide({ offsetPx: -step * width, animated: true, width });
-    slideTimer.current = setTimeout(() => {
-      slideTimer.current = null;
-      onLeave(explorePath(next));
-    }, SECTOR_SLIDE_MS);
-  }
-
-  /**
-   * 새 섹터가 반대편에서 들어오는 연출. **`useLayoutEffect` 여야 한다** — 그리기 전에 자리를
-   * 잡지 않으면 새 목록이 밀려 나간 쪽에 한 프레임 그려지고, 그러면 반대 방향으로 튄다.
+   * 옆 칸으로 미끄러뜨리고, 미끄러짐이 끝나는 자리에서 주소를 바꾼다.
    *
-   * 칩을 눌러 들어와도, 챗봇이 "게임 회사 보여줘"로 뛰어들어와도 같은 길이다 — 방향은
-   * 쓸어 온 방향이 아니라 **차례 위의 두 자리**로 정한다(`sectorStepBetween`).
+   * **`useLayoutEffect` 여야 한다** — 칩으로 멀리 뛸 때 그 칸은 이 커밋에서 처음 그려지므로,
+   * 그려지기 전에 밀기 시작하면 빈 자리로 미끄러진다.
+   */
+  useLayoutEffect(() => {
+    if (!pending) return;
+    sliding.current = true;
+    const el = trackRef.current;
+    applyTrack(-pending.step * trackBox().width, true);
+
+    /**
+     * 주소를 바꾸는 시점은 **미끄러짐이 실제로 끝나는 순간**이다. 타이머만 믿으면 화면이
+     * 바쁠 때(개발 서버 재컴파일·로고 로딩) 늦게 와서, 도착한 목록이 한 칸 옆으로 밀린 채
+     * 잠깐 서 있는다. 전환 이벤트가 오지 않는 경우(탭이 가려졌거나 전환이 끊겼다)를 위해
+     * 넉넉한 타이머를 함께 둔다.
+     */
+    let timer = 0;
+    const arrive = () => {
+      window.clearTimeout(timer);
+      el?.removeEventListener("transitionend", onEnd);
+      onLeave(explorePath(pending.filter));
+    };
+    // 카드가 눕는 전환(460ms)도 이 노드까지 올라온다 — 트랙 자신의 `transform` 만 본다.
+    const onEnd = (event: TransitionEvent) => {
+      if (event.target === el && event.propertyName === "transform") arrive();
+    };
+    timer = window.setTimeout(arrive, SECTOR_SLIDE_MS + 120);
+    el?.addEventListener("transitionend", onEnd);
+    return () => {
+      window.clearTimeout(timer);
+      el?.removeEventListener("transitionend", onEnd);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending]);
+
+  /**
+   * 주소가 바뀌어 **옆 칸이 가운데 칸이 된** 순간. 트랙을 전환 없이 원점으로 돌린다 —
+   * 화면에서 바뀌는 것이 없으므로(같은 목록이 같은 자리에 있다) 미끄러짐이 끝나자마자
+   * 다음 손짓을 받을 수 있다. 기다리는 구간도, 비는 구간도 없다.
+   *
+   * layout effect 인 이유는 그리기 전에 돌려놓아야 하기 때문이다. 그리고 나서 돌리면 새
+   * 목록이 한 프레임 옆으로 밀린 채 보인다.
    */
   const shownFilter = useRef(filter);
   useLayoutEffect(() => {
     if (shownFilter.current === filter) return;
-    const step = sectorStepBetween(swipeOrder, shownFilter.current, filter);
     shownFilter.current = filter;
-    // 유니버스가 늦게 와 첫 필터가 잡히는 것은 **넘어온 것이 아니다.** 그때는 레일이 아직
-    // 없으므로(유니버스 전에는 프레임만 그린다) 자리만 맞추고 연출은 걸지 않는다 —
-    // 그러지 않으면 `/explore/game` 을 주소로 바로 열 때마다 화면이 옆에서 밀려 들어온다.
-    if (!step || !rail.ref.current) {
-      sliding.current = false;
-      setSlide((prev) => ({ ...prev, offsetPx: 0, animated: false }));
-      return;
-    }
-    const width = railBox().width;
-    setSlide({ offsetPx: step * width, animated: false, width });
-    // 자리를 **한 번 그린 뒤에** 켠다. 한 프레임(rAF 한 번)만 두면 그 갱신이 같은 프레임의
-    // 그리기에 합쳐질 수 있고, 그러면 시작 자리가 없던 셈이 되어 전환이 붙지 않는다.
-    let settle = 0;
-    const frame = requestAnimationFrame(() => {
-      settle = requestAnimationFrame(() => restSlide());
-    });
-    const settled = setTimeout(() => {
-      sliding.current = false;
-    }, SECTOR_SLIDE_MS);
-    return () => {
-      cancelAnimationFrame(frame);
-      cancelAnimationFrame(settle);
-      clearTimeout(settled);
-    };
+    sliding.current = false;
+    applyTrack(0, false);
+    setPending(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
   /**
@@ -267,8 +398,14 @@ export function ExploreScreen({
    */
   const ready = universe !== null;
 
-  // 필터·검색이 바뀌면 처음 카드부터 다시 본다 — `componentDidUpdate` 의 scrollLeft 리셋과 같다.
-  useEffect(() => {
+  /**
+   * 필터·검색이 바뀌면 처음 카드부터 다시 본다 — `componentDidUpdate` 의 scrollLeft 리셋과 같다.
+   *
+   * **layout effect 여야 한다.** 섹터가 넘어간 뒤 가운데 칸은 같은 DOM 노드를 물려받으므로,
+   * 그리기 전에 되돌리지 않으면 새 목록이 이전 섹터의 스크롤 자리에서 한 프레임 그려진다 —
+   * 옆 칸은 늘 맨 위를 보여 주고 있었으니 그 순간 목록이 껑충 뛴다.
+   */
+  useLayoutEffect(() => {
     setCardIndex(0);
     if (rail.ref.current) rail.ref.current.scrollTop = 0;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -331,9 +468,30 @@ export function ExploreScreen({
   const empty = emptyState(query);
   const activeIndex = Math.min(cardIndex, Math.max(0, list.length - 1));
 
+  /**
+   * 옆 칸 하나. 목록은 앞쪽 몇 장만 그리지만 **업종 헤더 판정은 자르기 전 목록으로 한다** —
+   * 자른 목록으로 판정하면 앞 네 장이 한 업종일 때 헤더가 없다가, 넘어가 가운데 칸이 되는
+   * 순간 헤더가 새로 생긴다.
+   */
+  const paneFor = (paneFilter: string | null, step: SectorStep) => {
+    if (paneFilter === null) return null;
+    const full = exploreList(universe, { quotes, sparks }, paneFilter, query, watchCodes);
+    return {
+      key: paneFilter,
+      step,
+      list: sectorPreviewList(full),
+      showGroups: showSectorGroups(paneFilter, full),
+    };
+  };
+  // 옆 칸은 지금 섹터의 양옆이고, 칩으로 멀리 뛸 때만 그쪽 한 칸이 목표 섹터로 바뀐다.
+  const panes = [
+    paneFor(pending?.step === -1 ? pending.filter : neighbors.prev, -1),
+    paneFor(pending?.step === 1 ? pending.filter : neighbors.next, 1),
+  ];
+
   // 칩은 모두 같은 규칙이다 — 무엇을 보는지는 주소가 소유하므로 누르면 주소만 바꾼다.
-  // 넘어가는 연출은 쓸어 넘길 때와 같은 길을 태운다(`slideToSector`) — 같은 곳으로 가는
-  // 두 손짓이 다르게 보이면 안 된다. 방향은 칩 줄 위의 두 자리로 정한다.
+  // 넘어가는 연출은 쓸어 넘길 때와 같은 길을 태운다 — 같은 곳으로 가는 두 손짓이 다르게
+  // 보이면 안 된다. 방향은 칩 줄 위의 두 자리로 정한다.
   const pickChip = (id: string) => {
     setChipsOpen(false);
     if (id === filter || sliding.current) return;
@@ -342,7 +500,7 @@ export function ExploreScreen({
       onLeave(explorePath(id));
       return;
     }
-    slideToSector(id, step);
+    setPending({ filter: id, step });
   };
   const toggleSearch = () => {
     setSearchOpen((open) => !open);
@@ -415,103 +573,45 @@ export function ExploreScreen({
           </div>
         </div>
 
-        {list.length === 0 ? (
-          // 빈 목록에도 같은 손짓을 붙인다 — 관심 기업이 0개인 자리에서 쓸어 나갈 수 없으면
-          // 손가락만으로는 갇힌다. 넘길 것이 없으니 세로 판정은 하지 않고 가로만 받는다.
-          <div
-            onPointerDown={rail.onPointerDown}
-            ref={rail.ref}
-            style={styleFromCss(
-              "flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;gap:9px;" +
-                "touch-action:pan-y;user-select:none;-webkit-user-select:none;" +
-                sectorRailStyle(slide),
+        <div style={STAGE}>
+          {/* 이전·현재·다음 섹터가 나란히 놓인 트랙. 손가락을 따라 통째로 밀린다. */}
+          <div ref={trackRef} style={TRACK}>
+            {panes.map(
+              (pane) =>
+                pane && (
+                  <SectorPane
+                    activeIndex={0}
+                    empty={empty}
+                    key={pane.key}
+                    list={pane.list}
+                    paneKey={pane.key}
+                    showGroups={pane.showGroups}
+                    step={pane.step}
+                    universe={universe}
+                  />
+                ),
             )}
-          >
-            <div style={styleFromCss("font-size:16px;font-weight:800;color:#01185A;text-align:center")}>
-              {empty.title}
-            </div>
-            <div
-              style={styleFromCss(
-                "font-size:13.5px;font-weight:500;color:#8E93A8;line-height:1.6;text-align:center;text-wrap:pretty",
-              )}
-            >
-              {empty.hint}
-            </div>
+            <SectorPane
+              activeIndex={activeIndex}
+              empty={empty}
+              list={list}
+              onOpen={(code) => {
+                if (!rail.dragged()) onLeave(`/stock/${code}`);
+              }}
+              paneKey="now"
+              rail={rail}
+              showGroups={showGroups}
+              step={0}
+              universe={universe}
+            />
           </div>
-        ) : (
-          <div style={STAGE}>
-            <div
-              onPointerDown={rail.onPointerDown}
-              onScroll={rail.onScroll}
-              ref={rail.ref}
-              // 섹터가 넘어갈 때 레일 전체가 가로로 밀린다. 오른쪽 도트는 함께 밀지 않는다 —
-              // 그것은 목록 안 자리를 가리키는 표시라 목록과 같이 나갈 것이 아니다.
-              style={styleFromCss(RAIL_CSS + ";" + sectorRailStyle(slide))}
-            >
-              {list.map((stock, index) => {
-                const card = buildExploreCard(list, index, universe, activeIndex, showGroups);
-                return (
-                  <div
-                    // 튜토리얼은 레일 전체가 아니라 **지금 보고 있는 카드**만 짚는다.
-                    // 레일을 통째로 뚫으면 카드가 놓인 배경까지 밝아져 카드가 묻힌다.
-                    id={index === activeIndex ? "tut-explore-cards" : undefined}
-                    key={card.code}
-                    style={styleFromCss(card.slideStyle)}
-                  >
-                    {card.groupShow && (
-                      <div style={GROUP_WRAP}>
-                        {card.groupShowLine && <div style={GROUP_LINE} />}
-                        <div style={GROUP_NAME}>{card.groupName}</div>
-                      </div>
-                    )}
-                    <div
-                      onClick={() => {
-                        if (!rail.dragged()) onLeave(`/stock/${card.code}`);
-                      }}
-                      style={styleFromCss(card.cardStyle)}
-                    >
-                      <div style={styleFromCss(card.artStyle)}>
-                        {!card.hasLogo && <span style={{ fontSize: 40 }}>{card.emoji}</span>}
-                      </div>
-                      <div style={styleFromCss(card.catStyle)}>{card.category}</div>
-                      <div style={styleFromCss(card.nameStyle)}>
-                        <div style={styleFromCss(card.nameTextStyle)}>{card.name}</div>
-                        <div style={styleFromCss(card.codeStyle)}>{card.codeText}</div>
-                      </div>
-                      <div style={styleFromCss(card.priceStyle)}>
-                        <span>{card.priceText}</span>
-                        <span style={styleFromCss(card.wonStyle)}>원</span>
-                      </div>
-                      <div style={styleFromCss(card.changeStyle)}>
-                        {card.changeText}
-                        <span style={styleFromCss(card.changePctStyle)}>{card.changePctText}</span>
-                      </div>
-                      <svg height={104} style={styleFromCss(card.chartStyle)} viewBox="0 0 310 104" width={310}>
-                        <defs>
-                          <linearGradient id={card.gradId} x1="0" x2="0" y1="0" y2="1">
-                            <stop offset="0" stopColor={card.lineColor} stopOpacity="0.16" />
-                            <stop offset="1" stopColor={card.lineColor} stopOpacity="0.16" />
-                          </linearGradient>
-                        </defs>
-                        <path d={card.sparkArea} fill={`url(#${card.gradId})`} />
-                        <polyline fill="none" points={card.sparkLine} stroke="#FFFFFF" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8" strokeWidth="6" />
-                        <polyline fill="none" points={card.sparkLine} stroke={card.lineColor} strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.6" />
-                        <circle cx={card.endX} cy={card.endY} fill="#FFFFFF" fillOpacity="0.9" r="6.5" />
-                        <circle cx={card.endX} cy={card.endY} fill={card.lineColor} r="3.6" />
-                      </svg>
-                      <div style={styleFromCss(card.glintStyle)} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div style={DOTS_COL}>
-              {cardDots(list.length, activeIndex, "y").map((style, index) => (
-                <div key={index} style={styleFromCss(style)} />
-              ))}
-            </div>
+          {/* 도트는 트랙에 얹지 않는다 — 목록 안 자리를 가리키는 표시라 목록과 같이 나갈 것이 아니다. */}
+          <div style={DOTS_COL}>
+            {cardDots(list.length, activeIndex, "y").map((style, index) => (
+              <div key={index} style={styleFromCss(style)} />
+            ))}
           </div>
-        )}
+        </div>
 
         <BottomNav active="trade" onLeave={onLeave} />
       </div>
