@@ -9,6 +9,7 @@ import {
 } from "./archive-feed";
 import {
   axesFromCard,
+  buildTypePicks,
   familyMembers,
   myProfile,
   NEUTRAL_SCORES,
@@ -109,6 +110,46 @@ assert.equal(empty[0].week, "8월 3주차");
 assert.equal(empty[0].title, "관찰 중");
 assert.deepEqual(empty[0].scores, [5, 5, 5, 5, 5]);
 assert.match(empty[0].desc, /아직 산 게 없어요/u);
+
+// ── 성향별 종목 세 개 ─────────────────────────────────────────────────────
+// 유니버스가 아직 안 실린 첫 프레임: 이름은 표의 대체 이름, 시세는 0 이다.
+const cold = buildTypePicks("sniper", null, {});
+assert.deepEqual(cold.map((p) => p.code), ["005930", "000660", "066570"]);
+assert.deepEqual(cold.map((p) => p.name), ["삼성전자", "SK하이닉스", "LG전자"]);
+assert.equal(cold[0].logo, "");
+
+// 이름·로고·시세의 원본은 유니버스와 5초 시세다 — 표에는 코드와 업종 표기만 있다.
+const universe = {
+  sectors: [],
+  stocks: [{ code: "005930", name: "삼성전자", sector: "semi", desc: "", price: 100000, change: 1 }],
+  logos: { "005930": "assets/logos/005930.png" },
+};
+const picks = buildTypePicks("sniper", universe, {
+  "005930": { price: 71800, rate: 1.27 },
+  "000660": { price: 198500, rate: -2.1 },
+});
+assert.equal(picks[0].logo, "/ui/assets/logos/005930.png");
+assert.equal(picks[0].priceText, "71,800원");
+// 등락률만으로 되짚은 원화 변동폭. 탐색 카드와 같은 식이라 두 화면이 어긋나지 않는다.
+assert.equal(picks[0].changeText, "+900 (+1.3%)");
+assert.equal(picks[0].changeColor, "#E8322E");
+assert.equal(picks[1].changeText, "−4,258 (−2.1%)");
+assert.equal(picks[1].changeColor, "#1668DC");
+// 누르면 주문 화면으로 간다. 주소를 문자열로 짓지 않고 screen-route 가 만든다.
+assert.equal(picks[0].path, "/buy/005930");
+// 유니버스에 없는 코드도 표의 이름과 0 원으로 그린다 — 줄이 사라지지는 않는다.
+assert.equal(picks[2].name, "LG전자");
+assert.equal(picks[2].priceText, "0원");
+
+// 성향마다 세 개씩, 겹치는 종목은 없다.
+const all = (["sniper", "strategist", "fighter", "explorer"] as const).flatMap((key) =>
+  buildTypePicks(key, null, {}).map((p) => p.code),
+);
+assert.equal(all.length, 12);
+assert.equal(new Set(all).size, 12);
+
+// 유형이 아직 없는 주(`관찰 중`)에는 종목을 지어내지 않는다.
+assert.deepEqual(buildTypePicks(null, universe, {}), []);
 
 // ── 가족 비교 ────────────────────────────────────────────────────────────
 const members: FamilyRow[] = [
