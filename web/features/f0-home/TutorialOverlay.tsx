@@ -19,6 +19,7 @@ import {
 } from "./lib/tutorial-anchor";
 import { loadAccount } from "./lib/use-account";
 import {
+  backPath,
   enterPath,
   FALLBACK_STOCK,
   isSamePlace,
@@ -71,6 +72,17 @@ const BODY_INK = "#5C6280";
 const SUB_INK = "#6E7488";
 const MUTED = "#9BA0B5";
 const TERM_INK = MAGENTA;
+
+/** `이전`·`다음` 알약. 둘이 같은 모양이라 한 곳에서 정한다. */
+const STEP_BTN = {
+  flex: "none",
+  fontSize: 13.5,
+  fontWeight: 800,
+  color: NAVY,
+  background: "#ECEDF3",
+  borderRadius: 999,
+  padding: "10px 20px",
+} as const;
 
 /** 미니바가 하단 탭 위에 앉는 높이. */
 const MINIBAR_BOTTOM = 76;
@@ -290,6 +302,33 @@ export function TutorialOverlay({
     clickThrough(enter.anchors);
   };
 
+  const prevStep = index > 0 ? steps[index - 1] : null;
+  const prevPath = prevStep && backPath(prevStep, stock ?? FALLBACK_STOCK);
+  /** 되돌아갈 수 있는가. 주문 화면 밖으로 나가는 뒤로가기는 없다(`backPath` 참고). */
+  const canRetreat = prevStep !== null && (isSamePlace(step, prevStep) || prevPath !== null);
+
+  /**
+   * `이전`. 같은 자리면 설명만 되돌리고, 화면이 다르면 그 화면 주소로만 되돌아간다.
+   *
+   * 앞으로 갈 때 쓰는 `enter.anchors` 는 여기서 쓰지 않는다 — 그건 누르는 순서라
+   * 되감으려고 다시 실행하면 주문이 한 번 더 나간다.
+   */
+  const retreat = () => {
+    if (!prevStep) return;
+    setOpenConcept(false);
+
+    if (isSamePlace(step, prevStep)) {
+      setIndex(index - 1);
+      return;
+    }
+    if (!prevPath) return;
+    // 자리를 먼저 되돌려 놔야 화면이 바뀔 때 `place` 를 읽는 쪽이 "순서에 없는 화면" 으로
+    // 보고 튜토리얼을 닫아 버리지 않는다.
+    setIndex(index - 1);
+    setRead(true);
+    onGo(prevPath);
+  };
+
   return (
     <div
       style={{
@@ -478,20 +517,22 @@ export function TutorialOverlay({
               그만 보기
             </div>
             <div style={{ flex: 1 }} />
-            {/* 실제 앱 CTA 가 마젠타다. 여기까지 마젠타면 어느 쪽을 눌러야 할지 헷갈린다. */}
+            {/*
+              `이전` 은 `다음` 과 같은 알약이다. 되돌아갈 수 없는 자리(주문을 이미 넣은
+              뒤)에서는 지우지 않고 흐리게 둔다 — 있다가 없어지면 옆 버튼 자리가 흔들린다.
+            */}
             <div
-              onClick={advance}
+              onClick={canRetreat ? retreat : undefined}
               style={{
-                flex: "none",
-                fontSize: 13.5,
-                fontWeight: 800,
-                color: NAVY,
-                cursor: "pointer",
-                background: "#ECEDF3",
-                borderRadius: 999,
-                padding: "10px 20px",
+                ...STEP_BTN,
+                cursor: canRetreat ? "pointer" : "default",
+                opacity: canRetreat ? 1 : 0.4,
               }}
             >
+              이전
+            </div>
+            {/* 실제 앱 CTA 가 마젠타다. 여기까지 마젠타면 어느 쪽을 눌러야 할지 헷갈린다. */}
+            <div onClick={advance} style={{ ...STEP_BTN, cursor: "pointer" }}>
               {last ? "다 봤어요" : "다음"}
             </div>
           </div>
