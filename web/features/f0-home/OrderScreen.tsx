@@ -16,12 +16,14 @@ import { parseBehaviorEvent } from "./lib/prototype-bridge";
 import { pendingCards, won } from "./lib/portfolio-view";
 import { flushTabViews } from "./lib/tab-views";
 import {
+  appendQtyKey,
   applyBuyFill,
   applySellFill,
   blankBuyDraft,
   blankSellDraft,
   buyMath,
   buyStepOk,
+  formatQty,
   judgePlanMatch,
   orderChatContext,
   sellMath,
@@ -271,6 +273,8 @@ export function OrderScreen({
   const [sellBlocked, setSellBlocked] = useState(false);
   const [showPad, setShowPad] = useState(false);
   const [sellPick, setSellPick] = useState<string>("all");
+  // 키패드로 찍은 주 수의 원본. `draft.shares`·`sellDraft.qty` 는 숫자라 `0.` 을 못 담는다.
+  const [buyQtyStr, setBuyQtyStr] = useState("");
   const [sellQtyStr, setSellQtyStr] = useState("");
   const [reasonOrder] = useState(() => shuffledIndexes(6));
   const [sellReasonOrder] = useState(() => shuffledIndexes(5).concat([5]));
@@ -770,7 +774,7 @@ export function OrderScreen({
         : "얼마를 넣을지 골라보세요";
     const buyMaxHint =
       math.execPrice > 0 && me.cash > 0
-        ? `최대 ${Math.floor(me.cash / math.execPrice)}주까지 살 수 있어요 · 지갑 ${won(me.cash)}`
+        ? `최대 ${formatQty(math.maxShares)}주까지 살 수 있어요 · 지갑 ${won(me.cash)}`
         : "";
     const orderTypeText =
       draft.orderType === "limit"
@@ -781,9 +785,11 @@ export function OrderScreen({
 
     const padTap = (key: string) => {
       if (math.byQty) {
-        const cur = String(draft.shares || "");
-        const v = key === "←" ? cur.slice(0, -1) : cur + key;
-        patchDraft({ shares: Math.min(math.maxShares, parseInt(v || "0", 10) || 0), amountSource: "custom" });
+        // 지갑을 넘겨도 찍은 값을 그대로 둔다 — `buyMath` 가 경고로 막는다. 여기서 조용히
+        // 상한으로 바꾸면 소수점을 찍는 도중에 숫자가 튀어 뭘 눌렀는지 알 수 없다.
+        const v = appendQtyKey(buyQtyStr, key);
+        setBuyQtyStr(v);
+        patchDraft({ shares: parseFloat(v || "0") || 0, amountSource: "custom" });
         return;
       }
       const cur = String(draft.amount || "");
@@ -817,6 +823,7 @@ export function OrderScreen({
               onClick={() => {
                 patchDraft({ buyBy: "amount" });
                 setShowPad(false);
+                setBuyQtyStr("");
               }}
               style={chipStyle(!math.byQty)}
             >
@@ -826,6 +833,7 @@ export function OrderScreen({
               onClick={() => {
                 patchDraft({ buyBy: "qty" });
                 setShowPad(false);
+                setBuyQtyStr("");
               }}
               style={chipStyle(math.byQty)}
             >
@@ -843,7 +851,11 @@ export function OrderScreen({
                 whiteSpace: "nowrap",
               }}
             >
-              {(math.byQty ? draft.shares : draft.amount).toLocaleString("ko-KR")}
+              {math.byQty
+                ? buyQtyStr !== ""
+                  ? buyQtyStr
+                  : formatQty(draft.shares)
+                : draft.amount.toLocaleString("ko-KR")}
             </span>
             <span style={{ fontSize: 20, fontWeight: 800, color: "#01185A" }}>{math.byQty ? "주" : "원"}</span>
           </div>
@@ -862,6 +874,7 @@ export function OrderScreen({
                     onClick={() => {
                       patchDraft({ shares: Math.min(math.maxShares, v), amountSource: "preset" });
                       setShowPad(false);
+                      setBuyQtyStr("");
                     }}
                     style={chipStyle(draft.amountSource === "preset" && draft.shares === v)}
                   >
@@ -870,7 +883,11 @@ export function OrderScreen({
                 ))}
                 <div
                   onClick={() => {
-                    patchDraft({ shares: Math.min(math.maxShares, draft.shares), amountSource: "custom" });
+                    // 이어서 찍을 수 있게 지금 값을 문자열에 심는다. 빈 채로 두면 다음 한 타가
+                    // 앞자리를 통째로 지운 것처럼 보인다.
+                    const seeded = Math.min(math.maxShares, draft.shares);
+                    patchDraft({ shares: seeded, amountSource: "custom" });
+                    setBuyQtyStr(seeded > 0 ? formatQty(seeded) : "");
                     setShowPad((cur) => !cur);
                   }}
                   style={chipStyle(draft.amountSource === "custom")}
@@ -914,7 +931,7 @@ export function OrderScreen({
             <NumPad
               keys={
                 math.byQty
-                  ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "←", "0", "00"]
+                  ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "←", "0", "."]
                   : ["1", "2", "3", "4", "5", "6", "7", "8", "9", "←", "0", "000"]
               }
               onTap={padTap}
@@ -1362,11 +1379,7 @@ export function OrderScreen({
         patchSell({ amountInput: Math.min(Math.round(math.maxQty * math.execPrice), parseInt(v || "0", 10) || 0) });
         return;
       }
-      const cur = sellQtyStr;
-      let v: string;
-      if (key === "←") v = cur.slice(0, -1);
-      else if (key === ".") v = cur.includes(".") ? cur : cur === "" ? "0." : `${cur}.`;
-      else v = cur + key;
+      const v = appendQtyKey(sellQtyStr, key);
       setSellQtyStr(v);
       patchSell({ qty: parseFloat(v || "0") || 0 });
     };
@@ -1449,6 +1462,7 @@ export function OrderScreen({
               onClick={() => {
                 patchSell({ sellBy: "qty" });
                 setShowPad(false);
+                setSellQtyStr("");
               }}
               style={chipStyle(math.byQty)}
             >
@@ -1458,6 +1472,7 @@ export function OrderScreen({
               onClick={() => {
                 patchSell({ sellBy: "amount" });
                 setShowPad(false);
+                setSellQtyStr("");
               }}
               style={chipStyle(!math.byQty)}
             >
@@ -1467,7 +1482,9 @@ export function OrderScreen({
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 3, margin: "16px 0 4px" }}>
             <span style={{ fontSize: 32, fontWeight: 800, color: "#01185A", fontVariantNumeric: "tabular-nums", lineHeight: 1, whiteSpace: "nowrap" }}>
               {math.byQty
-                ? String(Math.round((sellDraft.qty || 0) * 100) / 100)
+                ? sellQtyStr !== ""
+                  ? sellQtyStr
+                  : formatQty(sellDraft.qty)
                 : (sellDraft.amountInput || 0).toLocaleString("ko-KR")}
             </span>
             <span style={{ fontSize: 19, fontWeight: 800, color: "#01185A" }}>{math.byQty ? "주" : "원"}</span>
@@ -1502,7 +1519,7 @@ export function OrderScreen({
             <NumPad
               keys={
                 math.byQty
-                  ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "←"]
+                  ? ["1", "2", "3", "4", "5", "6", "7", "8", "9", "←", "0", "."]
                   : ["1", "2", "3", "4", "5", "6", "7", "8", "9", "←", "0", "000"]
               }
               onTap={padTap}

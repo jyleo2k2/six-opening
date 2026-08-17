@@ -59,6 +59,42 @@ export function blankSellDraft(availableQty: number): SellDraft {
   };
 }
 
+/**
+ * 주 수 입력의 최소 단위. 0.01 주다.
+ *
+ * 화면과 계약이 이미 이 자리에서 끊고 있다 — `buyMath`·`sellMath` 의 티끌 경고(`< 0.01`),
+ * 챗봇 요청 계약(`f10-chatbot/lib/contracts.ts`)의 소수 둘째 자리 반올림, 확인 화면의
+ * `toFixed(2)` 가 모두 같은 자리다. 키패드만 더 잘게 받으면 화면에 적힌 수와 주문에
+ * 들어간 수가 갈린다.
+ */
+export const QTY_DECIMALS = 2;
+
+/**
+ * 주 수 키패드 한 타. 매수·매도가 같은 규칙을 쓰도록 계산만 여기에 둔다.
+ *
+ * 문자열이 원본인 것은 `0.` 처럼 **아직 숫자가 아닌 중간 상태**가 있기 때문이다. 숫자
+ * 상태만 두면 소수점을 누른 순간 값이 그대로라 아무 일도 안 일어난 것처럼 보인다.
+ */
+export function appendQtyKey(current: string, key: string): string {
+  if (key === "←") return current.slice(0, -1);
+  if (key === ".") {
+    if (current.includes(".")) return current;
+    return current === "" ? "0." : `${current}.`;
+  }
+  if (!/^[0-9]$/.test(key)) return current;
+  // `0` 뒤에 숫자를 이어 붙이면 `05` 가 된다. 소수점 뒤(`0.`)는 그대로 이어 붙인다.
+  if (current === "0") return key;
+  const dot = current.indexOf(".");
+  if (dot >= 0 && current.length - dot - 1 >= QTY_DECIMALS) return current;
+  return current + key;
+}
+
+/** 화면에 그리는 주 수. 최소 단위까지만 남기고 불필요한 0 은 붙이지 않는다. */
+export function formatQty(qty: number): string {
+  const unit = 10 ** QTY_DECIMALS;
+  return String(Math.round((qty || 0) * unit) / unit);
+}
+
 /** 매수 1단계의 돈 계산. `renderVals-compute.js` 의 amount·qty·warn 부분 그대로. */
 export function buyMath(draft: BuyDraft, price: number, cash: number) {
   const availableCash = Math.max(0, Math.floor(cash));
@@ -78,7 +114,9 @@ export function buyMath(draft: BuyDraft, price: number, cash: number) {
     : tooSmall
       ? "이 금액으로는 아직 살 수 없어. 조금 더 올려볼까?"
       : "";
-  const maxShares = execPrice > 0 ? Math.floor(availableCash / execPrice) : 0;
+  // 주 수도 0.01 주까지 살 수 있으므로 상한을 정수로 깎지 않는다. 정수로 깎으면 주가가
+  // 지갑보다 비쌀 때 상한이 0 이 돼서 소수 주문이 통째로 막힌다.
+  const maxShares = execPrice > 0 ? Math.floor((availableCash / execPrice) * 10 ** QTY_DECIMALS) / 10 ** QTY_DECIMALS : 0;
   return {
     availableCash,
     limPrice,
