@@ -230,7 +230,7 @@ function pickCardStyle(on: boolean, kind: "grid" | "row") {
  *
  * 날아가는 거리는 120px 를 넘기지 않는다. 가로로 넘친 조각은 `SCROLL` 의 `overflow-x:hidden`
  * 이 자르고, 세로는 이 거리 안에서 가운데 정렬된 칸을 벗어나지 않아 스크롤이 늘어나지 않는다.
- * 매수·매도 완료가 같은 연출을 쓰므로 두 곳이 이 한 조각을 부른다.
+ * 부르는 곳은 매수 완료 하나다. 매도 완료에는 폭죽을 두지 않는다.
  */
 function Burst({ mascotWidth }: { mascotWidth: number }) {
   const count = 18;
@@ -1907,10 +1907,9 @@ export function OrderScreen({
           paddingBottom: 6,
         }}
       >
+        {/* 폭죽은 매수 완료에만 있다. 파는 일은 축하할 일이 아니라 기록할 일이라, 잘 팔았다고
+            부추기는 연출을 여기 두지 않는다 — 원래 프로토타입도 그랬다. */}
         <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-        {/* 폭죽 — 매수 완료와 같은 연출이다. 원래 프로토타입에는 매도 완료에 이 연출이
-            없었지만 사용자 요청으로 매수와 맞춘다. */}
-        <Burst mascotWidth={150} />
         <img
           alt="키웅이"
           src="/ui/assets/mascot-bear.png"
@@ -1936,7 +1935,7 @@ export function OrderScreen({
             ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 주식은 잠깐 맡아둘게요."
             : done.scheduled
               ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게요."
-              : "왜 팔았는지까지 남겨뒀어요.\n아카이브에서 산 날과 판 날을 같이 볼 수 있어요."}
+              : "왜 팔았는지까지 남겨뒀어요.\n종목 차트에서 산 날과 판 날을 함께 볼 수 있어요."}
         </div>
 
         <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 20 }}>
@@ -1956,7 +1955,7 @@ export function OrderScreen({
 
         <div style={{ width: "100%", marginTop: 16 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: "#5C6280" }}>
-            하고 싶은 말이 있으면 남겨주세요 <span style={{ color: "#A9AEC4", fontWeight: 500 }}>(나중에 다시 보여줄게요)</span>
+            하고 싶은 말이 있으면 남겨주세요
           </div>
           <input
             maxLength={50}
