@@ -991,7 +991,7 @@ export function ArchiveScreen({
                                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5 }}>
                                     <input
                                       onChange={(event) => setEditing({ id: String(comment.id), body: event.target.value })}
-                                      style={{ flex: 1, minWidth: 0, border: "none", outline: "none", background: "#F2F3FA", borderRadius: 10, padding: "8px 11px", fontSize: 13, fontWeight: 600, color: "#001E5A", fontFamily: "inherit" }}
+                                      style={{ flex: 1, minWidth: 0, border: "none", background: "#F2F3FA", borderRadius: 10, padding: "8px 11px", fontSize: 13, fontWeight: 600, color: "#001E5A", fontFamily: "inherit" }}
                                       value={editing.body}
                                     />
                                     <div
@@ -1043,7 +1043,7 @@ export function ArchiveScreen({
                           <input
                             onChange={(event) => setDrafts((current) => ({ ...current, [card.id]: event.target.value }))}
                             placeholder="댓글 남기기"
-                            style={{ flex: 1, minWidth: 0, border: "none", outline: "none", background: "#F2F3FA", borderRadius: 999, padding: "9px 13px", fontSize: 13, fontWeight: 600, color: "#001E5A", fontFamily: "inherit" }}
+                            style={{ flex: 1, minWidth: 0, border: "none", background: "#F2F3FA", borderRadius: 999, padding: "9px 13px", fontSize: 13, fontWeight: 600, color: "#001E5A", fontFamily: "inherit" }}
                             value={drafts[card.id] ?? ""}
                           />
                           <div
@@ -1219,7 +1219,7 @@ export function ArchiveScreen({
                     onChange={(event) => setPostDraft(event.target.value)}
                     placeholder="왜 사고팔았는지 가족에게 한 줄 남겨요"
                     rows={3}
-                    style={{ marginTop: 7, border: "none", outline: "none", resize: "none", background: "#F2F3FA", borderRadius: 16, padding: "12px 14px", fontSize: 14, fontWeight: 600, color: "#001E5A", fontFamily: "inherit", lineHeight: 1.6 }}
+                    style={{ marginTop: 7, border: "none", resize: "none", background: "#F2F3FA", borderRadius: 16, padding: "12px 14px", fontSize: 14, fontWeight: 600, color: "#001E5A", fontFamily: "inherit", lineHeight: 1.6 }}
                     value={postDraft}
                   />
                   <div

@@ -406,7 +406,7 @@ function SigninScreen({
                 value={loginId}
                 onChange={(event) => onChangeId(event.target.value)}
                 autoComplete="username"
-                style={{ width: "100%", border: "none", background: "transparent", outline: "none", fontSize: 17, fontWeight: 700, color: "#01185A", marginTop: 3, padding: 0 }}
+                style={{ width: "100%", border: "none", background: "transparent", fontSize: 17, fontWeight: 700, color: "#01185A", marginTop: 3, padding: 0 }}
               />
             </div>
             <div style={FIELD}>
@@ -419,7 +419,7 @@ function SigninScreen({
                 value={loginPassword}
                 onChange={(event) => onChangePassword(event.target.value)}
                 autoComplete="current-password"
-                style={{ width: "100%", border: "none", background: "transparent", outline: "none", fontSize: 17, fontWeight: 700, color: "#01185A", letterSpacing: "0.14em", marginTop: 3, padding: 0 }}
+                style={{ width: "100%", border: "none", background: "transparent", fontSize: 17, fontWeight: 700, color: "#01185A", letterSpacing: "0.14em", marginTop: 3, padding: 0 }}
               />
             </div>
           </div>

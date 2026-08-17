@@ -145,7 +145,7 @@ const TARGET_ROW = styleFromCss(
     "border-radius:16px;padding:0 14px;box-shadow:inset 0 0 0 1px #E4E6F1",
 );
 const TARGET_INPUT = styleFromCss(
-  "flex:1;min-width:0;box-sizing:border-box;border:0;outline:none;background:transparent;" +
+  "flex:1;min-width:0;box-sizing:border-box;border:0;background:transparent;" +
     "font-family:'Pretendard',sans-serif;font-size:14px;font-weight:700;color:#01185A;font-variant-numeric:tabular-nums",
 );
 const TARGET_HINT = styleFromCss("font-size:12.5px;font-weight:500;color:#9B94C4;margin-top:-4px");
@@ -185,7 +185,7 @@ function sheetTabStyle(on: boolean) {
   );
 }
 const MEMO_INPUT = styleFromCss(
-  "width:100%;box-sizing:border-box;border:0;outline:none;background:#F4F4FA;border-radius:16px;padding:14px 15px;" +
+  "width:100%;box-sizing:border-box;border:0;background:#F4F4FA;border-radius:16px;padding:14px 15px;" +
     "font-family:'Pretendard',sans-serif;font-size:14px;font-weight:600;color:#01185A;box-shadow:inset 0 0 0 1px #E4E6F1",
 );
 const DONE_BOX = styleFromCss(

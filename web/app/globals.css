@@ -23,6 +23,17 @@
 
 * { box-sizing: border-box; }
 
+/* 입력창은 브랜드 마젠타 링으로 포커스를 알린다. 화면들이 인라인 스타일로 `outline:none` 을
+   걸어 두어 Tab 으로 옮겨 다니면 지금 어디에 있는지 아무 표시가 없었다. `:focus-visible` 이라
+   마우스 클릭에는 뜨지 않고 키보드로 이동할 때만 나온다. F10 챗봇은 Tailwind 클래스
+   (`ring-magenta focus:ring-2`)로 이미 같은 일을 하고 있고, 클래스가 요소 선택자를 이기므로
+   여기 규칙이 그쪽에 덧그려지지 않는다. */
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-magenta);
+  outline-offset: 2px;
+}
+
 html { background: var(--color-bg); }
 
 body {
