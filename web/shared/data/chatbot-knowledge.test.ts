@@ -23,6 +23,107 @@ for (const id of DAPIE_SCREEN_TERM_IDS) {
     `term:${id}`,
   );
 }
+
+// ── 설명 문장 예산 (SPEC §3.4.4) ────────────────────────────────────────────
+//
+// T5 게이트(shared/llm/filter.ts)의 최대 3문장은 **상한**이라 초과 0건인 채로
+// 평균이 상한에 붙어 있었다(brief 2.73 · detail 2.98문장). 상한을 내리면 term
+// 9종·업종·meta·rule 고정 응답까지 함께 막히므로 게이트는 그대로 두고 승인
+// 데이터에 예산을 여기서 건다. 이 검사가 없으면 문구가 조용히 다시 길어진다.
+//
+// 세는 방식은 게이트와 같다.
+function countSentences(text: string) {
+  return text
+    .split(/[.!?]+|\n+/)
+    .map((part) => part.trim())
+    .filter((part) => /[\p{L}\p{N}]/u.test(part)).length;
+}
+
+const SCRIPTED = CHATBOT_KNOWLEDGE.filter((entry) => entry.explainScript);
+
+for (const entry of SCRIPTED) {
+  const script = entry.explainScript!;
+  const where = `${entry.id}`;
+
+  // 전 카테고리 상한 — 지금보다 길어지는 것을 막는다.
+  assert.ok(countSentences(script.brief) <= 2, `${where}: brief 2문장 초과`);
+  assert.ok(countSentences(script.detail) <= 2, `${where}: detail 2문장 초과`);
+  assert.ok(countSentences(script.example) <= 2, `${where}: example 2문장 초과`);
+  if (script.adjust) {
+    assert.ok(
+      countSentences(script.adjust.explanation) <= 2,
+      `${where}: adjust.explanation 2문장 초과`,
+    );
+  }
+
+  // detail 은 brief 에 덧붙는 새 내용이어야 한다. 되풀이하면 퀴즈를 맞힌 아이가
+  // 방금 읽은 문장을 다시 읽는다 — screenTermScript 의 `detail: brief` 가 그랬다.
+  assert.notEqual(
+    script.detail.replaceAll(/\s/g, ""),
+    script.brief.replaceAll(/\s/g, ""),
+    `${where}: detail 이 brief 와 같다`,
+  );
+}
+
+// 정답 id 는 실제 선택지를 가리켜야 하고 선택지 id 는 서로 달라야 한다.
+// 어긋나면 아이가 정답을 골라도 오답 경로로 빠지는데, 화면에서는 그냥 "틀렸다"로
+// 보여 조용히 넘어간다.
+for (const entry of SCRIPTED) {
+  const script = entry.explainScript!;
+  for (const [where, choices, answerId] of [
+    ["check", script.check.choices, script.check.answerId],
+    ...(script.adjust
+      ? [["adjust", script.adjust.choices, script.adjust.answerId] as const]
+      : []),
+  ] as const) {
+    const ids = choices.map((c) => c.id);
+    assert.equal(new Set(ids).size, ids.length, `${entry.id}.${where}: 선택지 id 가 겹친다`);
+    assert.ok(ids.includes(answerId), `${entry.id}.${where}: answerId 가 선택지에 없다`);
+  }
+}
+
+// 진단 질문은 용어마다 달라야 한다 (SPEC §3.4).
+//
+// 화면 용어 22종이 `screenTermScript` 하나에서 똑같은 껍데기 질문을 받던 자리다
+// ("이 말은 화면의 무엇을 확인하는 데 쓰일까요?"). 용어가 무엇이든 질문이 같아
+// "전체 자산이 뭐야?" 에 그 메타 질문으로 되물었다. 질문이 겹치면 그 용어를
+// 묻지 않고 있다는 뜻이므로 여기서 막는다.
+const questions = SCRIPTED.map((entry) => entry.explainScript!.check.question);
+assert.equal(new Set(questions).size, questions.length, "check.question 이 서로 겹친다");
+
+const adjustQuestions = SCRIPTED.filter((e) => e.explainScript!.adjust).map(
+  (e) => e.explainScript!.adjust!.question,
+);
+assert.equal(
+  new Set(adjustQuestions).size,
+  adjustQuestions.length,
+  "adjust.question 이 서로 겹친다",
+);
+
+// 조정 설명은 정답 근거를 담아야 한다 (SPEC §3.4). 예전 화면 용어의 조정 설명은
+// "이건 맞히는 시험이 아니에요" 라 근거가 하나도 없었다.
+for (const entry of SCRIPTED) {
+  const adjust = entry.explainScript!.adjust;
+  if (!adjust) continue;
+  assert.ok(
+    !adjust.explanation.includes("맞히는 시험이 아니에요"),
+    `${entry.id}: 조정 설명에 정답 근거가 없다`,
+  );
+}
+
+// 직접 쓴 용어 스크립트는 전부 1문장 예산을 지킨다 (SPEC §3.4.4).
+//
+// 화면 용어(kind === "faq")만 제외한다. 그 brief 는 screenTermScript 가 `answer`
+// 를 그대로 쓴 것이라 FAQ 단답을 겸하는데, 둘째 문장이 "이미 체결된 주문은
+// 취소할 수 없어요" 처럼 실제 정보를 나른다. 1문장으로 깎으면 길이 대신 정보를
+// 잃는다.
+const GLOSSARY_SCRIPTED = SCRIPTED.filter((entry) => entry.kind === "glossary");
+assert.ok(GLOSSARY_SCRIPTED.length >= 36);
+for (const entry of GLOSSARY_SCRIPTED) {
+  const script = entry.explainScript!;
+  assert.equal(countSentences(script.brief), 1, `${entry.id}: brief 는 1문장이다`);
+  assert.equal(countSentences(script.detail), 1, `${entry.id}: detail 은 1문장이다`);
+}
 assert.equal(findChatbotKnowledge("PER이 뭐야?")?.id, "per");
 assert.equal(findChatbotKnowledge("이 회사 비싼지 어떻게 알아?")?.id, "per");
 assert.equal(findChatbotKnowledge("평가 손익이 뭐야?")?.id, "unrealized-profit");
