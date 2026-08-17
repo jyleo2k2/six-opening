@@ -1,8 +1,9 @@
 # f0-home — 홈·가족리그
 
 - 이 디렉터리의 `AGENTS.md`와 `CLAUDE.md`는 한 쌍이다. 둘 중 하나를 수정하면 같은 작업에서 짝 파일도 동일하게 수정하고 완료 전 비교한다.
-- 스펙은 `docs/기능명세.md`다. 이 폴더는 사용자 화면 7종과 그것을 그리는 호스트 `ConnectedPrototype`, F10 챗봇 오버레이 자리를 소유한다.
-- **화면 목록의 원본은 `screen-route.ts`의 `ScreenRoute`다.** 홈·탐색·종목 상세·계좌·랭킹·아카이브·주문이 전부이고, `routeFromPath`가 모르는 주소는 404다.
+- 스펙은 `docs/기능명세.md`다. 이 폴더는 사용자 화면 6종과 그것을 그리는 호스트 `ConnectedPrototype`, F10 챗봇 오버레이 자리를 소유한다.
+- **화면 목록의 원본은 `screen-route.ts`의 `ScreenRoute`다.** 홈·탐색·종목 상세·랭킹·아카이브·주문이 전부이고, `routeFromPath`가 모르는 주소는 404다.
+- **`내 계좌`(`PortfolioScreen`)는 2026-08-18 걷어냈다.** 되살리지 않는다 — 총자산·쓸 수 있는 돈·가진 회사는 `HomeScreen`이, 기다리는 주문과 그 취소는 `OrderScreen`의 `예약` 시트가 이미 갖고 있어 같은 것을 두 곳에서 보여 주고 있었다. 하단 탭에도 진입로가 없어 **매도 1단계 뒤로가기 하나로만 열리는 화면**이었다. 주문 화면의 뒤로가기는 1단계에서 그 회사 상세로, 완료 화면에서 홈으로 물러난다 — 매수·매도가 같다. 챗봇 계약(`shared/types/chatbot.ts`의 `CHAT_ACTION_TARGETS`)에는 아직 `portfolio` 타깃이 남아 있으므로 `routeFromChatAction`이 그것을 홈으로 받는다.
 - **iframe(`/ui/app.html`)과 조립기(`ui-src`·`ui-build.mjs`)는 철거했다.** 되살리지 않는다 — 화면 사각형은 `getPrototypeScreenRect` 순수 계산이 정하고, 실측식과 항등임을 14개 뷰포트에서 확인했다.
 - 폰 프레임은 `PhoneFrame`, 하단 탭은 `BottomNav`, 그 기하는 `lib/phone-frame.ts`가 소유한다. 배율은 챗봇이 시트를 맞출 때 쓰는 `getPrototypeScreenRect`와 같은 값이어야 한다.
 - **화면 계산은 `lib/`의 순수 함수에 두고 컴포넌트는 붙이기만 한다.** `ranking-data`·`portfolio-view`·`explore-cards`·`home-view`·`stock-news`·`archive-profile-view`·`archive-feed`·`order-view`·`chart-view`가 그것이고 각각 테스트를 함께 둔다 — 브라우저 없이 확인할 수 있어야 한다. 손짓 계산도 같다: 바텀 시트를 쓸어내려 닫는 거리·속도는 `lib/sheet-drag.ts`가 정하고, 닫히는 문턱은 챗봇 시트와 같은 `f10-chatbot/lib/bottom-sheet`의 규칙을 쓴다 — 한 폰 안에서 시트마다 닫히는 느낌이 다르면 안 된다. 탐색에서 **가로로 쓸어 섹터를 넘기는** 계산은 `lib/sector-swipe.ts`이고, 넘기는 문턱도 같은 `shouldDismissBottomSheet`를 화면 폭 기준으로 쓴다. 축은 손짓 하나에 **한 번만** 잠기므로(`lockSwipeAxis`) 세로 카드와 가로 섹터는 `use-rail-drag`의 같은 포인터를 나눠 쓴다 — 레일 위에 포인터를 따로 받으면 카드가 넘어가면서 섹터까지 바뀐다.

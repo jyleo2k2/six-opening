@@ -21,7 +21,6 @@ test("주소를 화면으로 읽는다", () => {
     assert.deepEqual(routeFromPath(`/archive/${view}`), { screen: "archive", view });
   }
   assert.deepEqual(routeFromPath("/ranking"), { screen: "ranking" });
-  assert.deepEqual(routeFromPath("/portfolio"), { screen: "portfolio" });
   assert.deepEqual(routeFromPath("/explore"), { screen: "explore" });
   assert.deepEqual(routeFromPath("/explore/game"), { screen: "explore", sector: "game" });
   assert.deepEqual(routeFromPath("/explore/watch"), { screen: "explore", sector: "watch" });
@@ -45,6 +44,8 @@ test("모르는 경로와 잘못된 종목 코드는 null 이다", () => {
   assert.equal(routeFromPath("/stock/005930/extra"), null);
   assert.equal(routeFromPath("/buy"), null);
   assert.equal(routeFromPath("/archive/report"), null);
+  // `내 계좌` 는 걷어낸 화면이다. 주소도 함께 사라져야 뒤로가기·북마크로 되살아나지 않는다.
+  assert.equal(routeFromPath("/portfolio"), null);
   // 탐색 섹터는 소문자 영문만. 형식이 아니면 주소가 아니다.
   assert.equal(routeFromPath("/explore/GAME"), null);
   assert.equal(routeFromPath("/explore/game/extra"), null);
@@ -56,7 +57,6 @@ test("화면을 주소로 되돌린다 — 왕복이 같아야 한다", () => {
     { screen: "explore" },
     { screen: "explore", sector: "game" },
     { screen: "ranking" },
-    { screen: "portfolio" },
     { screen: "archive" },
     { screen: "archive", view: "cards" },
     { screen: "archive", view: "last" },
@@ -125,8 +125,9 @@ test("챗봇 화면 버튼을 실제 React 화면으로 바꾼다", () => {
     ),
     { screen: "archive", view: "cards" },
   );
+  // 서버 계약에는 아직 `portfolio` 가 남아 있지만 갈 화면이 없다. 홈이 받는다.
   assert.deepEqual(routeFromChatAction({ type: "open_screen", target: "portfolio" }, null), {
-    screen: "portfolio",
+    screen: "home",
   });
   assert.deepEqual(routeFromChatAction({ type: "open_screen", target: "ranking" }, null), {
     screen: "ranking",

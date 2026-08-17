@@ -14,7 +14,6 @@ import { DetailScreen } from "./DetailScreen";
 import { ExploreScreen } from "./ExploreScreen";
 import { HomeScreen } from "./HomeScreen";
 import { OrderScreen } from "./OrderScreen";
-import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
 import {
   pathFromRoute,
@@ -142,9 +141,6 @@ export function ConnectedPrototype({
             />
           )}
           {overlay.screen === "ranking" && <RankingScreen onLeave={leaveToPath} />}
-          {overlay.screen === "portfolio" && (
-            <PortfolioScreen account={account} onLeave={leaveToPath} />
-          )}
           {overlay.screen === "stock" && (
             <DetailScreen
               account={account}

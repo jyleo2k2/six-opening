@@ -163,7 +163,6 @@ for (const step of steps) {
 const PATH_OF: Record<string, string> = {
   home: "/",
   explore: "/explore",
-  portfolio: "/portfolio",
   ranking: "/ranking",
   archive: "/archive",
   stock: "/stock/:code",
@@ -265,7 +264,6 @@ assert.equal(steps[at("stock", "news")].id, "detail-chart");
 
 // 순서에 없는 화면은 못 찾는다 — 오버레이가 이때 튜토리얼을 닫는다.
 assert.equal(at("archive"), -1);
-assert.equal(at("portfolio"), -1);
 assert.equal(at("ranking"), -1);
 
 // ── 다음 장 ─────────────────────────────────────────────────────────────────

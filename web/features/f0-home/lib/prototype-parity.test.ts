@@ -59,7 +59,6 @@ test("React 화면 루트에서 배경을 갖는 것은 아카이브 하나다",
     "ChartScreen.tsx",
     "NewsScreen.tsx",
     "OrderScreen.tsx",
-    "PortfolioScreen.tsx",
     "RankingScreen.tsx",
     "lib/stock-chrome.tsx",
   ];
