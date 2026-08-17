@@ -4,6 +4,7 @@ import {
   FormEvent,
   PointerEvent as ReactPointerEvent,
   ReactNode,
+  TransitionEvent as ReactTransitionEvent,
   useEffect,
   useMemo,
   useRef,
@@ -488,6 +489,10 @@ export function F10ChatbotDemo({
   // 삭제 타깃에 놓아 숨긴 상태. 되살리기는 홈 화면 버튼이 맡는다 (F10 SPEC §6.1).
   const [isChatDismissed, setIsChatDismissed] = useState(false);
   const [isOverDismissTargetNow, setIsOverDismissTargetNow] = useState(false);
+  // 닫힘→열림 전이에서만 슬라이드업을 재생한다. 이미 열린 채로 openChat()이 다시
+  // 불려도(예: 메시지 전송마다) 시트가 또 오르내리지 않는다.
+  const [isSheetEntering, setIsSheetEntering] = useState(false);
+  const [isHeaderAvatarVisible, setIsHeaderAvatarVisible] = useState(false);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
@@ -645,6 +650,27 @@ export function F10ChatbotDemo({
     return () => window.cancelAnimationFrame(frame);
   }, [isOpen, messages]);
 
+  /**
+   * 시트를 화면 밖(`sheetDragY = PROTOTYPE_SHEET_HEIGHT`)에 마운트한 뒤 한 프레임을
+   * 쉬고 0으로 내린다. 같은 틱에 바로 0을 주면 브라우저가 시작값을 칠하기 전에
+   * 도착값을 받아 트랜지션이 생략된다 — 두 번째 rAF까지 미뤄야 첫 프레임이 실제로
+   * 그려진 뒤 값이 바뀐다.
+   */
+  useEffect(() => {
+    if (!isSheetEntering) return;
+    let settleFrame = 0;
+    const paintFrame = window.requestAnimationFrame(() => {
+      settleFrame = window.requestAnimationFrame(() => {
+        setSheetDragY(0);
+        setIsSheetEntering(false);
+      });
+    });
+    return () => {
+      window.cancelAnimationFrame(paintFrame);
+      window.cancelAnimationFrame(settleFrame);
+    };
+  }, [isSheetEntering]);
+
   // 선제 도움 말풍선은 플로팅 버튼의 같은 중심 좌표를 앵커로 쓴다 (F10 SPEC §7).
   // 숨겨진 상태에서 신호가 오면 붙일 곳이 없으므로 버튼을 기본 자리로 되살린다.
   useEffect(() => {
@@ -673,10 +699,25 @@ export function F10ChatbotDemo({
         getPrototypeScreenRect(window.innerWidth, window.innerHeight),
       );
     }
-    setSheetDragY(0);
+    if (!isOpen) {
+      setSheetDragY(PROTOTYPE_SHEET_HEIGHT);
+      setIsSheetEntering(true);
+      setIsHeaderAvatarVisible(false);
+    }
     setIsSheetDragging(false);
     sheetDragRef.current = null;
     setIsOpen(true);
+  }
+
+  /**
+   * 시트가 다 올라온 순간(진입 트랜지션 종료)에만 헤더 아바타를 페이드인한다.
+   * 시트 안 다른 요소의 트랜지션이 버블링해 잘못 트리거하지 않도록 대상·속성을
+   * 함께 확인한다.
+   */
+  function handleSheetTransitionEnd(event: ReactTransitionEvent<HTMLElement>) {
+    if (event.target !== event.currentTarget) return;
+    if (event.propertyName !== "transform") return;
+    setIsHeaderAvatarVisible(true);
   }
 
   function openProactiveChat() {
@@ -782,6 +823,8 @@ export function F10ChatbotDemo({
     setIsOpen(false);
     setSheetDragY(0);
     setIsSheetDragging(false);
+    setIsSheetEntering(false);
+    setIsHeaderAvatarVisible(false);
     sheetDragRef.current = null;
   }
 
@@ -1408,6 +1451,7 @@ export function F10ChatbotDemo({
                 ? ""
                 : "transition-transform duration-200 ease-out motion-reduce:transition-none"
             }`}
+            onTransitionEnd={handleSheetTransitionEnd}
             role="dialog"
             style={{
               width: PROTOTYPE_PHONE.screenWidth,
@@ -1451,6 +1495,20 @@ export function F10ChatbotDemo({
                     {COPY.enableProactive}
                   </button>
                 )}
+                {/*
+                  시트가 다 올라온 뒤에만 페이드인한다(`isHeaderAvatarVisible`).
+                  플로팅 버튼은 스크림에 이미 즉시 가려지므로 별도 퇴장 모션은 두지 않는다.
+                */}
+                <img
+                  alt=""
+                  aria-hidden="true"
+                  className={`size-8 shrink-0 rounded-full object-cover transition-opacity duration-200 ${
+                    isHeaderAvatarVisible ? "opacity-100" : "opacity-0"
+                  }`}
+                  height={32}
+                  src={floatingAvatar.src}
+                  width={32}
+                />
                 <button
                   className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
                   onClick={resetChat}
