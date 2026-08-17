@@ -93,6 +93,14 @@ const PROFIT_LINE = styleFromCss(
  * 캐릭터 그림 자리는 **높이가 고정**이다. 원본 그림의 비율이 서로 달라(아빠 368×655,
  * 아이·엄마 524×654) 가로만 맞추면 계정마다 다른 크기로 그려졌다. 고정 상자 안에서
  * `contain` 하면 세 계정이 같은 자리·같은 높이에 선다.
+ *
+ * 수익률에 따라 무드 그림(보합 722×722, 손실 542×722)으로도 갈아 끼우는데, 그것들 역시
+ * 비율이 또 다르다. 상자가 고정이라 그림이 바뀌어도 아래 카드가 밀리지 않는다.
+ *
+ * 캐릭터 크기 맞추기는 `width`·`height` 가 아니라 **`transform: scale`** 로 건다.
+ * `contain` 이 캔버스를 맞추고 난 뒤에 걸려야 하는 보정이라 `max-width:100%` 에 걸려
+ * 조용히 되돌려지면 안 되고, 배치에 영향을 주지 않아야 아래 카드가 그대로 선다.
+ * 넘치는 것은 투명 여백뿐이다 — 배율을 다 걸어도 캐릭터는 상자 안에 있다.
  */
 const GOAL_BOX = styleFromCss(
   "flex:none;position:relative;height:240px;display:flex;align-items:center;justify-content:center;cursor:pointer",
@@ -353,7 +361,11 @@ export function HomeScreen({
           </div>
 
           <div onClick={popGoal} style={GOAL_BOX}>
-            <img alt="" src={view.info.goalImg} style={GOAL_IMG} />
+            <img
+              alt=""
+              src={view.moodImg}
+              style={{ ...GOAL_IMG, transform: `scale(${view.moodScale})` }}
+            />
             {popItems(popped, view.goalCount).map((item, index) =>
               item.on ? (
                 <img

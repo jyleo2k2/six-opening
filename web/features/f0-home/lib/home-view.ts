@@ -212,6 +212,10 @@ export type HomeView = {
   rateText: string;
   profitText: string;
   rateColor: string;
+  /** 가운데 큰 그림. 수익률 방향과 `goalCount` 가 목표 그림과 무드 그림을 가른다(`moodArt`). */
+  moodImg: string;
+  /** 그 그림에 걸 확대 배율. 무드 그림의 캐릭터를 목표 그림 캐릭터와 같은 높이로 맞춘다. */
+  moodScale: number;
   /** 헤더 프로필 옆 "○○ 총자산". 총자산 금액이 수익금액처럼 읽히지 않게 이름을 붙인다. */
   totalAssetsLabel: string;
   /** 현금(`balance`) + 보유 평가금액. 계좌를 못 읽었으면 보유 평가금액만(현금 없이) 보여준다. */
@@ -219,6 +223,69 @@ export type HomeView = {
   /** 계좌를 읽었는데 보유가 하나도 없을 때만 참. */
   noHoldings: boolean;
 };
+
+/** 보합(0%) 과 손실에 세우는 무드 그림. 목표 그림과 달리 역할을 타지 않는다. */
+export const MOOD_FLAT_IMG = "/ui/assets/mascot-bull-flat.png";
+export const MOOD_SAD_IMG = "/ui/assets/mascot-bull-bear-sad.png";
+
+/**
+ * 그림 캔버스에서 **실제 그림이 차지하는 세로 비율**. 원본 PNG 의 알파 경계를 재서 얻었다.
+ *
+ *   goal-child     524×654 · 그림 447×509      goal-mom  524×654 · 그림 508×479
+ *   goal-dad       368×655 · 그림 353×411
+ *   bull-flat      722×722 · 그림 417×499      bull-bear-sad  542×722 · 그림 473×356
+ *
+ * 무드 그림은 투명 여백이 훨씬 넓다. 고정 상자에 `contain` 만 하면 맞춰지는 것은 **캔버스**라,
+ * 여백이 넓을수록 캐릭터가 작게 선다 — 손실 그림은 아이 목표 그림의 63% 크기였다. 같은
+ * 자리에서 그림만 바뀌는데 캐릭터가 갑자기 쪼그라들면 화면이 한 번 더 주저앉아 보인다.
+ */
+const ART_HEIGHT_RATIO: Record<string, number> = {
+  "/ui/assets/goal-child.png": 509 / 654,
+  "/ui/assets/goal-mom.png": 479 / 654,
+  "/ui/assets/goal-dad.png": 411 / 655,
+  [MOOD_FLAT_IMG]: 499 / 722,
+  [MOOD_SAD_IMG]: 356 / 722,
+};
+
+/**
+ * 홈 가운데 큰 그림과 그 확대 배율.
+ *
+ *   목표 그림(향수·신발·왁뿌볼을 든 황소)  이익이 나고 **그 목표를 1개 이상 살 수 있을 때**
+ *   시무룩한 황소                          보합(0.0%) 이거나, 이익이지만 아직 1개도 못 살 때
+ *   우는 황소와 곰                         손실
+ *
+ * 목표 그림은 목표를 **든** 그림이다. `왁뿌볼 0개 살 수 있어요` 아래에서 그 왁뿌볼을 안고
+ * 웃고 있으면 그림이 문장을 뒤집는다 — 이익이라는 사실보다 아직 못 산다는 사실이 이 자리의
+ * 주인공이다. 그래서 방향(`trend`)만이 아니라 `goalCount` 까지 봐야 한다.
+ *
+ * 덕분에 목표 그림과 팝업이 한 조건에서 논다: 눌렀을 때 튀어오르는 아이템은
+ * `min(goalCount, 6)` 개라(`popItems`), 예전에는 목표 그림이 서 있는데 아무것도 안 튀는
+ * 구간(0 < 수익 < 단가)이 있었다.
+ *
+ * 방향은 `rate` 원값이 아니라 `Trend` 로 받는다 — 화면이 `+0.0%` 를 회색으로 적는 순간
+ * 그림만 웃고 있으면 숫자·색·그림이 서로 다른 말을 한다(`pctTrend`).
+ *
+ * `scale` 은 무드 그림의 **캐릭터를 그 계정의 목표 그림 캐릭터와 같은 높이로** 키우는 값이다.
+ * 기준이 계정마다 다르므로(아이 187px·엄마 176px·아빠 151px) 배율도 역할을 탄다 — 아빠는
+ * 목표 그림 쪽이 작아서 1 보다 작아진다. 상자 크기가 아니라 그림 크기를 맞추는 게 목적이다.
+ *
+ * 그림을 하나 더 얹지 않고 이 자리를 갈아 끼우는 이유는, 오른 상태에서 목표 그림과
+ * 같은 황소가 크게 한 번 작게 한 번 두 번 나왔던 적이 있기 때문이다(2026-08-16 되돌림).
+ */
+export function moodArt(
+  trend: Trend,
+  goalImg: string,
+  /** 목표 아이템을 몇 개 살 수 있나(`homeView` 의 `goalCount`). 0 이면 목표 그림을 세우지 않는다. */
+  goalCount: number,
+): { src: string; scale: number } {
+  if (trend > 0 && goalCount >= 1) return { src: goalImg, scale: 1 };
+  const src = trend < 0 ? MOOD_SAD_IMG : MOOD_FLAT_IMG;
+  const goalRatio = ART_HEIGHT_RATIO[goalImg];
+  const moodRatio = ART_HEIGHT_RATIO[src];
+  // 재 둔 그림이 아니면 배율을 지어내지 않는다 — 캔버스만 맞춘 예전 크기로 둔다.
+  if (!goalRatio || !moodRatio) return { src, scale: 1 };
+  return { src, scale: Math.round((goalRatio / moodRatio) * 1000) / 1000 };
+}
 
 /**
  * 수익도 실제 보유에서 낸다. 데모 상수(`info.profit`)를 실제 평가금액으로 나누면
@@ -243,6 +310,9 @@ export function homeView(
     0,
   );
   const rate = total ? (profit / total) * 100 : 0;
+  // 색과 그림이 같은 판정을 쓰도록 방향은 한 번만 낸다.
+  const trend = pctTrend(rate);
+  const art = moodArt(trend, info.goalImg, goalCount);
   // 계좌를 못 읽은 동안은 현금을 모른다 — 0으로 두어 보유 평가금액만 보여준다.
   const cash = loaded ? user?.balance ?? 0 : 0;
 
@@ -259,7 +329,9 @@ export function homeView(
     // 실제 계좌를 붙이면 손실도 나온다. 부호와 색을 함께 바꾼다.
     rateText: (rate >= 0 ? "+" : "−") + Math.abs(rate).toFixed(1) + "%",
     profitText: (profit >= 0 ? "+" : "−") + won(Math.abs(profit)),
-    rateColor: trendColor(pctTrend(rate)),
+    rateColor: trendColor(trend),
+    moodImg: art.src,
+    moodScale: art.scale,
     totalAssetsLabel: ((loaded && user?.name) || info.name) + " 총자산",
     totalAssetsText: won(cash + total),
     noHoldings: loaded && live.length === 0,
