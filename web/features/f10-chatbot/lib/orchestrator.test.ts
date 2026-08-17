@@ -204,7 +204,7 @@ async function main() {
   assert.equal(isExplainAction(ownRecords.action), false);
   assert.equal(ownRecords.action?.uiAction?.target, "archive");
 
-  // ── 2단: 지시어 후속 질문 되살리기 (SPEC §3.5) ───────────────────────────
+  // ── 2단: 지시어 후속 질문 되살리기 (SPEC §3.6) ───────────────────────────
   // "수익률이 뭐야?" 뒤의 "그럼 이게 높으면 좋은거야?" 는 그 문장만으로는 어떤
   // 허용 목적도 판정되지 않아 범위 밖으로 끝난다. 다시 써서 같은 라우터에 넣는다.
   let rewriteCalls = 0;

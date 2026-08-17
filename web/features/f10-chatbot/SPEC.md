@@ -1,6 +1,6 @@
 # F10 — 플로팅 AI 챗봇 “키웅이” 기능 명세
 
-> **기능 단일 원본** · 2026-08-14 · 기준: `docs/영웅키움_기획_통합문서_v2.md` v2.7 §12·§13
+> **기능 단일 원본** · 갱신 2026-08-18 · 기준: `docs/영웅키움_기획_통합문서_v2.md` v2.7 §12·§13 + `web/` 실제 코드(`main` = PR #361·#362·#355까지 병합)
 >
 > F10의 사용자 흐름, 콘텐츠, 데이터 수집·적재, API·안전 경계, 현재 구현과 완료 기준은 이 파일에서 관리한다. 제품 목표·법무·전역 레드라인은 통합문서를 따르며, 이 기능을 바꿀 때는 이 파일을 먼저 수정하고 전역 문서에는 요약과 링크만 둔다.
 
@@ -55,11 +55,22 @@
 | `web/features/f10-chatbot/lib/bottom-sheet.ts` | 휴대폰 화면 사각형·80% 시트 높이 계산, 드래그 닫기 임계값 순수 함수 |
 | `web/features/f0-home/lib/prototype-bridge.ts` | 폰 프레임 화면 div(`#kw-screen`)의 id 와 행동 이벤트 런타임 검증(§3.1) |
 | `web/features/f10-chatbot/lib/floating-avatar.ts` | 플로팅 버튼의 이동 판정과 직전 이미지 중복 없는 무작위 선택 순수 함수 |
-| `web/features/f10-chatbot/lib/routing.ts` | 입력 분류, FAQ·맥락 응답, 고정 거절, 선제 신호 |
-| `web/features/f10-chatbot/lib/openai.ts` | Luna Responses API 호출과 F10 시스템 지시문 |
+| `web/features/f10-chatbot/lib/routing.ts` | 입력 분류, FAQ·맥락 응답, 고정 거절, 선제 신호. **게이트 순서를 이 파일 하나가 소유한다**(§6) |
+| `web/features/f10-chatbot/lib/orchestrator.ts` | 라우팅 결과에 전이·툴·LLM 단계를 붙이고 출력 게이트까지 통과시키는 단일 진입점(`createChatOutcome`). 예산·닫힌 실패 처리가 여기 있다 |
+| `web/features/f10-chatbot/lib/contracts.ts` | 요청 런타임 검증(`parseChatRequest`)과 액션 정리(`sanitizeActionPayload`). 클라이언트 식별자 필드를 거부한다 |
+| `web/features/f10-chatbot/lib/session.ts` | 로그인 프로필 → 챗봇 세션 순수 변환. 역할이 비면 좁은 쪽인 `child` |
+| `web/features/f10-chatbot/lib/tools.ts` | 읽기 전용 툴 5종 실행. 조회 대상은 세션 사용자로만 정한다(§4) |
+| `web/features/f10-chatbot/lib/explain.ts` | DAPIE 전이(개시·진행·되묻기)와 타이핑 응답 해석(§3.4) |
+| `web/features/f10-chatbot/lib/stock-explore.ts`·`sector-explore.ts` | 종목 4주제 연속 탐색과 섹터 yes/no 전이(§3.5·§8.1) |
+| `web/features/f10-chatbot/lib/colloquial.ts`·`polite.ts` | 구어체 판정(§3.3.1)과 해요체·2인칭 안전망(§3.3.2) |
+| `web/features/f10-chatbot/lib/role-copy.ts` | 역할로 갈리는 문장만 라우팅 뒤에 교체(§12.3). 라우터는 세션을 받지 않는다 |
+| `web/features/f10-chatbot/lib/openai.ts` | Luna Responses API 호출과 F10 시스템 지시문. **답변 생성은 여기 하나뿐이다** |
+| `web/features/f10-chatbot/lib/rewrite.ts` | §3.6 지시어 후속 질문 재작성. 답을 만들지 않는다 |
 | `web/features/f10-chatbot/lib/output-judge.ts` | T5b 출력 판정 지시문과 structured output 호출 |
+| `web/features/f10-chatbot/lib/answer-relevance.ts` | §6.0.3 답변 적합성 검사. 위험군 고정 답변만 질문과 함께 다시 읽는다 |
 | `web/features/f10-chatbot/lib/term-classify.ts` | §6.1.5 term 9종 보조 분류기. `findTermKind` 키워드가 놓친 표현 변형을 enum structured output으로 분류만 하며 답변 문장은 만들지 않는다 |
-| `web/app/api/chat/route.ts` | 요청 검증, 목적 라우팅 연결, 출력 게이트, SSE 전송 |
+| `web/app/api/chat/route.ts` | 요청 검증, 세션 확정, 분당 한도, SSE 전송·로깅. **프롬프트와 게이트 판정은 넣지 않는다** |
+| `web/app/api/chat/personal-data.ts`·`rate-limit.ts` | 본인 `transactions`·`holdings` 조회 어댑터와 사용자별 분당 12건 카운터 |
 | `web/shared/data/` | 용어·FAQ·종목·섹터의 승인된 정적 데이터 |
 | `web/shared/llm/client.ts` | 서버 전용 OpenAI 클라이언트와 모델 상수 |
 | `web/shared/llm/filter.ts` | 금지 표현 차단과 문장 처리 |
@@ -157,22 +168,42 @@ type ChatResponse = {
   };
 };
 
-type ChatAction =
-  | Pick<ChatResponse, "suggestedQuestions" | "uiAction">
-  | {
-      kind: "explain";
-      turn: { scriptId: `term:${string}`; stage: "brief" | "detail" };
-      choices: Array<{ id: string; label: string }>;
-    }
-  | {
-      kind: "stock-explore";
-      turn: {
-        stockId: `KRX:${string}`;
-        shownTopics: Array<"company" | "business" | "industry" | "financial">;
-        prompt: string;
-        choices: Array<{ id: string; label: string }>;
-      };
-    };
+/**
+ * SSE `action` 이벤트의 본문. 원본 타입은 `lib/contracts.ts`의 `ChatActionPayload`이며
+ * **모든 변종이 `suggestedQuestions`·`uiAction`을 함께 실을 수 있다** — 오케스트레이터가
+ * 표준 액션 위에 전이 액션을 덮어쓰기 때문이다.
+ */
+type ChatAction = Pick<ChatResponse, "suggestedQuestions" | "uiAction"> &
+  (
+    | { kind?: undefined }
+    | { kind: "explain"; turn: ExplainTurn }
+    | { kind: "stock-explore"; turn: StockExploreTurn }
+    | { kind: "sector-explore"; turn: SectorExploreTurn }
+  );
+
+type ExplainTurn = {
+  /** 등록된 스크립트 id. 용어는 `term:*`, 공용 유도형은 `flow:guided`다. */
+  scriptId: string;
+  stage: "brief" | "detail" | "example" | "followup";
+  prompt: string;
+  choices: Array<{ id: string; label: string }>;
+  /** 같은 단계에서 되묻은 횟수(§3.4). 클라이언트가 다음 요청에 그대로 되돌려 보낸다. */
+  reaskCount?: number;
+};
+
+type StockExploreTurn = {
+  stockId: `KRX:${string}`;
+  shownTopics: Array<"company" | "business" | "industry" | "financial">;
+  prompt: string;
+  choices: Array<{ id: string; label: string }>;
+};
+
+/** §8.1 섹터 설명 뒤의 yes/no 한 턴. */
+type SectorExploreTurn = {
+  sectorId: string;
+  prompt: string;
+  choices: Array<{ id: "yes" | "no"; label: string }>;
+};
 ```
 
 - 답변은 해요체·쉬운 말·비유·이모지를 사용하고 최대 3문장이다. 자녀 뷰의 말끝은 “~예요/~해요/~하면 돼요”로 맺고 “~합니다”체와 “~하세요” 지시체는 쓰지 않는다.
@@ -364,24 +395,43 @@ DAPIE 는 **금융 용어와 화면 용어의 뜻을 설명할 때만** 연다. 
 
 ```ts
 type ChatRequest = {
-  message: string;
+  message: string;                        // 공백 정리 후 최대 500자
   context: {
     screen: "home" | "stock" | "order" | "archive";
-    stockId?: string;
+    stockId?: `KRX:${string}`;
     stockName?: string;
+    /** 금액 매수는 소수 수량이 정상값이라 정수로 받지 않는다. 화면과 같은 소수 둘째 자리. */
     quantity?: number;
     unitPrice?: number;
+    /**
+     * 아래 셋은 **지금 화면이 보여주고 있는 내 지갑 값**이다(`/api/account`·`/api/orders`
+     * 로 세운 값). 출력 게이트의 허용 숫자 목록에 들어가므로 화면과 다른 값을 말할 수
+     * 없고, 조회 대상 사용자는 여전히 서버가 쿠키로만 정한다 — 남의 값을 지정하는
+     * 통로가 아니다. 없으면 챗봇은 그 값을 말하지 않고 화면으로 보낸다.
+     */
+    pnlPercent?: number;
+    cash?: number;
+    holdingCount?: number;                // 51종을 넘는 값은 화면 값이 아니라 거절한다
   };
+  /** §3.6 재작성 입력. 직전 **서버** 답변 1건, 최대 800자. 아이가 쓴 말은 담지 않는다. */
+  lastAnswer?: string;
+  /** 직전에 다룬 용어 스크립트 id. 등록된 id 가 아니면 요청을 거절한다. */
+  lastTopicId?: string;
   explain?: {
     scriptId: string;
-    stage: "brief" | "detail" | "followup";
-    choiceId?: string;
-    previousAnswer?: string;
+    stage: "brief" | "detail" | "followup";   // `example`은 응답을 받지 않는다
+    choiceId?: string;                        // 없으면 타이핑이며 서버가 message 를 해석한다
+    reaskCount?: number;                      // 되묻기 왕복 횟수(§3.4)
+    previousAnswer?: string;                  // `flow:guided`의 "더 쉽게"에서만
   };
   stockExplore?: {
     stockId: `KRX:${string}`;
     shownTopics: Array<"company" | "business" | "industry" | "financial">;
     choiceId: "company" | "business" | "industry" | "financial" | "ask-other" | "done";
+  };
+  sectorExplore?: {                       // §8.1 섹터 yes/no 전이
+    sectorId: string;
+    choiceId: "yes" | "no";
   };
 };
 ```
@@ -394,6 +444,8 @@ type ChatRequest = {
 - 성공·실패를 가리지 않고 모든 응답에 `X-Request-Id`를 실어 서버 로그의 `requestId`와 맞춰 볼 수 있게 한다. 거절 본문에는 사람이 로그에서 읽을 이름을 `code`(`rate_limited`·`invalid_json`·`invalid_payload`)로 남긴다. 화면이 실패 문구를 가르는 기준은 HTTP 상태 코드와 `Retry-After`이며, `code`를 읽으려고 계약 타입을 새로 만들지 않는다.
 - 화면은 실패를 한 문구로 뭉뚱그리지 않는다. 분당 한도(`429`)는 남은 시간을 알려 주는 안내로, 연결 실패와 서버 오류(`5xx`·네트워크)는 다시 보낼 수 있는 안내로 가른다. 어느 쪽인지 모르는 실패만 “키웅이가 잠깐 낮잠 중이에요”로 남긴다.
 - `flow:guided`의 `brief` 단계에서 “더 쉽게”를 고른 경우에만 직전 서버 답변 한 건을 `previousAnswer`로 다시 보낸다. 대화 이력 전체는 보내지 않으며, 서버는 최대 800자로 검증한 뒤 Luna를 1회만 호출한다.
+- **`explain`·`stockExplore`·`sectorExplore`는 한 요청에 하나만 온다.** 둘 이상 실린 본문은 `400`이다 — 진행 중인 전이가 둘이면 어느 쪽으로 이어야 하는지 서버가 정할 근거가 없고, 그 판정을 클라이언트에 넘기면 위조한 전이가 생긴다.
+- `lastTopicId`는 **등록된 스크립트 id일 때만** 통과한다. 지어낸 id로 재작성 판정을 흔들 수 없다.
 
 ### 5.2 SSE 이벤트
 
@@ -422,6 +474,8 @@ type ChatRequest = {
 - §3.6의 재작성은 답변을 만들지 않는 정리 호출이므로 위 1회 제한과 별도다. 1단이 허용 목적을 판정했거나 직전 답변이 없으면 호출하지 않는다. `reasoning.effort`는 `none`, `max_output_tokens`는 200이다.
 - `routed.route === "fallback"`으로 넘어가기 직전에 §6.1.5 term 9종 보조 분류기(`lib/term-classify.ts`)를 먼저 부른다. 답변을 만들지 않는 분류 호출이라 위 1회 제한과 별도다. 9종 중 하나로 판정되면 `termReply`의 승인된 고정 문장으로 답하고 **생성·T5b를 모두 건너뛴다**. `"none"`이면 기존처럼 생성으로 이어진다. 분류 실패·시간 초과는 닫힌 실패로 `"none"` 처리해 기존 생성 경로를 그대로 쓴다.
 - §6.0.2의 T5b 판정은 답변을 만들지 않는 검사 호출이므로 위 1회 제한과 별도다. 생성이 없었던 요청에는 판정도 없다. **한 요청의 Luna 호출은 최대 4회**다 — 재작성 1 + 분류 1 + 생성 1 + 판정 1이며, 각 단계가 조건부라 대부분의 요청은 0~1회로 끝난다. [정정 2026-08-15] 이전 문구는 최대 3회라고 적었으나, 재작성이 일어난 요청이 `fallback`으로 이어지면 분류·생성·판정이 모두 따라붙어 4회가 된다. 통합문서 v2도 4회로 적고 있었다.
+- §6.0.3의 적합성 검사도 답변을 만들지 않는 검사 호출이다. **분류와 배타적이라 상한 4회는 그대로다** [명문화 2026-08-18] — 분류는 `fallback`·범위 밖에서만, 적합성 검사는 `faq`·`context`의 고정 답변에서만 돌기 때문에 한 요청이 둘 다 부르는 경로가 없다. 검사가 `off`를 내면 그때 생성이 붙고 그 생성문이 T5b를 받는다.
+- **단계마다 자기 지연 예산을 갖는다.** 재작성 4초 · 용어 분류 4초 · 적합성 검사 4초 · 답변 생성 8초 · 출력 판정 5초. 예산을 넘기면 그 단계만 닫고, 판정만 닫힌 실패(고정 안전 응답)이고 나머지는 직전 승인 결과를 그대로 쓴다.
 
 ## 6. 안전 게이트
 
@@ -444,6 +498,7 @@ type ChatRequest = {
 - 최대 3문장을 완성 버퍼에 모아 출처·권한·수치·금지 표현을 함께 검증한다.
 - 출력 필터가 차단하면 전체 답변을 고정 안전 응답으로 대체하고 스트림을 종료한다.
 - 비상 시 사전·FAQ 전용 모드로 강등할 수 있어야 한다.
+- **T4와 T5 사이에 차단하지 않는 단계가 하나 있다** — §6.0.3 답변 적합성 검사다. 위험군 고정 답변만 질문과 함께 다시 읽고, 비껴간 답이면 생성으로 돌려 T5·T5b를 받게 한다. 안전 판정이 아니라 **쓸모 판정**이라 T 번호를 주지 않았다.
 
 #### 6.0.1 T5 1단 — 결정적 룰 [개정 2026-08-14]
 
@@ -461,6 +516,17 @@ type ChatRequest = {
 - 파싱 오류·시간 초과·호출 실패는 모두 **닫힌 실패**로 처리해 고정 안전 응답으로 대체한다.
 - 2단이 오판해도 1단이 차단하던 표현은 그대로 막히므로 안전 하한선은 내려가지 않는다.
 - 도입 근거는 실측이다. 표현만 바꾼 추천·전망 문장을 1단 룰은 0/12, 룰을 8개 확장해도 재표현 5문장은 0/5 차단했다. Luna 판정은 12/12·5/5 차단에 정상 설명 8건 오탐 0건이었고 단건 지연은 약 1.5초로 §5.2의 최소 2초 준비 카드 안에 들어간다.
+
+#### 6.0.3 답변 적합성 검사 — “이 답이 이 질문에 답하나” [명문화 2026-08-18]
+
+앞의 게이트는 모두 **나가는 문장이 위험한가**를 본다. 그런데 규칙 라우터는 낱말이 겹치면 승인된 카드를 내므로, 문장 자체는 늘 안전한 채 **묻지 않은 것에 답하는** 오답이 남는다. 이 어긋남은 문장 형태로 구분되지 않아 정규식·형태 게이트로 못 잡는다 — 질문과 답을 **함께** 읽어야 판정된다. `lib/answer-relevance.ts`가 그 판정을 한다. 구현이 먼저 들어가 있었고 이 절이 없어 SPEC 없는 단계로 돌던 것을 여기 적는다.
+
+- **위험군에만 돌린다.** `source === "fixed"`이고 `route`가 `faq`·`context`이며 `intent`가 `service_help`·`own_records`·`own_profile`·`own_archive`인 응답이다. 실측 정확도가 `term` 98%·`company` 96%·`meta` 93%인 반면 `howto` 89%·`rule` 81%·`mydata` 23%였고, 낮은 쪽만 다시 읽는다.
+- 판정은 `on`·`off` 둘뿐이다. `off`면 **승인 문장을 버리고 생성으로 돌려** T5·T5b를 받게 한다. 화면에는 그 생성문이 나가고 로그에는 `relevanceRedirected`가 남는다.
+- **거절·안전·범위 밖은 검사하지 않는다.** 일부러 질문에 답하지 않는 응답이라 전부 `off`로 판정돼 보호 응답이 생성으로 바뀐다. 진행 중인 DAPIE·종목·섹터 전이도 대상이 아니다.
+- **검사 실패는 승인 문장을 그대로 둔다**(열린 실패). 검사기가 죽었다고 안전한 답을 생성으로 바꾸지 않는다. 반대로 생성이 실패하면 원래 승인 문장으로 되돌린다 — 비껴간 답이라도 폴백 문구보다 쓸모가 있다.
+- 지연 예산은 4초(`relevanceTimeoutMs`)이며 §6.1.5 용어 분류와 **배타적**이라 한 요청의 Luna 상한 4회는 그대로다(§5.3).
+- **[제약]** 도입 근거인 실측(고정 답변 262건 중 `partial` 59 · `off` 4 — 합쳐 24%)은 `lib/answer-relevance.ts` 머리말에만 기록돼 있고 재현하는 체크인 스크립트가 없다. `records/f10-child-sim`의 실행기들은 이 의존성을 `"on"`으로 스텁하므로 회귀는 이 단계를 검증하지 않는다. 임계·대상 의도를 바꿀 때는 측정을 다시 만들어야 한다.
 
 #### 6.0.4 사전 밖 금융 용어 구제 [신설 2026-08-16]
 
@@ -925,6 +991,9 @@ type SectorEducationContent = {
 - 서비스 사용법 FAQ 15건과 화면 맥락형 사용 안내는 DAPIE 전이 없이 승인 답변을 바로 제공하고, 등록된 `uiAction`을 같은 응답에 유지한다. 읽기 전용 Tool·허용 LLM·실패 안내는 기존 공통 유도형 전이를 유지한다.
 - 진행 중인 설명에서도 새 질문을 자유롭게 시작할 수 있고, 정답 뒤에는 다음 질문 또는 명시적 종료를 고르게 한다.
 - 51종 승인 교육 데이터는 회사 소개·수익 구조·산업 역할·2024년 실적 네 주제로 조회하며, 종목 질문 뒤에는 아직 보지 않은 주제를 중복 없이 추천한다.
+- 섹터 질문은 승인 섹터 설명 뒤 yes/no 한 턴(`sector-explore`)으로 이어지며, `응`이면 그 섹터 유니버스 회사 목록과 모아 보기 버튼을, `아니`면 목록 없이 종료한다(§8.1). LLM을 부르지 않고 `sectorId`는 서버가 등록 섹터와 대조한다.
+- 위험군 고정 답변은 질문과 함께 다시 읽어 비껴간 답을 생성으로 돌린다(§6.0.3). 검사·생성 실패는 원래 승인 문장을 유지한다.
+- 역할로 갈리는 고정 문장 네 건은 라우팅 뒤 `applyRoleCopy`가 교체하며, 자녀가 누를 수 없는 화면 버튼은 함께 뗀다(§12.3).
 
 ### 12.3 역할별 응답 분기 [신설 2026-08-16]
 
