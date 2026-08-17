@@ -163,6 +163,7 @@ export function ConnectedPrototype({
       {tutorialOn && overlay && (
         <TutorialOverlay
           onClose={() => setTutorialOn(false)}
+          onGo={leaveToPath}
           place={{ screen: overlay.screen, stage }}
         />
       )}
