@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { Account } from "./portfolio-view";
 import {
+  appendQtyKey,
   applyBuyFill,
   applySellFill,
   blankBuyDraft,
   blankSellDraft,
   buyMath,
   buyStepOk,
+  formatQty,
   judgePlanMatch,
   orderChatContext,
   sellMath,
@@ -33,6 +35,37 @@ test("매수: 금액으로 넣으면 소수 수량, 주 수로 넣으면 금액�
   assert.equal(byQty.amount, 120_000);
   assert.equal(byQty.warn, "지갑으로 살 수 있는 주 수보다 많아!");
   assert.equal(byQty.canConfirm, false);
+});
+
+test("주 수 키패드: 소수점은 한 번, 둘째 자리까지만 받는다", () => {
+  assert.equal(appendQtyKey("", "."), "0."); // 점부터 눌러도 `0.` 으로 시작한다
+  assert.equal(appendQtyKey("0.", "5"), "0.5");
+  assert.equal(appendQtyKey("0.5", "."), "0.5"); // 두 번째 점은 무시
+  assert.equal(appendQtyKey("0.57", "3"), "0.57"); // 셋째 자리는 무시
+  assert.equal(appendQtyKey("0", "5"), "5"); // 앞의 0 은 남기지 않는다
+  assert.equal(appendQtyKey("1.5", "←"), "1.");
+  assert.equal(appendQtyKey("1", "←"), "");
+  assert.equal(appendQtyKey("1", "00"), "1"); // 없어진 키가 남아 있어도 값을 바꾸지 않는다
+});
+
+test("주 수 표시: 최소 단위까지만 남긴다", () => {
+  assert.equal(formatQty(0.5), "0.5");
+  assert.equal(formatQty(1), "1");
+  assert.equal(formatQty(0.567), "0.57"); // 금액으로 산 소수 수량도 최소 단위로 접는다
+  assert.equal(formatQty(0), "0");
+});
+
+test("매수: 주 수도 0.01 주 단위로 살 수 있다", () => {
+  const half = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 0.5 }, 60_000, 100_000);
+  assert.equal(half.amount, 30_000);
+  assert.equal(half.qty, 0.5);
+  assert.equal(half.warn, "");
+  assert.equal(half.canConfirm, true);
+
+  // 주가가 지갑보다 비싸도 소수로는 살 수 있다 — 상한이 0 이면 이 주문이 통째로 막혔다.
+  const pricey = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 0.5 }, 200_000, 100_000);
+  assert.equal(pricey.maxShares, 0.5);
+  assert.equal(pricey.canConfirm, true);
 });
 
 test("챗봇 맥락: 주 수로 넣은 주 수를 그대로 싣는다", () => {
@@ -164,7 +197,7 @@ test("매수: 지정가는 주문 가격 기준으로 수량·최대 주 수를 
   );
   assert.equal(math.limPrice, 54_000);
   assert.equal(math.execPrice, 54_000);
-  assert.equal(math.maxShares, 1);
+  assert.equal(math.maxShares, 1.85);
 });
 
 test("매수: 지갑 초과·티끌 주문은 경고와 함께 막힌다", () => {
