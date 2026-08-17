@@ -11,8 +11,9 @@
 | 탐색·상세·매수·매도·질문식 기록·계좌 | `web/features/f0-home/`(`ExploreScreen`·`DetailScreen`·`OrderScreen`·`PortfolioScreen`과 `lib/`) | 화면의 정본. 즉시 상태는 서버 응답으로 세우고 저장하지 않는다(§6.2). 값 계산은 `lib/`의 순수 함수가 하고 컴포넌트는 붙이기만 한다 |
 | 지갑 시드·복원·총자산 | `web/shared/store/prototype-account.js` | 화면과 서버 경로가 같이 쓰는 단일 원본. `.js`인 것은 옛 iframe 사본 때문이었고 지금은 그냥 공용 모듈이다 |
 | 화면 호스트 | `web/features/f0-home/ConnectedPrototype.tsx` | 화면 선택과 F10 오버레이 조립. iframe은 철거했다 |
-| 상세 차트 | `web/features/f2-trade/TradingViewChart.tsx` | 분·일·주, 선·캔들 전환과 가족 체결 마커 |
-| 차트 라우트 | `web/app/tradingview-chart/page.tsx` | `ChartScreen`이 iframe으로 여는 차트 문서. 앱에 남은 유일한 iframe이다 |
+| 상세 차트 | `web/features/f0-home/ChartScreen.tsx`와 `web/features/f0-home/lib/chart-view.ts` | 시안대로 화면이 직접 그리는 인라인 SVG. 분·일·주, 선·캔들 전환과 가족 체결 핀 |
+| 차트 변환 | `web/features/f2-trade/chart-data.ts` | `/api/quote/{symbol}/chart` 응답을 봉 목록으로 검증·정렬한다. 화면이 이것만 읽는다 |
+| 은퇴 대기 | `web/features/f2-trade/TradingViewChart.tsx`, `web/app/tradingview-chart/page.tsx` | **어느 화면도 열지 않는다.** `lightweight-charts`는 축선·시간축을 늘 그려 시안과 달라 걷어냈다. 삭제는 `docs/기술스택.md`·`docs/기능명세.md`(오케스트레이터 소유)를 같이 고쳐야 해서 남겨 두었다 |
 | 유니버스·시세 | `web/app/api/universe/`, `web/app/api/quote/` | 51종 데이터, 현재가·캔들, 키움/캐시/픽스처 폴백 |
 | 공개 뉴스 | `web/features/f2-trade/lib/news/`, `web/app/api/news/` | 저장된 게시 뉴스의 런타임 계약과 공개 조회 |
 | 서버 거래·행동 저장 | `web/app/api/trade/`, `web/app/api/tab-view/` | 로그인 세션과 화면 계정이 맞을 때 Supabase에 후행 저장 |
@@ -31,18 +32,16 @@ GET / · /explore · /portfolio · /ranking · /archive · /stock/{code} · /buy
       ├─ /api/universe + /api/universe/data
       ├─ /api/news + /api/news/{newsId}
       ├─ /api/account · /api/orders → 서버 계좌·미체결 주문
-      ├─ /api/trades?symbol={symbol} → 매도 회고 재료
+      ├─ /api/trades?symbol={symbol} → 매도 회고 재료, 차트 체결 핀·범례
+      ├─ /api/quote/{symbol}/chart → ChartScreen이 인라인 SVG로 직접 그린다
       ├─ /api/watchlist → 관심 종목
       └─ /api/trade · /api/tab-view → 체결·열람 저장
-    → ChartScreen 안 /tradingview-chart iframe
-      ├─ /api/quote/{symbol}/chart
-      └─ /api/trades?symbol={symbol}
 ```
 
 - **주소가 화면을 가리킨다.** 아는 주소는 `features/f0-home/screen-route.ts`의 `routeFromPath`가 정하고 모르는 주소는 404다. `/stocks`·`/trade/[symbol]` 라우트는 없다.
 - 화면 전환은 라우터가 소유한다. 컴포넌트는 `onLeave(path)`로 올리고 `ConnectedPrototype`이 처리한다 — 예전의 `kiwoom:screen`·`leaveToRoute()` 메시지 왕복은 iframe과 함께 사라졌다.
 - 화면은 `/api/universe/data`를 5초마다 다시 읽어 현재가와 스파크라인을 갱신한다.
-- 차트 기간·유형은 iframe을 다시 열지 않고 `kiwoom:chart-options` 메시지로 바꾼다.
+- 차트 기간·유형은 `ChartScreen`의 상태다. `kiwoom:chart-options`·`kiwoom:chart-ready` 왕복은 iframe과 함께 사라졌고 **앱에 남은 `postMessage`는 없다.**
 - **접수가 곧 주문이다.** 즉시 체결도 예약도 서버가 확정한 뒤에야 완료 화면을 띄운다. 저장에 실패하면 거절 문구를 보여 주고 화면 상태를 바꾸지 않는다.
 
 ## 3. 확정된 현재 동작
@@ -64,7 +63,7 @@ GET / · /explore · /portfolio · /ranking · /archive · /stock/{code} · /buy
 1. 홈 또는 하단 `모의투자`에서 탐색 화면으로 간다.
 2. 검색·업종·상승순·관심 목록으로 51종을 탐색한다.
 3. 상세에서 현재가·등락·회사 설명·게시 뉴스·매수/매도 버튼을 본다.
-4. 차트 상세는 `/tradingview-chart`, 뉴스 상세는 같은 `newsId`의 `/api/news/{newsId}`를 사용한다.
+4. 차트 상세는 `/api/quote/{symbol}/chart`, 뉴스 상세는 같은 `newsId`의 `/api/news/{newsId}`를 사용한다.
 
 차트·뉴스 상세 진입은 `events`에 남고 닫을 때 `dwell_ms`가 붙는다(F9 입력). 현재 화면에는 별도 기업정보 상세 진입이 없어 `info_detail_opened`는 생산되지 않는다.
 
@@ -183,7 +182,7 @@ type TradeHistoryRow = {
 |---|---|---|
 | `GET /api/universe` | 연결 | 부팅 시 `window.KW_UNIVERSE` 스크립트 제공 |
 | `GET /api/universe/data` | 연결 | 5초 현재가·스파크 갱신 |
-| `GET /api/quote/{symbol}/chart` | 연결 | TradingView 캔들 데이터 |
+| `GET /api/quote/{symbol}/chart` | 연결 | 차트 봉 데이터 |
 | `GET /api/news`, `GET /api/news/{id}` | 연결 | 게시 상태 뉴스만 공개 |
 | `GET /api/account` | 연결 | 로그인 직후와 매매 성공 직후 `applyServerHoldings`가 서버 잔액·보유를 `state.acc[role]`에 반영. 화면의 `cash`는 총 현금(`balance`)이 아니라 **주문가능금액(`available` = `balance` − 잠긴 현금)**이다. 로그인한 역할만 덮어쓰고 반대쪽 로컬 데모 데이터는 그대로 둠 |
 | `POST /api/trade` | 조건부 연결 | 정규장 시장가와 장외 예약 시장가의 실제 체결만 best-effort 전송. 응답 실패 시 로컬 거래는 유지되고 서버 재조회는 하지 않음 |
