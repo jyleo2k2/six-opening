@@ -328,10 +328,14 @@ function CardShell({ type, children, style }: { type: ResolvedType; children: Re
 
 export function ArchiveScreen({
   account,
+  infoOpen,
+  onInfoOpenChange,
   onLeave,
   view: requested,
 }: {
   account: WalletAccountId;
+  infoOpen: boolean;
+  onInfoOpenChange: (open: boolean) => void;
   onLeave: (path: string) => void;
   /** 주소가 가리킨 자리(`/archive/return` 등). 챗봇 점프가 이 길로 들어온다. */
   view?: string;
@@ -357,8 +361,6 @@ export function ArchiveScreen({
    * 바뀌면 넘길 때마다 같은 문장이 세 장에 겹쳐 보인다.
    */
   const [pickedAxis, setPickedAxis] = useState<number | null>(null);
-  /** 제목 옆 ⓘ 로 여는 안내. 처음 들어온 사람은 카드를 넘길 수 있는 줄 모르므로 펴 둔다. */
-  const [infoOpen, setInfoOpen] = useState(true);
   const [famDetailOpen, setFamDetailOpen] = useState(false);
   /** 글쓰기 시트에서 고른 거래와 적고 있는 글. 시트를 닫으면 둘 다 버린다. */
   const [pickedTrade, setPickedTrade] = useState<string | null>(null);
@@ -500,7 +502,7 @@ export function ArchiveScreen({
               {/* 안내는 첫 화면에만 있다 — 넘길 카드가 있는 자리가 여기뿐이다. */}
               {view === "cards" && (
                 <div
-                  onClick={() => setInfoOpen(!infoOpen)}
+                  onClick={() => onInfoOpenChange(!infoOpen)}
                   style={{ flex: "none", display: "flex", alignItems: "center", cursor: "pointer", paddingBottom: 3 }}
                 >
                   <svg fill="none" height="24" stroke="#9095AA" style={{ display: "block" }} viewBox="0 0 24 24" width="24">
@@ -530,7 +532,7 @@ export function ArchiveScreen({
             <div style={{ position: "absolute", left: "50%", bottom: -7, width: 14, height: 14, transform: "translateX(-50%) rotate(45deg)", background: "#FDE7F1" }} />
             <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 10 }}>
               <div style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 800, color: ACCENT, letterSpacing: "-0.02em" }}>매주 새로운 카드가 쌓여요</div>
-              <div onClick={() => setInfoOpen(false)} style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1, cursor: "pointer", padding: "0 2px" }}>✕</div>
+              <div onClick={() => onInfoOpenChange(false)} style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1, cursor: "pointer", padding: "0 2px" }}>✕</div>
             </div>
             <div style={{ position: "relative", fontSize: 13.5, fontWeight: 600, color: "#5C6280", lineHeight: 1.65, marginTop: 8, whiteSpace: "pre-line" }}>
               {"좌우로 넘기면 지난주의 나를 볼 수 있어요.\n가운데 카드를 누르면 다섯 가지 투자 성향을 자세히 확인할 수 있어요."}
