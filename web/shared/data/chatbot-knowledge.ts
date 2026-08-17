@@ -662,7 +662,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       answerId: "sum",
     },
     detail: "주식을 사고팔지 않아도 가진 주식의 값이 움직이면 이 숫자는 달라져요.",
-    example: "지갑 속 돈만 세지 않고 책장에 둔 카드까지 오늘 값으로 함께 세어 보는 것과 비슷해요. 둘을 합쳐야 지금 가진 전부가 보여요.",
+    example: "저금통에 든 동전과 서랍에 넣어 둔 지폐를 함께 세어 보는 것과 비슷해요. 한쪽만 세면 실제보다 적어 보여요.",
   },
   "available-cash": {
     question: "기다리는 주문에 맡겨 둔 돈도 쓸 수 있는 돈에 들어 있을까요?",
@@ -702,7 +702,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       answerId: "filled",
     },
     detail: "같은 회사를 여러 번 나눠 사도 가진 회사에는 하나로 모여서 보여요.",
-    example: "도서관에서 빌리겠다고 신청만 한 책과 실제로 받아 온 책은 달라요. 지금 손에 있는 것은 받아 온 책뿐이에요.",
+    example: "택배를 주문한 것과 상자가 집에 도착한 것은 달라요. 지금 열어 볼 수 있는 것은 도착한 상자뿐이에요.",
   },
   "pending-order": {
     question: "기다리는 주문은 어떤 상태일까요?",
@@ -742,7 +742,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       answerId: "pending",
     },
     detail: "취소는 기다리는 주문 목록에서 하고, 돌아온 돈은 다시 쓸 수 있는 돈에 더해져요.",
-    example: "아직 만들기 전인 음식은 주문을 무르고 돈을 돌려받을 수 있어요. 이미 나온 음식은 무를 수 없는 것과 비슷해요.",
+    example: "아직 안 보낸 메시지는 지울 수 있지만 이미 보낸 메시지는 되돌릴 수 없는 것과 비슷해요.",
   },
   "sell-proceeds": {
     question: "받게 되는 돈은 무엇을 곱해 계산할까요?",
@@ -762,7 +762,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       answerId: "qty-price",
     },
     detail: "예상해 본 값이라 실제로 체결된 가격이 다르면 받는 돈도 달라져요.",
-    example: "장터에서 팔기 전에 개수와 값을 곱해 얼마 받을지 미리 세어 보는 것과 비슷해요. 막상 팔 때 값이 달라지기도 해요.",
+    example: "붕어빵 몇 개에 얼마인지 곱해서 낼 돈을 미리 세어 보는 것과 비슷해요. 가게에 가면 값이 올라 있기도 해요.",
   },
   "goal-price": {
     question: "이 값을 적어 두면 그 값이 됐을 때 자동으로 팔릴까요?",
@@ -781,7 +781,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "note",
     },
-    detail: "적어 둔 값은 나만 보고, 그 값이 되어도 알림이 오거나 주문이 나가지 않아요.",
+    detail: "적어 둔 값은 가족 기록에도 함께 보이고, 그 값이 되어도 알림이 오거나 주문이 나가지 않아요.",
     example: "공책에 '여기까지 오면 다시 생각해 보자'고 적어 두는 것과 비슷해요. 적었다고 저절로 무슨 일이 생기지는 않아요.",
   },
   "holding-period": {
@@ -981,7 +981,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "direction",
     },
-    detail: "다섯 가지 모두 이번 시즌에 남긴 기록으로만 계산해서, 기록이 없으면 아직 표시되지 않아요.",
+    detail: "다섯 가지 모두 이번 시즌 기록으로만 계산해서, 기록이 없으면 5점이에요.",
     example: "운동회 기록표에 달리기·던지기를 따로 적어 두는 것과 비슷해요. 항목마다 보는 것이 달라서 하나로 합쳐 순위를 매기지 않아요.",
   },
   "profile-definition": {
@@ -1043,26 +1043,6 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
     },
     detail: "두 축을 각각 어느 쪽으로 많이 움직였는지에 따라 네 모습 가운데 하나가 정해져요.",
     example: "좋아하는 색과 좋아하는 계절을 짝지어 이름을 붙이는 것과 비슷해요. 짝이 다르면 이름이 다를 뿐 더 좋은 짝은 없어요.",
-  },
-  "season-record": {
-    question: "시즌 기록은 무엇을 모아 보여줄까요?",
-    choices: [
-      { id: "counts", label: "이번 시즌의 매수·매도와 열람 건수" },
-      { id: "future", label: "앞으로의 수익률" },
-      { id: "others", label: "다른 가족의 기록" },
-    ],
-    answerId: "counts",
-    adjust: {
-      explanation: "시즌 기록은 이번 시즌에 남긴 매수·매도와 메모, 상세 열람 건수를 모아요. 기록 카드는 시즌이 끝난 뒤에 받아요.",
-      question: "그럼 기록 카드는 언제 받을까요?",
-      choices: [
-        { id: "after", label: "시즌이 끝난 뒤" },
-        { id: "first", label: "시즌 첫날" },
-      ],
-      answerId: "after",
-    },
-    detail: "몇 번 했는지를 세는 곳이라 얼마를 벌거나 잃었는지는 여기에 나오지 않아요.",
-    example: "한 달 동안 도서관에 몇 번 갔는지 세어 둔 표와 비슷해요. 무슨 책을 읽었는지까지는 따로 봐요.",
   },
 };
 
@@ -1192,8 +1172,11 @@ const ADDED_TERM_SCRIPTS: Record<string, ExplainScript> = {
   }),
 };
 
+// `season-record` 는 여기 없다. 매수·매도·메모·열람 건수를 모아 보여주는 화면이
+// 앱에 없어서 용어를 설명하면 있는 줄 안다 — `orderbook-unsupported` 와 같은
+// 이유로 "없다"를 말하는 단답만 남겼다(§3.3.1).
 const DAPIE_SCREEN_TERM_IDS = new Set([
-  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character", "season-record",
+  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character",
 ]);
 
 export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
@@ -1495,7 +1478,11 @@ export const CHATBOT_KNOWLEDGE: readonly ChatbotKnowledgeEntry[] = ([
   { id: "profile-definition", kind: "faq", category: "profile", termLabel: "성향", triggers: ["성향이 뭐", "성향 뜻", "능력치 오각형"], answer: "성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.", actionTarget: "archive", status: reviewed },
   { id: "profile-status", kind: "faq", category: "profile", termLabel: "관찰 중", triggers: ["관찰 중", "관찰 초기", "2거래일"], answer: "관찰 중은 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족한 상태예요. 정확력은 거래 뒤 2거래일이 지나야 계산돼서 그전에는 LV 표기가 붙지 않아요.", actionTarget: "archive", status: reviewed },
   { id: "profile-character", kind: "faq", category: "profile", termLabel: "성향 캐릭터", triggers: ["저격수", "전략가", "승부사", "탐험가", "성향 캐릭터"], answer: "성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.", actionTarget: "archive", status: reviewed },
-  { id: "season-record", kind: "faq", category: "profile", termLabel: "시즌 기록", triggers: ["시즌 기록이 뭐야", "기록 카드"], answer: "시즌 기록은 이번 시즌의 매수·매도·메모·상세 열람 건수를 모아 보여줘요. 기록 카드는 시즌이 끝난 뒤 받는 요약이며, 현재는 4주차까지 잠겨 있어요.", actionTarget: "archive", status: reviewed },
+  // 없는 화면이라 `termLabel`·`category`·DAPIE 를 붙이지 않는다. 매수·매도·메모·열람
+  // 건수를 세어 주는 자리가 아카이브에 없는데 용어로 설명하면 아이가 화면에서 그것을
+  // 계속 찾는다. `orderbook-unsupported` 와 같은 모양으로 "없다"를 말하고 실제로 있는
+  // 자리(주차별 성향 카드·지난 시즌 리포트)로 보낸다.
+  { id: "season-record", kind: "faq", triggers: ["시즌 기록이 뭐야", "기록 카드"], answer: "매수·매도와 메모를 몇 번 했는지 세어 주는 화면은 아직 없어요. 대신 아카이브에서 주차별 성향 카드와 지난 시즌 리포트를 볼 수 있어요.", actionTarget: "archive", status: reviewed },
   // "기록"은 "기록 어디서 봄?" 같은 위치 질문까지 잡으므로 DAPIE 를 붙이지 않는다.
   // 용어 뜻을 묻는 "투자 근거"·"근거 태그"는 아래 reason-tag 가 맡는다. 더 긴 트리거가
   // 먼저 매칭되므로 둘이 섞이지 않는다 (SPEC §3.4 — DAPIE 는 용어 설명에만 연다).

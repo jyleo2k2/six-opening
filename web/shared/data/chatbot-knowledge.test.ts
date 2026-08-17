@@ -15,13 +15,23 @@ assert.ok(
   ),
 );
 const DAPIE_SCREEN_TERM_IDS = [
-  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character", "season-record",
+  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character",
 ];
 for (const id of DAPIE_SCREEN_TERM_IDS) {
   assert.equal(
     CHATBOT_KNOWLEDGE.find((entry) => entry.id === id)?.explainScript?.id,
     `term:${id}`,
   );
+}
+
+// 없는 화면에는 DAPIE 를 붙이지 않는다 (SPEC §3.3.1). 용어로 설명하면 아이가 화면에서
+// 그것을 계속 찾는다 — `season-record` 는 매수·매도·메모·열람 건수를 모아 보여주는
+// 자리가 앱에 없고, `orderbook-unsupported` 도 같은 이유로 단답만 갖는다.
+for (const id of ["season-record", "orderbook-unsupported"]) {
+  const entry = CHATBOT_KNOWLEDGE.find((e) => e.id === id);
+  assert.ok(entry, `${id}: 항목이 없다 — 어느 경로에도 안 걸려 기본 안내로 끝난다`);
+  assert.equal(entry.explainScript, undefined, `${id}: 없는 화면에 DAPIE 가 붙었다`);
+  assert.equal(entry.termLabel, undefined, `${id}: 없는 화면이 용어 사전에 올라갔다`);
 }
 
 // ── 설명 문장 예산 (SPEC §3.4.4) ────────────────────────────────────────────
@@ -133,6 +143,30 @@ for (const entry of SCRIPTED) {
         ["no", "yes"],
         `${entry.id}.${where}: 명사를 묻는데 선택지가 예/아니오다`,
       );
+    }
+
+    // 명사를 묻는 조정 질문에는 선택지도 명사다 (SPEC §3.4.5).
+    //
+    // 바로 위 검사는 **선택지 id 가 yes/no 일 때만** 잡는다. `term:return` 의 조정이
+    // 그 틈으로 빠졌다 — "수익률은 지금 금액을 무엇과 비교할까요?" 에 오답이 "처음
+    // 금액은 보지 않아요" 였다. id 는 멀쩡하고 라벨만 서술형 부정문이라, 아이는
+    // 명사 자리를 묻는 질문에 문장을 받아 고를 수가 없다.
+    //
+    // 질문은 **명사 자리가 분명한 형태**만 본다. `무엇이 끝나야 할까요?` 처럼 절이
+    // 답인 질문까지 넣으면 `holdings.adjust` 의 "주문이 체결되어야 해요" 가 걸려
+    // 오탐이 된다 — 오탐이 한 번 나면 다음 사람이 이 파일을 믿지 않게 된다.
+    //
+    // `check` 는 넣지 않았다. SPEC §3.4.5 의 계약이 조정 선택지를 대상으로 하고,
+    // 지금 걸리는 것은 `trade-lock.check` 의 "아무것도 못 해요" 한 건뿐이라 그 문구를
+    // 고칠지는 이 가드와 따로 판단할 일이다.
+    if (where === "adjust" && /무엇(을|과|와|일까요)/.test(question)) {
+      for (const choice of choices) {
+        assert.ok(
+          // 해요체 서술어 꼬리. 명사구는 이 자리에서 `요` 로 끝나지 않는다.
+          !/요[.?!]?$/.test(choice.label),
+          `${entry.id}.${where}: 명사를 묻는데 선택지가 서술문이다 — ${choice.label}`,
+        );
+      }
     }
   }
 }
