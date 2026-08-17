@@ -13,6 +13,10 @@ const orderScreen = readFileSync(
   new URL("../../f0-home/OrderScreen.tsx", import.meta.url),
   "utf8",
 );
+const phoneFrameCss = readFileSync(
+  new URL("../../f0-home/phone-frame.css", import.meta.url),
+  "utf8",
+);
 
 assert.doesNotMatch(orderView, /9999999/u);
 assert.match(orderView, /const availableCash = Math\.max\(0, Math\.floor\(cash\)\);/u);
@@ -44,5 +48,9 @@ assert.match(
 );
 assert.match(orderScreen, /qty: math\.maxQty, amountInput: 0/u);
 assert.match(orderScreen, /\{ sellBy, qty: 0, amountInput: 0 \}/u);
+assert.match(orderScreen, /flashMaxHint/u);
+assert.match(orderScreen, /className=\{PRESSABLE\}/u);
+assert.match(phoneFrameCss, /\.order-pressable:active/u);
+assert.match(phoneFrameCss, /@keyframes orderMaxHintFlash/u);
 
 console.log("buy amount prototype UI contract tests passed");

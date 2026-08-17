@@ -57,6 +57,7 @@ import {
 
 const UP = "#E8322E";
 const DOWN = "#1668DC";
+const PRESSABLE = "order-pressable";
 
 // `ui-src/logic/constants.js` 의 CTA_ON·CTA_OFF·glass 와 같은 값이다. 회색 보조 단추
 // (`SUB_CTA`) 는 마지막으로 쓰던 완료 화면 `홈으로` 가 `CTA_ON` 으로 옮겨 가며 사라졌다.
@@ -277,7 +278,7 @@ function NumPad({ keys, onTap }: { keys: string[]; onTap: (key: string) => void 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 8, marginTop: 12 }}>
       {keys.map((key) => (
-        <div key={key} onClick={() => onTap(key)} style={PAD_KEY}>
+        <div key={key} className={PRESSABLE} onClick={() => onTap(key)} style={PAD_KEY}>
           {key}
         </div>
       ))}
@@ -347,6 +348,7 @@ export function OrderScreen({
   // 갖고 있지 않은 회사를 팔려고 했을 때 뜨는 안내. 프로토타입의 `sellBlocked` 와 같다.
   const [sellBlocked, setSellBlocked] = useState(false);
   const [showPad, setShowPad] = useState(false);
+  const [maxHintFlash, setMaxHintFlash] = useState(false);
   const [sellPick, setSellPick] = useState<string>("all");
   // 키패드로 찍은 주 수의 원본. `draft.shares`·`sellDraft.qty` 는 숫자라 `0.` 을 못 담는다.
   const [buyQtyStr, setBuyQtyStr] = useState("");
@@ -382,6 +384,23 @@ export function OrderScreen({
   const retroAtRef = useRef(0);
   const retroMsRef = useRef(0);
   const flowIdRef = useRef(`${side}_${Date.now().toString(36)}`);
+  const maxHintFlashTimerRef = useRef<number | null>(null);
+
+  const flashMaxHint = () => {
+    setMaxHintFlash(true);
+    if (maxHintFlashTimerRef.current !== null) window.clearTimeout(maxHintFlashTimerRef.current);
+    maxHintFlashTimerRef.current = window.setTimeout(() => {
+      maxHintFlashTimerRef.current = null;
+      setMaxHintFlash(false);
+    }, 700);
+  };
+
+  useEffect(
+    () => () => {
+      if (maxHintFlashTimerRef.current !== null) window.clearTimeout(maxHintFlashTimerRef.current);
+    },
+    [],
+  );
 
   const patchDraft = (patch: Partial<BuyDraft>) => setDraft((cur) => ({ ...cur, ...patch }));
   const patchSell = (patch: Partial<SellDraft>) =>
@@ -650,13 +669,13 @@ export function OrderScreen({
   // 1단계에서만 탭을 보여 준다 — 이후 단계에서는 흐름을 방해한다.
   const flowTabs = step === 1 && (
     <div id="tut-order-tabs" style={TAB_ROW}>
-      <div onClick={pickTabBuy} style={sheetTabStyle(side === "buy")}>
+      <div className={PRESSABLE} onClick={pickTabBuy} style={sheetTabStyle(side === "buy")}>
         살래
       </div>
-      <div onClick={pickTabSell} style={sheetTabStyle(side === "sell")}>
+      <div className={PRESSABLE} onClick={pickTabSell} style={sheetTabStyle(side === "sell")}>
         팔래
       </div>
-      <div id="tut-order-reserve" onClick={() => setOrderSheet(true)} style={sheetTabStyle(false)}>
+      <div id="tut-order-reserve" className={PRESSABLE} onClick={() => setOrderSheet(true)} style={sheetTabStyle(false)}>
         예약
       </div>
     </div>
@@ -691,7 +710,7 @@ export function OrderScreen({
         />
         <div style={BLOCK_TITLE}>판매할 주식이 없어요</div>
         <div style={BLOCK_BODY}>{"이 회사를 아직 갖고 있지 않아요.\n먼저 사고 나면 팔 수 있어요."}</div>
-        <div onClick={() => setSellBlocked(false)} style={BLOCK_CTA}>
+        <div className={PRESSABLE} onClick={() => setSellBlocked(false)} style={BLOCK_CTA}>
           알겠어요
         </div>
       </div>
@@ -725,7 +744,7 @@ export function OrderScreen({
               <div style={{ flex: 2, minWidth: 0, fontSize: 12.5, fontWeight: 500, color: "#8E93A8", fontVariantNumeric: "tabular-nums" }}>
                 {p.desc}
               </div>
-              <div onClick={() => cancelPending(p.order)} style={SHEET_CANCEL}>
+              <div className={PRESSABLE} onClick={() => cancelPending(p.order)} style={SHEET_CANCEL}>
                 취소
               </div>
             </div>
@@ -749,6 +768,7 @@ export function OrderScreen({
         */}
         <div
           id="tut-order-next"
+          className={ok && !(locked && step === 2) && !submitting ? PRESSABLE : undefined}
           onClick={onNext}
           style={ok && !(locked && step === 2) && !submitting ? CTA_ON : CTA_OFF}
         >
@@ -761,7 +781,7 @@ export function OrderScreen({
       // 완료 화면의 유일한 단추라 **1·2단계 `주문하기` 와 같은 모습**이다. 회색 보조 단추로
       // 두면 마지막 자리에서 눌러야 할 곳이 눌러도 되는 곳처럼 보인다.
       <div style={{ flex: "none", padding: "8px 16px 10px" }}>
-        <div onClick={() => onLeave("/")} style={CTA_ON}>
+        <div className={PRESSABLE} onClick={() => onLeave("/")} style={CTA_ON}>
           <span style={{ textShadow: "0 1px 2px rgba(170,30,95,0.22)" }}>홈으로</span>
         </div>
       </div>
@@ -813,7 +833,11 @@ export function OrderScreen({
     };
 
     const placeBuy = () => {
-      if (!nextOk || (locked && step === 2) || submitting) return;
+      if (!nextOk) {
+        if (step === 1 && math.byQty && math.warn && buyMaxHint) flashMaxHint();
+        return;
+      }
+      if ((locked && step === 2) || submitting) return;
       if (step < 2) {
         setStep(step + 1);
         setShowPad(false);
@@ -988,7 +1012,10 @@ export function OrderScreen({
           <div style={{ textAlign: "center", fontSize: 14.5, fontWeight: 600, color: "#F5327F", marginTop: 10 }}>
             {qtyHint}
           </div>
-          <div style={{ textAlign: "center", fontSize: 12.5, fontWeight: 500, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}>
+          <div
+            className={maxHintFlash ? "order-max-hint order-max-hint--flash" : "order-max-hint"}
+            style={{ textAlign: "center", fontSize: 12.5, fontWeight: 500, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}
+          >
             {buyMaxHint}
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
@@ -997,6 +1024,7 @@ export function OrderScreen({
                 {[1, 5, 10].map((v) => (
                   <div
                     key={v}
+                    className={PRESSABLE}
                     onClick={() => {
                       patchDraft({ shares: Math.min(math.maxShares, v), amountSource: "preset" });
                       setShowPad(false);
@@ -1008,6 +1036,7 @@ export function OrderScreen({
                   </div>
                 ))}
                 <div
+                  className={PRESSABLE}
                   onClick={() => {
                     // 이어서 찍을 수 있게 지금 값을 문자열에 심는다. 빈 채로 두면 다음 한 타가
                     // 앞자리를 통째로 지운 것처럼 보인다.
@@ -1034,6 +1063,7 @@ export function OrderScreen({
                     // 튜토리얼이 `다음` 으로 넘어갈 때 눌러 두는 기본값이다.
                     id={at === 0 ? "tut-order-amount-preset" : undefined}
                     key={v}
+                    className={PRESSABLE}
                     onClick={() => {
                       patchDraft({ amount: v, amountSource: "preset" });
                       setShowPad(false);
@@ -1044,6 +1074,7 @@ export function OrderScreen({
                   </div>
                 ))}
                 <div
+                  className={PRESSABLE}
                   onClick={() => {
                     patchDraft({ amount: Math.min(math.availableCash, draft.amount), amountSource: "custom" });
                     setShowPad((cur) => !cur);
@@ -1068,10 +1099,10 @@ export function OrderScreen({
         </div>
 
         <div id="tut-order-price" style={TOGGLE_ROW}>
-          <div onClick={() => pickOrderType("market")} style={chipStyle(draft.orderType === "market")}>
+          <div className={PRESSABLE} onClick={() => pickOrderType("market")} style={chipStyle(draft.orderType === "market")}>
             지금 가격에 바로
           </div>
-          <div onClick={() => pickOrderType("limit")} style={chipStyle(draft.orderType === "limit")}>
+          <div className={PRESSABLE} onClick={() => pickOrderType("limit")} style={chipStyle(draft.orderType === "limit")}>
             내가 정한 가격에
           </div>
         </div>
@@ -1101,7 +1132,7 @@ export function OrderScreen({
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
               {[-10, -5, -3, 0].map((pct) => (
-                <div key={pct} onClick={() => patchDraft({ limitPct: pct })} style={chipStyle(draft.limitPct === pct)}>
+                <div className={PRESSABLE} key={pct} onClick={() => patchDraft({ limitPct: pct })} style={chipStyle(draft.limitPct === pct)}>
                   {pct === 0 ? "지금값" : `${pct}%`}
                 </div>
               ))}
@@ -1140,6 +1171,7 @@ export function OrderScreen({
               <div
                 id={at === 0 ? "tut-order-reason-first" : undefined}
                 key={reason.code}
+                className={PRESSABLE}
                 onClick={() => patchDraft({ reason: reason.code })}
                 style={pickCardStyle(draft.reason === reason.code, "grid")}
               >
@@ -1155,6 +1187,7 @@ export function OrderScreen({
             <div
               id={at === 0 ? "tut-order-plan-first" : undefined}
               key={plan.code}
+              className={PRESSABLE}
               onClick={() =>
                 patchDraft({ plan: plan.code, targetPct: plan.code === "plan_target" ? draft.targetPct : null })
               }
@@ -1336,7 +1369,7 @@ export function OrderScreen({
     return (
       <div style={PAGE}>
         <div style={HEADER}>
-          <div onClick={goBack} style={BACK}>
+          <div className={PRESSABLE} onClick={goBack} style={BACK}>
             {step === 2 ? "‹" : "✕"}
           </div>
           <div style={TITLE}>살래(매수)</div>
@@ -1369,6 +1402,10 @@ export function OrderScreen({
     const heldPct = held && heldAvg > 0 ? ((price - heldAvg) / heldAvg) * 100 : 0;
     const reserved = reservedHoldingQty(me, code);
     const math = sellMath(sellDraft, price, heldQty, reserved);
+    const sellMaxHint =
+      math.maxQty > 0
+        ? `최대 ${Math.floor(math.maxQty * 100) / 100}주까지 팔 수 있어요 · ${won(math.maxQty * math.execPrice)}`
+        : "";
     const selectSellMode = (sellBy: SellDraft["sellBy"]) => {
       if (sellDraft.sellBy === sellBy) return;
       patchSell(
@@ -1416,7 +1453,11 @@ export function OrderScreen({
     };
 
     const placeSell = () => {
-      if (!sellOk || (locked && step === 2) || submitting) return;
+      if (!sellOk) {
+        if (step === 1 && math.byQty && math.warn && sellMaxHint) flashMaxHint();
+        return;
+      }
+      if ((locked && step === 2) || submitting) return;
       if (step === 1) {
         retroAtRef.current = Date.now();
         setOrderError(null);
@@ -1528,6 +1569,7 @@ export function OrderScreen({
     ).map((chip) => (
       <div
         key={chip.k}
+        className={PRESSABLE}
         onClick={() => {
           setSellPick(chip.k);
           setShowPad(false);
@@ -1582,12 +1624,14 @@ export function OrderScreen({
           <div style={CARD_TITLE}>얼마나 팔까요?</div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <div
+              className={PRESSABLE}
               onClick={() => selectSellMode("qty")}
               style={chipStyle(math.byQty)}
             >
               주 수로
             </div>
             <div
+              className={PRESSABLE}
               onClick={() => selectSellMode("amount")}
               style={chipStyle(!math.byQty)}
             >
@@ -1611,14 +1655,16 @@ export function OrderScreen({
                 ? "몇 주 팔지 골라보세요"
                 : "얼마어치 팔지 골라보세요"}
           </div>
-          <div style={{ textAlign: "center", fontSize: 12.5, fontWeight: 500, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}>
-            {math.maxQty > 0
-              ? `최대 ${Math.floor(math.maxQty * 100) / 100}주까지 팔 수 있어요 · ${won(math.maxQty * math.execPrice)}`
-              : ""}
+          <div
+            className={maxHintFlash ? "order-max-hint order-max-hint--flash" : "order-max-hint"}
+            style={{ textAlign: "center", fontSize: 12.5, fontWeight: 500, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}
+          >
+            {sellMaxHint}
           </div>
           <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
             {sellChips}
             <div
+              className={PRESSABLE}
               onClick={() => {
                 setSellPick("custom");
                 setShowPad(true);
@@ -1643,10 +1689,10 @@ export function OrderScreen({
         </div>
 
         <div id="tut-order-price" style={TOGGLE_ROW}>
-          <div onClick={() => patchSell({ orderType: "market" })} style={chipStyle(sellDraft.orderType !== "limit")}>
+          <div className={PRESSABLE} onClick={() => patchSell({ orderType: "market" })} style={chipStyle(sellDraft.orderType !== "limit")}>
             지금 가격에 바로
           </div>
-          <div onClick={() => patchSell({ orderType: "limit" })} style={chipStyle(sellDraft.orderType === "limit")}>
+          <div className={PRESSABLE} onClick={() => patchSell({ orderType: "limit" })} style={chipStyle(sellDraft.orderType === "limit")}>
             내가 정한 가격에
           </div>
         </div>
@@ -1665,7 +1711,7 @@ export function OrderScreen({
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
               {[0, 3, 5, 10].map((pct) => (
-                <div key={pct} onClick={() => patchSell({ limitPct: pct })} style={chipStyle(math.limPct === pct)}>
+                <div className={PRESSABLE} key={pct} onClick={() => patchSell({ limitPct: pct })} style={chipStyle(math.limPct === pct)}>
                   {pct === 0 ? "지금값" : `+${pct}%`}
                 </div>
               ))}
@@ -1798,6 +1844,7 @@ export function OrderScreen({
                 <div
                   id={at === 0 ? "tut-sell-reason-first" : undefined}
                   key={reason.code}
+                  className={PRESSABLE}
                   onClick={() => patchSell({ reason: reason.code })}
                   style={pickCardStyle(sellDraft.reason === reason.code, "grid")}
                 >
@@ -1835,6 +1882,7 @@ export function OrderScreen({
                   <div
                     id={at === 0 ? "tut-sell-change-first" : undefined}
                     key={change.code}
+                    className={PRESSABLE}
                     onClick={() => patchSell({ change: change.code })}
                     style={pickCardStyle(sellDraft.change === change.code, "row")}
                   >
@@ -1972,6 +2020,7 @@ export function OrderScreen({
               {sellDraft.memo.length} / 50
             </span>
             <div
+              className={memoSaved ? undefined : PRESSABLE}
               onClick={saveMemo}
               style={styleFromCss(
                 memoSaved
@@ -1990,7 +2039,7 @@ export function OrderScreen({
     return (
       <div style={PAGE}>
         <div style={HEADER}>
-          <div onClick={goBack} style={BACK}>
+          <div className={PRESSABLE} onClick={goBack} style={BACK}>
             {step === 2 ? "‹" : "✕"}
           </div>
           <div style={TITLE}>팔래(매도)</div>

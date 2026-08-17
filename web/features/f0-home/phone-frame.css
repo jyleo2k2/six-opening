@@ -26,6 +26,41 @@
   height: 0;
 }
 
+/* 주문 화면의 탭·칩·키패드가 손가락을 받았다는 짧은 피드백. */
+.order-pressable {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 90ms ease, filter 90ms ease;
+}
+
+.order-pressable:active {
+  transform: translateY(1px) scale(0.98);
+  filter: brightness(0.96);
+}
+
+/* 주 수가 한도를 넘었을 때 이미 보이는 최대 수량 안내만 잠깐 눈에 띄운다. */
+.order-max-hint {
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.order-max-hint--flash {
+  animation: orderMaxHintFlash 700ms ease-out;
+}
+
+@keyframes orderMaxHintFlash {
+  0%, 100% { background: transparent; box-shadow: none; }
+  20%, 60% { background: #fff0f7; box-shadow: 0 0 0 2px rgb(245 50 127 / 0.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .order-pressable { transition: none; }
+  .order-max-hint--flash {
+    animation: none;
+    background: #fff0f7;
+    box-shadow: 0 0 0 2px rgb(245 50 127 / 0.18);
+  }
+}
+
 /* 홈의 목표 아이템이 튀어오르는 연출과 보유 시트가 올라오는 연출.
    `ui-src/template/shell-0.html` 에서 같은 이름·같은 값으로 옮겼다. */
 @keyframes popItem {
