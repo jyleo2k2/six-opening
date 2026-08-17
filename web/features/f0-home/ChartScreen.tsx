@@ -8,18 +8,38 @@ import {
   SubScreenHeader,
 } from "./lib/stock-chrome";
 import { styleFromCss } from "./lib/css-style";
-import { buildTradeLegend, type LegendTrade, type PinRole } from "./lib/chart-trade-legend";
+import { buildTradeLegend, type PinRole } from "./lib/chart-trade-legend";
+import {
+  AXIS_LEFT,
+  buildChartView,
+  NOW_LEFT,
+  PLOT_H,
+  PLOT_W,
+  SVG_W,
+  type ChartViewTrade,
+} from "./lib/chart-view";
+import { parseChartPoints, type ChartPoint } from "../f2-trade/chart-data";
 
-const CHART_READY_MESSAGE = "kiwoom:chart-ready";
-const CHART_OPTIONS_MESSAGE = "kiwoom:chart-options";
+const UP = "#E8322E";
+const DOWN = "#1668DC";
+/** 눈금선. 선보다 훨씬 옅어야 값이 아니라 칸으로 읽힌다. */
+const GRID = "#EFEDF5";
 
 const CARD = styleFromCss(
   "background:#FFFFFF;border-radius:28px;padding:18px;box-shadow:0 2px 10px rgba(30,25,60,0.05)",
 );
-const PRICE_LABEL = styleFromCss("font-size:13px;font-weight:500;color:#8E93A8");
-const PRICE = styleFromCss(
-  "font-size:27px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;line-height:1.15;margin-top:4px;white-space:nowrap",
+/** 가격 카드 머리 — 시안 그대로 종목명이 왼쪽, 업종 배지가 오른쪽 끝이다. */
+const NAME_ROW = styleFromCss("display:flex;align-items:flex-start;justify-content:space-between;gap:10px");
+const NAME_TEXT = styleFromCss(
+  "flex:1;min-width:0;font-size:16px;font-weight:700;color:#141B3D;letter-spacing:-0.02em;" +
+    "white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
 );
+const PRICE = styleFromCss(
+  "font-size:32px;font-weight:800;color:#0D1330;font-variant-numeric:tabular-nums;line-height:1.1;" +
+    "margin-top:6px;white-space:nowrap;letter-spacing:-0.035em",
+);
+/** 변동액이 먼저, 등락률은 세로선 뒤에 작게 붙는다 — 상세 화면과 같은 한 줄이다. */
+const CHANGE_ROW = styleFromCss("display:flex;align-items:baseline;gap:8px;margin-top:6px");
 
 /** 선·캔들 전환 — 알약이 아니라 글자만 굵어지는 텍스트 토글. */
 const chipText = (on: boolean) =>
@@ -57,15 +77,53 @@ const CANDLE_TIP_ARROW = styleFromCss(
   "position:absolute;right:52px;top:-5px;width:12px;height:12px;transform:rotate(45deg);border-radius:3px;background:#FBE4F0;pointer-events:none",
 );
 
+/**
+ * 차트가 앉는 자리. 안쪽 글자(가격 눈금·현재가 태그·최고/최저 이름표·핀)는 전부 여기에
+ * `position:absolute` 로 얹히므로, 이 상자의 좌표계가 곧 SVG 의 좌표계여야 한다 —
+ * 카드 안쪽 폭(화면 402 − 좌우 16 − 카드 18 = 334)이 SVG 폭과 정확히 같다.
+ */
+const CHART_WRAP = styleFromCss("position:relative;margin-top:14px");
+/**
+ * 오른쪽 가격 글자. SVG `<text>` 를 쓰지 않는 이유는 시안과 같다 — 값 구멍이 들어간
+ * `<text>` 는 편집기가 span 을 끼워 넣어 글자가 사라진다.
+ */
+const AXIS_LABEL = styleFromCss(
+  "position:absolute;font-size:10px;font-weight:500;color:#9096AE;white-space:nowrap;" +
+    "font-variant-numeric:tabular-nums;pointer-events:none",
+);
+const NOW_TAG = styleFromCss(
+  "position:absolute;display:flex;align-items:center;justify-content:center;height:20px;padding:0 6px;border-radius:5px;" +
+    "font-size:10px;font-weight:700;color:#FFFFFF;white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none",
+);
+const MARK_LABEL = styleFromCss(
+  "position:absolute;transform:translateX(-50%);font-size:11.5px;font-weight:600;white-space:nowrap;pointer-events:none",
+);
+const PIN = styleFromCss(
+  "position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;" +
+    "pointer-events:none;filter:drop-shadow(0 2px 4px rgba(30,25,60,0.16))",
+);
+/** 파스텔 바탕에 짙은 남회색 글씨다 — 흰 글씨는 이 색 위에서 읽히지 않는다. */
+const PIN_BODY = styleFromCss(
+  "display:flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:8px;" +
+    "font-size:12px;font-weight:800;color:#3A3F5C;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.7)",
+);
+const PIN_TAIL = styleFromCss(
+  "width:0;height:0;margin-top:-1px;border-left:5px solid transparent;border-right:5px solid transparent",
+);
+const CHART_STATE = styleFromCss(
+  "position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;" +
+    "background:#FFFFFF;font-size:13.5px;font-weight:500;color:#8E93A8",
+);
+
 /** 체결 범례 — 차트 아래 얇은 선을 긋고 한 줄씩 쌓는다. 체결이 없으면 아예 그리지 않는다. */
 const LEGEND = styleFromCss(
   "display:flex;flex-direction:column;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid #F0EEF6",
 );
 const LEGEND_ROW = styleFromCss("display:flex;align-items:center;gap:7px");
 /**
- * 점은 차트 위 뱃지를 그대로 축소한 모양이다. 색도 마커와 같은 토큰을 쓴다 —
- * 범례가 있는 이유가 "이 색 핀이 이 사람"이라서 색이 갈리면 안 된다. 글자색도 같이
- * 토큰(`--color-trade-ink`)에서 받는다 — 파스텔 바탕에 흰 글씨는 읽히지 않는다.
+ * 점은 차트 위 핀을 그대로 축소한 모양이다. 색도 핀과 같은 토큰을 쓴다 — 범례가 있는
+ * 이유가 "이 색 핀이 이 사람"이라서 색이 갈리면 안 된다. 글자색도 같이 토큰
+ * (`--color-trade-ink`)에서 받는다 — 파스텔 바탕에 흰 글씨는 읽히지 않는다.
  */
 const ROLE_COLOR: Record<PinRole, string> = {
   child: "var(--color-trade-child)",
@@ -92,19 +150,32 @@ const TF_OPTIONS: { id: ChartPeriod; label: string }[] = [
   { id: "weekly", label: "주" },
 ];
 
+type LoadState = "loading" | "ready" | "error";
+
 /**
- * 차트 화면. `ui-src/screens/chart.html` 을 그대로 옮겨 왔다.
+ * 차트 화면. 시안(서비스 개요 HTML)의 "차트 화면" 카드를 그대로 옮겼다.
  *
- * 차트 iframe(`/tradingview-chart`)은 종목이 바뀔 때만 다시 연다. 기간·차트종류는
- * `kiwoom:chart-options` 메시지로 넘겨 문서를 다시 열지 않고 바꾼다 — `app.html` 의
- * `postChartOptions` 와 같은 계약이고, iframe 쪽 구현은 손대지 않았다.
+ * 차트는 **이 컴포넌트가 직접 그린다.** 예전에는 `/tradingview-chart` iframe 안의
+ * `lightweight-charts` 가 그렸는데, 그 렌더러는 세로 축선·시간축·세로 눈금선을 늘 함께
+ * 그려서 시안(축선 없이 가로 눈금 다섯 줄 + 오른쪽 가격 글자)과 다른 화면이 나왔다.
+ * 라이브러리 설정으로는 축을 없앨 수 없어 시안의 SVG 를 그대로 쓴다. 기하는 브라우저
+ * 없이 확인할 수 있게 `lib/chart-view.ts` 순수 계산이 갖는다.
+ *
+ * 그래서 `kiwoom:chart-options`·`kiwoom:chart-ready` 두 메시지도 함께 사라졌다 —
+ * 기간·차트종류는 이제 그냥 이 컴포넌트의 상태다.
  */
 export function ChartScreen({
   code,
   name,
+  sectorName,
+  sectorStyle,
+  price,
   priceText,
   changeText,
   changeStyle,
+  diffText,
+  diffStyle,
+  changeUp,
   locked,
   onBack,
   onLeave,
@@ -112,63 +183,90 @@ export function ChartScreen({
 }: {
   code: string;
   name: string;
+  sectorName: string;
+  sectorStyle: React.CSSProperties;
+  /** 지금 가격. 현재가 태그와 마지막 봉의 종가가 이 값을 쓴다. */
+  price: number;
   priceText: string;
   changeText: string;
   changeStyle: React.CSSProperties;
+  diffText: string;
+  diffStyle: React.CSSProperties;
+  /** 선·기준선·최고/최저 이름표의 색을 정한다. */
+  changeUp: boolean;
   locked: boolean;
   onBack: () => void;
   /** 하단 탭바가 쓴다. 뒤로가기(`onBack`)는 상세로 돌아가지만 탭은 앱의 다른 화면으로 나간다. */
   onLeave: (path: string) => void;
   onStartBuy: () => void;
 }) {
-  const frameRef = useRef<HTMLIFrameElement>(null);
   const [period, setPeriod] = useState<ChartPeriod>("daily");
   const [chartType, setChartType] = useState<ChartType>("line");
   const [tfMenuOpen, setTfMenuOpen] = useState(false);
   // 캔들 설명은 캔들차트를 켰을 때만 말풍선으로 뜬다. 닫으면 다시 켤 때까지 숨는다.
   const [candleTipClosed, setCandleTipClosed] = useState(false);
+  const [points, setPoints] = useState<ChartPoint[] | null>(null);
+  const [state, setState] = useState<LoadState>("loading");
   /**
-   * 차트 아래 범례가 읽는 이 종목의 가족 체결.
-   *
-   * 차트 위 B/S 핀은 iframe 안의 `TradingViewChart` 가 같은 API 로 따로 그린다.
-   * iframe 이 찍은 마커를 받아 오지 않는 이유는 가드다 — `kiwoom:chart-options` 가
-   * 남은 유일한 `postMessage` 이고 새 메시지 계약을 늘리지 않는다. 두 곳이 같은
-   * `GET /api/trades` 를 보므로 값은 어긋나지 않는다 (F11 SPEC §6.1).
+   * 이 종목의 가족 체결. `GET /api/trades` 가 유일한 출처다 (F11 SPEC §6.1).
+   * 차트 위 B/S 핀과 아래 범례가 **같은 목록 하나**를 본다 — 예전에는 iframe 과 범례가
+   * 같은 API 를 따로 불러 둘이 어긋날 자리가 있었다.
    */
-  const [trades, setTrades] = useState<LegendTrade[]>([]);
-  const optionsRef = useRef({ period, chartType });
-  optionsRef.current = { period, chartType };
+  const [trades, setTrades] = useState<ChartViewTrade[]>([]);
 
-  const postOptions = (overrides?: Partial<{ period: ChartPeriod; chartType: ChartType }>) => {
-    frameRef.current?.contentWindow?.postMessage(
-      { type: CHART_OPTIONS_MESSAGE, ...optionsRef.current, ...overrides },
-      window.location.origin,
-    );
-  };
-
-  // 새 문서가 준비를 알려오면 현재 선택을 되돌려 준다 (`app.html` 의 receiveChartReady).
+  /**
+   * 봉 데이터. 종목·기간에만 달려 있고 선↔캔들 전환은 여기를 다시 타지 않는다.
+   *
+   * 실시간처럼 보이게 1초마다 전체를 다시 받는다. 겹치는 요청은 만들지 않는다 —
+   * 이전 틱이 아직 안 끝났으면 다음 호출을 건너뛴다.
+   */
   useEffect(() => {
-    const receiveChartReady = (event: MessageEvent<unknown>) => {
-      if (
-        event.origin !== window.location.origin ||
-        event.source !== frameRef.current?.contentWindow ||
-        (event.data as { type?: string } | null)?.type !== CHART_READY_MESSAGE
-      ) {
-        return;
-      }
-      postOptions();
-    };
-    window.addEventListener("message", receiveChartReady);
-    return () => window.removeEventListener("message", receiveChartReady);
-  }, []);
+    const controller = new AbortController();
+    setPoints(null);
+    setState("loading");
 
-  // 로그인 전(401)이나 조회 실패는 빈 목록으로 둔다. 범례 없는 차트는 정상이다.
+    let fetching = false;
+    const load = () => {
+      if (fetching) return;
+      fetching = true;
+      fetch(`/api/quote/${encodeURIComponent(code)}/chart?period=${period}`, {
+        signal: controller.signal,
+        cache: "no-store",
+      })
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error("chart request failed"))))
+        .then((payload: unknown) => {
+          const received = parseChartPoints(payload);
+          if (!received.length) throw new Error("empty chart");
+          setPoints(received);
+          setState("ready");
+        })
+        .catch(() => {
+          // 최초 로드 실패만 화면을 에러로 바꾼다. 이미 보여주고 있는 값이 있으면
+          // 그 틱의 실패는 무시하고 다음 1초 뒤에 다시 시도한다.
+          if (!controller.signal.aborted) {
+            setState((current) => (current === "loading" ? "error" : current));
+          }
+        })
+        .finally(() => {
+          fetching = false;
+        });
+    };
+
+    load();
+    const timer = window.setInterval(load, 1000);
+    return () => {
+      window.clearInterval(timer);
+      controller.abort();
+    };
+  }, [code, period]);
+
+  // 로그인 전(401)이나 조회 실패는 빈 목록으로 둔다. 핀·범례 없는 차트는 정상이다.
   useEffect(() => {
     let cancelled = false;
     setTrades([]);
     fetch(`/api/trades?symbol=${encodeURIComponent(code)}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { trades?: LegendTrade[] } | null) => {
+      .then((data: { trades?: ChartViewTrade[] } | null) => {
         if (!cancelled && data) setTrades(data.trades ?? []);
       })
       .catch(() => {
@@ -182,26 +280,25 @@ export function ChartScreen({
   const pickPeriod = (next: ChartPeriod) => {
     setPeriod(next);
     setTfMenuOpen(false);
-    postOptions({ period: next });
-  };
-  const pickChartType = (next: ChartType) => {
-    setChartType(next);
-    postOptions({ chartType: next });
   };
   const tfLabel = TF_OPTIONS.find((option) => option.id === period)?.label ?? "일";
   const legend = buildTradeLegend(trades);
+  const line = changeUp ? UP : DOWN;
+  const chart = points ? buildChartView({ points, price, period, chartType, trades }) : null;
 
   return (
     <div style={SUB_PAGE}>
       <SubScreenHeader onBack={onBack} title={`${name} 차트`} />
       <div style={SUB_SCROLL}>
         <div style={CARD}>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
-            <div>
-              <div style={PRICE_LABEL}>지금 가격</div>
-              <div style={PRICE}>{priceText}</div>
-            </div>
+          <div style={NAME_ROW}>
+            <div style={NAME_TEXT}>{name}</div>
+            <div style={sectorStyle}>{sectorName}</div>
+          </div>
+          <div style={PRICE}>{priceText}</div>
+          <div style={CHANGE_ROW}>
             <span style={changeStyle}>{changeText}</span>
+            <span style={diffStyle}>{diffText}</span>
           </div>
           <div style={TF_ROW}>
             <div onClick={() => setTfMenuOpen((open) => !open)} style={TF_BTN(tfMenuOpen)}>
@@ -217,10 +314,10 @@ export function ChartScreen({
               </svg>
             </div>
             <div style={{ display: "flex", gap: 6 }}>
-              <div onClick={() => pickChartType("line")} style={chipText(chartType === "line")}>
+              <div onClick={() => setChartType("line")} style={chipText(chartType === "line")}>
                 선차트
               </div>
-              <div onClick={() => pickChartType("candlestick")} style={chipText(chartType === "candlestick")}>
+              <div onClick={() => setChartType("candlestick")} style={chipText(chartType === "candlestick")}>
                 캔들차트
               </div>
             </div>
@@ -248,8 +345,8 @@ export function ChartScreen({
                       "font-size:13px;font-weight:500;color:#B3286B;line-height:1.65;margin-top:7px;text-wrap:pretty",
                     )}
                   >
-                    시작한 값보다 끝난 값이 높으면 <b style={{ color: "#E8322E" }}>빨간 막대</b>, 낮으면{" "}
-                    <b style={{ color: "#1668DC" }}>파란 막대</b>예요. 위아래로 나온 선은 그날 가장 비쌌던
+                    시작한 값보다 끝난 값이 높으면 <b style={{ color: UP }}>빨간 막대</b>, 낮으면{" "}
+                    <b style={{ color: DOWN }}>파란 막대</b>예요. 위아래로 나온 선은 그날 가장 비쌌던
                     값과 가장 쌌던 값이에요.
                   </div>
                 </div>
@@ -278,20 +375,124 @@ export function ChartScreen({
               </div>
             </div>
           )}
-          <iframe
-            height={264}
-            loading="eager"
-            ref={frameRef}
-            src={`/tradingview-chart?symbol=${encodeURIComponent(code)}`}
-            style={{ display: "block", marginTop: 14, border: 0, background: "#FFFFFF" }}
-            title={`${name} TradingView 차트`}
-            width={330}
-          />
           {/*
-            차트 위 B/S 핀이 각각 누구의 언제·얼마짜리 매매인지 풀어 쓴다. 핀만으로는
-            체결가를 눈금에서 읽어야 하고, 같은 봉에 두 사람이 사면 누구 것인지도 못 가른다.
-            체결이 없으면 통째로 그리지 않는다 — 빈 줄과 얇은 선만 남으면 기록이 있는데
-            못 불러온 것처럼 보인다.
+            시안의 차트. 세로 축선도 시간축도 없다 — 가로 눈금 다섯 줄만 플롯 폭(278)까지
+            긋고, 가격은 그 오른쪽 여백에 HTML 글자로 얹는다. 값을 어느 눈금과 맞춰 읽을지는
+            현재가 태그와 최고·최저 이름표가 대신 짚어 준다.
+          */}
+          <div style={CHART_WRAP}>
+            <svg
+              height={PLOT_H}
+              style={{ display: "block", overflow: "visible" }}
+              viewBox={`0 0 ${SVG_W} ${PLOT_H}`}
+              width={SVG_W}
+            >
+              {chart && (
+                <>
+                  {chart.grid.map((gy, index) => (
+                    <line key={index} stroke={GRID} strokeWidth={1} x1={0} x2={PLOT_W} y1={gy} y2={gy} />
+                  ))}
+                  {/* 기간 첫 값 — "여기서 시작해서 지금 여기"를 눈으로 잇는 기준선이다. */}
+                  <line
+                    opacity={0.55}
+                    stroke={line}
+                    strokeDasharray="3 4"
+                    strokeWidth={1}
+                    x1={0}
+                    x2={PLOT_W}
+                    y1={chart.baseY}
+                    y2={chart.baseY}
+                  />
+                  {chart.candles.map((candle, index) => (
+                    <g key={index}>
+                      <line
+                        stroke={candle.up ? UP : DOWN}
+                        strokeWidth={1.2}
+                        x1={candle.x}
+                        x2={candle.x}
+                        y1={candle.highY}
+                        y2={candle.lowY}
+                      />
+                      <rect
+                        fill={candle.up ? UP : DOWN}
+                        height={candle.bodyH}
+                        rx={1}
+                        width={candle.bodyW}
+                        x={candle.bodyX}
+                        y={candle.bodyY}
+                      />
+                    </g>
+                  ))}
+                  {chart.linePoints && (
+                    <polyline
+                      fill="none"
+                      points={chart.linePoints}
+                      stroke={line}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                  )}
+                  {/* 핀에서 바닥까지 내리는 점선. 핀 하나가 어느 봉인지 못 박는다. */}
+                  {chart.pins.map((pin) => (
+                    <line
+                      key={pin.id}
+                      opacity={0.4}
+                      stroke={pin.color}
+                      strokeDasharray="2 3"
+                      strokeWidth={1}
+                      x1={pin.x}
+                      x2={pin.x}
+                      y1={pin.y}
+                      y2={PLOT_H}
+                    />
+                  ))}
+                  {chart.hi.visible && <circle cx={chart.hi.x} cy={chart.hi.y} fill={line} r={2} />}
+                  {chart.lo.visible && <circle cx={chart.lo.x} cy={chart.lo.y} fill={line} r={2} />}
+                </>
+              )}
+            </svg>
+            {chart?.axis.map((tick) => (
+              <div key={tick.y} style={{ ...AXIS_LABEL, left: AXIS_LEFT, top: tick.y - 7 }}>
+                {tick.text}
+              </div>
+            ))}
+            {chart && (
+              <div style={{ ...NOW_TAG, left: NOW_LEFT, top: chart.nowY - 10, background: line }}>
+                {chart.nowText}
+              </div>
+            )}
+            {chart?.hi.visible && (
+              <div style={{ ...MARK_LABEL, left: chart.hi.labelX, top: chart.hi.labelY, color: line }}>
+                {chart.hi.text}
+              </div>
+            )}
+            {chart?.lo.visible && (
+              <div style={{ ...MARK_LABEL, left: chart.lo.labelX, top: chart.lo.labelY, color: line }}>
+                {chart.lo.text}
+              </div>
+            )}
+            {chart?.pins.map((pin) => (
+              <div key={pin.id} style={{ ...PIN, left: pin.x, top: pin.y - 7 }} title={pin.title}>
+                <div style={{ ...PIN_BODY, background: pin.color }}>{pin.label}</div>
+                <div style={{ ...PIN_TAIL, borderTop: `7px solid ${pin.color}` }} />
+              </div>
+            ))}
+            {/*
+              봉을 받아 놓고도 기하가 안 나오는 경우(봉이 하나뿐이라 x 를 나눌 수 없다)가
+              있다. 그때 "불러오는 중" 을 계속 띄우면 영영 오지 않을 것을 기다리게 되므로
+              받아 온 뒤의 실패는 실패라고 말한다.
+            */}
+            {!chart && (
+              <div role="status" style={CHART_STATE}>
+                {state === "loading" ? "차트를 불러오는 중이에요…" : "차트 데이터를 불러오지 못했어요."}
+              </div>
+            )}
+          </div>
+          {/*
+            차트 위 B/S 핀이 각각 누구의 언제·얼마짜리 매매인지 풀어 쓴다. 핀은 선 위에
+            앉으므로 체결가는 여기서만 정확한 숫자로 읽는다. 체결이 없으면 통째로 그리지
+            않는다 — 빈 줄과 얇은 선만 남으면 기록이 있는데 못 불러온 것처럼 보인다.
           */}
           {legend.length > 0 && (
             <div style={LEGEND}>

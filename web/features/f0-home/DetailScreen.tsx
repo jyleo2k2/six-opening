@@ -312,14 +312,20 @@ export function DetailScreen({
     view === "chart" ? (
       <ChartScreen
         changeStyle={changeStyle}
+        changeText={changeText}
+        changeUp={changeUp}
         code={code}
+        diffStyle={diffStyle}
+        diffText={diffText}
         locked={locked}
         name={stock.name}
         onBack={() => setView("detail")}
         onLeave={onLeave}
         onStartBuy={startBuy}
+        price={live.price}
         priceText={priceText}
-        changeText={changeText}
+        sectorName={stock.sectorName}
+        sectorStyle={badgeFor(stock.sector)}
       />
     ) : view === "news" && activeNews ? (
       <NewsScreen
