@@ -14,6 +14,7 @@
 | `20260815033308_order_lifecycle_db_ownership.sql` | 주문 생애주기(체결·대기·예약·취소·거절)를 DB가 소유. `transactions`에 상태 컬럼, `account`·`holdings`에 예약 잠금 컬럼 추가. `apply_trade` 갱신, `reserve_order`·`settle_order`·`cancel_order` 신설 |
 | `20260817062524_seed_family_feed_memos.sql` | 가족 피드에 읽을 것이 생기게 데모 계정의 `memo`·`plan_code`·댓글·좋아요를 채운다. **덮어쓰지 않는다** — `memo is null` 인 행만 `coalesce` 로 채우고 댓글·좋아요는 `not exists` 로 막아 두 번 돌려도 늘지 않는다. 라이브 거래 id 를 짚으므로 빈 DB 에서는 아무것도 하지 않는다 |
 | `20260817070631_family_feed_portfolio_only.sql` | 피드를 데모 포트폴리오와 맞춘다. 찬영엄마의 문서 밖 삼성전자 거래·보유를 지우고 잔액을 되돌리며, 찬영아빠에게 오늘 자 매도·매수를 한 건씩 넣고, 남는 문서 종목 거래의 메모·계획을 채운다. **김찬영의 문서 밖 거래는 지우지 않는다** — 8/5~8/14 에 걸쳐 있어 지우면 지난 주차 성향 카드가 함께 바뀐다. 보유 0 이라 `/api/family` 의 보유 종목 필터가 이미 걸러낸다 |
+| `20260817151422_rebuild_holdings_from_transactions.sql` | `rebuild_holdings(user_id)` 신설. 체결·미체결 거래에서 `holdings`(수량·평단·예약 잠긴 수량)와 `account`(잔액·잠긴 현금)를 통째로 다시 낸다. **거래내역을 손으로 고쳤을 때 부르는 도구다** — 아래 "거래내역을 직접 고쳤다면" 참고. 트리거는 걸지 않는다 |
 
 이 표는 2026-08-15 이후 몇 건이 빠져 있다(`20260816013000`·`20260816150000`·`20260817000000`, 그리고 저장소에 파일이 없는 remote 기록 `20260817045325 reshape_child_weekly_behavior`). 각 작업 세션이 자기 것만 채워 넣는다.
 
@@ -147,6 +148,31 @@ create function auth.uid() returns uuid language sql stable as $$ select null::u
 ```
 
 이 뒤에 `migrations/*.sql` 을 파일명 순서로, 마지막에 `../seed.sql` 을 실행한다.
+
+## 거래내역을 직접 고쳤다면 `rebuild_holdings` 를 부른다
+
+`transactions` 와 `holdings` 는 서로를 모르는 별개의 표다. 둘을 잇는 트리거도 뷰도 없고,
+`holdings` 를 쓰는 것은 `apply_trade`·`reserve_order`·`settle_order`·`cancel_order` 네 함수뿐이다.
+
+그래서 **대시보드나 SQL 로 `transactions` 만 고치면 차트는 즉시 바뀌고 홈은 옛 값 그대로다.**
+차트의 Buy/Sell 핀은 `GET /api/trades` 로 `transactions` 를 화면 열 때마다 새로 읽지만, 홈의
+`내 보유 종목` 은 `GET /api/account` 로 `holdings` 를 읽기 때문이다. 고친 뒤에 부른다.
+
+```sql
+select rebuild_holdings(1);   -- 김찬영
+```
+
+체결 거래를 시간순으로 접어 수량·평단을 다시 내고(매수는 가중평균, 매도는 평단 유지),
+미체결 주문에서 예약 잠긴 수량·현금을 복원하고, `balance` 를 `10,000,000 − 매수 + 매도` 로
+다시 낸다. 남은 수량이 0 이면 그 종목 행은 지운다. 없는 계정을 부르면 `rebuilt: false` 만
+돌려주고 아무것도 하지 않는다.
+
+**앱으로 넣은 주문에는 부를 필요가 없다.** 위 네 함수가 이미 두 표를 같이 움직인다 —
+라이브 세 계정에 그냥 돌려 보면 12개 보유가 한 칸도 바뀌지 않는다(멱등). 그 성질이 곧
+안전 검증이므로, 이 함수를 고칠 때는 **먼저 지금 데이터에 돌려 아무것도 안 바뀌는지** 본다.
+
+자동 재계산 트리거는 일부러 두지 않았다. 앱 주문 경로에서는 순수한 덤이고, 예약이 수량과
+현금을 잠그는 도중에 끼어들면 순서가 꼬인다.
 
 ## 알아 둘 것
 
