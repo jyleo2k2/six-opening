@@ -149,9 +149,9 @@ export function PortfolioScreen({
     <PhoneFrame>
       <div style={PAGE}>
         <div style={HEADER}>
-          <div onClick={() => onLeave("/")} style={BACK}>
+          <button aria-label="뒤로" onClick={() => onLeave("/")} style={BACK} type="button">
             ‹
-          </div>
+          </button>
           <div style={TITLE}>내 계좌</div>
           <div style={{ width: 38 }} />
         </div>
@@ -185,9 +185,9 @@ export function PortfolioScreen({
                       <div style={{ fontSize: 15, fontWeight: 800, color: "#01185A" }}>{p.name}</div>
                       <div style={PENDING_DESC}>{p.desc}</div>
                     </div>
-                    <div onClick={() => cancel(p.order)} style={CANCEL}>
+                    <button onClick={() => cancel(p.order)} style={CANCEL} type="button">
                       취소
-                    </div>
+                    </button>
                   </div>
                 ))}
               </div>
@@ -224,23 +224,30 @@ export function PortfolioScreen({
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 9, marginTop: 13 }}>
-                    <div
+                    {/* 살 수 없는 상태는 `disabled` 로 알린다. 눌러도 아무 일이 없는 버튼은
+                        키보드로도 잡히고 읽히므로, 막힌 이유가 색으로만 남으면 안 된다.
+                        핸들러 안의 `canBuy` 검사는 그대로 둔다 — 두 곳이 같은 사실을 말한다. */}
+                    <button
+                      disabled={!h.canBuy}
                       onClick={() => {
                         if (h.canBuy) onLeave(`/buy/${h.code}`);
                       }}
                       style={styleFromCss(h.buyStyle)}
+                      type="button"
                     >
                       사러 가기
-                    </div>
-                    <div
+                    </button>
+                    <button
+                      disabled={!h.canSell}
                       id={index === 0 ? "tut-portfolio-sell" : undefined}
                       onClick={() => {
                         if (h.canSell) onLeave(`/sell/${h.code}`);
                       }}
                       style={styleFromCss(h.sellStyle)}
+                      type="button"
                     >
                       팔러 가기
-                    </div>
+                    </button>
                   </div>
                 </div>
               ))}
