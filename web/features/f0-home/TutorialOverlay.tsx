@@ -386,6 +386,8 @@ export function TutorialOverlay({
             left: BUBBLE_MARGIN,
             right: BUBBLE_MARGIN,
             top: placement.top,
+            // 바깥 딤은 클릭을 통과시키되, 말풍선 버튼은 키웅이보다 우선한다.
+            pointerEvents: "auto",
             background: BUBBLE_BG,
             borderRadius: 24,
             padding: "17px 19px",
