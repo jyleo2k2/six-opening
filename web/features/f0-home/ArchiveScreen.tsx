@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
-import { ACCENT, familySummary, feedCards, LANE_HEIGHT, returnSummary, runners, RUN_START } from "./lib/archive-feed";
+import { ACCENT, familySummary, feedCards, FEED_LIMIT, LANE_HEIGHT, returnSummary, runners, RUN_START } from "./lib/archive-feed";
 import {
   familyMembers,
   formatScore,
@@ -385,12 +385,21 @@ export function ArchiveScreen({
     node?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   };
 
+  /**
+   * 끝까지 내렸는데 **카드가 아직 여섯 장을 못 채웠을 때만** 다음 페이지를 부른다.
+   *
+   * 피드는 `FEED_LIMIT` 장만 깔기 때문에, 이미 찼으면 더 읽어도 보이는 것이 늘지 않는다 —
+   * 그런데도 페이지가 필요한 이유는 서버가 보유 종목으로 거른 뒤라 한 페이지(50건)가 여섯
+   * 장을 못 채울 수 있어서다. 이 조건을 빼면 스크롤할 때마다 아무것도 안 바뀌는 요청이 나간다.
+   */
   const loadMoreOnScroll = (event: React.UIEvent<HTMLDivElement>) => {
     const node = event.currentTarget;
     const movingDown = node.scrollTop > returnScrollTop.current;
     returnScrollTop.current = node.scrollTop;
     const remaining = node.scrollHeight - node.scrollTop - node.clientHeight;
-    if (movingDown && remaining < 240 && data.hasMore) void data.loadMoreFamily();
+    if (movingDown && remaining < 240 && data.hasMore && feed.length < FEED_LIMIT) {
+      void data.loadMoreFamily();
+    }
   };
 
   const sheetCard: WeekCard | undefined = cards[sheetIndex ?? activeCard] ?? cards[cards.length - 1];
@@ -729,10 +738,15 @@ export function ArchiveScreen({
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {/* 제목과 필터 칩이 한 줄이다. 칩이 오른쪽으로 밀려 제목과 나란히 선다. */}
+                {/*
+                  제목과 필터 칩이 한 줄이다. 칩이 오른쪽으로 밀려 제목과 나란히 선다.
+                  제목은 **누구를 골라도 `가족 피드` 로 고정**한다 — 지금 누구를 보고 있는지는
+                  바로 옆 칩이 이미 켜져서 말하고, 제목까지 `○○의 피드` 로 바뀌면 칩을 누를 때마다
+                  제목 너비가 달라져 칩 줄이 좌우로 흔들렸다.
+                */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 2px 0" }}>
                   <div style={{ flex: "none", fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
-                    {who === "all" ? "가족 피드" : `${family.find((f) => f.key === who)?.name ?? ""}의 피드`}
+                    가족 피드
                   </div>
                   <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "flex-end", gap: 5, overflowX: "auto", scrollbarWidth: "none" }}>
                     <Chips
@@ -765,6 +779,10 @@ export function ArchiveScreen({
                       <div style={{ flex: 1, minWidth: 0, background: "#F5F6FB", padding: "14px 15px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
                         <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>{card.sideLabel}</div>
                         <div style={{ fontSize: 17, fontWeight: 800, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", marginTop: 4, lineHeight: 1.35, textWrap: "pretty", color: card.sideColor }}>{card.sideValue}</div>
+                        {/* 못 잰 손익은 자리를 비운다 — `0원`으로 적으면 본전인 거래와 같아 보인다. */}
+                        {card.pnlText && (
+                          <div style={{ fontSize: 13.5, fontWeight: 800, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", marginTop: 3, whiteSpace: "nowrap", color: card.pnlColor }}>{card.pnlText}</div>
+                        )}
                         <div style={{ fontSize: 14, fontWeight: 700, color: "#3D4460", marginTop: 3, lineHeight: 1.4, textWrap: "pretty" }}>{card.shortMent}</div>
                       </div>
                     </div>

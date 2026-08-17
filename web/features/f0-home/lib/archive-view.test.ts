@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
-import { familySummary, feedCards, returnSummary, runners, type FamilyTrade } from "./archive-feed";
+import {
+  familySummary,
+  feedCards,
+  FEED_PER_MEMBER,
+  returnSummary,
+  runners,
+  type FamilyTrade,
+} from "./archive-feed";
 import {
   axesFromCard,
   familyMembers,
@@ -149,7 +156,7 @@ const trades: FamilyTrade[] = [
   },
   {
     id: "t2", userId: 2, side: "sell", symbol: "259960", stockName: "크래프톤",
-    tradedAt: "2026-08-15T01:00:00Z", price: null, quantity: null,
+    tradedAt: "2026-08-15T01:00:00Z", price: 240000, quantity: 3, avgPrice: 200000,
     reasonCode: "sell_fear_drop", planMatch: false, planChangedReason: "change_price_emotion",
   },
 ];
@@ -166,8 +173,12 @@ assert.equal(buy.dateLabel, "8월 14일 매수");
 assert.equal(buy.sideLabel, "목표 금액");
 assert.equal(buy.sideValue, "130,000원");
 assert.equal(buy.positive, true);
-// 이유·계획·목표가가 한 문장으로 붙는다.
-assert.equal(buy.text, "담았어. 뉴스를 보고 결정했어. 목표 가격이 되면 가지려고 했어. 목표 130,000원.");
+// 매수 카드의 손익은 **평가** 손익이다 — 지금 시세(120,000) − 산 가격(100,000), 2주.
+assert.equal(buy.pnlText, "▲ 40,000원 (+20.00%)");
+// 이유·계획·목표가가 한 문장으로 붙는다. **`담았어. `·`팔았어. ` 로 시작하지 않는다** —
+// 바로 위 날짜 라벨(`8월 14일 매수`)이 이미 방향을 말하고 있다.
+assert.equal(buy.text, "뉴스를 보고 결정했어. 목표 가격이 되면 가지려고 했어. 목표 130,000원.");
+assert.equal(buy.text.startsWith("담았어"), false);
 assert.equal(buy.shortMent, "뉴스를 보고");
 assert.equal(buy.likeCount, 2);
 assert.equal(buy.liked, true);
@@ -179,26 +190,75 @@ const noTarget = feedCards(
 )[0];
 assert.equal(noTarget.sideLabel, "가지고 갈 기간");
 assert.equal(noTarget.sideValue, "시즌 끝까지");
-// 남의 카드는 체결가가 마스킹된다 — 화면에서 추론하지 않는다.
+// 매도 카드는 **실현** 손익이다 — 판 가격(240,000) − 평단가(200,000), 3주.
+// 지금 시세는 쓰지 않는다: 이미 판 주식의 오늘 값은 그 사람이 번 돈과 상관이 없다.
 const sell = feed[0];
-assert.equal(sell.bigValue, "비공개");
-assert.equal(sell.sideValue, "비공개");
-// 마스킹돼도 라벨은 방향을 따른다 — 값만 가리고 무슨 가격이었는지는 숨기지 않는다.
-assert.equal(sell.sideLabel, "판 가격");
+assert.equal(sell.bigValue, "+20.00%");
+assert.equal(sell.sideLabel, "평단가");
+assert.equal(sell.sideValue, "200,000원");
+assert.equal(sell.pnlText, "▲ 120,000원 (+20.00%)");
 assert.equal(sell.dateLabel, "8월 15일 매도");
+// 평단가가 없으면 견줄 밑값이 없다. `0원`이 아니라 자리를 비운다.
+const noAvg = feedCards(
+  [{ ...trades[1], avgPrice: null }], members, {}, {}, {}, "all", now,
+)[0];
+assert.equal(noAvg.bigValue, "비공개");
+assert.equal(noAvg.sideValue, "비공개");
+assert.equal(noAvg.pnlText, "");
 // 매도는 계획 변경 이유를 덧붙인다.
-assert.match(sell.text, /계획을 바꿨어 — 가격이 움직여서 불안해졌어$/u);
+assert.equal(sell.text, "더 떨어질까 봐 결정했어. 계획을 바꿨어 — 가격이 움직여서 불안해졌어");
+// 메모가 있으면 메모가 첫 문장이다 — 고른 이유 문구가 아이가 쓴 말을 밀어내지 않는다.
+const memoCard = feedCards(
+  [{ ...trades[0], memo: "과자 회사라 믿음이 가!" }],
+  members, {}, {}, {}, "all", now,
+)[0];
+assert.equal(memoCard.text, "과자 회사라 믿음이 가! 목표 가격이 되면 가지려고 했어. 목표 130,000원.");
+// 메모도 이유도 계획도 없으면 빈 문자열이다 — 앞뒤 공백만 남은 줄이 카드에 뜨면 안 된다.
+const bare = feedCards(
+  [{ ...trades[0], memo: "", reasonCode: null, planCode: null, planTargetPrice: null }],
+  members, {}, {}, {}, "all", now,
+)[0];
+assert.equal(bare.text, "");
 
 // 구성원 필터는 그 사람 것만 남긴다.
 assert.deepEqual(feedCards(trades, members, {}, {}, {}, "db_1", now).map((f) => f.id), ["t1"]);
 
-// 화면 계산은 서버가 페이지로 준 기록을 다시 12건으로 자르지 않는다.
+// ── 몇 장을 깔지 ─────────────────────────────────────────────────────────
+// 한 사람이 몰아서 거래해도 `전체` 에서는 **최신 두 장까지만** 가져간다. 이걸 안 두면
+// 그날 많이 거래한 사람이 여섯 장을 통째로 차지해, 가족 피드인데 한 사람 것만 보인다.
+const many: FamilyTrade[] = [
+  ...Array.from({ length: 5 }, (_, i) => ({
+    ...trades[0], id: `child${i}`, userId: 1,
+    tradedAt: `2026-08-16T0${i}:00:00Z`,
+  })),
+  { ...trades[1], id: "mom1", userId: 2, tradedAt: "2026-08-15T02:00:00Z" },
+  { ...trades[1], id: "mom2", userId: 2, tradedAt: "2026-08-15T01:00:00Z" },
+  { ...trades[0], id: "dad1", userId: 3, tradedAt: "2026-08-14T01:00:00Z" },
+];
+const spread = feedCards(many, members, {}, {}, {}, "all", now);
+assert.equal(spread.length, 5);
+assert.deepEqual(spread.map((f) => f.id), ["child4", "child3", "mom1", "mom2", "dad1"]);
+// 구성원 칩을 누르면 그 사람 것으로 여섯 장을 채운다 — 두 장 제한은 `전체` 에만 걸린다.
+assert.deepEqual(
+  feedCards(many, members, {}, {}, {}, "db_1", now).map((f) => f.id),
+  ["child4", "child3", "child2", "child1", "child0"],
+);
+// 여섯 장을 넘기지 않는다.
+const flood = feedCards(
+  Array.from({ length: 20 }, (_, i) => ({
+    ...trades[0], id: `x${i}`, userId: 1, tradedAt: `2026-08-16T${String(i).padStart(2, "0")}:00:00Z`,
+  })),
+  members, {}, {}, {}, "db_1", now,
+);
+assert.equal(flood.length, 6);
+// 서버가 페이지로 여러 장을 줘도 화면에 까는 것은 여섯 장뿐이다. 더 읽어 오는 이유는
+// `holdings` 로 거른 뒤라 한 페이지가 여섯을 못 채울 수 있어서이지, 다 깔기 위해서가 아니다.
 const thirteenTrades = Array.from({ length: 13 }, (_, index) => ({
   ...trades[0],
   id: `many-${index}`,
   tradedAt: `2026-08-14T${String(index).padStart(2, "0")}:00:00Z`,
 }));
-assert.equal(feedCards(thirteenTrades, members, {}, {}, {}, "all", now).length, 13);
+assert.equal(feedCards(thirteenTrades, members, {}, {}, {}, "all", now).length, FEED_PER_MEMBER);
 
 // ── 머리 카드 ────────────────────────────────────────────────────────────
 const summary = returnSummary(

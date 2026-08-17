@@ -9,6 +9,7 @@ export const FAMILY_TRADE_PAGE_SIZE = 50;
 type TransactionRow = {
   id: string;
   user_id: number;
+  stock_id: number;
   side: "buy" | "sell";
   trade_price: number | string;
   trade_quantity: number | string;
@@ -22,10 +23,18 @@ type TransactionRow = {
   stocks: { stock_code: string; stock_name: string } | null;
 };
 
+type HoldingRow = {
+  user_id: number;
+  stock_id: number;
+  quantity: number | string;
+  avg_price: number | string;
+};
+
 export type FamilyDataDeps = {
   findProfileById(id: number): Promise<Profile | null>;
   selectProfiles(params: Record<string, string>): Promise<Profile[]>;
   selectTransactions(params: Record<string, string>): Promise<TransactionRow[]>;
+  selectHoldings(params: Record<string, string>): Promise<HoldingRow[]>;
   buildProfile(userId: number): Promise<Awaited<ReturnType<typeof buildSeasonCards>>>;
 };
 
@@ -33,6 +42,7 @@ const defaultDeps: FamilyDataDeps = {
   findProfileById,
   selectProfiles: (params) => selectRows<Profile>("profiles", params),
   selectTransactions: (params) => selectFilledTrades<TransactionRow>(params),
+  selectHoldings: (params) => selectRows<HoldingRow>("holdings", params),
   buildProfile: buildSeasonCards,
 };
 
@@ -55,16 +65,20 @@ export async function buildFamilyData(
   const members = profiles.length > 0 ? profiles : [viewer];
   const memberIds = members.map((member) => member.id);
 
-  const [transactions, behaviorProfiles] = await Promise.all([
+  const [transactions, holdings, behaviorProfiles] = await Promise.all([
     deps.selectTransactions({
       select:
-        "id,user_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
+        "id,user_id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
         "memo,plan_match,plan_changed_reason,created_at,stocks(stock_code,stock_name)",
       user_id: `in.(${memberIds.join(",")})`,
       order: "created_at.desc",
       offset: String(offset),
       // 한 건을 더 읽어 다음 페이지가 있는지만 확인하고, 화면에는 50건만 보낸다.
       limit: String(FAMILY_TRADE_PAGE_SIZE + 1),
+    }),
+    deps.selectHoldings({
+      select: "user_id,stock_id,quantity,avg_price",
+      user_id: `in.(${memberIds.join(",")})`,
     }),
     Promise.all(members.map(async (member) => {
       const profile = await deps.buildProfile(member.id);
@@ -84,6 +98,26 @@ export async function buildFamilyData(
   const behaviorByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.behavior]));
   const returnRateByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.returnRate]));
   const memberById = new Map(members.map((member) => [member.id, member]));
+
+  /**
+   * **지금 들고 있는 종목의 평단가.** 가족 피드가 두 가지로 쓴다.
+   *
+   * 1. 거를 기준 — 피드는 **아직 들고 있는 종목의 기록만** 보여 준다. 다 팔아 치운 종목이
+   *    카드로 남으면, 지금 우리 가족이 무엇을 들고 있는지 견주어 보라는 화면에 이제 아무도
+   *    안 가진 회사가 섞인다.
+   * 2. 손익을 낼 밑값 — 매도 카드의 실현 손익은 `판 가격 − 평단가` 다. 체결 행에는 살 때
+   *    가격이 없어서 이 표 없이는 낼 수 없었다.
+   *
+   * 수량이 0인 행은 이미 다 판 것이므로 없는 것으로 친다 — `holdings` 는 0으로 남기도 한다.
+   *
+   * **이 평단가는 지금 값이지 그 매도 시점 값이 아니다.** 이동평균법에서 매도는 평단가를
+   * 바꾸지 않으니 그 뒤로 더 사지 않았으면 같은 값이고, 더 샀으면 어긋난다.
+   */
+  const avgByHolding = new Map(
+    holdings
+      .filter((row) => Number(row.quantity) > 0)
+      .map((row) => [`${row.user_id}:${row.stock_id}`, Number(row.avg_price)]),
+  );
 
   /**
    * 같은 `family_tag` 인 사람들의 자산을 **합쳐서만** 내려보낸다 (2026-08-16 유저 확정).
@@ -120,7 +154,7 @@ export async function buildFamilyData(
     },
     // 수익률(%)은 타인 것도 내려보낸다 — 가족 달리기 트랙이 구성원을 나란히 세우는 화면이라
     // 없으면 기능 자체가 성립하지 않는다. 자산 규모를 드러내는 평가금액·원금·현금은 계속
-    // 가리므로, 아래 `trades` 의 price·quantity 마스킹과 어긋나지 않는다.
+    // 구성원 줄에서 가린다.
     members: members.map((member) => ({
       id: member.id,
       name: member.name,
@@ -131,7 +165,10 @@ export async function buildFamilyData(
     trades: transactions.slice(0, FAMILY_TRADE_PAGE_SIZE).flatMap((row) => {
       const member = memberById.get(row.user_id);
       if (!member || !row.stocks) return [];
-      const own = row.user_id === viewer.id;
+      // 아직 들고 있는 종목만 남긴다 (위 `avgByHolding` 주석). 여기서 걸러야 화면 필터로
+      // 우회할 수 없고, 밑에서 쓰는 평단가가 늘 있다는 것도 같은 조건으로 보장된다.
+      const avgPrice = avgByHolding.get(`${row.user_id}:${row.stock_id}`);
+      if (avgPrice === undefined) return [];
       return [{
         id: row.id,
         userId: row.user_id,
@@ -140,9 +177,24 @@ export async function buildFamilyData(
         symbol: row.stocks.stock_code,
         stockName: row.stocks.stock_name,
         side: row.side,
-        // 타인의 자산 규모는 응답 자체에서 가려 화면 필터로 우회할 수 없게 한다.
-        price: own ? Number(row.trade_price) : null,
-        quantity: own ? Number(row.trade_quantity) : null,
+        /**
+         * 체결가·수량을 가족 전원에게 그대로 내려보낸다 (2026-08-17 유저 확정).
+         *
+         * 예전에는 타인 것을 `null` 로 지웠고 화면은 그 자리에 `비공개` 를 찍었다. 그래서
+         * 가족 피드에서 **자기 카드만 숫자가 있고 나머지는 전부 `비공개`** 였다 — 서로의
+         * 기록을 견주어 보라고 만든 화면인데 견줄 것이 없었다.
+         *
+         * 자산 규모는 여기가 아니라 위 `members`·`total` 이 지킨다. 구성원 줄에는 평가금액·
+         * 원금·현금을 싣지 않고 합계만 낸다. 한 건의 체결가·수량으로는 그 사람이 얼마를
+         * 굴리는지 알 수 없다.
+         *
+         * **DB 값이 없으면 그대로 `null` 이다.** `Number(null)` 은 0 이라 형변환을 무조건
+         * 걸면 안 된다 — 값이 없는 옛 행이 `0원` 에 체결된 것처럼 보인다.
+         */
+        price: row.trade_price === null ? null : Number(row.trade_price),
+        quantity: row.trade_quantity === null ? null : Number(row.trade_quantity),
+        /** 지금 이 사람이 이 종목을 들고 있는 평단가. 매도 카드의 실현 손익이 이걸로 난다. */
+        avgPrice,
         reason: row.trade_reason?.trim() || "이유를 남기지 않았어요.",
         // 이유 코드 원본. 화면이 코드를 문구로 바꾼다 — `reason` 은 코드가 없을 때의 대체 문구다.
         reasonCode: row.trade_reason?.trim() || null,

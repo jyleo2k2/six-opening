@@ -18,6 +18,7 @@ const profiles: Profile[] = [
 
 let profileFilter = "";
 let transactionFilter = "";
+let holdingFilter = "";
 let transactionOffset = "";
 let transactionLimit = "";
 const deps: FamilyDataDeps = {
@@ -32,19 +33,36 @@ const deps: FamilyDataDeps = {
     transactionLimit = params.limit;
     return [
       {
-        id: "mine", user_id: 1, side: "buy", trade_price: 70000, trade_quantity: 2,
+        id: "mine", user_id: 1, stock_id: 7, side: "buy", trade_price: 70000, trade_quantity: 2,
         trade_reason: "buy_news", plan_code: "plan_target", plan_target_price: "84000",
         memo: " 목표 오면 팔기 ", plan_match: null, plan_changed_reason: null,
         created_at: "2026-08-14T00:00:00.000Z",
         stocks: { stock_code: "005930", stock_name: "삼성전자" },
       },
       {
-        id: "dad", user_id: 3, side: "sell", trade_price: 120000, trade_quantity: 4,
+        id: "dad", user_id: 3, stock_id: 11, side: "sell", trade_price: 120000, trade_quantity: 4,
         trade_reason: null, plan_code: null, plan_target_price: null, memo: null,
         plan_match: false, plan_changed_reason: "change_price_emotion",
         created_at: "2026-08-13T00:00:00.000Z",
         stocks: { stock_code: "035420", stock_name: "NAVER" },
       },
+      // 다 팔아 보유가 없는 종목. 피드에 남으면 아무도 안 가진 회사가 섞인다.
+      {
+        id: "sold-out", user_id: 1, stock_id: 3, side: "sell", trade_price: 137500,
+        trade_quantity: 17, trade_reason: null, plan_code: null, plan_target_price: null,
+        memo: null, plan_match: null, plan_changed_reason: null,
+        created_at: "2026-08-15T00:00:00.000Z",
+        stocks: { stock_code: "271560", stock_name: "오리온" },
+      },
+    ];
+  },
+  selectHoldings: async (params) => {
+    holdingFilter = params.user_id;
+    return [
+      { user_id: 1, stock_id: 7, quantity: 9, avg_price: "68000" },
+      { user_id: 3, stock_id: 11, quantity: 4, avg_price: "100000" },
+      // 수량 0 은 이미 다 판 것이다. `holdings` 는 행을 0 으로 남기기도 한다.
+      { user_id: 1, stock_id: 3, quantity: 0, avg_price: "130300" },
     ];
   },
   buildProfile: async (userId) => ({
@@ -102,10 +120,18 @@ async function main() {
   // 아직 아무도 안 샀으면 합계 수익률은 0% 가 아니라 null 이다. 현금은 그대로 합친다.
   assert.equal(noCost?.total.returnRate, null);
   assert.equal(noCost?.total.assets, 30_000_000);
+  assert.equal(holdingFilter, "in.(1,2,3)");
+  // 아직 들고 있는 종목만 남는다. 다 판 오리온은 빠지고, 평단가가 함께 실린다.
+  assert.deepEqual(family.trades.map((trade) => trade.id), ["mine", "dad"]);
+  assert.equal(family.trades[0].avgPrice, 68000);
+  assert.equal(family.trades[1].avgPrice, 100000);
+
   assert.equal(family.trades[0].price, 70000);
   assert.equal(family.trades[0].quantity, 2);
-  assert.equal(family.trades[1].price, null);
-  assert.equal(family.trades[1].quantity, null);
+  // 남의 체결가·수량도 그대로 내려보낸다 (2026-08-17 유저 확정). 자산 규모는 `members`·
+  // `total` 이 지킨다 — 체결 한 건으로는 그 사람이 얼마를 굴리는지 알 수 없다.
+  assert.equal(family.trades[1].price, 120000);
+  assert.equal(family.trades[1].quantity, 4);
   assert.equal(family.trades[1].reason, "이유를 남기지 않았어요.");
 
   // 계획·메모는 자산 규모가 아니므로 남의 거래에서도 가리지 않는다 (F2 SPEC §7.1)
@@ -120,9 +146,12 @@ async function main() {
   assert.equal(family.trades[1].memo, null);
   assert.deepEqual(family.page, { offset: 0, limit: 50, hasMore: false, nextOffset: null });
 
+  // `stock_id` 는 위 `selectHoldings` 가 보유로 준 것과 같아야 한다. 아니면 보유 종목
+  // 필터에 걸려 페이지가 통째로 비고, 세는 것이 페이지가 아니라 필터가 돼 버린다.
   const fiftyOne = Array.from({ length: 51 }, (_, index) => ({
     id: `page-${index}`,
     user_id: 1,
+    stock_id: 7,
     side: "buy" as const,
     trade_price: 70_000,
     trade_quantity: 1,
@@ -145,6 +174,16 @@ async function main() {
   assert.equal(firstPage?.trades.length, 50);
   assert.deepEqual(firstPage?.page, { offset: 0, limit: 50, hasMore: true, nextOffset: 50 });
 
+  // `hasMore` 는 **거르기 전** 행 수로 센다. 보유 종목 필터가 한 페이지를 통째로 비워도
+  // 다음 페이지는 있다 — 걸러진 수로 세면 거기서 페이지 넘김이 멎어 뒤가 영영 안 보인다.
+  const allFiltered = await buildFamilyData(1, {
+    ...deps,
+    selectTransactions: async () => fiftyOne.map((row) => ({ ...row, stock_id: 999 })),
+  });
+  assert.equal(allFiltered?.trades.length, 0);
+  assert.equal(allFiltered?.page.hasMore, true);
+  assert.equal(allFiltered?.page.nextOffset, 50);
+
   await buildFamilyData(1, {
     ...deps,
     selectTransactions: async (params) => {
@@ -157,6 +196,22 @@ async function main() {
   assert.equal(parseFamilyOffset("50"), 50);
   assert.equal(parseFamilyOffset("-1"), null);
   assert.equal(parseFamilyOffset("abc"), null);
+
+  // 값이 없는 옛 행은 `null` 그대로 나가야 한다. `Number(null)` 은 0 이라, 형변환을 무조건
+  // 걸면 체결가를 안 남긴 거래가 `0원` 에 체결된 것처럼 보인다.
+  const priceless = await buildFamilyData(1, {
+    ...deps,
+    selectTransactions: async () => [{
+      id: "old", user_id: 2, stock_id: 7, side: "sell", trade_price: null as unknown as number,
+      trade_quantity: null as unknown as number, trade_reason: null, plan_code: null,
+      plan_target_price: null, memo: null, plan_match: null, plan_changed_reason: null,
+      created_at: "2026-08-12T00:00:00.000Z",
+      stocks: { stock_code: "005930", stock_name: "삼성전자" },
+    }],
+    selectHoldings: async () => [{ user_id: 2, stock_id: 7, quantity: 1, avg_price: "270000" }],
+  });
+  assert.equal(priceless?.trades[0].price, null);
+  assert.equal(priceless?.trades[0].quantity, null);
 
   const solo: Profile = { ...profiles[0], id: 9, family_tag: null };
   let selectedProfiles = false;
