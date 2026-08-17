@@ -358,6 +358,10 @@ export function ArchiveScreen({
   const infoBtn = useRef<HTMLDivElement | null>(null);
   const pageRef = useRef<HTMLDivElement | null>(null);
   const [famDetailOpen, setFamDetailOpen] = useState(false);
+  /** 글쓰기 시트에서 고른 거래와 적고 있는 글. 시트를 닫으면 둘 다 버린다. */
+  const [pickedTrade, setPickedTrade] = useState<string | null>(null);
+  const [postDraft, setPostDraft] = useState("");
+  const [posting, setPosting] = useState(false);
   const [famPick, setFamPick] = useState("all");
   const [who, setWho] = useState("all");
   const [detailOpen, setDetailOpen] = useState(false);
@@ -374,6 +378,8 @@ export function ArchiveScreen({
    * 느낌이 다르면 안 되기 때문이다(`use-sheet-drag` 머리말).
    */
   const famSheet = useSheetDrag(FAM_SHEET_HEIGHT);
+  /** 피드 글쓰기 시트. 카드 시트·가족 시트와 같은 배선을 쓴다. */
+  const postSheet = useSheetDrag(SHEET_HEIGHT);
 
   useEffect(() => {
     if (view === "return") returnScrollTop.current = 0;
@@ -884,6 +890,23 @@ export function ArchiveScreen({
                     />
                   </div>
                 </div>
+                {/*
+                  글쓰기 문. **산다고 피드가 저절로 생기지 않으므로** 올릴 자리가 여기 있어야
+                  한다 — 이 단추가 없으면 새로 산 기록은 어디에서도 가족에게 갈 수 없다.
+                */}
+                <div
+                  onClick={() => {
+                    setPickedTrade(null);
+                    setPostDraft("");
+                    void data.loadCandidates().catch(() => {});
+                    postSheet.openSheet();
+                  }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "13px 15px", borderRadius: 18, cursor: "pointer", background: "#FFFFFF", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}
+                >
+                  <div style={{ flex: "none", width: 28, height: 28, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 800, lineHeight: 1, color: "#fff", background: ACCENT }}>+</div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 700, color: "#3D4460" }}>내 기록을 피드에 올리기</div>
+                  <div style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1 }}>›</div>
+                </div>
                 {feed.map((card) => (
                   <div key={card.id} style={{ background: "#fff", borderRadius: 22, padding: "16px 17px 14px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
@@ -915,7 +938,23 @@ export function ArchiveScreen({
                     </div>
 
                     <div style={{ fontSize: 14.5, fontWeight: 500, color: "#3D4460", lineHeight: 1.72, marginTop: 13, whiteSpace: "pre-line", textWrap: "pretty" }}>{card.text}</div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 20, marginTop: 13 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 13 }}>
+                      {/*
+                        내가 올린 카드만 내릴 수 있다. 내려도 거래 기록은 남는다 — 성향과
+                        수익률은 체결을 그대로 읽어야 하기 때문이다.
+                      */}
+                      {String(data.viewerId ?? "") === card.userId ? (
+                        <div
+                          onClick={() => {
+                            if (!window.confirm("이 기록을 피드에서 내릴까요? 사고판 기록은 그대로 남아요.")) return;
+                            void data.removeFeed(card.id).catch((e) => window.alert(e.message));
+                          }}
+                          style={{ flex: "none", fontSize: 12.5, fontWeight: 700, color: "#A9AEC4", cursor: "pointer", whiteSpace: "nowrap" }}
+                        >
+                          피드에서 내리기
+                        </div>
+                      ) : null}
+                      <div style={{ flex: 1 }} />
                       <div
                         onClick={() => setOpenComments((current) => ({ ...current, [card.id]: !current[card.id] }))}
                         style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, cursor: "pointer", fontVariantNumeric: "tabular-nums", color: openComments[card.id] ? "#0A3272" : "#A9AEC4" }}
@@ -1106,6 +1145,101 @@ export function ArchiveScreen({
                   <div style={{ ...DOOR_CHEVRON, fontSize: 16 }}>›</div>
                 </div>
               </div>
+            </div>
+          </>
+        )}
+
+        {/*
+          피드 글쓰기. 위에서 기록 하나를 고르고 아래에 글을 적는다 — 고르는 목록은 **아직
+          안 올린 내 체결**뿐이라(`GET /api/feed`) 같은 거래로 카드를 두 장 세울 수 없다.
+        */}
+        {postSheet.open && (
+          <>
+            <div
+              onClick={postSheet.closeSheet}
+              style={{ position: "absolute", inset: 0, zIndex: 6, background: "rgba(20,15,40,0.4)", ...postSheet.scrimStyle }}
+            />
+            <div
+              className="kwnos"
+              style={{
+                position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 7, maxHeight: `${SHEET_RATIO * 100}%`,
+                overflowY: "auto", borderRadius: "30px 30px 0 0", padding: "14px 22px 26px", background: "#FFFFFF",
+                boxShadow: "0 -18px 40px rgba(30,25,60,0.26)",
+                ...postSheet.sheetStyle("sheetUp 0.32s cubic-bezier(0.22,1,0.36,1)"),
+              }}
+            >
+              <div {...postSheet.handleProps}>
+                <div style={{ width: 44, height: 5, borderRadius: 999, margin: "0 auto 16px", background: "#E1E3EE" }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 21, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.02em" }}>피드에 올리기</div>
+                  <div data-sheet-static onClick={postSheet.closeSheet} style={{ flex: "none", fontSize: 14, fontWeight: 700, color: "#A9AEC4", padding: "6px 4px", cursor: "pointer", whiteSpace: "nowrap" }}>닫기</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: "#8E93A8", lineHeight: 1.65, marginTop: 8, textWrap: "pretty" }}>
+                올릴 기록을 고르고 가족에게 남길 말을 적어요. 사고판 기록은 올리지 않아도 그대로 남아요.
+              </div>
+
+              {data.candidates.length === 0 ? (
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: "#A9AEC4", lineHeight: 1.65, padding: "22px 2px", textAlign: "center", textWrap: "pretty" }}>
+                  올릴 수 있는 기록이 없어요.{"\n"}사고팔면 여기에서 고를 수 있어요.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14 }}>
+                  {data.candidates.map((trade) => {
+                    const on = pickedTrade === trade.id;
+                    const at = new Date(trade.tradedAt);
+                    return (
+                      <div
+                        key={trade.id}
+                        onClick={() => setPickedTrade(on ? null : trade.id)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 16, cursor: "pointer",
+                          background: on ? "#FDE7F1" : "#F5F6FB",
+                          boxShadow: on ? `inset 0 0 0 2px ${ACCENT}` : "inset 0 0 0 1px #E9EAF2",
+                        }}
+                      >
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 14.5, fontWeight: 800, color: "#001E5A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{trade.stockName}</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: "#8E93A8", marginTop: 3, whiteSpace: "nowrap" }}>
+                            {`${at.getMonth() + 1}월 ${at.getDate()}일 ${trade.side === "sell" ? "매도" : "매수"}`}
+                          </div>
+                        </div>
+                        <div style={{ flex: "none", fontSize: 13.5, fontWeight: 700, color: "#3D4460", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                          {trade.price === null ? "비공개" : `${Math.round(trade.price).toLocaleString("ko-KR")}원`}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <textarea
+                    onChange={(event) => setPostDraft(event.target.value)}
+                    placeholder="왜 사고팔았는지 가족에게 한 줄 남겨요"
+                    rows={3}
+                    style={{ marginTop: 7, border: "none", outline: "none", resize: "none", background: "#F2F3FA", borderRadius: 16, padding: "12px 14px", fontSize: 14, fontWeight: 600, color: "#001E5A", fontFamily: "inherit", lineHeight: 1.6 }}
+                    value={postDraft}
+                  />
+                  <div
+                    onClick={() => {
+                      const body = postDraft.trim();
+                      if (!pickedTrade || !body || posting) return;
+                      setPosting(true);
+                      void data
+                        .postFeed(pickedTrade, body)
+                        .then(() => { setPostDraft(""); setPickedTrade(null); postSheet.closeSheet(); })
+                        .catch((e) => window.alert(e.message))
+                        .finally(() => setPosting(false));
+                    }}
+                    style={{
+                      marginTop: 7, textAlign: "center", padding: "15px 0", borderRadius: 999,
+                      fontSize: 16, fontWeight: 800, whiteSpace: "nowrap",
+                      ...(pickedTrade && postDraft.trim() && !posting
+                        ? { color: "#fff", background: ACCENT, cursor: "pointer", boxShadow: "0 3px 10px -2px rgba(215,0,130,0.4)" }
+                        : { color: "#B8BDD0", background: "#F0F1F7" }),
+                    }}
+                  >
+                    {posting ? "올리는 중이에요" : "피드에 올리기"}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}

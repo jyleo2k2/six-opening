@@ -19,6 +19,7 @@ type TransactionRow = {
   memo: string | null;
   plan_match: boolean | null;
   plan_changed_reason: string | null;
+  feed_body: string | null;
   created_at: string;
   stocks: { stock_code: string; stock_name: string } | null;
 };
@@ -69,8 +70,17 @@ export async function buildFamilyData(
     deps.selectTransactions({
       select:
         "id,user_id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
-        "memo,plan_match,plan_changed_reason,created_at,stocks(stock_code,stock_name)",
+        "memo,plan_match,plan_changed_reason,feed_body,created_at,stocks(stock_code,stock_name)",
       user_id: `in.(${memberIds.join(",")})`,
+      /**
+       * **피드에 올린 것만 읽는다** (2026-08-17). 예전에는 체결이 곧 피드여서 한 번 살
+       * 때마다 카드가 저절로 생겼다 — 시험 삼아 눌러 본 매수까지 가족에게 그대로 갔다.
+       * 이제 `feed_body` 에 글을 쓴 거래만 피드가 된다(`POST /api/feed`).
+       *
+       * 성향·수익률은 이 필터와 무관하다. 그쪽은 `buildSeasonCards` 가 체결 전부를 읽는다 —
+       * 피드에 안 올렸다고 해서 안 산 것이 되면 안 된다.
+       */
+      feed_body: "not.is.null",
       order: "created_at.desc",
       offset: String(offset),
       // 한 건을 더 읽어 다음 페이지가 있는지만 확인하고, 화면에는 50건만 보낸다.
@@ -214,6 +224,8 @@ export async function buildFamilyData(
         planCode: row.plan_code,
         planTargetPrice: row.plan_target_price === null ? null : Number(row.plan_target_price),
         memo: row.memo?.trim() || null,
+        /** 피드에 올린 글. 카드 본문이 이 값이다 — 위 필터 때문에 늘 있다. */
+        feedBody: row.feed_body ?? "",
         planMatch: row.plan_match,
         planChangedReason: row.plan_changed_reason,
         tradedAt: row.created_at,
