@@ -212,7 +212,7 @@ export type HomeView = {
   rateText: string;
   profitText: string;
   rateColor: string;
-  /** 가운데 큰 그림. 수익률 방향에 따라 목표 그림과 무드 그림이 갈린다(`moodArt`). */
+  /** 가운데 큰 그림. 수익률 방향과 `goalCount` 가 목표 그림과 무드 그림을 가른다(`moodArt`). */
   moodImg: string;
   /** 그 그림에 걸 확대 배율. 무드 그림의 캐릭터를 목표 그림 캐릭터와 같은 높이로 맞춘다. */
   moodScale: number;
@@ -248,21 +248,37 @@ const ART_HEIGHT_RATIO: Record<string, number> = {
 };
 
 /**
- * 홈 가운데 큰 그림과 그 확대 배율. 올랐을 때만 역할별 목표 그림(향수·신발·왁뿌볼을 든
- * 황소)을 보여 주고, 그대로면 시무룩한 황소, 내렸으면 우는 황소와 곰으로 바꾼다.
+ * 홈 가운데 큰 그림과 그 확대 배율.
+ *
+ *   목표 그림(향수·신발·왁뿌볼을 든 황소)  이익이 나고 **그 목표를 1개 이상 살 수 있을 때**
+ *   시무룩한 황소                          보합(0.0%) 이거나, 이익이지만 아직 1개도 못 살 때
+ *   우는 황소와 곰                         손실
+ *
+ * 목표 그림은 목표를 **든** 그림이다. `왁뿌볼 0개 살 수 있어요` 아래에서 그 왁뿌볼을 안고
+ * 웃고 있으면 그림이 문장을 뒤집는다 — 이익이라는 사실보다 아직 못 산다는 사실이 이 자리의
+ * 주인공이다. 그래서 방향(`trend`)만이 아니라 `goalCount` 까지 봐야 한다.
+ *
+ * 덕분에 목표 그림과 팝업이 한 조건에서 논다: 눌렀을 때 튀어오르는 아이템은
+ * `min(goalCount, 6)` 개라(`popItems`), 예전에는 목표 그림이 서 있는데 아무것도 안 튀는
+ * 구간(0 < 수익 < 단가)이 있었다.
  *
  * 방향은 `rate` 원값이 아니라 `Trend` 로 받는다 — 화면이 `+0.0%` 를 회색으로 적는 순간
  * 그림만 웃고 있으면 숫자·색·그림이 서로 다른 말을 한다(`pctTrend`).
  *
  * `scale` 은 무드 그림의 **캐릭터를 그 계정의 목표 그림 캐릭터와 같은 높이로** 키우는 값이다.
- * 기준이 계정마다 다르므로(아이 187px·엄마 176px·아빠 150px) 배율도 역할을 탄다 — 아빠는
+ * 기준이 계정마다 다르므로(아이 187px·엄마 176px·아빠 151px) 배율도 역할을 탄다 — 아빠는
  * 목표 그림 쪽이 작아서 1 보다 작아진다. 상자 크기가 아니라 그림 크기를 맞추는 게 목적이다.
  *
  * 그림을 하나 더 얹지 않고 이 자리를 갈아 끼우는 이유는, 오른 상태에서 목표 그림과
  * 같은 황소가 크게 한 번 작게 한 번 두 번 나왔던 적이 있기 때문이다(2026-08-16 되돌림).
  */
-export function moodArt(trend: Trend, goalImg: string): { src: string; scale: number } {
-  if (trend > 0) return { src: goalImg, scale: 1 };
+export function moodArt(
+  trend: Trend,
+  goalImg: string,
+  /** 목표 아이템을 몇 개 살 수 있나(`homeView` 의 `goalCount`). 0 이면 목표 그림을 세우지 않는다. */
+  goalCount: number,
+): { src: string; scale: number } {
+  if (trend > 0 && goalCount >= 1) return { src: goalImg, scale: 1 };
   const src = trend < 0 ? MOOD_SAD_IMG : MOOD_FLAT_IMG;
   const goalRatio = ART_HEIGHT_RATIO[goalImg];
   const moodRatio = ART_HEIGHT_RATIO[src];
@@ -296,7 +312,7 @@ export function homeView(
   const rate = total ? (profit / total) * 100 : 0;
   // 색과 그림이 같은 판정을 쓰도록 방향은 한 번만 낸다.
   const trend = pctTrend(rate);
-  const art = moodArt(trend, info.goalImg);
+  const art = moodArt(trend, info.goalImg, goalCount);
   // 계좌를 못 읽은 동안은 현금을 모른다 — 0으로 두어 보유 평가금액만 보여준다.
   const cash = loaded ? user?.balance ?? 0 : 0;
 
