@@ -55,6 +55,8 @@ export function ConnectedPrototype({
    */
   const [tutorialOn, setTutorialOn] = useState(false);
   const [stage, setStage] = useState<TutorialStage | undefined>(undefined);
+  /** 아카이브 안내는 화면 이동 뒤에도 유지하고, 로그인 페이지로 나가면 새로 시작한다. */
+  const [archiveInfoOpen, setArchiveInfoOpen] = useState(true);
   const orderRequestId = useRef(0);
   /** 챗봇이 지정한 주문 단계. 주소로 표현할 수 없어 주문 화면에 한 번만 전달한다. */
   const [chatOrderRequest, setChatOrderRequest] = useState<ChatOrderRequest | null>(null);
@@ -131,7 +133,13 @@ export function ConnectedPrototype({
             <HomeScreen onLeave={leaveToPath} onStartTutorial={() => setTutorialOn(true)} />
           )}
           {overlay.screen === "archive" && (
-            <ArchiveScreen account={account} onLeave={leaveToPath} view={overlay.view} />
+            <ArchiveScreen
+              account={account}
+              infoOpen={archiveInfoOpen}
+              onInfoOpenChange={setArchiveInfoOpen}
+              onLeave={leaveToPath}
+              view={overlay.view}
+            />
           )}
           {overlay.screen === "ranking" && <RankingScreen onLeave={leaveToPath} />}
           {overlay.screen === "portfolio" && (
