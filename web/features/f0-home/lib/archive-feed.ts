@@ -101,9 +101,11 @@ export type FamilyTrade = {
   symbol: string;
   stockName?: string | null;
   tradedAt: string;
-  /** 남의 카드는 서버가 `null` 로 지운다. */
+  /** DB 에 값이 없는 옛 행만 `null` 이다. 가족 것도 가리지 않는다. */
   price?: number | null;
   quantity?: number | null;
+  /** 지금 그 사람이 이 종목을 들고 있는 평단가. 매도 카드의 실현 손익이 이걸로 난다. */
+  avgPrice?: number | null;
   reasonCode?: string | null;
   planCode?: string | null;
   planTargetPrice?: number | null;
@@ -147,6 +149,15 @@ export type FeedCard = {
   sideLabel: string;
   sideValue: string;
   sideColor: string;
+  /**
+   * 손익 한 줄 — `▲ 31,500원 (+2.79%)`. 매도는 **실현**(판 가격 − 평단가), 매수는 **평가**
+   * (지금 시세 − 산 가격)다. 둘 다 그 거래 수량만큼이라 계좌 전체 손익이 아니다.
+   *
+   * 낼 수 없으면 빈 문자열이다 — 체결가나 수량이 없는 옛 행, 시세를 못 받은 종목이 그렇다.
+   * 0원으로 적으면 본전인 거래와 못 잰 거래가 같아 보인다.
+   */
+  pnlText: string;
+  pnlColor: string;
   shortMent: string;
   text: string;
   liked: boolean;
@@ -167,8 +178,23 @@ const timeAgo = (ts: string, now: number) => {
   return `${Math.round(minutes / 1440)}일 전`;
 };
 
+/** 한 화면에 깔리는 카드 수. 시안이 4장이고, 가족 셋이 고루 보이려면 그보다 조금 넉넉해야 한다. */
+export const FEED_LIMIT = 6;
 /**
- * 거래 피드 — 서버에서 받아 누적한 페이지 전체. 필터가 걸리면 그 구성원 것만 남는다.
+ * `전체` 로 볼 때 한 사람이 차지할 수 있는 최대 장수.
+ *
+ * 이걸 안 두면 그날 많이 거래한 사람이 여섯 장을 통째로 가져가, **가족 피드인데 한 사람
+ * 것만 보인다.** 실제로 아이가 오전에 다섯 번 사자 아빠 카드가 한 장도 안 남았다.
+ */
+export const FEED_PER_MEMBER = 2;
+
+/**
+ * 거래 피드 — 서버에서 받아 누적한 페이지에서 **최신 여섯 장**을 고른다. `전체` 는 구성원
+ * 마다 최신 두 장까지만 넣고, 구성원 칩을 누르면 그 사람 것으로 여섯 장을 채운다.
+ *
+ * 서버 페이지(50건)보다 이 여섯이 훨씬 작다. 그런데도 더 읽어 올 이유가 있다 — 서버가
+ * `holdings` 로 거른 뒤라 한 페이지가 여섯 장을 못 채울 수 있다. 화면은 **여섯 장이 찰
+ * 때까지만** 다음 페이지를 부른다(`ArchiveScreen` 의 `loadMoreOnScroll`).
  *
  * 매수는 보유 계획과 목표가를, 매도는 계획 준수 여부와 변경 이유를 덧붙인다(F2 SPEC §7.1).
  * 예전에는 `memo` 에 이유 코드를 그대로 넣어 카드에 `buy_news` 가 찍혔다 — 이제 진짜 메모가 온다.
@@ -183,6 +209,7 @@ export function feedCards(
   now = Date.now(),
 ): FeedCard[] {
   const byUser = new Map(members.map((m) => [String(m.id), m]));
+  const perMember = new Map<string, number>();
   return trades
     .filter((t) => {
       const member = byUser.get(String(t.userId));
@@ -190,13 +217,38 @@ export function feedCards(
     })
     .slice()
     .sort((a, b) => String(b.tradedAt).localeCompare(String(a.tradedAt)))
+    // 정렬 뒤에 세야 **최신 두 장**이 남는다. 정렬 전에 자르면 아무 두 장이나 남는다.
+    .filter((t) => {
+      if (who !== "all") return true;
+      const key = String(t.userId);
+      const used = perMember.get(key) ?? 0;
+      if (used >= FEED_PER_MEMBER) return false;
+      perMember.set(key, used + 1);
+      return true;
+    })
+    .slice(0, FEED_LIMIT)
     .map((trade) => {
       const member = byUser.get(String(trade.userId)) as FamilyRow;
       const sell = trade.side === "sell";
-      const now_price = prices[trade.symbol] ?? 0;
-      const avg = trade.price === null || trade.price === undefined ? null : Number(trade.price);
-      const pc = avg ? ((now_price - avg) / avg) * 100 : 0;
+      const nowPrice = prices[trade.symbol] ?? 0;
+      const num = (v: number | null | undefined) => (v === null || v === undefined ? null : Number(v));
+      const tradePrice = num(trade.price);
+      const bookAvg = num(trade.avgPrice);
+      const qty = num(trade.quantity);
+      /**
+       * 손익을 재는 두 값. **매도는 평단가와 판 가격을**, 매수는 산 가격과 지금 시세를 견준다.
+       *
+       * 매도 쪽이 **실현** 손익이다 — 예전에는 살 때 가격이 없어 매도 카드도 "지금 시세 대비"
+       * 를 띄웠는데, 이미 판 주식의 오늘 시세는 그 사람이 번 돈과 아무 상관이 없다.
+       * 이제 `/api/family` 가 평단가를 함께 준다.
+       */
+      const base = sell ? bookAvg : tradePrice;
+      const mark = sell ? tradePrice : nowPrice;
+      // 0원은 못 잰 것이지 본전이 아니다. 나누는 쪽이 0이면 비율 자체가 없다.
+      const measurable = base !== null && base > 0 && mark !== null && mark > 0;
+      const pc = measurable ? ((mark - base) / base) * 100 : 0;
       const positive = pc >= 0;
+      const pnl = measurable && qty !== null ? (mark - base) * qty : null;
       const date = new Date(trade.tradedAt);
       const reason = choiceOf(sell ? SELL_REASONS : REASONS, trade.reasonCode ?? null);
       const plan = !sell && trade.planCode ? choiceOf(PLANS, trade.planCode) : null;
@@ -219,40 +271,53 @@ export function feedCards(
         time: timeAgo(trade.tradedAt, now),
         dateLabel: `${date.getMonth() + 1}월 ${date.getDate()}일 ${sell ? "매도" : "매수"}`,
         stockName: trade.stockName || trade.symbol,
-        // 매수 판에는 산 가격을, 매도 판에는 지금 시세와 견준 등락률을 크게 띄운다.
-        // **실현 손익은 낼 수 없다** — `/api/family` 의 매도 행에는 살 때 가격이 없다.
+        // 매수 판에는 산 가격을, 매도 판에는 **실현 수익률**을 크게 띄운다.
         bigBg: sell ? (positive ? ACCENT : "#001E5A") : "#12874F",
-        bigValue: avg
-          ? sell
+        bigValue: sell
+          ? measurable
             ? (positive ? "+" : "−") + Math.abs(pc).toFixed(2) + "%"
-            : won(avg)
-          : "비공개",
-        bigSize: avg && sell ? 25 : 19,
+            : "비공개"
+          : tradePrice
+            ? won(tradePrice)
+            : "비공개",
+        bigSize: sell && measurable ? 25 : 19,
         positive,
+        // 매도 카드가 견준 밑값을 그대로 적는다 — 큰 판의 수익률이 무엇에 견준 값인지
+        // 여기 말고는 알 곳이 없다. 매수는 계획(목표 금액 또는 가지고 갈 기간)이 온다.
         sideLabel: sell
-          ? "판 가격"
+          ? "평단가"
           : trade.planTargetPrice
             ? "목표 금액"
             : plan
               ? "가지고 갈 기간"
               : "산 가격",
         sideValue: sell
-          ? avg
-            ? won(avg)
+          ? bookAvg
+            ? won(bookAvg)
             : "비공개"
           : trade.planTargetPrice
             ? won(trade.planTargetPrice)
             : plan
               ? plan.short
-              : avg
-                ? won(avg)
+              : tradePrice
+                ? won(tradePrice)
                 : "비공개",
-        sideColor: sell && avg ? (positive ? UP : DOWN) : "#2C3245",
+        // 손익 색은 아래 `pnlColor` 가 따로 든다. 밑값까지 빨강·파랑으로 칠하면 평단가가
+        // 오르내린 것처럼 읽힌다.
+        sideColor: "#2C3245",
+        pnlText:
+          pnl === null
+            ? ""
+            : `${pnl > 0 ? "▲ " : pnl < 0 ? "▼ " : ""}${won(Math.abs(pnl))} (${
+                (pc > 0 ? "+" : pc < 0 ? "−" : "") + Math.abs(pc).toFixed(2)
+              }%)`,
+        pnlColor: pnl === null || pnl === 0 ? "#9CA1B4" : pnl > 0 ? UP : DOWN,
         shortMent: reason ? reason.short : sell ? "팔았어" : "담았어",
-        text:
-          (sell ? "팔았어. " : "담았어. ") +
-          (trade.memo || (reason ? `${reason.short} 결정했어.` : "")) +
-          planText,
+        // 본문은 **쓴 사람의 말로 시작한다** — 메모(없으면 고른 이유), 그 뒤에 계획 문장.
+        // 예전에는 앞에 `담았어. `·`팔았어. ` 를 붙였는데, 바로 위 날짜 라벨이 이미 매수·매도를
+        // 말하고 있어 같은 말을 두 번 하는 데다 아이가 쓴 첫 문장이 뒤로 밀렸다.
+        // 빈 조각이 이어 붙어 생기는 앞뒤 공백은 여기서 턴다 — 카드가 한 칸 들여 쓴 것처럼 보였다.
+        text: `${trade.memo || (reason ? `${reason.short} 결정했어.` : "")}${planText}`.trim(),
         liked: Boolean(like?.liked),
         likeCount: Number(like?.count ?? 0),
         comments: (comments[trade.id] ?? []).map((comment) => ({

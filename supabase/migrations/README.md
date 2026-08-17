@@ -12,6 +12,10 @@
 | `20260815002039_seed_family_portfolios.sql` | 찬영 가족 3계정의 보유·매수 이력·잔액을 데모 포트폴리오로 교체. **계정(`profiles`+`account`)이 없으면 먼저 만든다** — 파일 순서상 `seed_family_profiles` 보다 앞이라(아래 "순서 문제" 참고) 직접 만들어야 한다 |
 | `20260815033156_seed_family_profiles.sql` | 찬영 가족 3계정(`profiles`+`account`)을 저장소에서 재현 가능하게 함(위 파일과 같은 insert, `on conflict do nothing` 이라 중복 무해). 비밀번호는 자리표시자(`CHANGE_ME`) |
 | `20260815033308_order_lifecycle_db_ownership.sql` | 주문 생애주기(체결·대기·예약·취소·거절)를 DB가 소유. `transactions`에 상태 컬럼, `account`·`holdings`에 예약 잠금 컬럼 추가. `apply_trade` 갱신, `reserve_order`·`settle_order`·`cancel_order` 신설 |
+| `20260817062524_seed_family_feed_memos.sql` | 가족 피드에 읽을 것이 생기게 데모 계정의 `memo`·`plan_code`·댓글·좋아요를 채운다. **덮어쓰지 않는다** — `memo is null` 인 행만 `coalesce` 로 채우고 댓글·좋아요는 `not exists` 로 막아 두 번 돌려도 늘지 않는다. 라이브 거래 id 를 짚으므로 빈 DB 에서는 아무것도 하지 않는다 |
+| `20260817070631_family_feed_portfolio_only.sql` | 피드를 데모 포트폴리오와 맞춘다. 찬영엄마의 문서 밖 삼성전자 거래·보유를 지우고 잔액을 되돌리며, 찬영아빠에게 오늘 자 매도·매수를 한 건씩 넣고, 남는 문서 종목 거래의 메모·계획을 채운다. **김찬영의 문서 밖 거래는 지우지 않는다** — 8/5~8/14 에 걸쳐 있어 지우면 지난 주차 성향 카드가 함께 바뀐다. 보유 0 이라 `/api/family` 의 보유 종목 필터가 이미 걸러낸다 |
+
+이 표는 2026-08-15 이후 몇 건이 빠져 있다(`20260816013000`·`20260816150000`·`20260817000000`, 그리고 저장소에 파일이 없는 remote 기록 `20260817045325 reshape_child_weekly_behavior`). 각 작업 세션이 자기 것만 채워 넣는다.
 
 베이스 파일은 **뒤의 ALTER 2건이 아직 적용되지 않은 모양**이다. 즉 `stock_tab_views` 에는
 `duration_seconds`·`opened_at`·`closed_at` 만 있고 `stock_id`·`created_at` 은 없으며,

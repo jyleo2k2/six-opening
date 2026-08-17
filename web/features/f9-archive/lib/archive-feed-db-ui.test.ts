@@ -37,7 +37,13 @@ test("archive family feed reads and mutates server reactions", () => {
   assert.match(feed, /export function feedCards\(/u);
   assert.match(feed, /likes\[trade\.id\]/u);
   assert.match(feed, /comments\[trade\.id\]/u);
-  // 남의 체결가는 서버가 이미 지운 채 내려온다. 화면에서 되살리지 않는다.
-  assert.match(feed, /trade\.price === null \|\| trade\.price === undefined \? null/u);
+  // 서버가 안 준 값을 화면에서 지어내지 않는다. `Number(null)` 은 0 이라 형변환을 무조건
+  // 걸면 값이 없는 행이 `0원` 짜리 거래로 둔갑한다 — `null` 을 `null` 로 지나 보내야 한다.
+  assert.match(feed, /v === null \|\| v === undefined \? null : Number\(v\)/u);
+  assert.match(feed, /const tradePrice = num\(trade\.price\)/u);
   assert.match(feed, /"비공개"/u);
+  // 매도 손익은 서버가 준 평단가로만 낸다. 화면이 이전 매수 행을 뒤져 평단가를 짜 맞추면
+  // 그 사이 추가 매수·분할 매도를 놓쳐 조용히 틀린 수익률이 나온다.
+  assert.match(feed, /const bookAvg = num\(trade\.avgPrice\)/u);
+  assert.doesNotMatch(feed, /trades\.filter\([^)]*side === "buy"/u);
 });
