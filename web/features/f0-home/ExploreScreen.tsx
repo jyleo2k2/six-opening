@@ -363,10 +363,13 @@ export function ExploreScreen({
    * 넘어가는데 트랙패드로는 안 넘어가던 이유가 이것이다. 포인터를 아무리 기다려도 오지 않는다.
    *
    * 손을 뗀 순간이 없으므로 가로 델타를 모으고, 잠시 멎으면(`WHEEL_IDLE_MS`) 그때를 손 뗀
-   * 자리로 본다. 매 렌더 다시 붙이는 이유는 아래 두 함수가 **지금** 섹터·목록을 보고
-   * 판단하기 때문이다 — 처음 붙인 것을 붙들고 있으면 첫 섹터에서 굳는다.
+   * 자리로 본다. **한 손짓은 한 칸이고**(`spent`), 축은 한 번만 잠근다(`locked`) — 이벤트가
+   * 멎기 전까지는 관성 꼬리까지 전부 같은 손짓이다.
+   *
+   * 매 렌더 다시 붙이는 이유는 아래 두 함수가 **지금** 섹터·목록을 보고 판단하기 때문이다 —
+   * 처음 붙인 것을 붙들고 있으면 첫 섹터에서 굳는다.
    */
-  const wheel = useRef({ dx: 0, timer: 0, locked: false });
+  const wheel = useRef({ dx: 0, timer: 0, locked: false, spent: false });
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
@@ -379,22 +382,27 @@ export function ExploreScreen({
       // 가로로 남는 스크롤은 브라우저의 뒤로 가기 손짓이 가져간다. 막지 않으면 섹터를
       // 넘기려다 앱에서 나가 버린다. 그래서 `passive:false` 로 붙인다.
       event.preventDefault();
-      // 멎으면 손짓이 끝난 것이다. 넘어가는 중이든 아니든 이 시계는 늘 다시 감는다 —
-      // 관성 꼬리가 다 지나간 뒤에 축 잠금이 풀려야 다음 손짓을 처음부터 잰다.
+      // 멎으면 손짓이 끝난 것이다. 넘어가는 중이든 이미 넘겼든 이 시계는 늘 다시 감는다 —
+      // 관성 꼬리가 다 지나간 뒤에 풀려야 다음 손짓을 처음부터 잰다.
       window.clearTimeout(state.timer);
       state.timer = window.setTimeout(() => {
-        const { dx } = state;
+        const { dx, spent } = state;
         state.dx = 0;
         state.locked = false;
-        // 여기까지 왔다는 것은 문턱을 못 넘었다는 뜻이다. 제자리로 되돌린다.
-        if (dx !== 0) releaseTrack(dx, 0, true);
+        state.spent = false;
+        // 문턱을 못 넘고 멎었으면 제자리로 되돌린다. 이미 넘긴 손짓은 되돌릴 것이 없다.
+        if (!spent && dx !== 0) releaseTrack(dx, 0, true);
       }, WHEEL_IDLE_MS);
-      if (sliding.current) return;
+      // **한 손짓은 한 칸이다.** 트랙패드는 손을 뗀 뒤에도 관성 꼬리를 수백 ms 더 보내는데,
+      // 넘긴 뒤에도 계속 더하면 그 꼬리가 다음 칸, 그다음 칸까지 넘긴다 — 한 번 밀었는데
+      // 두세 칸씩 가던 것이 이것이다. 넘긴 손짓은 멎을 때까지 통째로 흘려보낸다.
+      if (state.spent || sliding.current) return;
       state.dx += wheelDragDelta(event.deltaX, event.deltaMode);
       // **넘는 순간 넘긴다.** 손 떼기를 기다리면 그 사이에 손짓이 끊겨 판정을 놓친다.
       if (shouldCommitWheelSwipe({ dx: state.dx, ...trackBox() })) {
         const { dx } = state;
         state.dx = 0;
+        state.spent = true;
         releaseTrack(dx, 0, true);
         return;
       }
