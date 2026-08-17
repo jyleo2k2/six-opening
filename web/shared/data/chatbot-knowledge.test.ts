@@ -15,13 +15,23 @@ assert.ok(
   ),
 );
 const DAPIE_SCREEN_TERM_IDS = [
-  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character", "season-record",
+  "mock-investing", "total-assets", "available-cash", "holdings", "pending-order", "order-cancel", "sell-proceeds", "goal-price", "holding-period", "buy-day-record", "plan-badge", "line-chart", "candle-chart", "minute-chart", "daily-chart", "weekly-chart", "delayed-price", "child-news", "season", "trade-lock", "ranking", "family-feed", "profile-abilities", "profile-definition", "profile-status", "profile-character",
 ];
 for (const id of DAPIE_SCREEN_TERM_IDS) {
   assert.equal(
     CHATBOT_KNOWLEDGE.find((entry) => entry.id === id)?.explainScript?.id,
     `term:${id}`,
   );
+}
+
+// 없는 화면에는 DAPIE 를 붙이지 않는다 (SPEC §3.3.1). 용어로 설명하면 아이가 화면에서
+// 그것을 계속 찾는다 — `season-record` 는 매수·매도·메모·열람 건수를 모아 보여주는
+// 자리가 앱에 없고, `orderbook-unsupported` 도 같은 이유로 단답만 갖는다.
+for (const id of ["season-record", "orderbook-unsupported"]) {
+  const entry = CHATBOT_KNOWLEDGE.find((e) => e.id === id);
+  assert.ok(entry, `${id}: 항목이 없다 — 어느 경로에도 안 걸려 기본 안내로 끝난다`);
+  assert.equal(entry.explainScript, undefined, `${id}: 없는 화면에 DAPIE 가 붙었다`);
+  assert.equal(entry.termLabel, undefined, `${id}: 없는 화면이 용어 사전에 올라갔다`);
 }
 
 // ── 설명 문장 예산 (SPEC §3.4.4) ────────────────────────────────────────────

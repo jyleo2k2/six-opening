@@ -39,6 +39,10 @@ import {
 
 export type { ChatContext, ProactiveSignal } from "../../../shared/types/chatbot";
 
+// `season-record` 는 DAPIE 가 없어진 뒤에도 **남겨 둔다.** 이 분기가 본인 데이터 도구보다
+// 먼저 return 하는 것이 "시즌 기록이 뭐야?" 를 단답으로 보내는 유일한 길이다 — 빼 보니
+// `own_archive` 도구가 먼저 잡아 route 가 `tool` 로 바뀌었다. 아래 조립은 스크립트가
+// 없으면 `explainScript` 를 붙이지 않으므로, 단답과 아카이브 버튼만 나간다.
 const EARLY_SCREEN_TERM_IDS = new Set([
   "goal-price",
   "buy-day-record",
