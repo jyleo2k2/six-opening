@@ -168,7 +168,7 @@ const timeAgo = (ts: string, now: number) => {
 };
 
 /**
- * 거래 피드 — 최신순 12건. 필터가 걸리면 그 구성원 것만 남는다.
+ * 거래 피드 — 서버에서 받아 누적한 페이지 전체. 필터가 걸리면 그 구성원 것만 남는다.
  *
  * 매수는 보유 계획과 목표가를, 매도는 계획 준수 여부와 변경 이유를 덧붙인다(F2 SPEC §7.1).
  * 예전에는 `memo` 에 이유 코드를 그대로 넣어 카드에 `buy_news` 가 찍혔다 — 이제 진짜 메모가 온다.
@@ -190,7 +190,6 @@ export function feedCards(
     })
     .slice()
     .sort((a, b) => String(b.tradedAt).localeCompare(String(a.tradedAt)))
-    .slice(0, 12)
     .map((trade) => {
       const member = byUser.get(String(trade.userId)) as FamilyRow;
       const sell = trade.side === "sell";
@@ -310,13 +309,14 @@ export type Holding = { code: string; qty: number; avg: number };
  * 수익률 탭 머리 카드 — 보고 있는 대상의 평가·원금·현금. 본인 계좌만 금액을 안다.
  *
  * `totalNumber` 는 단위를 뗀 숫자다. 카드가 `원` 을 따로 작게 붙이기 때문이다.
- * **출금가능금액은 예수금과 같은 값**이다 — 모의투자라 결제 대기 중인 돈이 없다.
+ * 예수금에는 예약 주문이 잠근 현금도 들어가고, 출금 가능 금액에서는 그만큼 뺀다.
  */
 export function returnSummary(
   cash: number,
   holdings: Holding[],
   prices: Record<string, number>,
   now = new Date(),
+  reservedCash = 0,
 ) {
   let value = 0;
   let cost = 0;
@@ -334,9 +334,9 @@ export function returnSummary(
     pnlText: (pnl > 0 ? "▲ " : pnl < 0 ? "▼ " : "") + won(Math.abs(pnl)),
     // 손익이 0 이면 빨강도 파랑도 아니다. 아직 아무것도 안 산 계좌가 "본전"으로 붉게 뜨면 안 된다.
     pctColor: pnl > 0 ? UP : pnl < 0 ? DOWN : "#9CA1B4",
-    totalNumber: Math.round(cash + value).toLocaleString("ko-KR"),
-    totalText: won(cash + value),
-    cashText: won(cash),
+    totalNumber: Math.round(cash + reservedCash + value).toLocaleString("ko-KR"),
+    totalText: won(cash + reservedCash + value),
+    cashText: won(cash + reservedCash),
     withdrawText: won(cash),
     settleText: `결제기준 ${pad(now.getMonth() + 1)}.${pad(now.getDate())}(${day}) 15:30`,
   };

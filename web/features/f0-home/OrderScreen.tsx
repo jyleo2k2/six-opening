@@ -8,12 +8,11 @@ import { CHANGES, PLANS, REASONS, SELL_REASONS, choiceOf } from "../../shared/da
 import {
   isRegularMarketOpen,
   nextOpeningDate,
-  reservedSellQty,
 } from "../f2-trade/lib/scheduled-orders.js";
 import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import { parseBehaviorEvent } from "./lib/prototype-bridge";
-import { pendingCards, won } from "./lib/portfolio-view";
+import { availableHoldingQty, pendingCards, reservedHoldingQty, won } from "./lib/portfolio-view";
 import { flushTabViews } from "./lib/tab-views";
 import {
   appendQtyKey,
@@ -37,6 +36,10 @@ import type { TutorialStage } from "./lib/tutorial-steps";
 import { useStockLive } from "./lib/use-universe";
 import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
 import { useAccount } from "./lib/use-account";
+import {
+  orderStageFromChatStep,
+  type ChatOrderRequest,
+} from "./screen-route";
 
 /**
  * 매수·매도 화면. `ui-src/screens/buy.html`·`sell.html` 과 그 렌더 로직을 그대로 옮겨 왔다.
@@ -243,6 +246,7 @@ export function OrderScreen({
   code,
   side,
   account,
+  chatOrderRequest,
   onLeave,
   onChatContext,
   onStage,
@@ -250,6 +254,7 @@ export function OrderScreen({
   code: string;
   side: "buy" | "sell";
   account: WalletAccountId;
+  chatOrderRequest?: ChatOrderRequest | null;
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
   /**
@@ -264,6 +269,7 @@ export function OrderScreen({
   const recordEvent = useChatBehaviorStore((s) => s.recordEvent);
 
   const [step, setStep] = useState(1);
+  const handledChatOrderRequest = useRef(0);
   useEffect(() => {
     onStage?.(`order-${step}` as TutorialStage);
   }, [step, onStage]);
@@ -320,8 +326,7 @@ export function OrderScreen({
   // 매도 초안은 지갑을 읽은 뒤에야 만들 수 있다 — 팔 수 있는 수량(예약 제외)이 기본값이다.
   useEffect(() => {
     if (side !== "sell" || sellDraft || !me) return;
-    const held = me.holdings.find((h) => h.code === code);
-    const available = Math.max(0, (held?.qty ?? 0) - reservedSellQty(me.pending || [], code));
+    const available = availableHoldingQty(me, code);
     setSellDraftState(blankSellDraft(available));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [side, sellDraft, me === null]);
@@ -363,7 +368,7 @@ export function OrderScreen({
         code,
         draft,
         price,
-        reservedQty: reservedSellQty(current.pending || [], code),
+        reservedQty: reservedHoldingQty(current, code),
         seed: SEED,
         sellDraft,
         side,
@@ -374,6 +379,49 @@ export function OrderScreen({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, side, stockName, account, wallet, price, draft, sellDraft, onChatContext]);
   useEffect(() => () => onChatContext(null), [onChatContext]);
+
+  // 챗봇의 주문 단계 지시는 현재 초안을 버리지 않는다. 앞 단계 값이 실제로 준비된
+  // 경우에만 2단계로 가고, 새 주문·불완전한 초안은 1단계에서 필요한 값부터 받는다.
+  useEffect(() => {
+    if (
+      !chatOrderRequest ||
+      handledChatOrderRequest.current === chatOrderRequest.id ||
+      !me ||
+      (side === "sell" && !sellDraft)
+    ) {
+      return;
+    }
+
+    handledChatOrderRequest.current = chatOrderRequest.id;
+    let quantityReady = false;
+    let confirmationReady = false;
+    if (side === "buy") {
+      const math = buyMath(draft, price, me.cash);
+      quantityReady = math.canConfirm;
+      confirmationReady = quantityReady && buyStepOk(2, draft, math);
+    } else if (sellDraft) {
+      const holding = me.holdings.find((item) => item.code === code);
+      const math = sellMath(
+        sellDraft,
+        price,
+        holding?.qty ?? 0,
+        reservedHoldingQty(me, code),
+      );
+      quantityReady = math.canConfirm;
+      confirmationReady = quantityReady && Boolean(sellDraft.reason);
+    }
+
+    setStep(
+      orderStageFromChatStep(
+        chatOrderRequest.step,
+        quantityReady,
+        confirmationReady,
+      ),
+    );
+    setShowPad(false);
+    setOrderSheet(false);
+    setOrderError(null);
+  }, [chatOrderRequest, code, draft, me, price, sellDraft, side]);
 
   if (!wallet || !me || !stock || (side === "sell" && !sellDraft)) return <PhoneFrame />;
 
@@ -489,8 +537,8 @@ export function OrderScreen({
   );
 
   // ── 구매·판매·대기 탭과 대기 목록 시트 — `ui-src` 의 새 디자인(PR #252)을 옮겨 왔다 ──
-  const ownedQty = me.holdings.find((h) => h.code === code)?.qty ?? 0;
-  const sellableQty = Math.max(0, ownedQty - reservedSellQty(me.pending || [], code));
+  const ownedQty = me.holdings.find((holding) => holding.code === code)?.qty ?? 0;
+  const sellableQty = availableHoldingQty(me, code);
   const pickTabBuy = () => {
     if (locked) return;
     if (side !== "buy") {
@@ -744,7 +792,7 @@ export function OrderScreen({
         finishBuy(saved.transaction_id, true);
         // 상세·차트·뉴스에서 쌓인 유효 열람을 이 매수와 묶어 보낸다 (`app.html` 과 같은 시점).
         // 거절된 주문에는 붙이지 않는다 — 버퍼는 다음 체결까지 남는다.
-        flushTabViews(code, syncable);
+        void flushTabViews(code, syncable);
         notifyBehavior({ kind: "trade_filled", stockId: `KRX:${code}`, side: "buy" });
         // 서버가 잔액의 원본이다. 완료 화면을 띄운 뒤 뒤에서 맞춘다 — 기다리지 않는다.
         refresh();
@@ -1258,7 +1306,7 @@ export function OrderScreen({
     const heldAvg = held?.avg ?? 0;
     const heldPnl = held ? (price - heldAvg) * heldQty : 0;
     const heldPct = held && heldAvg > 0 ? ((price - heldAvg) / heldAvg) * 100 : 0;
-    const reserved = reservedSellQty(me.pending || [], code);
+    const reserved = reservedHoldingQty(me, code);
     const math = sellMath(sellDraft, price, heldQty, reserved);
     // 회고 재료는 서버 체결 기록이다. 조회 전이거나 실패하면 `buy` 가 없어 판정도 없다.
     const { buy: buyRec, firstSell } = sellRetrospect(history);

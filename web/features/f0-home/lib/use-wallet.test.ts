@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { isRegularMarketOpen } from "../../f2-trade/lib/scheduled-orders.js";
-import { canTrade, invalidateOpenOrders, isSchoolTime, loadOpenOrders } from "./use-wallet";
+import {
+  canTrade,
+  invalidateOpenOrders,
+  isSchoolTime,
+  loadOpenOrders,
+  shouldRefreshAccount,
+} from "./use-wallet";
 
 // `isRegularMarketOpen`은 절대 시각을 KST로 환산해 비교한다(scheduled-orders.js).
 // 로컬 타임존으로 필드를 만들면 UTC 러너(CI)에서 9시간 어긋나므로, UTC 필드에서
@@ -103,6 +109,10 @@ async function openOrdersCacheTests() {
   nextBody = { orders: [], settled: [{ id: "1" }] };
   const settled = (await loadOpenOrders()) as { settled?: unknown[] };
   assert.equal(settled.settled?.length, 1);
+  assert.equal(shouldRefreshAccount({ orders: [], settled: [{ id: "1" }] }), true);
+  // 내가 체결하지 못했어도 동시 요청이 먼저 정산해 계좌가 바뀐 경우다.
+  assert.equal(shouldRefreshAccount({ orders: [], settled: [], accountChanged: true }), true);
+  assert.equal(shouldRefreshAccount({ orders: [], settled: [], accountChanged: false }), false);
 
   // 그래서 `refresh()` 가 계좌와 주문 캐시를 **둘 다** 비우는지 소스로 못 박는다.
   const source = readFileSync(new URL("./use-wallet.ts", import.meta.url), "utf8");

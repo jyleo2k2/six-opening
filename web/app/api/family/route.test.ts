@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildFamilyData, type FamilyDataDeps } from "./route";
+import { buildFamilyData, parseFamilyOffset, type FamilyDataDeps } from "./route";
 import type { AbilityCard } from "../../../shared/types/behavior-profile";
 import type { Profile } from "../supabase";
 
@@ -18,6 +18,8 @@ const profiles: Profile[] = [
 
 let profileFilter = "";
 let transactionFilter = "";
+let transactionOffset = "";
+let transactionLimit = "";
 const deps: FamilyDataDeps = {
   findProfileById: async (id) => profiles.find((profile) => profile.id === id) ?? null,
   selectProfiles: async (params) => {
@@ -26,6 +28,8 @@ const deps: FamilyDataDeps = {
   },
   selectTransactions: async (params) => {
     transactionFilter = params.user_id;
+    transactionOffset = params.offset;
+    transactionLimit = params.limit;
     return [
       {
         id: "mine", user_id: 1, side: "buy", trade_price: 70000, trade_quantity: 2,
@@ -58,6 +62,8 @@ async function main() {
   assert.ok(family);
   assert.equal(profileFilter, "eq.찬영가족");
   assert.equal(transactionFilter, "in.(1,2,3)");
+  assert.equal(transactionOffset, "0");
+  assert.equal(transactionLimit, "51");
   assert.deepEqual(family.members.map((member) => member.name), ["찬영", "찬영엄마", "찬영아빠"]);
   assert.equal(family.members[2].behavior?.samples.buys, 3);
 
@@ -112,6 +118,45 @@ async function main() {
   assert.equal(family.trades[1].planChangedReason, "change_price_emotion");
   assert.equal(family.trades[1].reasonCode, null);
   assert.equal(family.trades[1].memo, null);
+  assert.deepEqual(family.page, { offset: 0, limit: 50, hasMore: false, nextOffset: null });
+
+  const fiftyOne = Array.from({ length: 51 }, (_, index) => ({
+    id: `page-${index}`,
+    user_id: 1,
+    side: "buy" as const,
+    trade_price: 70_000,
+    trade_quantity: 1,
+    trade_reason: null,
+    plan_code: null,
+    plan_target_price: null,
+    memo: null,
+    plan_match: null,
+    plan_changed_reason: null,
+    created_at: `2026-08-14T00:${String(index).padStart(2, "0")}:00.000Z`,
+    stocks: { stock_code: "005930", stock_name: "삼성전자" },
+  }));
+  const firstPage = await buildFamilyData(1, {
+    ...deps,
+    selectTransactions: async (params) => {
+      transactionOffset = params.offset;
+      return fiftyOne;
+    },
+  });
+  assert.equal(firstPage?.trades.length, 50);
+  assert.deepEqual(firstPage?.page, { offset: 0, limit: 50, hasMore: true, nextOffset: 50 });
+
+  await buildFamilyData(1, {
+    ...deps,
+    selectTransactions: async (params) => {
+      transactionOffset = params.offset;
+      return [];
+    },
+  }, 50);
+  assert.equal(transactionOffset, "50");
+  assert.equal(parseFamilyOffset(null), 0);
+  assert.equal(parseFamilyOffset("50"), 50);
+  assert.equal(parseFamilyOffset("-1"), null);
+  assert.equal(parseFamilyOffset("abc"), null);
 
   const solo: Profile = { ...profiles[0], id: 9, family_tag: null };
   let selectedProfiles = false;

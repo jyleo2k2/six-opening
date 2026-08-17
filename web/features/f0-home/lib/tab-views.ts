@@ -25,16 +25,35 @@ export function takeTabViews(code: string): TabView[] {
 }
 
 /**
- * 매수 체결 때 부른다. `app.html` 의 `flushTabViews` 와 같은 규칙이다 —
- * 로그인 역할이 맞지 않으면(`canPost=false`) 보내지 않고 **버리기만** 한다.
- * 남겨 두면 다음 로그인 사용자의 체결에 남의 열람이 딸려 간다.
+ * 매수 체결 때 부른다. 로그인 역할이 맞지 않으면(`canPost=false`) 보내지 않고
+ * **버리기만** 한다. 남겨 두면 다음 로그인 사용자의 체결에 남의 열람이 딸려 간다.
+ *
+ * 보낼 수 있을 때는 서버가 2xx 로 확인한 뒤에만 버퍼에서 지운다. 전송 중 새로 쌓인
+ * 열람은 이번 묶음에 없었으므로 그대로 남겨 다음 체결 때 보낸다.
  */
-export function flushTabViews(code: string, canPost: boolean) {
-  const views = takeTabViews(code);
-  if (!canPost || views.length === 0) return;
-  fetch("/api/tab-view", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ stock_code: code, views }),
-  }).catch(() => {});
+export async function flushTabViews(code: string, canPost: boolean): Promise<boolean> {
+  if (!canPost) {
+    takeTabViews(code);
+    return false;
+  }
+
+  const views = (buffer[code] ?? []).slice();
+  if (views.length === 0) return true;
+
+  try {
+    const response = await fetch("/api/tab-view", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stock_code: code, views }),
+    });
+    if (!response.ok) return false;
+
+    const sent = new Set(views);
+    const remaining = (buffer[code] ?? []).filter((view) => !sent.has(view));
+    if (remaining.length > 0) buffer[code] = remaining;
+    else delete buffer[code];
+    return true;
+  } catch {
+    return false;
+  }
 }

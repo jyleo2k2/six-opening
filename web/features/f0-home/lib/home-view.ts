@@ -18,10 +18,16 @@ export type AccountUser = {
   name?: string | null;
   /** 총 현금(미체결 주문이 잠근 몫 포함). 총자산 = 이 값 + 보유 평가금액(`route.ts` 규칙과 같다). */
   balance?: number | null;
+  /** 미체결 매수 주문이 잠근 현금. 화면 지갑이 주문 목록 없이도 총자산을 보존한다. */
+  reserved?: number | null;
+  /** 새 주문에 쓸 수 있는 현금 = `balance` − `reserved`. */
+  available?: number | null;
   holdings: {
     stock_code: string | null;
     stock_name: string | null;
     quantity: number;
+    reserved_quantity?: number;
+    available_quantity?: number;
     avg_price: number;
   }[];
 };

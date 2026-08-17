@@ -46,6 +46,20 @@ async function main() {
   assert.equal(tradeResult.status, "ok");
   assert.equal(tradeResult.response.text.includes("2개"), true);
 
+  const cappedTradeResult = await createReadOnlyToolRunner({
+    ...dataSource,
+    getTradeRecordSummary: async () => ({
+      recordCount: 200,
+      recordCountIsExact: false,
+      latestReasonLabel: null,
+    }),
+  })("own_trade_records", { screen: "archive" }, session);
+  assert.equal(
+    cappedTradeResult.response.text,
+    "투자 기록이 200개보다 많아요. 최근 200개를 확인했어요.",
+  );
+  assert.deepEqual(cappedTradeResult.evidence, ["trade-record-count-at-least:200"]);
+
   // 성향은 값을 읽어 주지 않고 성향 화면으로 보낸다. 저장된 요약이 있어도 마찬가지다.
   const profileResult = await runTool("own_behavior_profile", { screen: "archive" }, session);
   assert.equal(profileResult.status, "ok");

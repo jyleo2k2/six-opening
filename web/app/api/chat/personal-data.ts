@@ -34,9 +34,9 @@ const REASON_LABEL: Record<string, string> = {
   sell_liquidity: "다른 데 쓸 돈이 필요해서",
 };
 
-const MAX_TRANSACTION_ROWS = 200;
+export const MAX_TRANSACTION_ROWS = 200;
 
-type TransactionRow = { trade_reason: string | null; created_at: string };
+export type TransactionRow = { trade_reason: string | null; created_at: string };
 type HoldingRow = {
   quantity: number | string;
   avg_price: number | string;
@@ -47,6 +47,23 @@ type HoldingRow = {
 function symbolOf(stockId: string | undefined) {
   const match = /^KRX:(\d{6})$/.exec(stockId ?? "");
   return match ? match[1] : null;
+}
+
+export function summarizeTradeRecords(rows: TransactionRow[]): TradeRecordSummary | null {
+  if (rows.length === 0) return null;
+  const visible = rows.slice(0, MAX_TRANSACTION_ROWS);
+  // 승인 목록에 없는 코드는 라벨을 만들지 않는다. 손으로 넣은 시험 행과
+  // 인코딩이 깨진 값이 그대로 아이 화면에 나가면 안 된다.
+  const latestReasonLabel =
+    visible
+      .map((row) => REASON_LABEL[String(row.trade_reason ?? "")])
+      .find((label) => Boolean(label)) ?? null;
+
+  return {
+    recordCount: visible.length,
+    recordCountIsExact: rows.length <= MAX_TRANSACTION_ROWS,
+    latestReasonLabel,
+  };
 }
 
 export function createSupabasePersonalData(
@@ -60,18 +77,10 @@ export function createSupabasePersonalData(
       select: "trade_reason,created_at",
       user_id: `eq.${userId}`,
       order: "created_at.desc",
-      limit: String(MAX_TRANSACTION_ROWS),
+      // 한 건을 더 읽어 200이 전체 개수인지, 조회 상한인지 구분한다.
+      limit: String(MAX_TRANSACTION_ROWS + 1),
     });
-    if (rows.length === 0) return null;
-
-    // 승인 목록에 없는 코드는 라벨을 만들지 않는다. 손으로 넣은 시험 행과
-    // 인코딩이 깨진 값이 그대로 아이 화면에 나가면 안 된다.
-    const latestReasonLabel =
-      rows
-        .map((row) => REASON_LABEL[String(row.trade_reason ?? "")])
-        .find((label) => Boolean(label)) ?? null;
-
-    return { recordCount: rows.length, latestReasonLabel };
+    return summarizeTradeRecords(rows);
   }
 
   async function getHoldingSummary(

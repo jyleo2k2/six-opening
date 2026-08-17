@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { ChatContext } from "../../shared/types/chatbot";
+import type { ChatContext, ChatUiAction } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
 import {
   getPrototypeScreenRect,
@@ -16,7 +16,13 @@ import { HomeScreen } from "./HomeScreen";
 import { OrderScreen } from "./OrderScreen";
 import { PortfolioScreen } from "./PortfolioScreen";
 import { RankingScreen } from "./RankingScreen";
-import { pathFromRoute, routeFromPath, type ScreenRoute } from "./screen-route";
+import {
+  pathFromRoute,
+  routeFromChatAction,
+  routeFromPath,
+  type ChatOrderRequest,
+  type ScreenRoute,
+} from "./screen-route";
 import { TutorialOverlay } from "./TutorialOverlay";
 import type { TutorialStage } from "./lib/tutorial-steps";
 
@@ -49,6 +55,9 @@ export function ConnectedPrototype({
    */
   const [tutorialOn, setTutorialOn] = useState(false);
   const [stage, setStage] = useState<TutorialStage | undefined>(undefined);
+  const orderRequestId = useRef(0);
+  /** 챗봇이 지정한 주문 단계. 주소로 표현할 수 없어 주문 화면에 한 번만 전달한다. */
+  const [chatOrderRequest, setChatOrderRequest] = useState<ChatOrderRequest | null>(null);
 
   // 챗봇 시트와 폰 프레임은 화면 사각형에 딱 맞아야 한다. 기하의 원본은 `PROTOTYPE_PHONE`
   // 상수 하나이고, 옮겨 온 화면(`PhoneFrame`)도 같은 함수로 자기 자리를 잡는다.
@@ -80,9 +89,10 @@ export function ConnectedPrototype({
     window.history.replaceState(null, "", path);
   };
 
-  const openRoute = (next: ScreenRoute) => {
+  const openRoute = (next: ScreenRoute, orderRequest: ChatOrderRequest | null = null) => {
     setOverlay(next);
     setStage(undefined);
+    setChatOrderRequest(next.screen === "order" ? orderRequest : null);
     writePath(next);
   };
 
@@ -90,6 +100,14 @@ export function ConnectedPrototype({
   const leaveToPath = (path: string) => {
     const next = routeFromPath(path);
     if (next) openRoute(next);
+  };
+
+  const openChatAction = (action: ChatUiAction) => {
+    const next = routeFromChatAction(action, overlay);
+    const orderRequest = next.screen === "order"
+      ? { id: ++orderRequestId.current, step: action.orderStep }
+      : null;
+    openRoute(next, orderRequest);
   };
 
   // 브라우저 뒤로·앞으로 가기.
@@ -139,6 +157,7 @@ export function ConnectedPrototype({
           {overlay.screen === "order" && (
             <OrderScreen
               account={account}
+              chatOrderRequest={chatOrderRequest}
               code={overlay.code}
               // 종목·방향이 바뀌면 단계·초안을 처음부터 시작한다.
               key={`${overlay.side}-${overlay.code}`}
@@ -154,7 +173,11 @@ export function ConnectedPrototype({
         className="prototype-chat-overlay"
         style={{ clipPath: phoneScreenClipPath(screenRect) }}
       >
-        <F10ChatbotDemo context={overlayContext ?? HOME_CONTEXT} screenRect={screenRect} />
+        <F10ChatbotDemo
+          context={overlayContext ?? HOME_CONTEXT}
+          onUiAction={openChatAction}
+          screenRect={screenRect}
+        />
       </div>
       {/*
         튜토리얼은 챗봇 오버레이 위, 프레임 아래다. 역할이 갈린다 — 코치마크는 지금 이

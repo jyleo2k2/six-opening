@@ -11,6 +11,8 @@ import type { ChatSession } from "./session";
 
 export type TradeRecordSummary = {
   recordCount: number;
+  /** false면 조회 상한 밖의 행도 확인됐으므로 전체 개수라고 단정하지 않는다. */
+  recordCountIsExact?: boolean;
   latestReasonLabel: string | null;
 };
 
@@ -140,11 +142,10 @@ export function createReadOnlyToolRunner(
     if (tool === "own_trade_records") {
       const summary = await dataSource.getTradeRecordSummary(session.userId);
       if (!summary) {
-        // 주문의 서버 저장은 best-effort 라 방금 한 거래가 여기 없을 수 있다.
-        // "기록이 없다" 고 단정하지 않고 화면을 원본으로 안내한다.
+        // 조회 실패와 기록 0건을 구분할 수 없으므로 "없다" 고 단정하지 않는다.
         return unavailable(
           tool,
-          "서버에 저장된 거래 기록을 찾지 못했어요. 방금 한 거래는 아카이브 화면에 먼저 보이니 거기서 확인해 주세요.",
+          "저장된 거래 기록을 지금 확인하지 못했어요. 아카이브 화면에서 확인해 주세요.",
           "archive",
           "return",
         );
@@ -153,7 +154,9 @@ export function createReadOnlyToolRunner(
         tool,
         status: "ok",
         response: {
-          text: `투자 기록은 ${summary.recordCount}개예요.${summary.latestReasonLabel ? ` 가장 최근에는 “${summary.latestReasonLabel}”라고 이유를 남겼어요.` : ""}`,
+          text: `${summary.recordCountIsExact === false
+            ? `투자 기록이 ${summary.recordCount}개보다 많아요. 최근 ${summary.recordCount}개를 확인했어요.`
+            : `투자 기록은 ${summary.recordCount}개예요.`}${summary.latestReasonLabel ? ` 가장 최근에는 “${summary.latestReasonLabel}”라고 이유를 남겼어요.` : ""}`,
           // 거래 하나하나와 그때 고른 이유는 아카이브 **수익률 탭**의 피드에 있다.
           // 탭을 비워 보내면 화면이 성향 탭으로 폴백해 엉뚱한 곳이 열린다.
           uiAction: {
@@ -163,7 +166,9 @@ export function createReadOnlyToolRunner(
             label: "거래 기록 보기",
           },
         },
-        evidence: [`trade-record-count:${summary.recordCount}`],
+        evidence: [
+          `${summary.recordCountIsExact === false ? "trade-record-count-at-least" : "trade-record-count"}:${summary.recordCount}`,
+        ],
       };
     }
 

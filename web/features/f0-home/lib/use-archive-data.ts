@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FeedComment, FeedLike, FamilyTotal, FamilyTrade } from "./archive-feed";
 import type { FamilyRow, SeasonCards } from "./archive-profile-view";
 
@@ -21,6 +21,12 @@ export type ArchiveData = {
     members: FamilyRow[];
     trades: FamilyTrade[];
     total?: FamilyTotal;
+    page?: {
+      offset: number;
+      limit: number;
+      hasMore: boolean;
+      nextOffset: number | null;
+    };
   } | null;
   comments: Record<string, FeedComment[]>;
   likes: Record<string, FeedLike>;
@@ -33,17 +39,16 @@ export function useArchiveData() {
   const [family, setFamily] = useState<ArchiveData["family"]>(null);
   const [comments, setComments] = useState<Record<string, FeedComment[]>>({});
   const [likes, setLikes] = useState<Record<string, FeedLike>>({});
+  const [loadingMore, setLoadingMore] = useState(false);
+  const familyRef = useRef<ArchiveData["family"]>(null);
+  const loadingMoreRef = useRef(false);
 
-  /** 거래 id 별 댓글·좋아요를 한 번에 읽는다. 카드마다 부르면 12번 왕복한다. */
+  /** 한 페이지(최대 50건)의 댓글·좋아요를 묶어 읽고 기존 페이지 뒤에 합친다. */
   const loadReactions = useCallback((trades: FamilyTrade[]) => {
     const ids = [...new Set(trades.map((t) => t.id).filter(Boolean))];
-    if (!ids.length) {
-      setComments({});
-      setLikes({});
-      return;
-    }
+    if (!ids.length) return Promise.resolve();
     const query = encodeURIComponent(ids.join(","));
-    Promise.all([
+    return Promise.all([
       fetch(`/api/comments?transaction_id=${query}`, { cache: "no-store" }).then(json),
       fetch(`/api/likes?transaction_id=${query}`, { cache: "no-store" }).then(json),
     ])
@@ -53,12 +58,13 @@ export function useArchiveData() {
           for (const comment of commentPayload.comments as FeedComment[]) {
             grouped[comment.transactionId] = [...(grouped[comment.transactionId] ?? []), comment];
           }
-          setComments(grouped);
+          setComments((current) => ({ ...current, ...grouped }));
         }
         if (Array.isArray(likePayload?.likes)) {
-          setLikes(
-            Object.fromEntries((likePayload.likes as FeedLike[]).map((l) => [l.transactionId, l])),
+          const next = Object.fromEntries(
+            (likePayload.likes as FeedLike[]).map((like) => [like.transactionId, like]),
           );
+          setLikes((current) => ({ ...current, ...next }));
         }
       })
       .catch(() => {});
@@ -74,17 +80,48 @@ export function useArchiveData() {
         if (alive && data?.cumulative) setSeason(data);
       })
       .catch(() => {});
-    fetch("/api/family", { cache: "no-store" })
+    fetch("/api/family?offset=0", { cache: "no-store" })
       .then(json)
       .then((data) => {
         if (!alive || !data?.viewer || !Array.isArray(data.members)) return;
-        setFamily(data);
-        loadReactions(Array.isArray(data.trades) ? data.trades : []);
+        const first = { ...data, trades: Array.isArray(data.trades) ? data.trades : [] };
+        familyRef.current = first;
+        setFamily(first);
+        void loadReactions(first.trades);
       })
       .catch(() => {});
     return () => {
       alive = false;
+      familyRef.current = null;
     };
+  }, [loadReactions]);
+
+  /** 아래 끝까지 내려왔을 때만 다음 50건을 읽는다. 빠른 연속 스크롤은 한 요청으로 합친다. */
+  const loadMoreFamily = useCallback(async () => {
+    const current = familyRef.current;
+    if (!current || loadingMoreRef.current) return;
+    const nextOffset = current.page?.nextOffset;
+    if (nextOffset === null || nextOffset === undefined) return;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    try {
+      const response = await fetch(`/api/family?offset=${nextOffset}`, { cache: "no-store" });
+      const data = await json(response);
+      if (!data?.viewer || !Array.isArray(data.members) || !Array.isArray(data.trades)) return;
+
+      const known = new Set(current.trades.map((trade) => trade.id));
+      const added = (data.trades as FamilyTrade[]).filter((trade) => !known.has(trade.id));
+      const next = { ...data, trades: [...current.trades, ...added] } as NonNullable<ArchiveData["family"]>;
+      familyRef.current = next;
+      setFamily(next);
+      await loadReactions(added);
+    } catch {
+      // 기존 50건은 그대로 둔다. 다음 스크롤에서 같은 페이지를 다시 시도할 수 있다.
+    } finally {
+      loadingMoreRef.current = false;
+      setLoadingMore(false);
+    }
   }, [loadReactions]);
 
   /** 좋아요는 서버가 돌려준 개수·상태로만 갱신한다 — 눌린 수를 화면에서 세지 않는다. */
@@ -158,6 +195,9 @@ export function useArchiveData() {
     family,
     comments,
     likes,
+    loadingMore,
+    hasMore: family?.page?.hasMore ?? false,
+    loadMoreFamily,
     toggleLike,
     sendComment,
     editComment,

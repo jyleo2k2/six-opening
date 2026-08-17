@@ -1,3 +1,5 @@
+import type { ChatOrderStep, ChatUiAction } from "../../shared/types/chatbot";
+
 /**
  * 화면 ↔ 주소 매핑.
  *
@@ -80,5 +82,71 @@ export function pathFromRoute(route: ScreenRoute): string {
       return `/${route.side}/${route.code}`;
     default:
       return `/${route.screen}`;
+  }
+}
+
+function currentStockCode(route: ScreenRoute | null): string | null {
+  return route?.screen === "stock" || route?.screen === "order" ? route.code : null;
+}
+
+function actionStockCode(action: ChatUiAction, current: ScreenRoute | null): string | null {
+  const match = /^KRX:(\d{6})$/u.exec(action.stockId ?? "");
+  return match?.[1] ?? currentStockCode(current);
+}
+
+export type ChatOrderRequest = {
+  id: number;
+  step?: ChatOrderStep;
+};
+
+/**
+ * 주문 단계는 주소가 아니라 화면 안 상태다. 필요한 앞 단계 값이 있을 때만 2단계로
+ * 보내고, 새 주문이나 불완전한 초안은 1단계에서 시작한다.
+ */
+export function orderStageFromChatStep(
+  step: ChatOrderStep | undefined,
+  quantityReady: boolean,
+  confirmationReady: boolean,
+): 1 | 2 {
+  if (step === "reason" && quantityReady) return 2;
+  if (step === "confirmation" && confirmationReady) return 2;
+  return 1;
+}
+
+/** 서버가 허용한 챗봇 버튼을 현재 React 화면 주소로 바꾼다. 모델 URL은 받지 않는다. */
+export function routeFromChatAction(
+  action: ChatUiAction,
+  current: ScreenRoute | null,
+): ScreenRoute {
+  switch (action.target) {
+    case "home":
+      return { screen: "home" };
+    case "ranking":
+      return { screen: "ranking" };
+    case "portfolio":
+      return { screen: "portfolio" };
+    case "archive":
+      return action.archiveOverlay === "cards"
+        ? { screen: "archive", view: "cards" }
+        : action.archiveTab === "return"
+          ? { screen: "archive", view: "return" }
+          : { screen: "archive" };
+    case "stock": {
+      // 섹터·탐색 지시는 특정 종목보다 먼저다. `rank` 는 탐색의 기본 필터라 주소를 생략한다.
+      if (action.stockView === "explore" || action.sectorId) {
+        const sector = action.sectorId;
+        return sector && sector !== "rank" && /^[a-z]+$/u.test(sector)
+          ? { screen: "explore", sector }
+          : { screen: "explore" };
+      }
+      const code = actionStockCode(action, current);
+      return code ? { screen: "stock", code } : { screen: "explore" };
+    }
+    case "order": {
+      const code = actionStockCode(action, current);
+      if (!code) return { screen: "explore" };
+      const side = action.orderSide ?? (current?.screen === "order" ? current.side : "buy");
+      return { screen: "order", code, side };
+    }
   }
 }

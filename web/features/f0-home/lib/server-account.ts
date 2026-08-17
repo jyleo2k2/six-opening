@@ -15,8 +15,6 @@ export type ServerAccount = AccountUser & {
   name?: string | null;
   /** 총 현금. 미체결 주문이 잠근 몫까지 포함한다 — 주문 한도가 아니다. */
   balance?: number | null;
-  /** 주문에 쓸 수 있는 현금 = `balance` − 잠긴 현금. 화면의 `cash` 는 이 값이다. */
-  available?: number | null;
 };
 
 export function applyServerAccount(
@@ -33,6 +31,10 @@ export function applyServerAccount(
       code: row.stock_code as string,
       qty: row.quantity,
       avg: row.avg_price,
+      reservedQty:
+        typeof row.reserved_quantity === "number" ? row.reserved_quantity : undefined,
+      availableQty:
+        typeof row.available_quantity === "number" ? row.available_quantity : undefined,
     }));
 
   const prev = acc[role];
@@ -50,10 +52,11 @@ export function applyServerAccount(
       ...prev,
       name: user.name ?? prev?.name,
       cash,
+      reservedCash: typeof user.reserved === "number" ? user.reserved : undefined,
       holdings,
-      // 미체결 주문도 서버가 원본이다(`GET /api/orders`). 그 목록을 못 읽었을 때만 저장소
-      // 값을 남긴다 — 조회 한 번 실패했다고 예약이 사라진 것처럼 보이면 안 된다.
-      pending: pending ?? prev?.pending ?? [],
+      // 목록 조회가 실패해도 예약금·예약수량은 `/api/account` 값으로 보존한다. 시드 주문을
+      // 섞으면 서버에 없는 주문이 나타나므로 목록 자체는 빈 배열로 둔다.
+      pending: pending ?? [],
     },
   };
 }

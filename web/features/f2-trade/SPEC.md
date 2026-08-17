@@ -172,11 +172,11 @@ type TradeHistoryRow = {
 
 - 접수는 `POST /api/orders` 하나다. `reserve_order`가 한 트랜잭션에서 매수는 현금(`account.reserved_balance`), 매도는 수량(`holdings.reserved_quantity`)을 잠근다. 잔고를 직접 깎지 않으므로 예약·취소가 총자산을 바꾸지 않는다.
 - **접수가 실패하면 주문은 없던 일이다.** 화면은 완료 화면으로 넘어가지 않고 확인 단계에 남아 거절을 알린다. 로컬 현금·보유·`pending`은 어느 쪽으로도 움직이지 않는다.
-- 조회는 `GET /api/orders`다. 응답을 `pendingFromServerOrders()`가 화면이 쓰던 `pending` 모양(`kind`·`side`·`reservedAmount`·`reservedQty`·`reservationMode`)으로 바꾸므로, 사용 가능 수량 계산과 카드 렌더는 그대로다.
-- 정산도 그 조회가 겸한다. 예약일 이후 `volume > 0`인 첫 일봉만 실제 거래가 확인된 날로 인정하고 그 봉의 `open`으로 `settle_order`를 부른다. 휴일·거래정지·데이터 실패에는 체결하지 않는다. `settle_order`는 멱등이라 같은 주문을 두 번 불러도 중복 체결되지 않는다.
+- 조회는 `GET /api/orders`다. 응답을 `pendingFromServerOrders()`가 화면이 쓰는 `pending` 모양(`kind`·`side`·`reservedAmount`·`reservedQty`·`reservationMode`)으로 바꿔 대기 카드에 쓴다. 주문가능 현금과 매도 가능 수량은 `/api/account`의 `available`·`available_quantity`가 원본이며, 주문 목록 조회가 실패했을 때도 예약 자원이 사라지지 않는다.
+- 정산도 그 조회가 겸한다. 예약일 이후 `volume > 0`인 첫 일봉만 실제 거래가 확인된 날로 인정하고 그 봉의 `open`으로 `settle_order`를 부른다. 휴일·거래정지·데이터 실패에는 체결하지 않는다. `settle_order`는 멱등이라 같은 주문을 두 번 불러도 중복 체결되지 않는다. 만기 주문을 본 요청은 자신이 정산에 성공하지 못했어도 목록을 다시 읽는다 — 다른 동시 요청이 먼저 정산했을 수 있기 때문이다. 전후 목록이 달라졌을 때만 `accountChanged`로 계좌 재조회를 지시해 반복 조회를 막는다.
 - 금액 매수는 예약 금액 전부를 `예약 금액 / 시가`의 소수 수량으로 바꾼다. 수량 매수는 실제 시가 필요액이 예약액보다 크면 거절하고 전액 반환하며, 작으면 차액을 반환한다. 이 규칙은 이제 `settle_order` SQL이 소유한다.
 - 취소는 `DELETE /api/orders?id=`다. `cancel_order`가 `user_id`까지 대조해 남의 주문을 못 지우게 하고, 잠긴 자원을 같은 트랜잭션에서 푼다. 화면은 취소 뒤 목록을 다시 읽는다.
-- 화면 상태에는 **접수 뒤 서버에서 읽어 온 목록만** 들어간다. `localStorage`의 `acc.{account}.pending`은 조회에 실패했을 때만 남는 캐시이며, 매수·매도 화면은 여기에 쓰지 않는다.
+- 화면 상태에는 **접수 뒤 서버에서 읽어 온 목록만** 들어간다. 브라우저 예약 캐시는 없다. 목록을 못 읽으면 대기 카드는 비우되 `/api/account`가 준 `reserved`·`reserved_quantity`로 총자산과 새 주문 한도를 보존한다.
 
 ## 7. 백엔드 연결 상태
 
@@ -186,14 +186,14 @@ type TradeHistoryRow = {
 | `GET /api/universe/data` | 연결 | 5초 현재가·스파크 갱신 |
 | `GET /api/quote/{symbol}/chart` | 연결 | 차트 봉 데이터 |
 | `GET /api/news`, `GET /api/news/{id}` | 연결 | 게시 상태 뉴스만 공개 |
-| `GET /api/account` | 연결 | 로그인 직후와 매매 성공 직후 `applyServerHoldings`가 서버 잔액·보유를 `state.acc[role]`에 반영. 화면의 `cash`는 총 현금(`balance`)이 아니라 **주문가능금액(`available` = `balance` − 잠긴 현금)**이다. 로그인한 역할만 덮어쓰고 반대쪽 로컬 데모 데이터는 그대로 둠 |
-| `POST /api/trade` | 조건부 연결 | 정규장 시장가와 장외 예약 시장가의 실제 체결만 best-effort 전송. 응답 실패 시 로컬 거래는 유지되고 서버 재조회는 하지 않음 |
-| `POST /api/tab-view` | 조건부 연결 | 종목별 기업정보·차트·뉴스 방문 중 10초 이상인 것만 서버가 다시 세어 매수 체결 시 최종 개수 저장 |
+| `GET /api/account` | 연결 | 로그인 직후와 매매 성공 직후 `applyServerAccount`가 서버 잔액·보유를 지갑의 로그인 역할에 반영. `cash`는 **주문가능금액(`available`)**, `reservedCash`는 잠긴 현금이며, 보유마다 총수량·`reservedQty`·`availableQty`를 함께 보존한다. 총자산은 `available + reserved + 보유 평가액`이고 예약 필드가 없는 구형 응답만 주문 목록으로 보완한다 |
+| `POST /api/trade` | 조건부 연결 | 정규장 시장가 실제 체결. 서버가 `transaction_id`를 확정해야 지갑과 완료 화면을 바꾸며 실패·미전송은 주문 거절로 끝남 |
+| `POST /api/tab-view` | 조건부 연결 | 종목별 기업정보·차트·뉴스 방문 중 10초 이상인 것만 서버가 다시 세어 매수 체결 시 저장. **2xx 확인 뒤에만 보낸 열람을 버퍼에서 지우며**, 실패하면 다음 체결을 위해 남김 |
 | `GET /api/profile/season-cards` | 연결 | 아카이브 진입 시 캐릭터 카드와 지난 주차 카드를 조회. **성향 값의 유일한 원본이다** — `GET /api/profile/behavior`는 2026-08-16 삭제됐다 (F9 SPEC §3.2·§6.11) |
 | `GET·POST·DELETE /api/orders` | 연결 | 미체결 주문의 유일한 원본(§6.3). `POST`는 지정가·장외 예약 접수, `GET`은 목록 조회 겸 만기 예약 정산, `DELETE`는 취소. 화면은 `useWallet()`으로만 부른다 |
 | `POST·DELETE /api/auth/login` | 연결 | 로그인은 `LoginGate`, 로그아웃은 `HomeScreen`의 메뉴 |
 
-`POST /api/trade`는 `dbUser`가 있고 메인 화면의 `account`가 서버 프로필 역할과 같을 때만 보낸다. 화면 계정 스위처가 없으므로 부모 역할 거래의 실제 서버 생산 경로는 현재 사용자 UI에 없다. 같은 조건에서 응답이 200이면 `loadDbUser()`를 다시 호출해 홈 화면 보유종목을 서버 값으로 재동기화한다.
+`POST /api/trade`는 서버 사용자가 있고 현재 화면 `account`가 서버 프로필 역할과 같을 때만 보낸다. 조건이 맞지 않으면 로컬 성공으로 처리하지 않고 같은 주문 거절 분기로 간다. 응답이 성공하면 `refresh()`가 `/api/account`와 `/api/orders`를 다시 읽어 지갑을 서버 값으로 맞춘다.
 
 ### 7.1 서버 거래 저장 계약
 
@@ -264,9 +264,6 @@ type TradeHistoryRow = {
 
 - 지정가 자동 체결 스케줄러가 없다.
 - 메인 화면에 전역 부모↔자녀 스위처가 없다. 계정 전환은 로그아웃 후 재로그인으로 확정됐고 `/api/auth/switch`는 PR #221에서 삭제했다.
-- `POST /api/trade` 응답이 실패하면 로컬 거래와 Supabase 거래가 재조정되지 않는다(성공 시에는 `applyServerHoldings`가 재동기화한다).
-- 미체결 주문은 서버로 옮겼지만(§6.3) **체결된 거래 기록은 아직 두 갈래다.** 정규장 시장가 체결은 여전히 로컬 `records`·`sellRecords`가 먼저고 `POST /api/trade`가 best-effort다.
-- 예약 주문의 로컬 그림자 기록이 상태를 따라가지 않는다. 접수할 때 남긴 `records`의 `order_status`는 `pending`·`scheduled`에 머무르고, 서버가 체결·취소해도 `filled`로 바뀌지 않는다. 매도 화면 회고 카드(`lastBuy`)는 그 기록을 그대로 쓰므로 화면은 맞다. 성향 계산은 `GET /api/profile/season-cards`가 DB를 보므로 영향이 없다 — 로컬 기록으로 성향을 재계산하던 경로는 2026-08-16 삭제됐다.
 - 예약 정산 트리거가 조회에 붙어 있다. 아무도 앱을 열지 않으면 만기 예약이 정산되지 않는다 — 배치가 필요하면 `settleDueOrders`를 그대로 쓰면 된다.
 - 거래를 읽는 서버 경로는 전부 `order_status='filled'`을 걸러야 한다(`app/api/supabase.ts`의 `selectFilledTrades`). 주문 자체를 다루는 `api/orders`만 예외로 `selectRows`를 직접 쓴다.
 - F11 어댑터는 매도 기록에 `amount_krw`가 없어 시장가 매도 카드 단가를 0원으로 만들 수 있다.
@@ -274,7 +271,7 @@ type TradeHistoryRow = {
 ## 10. 완료 기준
 
 - `탐색 → 상세 → 매수/매도 → 질문식 기록 → 정규장 시장가 체결 또는 장외 시장가 예약`이 React 화면에서 동작한다.
-- 1,000만원 지갑, 이유·계획 코드, 로컬 저장 모양이 이 문서와 일치한다.
+- 1,000만원 지갑, 이유·계획 코드, 서버 계좌·주문 계약이 이 문서와 일치한다.
 - 지정가는 대기 상태로 표시되고 자동 체결된 것처럼 설명하지 않는다.
 - 주말·휴장·시가 데이터 없음·가격 갭·취소·새로고침·중복 처리에서 예약 현금과 수량이 보존된다.
 - 프론트에서 소비하지 않는 API는 구현 완료 UI로 표기하지 않는다.
