@@ -24,10 +24,11 @@ const steps = TUTORIAL_STEPS;
 
 // ── 순서 ────────────────────────────────────────────────────────────────────
 
-// 사러 가는 길 하나를 끝까지 따라간다. 홈에서 시작해 매수 3단계, 매도 3단계로 끝난다.
+// 사러 가는 길 하나를 끝까지 따라간다. 환영 인사로 시작해 매수 3단계, 매도 3단계로 끝난다.
 assert.deepEqual(
   steps.map((step) => step.id),
   [
+    "welcome",
     "home-goal",
     "nav-trade",
     "explore-chips",
@@ -59,12 +60,20 @@ for (const step of steps) {
   for (const [key, value] of Object.entries(step)) {
     if (typeof value === "string") assert.equal(value.trim().length > 0, true, `${step.id}.${key}`);
   }
-  assert.equal(step.anchors.length > 0, true, step.id);
+  // `welcome` 은 짚을 곳 없이 인사만 하는 장이라 구멍이 없다.
+  if (step.id !== "welcome") assert.equal(step.anchors.length > 0, true, step.id);
+  // 어려운 낱말 설명은 화면에 그 낱말이 실제로 보일 때만 단다 — 있으면 둘 다 있어야
+  // 말풍선이 `term` 만 뜨고 `concept` 는 빈 채로 펼쳐지는 일이 없다.
+  assert.equal(step.term !== undefined, step.concept !== undefined, step.id);
   // `side` 는 매수·매도가 갈리는 주문 화면에서만 뜻이 있다.
   if (step.side !== undefined) assert.equal(step.screen, "order", step.id);
   // 주문 화면은 반대로 `side` 가 없으면 매도 화면에 매수 문안이 뜬다.
   if (step.screen === "order") assert.notEqual(step.side, undefined, step.id);
 }
+assert.deepEqual(
+  steps.filter((step) => step.anchors.length === 0).map((step) => step.id),
+  ["welcome"],
+);
 
 // ── 진입로 ──────────────────────────────────────────────────────────────────
 
@@ -76,8 +85,8 @@ for (let i = 0; i + 1 < steps.length; i += 1) {
 }
 
 // 같은 자리에 이어 붙은 장은 진입로가 필요 없다 — `다음` 이 그 자리에서 넘어간다.
-assert.equal(isSamePlace(steps[8], steps[9]), true);
-assert.equal(steps[9].enter, undefined);
+assert.equal(isSamePlace(steps[9], steps[10]), true);
+assert.equal(steps[10].enter, undefined);
 
 // 진입로는 목적지가 들고 있다. 종목 코드가 주소에 필요한 자리는 이동 버튼을 눌러 들어간다.
 const enterOf = (id: string) => steps.find((step) => step.id === id)?.enter;
@@ -246,7 +255,8 @@ for (const anchor of usedAnchors) {
 const at = (screen: TutorialPlace["screen"], stage?: TutorialStage, side?: "buy" | "sell") =>
   stepIndexAt(steps, { screen, stage, side });
 
-assert.equal(steps[at("home")].id, "home-goal");
+// `welcome` 이 배열 맨 앞이라 홈 화면에 처음 뜨면 인사부터 한다.
+assert.equal(steps[at("home")].id, "welcome");
 assert.equal(steps[at("explore")].id, "explore-chips");
 assert.equal(steps[at("stock", "detail")].id, "detail-chart");
 
@@ -268,12 +278,15 @@ assert.equal(at("ranking"), -1);
 
 // ── 다음 장 ─────────────────────────────────────────────────────────────────
 
-assert.equal(steps[nextStepIndex(steps, 0)].id, "nav-trade");
+assert.equal(steps[nextStepIndex(steps, 0)].id, "home-goal");
+assert.equal(steps[nextStepIndex(steps, 1)].id, "nav-trade");
 assert.equal(nextStepIndex(steps, steps.length - 1), -1);
 assert.equal(nextStepIndex(steps, -1), -1);
 
 // 같은 자리끼리 / 다른 자리끼리.
-assert.equal(isSamePlace(steps[9], steps[10]), true);
-assert.equal(isSamePlace(steps[10], steps[11]), false);
+assert.equal(isSamePlace(steps[10], steps[11]), true);
+assert.equal(isSamePlace(steps[11], steps[12]), false);
 // 매수 1단계와 매도 1단계는 같은 자리가 아니다.
-assert.equal(isSamePlace(steps[9], steps[13]), false);
+assert.equal(isSamePlace(steps[10], steps[14]), false);
+// 환영 인사와 홈 첫 장은 같은 자리다 — `다음` 이 화면을 옮기지 않고 바로 넘어간다.
+assert.equal(isSamePlace(steps[0], steps[1]), true);
