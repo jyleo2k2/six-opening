@@ -11,10 +11,11 @@
 /**
  * 타입은 JSDoc 으로 단다 — 이 파일은 `.js` 이고 `.ts` 쪽에서 그대로 import 한다.
  *
- * @typedef {{ code: string, qty: number, avg: number }} PrototypeHolding
+ * @typedef {{ code: string, qty: number, avg: number, reservedQty?: number,
+ *   availableQty?: number }} PrototypeHolding
  * @typedef {{ id?: string, side?: string, kind?: string, code?: string,
  *   amount?: number, qty?: number, reservedAmount?: number, reservedQty?: number }} PrototypePendingOrder
- * @typedef {{ name?: string, cash: number, holdings: PrototypeHolding[],
+ * @typedef {{ name?: string, cash: number, reservedCash?: number, holdings: PrototypeHolding[],
  *   pending: PrototypePendingOrder[] }} PrototypeAccount
  */
 
@@ -54,7 +55,7 @@ export function seedAccounts() {
 }
 
 /**
- * 총자산 = 현금 + 보유 평가액 + 매수 예약에 묶인 현금.
+ * 총자산 = 주문 가능 현금 + 보유 평가액 + 매수 예약에 묶인 현금.
  *
  * 매수 예약 현금은 주문을 넣을 때 `cash` 에서 이미 빠져 있으므로 다시 더한다.
  * 매도 예약 수량은 `holdings` 에 그대로 남아 있어 보유 평가액에 이미 들어 있다 —
@@ -72,9 +73,11 @@ export function accountTotalAsset(account, priceOf) {
     const price = Number(priceOf(holding.code));
     return sum + (Number.isFinite(price) ? price * (Number(holding.qty) || 0) : 0);
   }, 0);
-  const reserved = (account.pending || []).reduce((sum, order) => {
-    if ((order.side || "buy") !== "buy") return sum;
-    return sum + (Number(order.reservedAmount ?? order.amount) || 0);
-  }, 0);
+  const reserved = Number.isFinite(account.reservedCash)
+    ? Math.max(0, Number(account.reservedCash))
+    : (account.pending || []).reduce((sum, order) => {
+        if ((order.side || "buy") !== "buy") return sum;
+        return sum + (Number(order.reservedAmount ?? order.amount) || 0);
+      }, 0);
   return (Number(account.cash) || 0) + held + reserved;
 }

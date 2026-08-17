@@ -4,6 +4,7 @@ import { findProfileById, selectFilledTrades, selectRows, sessionUserId, type Pr
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const FAMILY_TRADE_PAGE_SIZE = 50;
 
 type TransactionRow = {
   id: string;
@@ -36,7 +37,11 @@ const defaultDeps: FamilyDataDeps = {
 };
 
 /** 로그인 세션의 family_tag 로만 가족 범위를 정한다. */
-export async function buildFamilyData(userId: number, deps: FamilyDataDeps = defaultDeps) {
+export async function buildFamilyData(
+  userId: number,
+  deps: FamilyDataDeps = defaultDeps,
+  offset = 0,
+) {
   const viewer = await deps.findProfileById(userId);
   if (!viewer) return null;
 
@@ -57,6 +62,9 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
         "memo,plan_match,plan_changed_reason,created_at,stocks(stock_code,stock_name)",
       user_id: `in.(${memberIds.join(",")})`,
       order: "created_at.desc",
+      offset: String(offset),
+      // 한 건을 더 읽어 다음 페이지가 있는지만 확인하고, 화면에는 50건만 보낸다.
+      limit: String(FAMILY_TRADE_PAGE_SIZE + 1),
     }),
     Promise.all(members.map(async (member) => {
       const profile = await deps.buildProfile(member.id);
@@ -120,7 +128,7 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
       behavior: behaviorByUser.get(member.id),
       returnRate: returnRateByUser.get(member.id) ?? null,
     })),
-    trades: transactions.flatMap((row) => {
+    trades: transactions.slice(0, FAMILY_TRADE_PAGE_SIZE).flatMap((row) => {
       const member = memberById.get(row.user_id);
       if (!member || !row.stocks) return [];
       const own = row.user_id === viewer.id;
@@ -147,14 +155,30 @@ export async function buildFamilyData(userId: number, deps: FamilyDataDeps = def
         tradedAt: row.created_at,
       }];
     }),
+    page: {
+      offset,
+      limit: FAMILY_TRADE_PAGE_SIZE,
+      hasMore: transactions.length > FAMILY_TRADE_PAGE_SIZE,
+      nextOffset:
+        transactions.length > FAMILY_TRADE_PAGE_SIZE ? offset + FAMILY_TRADE_PAGE_SIZE : null,
+    },
   };
+}
+
+export function parseFamilyOffset(raw: string | null): number | null {
+  if (raw === null) return 0;
+  if (!/^\d+$/.test(raw)) return null;
+  const offset = Number(raw);
+  return Number.isSafeInteger(offset) ? offset : null;
 }
 
 export async function GET(request: NextRequest) {
   const userId = sessionUserId(request);
   if (!userId) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  const offset = parseFamilyOffset(request.nextUrl.searchParams.get("offset"));
+  if (offset === null) return Response.json({ error: "offset이 올바르지 않습니다." }, { status: 400 });
   try {
-    const family = await buildFamilyData(userId);
+    const family = await buildFamilyData(userId, defaultDeps, offset);
     if (!family) return Response.json({ error: "사용자를 찾을 수 없습니다." }, { status: 404 });
     return Response.json(family);
   } catch (error) {

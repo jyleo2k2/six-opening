@@ -70,6 +70,17 @@ function main() {
   };
   assert.equal(accountTotalAsset(withBuyOrder, () => 0), 1500);
 
+  // 주문 목록을 못 읽어도 계좌 응답의 예약금으로 총자산을 보존한다.
+  assert.equal(
+    accountTotalAsset({ ...withBuyOrder, reservedCash: 700, pending: [] }, () => 0),
+    1700,
+  );
+  // 예약금과 주문 목록이 둘 다 있어도 한 번만 더한다.
+  assert.equal(
+    accountTotalAsset({ ...withBuyOrder, reservedCash: 700 }, () => 0),
+    1700,
+  );
+
   // 매도 예약 수량은 holdings 에 남아 있다. 여기서 또 더하면 두 번 센다.
   const withSellOrder = {
     ...child,

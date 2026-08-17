@@ -74,14 +74,12 @@ import {
   isRetryableChatFailure,
   readChatFailure,
 } from "./lib/request-failure";
+import { isCompleteChatStream } from "./lib/sse";
 
 type Screen = "home" | "stock" | "order" | "archive";
 type F10ChatbotDemoProps = {
   context?: ChatContext;
-  /**
-   * 답변 하단의 화면 이동 버튼을 없애면서 이 시트에는 누를 곳이 남지 않았다. 호스트
-   * (`f0-home`)가 아직 넘기고 있어 계약만 남긴다 — 지금은 호출되지 않는다.
-   */
+  /** 검증된 화면 버튼을 사용자가 눌렀을 때만 호스트가 실제 React 화면을 연다. */
   onUiAction?: (action: ChatUiAction) => void;
   /**
    * 폰 프레임 안 화면의 실제 사각형. 프로토타입 호스트가 `app.html` 요소를 재서 준다.
@@ -294,6 +292,7 @@ function TurnPrompt({ prompt, children }: { prompt: string; children: ReactNode 
 
 function MessageBubble({
   message,
+  onAction,
   onQuestion,
   onExplainChoice,
   onStockExploreChoice,
@@ -301,6 +300,7 @@ function MessageBubble({
   actionsDisabled,
 }: {
   message: Message;
+  onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
   onExplainChoice: (choice: ExplainChoice) => void;
   onStockExploreChoice: (
@@ -311,6 +311,7 @@ function MessageBubble({
   actionsDisabled: boolean;
 }) {
   const userMessage = message.role === "user";
+  const uiAction = isAllowedUiAction(message.uiAction) ? message.uiAction : undefined;
 
   return (
     <div className={userMessage ? "flex justify-end" : "flex justify-start"}>
@@ -324,6 +325,16 @@ function MessageBubble({
         >
           {message.text}
         </p>
+        {!userMessage && uiAction && (
+          <button
+            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy disabled:opacity-50"
+            disabled={actionsDisabled}
+            onClick={() => onAction(uiAction)}
+            type="button"
+          >
+            {uiAction.label ?? "관련 화면 보기"}
+          </button>
+        )}
         {!userMessage && message.retryQuestion && (
           <div className="mt-2 flex flex-wrap gap-2">
             <button
@@ -440,6 +451,7 @@ function ResponsePreparation({ status }: { status: string }) {
 
 export function F10ChatbotDemo({
   context,
+  onUiAction,
   screenRect,
 }: F10ChatbotDemoProps = {}) {
   const [screen, setScreen] = useState<Screen>(context?.screen ?? "stock");
@@ -1017,6 +1029,7 @@ export function F10ChatbotDemo({
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let pending = "";
+      let receivedDone = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -1067,7 +1080,14 @@ export function F10ChatbotDemo({
 
             pendingStandardAction = value as StandardChatActionPayload;
           }
+          if (type === "done") receivedDone = true;
         }
+      }
+
+      pending += decoder.decode();
+      if (!isCompleteChatStream(receivedDone, pending, bufferedText)) {
+        failure = UNREACHABLE_CHAT_FAILURE;
+        throw new Error("Chat stream ended before done");
       }
 
       await new Promise<void>((resolve) => {
@@ -1157,6 +1177,16 @@ export function F10ChatbotDemo({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (input.trim() && !isLoading) void ask(input);
+  }
+
+  function handleUiAction(action: ChatUiAction) {
+    if (onUiAction) {
+      onUiAction(action);
+    } else if (action.target !== "portfolio" && action.target !== "ranking") {
+      setScreen(action.target);
+    }
+    closeChat();
+    setStatus(`${action.label ?? "관련 화면"}으로 이동했어요`);
   }
 
   function recordBuyConfirmationAbandonment() {
@@ -1436,6 +1466,7 @@ export function F10ChatbotDemo({
                     text: COPY.greeting,
                     suggestedQuestions: GREETING_SUGGESTED_QUESTIONS,
                   }}
+                  onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
                   }}
@@ -1451,6 +1482,7 @@ export function F10ChatbotDemo({
                 <MessageBubble
                   key={index}
                   message={message}
+                  onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
                   }}

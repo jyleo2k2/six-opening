@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { pathFromRoute, routeFromPath, SCREEN_SEGMENTS } from "./screen-route";
+import {
+  orderStageFromChatStep,
+  pathFromRoute,
+  routeFromChatAction,
+  routeFromPath,
+  SCREEN_SEGMENTS,
+} from "./screen-route";
 
 function test(name: string, run: () => void): void {
   run();
@@ -70,6 +76,70 @@ test("주소 첫 칸 목록이 매핑과 어긋나지 않는다", () => {
     const withCode = routeFromPath(`/${segment}/005930`);
     assert.ok(single || withCode, `${segment} 은 어느 형태로도 읽히지 않는다`);
   }
+});
+
+test("챗봇 화면 버튼을 실제 React 화면으로 바꾼다", () => {
+  assert.deepEqual(
+    routeFromChatAction(
+      { type: "open_screen", target: "stock", stockId: "KRX:259960" },
+      { screen: "stock", code: "005930" },
+    ),
+    { screen: "stock", code: "259960" },
+  );
+  assert.deepEqual(
+    routeFromChatAction(
+      { type: "open_screen", target: "stock", stockView: "explore", sectorId: "game" },
+      null,
+    ),
+    { screen: "explore", sector: "game" },
+  );
+  assert.deepEqual(
+    routeFromChatAction(
+      { type: "open_screen", target: "stock", stockView: "explore", sectorId: "rank" },
+      null,
+    ),
+    { screen: "explore" },
+  );
+  assert.deepEqual(
+    routeFromChatAction(
+      { type: "open_screen", target: "order", orderSide: "sell", orderStep: "quantity" },
+      { screen: "stock", code: "005930" },
+    ),
+    { screen: "order", code: "005930", side: "sell" },
+  );
+  assert.deepEqual(
+    routeFromChatAction({ type: "open_screen", target: "order" }, { screen: "home" }),
+    { screen: "explore" },
+  );
+  assert.deepEqual(
+    routeFromChatAction(
+      { type: "open_screen", target: "archive", archiveTab: "return" },
+      null,
+    ),
+    { screen: "archive", view: "return" },
+  );
+  assert.deepEqual(
+    routeFromChatAction(
+      { type: "open_screen", target: "archive", archiveTab: "report", archiveOverlay: "cards" },
+      null,
+    ),
+    { screen: "archive", view: "cards" },
+  );
+  assert.deepEqual(routeFromChatAction({ type: "open_screen", target: "portfolio" }, null), {
+    screen: "portfolio",
+  });
+  assert.deepEqual(routeFromChatAction({ type: "open_screen", target: "ranking" }, null), {
+    screen: "ranking",
+  });
+});
+
+test("챗봇 주문 단계는 앞 단계 값이 준비됐을 때만 건너뛴다", () => {
+  assert.equal(orderStageFromChatStep("quantity", true, true), 1);
+  assert.equal(orderStageFromChatStep("reason", false, false), 1);
+  assert.equal(orderStageFromChatStep("reason", true, false), 2);
+  assert.equal(orderStageFromChatStep("confirmation", true, false), 1);
+  assert.equal(orderStageFromChatStep("confirmation", true, true), 2);
+  assert.equal(orderStageFromChatStep("memo", true, true), 1);
 });
 
 console.log("screen-route tests passed");

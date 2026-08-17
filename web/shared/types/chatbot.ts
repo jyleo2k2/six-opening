@@ -37,10 +37,10 @@ export type ChatContext = {
   quantity?: number;
   unitPrice?: number;
   /**
-   * 아래 셋은 지금 화면이 보여주고 있는 내 지갑 값이다. 서버 DB 가 아니라
-   * `app.html` 이 원본인데, 주문의 서버 저장이 best-effort 라 DB 가 최신이
-   * 아닐 수 있기 때문이다. `quantity`·`unitPrice` 와 같은 성격이며 조회 대상
-   * 사용자는 여전히 서버가 쿠키로만 정한다 — 남의 값을 지정하는 통로가 아니다.
+   * 아래 셋은 지금 React 화면이 보여주고 있는 내 지갑 값이다. 지갑은 `/api/account`와
+   * `/api/orders` 응답으로 세우며, 체결 직후에는 서버 재조회 전 표시용 메모리 값일 수 있다.
+   * `quantity`·`unitPrice`와 같은 화면 맥락이며 조회 대상 사용자는 여전히 서버가 쿠키로만
+   * 정한다 — 남의 값을 지정하는 통로가 아니다.
    * 출력 게이트의 허용 숫자 목록에 들어가므로 화면과 다른 값을 말할 수 없다.
    */
   pnlPercent?: number;

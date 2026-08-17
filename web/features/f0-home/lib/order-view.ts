@@ -122,8 +122,8 @@ export function sellMath(draft: SellDraft, price: number, heldQty: number, reser
 /**
  * 주문 화면이 챗봇에게 넘기는 맥락.
  *
- * 화면이 지금 보여 주는 값이 원본이다. 챗봇은 서버에서 돌아 이 화면의 초안을 못 보고,
- * 주문의 서버 저장은 best-effort 라 DB 가 최신이 아닐 수 있다.
+ * 화면이 지금 보여 주는 값이 원본이다. 챗봇은 서버에서 돌아 아직 제출하지 않은
+ * 이 화면의 주문 초안을 볼 수 없으므로 필요한 값을 맥락에 직접 싣는다.
  *
  * 수량·주문가는 반드시 `buyMath`·`sellMath` 를 거친다. 화면이 쓰는 계산을 여기서 다시
  * 적으면 두 벌이 갈라진다 — 실제로 갈라져서 `금액 ÷ 주문가` 만 아는 코드가 **주 수로 넣은
@@ -248,7 +248,12 @@ export function applyBuyFill(account: Account, code: string, price: number, qty:
   if (index >= 0) {
     const h = holdings[index];
     const nextQty = h.qty + qty;
-    holdings[index] = { code: h.code, qty: nextQty, avg: (h.avg * h.qty + amount) / nextQty };
+    holdings[index] = {
+      ...h,
+      qty: nextQty,
+      avg: (h.avg * h.qty + amount) / nextQty,
+      availableQty: Number.isFinite(h.availableQty) ? (h.availableQty as number) + qty : undefined,
+    };
   } else {
     holdings.push({ code, qty, avg: price });
   }
@@ -262,7 +267,16 @@ export function applySellFill(account: Account, code: string, qty: number, proce
   if (index >= 0) {
     const left = holdings[index].qty - qty;
     if (left < 0.005) holdings.splice(index, 1);
-    else holdings[index] = { ...holdings[index], qty: left };
+    else {
+      const holding = holdings[index];
+      holdings[index] = {
+        ...holding,
+        qty: left,
+        availableQty: Number.isFinite(holding.availableQty)
+          ? Math.max(0, (holding.availableQty as number) - qty)
+          : undefined,
+      };
+    }
   }
   return { ...account, cash: account.cash + proceeds, holdings };
 }

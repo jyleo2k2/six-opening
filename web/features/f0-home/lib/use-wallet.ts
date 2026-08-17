@@ -37,7 +37,16 @@ export type WalletAccountId = "child" | "parent";
  * 이 조회가 곧 예약 체결 트리거다 — 화면이 따로 시가를 확인하지 않는다. 정산은 잔액을
  * 바꾸므로 그때는 계좌 캐시를 비우고 한 번 더 읽는다.
  */
-export type OpenOrders = { orders?: Record<string, unknown>[]; settled?: unknown[] };
+export type OpenOrders = {
+  orders?: Record<string, unknown>[];
+  settled?: unknown[];
+  /** 이 조회 중 내 요청 또는 동시 요청이 예약을 정산해 계좌가 달라졌는지. */
+  accountChanged?: boolean;
+};
+
+export function shouldRefreshAccount(open: OpenOrders | null): boolean {
+  return Boolean(open?.accountChanged || open?.settled?.length);
+}
 
 /**
  * 열린 주문도 계좌처럼 모듈에 한 번만 담아 둔다.
@@ -95,7 +104,7 @@ export function useWallet() {
       setWallet({ acc: applyServerAccount(seeded, user, pending) });
       // 조회가 만기 예약을 정산했으면 방금 읽은 계좌는 이미 낡았다. 한 번 더 돈다 —
       // 두 번째에는 정산할 것이 없으므로 여기서 멈춘다.
-      if (open?.settled?.length) refresh();
+      if (shouldRefreshAccount(open)) refresh();
     });
     return () => {
       alive = false;

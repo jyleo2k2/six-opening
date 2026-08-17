@@ -75,6 +75,21 @@ const openOrders = (userId: number) =>
   });
 
 /**
+ * 만기 주문을 본 요청은 정산 성공 주체와 상관없이 목록을 다시 읽는다.
+ * 다른 동시 요청이 먼저 정산했으면 이 요청의 `settled` 는 비어도 `before` 는 이미 낡았다.
+ */
+export async function reconcileOpenOrders<T extends { id: string; order_status: string }>(
+  before: T[],
+  hadDueOrders: boolean,
+  reload: () => Promise<T[]>,
+): Promise<{ rows: T[]; changed: boolean }> {
+  if (!hadDueOrders) return { rows: before, changed: false };
+  const rows = await reload();
+  const signature = (items: T[]) => items.map((item) => `${item.id}:${item.order_status}`).join("|");
+  return { rows, changed: signature(rows) !== signature(before) };
+}
+
+/**
  * 미체결 주문 목록. 읽기 전에 정산이 끝난 예약을 먼저 처리한다.
  *
  * 조회가 쓰기를 겸하는 모양이지만, 그렇게 두면 화면은 이 경로 하나만 부르면 되고 정산
@@ -110,9 +125,14 @@ export async function GET(request: NextRequest) {
       due,
     );
 
-    // 정산이 있었으면 목록을 다시 읽는다. 방금 체결된 주문이 대기 목록에 남으면 안 된다.
-    const rows = settled.length > 0 ? await openOrders(userId) : before;
-    return Response.json({ orders: rows.map(toOrder), settled });
+    const reconciled = await reconcileOpenOrders(before, due.length > 0, () => openOrders(userId));
+    return Response.json({
+      orders: reconciled.rows.map(toOrder),
+      settled,
+      // 내가 정산했거나, 동시에 들어온 다른 요청이 먼저 정산해 목록이 달라졌다면 계좌도
+      // 다시 읽어야 한다. 단순히 만기 주문이 아직 남은 경우에는 true가 아니어서 반복 조회가 없다.
+      accountChanged: settled.length > 0 || reconciled.changed,
+    });
   } catch (error) {
     console.error(JSON.stringify({ event: "orders_read", result: "error", message: String(error) }));
     return Response.json({ error: "주문을 불러오지 못했습니다." }, { status: 502 });

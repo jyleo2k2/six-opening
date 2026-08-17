@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { applyServerAccount, type ServerAccount } from "./server-account";
-import type { Account } from "./portfolio-view";
+import { availableHoldingQty, reservedHoldingQty, type Account } from "./portfolio-view";
 
 // 이관 뒤 계좌·상세·탐색이 DB 보유 대신 시드값을 그리던 원인을 막는 자리다.
 // `app.html` 의 applyServerHoldings 는 메모리에만 쓰고 localStorage 에 남기지 않으므로,
@@ -22,20 +22,31 @@ const dbChild: ServerAccount = {
   parent_child: "child",
   guardian_role: null,
   balance: 4_120_000,
+  reserved: 920_000,
+  available: 3_200_000,
   holdings: [
-    { stock_code: "005930", stock_name: "삼성전자", quantity: 3, avg_price: 71_000 },
+    {
+      stock_code: "005930", stock_name: "삼성전자", quantity: 3,
+      reserved_quantity: 1, available_quantity: 2, avg_price: 71_000,
+    },
     { stock_code: null, stock_name: null, quantity: 5, avg_price: 100 },
   ],
 };
 
 // 로그인한 역할만 서버 값으로 덮는다.
 const applied = applyServerAccount(seed, dbChild);
-assert.equal(applied.child.cash, 4_120_000);
-assert.deepEqual(applied.child.holdings, [{ code: "005930", qty: 3, avg: 71_000 }]);
+assert.equal(applied.child.cash, 3_200_000);
+assert.equal(applied.child.reservedCash, 920_000);
+assert.deepEqual(applied.child.holdings, [
+  { code: "005930", qty: 3, avg: 71_000, reservedQty: 1, availableQty: 2 },
+]);
 // 종목 코드가 없는 행은 버린다 — 화면이 코드로 종목을 찾는다.
 assert.equal(applied.child.holdings.length, 1);
-// 예약 주문은 서버가 모른다. 응답에 없다고 지우면 로컬 예약이 사라진다.
-assert.deepEqual(applied.child.pending, seed.child.pending);
+// 주문 목록 조회가 실패해도 계좌 응답의 예약 필드가 정확한 한도와 총자산을 지킨다.
+// 서버에 없는 시드 주문은 목록에 섞지 않는다.
+assert.deepEqual(applied.child.pending, []);
+assert.equal(reservedHoldingQty(applied.child, "005930"), 1);
+assert.equal(availableHoldingQty(applied.child, "005930"), 2);
 // 반대쪽 역할은 로컬 데모 그대로다.
 assert.deepEqual(applied.parent, seed.parent);
 
@@ -76,13 +87,29 @@ assert.equal(applyServerAccount(seed, { ...dbChild, user_id: 0 }), seed);
 assert.equal(applyServerAccount(seed, { ...dbChild, parent_child: "guest" }), seed);
 
 // 잔액이 숫자가 아니면 덮지 않는다. NaN 총자산이 화면 전체를 망친다.
-assert.equal(applyServerAccount(seed, { ...dbChild, balance: null }).child.cash, 9_339_500);
 assert.equal(
-  applyServerAccount(seed, { ...dbChild, balance: undefined }).child.cash,
+  applyServerAccount(seed, { ...dbChild, balance: null, available: null }).child.cash,
+  9_339_500,
+);
+assert.equal(
+  applyServerAccount(seed, { ...dbChild, balance: undefined, available: undefined }).child.cash,
   9_339_500,
 );
 // 잔액이 0 이면 0 이다 — 떨어진 잔고를 시드로 되돌리면 안 된다.
-assert.equal(applyServerAccount(seed, { ...dbChild, balance: 0 }).child.cash, 0);
+assert.equal(applyServerAccount(seed, { ...dbChild, balance: 0, available: undefined }).child.cash, 0);
 
 // 보유가 비면 비운다. 다 팔았는데 시드 보유가 남아 있으면 안 된다.
 assert.deepEqual(applyServerAccount(seed, { ...dbChild, holdings: [] }).child.holdings, []);
+
+// 구형 응답에는 예약 수량이 없을 수 있다. 그때만 주문 목록으로 계산한다.
+const legacy = applyServerAccount(
+  seed,
+  {
+    ...dbChild,
+    reserved: undefined,
+    holdings: [{ stock_code: "005930", stock_name: "삼성전자", quantity: 3, avg_price: 71_000 }],
+  },
+  [{ side: "sell", code: "005930", reservedQty: 2 }],
+).child;
+assert.equal(reservedHoldingQty(legacy, "005930"), 2);
+assert.equal(availableHoldingQty(legacy, "005930"), 1);

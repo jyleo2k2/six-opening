@@ -3963,8 +3963,7 @@ function formatPercent(value: number) {
 
 /**
  * 화면이 실어 보낸 내 지갑 값으로 답한다. 값이 없으면 `null` 을 돌려주고
- * 지어내지 않는다 — 서버 DB 는 주문 저장이 best-effort 라 최신이 아닐 수 있어
- * 화면 값을 원본으로 쓴다(`ChatContext` 주석).
+ * 지어내지 않는다. 계좌 화면과 같은 응답에서 만든 값을 쓴다(`ChatContext` 주석).
  */
 function getPersonalValueReply(
   message: string,

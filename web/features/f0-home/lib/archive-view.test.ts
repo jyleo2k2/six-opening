@@ -192,6 +192,14 @@ assert.match(sell.text, /계획을 바꿨어 — 가격이 움직여서 불안�
 // 구성원 필터는 그 사람 것만 남긴다.
 assert.deepEqual(feedCards(trades, members, {}, {}, {}, "db_1", now).map((f) => f.id), ["t1"]);
 
+// 화면 계산은 서버가 페이지로 준 기록을 다시 12건으로 자르지 않는다.
+const thirteenTrades = Array.from({ length: 13 }, (_, index) => ({
+  ...trades[0],
+  id: `many-${index}`,
+  tradedAt: `2026-08-14T${String(index).padStart(2, "0")}:00:00Z`,
+}));
+assert.equal(feedCards(thirteenTrades, members, {}, {}, {}, "all", now).length, 13);
+
 // ── 머리 카드 ────────────────────────────────────────────────────────────
 const summary = returnSummary(
   500000,
@@ -208,6 +216,17 @@ assert.equal(summary.cashText, "500,000원");
 // 모의투자에는 결제 대기 중인 돈이 없다 — 출금가능금액은 예수금과 같다.
 assert.equal(summary.withdrawText, summary.cashText);
 assert.equal(summary.settleText, "결제기준 08.16(일) 15:30");
+// 예약 매수 현금은 총자산·예수금에는 남고 새 주문에 쓸 수 있는 금액에서는 빠진다.
+const reservedSummary = returnSummary(
+  300_000,
+  [],
+  {},
+  new Date("2026-08-16T09:00:00+09:00"),
+  200_000,
+);
+assert.equal(reservedSummary.totalText, "500,000원");
+assert.equal(reservedSummary.cashText, "500,000원");
+assert.equal(reservedSummary.withdrawText, "300,000원");
 // 원금이 0 이면 수익률도 0 이다 — 0 으로 나누지 않는다. 손익 0 은 빨강도 파랑도 아니다.
 const flat = returnSummary(100, [], {});
 assert.equal(flat.pctText, "0.00%");

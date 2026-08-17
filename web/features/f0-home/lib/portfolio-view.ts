@@ -14,7 +14,15 @@ import { SEED, accountTotalAsset } from "../../../shared/store/prototype-account
 const UP = "#E8322E";
 const DOWN = "#1668DC";
 
-export type Holding = { code: string; qty: number; avg: number };
+export type Holding = {
+  code: string;
+  qty: number;
+  avg: number;
+  /** 서버 계좌가 확정한 매도 예약 수량. 없을 때만 pending 목록으로 계산한다. */
+  reservedQty?: number;
+  /** 서버 계좌가 확정한 새 매도 가능 수량. */
+  availableQty?: number;
+};
 export type PendingOrder = {
   id?: string;
   side?: string;
@@ -35,7 +43,10 @@ export type PendingOrder = {
 };
 export type Account = {
   name?: string;
+  /** 새 주문에 쓸 수 있는 현금. */
   cash: number;
+  /** 미체결 매수 주문에 잠긴 현금. 없을 때만 pending 목록으로 계산한다. */
+  reservedCash?: number;
   holdings: Holding[];
   pending: PendingOrder[];
 };
@@ -64,6 +75,29 @@ export function accountSummary(account: Account, prices: Record<string, number>)
   };
 }
 
+/** 서버의 예약 수량이 있으면 그것을 쓰고, 구형 응답일 때만 주문 목록에서 계산한다. */
+export function reservedHoldingQty(account: Account, code: string): number {
+  const holding = account.holdings.find((item) => item.code === code);
+  if (!holding) return 0;
+  if (Number.isFinite(holding.reservedQty)) {
+    return Math.max(0, Math.min(holding.qty, holding.reservedQty as number));
+  }
+  if (Number.isFinite(holding.availableQty)) {
+    return Math.max(0, holding.qty - Math.min(holding.qty, holding.availableQty as number));
+  }
+  return Math.max(0, Math.min(holding.qty, reservedSellQty(account.pending || [], code)));
+}
+
+/** 새 매도에 쓸 수 있는 수량. 서버 값이 있으면 pending 조회 실패와 무관하게 정확하다. */
+export function availableHoldingQty(account: Account, code: string): number {
+  const holding = account.holdings.find((item) => item.code === code);
+  if (!holding) return 0;
+  if (Number.isFinite(holding.availableQty)) {
+    return Math.max(0, Math.min(holding.qty, holding.availableQty as number));
+  }
+  return Math.max(0, holding.qty - reservedHoldingQty(account, code));
+}
+
 export function holdingCards(account: Account, prices: Record<string, number>, locked: boolean) {
   return account.holdings
     .map((h) => {
@@ -76,8 +110,8 @@ export function holdingCards(account: Account, prices: Record<string, number>, l
       const d = val - cost;
       const pct = cost > 0 ? (d / cost) * 100 : 0;
       const sectorLabel = SECTOR_LABEL.get(stock.sector) ?? "";
-      const reserved = reservedSellQty(account.pending || [], h.code);
-      const available = Math.max(0, h.qty - reserved);
+      const reserved = reservedHoldingQty(account, h.code);
+      const available = availableHoldingQty(account, h.code);
       return {
         code: h.code,
         name: stock.name,

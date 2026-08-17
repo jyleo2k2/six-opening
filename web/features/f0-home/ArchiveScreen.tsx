@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
@@ -323,7 +323,12 @@ export function ArchiveScreen({
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   /** 고칠 댓글 하나. 두 개를 동시에 열 수 없다 — 열려 있던 쪽은 저장 없이 닫힌다. */
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
+  const returnScrollTop = useRef(0);
   const sheet = useSheetDrag(SHEET_HEIGHT);
+
+  useEffect(() => {
+    if (view === "return") returnScrollTop.current = 0;
+  }, [view]);
 
   const prices = useMemo(
     () =>
@@ -350,7 +355,13 @@ export function ArchiveScreen({
   const famShown = family.filter((f) => f.has && (famPick === "all" || f.key === famPick));
   const lanes = runners(data.family?.members ?? []);
   const me = wallet?.acc[account];
-  const summary = returnSummary(me?.cash ?? 0, me?.holdings ?? [], prices);
+  const summary = returnSummary(
+    me?.cash ?? 0,
+    me?.holdings ?? [],
+    prices,
+    new Date(),
+    me?.reservedCash ?? 0,
+  );
   /**
    * 제목 옆 지갑 — 같은 `family_tag` 사람들의 자산 합계다. 서버가 합계를 못 줄 때만
    * (비로그인·조회 실패) 내 계좌 요약으로 되돌아가므로 자리가 비지 않는다.
@@ -372,6 +383,14 @@ export function ArchiveScreen({
   const snapTo = (index: number) => {
     const node = rail.ref.current?.children[index] as HTMLElement | undefined;
     node?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  };
+
+  const loadMoreOnScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const node = event.currentTarget;
+    const movingDown = node.scrollTop > returnScrollTop.current;
+    returnScrollTop.current = node.scrollTop;
+    const remaining = node.scrollHeight - node.scrollTop - node.clientHeight;
+    if (movingDown && remaining < 240 && data.hasMore) void data.loadMoreFamily();
   };
 
   const sheetCard: WeekCard | undefined = cards[sheetIndex ?? activeCard] ?? cards[cards.length - 1];
@@ -628,7 +647,7 @@ export function ArchiveScreen({
         )}
 
         {view === "return" && (
-          <div style={BODY}>
+          <div onScroll={loadMoreOnScroll} style={BODY}>
             <div style={{ display: "flex", flexDirection: "column", gap: 13, paddingBottom: 10 }}>
               {/*
                 머리 카드 — 내 계좌 하나의 총액·손익이다. `상세` 를 켜야 예수금과 결제 기준이
@@ -862,6 +881,11 @@ export function ArchiveScreen({
                     )}
                   </div>
                 ))}
+                {data.loadingMore && (
+                  <div style={{ padding: "8px 0 14px", textAlign: "center", fontSize: 13, fontWeight: 700, color: "#8E93A8" }}>
+                    다음 기록 50개를 불러오는 중이에요
+                  </div>
+                )}
               </div>
             </div>
           </div>
