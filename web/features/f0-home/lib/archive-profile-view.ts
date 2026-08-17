@@ -448,6 +448,20 @@ export type FamilyRow = {
     character?: string | null;
     level?: number | null;
   } | null;
+  /**
+   * 그 사람의 주차 카드. `/api/profile/season-cards` 가 나에게 주는 것과 **같은 모양**이라
+   * 지난 주차 리포트(`archive-season.ts`)가 내 카드와 같은 코드로 편다.
+   *
+   * 금액은 들어 있지 않다 — 성향 점수·유형·거래 건수뿐이고, 이는 이미 내려보내던
+   * 누적 카드(`behavior`)와 같은 종류다. 자산 규모는 계속 `total` 합계로만 나간다.
+   */
+  weeks?: {
+    weekStart: string;
+    label: string;
+    status: "closed" | "current";
+    count: number;
+    card: AbilityCard;
+  }[];
 };
 
 /**

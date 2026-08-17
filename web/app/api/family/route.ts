@@ -85,6 +85,16 @@ export async function buildFamilyData(
       return {
         userId: member.id,
         behavior: profile.cumulative,
+        /**
+         * 주차 카드도 함께 넘긴다 (2026-08-17). 지난 주차 리포트(F9 아카이브)가 구성원마다
+         * 끝난 주를 되짚는데, 그 값을 여기서 이미 계산해 놓고 버리고 있었다 — 화면은
+         * 그래서 사람이 적어 둔 표본을 그리고 있었다.
+         *
+         * **금액은 실리지 않는다.** 주차 카드에는 성향 점수·유형·거래 건수만 있고, 이는
+         * 이미 내려보내던 누적 카드(`behavior`)와 같은 종류다. 자산 규모를 드러내는
+         * 평가금액·원금·현금은 계속 `total` 합계로만 나간다.
+         */
+        weeks: profile.weeks,
         // 원금이 0이면 잰 것이 없다는 뜻이라 0% 가 아니라 null 이다 — 화면은 이걸 "아직" 으로
         // 그린다. 0% 로 내려보내면 본전인 사람과 아직 안 산 사람이 같아 보인다.
         returnRate: profile.valuation && profile.valuation.cost > 0
@@ -97,6 +107,7 @@ export async function buildFamilyData(
   ]);
   const behaviorByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.behavior]));
   const returnRateByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.returnRate]));
+  const weeksByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.weeks]));
   const memberById = new Map(members.map((member) => [member.id, member]));
 
   /**
@@ -161,6 +172,7 @@ export async function buildFamilyData(
       role: member.parent_child === "parent" ? "parent" as const : "child" as const,
       behavior: behaviorByUser.get(member.id),
       returnRate: returnRateByUser.get(member.id) ?? null,
+      weeks: weeksByUser.get(member.id) ?? [],
     })),
     trades: transactions.slice(0, FAMILY_TRADE_PAGE_SIZE).flatMap((row) => {
       const member = memberById.get(row.user_id);

@@ -29,7 +29,7 @@ import {
   type WeekCard,
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
-import { lastSeasonReport } from "./lib/archive-season";
+import { closedWeekRows, seasonReport } from "./lib/archive-season";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
@@ -44,8 +44,12 @@ import { PhoneFrame } from "./PhoneFrame";
  *
  * **자리는 셋이고 첫 화면만 개인 것이다.** 들어오면 로그인한 사람의 주차 성향 카드가
  * 레일로 깔리고(`cards`), 가족 것은 두 자리다 — `성향 리포트`(`family`)가 가족 성향을
- * 현재 시즌·과거 시즌으로 갈아 끼우고, `투자 현황`(`return`)이 수익률 자리다.
+ * `지금까지`·`지난 주차`로 갈아 끼우고, `투자 현황`(`return`)이 수익률 자리다.
  * 돌아오는 길은 머리의 `‹` 다.
+ *
+ * **지난 주차도 Supabase 다**(2026-08-17). `/api/family` 가 구성원마다 주차 카드를 함께
+ * 주고 `archive-season.ts` 가 끝난 주만 골라 편다. 예전에 있던 4주 표본 픽스처는 지웠다 —
+ * 되짚을 주가 없으면 빈 자리 문구를 세우고 가짜 값을 그리지 않는다.
  *
  * **가족으로 가는 문은 첫 화면 아래 `우리 가족 투자 보기` 하나다**(2026-08-17). 머리에
  * 있던 분홍 단추 둘과 제목 옆 지갑을 지우고 목업대로 시트 한 장으로 모았다 — 첫 화면의
@@ -467,9 +471,15 @@ export function ArchiveScreen({
   /** 그 주 유형의 종목 세 개. 유형이 아직 없는 주(`관찰 중`)면 빈 배열이다. */
   const sheetPicks = buildTypePicks(sheetCard?.type.key ?? null, universe, quotes);
 
-  // 지난 시즌 — 아직 서버 값이 없어 `archive-season` 픽스처를 그대로 쓴다(그 파일 머리말).
-  const last = useMemo(() => lastSeasonReport(), []);
-  const lastShown = last.members.filter((m) => lastPick === "all" || m.key === lastPick);
+  /**
+   * 지난 주차 — 서버가 구성원마다 준 주차 카드에서 **끝난 주만** 골라 되짚는다.
+   * 되짚을 것이 없으면 `null` 이고 그 자리에는 빈 자리 문구가 선다.
+   */
+  const last = useMemo(
+    () => seasonReport(closedWeekRows(data.family?.members ?? [])),
+    [data.family?.members],
+  );
+  const lastShown = last?.members.filter((m) => lastPick === "all" || m.key === lastPick) ?? [];
 
   /** 제목이 곧 현재 자리다. 주차 머리말은 어느 자리에서나 같은 이번 주를 가리킨다. */
   const screenTitle =
@@ -534,8 +544,8 @@ export function ArchiveScreen({
         {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
         {view === "family" && (
           <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>현재 시즌</div>
-            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>과거 시즌</div>
+            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>지금까지</div>
+            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>지난 주차</div>
           </div>
         )}
 
@@ -583,17 +593,30 @@ export function ArchiveScreen({
           </>
         )}
 
-        {view === "family" && season === "last" && (
+        {/*
+          되짚을 끝난 주가 없을 때. 첫 주에 들어온 가족이 여기다 — 없는 것을 지어내지 않고
+          왜 비었는지만 적는다.
+        */}
+        {view === "family" && season === "last" && !last && (
+          <div style={{ ...BODY, alignItems: "center", justifyContent: "center", gap: 10, paddingBottom: 40 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#5C6280" }}>아직 되짚을 주차가 없어요</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", textWrap: "pretty" }}>
+              이번 주가 끝나면 그 주의 성향 카드가 여기에 쌓여요.
+            </div>
+          </div>
+        )}
+
+        {view === "family" && season === "last" && last && (
           <>
             <div style={{ ...BODY, gap: 12 }}>
-              {/* 시즌 종합 카드. 겉면 색과 캐릭터는 가족의 최빈 시즌 성향에서 나온다. */}
+              {/* 종합 카드. 겉면 색과 캐릭터는 가족의 최빈 성향에서 나온다. */}
               <div style={{ flex: "none", borderRadius: 26, padding: 7, background: last.gradient }}>
                 <div style={{ position: "relative", overflow: "hidden", borderRadius: 20, padding: "16px 18px 14px", background: "linear-gradient(158deg,rgba(255,255,255,0.5) 0%,rgba(255,255,255,0.16) 44%,rgba(255,255,255,0.24) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7),inset 0 0 0 1px rgba(255,255,255,0.4)" }}>
                   <div style={{ position: "absolute", right: -40, bottom: -40, width: 170, height: 170, borderRadius: "50%", filter: "blur(22px)", pointerEvents: "none", background: last.glow }} />
                   <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ flex: "none", width: 104, height: 124, margin: "-8px 0 -12px", background: last.image, filter: last.imageShadow }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: last.inkSoft }}>지난 시즌 종합 리포트</div>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: last.inkSoft }}>지난 주차 종합 리포트</div>
                       <div style={{ fontSize: 21, fontWeight: 900, marginTop: 4, letterSpacing: "-0.01em", lineHeight: 1.25, color: last.ink }}>{last.title}</div>
                       <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, marginTop: 6, textWrap: "pretty", color: last.inkSoft }}>{last.text}</div>
                     </div>
@@ -649,7 +672,7 @@ export function ArchiveScreen({
               })}
 
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
-                지난 시즌 기록은 그대로 보관돼요. 위 단추로 현재 시즌과 견줘 보세요.
+                끝난 주차 기록은 그대로 보관돼요. 위 단추로 지금까지와 견줘 보세요.
               </div>
             </div>
           </>

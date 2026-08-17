@@ -19,7 +19,7 @@ import {
   weekCards,
   type FamilyRow,
 } from "./archive-profile-view";
-import { lastSeasonReport, seasonTypeOf } from "./archive-season";
+import { closedWeekRows, seasonReport, seasonTypeOf } from "./archive-season";
 
 // ── 성향: 원본은 season-cards 누적 카드 하나다 ──────────────────────────────
 const card = {
@@ -333,40 +333,89 @@ const flat = returnSummary(100, [], {});
 assert.equal(flat.pctText, "0.00%");
 assert.equal(flat.pctColor, "#9CA1B4");
 
-// ── 지난 시즌 ────────────────────────────────────────────────────────────
-// 한 사람의 시즌 성향은 네 주 중 최빈 유형, 가족 성향은 그 최빈 유형 중 최빈이다.
+// ── 지난 주차: 원본은 /api/family 가 주는 구성원 주차 카드다 ──────────────────
+// 한 사람의 성향은 끝난 주 중 최빈 유형, 가족 성향은 그 최빈 유형 중 최빈이다.
 assert.equal(
   seasonTypeOf([
-    { label: "1주차", type: "explorer", count: 1 },
-    { label: "2주차", type: "sniper", count: 1 },
-    { label: "3주차", type: "sniper", count: 1 },
+    { label: "8/3 – 8/9", type: "explorer", count: 1 },
+    { label: "8/10 – 8/16", type: "sniper", count: 1 },
+    { label: "8/17 – 8/23", type: "sniper", count: 1 },
   ]),
   "sniper",
 );
 // 동점이면 먼저 나온 주차의 유형을 고른다 — 같은 입력이 늘 같은 답을 내야 한다.
 assert.equal(
   seasonTypeOf([
-    { label: "1주차", type: "fighter", count: 1 },
-    { label: "2주차", type: "explorer", count: 1 },
+    { label: "8/3 – 8/9", type: "fighter", count: 1 },
+    { label: "8/10 – 8/16", type: "explorer", count: 1 },
   ]),
   "fighter",
 );
-const report = lastSeasonReport();
-// 표본은 저격수 2명·전략가 1명이다.
+// 유형이 정해진 주가 하나도 없으면 셀 것이 없다 — 아무 유형이나 고르지 않는다.
+assert.equal(seasonTypeOf([{ label: "8/3 – 8/9", type: null, count: 0 }]), null);
+
+const weekCard = (character: string | null, focus: number) => ({
+  scores: { focus, diversification: 4, accuracy: 5, intuition: 3, evidence: 6 },
+  character,
+  level: 2,
+  samples: { buys: 1, sells: 0 },
+});
+const seasonMembers: FamilyRow[] = [
+  {
+    id: 1, name: "찬영아빠", role: "parent",
+    weeks: [
+      { weekStart: "2026-08-03", label: "8/3 – 8/9", status: "closed", count: 2, card: weekCard("sniper", 8) },
+      { weekStart: "2026-08-10", label: "8/10 – 8/16", status: "closed", count: 4, card: weekCard("sniper", 6) },
+      // 이번 주는 아직 안 끝났다 — 되짚을 기록이 아니라 빠져야 한다.
+      { weekStart: "2026-08-17", label: "8/17 – 8/23", status: "current", count: 4, card: weekCard("explorer", 2) },
+    ],
+  },
+  {
+    id: 2, name: "찬영엄마", role: "parent",
+    weeks: [
+      { weekStart: "2026-08-10", label: "8/10 – 8/16", status: "closed", count: 5, card: weekCard("strategist", 3) },
+    ],
+  },
+  // 끝난 주가 없는 사람은 아예 빠진다.
+  { id: 3, name: "김찬영", role: "child", weeks: [
+    { weekStart: "2026-08-17", label: "8/17 – 8/23", status: "current", count: 13, card: weekCard("fighter", 9) },
+  ] },
+];
+
+const rows = closedWeekRows(seasonMembers);
+assert.deepEqual(rows.map((r) => r.name), ["찬영아빠", "찬영엄마"]);
+// 이번 주가 빠졌으므로 아빠는 두 주만 남는다.
+assert.deepEqual(rows[0].weeks.map((w) => w.label), ["8/3 – 8/9", "8/10 – 8/16"]);
+// 오각형은 끝난 주 카드의 평균이다 — 누적 카드를 다시 쓰면 `지금까지` 탭과 같은 그림이 된다.
+assert.equal(rows[0].scores[0], 7);
+// 색·얼굴은 `familyMembers` 가 정한 것과 같아야 두 탭을 겹쳐 볼 수 있다.
+assert.deepEqual(rows.map((r) => r.color), familyMembers(seasonMembers).slice(0, 2).map((m) => m.color));
+
+const report = seasonReport(rows);
+assert.ok(report);
+// 저격수 1명·전략가 1명이면 먼저 나온 저격수다.
 assert.equal(report.type, "sniper");
 assert.equal(report.title, "저격수 가족이었어요");
 assert.deepEqual(report.members.map((m) => m.title), [
-  "시즌 성향 · 저격수",
-  "시즌 성향 · 전략가",
-  "시즌 성향 · 저격수",
+  "지난 주차 성향 · 저격수",
+  "지난 주차 성향 · 전략가",
 ]);
-assert.equal(
-  report.members[2].trend,
-  "주차별로 보면 탐험가 → 승부사 → 저격수 → 저격수 순서였어요.",
-);
-assert.equal(report.members[0].weeks[0].note, "거래 2건");
+assert.equal(report.members[0].trend, "주차별로 보면 저격수 → 저격수 순서였어요.");
+// 서버 `count` 는 매수 건수라 라벨도 `매수` 다 — 판 것까지 센 것처럼 보이면 안 된다.
+assert.equal(report.members[0].weeks[0].note, "매수 2건");
 // 오각형은 가족 비교와 같은 0~10 스케일이다 — 두 화면을 겹쳐 볼 수 있어야 한다.
-assert.deepEqual(report.members.map((m) => m.scaleMax), [10, 10, 10]);
+assert.deepEqual(report.members.map((m) => m.scaleMax), [10, 10]);
+// 되짚을 것이 없으면 리포트가 없다. 화면은 그때 빈 자리 문구를 세운다.
+assert.equal(seasonReport([]), null);
+assert.equal(closedWeekRows([{ id: 9, name: "새 가족", role: "child" }]).length, 0);
+// 끝난 주는 있는데 유형이 하나도 안 정해졌으면 겉면 색을 고를 수 없다 — 리포트가 없다.
+assert.equal(
+  seasonReport(closedWeekRows([{
+    id: 4, name: "관찰중", role: "child",
+    weeks: [{ weekStart: "2026-08-03", label: "8/3 – 8/9", status: "closed", count: 0, card: weekCard(null, 5) }],
+  }])),
+  null,
+);
 
 // ── 첫 화면 제목 옆 지갑: 가족 자산 합계 ────────────────────────────────────
 // `returnSummary` 와 같은 모양으로 편다 — 두 값이 같은 자리에 번갈아 들어간다.

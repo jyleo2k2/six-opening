@@ -10,6 +10,15 @@ const neutral: AbilityCard = {
   samples: { buys: 0, sells: 0, graded: 0, pending: 0, hits: 0 },
   observation: "none",
 };
+/** 주차 카드 한 장. 서버는 `WeekCard`(= 능력치 카드 + 주차 정보)를 그대로 싣는다. */
+const weekOf = (
+  weekStart: string,
+  weekEnd: string,
+  label: string,
+  status: "closed" | "current",
+  count: number,
+) => ({ weekStart, weekEnd, label, status, count, card: { ...neutral, weekStart, weekEnd, label, status } });
+
 const profiles: Profile[] = [
   { id: 1, name: "찬영", login_id: "child", parent_child: "child", family_tag: "찬영가족", guardian_role: null },
   { id: 2, name: "찬영엄마", login_id: "mom", parent_child: "parent", family_tag: "찬영가족", guardian_role: "mom" },
@@ -66,7 +75,12 @@ const deps: FamilyDataDeps = {
     ];
   },
   buildProfile: async (userId) => ({
-    weeks: [], cumulative: { ...neutral, samples: { ...neutral.samples, buys: userId } },
+    // 주차 카드도 구성원마다 다르게 줘서 어느 사람 것이 어디로 가는지 구분한다.
+    weeks: [
+      weekOf("2026-08-03", "2026-08-09", "8/3 – 8/9", "closed", userId),
+      weekOf("2026-08-10", "2026-08-16", "8/10 – 8/16", "current", 0),
+    ],
+    cumulative: { ...neutral, samples: { ...neutral.samples, buys: userId } },
     // 구성원마다 다른 수익률을 줘서 어느 값이 어디로 가는지 구분한다.
     valuation: {
       marketValue: 1_000_000 + userId, cost: 1_000_000, cash: 500_000,
@@ -84,6 +98,19 @@ async function main() {
   assert.equal(transactionLimit, "51");
   assert.deepEqual(family.members.map((member) => member.name), ["찬영", "찬영엄마", "찬영아빠"]);
   assert.equal(family.members[2].behavior?.samples.buys, 3);
+
+  /**
+   * 주차 카드도 구성원마다 내려간다. 지난 주차 리포트가 이 값으로 끝난 주를 되짚는다 —
+   * 예전에는 여기서 계산해 놓고 버려서 화면이 사람이 적어 둔 표본을 그리고 있었다.
+   */
+  assert.deepEqual(family.members.map((member) => member.weeks.length), [2, 2, 2]);
+  assert.deepEqual(family.members.map((member) => member.weeks[0].count), [1, 2, 3]);
+  assert.deepEqual(family.members[0].weeks.map((week) => week.status), ["closed", "current"]);
+  // 주차 카드에 금액이 실리면 안 된다 — 자산 규모는 계속 `total` 합계로만 나간다.
+  const weekKeys = new Set(family.members.flatMap((m) => m.weeks.flatMap((w) => Object.keys(w))));
+  for (const banned of ["marketValue", "cost", "cash", "profit", "valuation"]) {
+    assert.equal(weekKeys.has(banned), false, `주차 카드에 ${banned} 가 실렸다`);
+  }
 
   // 수익률은 타인 것도 내려간다 — 트랙이 구성원을 나란히 세우는 화면이라 필요하다.
   assert.deepEqual(family.members.map((member) => member.returnRate), [1.5, 3, 4.5]);
