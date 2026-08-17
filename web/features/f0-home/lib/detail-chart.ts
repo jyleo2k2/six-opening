@@ -44,10 +44,23 @@ export const PIN_COLORS: Readonly<Record<PinRole, string>> = Object.freeze({
 });
 
 
+/**
+ * 최고·최저 이름표 하나.
+ *
+ * **`x` 는 이름표 자리다.** 가장자리 값은 글씨가 카드 밖으로 잘리므로 `clampX` 로 안쪽에
+ * 끌어들인 좌표이고, 따라서 실제 최고·최저가 찍힌 자리와는 다를 수 있다. 여기에 안 끌린
+ * `y` 를 짝지어 점을 찍으면 선에서 떨어진 허공에 뜬다 — 상세 미니 차트가 점을 그리지 않는
+ * 이유이고, 점이 필요한 차트 화면(`chart-view.ts`)은 점용 `x` 와 이름표용 `labelX` 를
+ * 따로 낸다.
+ *
+ * `y` 는 값의 실제 높이다. 이름표를 핀에서 비켜 세우는 계산이 이 값을 기준으로 잰다.
+ */
+type DetailChartMark = { x: number; y: number; text: string; visible: boolean; labelY: number };
+
 export type DetailChartGeometry = {
   linePoints: string;
-  hi: { x: number; y: number; text: string; visible: boolean; labelY: number };
-  lo: { x: number; y: number; text: string; visible: boolean; labelY: number };
+  hi: DetailChartMark;
+  lo: DetailChartMark;
   pins: DetailPin[];
 };
 
