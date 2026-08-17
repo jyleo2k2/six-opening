@@ -42,6 +42,34 @@ export function sectorPreviewList<T>(list: readonly T[]): T[] {
   return list.slice(0, PREVIEW_CARDS);
 }
 
+/**
+ * 트랙패드 두 손가락 가로 스와이프가 멎었다고 보는 시간.
+ *
+ * 휠에는 **손을 뗀 순간이 없다** — 이벤트가 잠깐 멎으면 그것이 끝이다. 관성 꼬리가 이어지는
+ * 동안에도 계속 오므로, 너무 짧게 잡으면 한 번 쓴 것이 두 손짓으로 갈린다.
+ */
+export const WHEEL_IDLE_MS = 90;
+
+/** 줄 단위(`deltaMode:1`)로 오는 장치의 한 줄. 픽셀로 펴야 다른 손짓과 같은 자로 잰다. */
+const WHEEL_LINE_PX = 16;
+
+/**
+ * 가로로 쓸려는 휠인가. **세로가 더 크면 손대지 않는다** — 그것은 카드를 넘기는 손짓이고,
+ * 세로는 브라우저의 기본 스크롤이 그대로 받아야 한다. 같으면 세로로 본다(세로가 기본이다).
+ */
+export function isHorizontalWheel(deltaX: number, deltaY: number): boolean {
+  return Math.abs(deltaX) > Math.abs(deltaY);
+}
+
+/**
+ * 휠 한 번을 손짓 이동량으로 바꾼다. 부호가 뒤집히는 이유는 **미는 방향과 목록이 끌리는
+ * 방향이 반대**여서다 — 두 손가락을 왼쪽으로 밀면 `deltaX` 는 양수이고, 그것은 목록을
+ * 왼쪽으로 끈 것(`dx < 0`)과 같아서 다음 섹터로 간다. 손가락으로 왼쪽으로 쓰는 것과 같다.
+ */
+export function wheelDragDelta(deltaX: number, deltaMode: number): number {
+  return -deltaX * (deltaMode === 1 ? WHEEL_LINE_PX : 1);
+}
+
 /** 목록을 넘기는 방향. `1` 은 다음 섹터(왼쪽으로 쓸었다), `-1` 은 이전 섹터다. */
 export type SectorStep = 1 | -1;
 

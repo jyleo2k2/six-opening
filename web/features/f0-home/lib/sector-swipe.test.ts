@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   AXIS_LOCK_PX,
+  isHorizontalWheel,
   lockSwipeAxis,
   nextSectorFilter,
   PREVIEW_CARDS,
@@ -12,7 +13,9 @@ import {
   sectorSwipeStep,
   sectorTrackStyle,
   shouldCommitSectorSwipe,
+  wheelDragDelta,
   SECTOR_SLIDE_MS,
+  WHEEL_IDLE_MS,
 } from "./sector-swipe";
 import { sectorChips } from "./explore-cards";
 import type { Universe } from "./use-universe";
@@ -34,6 +37,22 @@ assert.deepEqual(order, sectorChips(universe, "game").map((chip) => chip.id));
 // 왼쪽으로 쓸면 다음 섹터, 오른쪽으로 쓸면 이전 섹터다.
 assert.equal(sectorSwipeStep(-40), 1);
 assert.equal(sectorSwipeStep(40), -1);
+
+// 트랙패드 두 손가락 스와이프는 포인터가 아니라 휠로 온다. 세로가 더 크면 카드를 넘기는
+// 손짓이므로 건드리지 않는다 — 같으면 세로로 본다(세로 레일이 기본이다).
+assert.equal(isHorizontalWheel(30, 4), true);
+assert.equal(isHorizontalWheel(-30, 4), true);
+assert.equal(isHorizontalWheel(4, 30), false);
+assert.equal(isHorizontalWheel(12, 12), false);
+// 미는 방향과 목록이 끌리는 방향은 반대다. 줄 단위로 오는 장치는 한 줄을 16px 로 편다.
+assert.equal(wheelDragDelta(30, 0), -30);
+assert.equal(wheelDragDelta(-30, 0), 30);
+assert.equal(wheelDragDelta(-2, 1), 32);
+// 그래서 두 손가락을 왼쪽으로 밀면(deltaX 양수) 손가락으로 왼쪽으로 쓴 것과 같은 쪽으로 간다.
+assert.equal(sectorSwipeStep(wheelDragDelta(30, 0)), 1);
+assert.equal(sectorSwipeStep(wheelDragDelta(-30, 0)), -1);
+// 멎었다고 보는 시간은 관성 꼬리보다 길어야 한 번 쓴 것이 두 손짓으로 갈리지 않는다.
+assert.ok(WHEEL_IDLE_MS >= 60);
 
 assert.equal(nextSectorFilter(order, "all", 1), "rank");
 assert.equal(nextSectorFilter(order, "game", -1), "watch");

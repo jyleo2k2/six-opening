@@ -19,6 +19,7 @@ import {
 import { exploreSpotFor, rememberExploreSpot } from "./lib/explore-memo";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import {
+  isHorizontalWheel,
   nextSectorFilter,
   SECTOR_SLIDE_MS,
   sectorDragOffset,
@@ -29,6 +30,8 @@ import {
   sectorSwipeStep,
   sectorTrackStyle,
   shouldCommitSectorSwipe,
+  wheelDragDelta,
+  WHEEL_IDLE_MS,
   type SectorStep,
 } from "./lib/sector-swipe";
 import { useRailDrag } from "./lib/use-rail-drag";
@@ -279,6 +282,8 @@ export function ExploreScreen({
   });
   /** 세 칸 트랙. 가로 이동은 이 노드의 인라인 스타일이 소유한다(위 `TRACK` 주석). */
   const trackRef = useRef<HTMLDivElement>(null);
+  /** 트랙을 담은 무대. 트랙패드 휠을 여기서 받는다(아래 effect). */
+  const stageRef = useRef<HTMLDivElement>(null);
 
   // 유니버스가 오기 전에는 섹터 id 목록이 비어 있어 무엇이든 전체로 떨어진다. 도착하면
   // 같은 렌더에서 제 필터가 잡히고, 아래 effect 들이 그 값으로 한 번 더 돈다.
@@ -334,6 +339,48 @@ export function ExploreScreen({
     }
     applyTrack(0, true);
   }
+
+  /**
+   * 트랙패드로 두 손가락을 가로로 미는 손짓. **포인터가 아니라 휠로 온다** — 마우스로는
+   * 넘어가는데 트랙패드로는 안 넘어가던 이유가 이것이다. 포인터를 아무리 기다려도 오지 않는다.
+   *
+   * 손을 뗀 순간이 없으므로 가로 델타를 모으고, 잠시 멎으면(`WHEEL_IDLE_MS`) 그때를 손 뗀
+   * 자리로 본다. 매 렌더 다시 붙이는 이유는 아래 두 함수가 **지금** 섹터·목록을 보고
+   * 판단하기 때문이다 — 처음 붙인 것을 붙들고 있으면 첫 섹터에서 굳는다.
+   */
+  const wheel = useRef({ dx: 0, timer: 0 });
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const onWheel = (event: WheelEvent) => {
+      if (!isHorizontalWheel(event.deltaX, event.deltaY)) return;
+      // 가로로 남는 스크롤은 브라우저의 뒤로 가기 손짓이 가져간다. 막지 않으면 섹터를
+      // 넘기려다 앱에서 나가 버린다. 그래서 `passive:false` 로 붙인다.
+      event.preventDefault();
+      if (sliding.current) return;
+      const state = wheel.current;
+      state.dx += wheelDragDelta(event.deltaX, event.deltaMode);
+      dragTrack(state.dx);
+      window.clearTimeout(state.timer);
+      state.timer = window.setTimeout(() => {
+        const { dx } = state;
+        state.dx = 0;
+        // 넘길지는 **쓴 거리로만** 정한다(속도 0). 휠 한 번의 델타는 손가락 한 프레임보다
+        // 훨씬 커서 속도로 재면 살짝 튕긴 것도 문턱을 넘는다.
+        releaseTrack(dx, 0);
+      }, WHEEL_IDLE_MS);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+    };
+  });
+  /**
+   * 멎기를 기다리는 타이머는 **화면을 떠날 때만** 끊는다. 위 effect 의 뒷정리에서 끊으면,
+   * 쓸고 있는 중에 시세 폴링(5초)이 한 번 그리기만 해도 기다리던 손짓이 사라져 트랙이
+   * 밀린 채로 선다.
+   */
+  useEffect(() => () => window.clearTimeout(wheel.current.timer), []);
 
   /**
    * 옆 칸으로 미끄러뜨리고, 미끄러짐이 끝나는 자리에서 주소를 바꾼다.
@@ -573,7 +620,7 @@ export function ExploreScreen({
           </div>
         </div>
 
-        <div style={STAGE}>
+        <div ref={stageRef} style={STAGE}>
           {/* 이전·현재·다음 섹터가 나란히 놓인 트랙. 손가락을 따라 통째로 밀린다. */}
           <div ref={trackRef} style={TRACK}>
             {panes.map(
