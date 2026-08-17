@@ -48,6 +48,12 @@ const json = (response: Response) => (response.ok ? response.json() : null);
 
 export function useArchiveData() {
   const [season, setSeason] = useState<SeasonCards>(null);
+  /**
+   * `season` 조회가 아직 안 끝났는지. 화면이 이걸로 "아직 안 왔다"와 "정말 없다"를
+   * 가른다 — 없이는 응답을 기다리는 1초 동안 중립 카드(`관찰 중` · 전부 5)가 먼저
+   * 떴다가 진짜 카드로 바뀌어 화면이 깜빡인다.
+   */
+  const [seasonLoading, setSeasonLoading] = useState(true);
   const [family, setFamily] = useState<ArchiveData["family"]>(null);
   const [comments, setComments] = useState<Record<string, FeedComment[]>>({});
   const [likes, setLikes] = useState<Record<string, FeedLike>>({});
@@ -112,7 +118,9 @@ export function useArchiveData() {
         // 사용자가 누적 카드까지 못 받아, 유형이 영영 `관찰 중` 에 머문다.
         if (alive && data?.cumulative) setSeason(data);
       })
-      .catch(() => {});
+      .catch(() => {})
+      // 실패해도 기다림은 끝났다 — 그때는 중립 카드가 맞다(비로그인·조회 실패).
+      .finally(() => { if (alive) setSeasonLoading(false); });
     fetch("/api/family?offset=0", { cache: "no-store" })
       .then(json)
       .then((data) => {
@@ -255,6 +263,7 @@ export function useArchiveData() {
 
   return {
     season,
+    seasonLoading,
     family,
     comments,
     likes,

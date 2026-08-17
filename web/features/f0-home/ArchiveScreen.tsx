@@ -520,7 +520,8 @@ export function ArchiveScreen({
           카드를 어떻게 보는지 알려 주는 안내. 화면 아래 도움말 줄을 없애고 여기로 모았다 —
           아래에 두면 카드 레일이 그만큼 눌려 가운데 카드가 작아진다.
         */}
-        {view === "cards" && infoOpen && (
+        {/* 안내도 카드가 선 뒤에 띄운다 — 가리킬 카드가 아직 없는데 꼬리만 서면 이상하다. */}
+        {view === "cards" && infoOpen && !data.seasonLoading && (
           <div style={{ position: "absolute", left: 20, right: 20, top: 112, zIndex: INFO_Z, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
             {/*
               꼬리는 **아래로** 내려 가운데 성향 카드를 가리킨다. 안내가 말하는 대상이
@@ -674,7 +675,17 @@ export function ArchiveScreen({
           </>
         )}
 
-        {view === "cards" && (
+        {/*
+          성향 응답을 기다리는 동안에는 카드를 세우지 않는다. 기다림 없이 그리면 중립
+          카드(`관찰 중` · 전부 5)가 1초쯤 떴다가 진짜 카드로 바뀌어 깜빡인다 — "아직
+          안 왔다"는 빈 자리로, "정말 없다"(비로그인·조회 실패)는 중립 카드로 가른다.
+        */}
+        {view === "cards" && data.seasonLoading && (
+          <div style={{ flex: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>기록을 불러오고 있어요</div>
+          </div>
+        )}
+        {view === "cards" && !data.seasonLoading && (
           <>
             <div style={{ position: "relative", zIndex: 2, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
               <div
