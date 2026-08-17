@@ -38,14 +38,18 @@ function readSessions(root) {
   }
 }
 
-export function findDevPort(root) {
+export function findManagedDevPort(root) {
   const session = readSessions(root).find(
     (entry) =>
       ["starting", "active"].includes(entry.status) &&
       entry.worktree &&
       samePath(entry.worktree, root),
   );
-  return Number.isInteger(session?.port) ? session.port : DEFAULT_PORT;
+  return Number.isInteger(session?.port) ? session.port : null;
+}
+
+export function findDevPort(root) {
+  return findManagedDevPort(root) ?? DEFAULT_PORT;
 }
 
 export function findReservedDevPorts(root) {

@@ -420,7 +420,10 @@ test("PR 템플릿과 GitHub 정책 검사가 같은 필수 항목을 사용한�
     path.join(repositoryRoot, ".github/workflows/session-policy.yml"),
     "utf8",
   );
-  assert.match(workflow, /node --test scripts\/git-session-manager\.test\.mjs/u);
+  assert.match(
+    workflow,
+    /node --test scripts\/dev-port\.test\.mjs scripts\/dev-runner\.test\.mjs scripts\/git-session-manager\.test\.mjs/u,
+  );
   assert.match(workflow, /check-pr --event/u);
   assert.match(workflow, /check-guards/u);
 });
