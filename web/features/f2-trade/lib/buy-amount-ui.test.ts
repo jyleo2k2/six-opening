@@ -52,5 +52,13 @@ assert.match(orderScreen, /flashMaxHint/u);
 assert.match(orderScreen, /className=\{PRESSABLE\}/u);
 assert.match(phoneFrameCss, /\.order-pressable:active/u);
 assert.match(phoneFrameCss, /@keyframes orderMaxHintFlash/u);
+assert.match(orderScreen, /tutorialMode\?: boolean/u);
+assert.match(orderScreen, /finishBuy\(null, false, true\)/u);
+assert.match(orderScreen, /finishSell\(null, false, true\)/u);
+assert.doesNotMatch(orderScreen, /계획 실천 배지를 받았어요!/u);
+const sellStart = orderScreen.indexOf("// ── 매도");
+assert.ok(sellStart >= 0);
+const sellScreen = orderScreen.slice(sellStart);
+assert.doesNotMatch(sellScreen, /kwFall|kwPop/u);
 
 console.log("buy amount prototype UI contract tests passed");
