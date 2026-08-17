@@ -63,6 +63,40 @@ for (const entry of SCRIPTED) {
     script.brief.replaceAll(/\s/g, ""),
     `${where}: detail 이 brief 와 같다`,
   );
+
+  // example 은 조정 설명에서 이미 쓴 비유를 되풀이하지 않는다. example 까지 온
+  // 아이는 두 번 틀린 아이인데, 방금 실패한 그림을 그대로 다시 내밀면 새로 쥘
+  // 것이 없다. term:stock(피자)·term:index(반 평균)·term:diversification(달걀
+  // 바구니)이 그랬다.
+  if (script.adjust) {
+    assert.notEqual(
+      script.example.replaceAll(/\s/g, ""),
+      script.adjust.explanation.replaceAll(/\s/g, ""),
+      `${where}: example 이 adjust.explanation 과 같다`,
+    );
+  }
+}
+
+// detail·example 은 용어마다 달라야 한다 (SPEC §3.4.4).
+//
+// 화면 용어 22종이 `screenTermScript` 에서 공용 한 문장을 함께 받던 자리다
+// ("화면에 이미 있는 값을 가리키는 말이라…"). `detail` 은 **정답 경로**라 맞힌
+// 아이가 거의 모두 지나가는데 용어가 무엇이든 같은 말이 나왔고, 모의투자·시즌·
+// 주문 잠금처럼 화면의 값이 아닌 용어에는 사실도 어긋났다. 겹치면 그 용어를
+// 설명하지 않고 있다는 뜻이므로 여기서 막는다.
+for (const field of ["detail", "example"] as const) {
+  const texts = SCRIPTED.map((entry) => entry.explainScript![field]);
+  const seen = new Map<string, string>();
+  for (const [i, text] of texts.entries()) {
+    const key = text.replaceAll(/\s/g, "");
+    const owner = seen.get(key);
+    assert.equal(
+      owner,
+      undefined,
+      `${field} 이 겹친다: ${owner} 와 ${SCRIPTED[i]!.id}`,
+    );
+    seen.set(key, SCRIPTED[i]!.id);
+  }
 }
 
 // 정답 id 는 실제 선택지를 가리켜야 하고 선택지 id 는 서로 달라야 한다.
