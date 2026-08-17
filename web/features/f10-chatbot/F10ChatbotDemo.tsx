@@ -662,7 +662,6 @@ export function F10ChatbotDemo({
     const paintFrame = window.requestAnimationFrame(() => {
       settleFrame = window.requestAnimationFrame(() => {
         setSheetDragY(0);
-        setIsSheetEntering(false);
       });
     });
     return () => {
@@ -710,14 +709,18 @@ export function F10ChatbotDemo({
   }
 
   /**
-   * 시트가 다 올라온 순간(진입 트랜지션 종료)에만 헤더 아바타를 페이드인한다.
-   * 시트 안 다른 요소의 트랜지션이 버블링해 잘못 트리거하지 않도록 대상·속성을
-   * 함께 확인한다.
+   * 시트가 다 올라온 순간(진입 트랜지션 종료)에만 헤더 아바타를 페이드인하고
+   * 진입 전용 느린 duration을 되돌린다. `isSheetEntering`을 트랜지션이 끝난 뒤에야
+   * 끄는 이유는, rAF 콜백에서 같은 틱에 꺼 버리면 `sheetDragY`가 0으로 바뀌는
+   * 순간 className이 이미 평소 duration으로 넘어가 있어 느린 진입 모션이
+   * 재생되지 않기 때문이다. 시트 안 다른 요소의 트랜지션이 버블링해 잘못
+   * 트리거하지 않도록 대상·속성을 함께 확인한다.
    */
   function handleSheetTransitionEnd(event: ReactTransitionEvent<HTMLElement>) {
     if (event.target !== event.currentTarget) return;
     if (event.propertyName !== "transform") return;
     setIsHeaderAvatarVisible(true);
+    setIsSheetEntering(false);
   }
 
   function openProactiveChat() {
@@ -1449,7 +1452,11 @@ export function F10ChatbotDemo({
             className={`absolute bottom-0 left-0 z-10 flex flex-col overflow-hidden rounded-t-[28px] bg-white shadow-card ${
               isSheetDragging
                 ? ""
-                : "transition-transform duration-200 ease-out motion-reduce:transition-none"
+                : isSheetEntering
+                  ? // 슬라이드업 진입만 느리게 보여준다. 드래그를 놓아 원위치로
+                    // 스냅할 때까지 700ms를 쓰면 손짓에 비해 굼뜨게 느껴진다.
+                    "transition-transform duration-700 ease-out motion-reduce:transition-none"
+                  : "transition-transform duration-200 ease-out motion-reduce:transition-none"
             }`}
             onTransitionEnd={handleSheetTransitionEnd}
             role="dialog"
