@@ -177,6 +177,21 @@ export function TutorialOverlay({
     setBoxes(found);
   }, [step]);
 
+  /**
+   * 장이 바뀌면 짚을 자리를 **화면 안으로 끌어온다.**
+   *
+   * 상세 화면처럼 세로로 긴 곳은 회사 소개·요즘 소식 카드가 스크롤 아래에 있어, 그냥
+   * 재면 구멍이 화면 밖에 뚫리고 말풍선만 덩그러니 뜬다. 종목이 바뀌면 카드 높이도
+   * 달라지므로 좌표를 미리 정해 둘 수도 없다 — 그때그때 그 자리로 옮긴다.
+   *
+   * 스크롤이 움직이는 동안은 아래 `scroll` 리스너가 계속 다시 재므로 구멍이 따라온다.
+   */
+  useEffect(() => {
+    const id = step?.anchors[0];
+    if (!id) return;
+    visibleNode(id)?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [step]);
+
   // 원본은 200ms 마다 DOM 을 전수 검색했다. 화면이 React 로 넘어온 지금은 장이 바뀔 때와
   // 화면이 실제로 움직였을 때만 다시 재면 된다. 안쪽 스크롤 컨테이너까지 잡으려면
   // 스크롤은 캡처 단계에서 받아야 한다.
