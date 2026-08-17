@@ -577,7 +577,7 @@ export function OrderScreen({
   };
   // 1단계에서만 탭을 보여 준다 — 이후 단계에서는 흐름을 방해한다.
   const flowTabs = step === 1 && (
-    <div style={TAB_ROW}>
+    <div id="tut-order-tabs" style={TAB_ROW}>
       <div onClick={pickTabBuy} style={sheetTabStyle(side === "buy")}>
         살래
       </div>
@@ -846,7 +846,7 @@ export function OrderScreen({
     };
 
     const step1 = (
-      <div id="tut-order-amount" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={WALLET_ROW}>
           <span style={{ fontSize: 14, fontWeight: 600, color: "#5C6280", whiteSpace: "nowrap" }}>내 지갑</span>
           <span
@@ -864,7 +864,7 @@ export function OrderScreen({
           </span>
         </div>
 
-        <div style={CARD}>
+        <div id="tut-order-amount" style={CARD}>
           <div style={CARD_TITLE}>얼마나 살까요?</div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <div
@@ -951,8 +951,10 @@ export function OrderScreen({
                     [30000, "3만원"],
                     [50000, "5만원"],
                   ] as const
-                ).map(([v, label]) => (
+                ).map(([v, label], at) => (
                   <div
+                    // 튜토리얼이 `다음` 으로 넘어갈 때 눌러 두는 기본값이다.
+                    id={at === 0 ? "tut-order-amount-preset" : undefined}
                     key={v}
                     onClick={() => {
                       patchDraft({ amount: v, amountSource: "preset" });
@@ -987,7 +989,7 @@ export function OrderScreen({
           )}
         </div>
 
-        <div style={TOGGLE_ROW}>
+        <div id="tut-order-price" style={TOGGLE_ROW}>
           <div onClick={() => pickOrderType("market")} style={chipStyle(draft.orderType === "market")}>
             지금 가격에 바로
           </div>
@@ -1054,10 +1056,11 @@ export function OrderScreen({
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {reasonOrder.map((index) => {
+          {reasonOrder.map((index, at) => {
             const reason = REASONS[index];
             return (
               <div
+                id={at === 0 ? "tut-order-reason-first" : undefined}
                 key={reason.code}
                 onClick={() => patchDraft({ reason: reason.code })}
                 style={pickCardStyle(draft.reason === reason.code, "grid")}
@@ -1070,8 +1073,9 @@ export function OrderScreen({
 
         <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>언제까지 가질 생각인가요?</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {PLANS.map((plan) => (
+          {PLANS.map((plan, at) => (
             <div
+              id={at === 0 ? "tut-order-plan-first" : undefined}
               key={plan.code}
               onClick={() =>
                 patchDraft({ plan: plan.code, targetPct: plan.code === "plan_target" ? draft.targetPct : null })
@@ -1254,7 +1258,7 @@ export function OrderScreen({
                 ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 돈을 그대로 맡아둘게요."
                 : "왜 샀는지까지 남긴 건 정말 잘한 거예요.\n나중에 아카이브에서 오늘의 나를 다시 만나요!"}
           </div>
-          <div style={{ ...DONE_BOX, marginTop: 22 }}>
+          <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 22 }}>
             <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>
               <span>{done.name}</span>
               <span style={SUMMARY_VALUE}>{doneQtyText}</span>
@@ -1503,7 +1507,7 @@ export function OrderScreen({
           </div>
         </div>
 
-        <div style={CARD}>
+        <div id="tut-order-amount" style={CARD}>
           <div style={CARD_TITLE}>얼마나 팔까요?</div>
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             <div
@@ -1575,7 +1579,7 @@ export function OrderScreen({
           )}
         </div>
 
-        <div style={TOGGLE_ROW}>
+        <div id="tut-order-price" style={TOGGLE_ROW}>
           <div onClick={() => patchSell({ orderType: "market" })} style={chipStyle(sellDraft.orderType !== "limit")}>
             지금 가격에 바로
           </div>
@@ -1649,7 +1653,10 @@ export function OrderScreen({
           </div>
         </div>
 
-        <div style={styleFromCss("background:#FDEFF5;border-radius:26px;padding:20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)")}>
+        <div
+          id="tut-sell-recall"
+          style={styleFromCss("background:#FDEFF5;border-radius:26px;padding:20px;box-shadow:0 2px 10px rgba(90,25,70,0.06)")}
+        >
           <span
             style={styleFromCss(
               "display:inline-block;font-size:13px;font-weight:700;color:#F5327F;background:#FCE9F1;border-radius:999px;padding:6px 13px;white-space:nowrap",
@@ -1715,68 +1722,76 @@ export function OrderScreen({
           </div>
         </div>
 
-        <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>왜 팔고 싶나요?</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {sellReasonOrder.map((index) => {
-            const reason = SELL_REASONS[index];
-            return (
-              <div
-                key={reason.code}
-                onClick={() => patchSell({ reason: reason.code })}
-                style={pickCardStyle(sellDraft.reason === reason.code, "grid")}
-              >
-                <div style={{ fontSize: 14.5, fontWeight: 600, color: "#01185A", lineHeight: 1.45 }}>{reason.label}</div>
-              </div>
-            );
-          })}
-        </div>
-
-        {showJudge && planMatch === true && (
-          <div
-            style={styleFromCss(
-              "display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:20px;padding:15px 17px;box-shadow:0 1px 3px rgba(120,90,20,0.08)",
-            )}
-          >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A" }}>계획 실천 배지</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#8A6B1F", marginTop: 4, lineHeight: 1.5 }}>
-                처음 세운 생각을 기억하고 실천했네요! 아카이브에 모아둘게요.
-              </div>
-            </div>
-          </div>
-        )}
-
-        {showJudge && planMatch === false && (
-          <>
-            {/* 원본은 두 문장을 줄로 나눈다 — `\n` 이 살려면 `pre-line` 이 함께 있어야 한다. */}
-            <div
-              style={{
-                fontSize: 15.5,
-                fontWeight: 800,
-                color: "#01185A",
-                marginTop: 9,
-                lineHeight: 1.4,
-                textWrap: "pretty",
-                whiteSpace: "pre-line",
-              }}
-            >
-              {buyRec
-                ? `처음에는 ${choiceOf(PLANS, buyRec.planCode)?.short ?? ""} 가지려고 했었네요.\n무엇이 달라졌나요?`
-                : "무엇이 달라졌나요?"}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              {CHANGES.map((change) => (
+        {/*
+          파는 이유와 계획 변경 이유는 튜토리얼이 한 덩어리로 짚는 자리다(`tut-sell-reason`).
+          바깥 열과 같은 `gap:12` 라 감싸도 사이 간격이 그대로다.
+        */}
+        <div id="tut-sell-reason" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>왜 팔고 싶나요?</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            {sellReasonOrder.map((index, at) => {
+              const reason = SELL_REASONS[index];
+              return (
                 <div
-                  key={change.code}
-                  onClick={() => patchSell({ change: change.code })}
-                  style={pickCardStyle(sellDraft.change === change.code, "row")}
+                  id={at === 0 ? "tut-sell-reason-first" : undefined}
+                  key={reason.code}
+                  onClick={() => patchSell({ reason: reason.code })}
+                  style={pickCardStyle(sellDraft.reason === reason.code, "grid")}
                 >
-                  <span style={{ fontSize: 15, fontWeight: 600, color: "#01185A", lineHeight: 1.4 }}>{change.label}</span>
+                  <div style={{ fontSize: 14.5, fontWeight: 600, color: "#01185A", lineHeight: 1.45 }}>{reason.label}</div>
                 </div>
-              ))}
+              );
+            })}
+          </div>
+
+          {showJudge && planMatch === true && (
+            <div
+              style={styleFromCss(
+                "display:flex;align-items:center;gap:12px;background:#FFF6E0;border-radius:20px;padding:15px 17px;box-shadow:0 1px 3px rgba(120,90,20,0.08)",
+              )}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A" }}>계획 실천 배지</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#8A6B1F", marginTop: 4, lineHeight: 1.5 }}>
+                  처음 세운 생각을 기억하고 실천했네요! 아카이브에 모아둘게요.
+                </div>
+              </div>
             </div>
-          </>
-        )}
+          )}
+
+          {showJudge && planMatch === false && (
+            <>
+              {/* 원본은 두 문장을 줄로 나눈다 — `\n` 이 살려면 `pre-line` 이 함께 있어야 한다. */}
+              <div
+                style={{
+                  fontSize: 15.5,
+                  fontWeight: 800,
+                  color: "#01185A",
+                  marginTop: 9,
+                  lineHeight: 1.4,
+                  textWrap: "pretty",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {buyRec
+                  ? `처음에는 ${choiceOf(PLANS, buyRec.planCode)?.short ?? ""} 가지려고 했었네요.\n무엇이 달라졌나요?`
+                  : "무엇이 달라졌나요?"}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {CHANGES.map((change, at) => (
+                  <div
+                    id={at === 0 ? "tut-sell-change-first" : undefined}
+                    key={change.code}
+                    onClick={() => patchSell({ change: change.code })}
+                    style={pickCardStyle(sellDraft.change === change.code, "row")}
+                  >
+                    <span style={{ fontSize: 15, fontWeight: 600, color: "#01185A", lineHeight: 1.4 }}>{change.label}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
 
         <div style={DARK_SUMMARY}>
           <div style={DARK_ROW}>
@@ -1910,7 +1925,7 @@ export function OrderScreen({
           </div>
         )}
 
-        <div style={{ ...DONE_BOX, marginTop: 20 }}>
+        <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 20 }}>
           <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>
             <span>{done.name}</span>
             <span style={SUMMARY_VALUE}>{sdQty}</span>

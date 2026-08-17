@@ -19,6 +19,7 @@ type TransactionRow = {
   memo: string | null;
   plan_match: boolean | null;
   plan_changed_reason: string | null;
+  feed_body: string | null;
   created_at: string;
   stocks: { stock_code: string; stock_name: string } | null;
 };
@@ -69,8 +70,17 @@ export async function buildFamilyData(
     deps.selectTransactions({
       select:
         "id,user_id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
-        "memo,plan_match,plan_changed_reason,created_at,stocks(stock_code,stock_name)",
+        "memo,plan_match,plan_changed_reason,feed_body,created_at,stocks(stock_code,stock_name)",
       user_id: `in.(${memberIds.join(",")})`,
+      /**
+       * **피드에 올린 것만 읽는다** (2026-08-17). 예전에는 체결이 곧 피드여서 한 번 살
+       * 때마다 카드가 저절로 생겼다 — 시험 삼아 눌러 본 매수까지 가족에게 그대로 갔다.
+       * 이제 `feed_body` 에 글을 쓴 거래만 피드가 된다(`POST /api/feed`).
+       *
+       * 성향·수익률은 이 필터와 무관하다. 그쪽은 `buildSeasonCards` 가 체결 전부를 읽는다 —
+       * 피드에 안 올렸다고 해서 안 산 것이 되면 안 된다.
+       */
+      feed_body: "not.is.null",
       order: "created_at.desc",
       offset: String(offset),
       // 한 건을 더 읽어 다음 페이지가 있는지만 확인하고, 화면에는 50건만 보낸다.
@@ -85,6 +95,16 @@ export async function buildFamilyData(
       return {
         userId: member.id,
         behavior: profile.cumulative,
+        /**
+         * 주차 카드도 함께 넘긴다 (2026-08-17). 지난 주차 리포트(F9 아카이브)가 구성원마다
+         * 끝난 주를 되짚는데, 그 값을 여기서 이미 계산해 놓고 버리고 있었다 — 화면은
+         * 그래서 사람이 적어 둔 표본을 그리고 있었다.
+         *
+         * **금액은 실리지 않는다.** 주차 카드에는 성향 점수·유형·거래 건수만 있고, 이는
+         * 이미 내려보내던 누적 카드(`behavior`)와 같은 종류다. 자산 규모를 드러내는
+         * 평가금액·원금·현금은 계속 `total` 합계로만 나간다.
+         */
+        weeks: profile.weeks,
         // 원금이 0이면 잰 것이 없다는 뜻이라 0% 가 아니라 null 이다 — 화면은 이걸 "아직" 으로
         // 그린다. 0% 로 내려보내면 본전인 사람과 아직 안 산 사람이 같아 보인다.
         returnRate: profile.valuation && profile.valuation.cost > 0
@@ -97,6 +117,7 @@ export async function buildFamilyData(
   ]);
   const behaviorByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.behavior]));
   const returnRateByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.returnRate]));
+  const weeksByUser = new Map(behaviorProfiles.map((item) => [item.userId, item.weeks]));
   const memberById = new Map(members.map((member) => [member.id, member]));
 
   /**
@@ -134,11 +155,18 @@ export async function buildFamilyData(
   const assets = valuations.reduce((sum, v) => sum + v.marketValue + v.cash, 0);
   const cost = valuations.reduce((sum, v) => sum + v.cost, 0);
   const profit = valuations.reduce((sum, v) => sum + v.profit, 0);
+  const cash = valuations.reduce((sum, v) => sum + v.cash, 0);
   const total = {
     /** 평가금액 + 예수금 합계 */
     assets,
     cost,
     profit,
+    /**
+     * 가족 예수금 합계 (2026-08-17). 투자 현황의 `투자 가능 금액` 이 가족 전체가 쓸 수
+     * 있는 현금을 보여 준다. 합계라 개별 자산 마스킹 규칙은 그대로다 — 누가 얼마 들고
+     * 있는지는 여기서도 안 갈린다.
+     */
+    cash,
     /** 원금이 0이면 잰 것이 없다 — 0% 가 아니라 null 이다. */
     returnRate: cost > 0 ? (profit / cost) * 100 : null,
     /** 합계에 든 사람 수. 둘이면 뺄셈으로 상대가 드러난다는 걸 화면이 알 수 있게 준다. */
@@ -161,6 +189,7 @@ export async function buildFamilyData(
       role: member.parent_child === "parent" ? "parent" as const : "child" as const,
       behavior: behaviorByUser.get(member.id),
       returnRate: returnRateByUser.get(member.id) ?? null,
+      weeks: weeksByUser.get(member.id) ?? [],
     })),
     trades: transactions.slice(0, FAMILY_TRADE_PAGE_SIZE).flatMap((row) => {
       const member = memberById.get(row.user_id);
@@ -202,6 +231,8 @@ export async function buildFamilyData(
         planCode: row.plan_code,
         planTargetPrice: row.plan_target_price === null ? null : Number(row.plan_target_price),
         memo: row.memo?.trim() || null,
+        /** 피드에 올린 글. 카드 본문이 이 값이다 — 위 필터 때문에 늘 있다. */
+        feedBody: row.feed_body ?? "",
         planMatch: row.plan_match,
         planChangedReason: row.plan_changed_reason,
         tradedAt: row.created_at,

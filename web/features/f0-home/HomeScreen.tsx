@@ -431,7 +431,7 @@ export function HomeScreen({
             </div>
           )}
 
-          <div style={{ flex: "none", textAlign: "center", padding: "6px 0 2px" }}>
+          <div id="tut-home-goal" style={{ flex: "none", textAlign: "center", padding: "6px 0 2px" }}>
             <div style={DAY_CHIP}>{view.dayCount}</div>
             <div style={ITEM_LINE}>{view.itemLine}</div>
             <div style={{ ...PROFIT_LINE, color: view.rateColor }}>

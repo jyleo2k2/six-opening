@@ -11,6 +11,7 @@ import {
   formatScore,
   gridRings,
   labelAt,
+  mondayOf,
   myProfile,
   PICKS_LEAD,
   PICKS_NOTE,
@@ -18,15 +19,17 @@ import {
   pointAt,
   resolveType,
   rgba,
+  TRAIT_DESCS,
   TRAIT_LABELS,
   typeImage,
   weekCards,
+  weekLabel,
   type FamilyMember,
   type ResolvedType,
   type WeekCard,
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
-import { lastSeasonReport } from "./lib/archive-season";
+import { closedWeekRows, seasonReport } from "./lib/archive-season";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
@@ -40,9 +43,19 @@ import { PhoneFrame } from "./PhoneFrame";
  * `lib/archive-season.ts`(지난 시즌)가 하고 여기는 붙이기만 한다.
  *
  * **자리는 셋이고 첫 화면만 개인 것이다.** 들어오면 로그인한 사람의 주차 성향 카드가
- * 레일로 깔리고(`cards`), 머리의 단추 둘은 가족 것이다 — `우리 가족 투자`(`family`)가 가족
- * 성향을 현재 시즌·과거 시즌으로 갈아 끼우고, `우리 가족 수익`(`return`)이 수익률 자리다.
- * 가족 단추 둘은 첫 화면에만 있고 들어가면 사라진다. 돌아오는 길은 머리의 `‹` 다.
+ * 레일로 깔리고(`cards`), 가족 것은 두 자리다 — `성향 리포트`(`family`)가 가족 성향을
+ * `지금까지`·`지난 주차`로 갈아 끼우고, `투자 현황`(`return`)이 수익률 자리다.
+ * 돌아오는 길은 머리의 `‹` 다.
+ *
+ * **지난 주차도 Supabase 다**(2026-08-17). `/api/family` 가 구성원마다 주차 카드를 함께
+ * 주고 `archive-season.ts` 가 끝난 주만 골라 편다. 예전에 있던 4주 표본 픽스처는 지웠다 —
+ * 되짚을 주가 없으면 빈 자리 문구를 세우고 가짜 값을 그리지 않는다.
+ *
+ * **가족으로 가는 문은 첫 화면 아래 `우리 가족 투자 보기` 하나다**(2026-08-17). 머리에
+ * 있던 분홍 단추 둘과 제목 옆 지갑을 지우고 목업대로 시트 한 장으로 모았다 — 첫 화면의
+ * 주인공은 내 성향 카드이고, 가족 숫자는 그 위에 얹히면 카드보다 먼저 읽힌다.
+ * 시트가 가족 총자산과 두 갈래(`성향 리포트`·`투자 현황`)를 함께 들고 있으므로 어디로
+ * 가는지는 시트 안에서 정한다. 튜토리얼이 짚는 `id="tut-archive-family"` 는 그 문에 있다.
  *
  * **`보유 종목 · 섹터별` 레일은 2026-08-16 지웠다.** 그 레일에서만 열리던 섹터 상세 모달은
  * 이관 때 이미 빠져 도달 불가로 남아 있었고(F9 SPEC §7), 디자인 목업에도 레일이 없다.
@@ -62,13 +75,22 @@ const TITLE = styleFromCss(
   "font-size:27px;font-weight:800;color:#001E5A;letter-spacing:-0.025em;margin-top:2px",
 );
 /**
- * 첫 화면의 가족 자리 단추. 탭이 아니라 문이라 **켜짐·꺼짐이 없다** — 들어가면 줄째로
- * 사라지므로 늘 같은 분홍이다.
+ * 첫 화면 아래 가족으로 가는 문. 탭이 아니라 문이라 **켜짐·꺼짐이 없다** — 누르면
+ * 시트가 올라오고 어디로 갈지는 거기서 고른다.
  */
-const ENTER = styleFromCss(
-  "flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;" +
-    `white-space:nowrap;color:#fff;background:${ACCENT};box-shadow:0 3px 10px -2px rgba(215,0,130,0.4)`,
+const FAMILY_DOOR = styleFromCss(
+  "display:flex;align-items:center;gap:12px;padding:17px 18px;border-radius:20px;cursor:pointer;" +
+    "background:#F4F2FE;box-shadow:inset 0 0 0 1px #E3E0F5,0 2px 8px -4px rgba(30,25,60,0.18)",
 );
+/** 시트 안의 두 갈래. 문과 같은 연보라를 쓰되 한 겹 안이라 그림자를 뺀다. */
+const FAMILY_ROW = styleFromCss(
+  "display:flex;align-items:center;gap:11px;padding:16px 17px;border-radius:18px;cursor:pointer;" +
+    "background:#F4F2FE;box-shadow:inset 0 0 0 1px #E3E0F5",
+);
+const DOOR_LABEL = styleFromCss(
+  "flex:1;min-width:0;font-size:16px;font-weight:800;color:#1A1F4B;letter-spacing:-0.02em;white-space:nowrap",
+);
+const DOOR_CHEVRON = styleFromCss("flex:none;font-size:17px;font-weight:800;color:#E5007E;line-height:1");
 const tabStyle = (on: boolean) =>
   styleFromCss(
     "flex:1;text-align:center;padding:11px 0;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;" +
@@ -83,8 +105,19 @@ const BACK = styleFromCss(
     "font-size:22px;font-weight:800;line-height:1;padding-bottom:2px;color:#001E5A;cursor:pointer;" +
     "background:#FFFFFF;box-shadow:0 2px 8px rgba(30,25,60,0.14),inset 0 0 0 1px #E4E6F1",
 );
+/**
+ * ⓘ 안내가 서는 층. **카드 레일(`2`)보다 위**여야 한다 — 아래에 두면 확대된 가운데
+ * 카드가 안내를 덮어 무슨 말인지 보이지 않는다. 시트(`6`·`7`)보다는 낮게 둔다:
+ * 시트가 올라오면 안내는 그 뒤로 가려지는 것이 맞다.
+ */
+const INFO_Z = 5;
 const SHEET_RATIO = 0.82;
 const SHEET_HEIGHT = PROTOTYPE_PHONE.screenHeight * SHEET_RATIO;
+/**
+ * 가족 시트는 내용만큼만 자란다. 쓸어내려 닫는 판정은 시트 높이를 알아야 하므로
+ * 대략의 높이를 준다 — 실제보다 조금 크게 잡으면 닫히는 문턱이 그만큼 멀어질 뿐이다.
+ */
+const FAM_SHEET_HEIGHT = PROTOTYPE_PHONE.screenHeight * 0.46;
 
 /** 오각형 한 장. 성향 카드·주차 카드가 같은 것을 쓴다(반지름과 색만 다르다). */
 function Radar({
@@ -318,6 +351,19 @@ export function ArchiveScreen({
   const [season, setSeason] = useState<"now" | "last">(requested === "last" ? "last" : "now");
   const [cardActive, setCardActive] = useState<number | null>(null);
   const [sheetIndex, setSheetIndex] = useState<number | null>(null);
+  /**
+   * 카드 아래 설명칸이 지금 무엇을 말하는지. `null` 이면 그 주 성향 설명이고, 축을 고르면
+   * 그 축의 점수·설명으로 바뀐다. **켜진 카드 하나에만** 걸린다 — 옆 카드까지 축 설명으로
+   * 바뀌면 넘길 때마다 같은 문장이 세 장에 겹쳐 보인다.
+   */
+  const [pickedAxis, setPickedAxis] = useState<number | null>(null);
+  /** 제목 옆 ⓘ 로 여는 안내. 처음 들어온 사람은 카드를 넘길 수 있는 줄 모르므로 펴 둔다. */
+  const [infoOpen, setInfoOpen] = useState(true);
+  const [famDetailOpen, setFamDetailOpen] = useState(false);
+  /** 글쓰기 시트에서 고른 거래와 적고 있는 글. 시트를 닫으면 둘 다 버린다. */
+  const [pickedTrade, setPickedTrade] = useState<string | null>(null);
+  const [postDraft, setPostDraft] = useState("");
+  const [posting, setPosting] = useState(false);
   const [famPick, setFamPick] = useState("all");
   const [who, setWho] = useState("all");
   const [detailOpen, setDetailOpen] = useState(false);
@@ -329,6 +375,13 @@ export function ArchiveScreen({
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
   const returnScrollTop = useRef(0);
   const sheet = useSheetDrag(SHEET_HEIGHT);
+  /**
+   * 가족 시트도 카드 시트와 **같은 배선**을 쓴다. 한 폰 안에서 시트마다 쓸어내려 닫는
+   * 느낌이 다르면 안 되기 때문이다(`use-sheet-drag` 머리말).
+   */
+  const famSheet = useSheetDrag(FAM_SHEET_HEIGHT);
+  /** 피드 글쓰기 시트. 카드 시트·가족 시트와 같은 배선을 쓴다. */
+  const postSheet = useSheetDrag(SHEET_HEIGHT);
 
   useEffect(() => {
     if (view === "return") returnScrollTop.current = 0;
@@ -410,67 +463,85 @@ export function ArchiveScreen({
   /** 그 주 유형의 종목 세 개. 유형이 아직 없는 주(`관찰 중`)면 빈 배열이다. */
   const sheetPicks = buildTypePicks(sheetCard?.type.key ?? null, universe, quotes);
 
-  // 지난 시즌 — 아직 서버 값이 없어 `archive-season` 픽스처를 그대로 쓴다(그 파일 머리말).
-  const last = useMemo(() => lastSeasonReport(), []);
-  const lastShown = last.members.filter((m) => lastPick === "all" || m.key === lastPick);
-
-  /** 제목이 곧 현재 자리다 — 머리말 줄을 없앴으므로 여기 말고 어디인지 적는 곳이 없다. */
-  const screenTitle =
-    view === "return" ? "우리 가족 수익" : view === "family" ? "우리 가족 투자" : "성장 아카이브";
   /**
-   * 뒤로 — 가족 탭에서는 내 카드(첫 화면)로 돌아오고, 첫 화면에서는 화면을 뜬다.
-   * 목업의 뒤로가기는 첫 화면에서 아무 일도 하지 않지만, 그건 나갈 곳이 없는 단독
-   * 페이지라서다. 여기서는 홈으로 보낸다 — 눌러도 안 움직이는 단추를 두지 않는다.
+   * 지난 주차 — 서버가 구성원마다 준 주차 카드에서 **끝난 주만** 골라 되짚는다.
+   * 되짚을 것이 없으면 `null` 이고 그 자리에는 빈 자리 문구가 선다.
    */
-  const goBack = () => {
-    if (view !== "cards") return setView("cards");
-    onLeave("/");
-  };
+  const last = useMemo(
+    () => seasonReport(closedWeekRows(data.family?.members ?? [])),
+    [data.family?.members],
+  );
+  const lastShown = last?.members.filter((m) => lastPick === "all" || m.key === lastPick) ?? [];
 
+  /** 제목이 곧 현재 자리다. 주차 머리말은 어느 자리에서나 같은 이번 주를 가리킨다. */
+  const screenTitle =
+    view === "return" ? "우리 가족 투자 현황" : view === "family" ? "우리 가족 성향 리포트" : "내 투자 성향";
+  const thisWeek = weekLabel(mondayOf(Date.now()));
   return (
     <PhoneFrame>
       <div style={PAGE}>
-        <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 12, padding: "6px 20px 0" }}>
-          <div onClick={goBack} style={BACK}>‹</div>
-          <div style={{ flex: 1 }} />
-        </div>
-        <div style={{ flex: "none", display: "flex", alignItems: "flex-end", gap: 10, padding: "10px 20px 0" }}>
-          <div style={{ ...TITLE, flex: 1, minWidth: 0 }}>{screenTitle}</div>
-          {/*
-            첫 화면 제목 옆의 지갑. 같은 `family_tag` 사람들의 자산 합계이고, 서버가 합계를
-            못 줄 때만 내 계좌로 되돌아간다. 눌러서 `우리 가족 수익` 자리로 들어간다.
-          */}
-          {view === "cards" && (
-            <div onClick={() => setView("return")} style={{ flex: "none", textAlign: "right", paddingBottom: 3, cursor: "pointer" }}>
-              <div style={{ fontSize: 10.5, fontWeight: 700, color: "#9095AA", whiteSpace: "nowrap" }}>우리 가족 자산</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "#001E5A", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", marginTop: 2 }}>{walletHead.totalText}</div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5, marginTop: 2, fontSize: 11.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: walletHead.pctColor }}>
-                <span>{walletHead.pnlText}</span>
-                <span style={{ width: 1, height: 9, background: "#DFE1EB" }} />
-                <span>{walletHead.pctText}</span>
-              </div>
-            </div>
-          )}
-        </div>
         {/*
-          가족 단추 둘은 **첫 화면에만** 있다. 누르면 그 자리로 들어가고 단추는 사라진다 —
-          켜진 탭으로 남지 않으므로 어디에 있는지는 제목(`screenTitle`)이 말하고, 돌아오는
-          길은 머리의 `‹` 하나다.
+          뒤로는 **가족 자리에만** 있다 — 내 카드(첫 화면)로 돌아오는 길이다.
+          첫 화면에는 단추 자체를 두지 않는다(2026-08-17 유저 확정). 아카이브는 하단
+          탭으로 드나드는 곳이라 나갈 문이 이미 있고, 목업의 뒤로가기도 첫 화면에서는
+          아무 일도 하지 않았다. 줄째로 접어야 제목이 그만큼 올라와 카드 자리가 넓다.
         */}
-        {view === "cards" && (
-          <div
-            id="tut-archive-family"
-            style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}
-          >
-            <div onClick={() => setView("family")} style={ENTER}>우리 가족 투자</div>
-            <div onClick={() => setView("return")} style={ENTER}>우리 가족 수익</div>
+        {view !== "cards" && (
+          <div style={{ flex: "none", display: "flex", alignItems: "center", gap: 12, padding: "6px 20px 0" }}>
+            <div onClick={() => setView("cards")} style={BACK}>‹</div>
+            <div style={{ flex: 1 }} />
+          </div>
+        )}
+        <div style={{ flex: "none", display: "flex", alignItems: "flex-end", gap: 10, padding: "10px 20px 4px" }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#9095AA", letterSpacing: "-0.01em" }}>{thisWeek}</div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
+              <div style={{ ...TITLE, flex: "none" }}>{screenTitle}</div>
+              {/* 안내는 첫 화면에만 있다 — 넘길 카드가 있는 자리가 여기뿐이다. */}
+              {view === "cards" && (
+                <div
+                  onClick={() => setInfoOpen(!infoOpen)}
+                  style={{ flex: "none", display: "flex", alignItems: "center", cursor: "pointer", paddingBottom: 3 }}
+                >
+                  <svg fill="none" height="24" stroke="#9095AA" style={{ display: "block" }} viewBox="0 0 24 24" width="24">
+                    <circle cx="12" cy="12" r="9.2" strokeWidth="1.6" />
+                    <circle cx="12" cy="7.9" fill="#9095AA" r="1.15" stroke="none" />
+                    <path d="M12 11 V16.6" strokeLinecap="round" strokeWidth="1.9" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/*
+          카드를 어떻게 보는지 알려 주는 안내. 화면 아래 도움말 줄을 없애고 여기로 모았다 —
+          아래에 두면 카드 레일이 그만큼 눌려 가운데 카드가 작아진다.
+        */}
+        {/* 안내도 카드가 선 뒤에 띄운다 — 가리킬 카드가 아직 없는데 꼬리만 서면 이상하다. */}
+        {view === "cards" && infoOpen && !data.seasonLoading && (
+          // `top` 은 제목 줄 바로 아래다 — 첫 화면은 뒤로가기 줄이 없어 제목이 위에 붙는다.
+          <div style={{ position: "absolute", left: 20, right: 20, top: 136, zIndex: INFO_Z, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
+            {/*
+              꼬리는 **아래로** 내려 가운데 성향 카드를 가리킨다. 안내가 말하는 대상이
+              ⓘ 가 아니라 그 아래 카드이기 때문이다. 카드는 레일 한가운데에 서므로
+              꼬리도 가운데다 — ⓘ 를 재서 맞추던 코드는 그래서 지웠다.
+            */}
+            <div style={{ position: "absolute", left: "50%", bottom: -7, width: 14, height: 14, transform: "translateX(-50%) rotate(45deg)", background: "#FDE7F1" }} />
+            <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 800, color: ACCENT, letterSpacing: "-0.02em" }}>매주 새로운 카드가 쌓여요</div>
+              <div onClick={() => setInfoOpen(false)} style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1, cursor: "pointer", padding: "0 2px" }}>✕</div>
+            </div>
+            <div style={{ position: "relative", fontSize: 13.5, fontWeight: 600, color: "#5C6280", lineHeight: 1.65, marginTop: 8, whiteSpace: "pre-line" }}>
+              {"좌우로 넘기면 지난주의 나를 볼 수 있어요.\n가운데 카드를 누르면 다섯 가지 투자 성향을 자세히 확인할 수 있어요."}
+            </div>
           </div>
         )}
         {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
         {view === "family" && (
           <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>현재 시즌</div>
-            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>과거 시즌</div>
+            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>지금까지</div>
+            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>지난 주차</div>
           </div>
         )}
 
@@ -518,17 +589,30 @@ export function ArchiveScreen({
           </>
         )}
 
-        {view === "family" && season === "last" && (
+        {/*
+          되짚을 끝난 주가 없을 때. 첫 주에 들어온 가족이 여기다 — 없는 것을 지어내지 않고
+          왜 비었는지만 적는다.
+        */}
+        {view === "family" && season === "last" && !last && (
+          <div style={{ ...BODY, alignItems: "center", justifyContent: "center", gap: 10, paddingBottom: 40 }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#5C6280" }}>아직 되짚을 주차가 없어요</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", textWrap: "pretty" }}>
+              이번 주가 끝나면 그 주의 성향 카드가 여기에 쌓여요.
+            </div>
+          </div>
+        )}
+
+        {view === "family" && season === "last" && last && (
           <>
             <div style={{ ...BODY, gap: 12 }}>
-              {/* 시즌 종합 카드. 겉면 색과 캐릭터는 가족의 최빈 시즌 성향에서 나온다. */}
+              {/* 종합 카드. 겉면 색과 캐릭터는 가족의 최빈 성향에서 나온다. */}
               <div style={{ flex: "none", borderRadius: 26, padding: 7, background: last.gradient }}>
                 <div style={{ position: "relative", overflow: "hidden", borderRadius: 20, padding: "16px 18px 14px", background: "linear-gradient(158deg,rgba(255,255,255,0.5) 0%,rgba(255,255,255,0.16) 44%,rgba(255,255,255,0.24) 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7),inset 0 0 0 1px rgba(255,255,255,0.4)" }}>
                   <div style={{ position: "absolute", right: -40, bottom: -40, width: 170, height: 170, borderRadius: "50%", filter: "blur(22px)", pointerEvents: "none", background: last.glow }} />
                   <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ flex: "none", width: 104, height: 124, margin: "-8px 0 -12px", background: last.image, filter: last.imageShadow }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: last.inkSoft }}>지난 시즌 종합 리포트</div>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: last.inkSoft }}>지난 주차 종합 리포트</div>
                       <div style={{ fontSize: 21, fontWeight: 900, marginTop: 4, letterSpacing: "-0.01em", lineHeight: 1.25, color: last.ink }}>{last.title}</div>
                       <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, marginTop: 6, textWrap: "pretty", color: last.inkSoft }}>{last.text}</div>
                     </div>
@@ -584,15 +668,25 @@ export function ArchiveScreen({
               })}
 
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
-                지난 시즌 기록은 그대로 보관돼요. 위 단추로 현재 시즌과 견줘 보세요.
+                끝난 주차 기록은 그대로 보관돼요. 위 단추로 지금까지와 견줘 보세요.
               </div>
             </div>
           </>
         )}
 
-        {view === "cards" && (
+        {/*
+          성향 응답을 기다리는 동안에는 카드를 세우지 않는다. 기다림 없이 그리면 중립
+          카드(`관찰 중` · 전부 5)가 1초쯤 떴다가 진짜 카드로 바뀌어 깜빡인다 — "아직
+          안 왔다"는 빈 자리로, "정말 없다"(비로그인·조회 실패)는 중립 카드로 가른다.
+        */}
+        {view === "cards" && data.seasonLoading && (
+          <div style={{ flex: 1, minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#A9AEC4" }}>기록을 불러오고 있어요</div>
+          </div>
+        )}
+        {view === "cards" && !data.seasonLoading && (
           <>
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ position: "relative", zIndex: 2, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
               <div
                 className="kwcardrail"
                 onPointerDown={rail.onPointerDown}
@@ -637,10 +731,32 @@ export function ArchiveScreen({
                             <div style={{ width: 158, height: 196, margin: "0 -16px -4px -14px", background: card.type.key ? `url(${typeImage(card.type.key)}) center bottom/contain no-repeat` : "none", filter: card.type.key ? `drop-shadow(0 12px 14px ${rgba(ink, 0.38)})` : "none" }} />
                             <div style={{ width: 82, height: 18, marginTop: -8, borderRadius: "50%", background: `radial-gradient(ellipse at center,${rgba(ink, 0.22)} 0%,${rgba(ink, 0.06)} 46%,rgba(0,0,0,0) 72%)` }} />
                           </div>
-                          <Radar ink={ink} scaleMax={card.scaleMax} scores={card.scores} />
+                          <Radar
+                            ink={ink}
+                            onPick={on ? (axis) => setPickedAxis(pickedAxis === axis ? null : axis) : undefined}
+                            picked={on ? pickedAxis : null}
+                            scaleMax={card.scaleMax}
+                            scores={card.scores}
+                          />
                         </div>
+                        {/*
+                          설명칸 하나를 둘이 나눠 쓴다. 축 이름표를 누르면 그 축의 점수·뜻으로
+                          바뀌고 다시 누르면 그 주 성향 설명으로 돌아온다 — 칸을 따로 만들면
+                          카드가 그만큼 길어져 레일에서 아래가 잘린다.
+                        */}
                         <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 9, marginTop: 8, borderRadius: 14, padding: "10px 11px", background: "rgba(255,255,255,0.5)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.75),inset 0 0 0 1px rgba(255,255,255,0.45)" }}>
-                          <div style={{ flex: 1, minWidth: 0, fontSize: 11.5, fontWeight: 600, color: rgba(ink, 0.9), lineHeight: 1.6, textWrap: "pretty", whiteSpace: "pre-line" }}>{card.desc}</div>
+                          {on && pickedAxis !== null ? (
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
+                                <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: "-0.01em", marginRight: 8, color: ink }}>{TRAIT_LABELS[pickedAxis]}</span>
+                                <span style={{ fontSize: 17, fontWeight: 900, letterSpacing: "-0.01em", fontVariantNumeric: "tabular-nums", color: ink }}>{Math.round(card.scores[pickedAxis])}</span>
+                                <span style={{ fontSize: 11, fontWeight: 700, fontVariantNumeric: "tabular-nums", marginLeft: 3, color: rgba(ink, 0.6) }}>/{card.scaleMax}점</span>
+                              </div>
+                              <div style={{ fontSize: 11.5, fontWeight: 600, lineHeight: 1.6, marginTop: 4, textWrap: "pretty", color: rgba(ink, 0.9) }}>{TRAIT_DESCS[pickedAxis]}</div>
+                            </div>
+                          ) : (
+                            <div style={{ flex: 1, minWidth: 0, fontSize: 11.5, fontWeight: 600, color: rgba(ink, 0.9), lineHeight: 1.6, textWrap: "pretty", whiteSpace: "pre-line" }}>{card.desc}</div>
+                          )}
                         </div>
                       </div>
                     </CardShell>
@@ -652,10 +768,21 @@ export function ArchiveScreen({
                   <div key={card.key} style={{ width: i === activeCard ? 20 : 7, height: 7, borderRadius: 999, transition: "width 0.25s ease,background 0.25s ease", background: i === activeCard ? ACCENT : "#D5D8E6" }} />
                 ))}
               </div>
-              <div style={{ flex: "none", textAlign: "center", padding: "14px 26px 0" }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: "#8E93A8", lineHeight: 1.6, textWrap: "pretty" }}>
-                  한 주에 한 장씩 쌓여요. 옆으로 넘겨 지난 주의 나를 보고, 가운데 카드를 누르면 다섯 축을 펼쳐 봐요.
-                </div>
+            </div>
+            {/*
+              가족으로 가는 문. **첫 화면에만** 있고 어디로 갈지는 시트 안에서 고른다.
+              튜토리얼(`tutorial-steps`)이 이 `id` 를 짚으므로 지우기 전에 그 파일을 본다.
+            */}
+            <div style={{ flex: "none", padding: "0 20px 14px" }}>
+              <div id="tut-archive-family" onClick={famSheet.openSheet} style={FAMILY_DOOR}>
+                <svg fill="none" height="26" stroke="#1A1F4B" style={{ display: "block", flex: "none" }} viewBox="0 0 24 24" width="26">
+                  <circle cx="8" cy="7.4" r="2.6" strokeWidth="1.7" />
+                  <circle cx="16" cy="8.6" r="2.1" strokeWidth="1.7" />
+                  <path d="M4 19.5 v-3.2 a4 4 0 0 1 8 0 v3.2" strokeLinecap="round" strokeWidth="1.7" />
+                  <path d="M13.6 19.5 v-2.6 a3.2 3.2 0 0 1 6.4 0 v2.6" strokeLinecap="round" strokeWidth="1.7" />
+                </svg>
+                <div style={DOOR_LABEL}>우리 가족 투자 보기</div>
+                <div style={DOOR_CHEVRON}>›</div>
               </div>
             </div>
           </>
@@ -663,14 +790,17 @@ export function ArchiveScreen({
 
         {view === "return" && (
           <div onScroll={loadMoreOnScroll} style={BODY}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 13, paddingBottom: 10 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 13, padding: "20px 0 10px" }}>
               {/*
-                머리 카드 — 내 계좌 하나의 총액·손익이다. `상세` 를 켜야 예수금과 결제 기준이
-                나온다. 접어 두는 이유는 아이가 먼저 볼 숫자가 총액과 수익률이기 때문이다.
+                머리 카드 — **가족 합계**의 총액·손익이다(2026-08-17 유저 확정). 화면
+                이름이 `우리 가족 투자 현황` 인데 내 계좌 숫자가 서 있으면 제목과 숫자가
+                다른 말을 한다. 서버가 합계를 못 줄 때만(비로그인·조회 실패) 내 계좌로
+                되돌아간다(`walletHead`). `상세` 를 켜야 투자 가능 금액과 결제 기준이
+                나온다 — 아이가 먼저 볼 숫자는 총액과 수익률이다.
               */}
               <div style={{ background: "#FFFFFF", borderRadius: 22, padding: "18px 19px 16px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em" }}>우리 가족 수익률</div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em" }}>우리 가족 총자산</div>
                   <div onClick={() => setDetailOpen(!detailOpen)} style={{ flex: "none", display: "flex", alignItems: "center", gap: 7, cursor: "pointer" }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: detailOpen ? "#3D4460" : "#9CA1B4" }}>상세</span>
                     <div style={{ width: 40, height: 23, borderRadius: 999, padding: 2, display: "flex", transition: "background 0.2s ease", background: detailOpen ? ACCENT : "#DFE1EB", justifyContent: detailOpen ? "flex-end" : "flex-start" }}>
@@ -679,20 +809,21 @@ export function ArchiveScreen({
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 8 }}>
-                  <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "#111524" }}>{summary.totalNumber}</div>
+                  <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "#111524" }}>{walletHead.totalNumber}</div>
                   <div style={{ fontSize: 19, fontWeight: 700, color: "#111524" }}>원</div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 7, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: summary.pctColor }}>
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{summary.pnlText}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 7, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: walletHead.pctColor }}>
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pnlText}</span>
                   <span style={{ width: 1, height: 13, background: "#DFE1EB" }} />
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{summary.pctText}</span>
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pctText}</span>
                 </div>
                 {detailOpen && (
                   <div style={{ marginTop: 15, paddingTop: 14, borderTop: "1px solid #EFF0F6", display: "flex", flexDirection: "column", gap: 11 }}>
-                    {[
-                      { label: "예수금", value: summary.cashText },
-                      { label: "출금가능금액", value: summary.withdrawText },
-                    ].map((row) => (
+                    {/*
+                      가족 예수금 합계다. 총자산이 가족 것인데 이 줄만 내 현금이면 한 카드
+                      안에서 기준이 갈린다. 합계가 없으면(구버전 응답) 내 것으로 되돌아간다.
+                    */}
+                    {[{ label: "투자 가능 금액", value: walletHead.cashText ?? summary.cashText }].map((row) => (
                       <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 600, color: "#8E93A8" }}>{row.label}</div>
                         <div style={{ flex: "none", fontSize: 15, fontWeight: 700, color: "#2C3245", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{row.value}</div>
@@ -709,7 +840,7 @@ export function ArchiveScreen({
               */}
               <div style={{ background: "#2F3140", borderRadius: 22, padding: "15px 14px 14px", boxShadow: "0 6px 18px -8px rgba(20,18,40,0.5)" }}>
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, padding: "0 3px" }}>
-                  <div style={{ flex: "none", fontSize: 15.5, fontWeight: 800, color: "#FFFFFF", whiteSpace: "nowrap", letterSpacing: "-0.01em" }}>가족 수익률 달리기</div>
+                  <div style={{ flex: "none", fontSize: 15.5, fontWeight: 800, color: "#FFFFFF", whiteSpace: "nowrap", letterSpacing: "-0.01em" }}>수익률 레이스</div>
                   <div style={{ flex: 1, minWidth: 0, textAlign: "right", fontSize: 11, fontWeight: 700, color: "#F3C64B", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>START 왼쪽은 마이너스</div>
                 </div>
                 <div style={{ position: "relative", marginTop: 13, borderRadius: 16, overflow: "hidden", background: "#3A3C4C", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.08)" }}>
@@ -746,13 +877,14 @@ export function ArchiveScreen({
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {/*
                   제목과 필터 칩이 한 줄이다. 칩이 오른쪽으로 밀려 제목과 나란히 선다.
-                  제목은 **누구를 골라도 `가족 피드` 로 고정**한다 — 지금 누구를 보고 있는지는
+                  제목은 **누구를 골라도 `투자 피드` 로 고정**한다 — 지금 누구를 보고 있는지는
                   바로 옆 칩이 이미 켜져서 말하고, 제목까지 `○○의 피드` 로 바뀌면 칩을 누를 때마다
-                  제목 너비가 달라져 칩 줄이 좌우로 흔들렸다.
+                  제목 너비가 달라져 칩 줄이 좌우로 흔들렸다. 목업은 이름을 갈아 끼우지만
+                  그 흔들림은 이미 고친 것이라 되돌리지 않는다.
                 */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 2px 0" }}>
                   <div style={{ flex: "none", fontSize: 16, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
-                    가족 피드
+                    투자 피드
                   </div>
                   <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "flex-end", gap: 5, overflowX: "auto", scrollbarWidth: "none" }}>
                     <Chips
@@ -762,6 +894,23 @@ export function ArchiveScreen({
                       picked={who}
                     />
                   </div>
+                </div>
+                {/*
+                  글쓰기 문. **산다고 피드가 저절로 생기지 않으므로** 올릴 자리가 여기 있어야
+                  한다 — 이 단추가 없으면 새로 산 기록은 어디에서도 가족에게 갈 수 없다.
+                */}
+                <div
+                  onClick={() => {
+                    setPickedTrade(null);
+                    setPostDraft("");
+                    void data.loadCandidates().catch(() => {});
+                    postSheet.openSheet();
+                  }}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "13px 15px", borderRadius: 18, cursor: "pointer", background: "#FFFFFF", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}
+                >
+                  <div style={{ flex: "none", width: 28, height: 28, borderRadius: 999, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 800, lineHeight: 1, color: "#fff", background: ACCENT }}>+</div>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 700, color: "#3D4460" }}>내 기록을 피드에 올리기</div>
+                  <div style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1 }}>›</div>
                 </div>
                 {feed.map((card) => (
                   <div key={card.id} style={{ background: "#fff", borderRadius: 22, padding: "16px 17px 14px", boxShadow: "0 2px 10px rgba(30,25,60,0.05)" }}>
@@ -794,7 +943,23 @@ export function ArchiveScreen({
                     </div>
 
                     <div style={{ fontSize: 14.5, fontWeight: 500, color: "#3D4460", lineHeight: 1.72, marginTop: 13, whiteSpace: "pre-line", textWrap: "pretty" }}>{card.text}</div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 20, marginTop: 13 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 20, marginTop: 13 }}>
+                      {/*
+                        내가 올린 카드만 내릴 수 있다. 내려도 거래 기록은 남는다 — 성향과
+                        수익률은 체결을 그대로 읽어야 하기 때문이다.
+                      */}
+                      {String(data.viewerId ?? "") === card.userId ? (
+                        <div
+                          onClick={() => {
+                            if (!window.confirm("이 기록을 피드에서 내릴까요? 사고판 기록은 그대로 남아요.")) return;
+                            void data.removeFeed(card.id).catch((e) => window.alert(e.message));
+                          }}
+                          style={{ flex: "none", fontSize: 12.5, fontWeight: 700, color: "#A9AEC4", cursor: "pointer", whiteSpace: "nowrap" }}
+                        >
+                          피드에서 내리기
+                        </div>
+                      ) : null}
+                      <div style={{ flex: 1 }} />
                       <div
                         onClick={() => setOpenComments((current) => ({ ...current, [card.id]: !current[card.id] }))}
                         style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, fontWeight: 700, cursor: "pointer", fontVariantNumeric: "tabular-nums", color: openComments[card.id] ? "#0A3272" : "#A9AEC4" }}
@@ -916,6 +1081,173 @@ export function ArchiveScreen({
         )}
 
         <BottomNav active="archive" onLeave={onLeave} />
+
+        {/*
+          가족 시트. 총자산도 투자 가능 금액도 같은 `family_tag` 사람들의 **합계**다
+          (2026-08-17 유저 확정) — 투자 현황 머리 카드와 같은 값이라 두 자리의 숫자가
+          늘 같다. 서버가 합계를 못 줄 때만 내 계좌로 되돌아간다.
+        */}
+        {famSheet.open && (
+          <>
+            <div
+              onClick={famSheet.closeSheet}
+              style={{ position: "absolute", inset: 0, zIndex: 6, background: "rgba(20,15,40,0.4)", ...famSheet.scrimStyle }}
+            />
+            <div
+              style={{
+                position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 7,
+                borderRadius: "30px 30px 0 0", padding: "14px 22px 26px", background: "#FFFFFF",
+                boxShadow: "0 -18px 40px rgba(30,25,60,0.26)",
+                ...famSheet.sheetStyle("sheetUp 0.32s cubic-bezier(0.22,1,0.36,1)"),
+              }}
+            >
+              <div {...famSheet.handleProps}>
+                <div style={{ width: 44, height: 5, borderRadius: 999, margin: "0 auto 16px", background: "#E1E3EE" }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 21, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.02em" }}>우리 가족 한눈에 보기</div>
+                  <div data-sheet-static onClick={famSheet.closeSheet} style={{ flex: "none", fontSize: 14, fontWeight: 700, color: "#A9AEC4", padding: "6px 4px", cursor: "pointer", whiteSpace: "nowrap" }}>닫기</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: "#001E5A", marginTop: 16 }}>총자산</div>
+              <div onClick={() => setFamDetailOpen(!famDetailOpen)} style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 8, cursor: "pointer" }}>
+                <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "#111524" }}>{walletHead.totalNumber}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: "#111524" }}>원</div>
+                <div style={{ flex: "none", fontSize: 32, fontWeight: 800, color: "#111524", lineHeight: 1, width: 20, textAlign: "center" }}>{famDetailOpen ? "⌄" : "›"}</div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 7, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: walletHead.pctColor }}>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pnlText}</span>
+                <span style={{ width: 1, height: 13, background: "#DFE1EB" }} />
+                <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pctText}</span>
+              </div>
+              {famDetailOpen && (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16, paddingTop: 15, borderTop: "1px solid #EFF0F6" }}>
+                    <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 600, color: "#8E93A8" }}>투자 가능 금액</div>
+                    <div style={{ flex: "none", fontSize: 15.5, fontWeight: 700, color: "#2C3245", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{walletHead.cashText ?? summary.cashText}</div>
+                  </div>
+                  <div style={{ textAlign: "right", fontSize: 12, fontWeight: 600, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}>{summary.settleText}</div>
+                </>
+              )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 18 }}>
+                <div onClick={() => { setView("family"); setSeason("now"); setFamPick("all"); famSheet.closeSheet(); }} style={FAMILY_ROW}>
+                  <svg fill="none" height="22" stroke="#1A1F4B" style={{ display: "block", flex: "none" }} viewBox="0 0 24 24" width="22">
+                    <circle cx="12" cy="12" r="8.2" strokeWidth="1.7" />
+                    <path d="M12 12 V3.8" strokeWidth="1.7" />
+                    <path d="M12 12 L19.4 15.6" strokeWidth="1.7" />
+                    <path d="M12 3.8 a8.2 8.2 0 0 1 7.4 11.8 L12 12 Z" fill="#1A1F4B" stroke="none" />
+                  </svg>
+                  <div style={{ ...DOOR_LABEL, fontSize: 15.5 }}>성향 리포트</div>
+                  <div style={{ ...DOOR_CHEVRON, fontSize: 16 }}>›</div>
+                </div>
+                <div onClick={() => { setView("return"); famSheet.closeSheet(); }} style={FAMILY_ROW}>
+                  <svg fill="none" height="22" stroke="#1A1F4B" style={{ display: "block", flex: "none" }} viewBox="0 0 24 24" width="22">
+                    <path d="M4.5 20 H20" strokeLinecap="round" strokeWidth="1.8" />
+                    <rect height="6.5" rx="1" strokeWidth="1.7" width="3.4" x="6" y="10.5" />
+                    <rect height="11" rx="1" strokeWidth="1.7" width="3.4" x="11.3" y="6" />
+                    <rect height="8.5" rx="1" strokeWidth="1.7" width="3.4" x="16.6" y="8.5" />
+                  </svg>
+                  <div style={{ ...DOOR_LABEL, fontSize: 15.5 }}>투자 현황</div>
+                  <div style={{ ...DOOR_CHEVRON, fontSize: 16 }}>›</div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/*
+          피드 글쓰기. 위에서 기록 하나를 고르고 아래에 글을 적는다 — 고르는 목록은 **아직
+          안 올린 내 체결**뿐이라(`GET /api/feed`) 같은 거래로 카드를 두 장 세울 수 없다.
+        */}
+        {postSheet.open && (
+          <>
+            <div
+              onClick={postSheet.closeSheet}
+              style={{ position: "absolute", inset: 0, zIndex: 6, background: "rgba(20,15,40,0.4)", ...postSheet.scrimStyle }}
+            />
+            <div
+              className="kwnos"
+              style={{
+                position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 7, maxHeight: `${SHEET_RATIO * 100}%`,
+                overflowY: "auto", borderRadius: "30px 30px 0 0", padding: "14px 22px 26px", background: "#FFFFFF",
+                boxShadow: "0 -18px 40px rgba(30,25,60,0.26)",
+                ...postSheet.sheetStyle("sheetUp 0.32s cubic-bezier(0.22,1,0.36,1)"),
+              }}
+            >
+              <div {...postSheet.handleProps}>
+                <div style={{ width: 44, height: 5, borderRadius: 999, margin: "0 auto 16px", background: "#E1E3EE" }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0, fontSize: 21, fontWeight: 800, color: "#001E5A", letterSpacing: "-0.02em" }}>피드에 올리기</div>
+                  <div data-sheet-static onClick={postSheet.closeSheet} style={{ flex: "none", fontSize: 14, fontWeight: 700, color: "#A9AEC4", padding: "6px 4px", cursor: "pointer", whiteSpace: "nowrap" }}>닫기</div>
+                </div>
+              </div>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: "#8E93A8", lineHeight: 1.65, marginTop: 8, textWrap: "pretty" }}>
+                올릴 기록을 고르고 가족에게 남길 말을 적어요. 사고판 기록은 올리지 않아도 그대로 남아요.
+              </div>
+
+              {data.candidates.length === 0 ? (
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: "#A9AEC4", lineHeight: 1.65, padding: "22px 2px", textAlign: "center", textWrap: "pretty" }}>
+                  올릴 수 있는 기록이 없어요.{"\n"}사고팔면 여기에서 고를 수 있어요.
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 14 }}>
+                  {data.candidates.map((trade) => {
+                    const on = pickedTrade === trade.id;
+                    const at = new Date(trade.tradedAt);
+                    return (
+                      <div
+                        key={trade.id}
+                        onClick={() => setPickedTrade(on ? null : trade.id)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 10, padding: "12px 14px", borderRadius: 16, cursor: "pointer",
+                          background: on ? "#FDE7F1" : "#F5F6FB",
+                          boxShadow: on ? `inset 0 0 0 2px ${ACCENT}` : "inset 0 0 0 1px #E9EAF2",
+                        }}
+                      >
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 14.5, fontWeight: 800, color: "#001E5A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{trade.stockName}</div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: "#8E93A8", marginTop: 3, whiteSpace: "nowrap" }}>
+                            {`${at.getMonth() + 1}월 ${at.getDate()}일 ${trade.side === "sell" ? "매도" : "매수"}`}
+                          </div>
+                        </div>
+                        <div style={{ flex: "none", fontSize: 13.5, fontWeight: 700, color: "#3D4460", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                          {trade.price === null ? "비공개" : `${Math.round(trade.price).toLocaleString("ko-KR")}원`}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <textarea
+                    onChange={(event) => setPostDraft(event.target.value)}
+                    placeholder="왜 사고팔았는지 가족에게 한 줄 남겨요"
+                    rows={3}
+                    style={{ marginTop: 7, border: "none", outline: "none", resize: "none", background: "#F2F3FA", borderRadius: 16, padding: "12px 14px", fontSize: 14, fontWeight: 600, color: "#001E5A", fontFamily: "inherit", lineHeight: 1.6 }}
+                    value={postDraft}
+                  />
+                  <div
+                    onClick={() => {
+                      const body = postDraft.trim();
+                      if (!pickedTrade || !body || posting) return;
+                      setPosting(true);
+                      void data
+                        .postFeed(pickedTrade, body)
+                        .then(() => { setPostDraft(""); setPickedTrade(null); postSheet.closeSheet(); })
+                        .catch((e) => window.alert(e.message))
+                        .finally(() => setPosting(false));
+                    }}
+                    style={{
+                      marginTop: 7, textAlign: "center", padding: "15px 0", borderRadius: 999,
+                      fontSize: 16, fontWeight: 800, whiteSpace: "nowrap",
+                      ...(pickedTrade && postDraft.trim() && !posting
+                        ? { color: "#fff", background: ACCENT, cursor: "pointer", boxShadow: "0 3px 10px -2px rgba(215,0,130,0.4)" }
+                        : { color: "#B8BDD0", background: "#F0F1F7" }),
+                    }}
+                  >
+                    {posting ? "올리는 중이에요" : "피드에 올리기"}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {sheet.open && sheetCard && (
           <>

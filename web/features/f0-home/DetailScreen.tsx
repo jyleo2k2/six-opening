@@ -438,14 +438,14 @@ export function DetailScreen({
             </div>
           </div>
 
-          <div style={CARD}>
+          <div id="tut-detail-about" style={CARD}>
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
               <span style={CARD_TITLE}>이 회사는 뭘 하나요?</span>
             </div>
             <div style={CARD_BODY}>{`${stock.name}${josa(stock.name)} ${stock.desc}.`}</div>
           </div>
 
-          <div style={CARD}>
+          <div id="tut-detail-news" style={CARD}>
             <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
               <span style={CARD_TITLE}>요즘 무슨 일이 있었나요?</span>
             </div>

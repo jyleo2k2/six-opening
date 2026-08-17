@@ -12,25 +12,23 @@ import type { ScreenRoute } from "../screen-route";
  *    200ms 폴링으로 DOM 을 뒤져 알아냈지만, 화면이 React 로 넘어온 지금은
  *    `ScreenRoute` 를 읽으면 된다.
  * 2. **말투는 해요체다.** 원본은 반말이었고 정본 톤과 어긋난다.
- * 3. **문안을 지금 화면에 맞춘다.** 탐색 카드는 세로로 넘기고(원본은 "옆으로"),
- *    버튼 이름은 자리마다 다음·주문하기·팔기로 갈린다.
+ * 3. **문안을 지금 화면에 맞춘다.** 버튼 이름은 자리마다 다음·주문하기·팔기로 갈린다.
  *
- * 길이는 5·8·13 중에서 고른다. `from` 이 그 장이 처음 들어오는 길이라 5 ⊂ 8 ⊂ 13 이고,
- * **8 장은 화면마다 정확히 한 장**이다 — 나중에 "화면당 한 장을 저절로 띄우는" 방식으로
- * 갈아타도 문안을 다시 쓸 일이 없다.
+ * **한 벌짜리 흐름이다** [2026-08-17 확정]. 예전에는 5·8·13 세 길이를 두고 장마다
+ * `from` 으로 어느 길이부터 나오는지 적었는데, 화면에 붙인 `ConnectedPrototype` 이 길이를
+ * 넘기지 않아 **언제나 8장만 떴다.** 섹터·매수 이유·매도처럼 정작 설명이 필요한 자리가
+ * 13장에만 있어 실행 경로에서 한 번도 보이지 않았고, 길이를 고르는 화면도 없었다.
+ * 고를 수 없는 선택지를 지우고 사러 가는 길 하나를 끝까지 따라가는 순서로 바꿨다.
+ *
+ * 흐름은 **홈 → 모의투자 → 섹터 → 종목 카드 → 상세(차트·회사·뉴스) → 매수 3단계 →
+ * 매도 3단계** 다. 사고파는 과정을 한 번씩 끝까지 보여 주는 것이 목적이라 계좌·랭킹·
+ * 아카이브는 넣지 않는다.
  */
-
-export type TutorialLength = 5 | 8 | 13;
-
-export const TUTORIAL_LENGTHS = [5, 8, 13] as const satisfies readonly TutorialLength[];
-
-/** 기본 길이. 화면마다 한 장씩이다. */
-export const TUTORIAL_LENGTH = 8 satisfies TutorialLength;
 
 /**
  * 화면 안에서만 바뀌는 자리.
  *
- * 주문 1/2/3 단계와 상세→뉴스는 주소가 안 바뀌어(`useState`) 밖에서는 안 보인다.
+ * 주문 1/2/3 단계와 상세→차트·뉴스는 주소가 안 바뀌어(`useState`) 밖에서는 안 보인다.
  * 화면이 `onLeave` 와 같은 패턴으로 올려 주고, 값은 화면이 이미 쓰는 상태 이름 그대로다.
  */
 export type TutorialStage =
@@ -48,6 +46,11 @@ export type TutorialStep = {
   screen: ScreenRoute["screen"];
   /** 없으면 그 화면 어디에 있든 이 장이다. */
   stage?: TutorialStage;
+  /**
+   * 주문 화면의 매수·매도 구분. 두 흐름이 `screen: "order"` 와 `stage` 를 그대로 공유하므로
+   * 이것이 없으면 **매도 화면에 매수 문안이 뜬다**.
+   */
+  side?: "buy" | "sell";
   /** 짚어 줄 요소의 `id`. 화면에 없으면 구멍 없이 설명만 띄운다. */
   anchors: string[];
   title: string;
@@ -61,209 +64,276 @@ export type TutorialStep = {
   /**
    * 이 자리로 **들어가는 방법**. `다음` 을 누르면 다음 장의 이것을 실행한다.
    *
-   * 장이 아니라 자리에 매어 둔 이유는 길이(5·8·13)에 따라 다음 장이 달라지기 때문이다 —
-   * 8장에서는 주문 다음이 계좌지만 13장에서는 예약이다. 목적지가 제 진입로를 들고 있으면
-   * 어느 길이에서도 맞는다.
+   * 장이 아니라 자리에 매어 둔 이유는 같은 자리로 여러 길에서 들어올 수 있어서다.
+   * 목적지가 제 진입로를 들고 있으면 어디서 오든 맞는다.
    *
-   * - `path` — 주소로 바로 간다.
-   * - `anchor` — 그 자리의 **이동 버튼**을 대신 누른다. 종목 코드처럼 화면만 아는 값이
-   *   주소에 필요할 때 쓴다. 누르는 것은 이동 버튼뿐이고 금액·이유 같은 **고르는 자리는
-   *   건드리지 않는다** — 그건 아이 대신 투자 결정을 고르는 짓이다.
+   * - `path` — 주소로 바로 간다. `:code` 는 지금 보고 있는 종목 코드로 바꾼다(방금 산
+   *   회사를 그대로 팔러 갈 때 쓴다 — 코드는 화면만 안다).
+   * - `anchors` — 그 자리로 가는 데 필요한 것을 **적힌 순서대로 한 프레임에 하나씩**
+   *   누른다. 화면이 다시 그려져야 다음 버튼이 열리는 자리가 있어서다(금액을 골라야
+   *   `다음` 이 켜진다).
    *
-   * 없으면 데려가지 않는다. 아이가 직접 골라야 넘어가는 자리(주문 2단계)가 그렇다.
+   * **모든 장에 진입로가 있다** [2026-08-17 확정]. 예전에는 주문 단계 사이를 비워 두고
+   * 아이가 직접 고르기를 기다렸다 — 대신 고르는 것이 원본 튜토리얼의 문제였기 때문이다.
+   * 그런데 그러면 `다음` 이 아무 일도 안 하는 장이 넷이나 생겨 안내가 거기서 끊겼다.
+   * 지금은 튜토리얼이 **보기 좋은 기본값**(1만원·첫 이유·첫 계획)을 눌러 끝까지 데려가고,
+   * 아이는 설명을 읽은 뒤 그 자리에서 직접 바꾸면 된다.
    */
-  enter?: { path: string } | { anchor: string };
-  /** 이 장이 처음 들어오는 길이. */
-  from: TutorialLength;
+  enter?: { path: string } | { anchors: string[] };
 };
 
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
   {
-    id: "home",
+    id: "home-goal",
     screen: "home",
-    anchors: ["tut-home-total"],
-    title: "내 돈이 얼마인지",
-    what: "맨 위 숫자가 지금 내가 가진 전부예요. 남은 현금이랑 사 둔 주식을 합한 값이에요.",
-    term: "총자산",
+    anchors: ["tut-home-goal"],
+    title: "오늘 내가 얼마나 벌었나",
+    what: "여기 왁뿌볼을 몇 개 살 수 있는지 나와요. 아래 숫자로 지금 얼마나 벌었는지 한눈에 볼 수 있어요.",
+    term: "수익",
     concept:
-      "지갑에 남은 현금과 지금 갖고 있는 주식 값을 더한 게 총자산이에요. 주식 값은 매일 바뀌니까 이 숫자도 같이 움직여요. 빨간색은 어제보다 올랐다는 뜻이고, 파란색은 내렸다는 뜻이에요.",
-    hint: "아래 모의투자를 누르면 회사를 구경할 수 있어요",
+      "처음 받은 돈보다 지금 가진 돈이 많으면 번 거고, 적으면 잃은 거예요. 그 차이가 수익이에요. 빨간색은 늘었다는 뜻이고 파란색은 줄었다는 뜻이에요. 갖고 있는 주식 값이 매일 바뀌니까 이 숫자도 같이 움직여요.",
+    hint: "아래 모의투자를 찾아봐요",
     enter: { path: "/" },
-    from: 5,
+  },
+  {
+    id: "nav-trade",
+    screen: "home",
+    anchors: ["tut-nav-trade"],
+    title: "사고파는 곳으로 가기",
+    what: "모의투자를 누르면 회사를 구경하고 주식을 사고팔 수 있어요. 한번 눌러 볼까요?",
+    term: "모의투자",
+    concept:
+      "진짜 돈이 아니라 연습용 돈으로 해 보는 투자예요. 틀려도 진짜 돈이 줄지 않으니까 마음 편히 이것저것 해 봐도 돼요. 대신 값이 움직이는 건 진짜와 똑같아요.",
+    hint: "모의투자를 눌러 봐요",
   },
   {
     id: "explore-chips",
     screen: "explore",
     anchors: ["tut-explore-chips"],
     title: "회사 종류 고르기",
-    what: "여기서 회사 종류를 골라요. 맨 왼쪽은 오늘 많이 오른 회사부터 보여줘요.",
+    what: "사거나 팔고 싶은 주식의 종류를 여기서 고를 수 있어요. 맨 왼쪽은 오늘 많이 오른 회사부터 보여줘요.",
     term: "섹터",
     concept:
       "비슷한 일을 하는 회사끼리 묶은 걸 섹터라고 해요. 게임 만드는 회사는 게임 섹터, 라면 만드는 회사는 식품 섹터예요. 한 섹터가 통째로 오르거나 내릴 때가 있어서, 여러 섹터를 나눠 가지면 한쪽이 흔들려도 덜 휘청여요.",
     hint: "마음에 드는 종류를 눌러 봐요",
-    enter: { path: "/explore" },
-    from: 13,
+    enter: { anchors: ["tut-nav-trade"] },
   },
   {
     id: "explore-cards",
     screen: "explore",
     anchors: ["tut-explore-cards"],
-    title: "회사 카드 넘겨보기",
-    what: "카드를 위아래로 밀면 다른 회사가 나와요. 카드에 오늘 값이랑 얼마나 움직였는지가 적혀 있어요.",
+    title: "회사 카드 보기",
+    what: "주식의 지금 가격과 오늘 얼마나 오르고 내렸는지가 카드에 나와요. 카드를 위아래로 밀면 다른 회사가 나와요.",
     term: "주식과 주가",
     concept:
       "주식은 회사를 아주 잘게 나눈 조각이에요. 한 조각을 사면 나도 그 회사의 주인 중 한 명이 돼요. 그 조각 하나의 값이 주가예요. 빨간색은 어제보다 오른 거고, 파란색은 내린 거예요.",
     hint: "카드를 눌러서 회사를 자세히 봐요",
-    enter: { path: "/explore" },
-    from: 5,
   },
   {
-    id: "detail",
+    id: "detail-chart",
     screen: "stock",
     stage: "detail",
-    anchors: ["tut-detail-chart", "tut-detail-buy"],
-    title: "회사 자세히 보기",
-    what: "그래프로 값이 그동안 어떻게 움직였는지 볼 수 있어요. 사러 가려면 아래 주문하기를 눌러요.",
+    anchors: ["tut-detail-chart"],
+    title: "값이 어떻게 움직였나",
+    what: "차트를 누르면 이 주식의 가격이 그동안 어떻게 움직였는지 한눈에 볼 수 있어요.",
+    term: "차트",
+    concept:
+      "값이 오르내린 길을 선으로 이어 그린 그림이에요. 선이 위로 가면 그동안 오른 거고 아래로 가면 내린 거예요. 지나온 길은 알려 주지만 앞으로 어디로 갈지는 알려 주지 않아요.",
+    hint: "차트 자세히 보기를 눌러도 돼요",
+    // 종목 코드는 화면만 안다. 지금 보고 있는 카드를 눌러 그 종목으로 들어간다.
+    enter: { anchors: ["tut-explore-cards"] },
+  },
+  {
+    id: "detail-about",
+    screen: "stock",
+    stage: "detail",
+    anchors: ["tut-detail-about"],
+    title: "이 회사는 뭘 하나요",
+    what: "이 회사가 어떤 일을 하는 곳인지 알려줘요.",
+    term: "회사와 주식",
+    concept:
+      "주식을 산다는 건 그 회사의 아주 작은 주인이 된다는 뜻이에요. 그래서 무슨 일을 하는 회사인지 아는 게 먼저예요. 내가 무슨 일을 하는지도 모르는 곳의 주인이 되는 건 이상하잖아요.",
+    hint: "아래 소식도 읽어 봐요",
+  },
+  {
+    id: "detail-news",
+    screen: "stock",
+    stage: "detail",
+    anchors: ["tut-detail-news"],
+    title: "요즘 무슨 일이 있었나",
+    what: "최근에 이 회사에 이런 일이 있었어요. 어려운 말은 쉬운 말로 풀어서 알려줘요.",
+    term: "뉴스와 주가",
+    concept:
+      "회사에 좋은 일이 생기면 사려는 사람이 늘고, 걱정되는 일이 생기면 팔려는 사람이 늘어요. 그래서 뉴스가 나오면 값이 움직이곤 해요. 다만 뉴스 하나만 보고 다음에 오를지 내릴지는 아무도 알 수 없어요.",
+    hint: "뉴스 자세히 보기를 눌러도 돼요",
+  },
+  {
+    id: "detail-buy",
+    screen: "stock",
+    stage: "detail",
+    anchors: ["tut-detail-buy"],
+    title: "사러 가기",
+    what: "이 회사가 마음에 들면 주문하기를 눌러 볼까요?",
     term: "매수",
     concept:
       "주식을 사는 걸 매수라고 해요. 가게에서 물건 사는 거랑 비슷한데 다른 게 하나 있어요. 값이 계속 바뀌어서, 내가 산 뒤에 오를 수도 내릴 수도 있다는 거예요. 그래서 사기 전에 왜 사는지 한 번 생각해 보면 좋아요.",
     hint: "주문하기를 눌러 봐요",
-    // 종목 코드는 화면만 안다. 지금 보고 있는 카드를 눌러 그 종목으로 들어간다.
-    enter: { anchor: "tut-explore-cards" },
-    from: 8,
   },
   {
-    id: "news",
-    screen: "stock",
-    stage: "news",
-    anchors: ["tut-news-easy"],
-    title: "어려운 말 풀어 보기",
-    what: "이 회사에 무슨 일이 있었는지 3줄로 알려줘요. 기사에 나온 어려운 말은 아래에 쉬운 말로 풀어 놨어요.",
-    term: "뉴스와 주가",
-    concept:
-      "회사에 좋은 일이 생기면 사려는 사람이 늘고, 걱정되는 일이 생기면 팔려는 사람이 늘어요. 그래서 뉴스가 나오면 값이 움직이곤 해요. 다만 뉴스 하나만 보고 다음에 오를지 내릴지는 아무도 알 수 없어요.",
-    hint: "이 말은 무슨 뜻이야 칸을 읽어 봐요",
-    enter: { anchor: "tut-detail-news" },
-    from: 8,
-  },
-  {
-    id: "order-amount",
+    id: "buy-tabs",
     screen: "order",
     stage: "order-1",
-    anchors: ["tut-order-amount", "tut-order-next"],
+    side: "buy",
+    anchors: ["tut-order-tabs"],
+    title: "살래 · 팔래 · 예약",
+    what: "여기서 사기와 팔기를 오갈 수 있어요. 예약을 누르면 기다리는 주문도 볼 수 있어요.",
+    term: "주문",
+    concept:
+      "사겠다 또는 팔겠다고 내는 신청이 주문이에요. 주문을 넣었다고 바로 거래가 되는 건 아니에요. 사겠다는 사람과 팔겠다는 사람의 값이 맞아야 그때 거래가 이뤄져요.",
+    hint: "얼마나 살지 골라 봐요",
+    enter: { anchors: ["tut-detail-buy"] },
+  },
+  {
+    id: "buy-amount",
+    screen: "order",
+    stage: "order-1",
+    side: "buy",
+    anchors: ["tut-order-amount"],
     title: "얼마나 살까",
-    what: "쓸 금액을 고르거나 몇 주 살지 골라요. 다 고르면 아래 다음을 눌러요.",
+    what: "사고 싶은 주식을 만원어치씩 살 수도 있고, 몇 주 살지 개수로 고를 수도 있어요.",
     term: "분산",
     concept:
       "가진 돈을 한 회사에 몽땅 넣으면 그 회사가 흔들릴 때 내 돈도 전부 같이 흔들려요. 여러 곳에 나눠 담으면 한 곳이 내려가도 다른 곳이 버텨 줘요. 이걸 분산이라고 해요.",
-    hint: "금액이나 주 수를 고르고 다음을 눌러요",
-    enter: { anchor: "tut-detail-buy" },
-    from: 5,
+    hint: "금액이나 주 수를 골라 봐요",
   },
   {
-    // 예약은 1단계 안의 갈래라 `order-amount` 와 같은 자리다. 바로 뒤에 두어야
-    // `다음` 이 그 자리에서 이어진다.
-    id: "order-reserve",
+    id: "buy-price",
     screen: "order",
     stage: "order-1",
-    anchors: ["tut-order-reserve"],
-    title: "값을 정해 두고 기다리기",
-    what: "예약을 고르면 내가 정한 값이 될 때까지 기다렸다가 사요. 기다리는 동안 그 돈은 잠깐 맡아 둬요.",
+    side: "buy",
+    anchors: ["tut-order-price"],
+    title: "어떤 값에 살까",
+    what: "지금 가격으로 바로 살 수도 있고, 내가 정한 가격이 될 때까지 기다렸다 살 수도 있어요.",
     term: "예약 주문",
     concept:
       "지금 값이 마음에 안 들 때, 얼마가 되면 사겠다고 미리 적어 두는 거예요. 그 값이 오지 않으면 주문은 그냥 기다리기만 해요. 기다리는 동안 그 돈은 다른 데 못 쓰니까, 오래 걸어 두면 답답할 수 있어요.",
-    hint: "지금 값으로 바로 사려면 그냥 다음을 눌러요",
-    from: 13,
+    hint: "다 골랐으면 다음을 눌러요",
   },
   {
-    id: "order-reason",
+    id: "buy-reason",
     screen: "order",
     stage: "order-2",
-    anchors: ["tut-order-reason", "tut-order-next"],
-    title: "왜 사는지, 언제까지 가질지",
-    what: "왜 사고 싶은지 고르고, 얼마나 오래 갖고 있을지도 골라요. 하고 싶은 말은 아래에 한 줄 남겨도 돼요.",
+    side: "buy",
+    anchors: ["tut-order-reason"],
+    title: "왜 사는지 남기기",
+    what: "왜 이 회사가 좋아 보였는지, 언제까지 갖고 있을지 고르고 하고 싶은 말도 남길 수 있어요.",
     term: "투자 이유",
     concept:
       "이유를 남겨 두면 나중에 다시 볼 수 있어요. 잘됐을 때도 아쉬웠을 때도 “그때 나는 이렇게 생각했구나” 하고 알 수 있거든요. 언제까지 가질지 미리 정해 두면 값이 흔들릴 때 덜 놀라요.",
-    hint: "다 고르면 주문하기를 눌러요",
-    from: 13,
+    hint: "이유와 목표를 골라 봐요",
+    // 금액을 골라야 `다음` 이 켜진다. 1만원을 눌러 두고 넘긴다 — 아이는 여기서 바꿀 수 있다.
+    enter: { anchors: ["tut-order-amount-preset", "tut-order-next"] },
   },
   {
-    id: "portfolio",
-    screen: "portfolio",
-    anchors: ["tut-portfolio-holdings"],
-    title: "내가 가진 것 보기",
-    what: "지금 갖고 있는 회사들이 여기 모여 있어요. 얼마에 샀는지, 지금은 얼마인지 한눈에 볼 수 있어요.",
-    term: "보유 종목",
+    id: "buy-done",
+    screen: "order",
+    stage: "order-3",
+    side: "buy",
+    anchors: ["tut-order-done"],
+    title: "샀어요!",
+    what: "짠, 사기로 결정했어요! 얼마에 몇 개를 샀는지 여기서 볼 수 있어요. 이제 파는 단계도 볼까요?",
+    term: "체결",
     concept:
-      "내가 지금 갖고 있는 회사들을 보유 종목이라고 해요. 산 값보다 지금 값이 높으면 빨간색, 낮으면 파란색이에요. 팔기 전까지는 아직 정해진 게 아니에요 — 숫자는 계속 움직이거든요.",
-    hint: "종목을 누르면 자세히 볼 수 있어요",
-    enter: { path: "/portfolio" },
-    from: 5,
+      "주문이 실제 거래로 바뀌는 걸 체결이라고 해요. 장이 열려 있을 때 지금 값으로 사면 바로 체결되고, 장이 닫혔거나 값을 정해 뒀으면 그 조건이 될 때까지 기다렸다 체결돼요.",
+    hint: "다음을 누르면 파는 화면으로 가요",
+    // 이유와 계획을 고른 뒤라야 `주문하기` 가 켜진다. 첫 칸을 눌러 두고 주문을 넣는다.
+    enter: { anchors: ["tut-order-reason-first", "tut-order-plan-first", "tut-order-next"] },
   },
   {
-    id: "portfolio-pending",
-    screen: "portfolio",
-    anchors: ["tut-portfolio-pending"],
-    title: "기다리는 주문 보기",
-    what: "예약해 둔 주문은 여기서 기다려요. 마음이 바뀌면 취소할 수 있어요.",
-    term: "미체결",
-    concept:
-      "아직 거래가 이뤄지지 않은 주문을 미체결이라고 해요. 사겠다는 사람과 팔겠다는 사람의 값이 맞아야 거래가 되거든요. 값이 맞으면 그때 체결되고, 그제야 주식이 진짜 내 것이 돼요.",
-    hint: "취소를 누르면 맡아 둔 돈을 돌려줘요",
-    enter: { path: "/portfolio" },
-    from: 13,
-  },
-  {
-    id: "portfolio-sell",
-    screen: "portfolio",
-    anchors: ["tut-portfolio-sell"],
-    title: "팔러 가기",
-    what: "갖고 있는 걸 팔 수도 있어요. 종목 카드 아래 팔러 가기를 누르면 돼요.",
+    id: "sell-amount",
+    screen: "order",
+    stage: "order-1",
+    side: "sell",
+    anchors: ["tut-order-amount"],
+    title: "얼마나 팔까",
+    what: "갖고 있는 것 중에 얼마나 팔 건지 정할 수 있어요. 전부 팔 수도 있고 절반만 팔 수도 있어요.",
     term: "매도",
     concept:
       "주식을 파는 걸 매도라고 해요. 팔면 그만큼 다시 돈으로 바뀌어서 지갑에 들어와요. 한꺼번에 다 팔지 않고 나눠서 파는 것도 할 수 있어요.",
-    hint: "팔러 가기를 누르면 얼마나 팔지 고를 수 있어요",
-    enter: { path: "/portfolio" },
-    from: 13,
+    hint: "얼마나 팔지 골라 봐요",
+    // 방금 본 그 회사를 그대로 팔러 간다. 종목 코드는 화면만 아니까 자리에서 받아 채운다.
+    enter: { path: "/sell/:code" },
   },
   {
-    id: "ranking",
-    screen: "ranking",
-    anchors: ["tut-ranking"],
-    title: "다른 사람과 견줘 보기",
-    what: "같이 하는 사람들이 이번 시즌에 어떻게 하고 있는지 볼 수 있어요.",
-    term: "수익률",
+    id: "sell-price",
+    screen: "order",
+    stage: "order-1",
+    side: "sell",
+    anchors: ["tut-order-price"],
+    title: "어떤 값에 팔까",
+    what: "지금 가격에 바로 팔 수도 있고, 팔고 싶은 가격을 정해 두고 기다릴 수도 있어요.",
+    term: "목표 가격",
     concept:
-      "처음 가진 돈에서 얼마나 늘거나 줄었는지를 퍼센트로 나타낸 게 수익률이에요. 금액이 아니라 비율이라서 시작한 돈이 서로 달라도 견줄 수 있어요. 순위는 지금 이 순간의 모습이라 매일 바뀌어요.",
-    hint: "아카이브에서 내 기록을 볼 수 있어요",
-    enter: { path: "/ranking" },
-    from: 8,
+      "얼마가 되면 팔겠다고 미리 정해 두는 값이에요. 미리 정해 두면 값이 갑자기 움직여도 그때그때 마음 가는 대로 정하지 않게 돼요. 대신 그 값이 오지 않으면 계속 기다리기만 해요.",
+    hint: "다 골랐으면 다음을 눌러요",
   },
   {
-    id: "archive",
-    screen: "archive",
-    anchors: ["tut-archive-family"],
-    title: "가족과 견줘 보기",
-    what: "사고팔았던 게 전부 여기 쌓여요. 가족이 어떻게 했는지도 같이 볼 수 있어요.",
-    term: "기록",
+    id: "sell-recall",
+    screen: "order",
+    stage: "order-2",
+    side: "sell",
+    anchors: ["tut-sell-recall"],
+    title: "살 때 쓴 일기",
+    what: "살 때 적어둔 일기를 여기서 다시 볼 수 있어요. 그때 나는 어떤 생각이었을까요?",
+    term: "계획 지키기",
     concept:
-      "언제 사서 언제 팔았는지, 그때 무슨 생각이었는지가 남아요. 가족끼리 서로 어떻게 골랐는지 견줘 보면 나는 어떤 쪽인지 알게 돼요. 이게 이 앱에서 제일 중요한 부분이에요.",
-    hint: "우리 가족 수익을 누르면 가족 피드가 나와요",
-    enter: { path: "/archive" },
-    from: 5,
+      "살 때 “언제까지 갖고 있겠다”고 정한 것과 지금 파는 것이 같은지 견줘 보는 자리예요. 계획대로 팔았는지 마음이 바뀌어 팔았는지는 둘 다 괜찮아요. 다만 어느 쪽이었는지 알아 두면 다음에 더 나은 결정을 할 수 있어요.",
+    hint: "그때 마음과 지금 마음을 견줘 봐요",
+    // 팔 수량은 기본이 전부라 그대로 넘어간다.
+    enter: { anchors: ["tut-order-next"] },
+  },
+  {
+    id: "sell-reason",
+    screen: "order",
+    stage: "order-2",
+    side: "sell",
+    anchors: ["tut-sell-reason"],
+    title: "왜 파는지 남기기",
+    what: "왜 팔고 싶은지, 어떤 생각이 들었는지 적어 봐요.",
+    term: "매도 이유",
+    concept:
+      "파는 이유도 사는 이유만큼 중요해요. 값이 올라서 판 건지, 무서워서 판 건지, 다른 걸 사려고 판 건지 남겨 두면 나중에 내가 어떤 때 흔들리는 사람인지 알게 돼요.",
+    hint: "다 고르면 팔기를 눌러요",
+  },
+  {
+    id: "sell-done",
+    screen: "order",
+    stage: "order-3",
+    side: "sell",
+    anchors: ["tut-order-done"],
+    title: "팔았어요!",
+    what: "팔기로 결정했어요! 얼마에 몇 개를 팔았는지 여기서 볼 수 있어요.",
+    term: "실현 수익",
+    concept:
+      "팔기 전까지 오르내리던 숫자는 아직 정해진 게 아니에요. 팔아야 그때 값으로 정해지고, 그걸 실현 수익이라고 해요. 사고판 기록은 아카이브에 모여서 내가 어떤 투자자인지 보여줘요.",
+    hint: "여기까지예요. 이제 직접 해 봐요!",
+    // 계획을 지켰으면 변경 이유 칸이 아예 없다. 없는 앵커는 조용히 건너뛴다.
+    enter: { anchors: ["tut-sell-reason-first", "tut-sell-change-first", "tut-order-next"] },
   },
 ];
-
-/** 고른 길이에 들어가는 장만. 순서는 그대로다. */
-export function tutorialSteps(length: TutorialLength = TUTORIAL_LENGTH) {
-  return TUTORIAL_STEPS.filter((step) => step.from <= length);
-}
 
 export type TutorialPlace = {
   screen: ScreenRoute["screen"];
   stage?: TutorialStage;
+  side?: "buy" | "sell";
+  /** 지금 보고 있는 종목. `enter.path` 의 `:code` 를 채운다. */
+  code?: string;
 };
+
+/** 장이 `side` 를 적었으면 그 방향에서만 이 장이다. 안 적었으면 어느 쪽이든 맞다. */
+function sideMatches(step: TutorialStep, at: TutorialPlace) {
+  return step.side === undefined || step.side === at.side;
+}
 
 /**
  * 지금 화면에 해당하는 장을 찾는다. 없으면 `-1`.
@@ -273,16 +343,16 @@ export type TutorialPlace = {
  */
 export function stepIndexAt(steps: readonly TutorialStep[], at: TutorialPlace) {
   const exact = steps.findIndex(
-    (step) => step.screen === at.screen && step.stage === at.stage,
+    (step) => step.screen === at.screen && step.stage === at.stage && sideMatches(step, at),
   );
   if (exact >= 0) return exact;
 
   const anyStage = steps.findIndex(
-    (step) => step.screen === at.screen && step.stage === undefined,
+    (step) => step.screen === at.screen && step.stage === undefined && sideMatches(step, at),
   );
   if (anyStage >= 0) return anyStage;
 
-  return steps.findIndex((step) => step.screen === at.screen);
+  return steps.findIndex((step) => step.screen === at.screen && sideMatches(step, at));
 }
 
 /** 다음 장. 끝이면 `-1`. */
@@ -298,5 +368,10 @@ export function nextStepIndex(steps: readonly TutorialStep[], index: number) {
  * 풀려고 선택지를 하나씩 눌러 봤는데, 그건 아이 대신 투자 결정을 고르는 짓이다.
  */
 export function isSamePlace(a: TutorialStep, b: TutorialStep) {
-  return a.screen === b.screen && a.stage === b.stage;
+  return a.screen === b.screen && a.stage === b.stage && a.side === b.side;
+}
+
+/** `enter.path` 의 `:code` 를 지금 보고 있는 종목으로 바꾼다. 모르면 빈 문자열이라 404 다. */
+export function enterPath(path: string, at: TutorialPlace) {
+  return path.replace(":code", at.code ?? "");
 }
