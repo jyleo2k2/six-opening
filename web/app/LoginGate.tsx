@@ -6,6 +6,10 @@ import { Jua } from "next/font/google";
 import iconChild from "./front UI/assets/icon-child.png";
 import iconParents from "./front UI/assets/icon-parents.png";
 import splashHero from "./front UI/assets/splash-hero.png";
+// 폰 프레임의 배율·기하는 로그인도 로그인 뒤 화면과 같은 것을 쓴다. `usePhoneScreenRect`
+// 를 들여오면 무대(`.phone-stage`) 스타일도 함께 딸려 온다.
+import { usePhoneScreenRect } from "../features/f0-home/PhoneFrame";
+import { PHONE_SCREEN, PROTOTYPE_PHONE } from "../features/f0-home/lib/phone-frame";
 import { SignupWizard } from "./SignupWizard";
 
 const jua = Jua({ weight: "400", subsets: ["latin"], preload: false });
@@ -102,14 +106,16 @@ export function LoginGate() {
     }
   }
 
+  // 로그인 뒤 화면(`PhoneFrame`)과 **같은 함수**가 배율을 정한다. 예전에는 여기서 CSS 로
+  // 따로 계산했는데 `calc((100vw - 16px) / 450)` 이 길이라 숫자를 받는 `scale()` 과 타입이
+  // 맞지 않아 선언이 통째로 버려졌고, 폰이 창 크기와 무관하게 원본 450×920 으로 그려졌다.
+  // 창 높이가 928 미만이면 로그인에서 홈으로 넘어갈 때 폰이 눈에 띄게 작아졌다.
+  const scale = usePhoneScreenRect()?.scale ?? 1;
+
   return (
     <div
+      className="phone-stage"
       style={{
-        minHeight: "100dvh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#F6F7FA",
         fontFamily: "'Pretendard','Segoe UI','Malgun Gothic',sans-serif",
         color: "#1A2233",
       }}
@@ -117,20 +123,21 @@ export function LoginGate() {
       <div
         style={{
           position: "relative",
-          width: 450,
-          height: 920,
+          width: PROTOTYPE_PHONE.frameWidth,
+          height: PROTOTYPE_PHONE.frameHeight,
           flex: "none",
-          transform: "scale(min(1, calc((100vw - 16px) / 450), calc((100dvh - 16px) / 920)))",
+          transform: `scale(${scale})`,
+          transformOrigin: "center center",
         }}
       >
         <div
           style={{
             position: "absolute",
-            left: 24,
-            top: 23,
-            width: 402,
-            height: 874,
-            borderRadius: 40,
+            left: PHONE_SCREEN.left,
+            top: PHONE_SCREEN.top,
+            width: PROTOTYPE_PHONE.screenWidth,
+            height: PROTOTYPE_PHONE.screenHeight,
+            borderRadius: PHONE_SCREEN.borderRadius,
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
@@ -168,8 +175,8 @@ export function LoginGate() {
         </div>
         <img
           src="/ui/assets/iphone-frame.png"
-          width={450}
-          height={920}
+          width={PROTOTYPE_PHONE.frameWidth}
+          height={PROTOTYPE_PHONE.frameHeight}
           alt=""
           style={{ position: "absolute", left: 0, top: 0, display: "block", zIndex: 5, pointerEvents: "none" }}
         />
