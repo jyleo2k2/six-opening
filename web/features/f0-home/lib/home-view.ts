@@ -71,6 +71,12 @@ export const HOME_INFO: Record<
   {
     /** 헤더 "○○ 총자산" 에 쓰는 데모 이름. 서버 계좌 이름이 있으면 그쪽이 이긴다. */
     name: string;
+    /**
+     * 데모 지갑(주식을 안 사고 남은 현금). 계좌를 못 읽는 동안 `내 지갑` 을 `0원` 으로
+     * 두면 고장난 화면처럼 보이고, 총자산도 보유 평가금액과 같아져 둘을 나눠 적을 이유가
+     * 사라진다. 데모에서도 **총자산 = 지갑 + 평가금액**이 맞아떨어지게 여기 값을 둔다.
+     */
+    cash: number;
     avatarImg: string;
     brand: string;
     unit: string;
@@ -83,6 +89,7 @@ export const HOME_INFO: Record<
 > = {
   mom: {
     name: "찬영 어머님",
+    cash: 320000,
     avatarImg: "/ui/assets/profile-mom.png",
     brand: "샤넬",
     unit: "향수",
@@ -98,6 +105,7 @@ export const HOME_INFO: Record<
   },
   dad: {
     name: "찬영 아버님",
+    cash: 540000,
     avatarImg: "/ui/assets/profile-dad.png",
     brand: "나이키",
     unit: "신발",
@@ -114,6 +122,7 @@ export const HOME_INFO: Record<
   },
   child: {
     name: "김찬영",
+    cash: 90000,
     avatarImg: "/ui/assets/profile-child.png",
     brand: "",
     unit: "왁뿌볼",
@@ -218,8 +227,16 @@ export type HomeView = {
   moodScale: number;
   /** 헤더 프로필 옆 "○○ 총자산". 총자산 금액이 수익금액처럼 읽히지 않게 이름을 붙인다. */
   totalAssetsLabel: string;
-  /** 현금(`balance`) + 보유 평가금액. 계좌를 못 읽었으면 보유 평가금액만(현금 없이) 보여준다. */
+  /** 총 현금(`balance`) + 보유 평가금액. 잠긴 현금도 내 돈이라 여기엔 들어간다. */
   totalAssetsText: string;
+  /**
+   * 총자산을 펼치면 나오는 `내 지갑` — 주식을 사지 않고 남은 현금이다.
+   *
+   * **매수 화면의 `내 지갑` 과 같은 값이어야 한다.** 그쪽은 지갑의 `cash`(=`available`)를
+   * 적으므로 여기서 `balance` 를 쓰면 미체결 매수가 잠근 돈만큼 홈이 더 크게 적는다 —
+   * 같은 이름의 두 숫자가 화면마다 다르면 어느 쪽이 진짜인지 알 길이 없다.
+   */
+  walletText: string;
   /** 계좌를 읽었는데 보유가 하나도 없을 때만 참. */
   noHoldings: boolean;
 };
@@ -313,8 +330,10 @@ export function homeView(
   // 색과 그림이 같은 판정을 쓰도록 방향은 한 번만 낸다.
   const trend = pctTrend(rate);
   const art = moodArt(trend, info.goalImg, goalCount);
-  // 계좌를 못 읽은 동안은 현금을 모른다 — 0으로 두어 보유 평가금액만 보여준다.
-  const cash = loaded ? user?.balance ?? 0 : 0;
+  // 총자산은 총 현금을 쓰고 지갑은 주문에 쓸 수 있는 현금을 쓴다. 계좌를 못 읽은 동안은
+  // 둘 다 모르므로 데모 지갑 하나로 본다 — 그때는 잠긴 주문도 없다.
+  const cash = loaded ? user?.balance ?? 0 : info.cash;
+  const wallet = loaded ? user?.available ?? user?.balance ?? 0 : info.cash;
 
   return {
     role: role ?? "child",
@@ -334,6 +353,7 @@ export function homeView(
     moodScale: art.scale,
     totalAssetsLabel: ((loaded && user?.name) || info.name) + " 총자산",
     totalAssetsText: won(cash + total),
+    walletText: won(wallet),
     noHoldings: loaded && live.length === 0,
   };
 }
@@ -345,6 +365,21 @@ export function homeView(
 export function pctTrend(pct: number): Trend {
   const shown = Math.round(pct * 10) / 10;
   return shown > 0 ? 1 : shown < 0 ? -1 : 0;
+}
+
+const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+
+/**
+ * 지갑을 펼쳤을 때 밑에 붙는 `결제기준 08.17(월) 13:48`.
+ *
+ * 여기 들어가는 시각은 **서버 계좌를 읽은 시각**이지 이 줄을 펼친 시각이 아니다
+ * (`use-account` 의 `accountReadAt`). 펼칠 때마다 지금 시각을 찍으면 잔액은 그대로인데
+ * 시각만 새로 적혀, 방금 갱신된 숫자처럼 읽힌다.
+ */
+export function basisTimeText(at: number): string {
+  const d = new Date(at);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getMonth() + 1)}.${pad(d.getDate())}(${WEEKDAYS[d.getDay()]}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 /** 오르면 핑크, 내리면 남색, 그대로면 회색. 총 수익률과 보유 줄이 같은 규칙을 쓴다. */

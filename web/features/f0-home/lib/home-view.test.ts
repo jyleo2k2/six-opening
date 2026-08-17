@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  basisTimeText,
   HOME_HOLDING_LIMIT,
   HOME_INFO,
   homeRole,
@@ -44,8 +45,9 @@ assert.deepEqual(demo.holdings, [
 assert.equal(demo.goalCount, 35);
 assert.equal(demo.itemLine, "왁뿌볼 35개 살 수 있어요");
 assert.equal(demo.noHoldings, false);
-// 계좌를 못 읽은 동안은 현금을 모른다 — 총자산은 데모 보유 평가금액만이다(238,500+124,000+96,500).
-assert.equal(demo.totalAssetsText, "459,000원");
+// 계좌를 못 읽은 동안은 데모 지갑을 쓴다 — 총자산 = 지갑 90,000 + 평가금액(238,500+124,000+96,500).
+assert.equal(demo.totalAssetsText, "549,000원");
+assert.equal(demo.walletText, "90,000원");
 // 총자산은 헤더 프로필 옆에 이름과 함께 선다 — 가운데 두면 바로 아래 수익금액과 헷갈린다.
 assert.equal(demo.totalAssetsLabel, "김찬영 총자산");
 
@@ -71,6 +73,12 @@ assert.equal(momDemo.itemLine, "샤넬 향수 1개 살 수 있어요");
 assert.equal(dadDemo.itemLine, "나이키 신발 5개 살 수 있어요");
 assert.equal(momDemo.totalAssetsLabel, "찬영 어머님 총자산");
 assert.equal(dadDemo.totalAssetsLabel, "찬영 아버님 총자산");
+// 데모에서도 총자산 = 지갑 + 평가금액이 맞아떨어진다. 지갑을 0원으로 두면 두 숫자가
+// 같아져 나눠 적을 이유가 사라지고, 펼친 지갑이 고장난 것처럼 보인다.
+assert.equal(momDemo.walletText, "320,000원");
+assert.equal(momDemo.totalAssetsText, "1,296,000원");
+assert.equal(dadDemo.walletText, "540,000원");
+assert.equal(dadDemo.totalAssetsText, "1,617,000원");
 
 // 카드에는 세 줄까지만 세운다. 나머지는 `전체보기` 시트가 맡는다 — 카드가 보유 개수만큼
 // 길어지면 그 위 캐릭터 그림이 계정마다 다른 자리에 선다.
@@ -123,6 +131,16 @@ assert.equal(
   homeView({ ...held, balance: 1_000_000 }, prices).totalAssetsText,
   "1,420,000원",
 );
+
+// 내 지갑은 **주문에 쓸 수 있는 현금**(`available`)이다. 매수 화면의 `내 지갑` 이 같은 값을
+// 적으므로(`applyServerAccount` 의 cash), 여기서 총 현금을 쓰면 미체결이 잠근 돈만큼 홈이
+// 더 크게 적는다 — 같은 이름의 숫자가 화면마다 달라진다. 총자산 쪽은 총 현금 그대로다.
+const reservedUser = { ...held, balance: 1_000_000, reserved: 300_000, available: 700_000 };
+assert.equal(homeView(reservedUser, prices).walletText, "700,000원");
+assert.equal(homeView(reservedUser, prices).totalAssetsText, "1,420,000원");
+// `available` 을 안 주던 옛 응답은 총 현금으로 떨어진다. 둘 다 없으면 0원이다.
+assert.equal(homeView({ ...held, balance: 1_000_000 }, prices).walletText, "1,000,000원");
+assert.equal(homeView(held, prices).walletText, "0원");
 
 // 손실이면 부호와 색이 함께 바뀌고 목표 개수는 0 아래로 내려가지 않는다.
 const losing = homeView(held, { "005930": 50000, "259960": 100000 });
@@ -281,5 +299,13 @@ assert.equal(popItems(true, 3).filter((p) => p.on).length, 3);
 assert.equal(popItems(true, 99).filter((p) => p.on).length, 6);
 assert.equal(popItems(false, 3).filter((p) => p.on).length, 0);
 assert.deepEqual(popItems(true, 6)[0], popItems(true, 6)[0]);
+
+// 지갑 밑의 결제기준. 계좌를 읽은 **그 시각**을 적는다 — 로컬 시각으로 만들어 물어야
+// 표준시가 다른 기계에서도 같은 답이 나온다.
+assert.equal(basisTimeText(new Date(2026, 7, 17, 13, 48).getTime()), "08.17(월) 13:48");
+// 한 자리 월·일·시·분은 0을 채운다. 자리 수가 흔들리면 숫자가 아니라 문장처럼 읽힌다.
+assert.equal(basisTimeText(new Date(2026, 0, 5, 9, 7).getTime()), "01.05(월) 09:07");
+// 요일은 일요일부터 센다.
+assert.equal(basisTimeText(new Date(2026, 7, 16, 0, 0).getTime()), "08.16(일) 00:00");
 
 console.log("home view tests passed");

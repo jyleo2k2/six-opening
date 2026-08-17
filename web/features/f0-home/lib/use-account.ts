@@ -14,6 +14,7 @@ import type { ServerAccount } from "./server-account";
  */
 let accountPromise: Promise<ServerAccount | null> | null = null;
 let cachedUser: ServerAccount | null = null;
+let readAt: number | null = null;
 
 /**
  * 다음 조회가 서버를 다시 읽게 한다. 주문 접수·취소·정산은 잔액과 잠긴 금액을 바꾸므로
@@ -32,6 +33,7 @@ export function loadAccount(): Promise<ServerAccount | null> {
       .then((data: (ServerAccount & { user_id?: number }) | null) => {
         if (data?.user_id) {
           cachedUser = data;
+          readAt = Date.now();
           return data;
         }
         accountPromise = null;
@@ -46,6 +48,17 @@ export function loadAccount(): Promise<ServerAccount | null> {
  * 아이 계정 데모를 그린다 — 빈 화면보다는 낫다는 `app.html` 의 판단을 그대로 따른다.
  * 한 번 받은 뒤로는 초기값이 캐시라 재방문에 데모가 끼어들 틈이 없다.
  */
+/**
+ * 마지막으로 계좌 응답을 **받은** 시각. 홈이 지갑 밑에 적는 `결제기준` 이 이 값이다.
+ *
+ * 상태가 아니라 모듈 값인 이유는 응답이 이미 모듈 캐시라서다 — `useAccount` 가 응답을
+ * 세우며 다시 그릴 때 같이 읽히고, 주문 뒤 `invalidateAccount()` 로 다시 읽으면 함께
+ * 새 시각이 된다. 아직 못 읽었으면 `null` 이고, 그때 화면은 그 줄을 적지 않는다.
+ */
+export function accountReadAt(): number | null {
+  return readAt;
+}
+
 export function useAccount() {
   const [user, setUser] = useState<AccountUser | null>(cachedUser);
 

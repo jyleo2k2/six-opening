@@ -3,10 +3,10 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
-import { homeView, popItems, trendColor, type HomeHolding } from "./lib/home-view";
+import { basisTimeText, homeView, popItems, trendColor, type HomeHolding } from "./lib/home-view";
 import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { shouldOpenSheetByPull } from "./lib/sheet-drag";
-import { useAccount } from "./lib/use-account";
+import { accountReadAt, useAccount } from "./lib/use-account";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { PhoneFrame, usePhoneScreenRect } from "./PhoneFrame";
@@ -34,6 +34,33 @@ const ASSET_LABEL = styleFromCss("font-size:17px;font-weight:700;color:#8E7BC7")
 const ASSET_TOTAL = styleFromCss(
   "font-size:21px;font-weight:800;color:#01185A;letter-spacing:-0.02em;line-height:1.2;" +
     "font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
+);
+/**
+ * 총자산 줄은 통째로 누를 수 있다 — 오른쪽 `>` 를 누르면 아래로 돌아가며 지갑이 열린다.
+ * 셰브런만 손잡이로 두면 9px 짜리 과녁을 손가락으로 맞혀야 한다.
+ */
+const ASSET_ROW = styleFromCss("display:flex;align-items:center;gap:7px;cursor:pointer");
+/**
+ * 펼친 지갑은 헤더 **위에 겹치는** 패널이다. 헤더 안에서 자리를 차지하게 두면 펼칠 때마다
+ * 캐릭터 그림과 보유 카드가 아래로 밀린다 — 계정마다 다르던 그 자리를 고정한 게 직전
+ * 작업이었다. 여기서 되돌릴 이유가 없다.
+ */
+const WALLET_PANEL = styleFromCss(
+  "position:absolute;left:0;top:100%;z-index:3;min-width:236px;margin-top:9px;border-radius:18px;padding:13px 15px;" +
+    "background:#fff;box-shadow:0 18px 34px -12px rgba(35,25,80,0.3),inset 0 0 0 1px rgba(35,25,80,0.06);cursor:default",
+);
+const WALLET_ROW = styleFromCss(
+  "display:flex;align-items:center;justify-content:space-between;gap:16px",
+);
+const WALLET_LABEL = styleFromCss(
+  "font-size:14px;font-weight:600;color:#5C6280;white-space:nowrap",
+);
+const WALLET_VALUE = styleFromCss(
+  "font-size:17px;font-weight:800;color:#01185A;font-variant-numeric:tabular-nums;white-space:nowrap",
+);
+/** 이 숫자가 언제 것인지. 계좌를 아직 못 읽었으면 적을 시각이 없어 줄째로 빠진다. */
+const WALLET_BASIS = styleFromCss(
+  "font-size:11.5px;font-weight:500;color:#A9AEC4;margin-top:9px;white-space:nowrap",
 );
 const MENU_BTN = styleFromCss(
   "flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer",
@@ -235,6 +262,7 @@ export function HomeScreen({
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [walletOpen, setWalletOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [popped, setPopped] = useState(false);
   const sheet = useSheetDrag(SHEET_HEIGHT);
@@ -247,6 +275,8 @@ export function HomeScreen({
   );
   // 유니버스는 데모 보유에 종목코드를 붙이는 데만 쓴다 — 실제 계좌 보유는 코드를 갖고 온다.
   const view = homeView(user, prices, universe?.stocks ?? []);
+  // 지갑 밑의 결제기준. 계좌 응답이 세워질 때 함께 다시 그려지므로 여기서 읽으면 최신이다.
+  const readAt = accountReadAt();
 
   // 세션 쿠키를 지우는 유일한 화면 경로다. 지우면 `/` 가 다시 로그인 화면을 띄운다.
   const logout = () => {
@@ -300,9 +330,49 @@ export function HomeScreen({
       <div style={PAGE}>
         <div style={HEADER}>
           <img alt="" height={42} src={view.info.avatarImg} style={AVATAR} width={42} />
-          <div id="tut-home-total" style={{ flex: 1, minWidth: 0 }}>
+          <div
+            id="tut-home-total"
+            style={{ flex: 1, minWidth: 0, position: "relative", zIndex: walletOpen ? 3 : undefined }}
+          >
             <div style={ASSET_LABEL}>{view.totalAssetsLabel}</div>
-            <div style={ASSET_TOTAL}>{view.totalAssetsText}</div>
+            <div
+              onClick={() => {
+                setMenuOpen(false);
+                setWalletOpen((open) => !open);
+              }}
+              style={ASSET_ROW}
+            >
+              <div style={ASSET_TOTAL}>{view.totalAssetsText}</div>
+              <svg
+                aria-hidden="true"
+                height="15"
+                style={{
+                  flex: "none",
+                  transform: walletOpen ? "rotate(90deg)" : "none",
+                  transition: "transform 0.18s ease",
+                }}
+                viewBox="0 0 9 15"
+                width="9"
+              >
+                <path
+                  d="M1.6 1.6 L7 7.5 L1.6 13.4"
+                  fill="none"
+                  stroke="#01185A"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2.2"
+                />
+              </svg>
+            </div>
+            {walletOpen && (
+              <div onClick={(event) => event.stopPropagation()} style={WALLET_PANEL}>
+                <div style={WALLET_ROW}>
+                  <span style={WALLET_LABEL}>내 지갑</span>
+                  <span style={WALLET_VALUE}>{view.walletText}</span>
+                </div>
+                {readAt !== null && <div style={WALLET_BASIS}>결제기준 {basisTimeText(readAt)}</div>}
+              </div>
+            )}
           </div>
           {/*
             튜토리얼 `?` 는 햄버거 **왼쪽**이다. 우하단은 키웅이가 쓰고 드래그로 움직이니
@@ -314,7 +384,13 @@ export function HomeScreen({
               ?
             </div>
           )}
-          <div onClick={() => setMenuOpen((open) => !open)} style={MENU_BTN}>
+          <div
+            onClick={() => {
+              setWalletOpen(false);
+              setMenuOpen((open) => !open);
+            }}
+            style={MENU_BTN}
+          >
             <svg aria-hidden="true" height="16" viewBox="0 0 22 16" width="22">
               <g stroke="#3B3F60" strokeLinecap="round" strokeWidth="2.2">
                 <path d="M1.5 2h19" />
@@ -324,6 +400,9 @@ export function HomeScreen({
             </svg>
           </div>
         </div>
+
+        {/* 펼친 지갑 뒤. 다른 곳을 누르면 접힌다 — 메뉴가 닫히는 길과 같다. */}
+        {walletOpen && <div onClick={() => setWalletOpen(false)} style={MENU_SCRIM} />}
 
         {menuOpen && (
           <>
