@@ -63,14 +63,11 @@ for (const step of steps) {
 
 // ── 진입로 ──────────────────────────────────────────────────────────────────
 
-// `다음` 이 자리를 옮겨야 하는데 진입로가 없으면 데려갈 수가 없다. 주문 단계 사이만
-// 예외로 둔다 — 금액·이유를 대신 골라 주는 것이 원본의 문제였고, 아이가 고르고 눌러야
-// 다음 단계가 열린다.
-const NEEDS_CHOICE = new Set(["buy-reason", "buy-done", "sell-recall", "sell-done"]);
+// **자리를 옮기는 모든 장에 진입로가 있다.** 하나라도 비면 `다음` 이 아무 일도 하지 않는
+// 장이 생기고 안내가 거기서 끊긴다.
 for (let i = 0; i + 1 < steps.length; i += 1) {
   if (isSamePlace(steps[i], steps[i + 1])) continue;
-  const target = steps[i + 1];
-  assert.equal(target.enter !== undefined, !NEEDS_CHOICE.has(target.id), `${target.id} 진입로`);
+  assert.notEqual(steps[i + 1].enter, undefined, `${steps[i + 1].id} 진입로`);
 }
 
 // 같은 자리에 이어 붙은 장은 진입로가 필요 없다 — `다음` 이 그 자리에서 넘어간다.
@@ -80,18 +77,35 @@ assert.equal(steps[9].enter, undefined);
 // 진입로는 목적지가 들고 있다. 종목 코드가 주소에 필요한 자리는 이동 버튼을 눌러 들어간다.
 const enterOf = (id: string) => steps.find((step) => step.id === id)?.enter;
 assert.deepEqual(enterOf("home-goal"), { path: "/" });
-assert.deepEqual(enterOf("explore-chips"), { anchor: "tut-nav-trade" });
-assert.deepEqual(enterOf("detail-chart"), { anchor: "tut-explore-cards" });
-assert.deepEqual(enterOf("buy-tabs"), { anchor: "tut-detail-buy" });
+assert.deepEqual(enterOf("explore-chips"), { anchors: ["tut-nav-trade"] });
+assert.deepEqual(enterOf("detail-chart"), { anchors: ["tut-explore-cards"] });
+assert.deepEqual(enterOf("buy-tabs"), { anchors: ["tut-detail-buy"] });
 // 방금 산 그 회사를 그대로 팔러 간다.
 assert.deepEqual(enterOf("sell-amount"), { path: "/sell/:code" });
 
-// 진입로가 가리키는 앵커는 **그 자리로 데려가는 버튼**이고, 어느 장이든 짚는 앵커
-// 목록에 실재하는 id 여야 한다 — 오타면 `다음` 이 조용히 아무 일도 안 한다.
-const stepAnchors = new Set(steps.flatMap((step) => step.anchors));
+// 주문 단계는 고르는 자리를 지나야 `다음` 이 켜진다. 튜토리얼이 기본값을 눌러 두고 넘긴다.
+assert.deepEqual(enterOf("buy-reason"), {
+  anchors: ["tut-order-amount-preset", "tut-order-next"],
+});
+assert.deepEqual(enterOf("buy-done"), {
+  anchors: ["tut-order-reason-first", "tut-order-plan-first", "tut-order-next"],
+});
+assert.deepEqual(enterOf("sell-recall"), { anchors: ["tut-order-next"] });
+assert.deepEqual(enterOf("sell-done"), {
+  anchors: ["tut-sell-reason-first", "tut-sell-change-first", "tut-order-next"],
+});
+
+// 주문 화면 **안에서** 다음 단계로 넘어가는 길은 마지막이 언제나 그 단계를 넘기는
+// 버튼이다 — 고르기만 하고 안 넘기면 그 자리에서 멈춘다.
+for (let i = 0; i + 1 < steps.length; i += 1) {
+  const [from, to] = [steps[i], steps[i + 1]];
+  if (from.screen !== "order" || to.screen !== "order" || from.side !== to.side) continue;
+  if (!to.enter || !("anchors" in to.enter)) continue;
+  assert.equal(to.enter.anchors.at(-1), "tut-order-next", to.id);
+}
+
 for (const step of steps) {
-  if (!step.enter || !("anchor" in step.enter)) continue;
-  assert.equal(stepAnchors.has(step.enter.anchor), true, step.id);
+  if (step.enter && "anchors" in step.enter) assert.equal(step.enter.anchors.length > 0, true, step.id);
 }
 
 // 주소로 들어가는 자리는 그 화면의 실제 주소여야 한다.
@@ -139,7 +153,14 @@ const domAnchors = new Set(
     .flatMap((source) => [...source.matchAll(/id=\{?[^}\n]*?"(tut-[a-z-]+)"/g)])
     .map((match) => match[1]),
 );
-for (const anchor of stepAnchors) {
+// 짚는 앵커와 대신 눌러 주는 앵커 둘 다 화면에 있어야 한다.
+const usedAnchors = new Set(
+  steps.flatMap((step) => [
+    ...step.anchors,
+    ...(step.enter && "anchors" in step.enter ? step.enter.anchors : []),
+  ]),
+);
+for (const anchor of usedAnchors) {
   assert.equal(domAnchors.has(anchor), true, `화면에 없는 앵커: ${anchor}`);
 }
 

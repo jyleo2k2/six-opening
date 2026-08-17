@@ -951,8 +951,10 @@ export function OrderScreen({
                     [30000, "3만원"],
                     [50000, "5만원"],
                   ] as const
-                ).map(([v, label]) => (
+                ).map(([v, label], at) => (
                   <div
+                    // 튜토리얼이 `다음` 으로 넘어갈 때 눌러 두는 기본값이다.
+                    id={at === 0 ? "tut-order-amount-preset" : undefined}
                     key={v}
                     onClick={() => {
                       patchDraft({ amount: v, amountSource: "preset" });
@@ -1054,10 +1056,11 @@ export function OrderScreen({
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {reasonOrder.map((index) => {
+          {reasonOrder.map((index, at) => {
             const reason = REASONS[index];
             return (
               <div
+                id={at === 0 ? "tut-order-reason-first" : undefined}
                 key={reason.code}
                 onClick={() => patchDraft({ reason: reason.code })}
                 style={pickCardStyle(draft.reason === reason.code, "grid")}
@@ -1070,8 +1073,9 @@ export function OrderScreen({
 
         <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>언제까지 가질 생각인가요?</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          {PLANS.map((plan) => (
+          {PLANS.map((plan, at) => (
             <div
+              id={at === 0 ? "tut-order-plan-first" : undefined}
               key={plan.code}
               onClick={() =>
                 patchDraft({ plan: plan.code, targetPct: plan.code === "plan_target" ? draft.targetPct : null })
@@ -1725,10 +1729,11 @@ export function OrderScreen({
         <div id="tut-sell-reason" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ fontSize: 15.5, fontWeight: 800, color: "#01185A", marginTop: 9 }}>왜 팔고 싶나요?</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-            {sellReasonOrder.map((index) => {
+            {sellReasonOrder.map((index, at) => {
               const reason = SELL_REASONS[index];
               return (
                 <div
+                  id={at === 0 ? "tut-sell-reason-first" : undefined}
                   key={reason.code}
                   onClick={() => patchSell({ reason: reason.code })}
                   style={pickCardStyle(sellDraft.reason === reason.code, "grid")}
@@ -1773,8 +1778,9 @@ export function OrderScreen({
                   : "무엇이 달라졌나요?"}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                {CHANGES.map((change) => (
+                {CHANGES.map((change, at) => (
                   <div
+                    id={at === 0 ? "tut-sell-change-first" : undefined}
                     key={change.code}
                     onClick={() => patchSell({ change: change.code })}
                     style={pickCardStyle(sellDraft.change === change.code, "row")}

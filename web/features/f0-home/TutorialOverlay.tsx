@@ -46,31 +46,28 @@ import {
 
 const { screenWidth: SCREEN_W, screenHeight: SCREEN_H } = PROTOTYPE_PHONE;
 
-/** 딤은 네이비를 옅게 깐다. 검정은 앱의 보라·네이비 톤에서 혼자 튄다. */
-const DIM = "rgba(0,30,90,0.58)";
+/**
+ * 딤은 **그냥 어둡다.** 네이비를 깔아 봤더니 앱의 보라·연분홍 위에서 색이 남아 화면이
+ * 어두워지는 대신 파랗게 물들었다. 짚은 자리만 밝게 남기는 게 목적이므로 색을 섞지 않는다.
+ */
+const DIM = "rgba(0,0,0,0.56)";
 const RING = "#FFC7DE";
 
-/** `globals.css` 의 `--color-navy`. */
+/** `globals.css` 의 `--color-navy`·`--color-magenta`. */
 const NAVY = "#001E5A";
+const MAGENTA = "#D70082";
 
-/**
- * 말풍선은 **딤보다 어둡다.**
- *
- * 앱 카드가 전부 흰색이라 예전에는 연회색 유리판으로 구분했는데, 딤을 깐 화면에서 밝은
- * 판은 그 자체가 가장 밝은 면이 돼 정작 짚은 버튼보다 먼저 눈에 들어왔다. 코치마크의
- * 주인공은 설명이 아니라 **짚은 자리**다. 미니바가 이미 쓰는 네이비를 그대로 써서
- * 말풍선을 배경으로 물리고 글씨만 띄운다.
- */
-const BUBBLE_BG = NAVY;
-const BUBBLE_TOP = NAVY;
-const BUBBLE_BOTTOM = NAVY;
+/** 말풍선은 앱 카드와 같은 흰색이다. 어두워진 화면 위에서 설명만 밝게 떠 있으면 된다. */
+const BUBBLE_BG = "#FFFFFF";
+const BUBBLE_TOP = "#FFFFFF";
+const BUBBLE_BOTTOM = "#FFFFFF";
 
-/** 어두운 판 위 글씨. 개념 제목은 마젠타 대신 구멍 테두리와 같은 분홍이라야 읽힌다. */
-const TITLE_INK = "#FFFFFF";
-const BODY_INK = "rgba(255,255,255,0.86)";
-const SUB_INK = "rgba(255,255,255,0.72)";
-const MUTED = "rgba(255,255,255,0.58)";
-const TERM_INK = RING;
+/** 흰 판 위 글씨. 옮겨 온 화면들이 본문·보조에 쓰는 회색 단계를 그대로 쓴다. */
+const TITLE_INK = NAVY;
+const BODY_INK = "#5C6280";
+const SUB_INK = "#6E7488";
+const MUTED = "#9BA0B5";
+const TERM_INK = MAGENTA;
 
 /** 미니바가 하단 탭 위에 앉는 높이. */
 const MINIBAR_BOTTOM = 76;
@@ -84,6 +81,21 @@ function visibleNode(id: string) {
     if (rect.width > 0 && rect.height > 0) return node;
   }
   return null;
+}
+
+/**
+ * 적힌 순서대로 **한 프레임에 하나씩** 누른다.
+ *
+ * 한 번에 몰아 누르면 안 된다 — 금액을 고르는 클릭과 `다음` 클릭이 같은 프레임에 있으면
+ * `다음` 은 아직 금액이 0 이던 렌더의 핸들러를 실행해 조용히 무시된다. 화면이 다시
+ * 그려질 틈을 주고 다음 것을 누른다. 없는 자리는 건너뛴다(계획을 지켰으면 변경 이유
+ * 칸이 아예 없다).
+ */
+function clickThrough([head, ...rest]: string[]) {
+  if (!head) return;
+  const node = visibleNode(head);
+  if (node instanceof HTMLElement) node.click();
+  if (rest.length) requestAnimationFrame(() => clickThrough(rest));
 }
 
 export function TutorialOverlay({
@@ -106,6 +118,26 @@ export function TutorialOverlay({
   const [boxes, setBoxes] = useState<AnchorRect[]>([]);
   const [bubbleHeight, setBubbleHeight] = useState(240);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
+  const minibarRef = useRef<HTMLDivElement | null>(null);
+
+  /**
+   * 말풍선 밖을 누르면 그만 보겠다는 뜻이다 — 어느 화면이든, 무엇을 누르든.
+   *
+   * 딤이 클릭을 통과시키므로(`pointer-events:none`) 누른 버튼은 제 일을 그대로 한다.
+   * 튜토리얼만 닫힌다. 화면 이동이 아니라 **누른 순간**을 보므로, 같은 화면 안에서
+   * 딴 곳을 눌러도(홈에서 지갑을 펼치든) 바로 나간다.
+   */
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (bubbleRef.current?.contains(target) || minibarRef.current?.contains(target)) return;
+      onClose();
+    };
+    // 캡처 단계라야 그 클릭으로 화면이 갈아치워져도 놓치지 않는다.
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [onClose]);
 
   const step = steps[index];
 
@@ -189,10 +221,8 @@ export function TutorialOverlay({
   /**
    * `다음`. 같은 자리면 그 자리에서 이어지고, 자리를 옮겨야 하면 **데려간다**.
    *
-   * 데려가기 전에 먼저 접는 이유는 못 데려갈 수도 있어서다 — 학교 시간이라 주문 버튼이
-   * 잠겼거나, 아이가 아직 금액을 안 골랐거나. 그때는 남은 미니바 힌트가 무엇을 해야
-   * 하는지 말해 준다. 누르는 것은 **이동 버튼뿐**이고 금액·이유 같은 고르는 자리는
-   * 건드리지 않는다.
+   * 데려가기 전에 먼저 접는 이유는 화면이 바뀌는 동안 말풍선이 옛 자리를 짚고 있으면
+   * 안 되기 때문이다. 새 자리에 닿으면 `place` 가 바뀌면서 다시 펼친다.
    */
   const advance = () => {
     const next = nextStepIndex(steps, index);
@@ -208,8 +238,7 @@ export function TutorialOverlay({
     const enter = steps[next].enter;
     if (!enter) return;
     if ("path" in enter) return onGo(enterPath(enter.path, place));
-    const node = visibleNode(enter.anchor);
-    if (node instanceof HTMLElement) node.click();
+    clickThrough(enter.anchors);
   };
 
   return (
@@ -288,8 +317,7 @@ export function TutorialOverlay({
             background: BUBBLE_BG,
             borderRadius: 24,
             padding: "17px 19px",
-            boxShadow:
-              "0 20px 44px rgba(0,12,40,0.42),inset 0 1px 0 rgba(255,255,255,0.16),inset 0 0 0 1px rgba(255,255,255,0.12)",
+            boxShadow: "0 20px 44px rgba(0,12,40,0.34),0 2px 6px rgba(0,12,40,0.12)",
           }}
         >
           {placement.side !== "floor" && holes.length > 0 && (
@@ -341,7 +369,7 @@ export function TutorialOverlay({
               position: "relative",
               marginTop: 12,
               paddingTop: 12,
-              borderTop: "1px solid rgba(255,255,255,0.16)",
+              borderTop: "1px solid rgba(0,30,90,0.10)",
             }}
           >
             <div
@@ -410,11 +438,9 @@ export function TutorialOverlay({
                 fontWeight: 800,
                 color: NAVY,
                 cursor: "pointer",
-                background: "linear-gradient(180deg,#EFF0F6 0%,#D9DBE7 100%)",
+                background: "#ECEDF3",
                 borderRadius: 999,
                 padding: "10px 20px",
-                boxShadow:
-                  "0 5px 10px -4px rgba(0,12,40,0.34),inset 0 1.5px 1px rgba(255,255,255,0.9)",
               }}
             >
               {last ? "다 봤어요" : "다음"}
@@ -424,6 +450,7 @@ export function TutorialOverlay({
 
         {read && (
           <div
+            ref={minibarRef}
             style={{
               position: "absolute",
               left: BUBBLE_MARGIN,
