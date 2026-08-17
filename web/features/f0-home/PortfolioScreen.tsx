@@ -176,7 +176,7 @@ export function PortfolioScreen({
           )}
 
           {pending.length > 0 && (
-            <div style={SECTION}>
+            <div id="tut-portfolio-pending" style={SECTION}>
               <div style={SECTION_TITLE}>기다리는 주문</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 12 }}>
                 {pending.map((p, index) => (
@@ -196,8 +196,10 @@ export function PortfolioScreen({
 
           {holdings.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {holdings.map((h) => (
-                <div key={h.code} style={HOLDING}>
+              {holdings.map((h, index) => (
+                // 튜토리얼은 목록 전체가 아니라 첫 칸만 짚는다 — 보유가 많으면 화면이
+                // 통째로 밝아져 짚는 뜻이 없어진다.
+                <div id={index === 0 ? "tut-portfolio-holdings" : undefined} key={h.code} style={HOLDING}>
                   <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
                     <div style={styleFromCss(h.badgeStyle)}>{h.emoji}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -231,6 +233,7 @@ export function PortfolioScreen({
                       사러 가기
                     </div>
                     <div
+                      id={index === 0 ? "tut-portfolio-sell" : undefined}
                       onClick={() => {
                         if (h.canSell) onLeave(`/sell/${h.code}`);
                       }}

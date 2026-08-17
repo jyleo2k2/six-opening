@@ -31,6 +31,7 @@ import {
   type SellDraft,
   type TradeHistoryRow,
 } from "./lib/order-view";
+import type { TutorialStage } from "./lib/tutorial-steps";
 import { useStockLive } from "./lib/use-universe";
 import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
 import { useAccount } from "./lib/use-account";
@@ -242,12 +243,18 @@ export function OrderScreen({
   account,
   onLeave,
   onChatContext,
+  onStage,
 }: {
   code: string;
   side: "buy" | "sell";
   account: WalletAccountId;
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
+  /**
+   * 주문 1/2/3 단계는 주소가 안 바뀌어(`useState`) 밖에서는 어디에 있는지 안 보인다.
+   * 튜토리얼은 그 자리를 알아야 맞는 설명을 띄우므로 `onLeave` 와 같은 패턴으로 올린다.
+   */
+  onStage?: (stage: TutorialStage) => void;
 }) {
   const { wallet, update, refresh } = useWallet();
   const live = useStockLive(code);
@@ -255,6 +262,9 @@ export function OrderScreen({
   const recordEvent = useChatBehaviorStore((s) => s.recordEvent);
 
   const [step, setStep] = useState(1);
+  useEffect(() => {
+    onStage?.(`order-${step}` as TutorialStage);
+  }, [step, onStage]);
   const [draft, setDraft] = useState<BuyDraft>(blankBuyDraft);
   const [sellDraft, setSellDraftState] = useState<SellDraft | null>(null);
   // 갖고 있지 않은 회사를 팔려고 했을 때 뜨는 안내. 프로토타입의 `sellBlocked` 와 같다.
@@ -522,7 +532,7 @@ export function OrderScreen({
       <div onClick={pickTabSell} style={sheetTabStyle(side === "sell")}>
         팔래
       </div>
-      <div onClick={() => setOrderSheet(true)} style={sheetTabStyle(false)}>
+      <div id="tut-order-reserve" onClick={() => setOrderSheet(true)} style={sheetTabStyle(false)}>
         예약
       </div>
     </div>
@@ -611,6 +621,7 @@ export function OrderScreen({
           같은 주문이 두 번 들어간다.
         */}
         <div
+          id="tut-order-next"
           onClick={onNext}
           style={ok && !(locked && step === 2) && !submitting ? CTA_ON : CTA_OFF}
         >
@@ -781,7 +792,7 @@ export function OrderScreen({
     };
 
     const step1 = (
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div id="tut-order-amount" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={WALLET_ROW}>
           <span style={{ fontSize: 14, fontWeight: 600, color: "#5C6280", whiteSpace: "nowrap" }}>내 지갑</span>
           <span
@@ -965,7 +976,7 @@ export function OrderScreen({
     );
 
     const step2 = (
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div id="tut-order-reason" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
           <img alt="키웅이" src="/ui/assets/mascot-bear.png" style={MASCOT_IMG} width={72} />
           <div style={MASCOT_BUBBLE}>

@@ -16,6 +16,7 @@ import {
 } from "./lib/stock-chrome";
 import { validNewsItem, type NewsItem } from "./lib/stock-news";
 import { recordTabView } from "./lib/tab-views";
+import type { TutorialStage } from "./lib/tutorial-steps";
 import { useStockLive } from "./lib/use-universe";
 import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
 import { useWatchlist } from "./lib/use-watchlist";
@@ -128,16 +129,25 @@ export function DetailScreen({
   account,
   onLeave,
   onChatContext,
+  onStage,
 }: {
   code: string;
   account: WalletAccountId;
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
+  /**
+   * 상세·차트·뉴스는 주소가 안 바뀌어(`useState`) 밖에서는 어디에 있는지 안 보인다.
+   * 튜토리얼은 그 자리를 알아야 맞는 설명을 띄우므로 `onLeave` 와 같은 패턴으로 올린다.
+   */
+  onStage?: (stage: TutorialStage) => void;
 }) {
   const { wallet } = useWallet();
   const { codes: watchCodes, toggle: watchToggle } = useWatchlist();
   const live = useStockLive(code);
   const [view, setView] = useState<"detail" | "chart" | "news">("detail");
+  useEffect(() => {
+    onStage?.(view);
+  }, [view, onStage]);
   const [newsStatus, setNewsStatus] = useState<NewsStatus>("loading");
   const [newsItem, setNewsItem] = useState<NewsItem | null>(null);
   const [activeNews, setActiveNews] = useState<NewsItem | null>(null);
@@ -353,7 +363,7 @@ export function DetailScreen({
               <span style={changeStyle}>{changeText}</span>
               <span style={diffStyle}>{diffText}</span>
             </div>
-            <div style={CHART_WRAP}>
+            <div id="tut-detail-chart" style={CHART_WRAP}>
               <svg
                 height={164}
                 preserveAspectRatio="none"

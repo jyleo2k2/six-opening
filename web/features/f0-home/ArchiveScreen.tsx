@@ -424,7 +424,10 @@ export function ArchiveScreen({
           길은 머리의 `‹` 하나다.
         */}
         {view === "cards" && (
-          <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
+          <div
+            id="tut-archive-family"
+            style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}
+          >
             <div onClick={() => setView("family")} style={ENTER}>우리 가족 투자</div>
             <div onClick={() => setView("return")} style={ENTER}>우리 가족 수익</div>
           </div>
