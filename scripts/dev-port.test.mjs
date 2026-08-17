@@ -3,7 +3,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { findDevPort, findReservedDevPorts } from "./dev-port.mjs";
+import {
+  findDevPort,
+  findManagedDevPort,
+  findReservedDevPorts,
+} from "./dev-port.mjs";
 
 function makeTempDir(name) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `${name}-`));
@@ -21,9 +25,11 @@ function writeRegistry(gitDir, sessions) {
 test("등록되지 않은 폴더는 기본 포트를 쓴다", () => {
   const root = makeTempDir("devport-plain");
   assert.equal(findDevPort(root), 3000);
+  assert.equal(findManagedDevPort(root), null);
 
   fs.mkdirSync(path.join(root, ".git"));
   assert.equal(findDevPort(root), 3000);
+  assert.equal(findManagedDevPort(root), null);
 });
 
 test("관제 저장소는 자기 세션 포트를 찾는다", () => {
@@ -32,6 +38,7 @@ test("관제 저장소는 자기 세션 포트를 찾는다", () => {
     { worktree: root, port: 3123, status: "active" },
   ]);
   assert.equal(findDevPort(root), 3123);
+  assert.equal(findManagedDevPort(root), 3123);
 });
 
 test("worktree는 .git 파일을 따라 관제 저장소의 레지스트리를 읽는다", () => {
@@ -48,6 +55,7 @@ test("worktree는 .git 파일을 따라 관제 저장소의 레지스트리를 �
     "utf8",
   );
   assert.equal(findDevPort(worktree), 3117);
+  assert.equal(findManagedDevPort(worktree), 3117);
 });
 
 test("해제된 세션의 포트는 쓰지 않는다", () => {
@@ -56,6 +64,7 @@ test("해제된 세션의 포트는 쓰지 않는다", () => {
     { worktree: root, port: 3131, status: "released" },
   ]);
   assert.equal(findDevPort(root), 3000);
+  assert.equal(findManagedDevPort(root), null);
 });
 
 test("레지스트리가 깨져 있어도 기본 포트로 떨어진다", () => {

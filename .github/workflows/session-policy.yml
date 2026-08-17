@@ -17,8 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate session manager
-        run: node --test scripts/git-session-manager.test.mjs
+      - name: Validate development tooling
+        run: node --test scripts/dev-port.test.mjs scripts/dev-runner.test.mjs scripts/git-session-manager.test.mjs
       - name: Validate PR policy
         run: node scripts/git-session-manager.mjs check-pr --event "$GITHUB_EVENT_PATH"
       - name: Validate guard pairs

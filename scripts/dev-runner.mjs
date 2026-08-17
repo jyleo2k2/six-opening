@@ -5,9 +5,14 @@ import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { findDevPort, findReservedDevPorts } from "./dev-port.mjs";
+import {
+  findDevPort,
+  findManagedDevPort,
+  findReservedDevPorts,
+} from "./dev-port.mjs";
 
-const APP_MARKER = "영웅 키움";
+export const APP_MARKER = "six-opening-dev-server:v1";
+export const APP_PROBE_PATH = "/__dev__/six-opening-ready.txt";
 const PORT_MIN = 3000;
 const PORT_MAX = 3199;
 const DEPENDENCY_STAMP = ".six-opening-package-lock.sha256";
@@ -154,11 +159,11 @@ export async function inspectProject(port, fetchImpl = fetch) {
   const timer = setTimeout(() => controller.abort(), 1500);
   try {
     const response = await fetchImpl(
-      `http://127.0.0.1:${port}/ui/app.html?runtime=1`,
+      `http://127.0.0.1:${port}${APP_PROBE_PATH}`,
       { cache: "no-store", signal: controller.signal },
     );
-    if (!response.ok) return "unavailable";
-    return (await response.text()).includes(APP_MARKER) ? "project" : "other";
+    if (!response.ok) return "other";
+    return (await response.text()).trim() === APP_MARKER ? "project" : "other";
   } catch {
     return "unavailable";
   } finally {
@@ -173,11 +178,12 @@ export async function waitForProject(
   intervalMs = 400,
 ) {
   const deadline = Date.now() + timeoutMs;
-  do {
-    if ((await inspect(port)) === "project") return true;
-    await delay(intervalMs);
-  } while (Date.now() < deadline);
-  return false;
+  while (true) {
+    const state = await inspect(port);
+    if (state === "project") return true;
+    if (state === "other" || Date.now() >= deadline) return false;
+    await delay(Math.min(intervalMs, Math.max(0, deadline - Date.now())));
+  }
 }
 
 export async function chooseDevPort(
@@ -217,6 +223,30 @@ export async function chooseDevPort(
     }
   }
   throw new Error(`${PORT_MIN}~${PORT_MAX} 범위에서 사용할 수 있는 포트가 없습니다.`);
+}
+
+export async function chooseManagedDevPort(
+  port,
+  {
+    inspect = inspectProject,
+    free = isPortFree,
+    wait = waitForProject,
+  } = {},
+) {
+  const state = await inspect(port);
+  if (state === "project") {
+    return { port, existing: true, conflicted: false };
+  }
+  if (await free(port)) {
+    return { port, existing: false, conflicted: false };
+  }
+  if (state === "unavailable" && (await wait(port, 8000, inspect))) {
+    return { port, existing: true, conflicted: false };
+  }
+  throw new Error(
+    `${port}번은 이 작업 세션에 배정된 포트지만 다른 프로그램이 사용 중입니다. ` +
+      "해당 프로그램을 종료한 뒤 dev.bat을 다시 실행하세요.",
+  );
 }
 
 function spawnNpm(args, cwd) {
@@ -307,6 +337,7 @@ export async function runDevServer(
       spawnNpm(["run", "dev", "--", "-p", String(port)], webDir),
     inspect = inspectProject,
     open = openBrowser,
+    stop = stopProcessTree,
     startupWarningMs = 90_000,
     intervalMs = 500,
   } = {},
@@ -315,6 +346,7 @@ export async function runDevServer(
   const child = spawnServer();
   let exited = false;
   let opened = false;
+  let rejected = false;
   let warned = false;
   const startedAt = Date.now();
   const exit = waitForExit(child).then((result) => {
@@ -327,13 +359,22 @@ export async function runDevServer(
 
   const monitor = (async () => {
     while (!exited) {
-      if ((await inspect(port)) === "project") {
+      const state = await inspect(port);
+      if (state === "project") {
         log(`[준비 완료] ${url}`);
         open(url);
         opened = true;
         // 예전에는 여기서 `npm run ui:watch` 를 함께 띄웠다. iframe 시절 `ui-src` 조립본이
         // pull 로 낡는 것을 막던 감시인데, iframe 철거(PR #296)로 그 스크립트가 사라져
         // 매번 `Missing script` 로 죽는 프로세스만 남았다. Next 개발 서버가 직접 다시 그린다.
+        return;
+      }
+      if (state === "other") {
+        rejected = true;
+        error(`\n[준비 실패] ${port}번 포트가 이 프로젝트가 아닌 응답을 보냈습니다.`);
+        error("- 잘못된 주소를 반복 호출하지 않고 방금 시작한 서버를 종료합니다.");
+        error("- 해당 포트를 쓰는 프로그램을 종료한 뒤 dev.bat을 다시 실행하세요.\n");
+        stop(child);
         return;
       }
       if (!warned && Date.now() - startedAt >= startupWarningMs) {
@@ -350,12 +391,13 @@ export async function runDevServer(
 
   const result = await exit;
   await monitor;
-  if (!opened && result.code !== 0) {
+  if (!opened && !rejected && result.code !== 0) {
     error("\n[실행 실패] 개발 서버가 준비되기 전에 종료됐습니다.");
     error(`- 종료 코드: ${result.code ?? result.signal ?? "알 수 없음"}`);
     error("- 포트 충돌, 패키지 오류, 환경 변수 오류를 위 로그에서 확인하세요.");
     error("- 해결되지 않으면 web 폴더에서 npm run dev를 실행해 상세 로그를 확인하세요.\n");
   }
+  if (rejected) return 1;
   return result.code ?? (result.signal ? 1 : 0);
 }
 
@@ -371,11 +413,12 @@ export async function runDevLauncher(root, { log = console.log } = {}) {
   }
   await ensureDependencies(webDir, { log });
 
-  const preferredPort = findDevPort(repositoryRoot);
-  const selection = await chooseDevPort(
-    preferredPort,
-    findReservedDevPorts(repositoryRoot),
-  );
+  const managedPort = findManagedDevPort(repositoryRoot);
+  const preferredPort = managedPort ?? findDevPort(repositoryRoot);
+  const selection =
+    managedPort === null
+      ? await chooseDevPort(preferredPort, findReservedDevPorts(repositoryRoot))
+      : await chooseManagedDevPort(managedPort);
   const url = `http://localhost:${selection.port}`;
   if (selection.existing) {
     if (selection.conflicted) {

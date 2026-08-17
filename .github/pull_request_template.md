@@ -24,7 +24,7 @@
 
 ## 검증
 
-- [ ] `node --test scripts/git-session-manager.test.mjs` (하네스 변경 시)
+- [ ] `node --test scripts/dev-port.test.mjs scripts/dev-runner.test.mjs scripts/git-session-manager.test.mjs` (개발 도구 변경 시)
 - [ ] 해당 골든 패스 또는 테스트
 - [ ] `npm run build` (코드 변경 시)
 - [ ] `git diff --check`

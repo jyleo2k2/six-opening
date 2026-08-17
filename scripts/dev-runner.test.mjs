@@ -8,7 +8,10 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import {
+  APP_MARKER,
+  APP_PROBE_PATH,
   chooseDevPort,
+  chooseManagedDevPort,
   dependencySyncReason,
   ensureDependencies,
   findControlRoot,
@@ -152,9 +155,34 @@ test("막 시작한 기존 서버를 기다렸다가 재사용한다", async () 
   assert.equal(selection.port, 3100);
 });
 
+test("관리 세션은 배정 포트가 충돌해도 다른 포트로 바꾸지 않는다", async () => {
+  await assert.rejects(
+    chooseManagedDevPort(3100, {
+      inspect: async () => "other",
+      free: async () => false,
+    }),
+    /이 작업 세션에 배정된 포트/,
+  );
+});
+
+test("관리 세션도 막 시작한 자기 서버는 기다렸다가 재사용한다", async () => {
+  const selection = await chooseManagedDevPort(3100, {
+    inspect: async () => "unavailable",
+    free: async () => false,
+    wait: async () => true,
+  });
+  assert.deepEqual(selection, {
+    port: 3100,
+    existing: true,
+    conflicted: false,
+  });
+});
+
 test("HTTP 응답의 프로젝트 표식을 구분한다", async (context) => {
-  const server = http.createServer((_request, response) => {
-    response.end("<html><body>영웅 키움</body></html>");
+  let requestedUrl = null;
+  const server = http.createServer((request, response) => {
+    requestedUrl = request.url;
+    response.end(`${APP_MARKER}\n`);
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   context.after(() => server.close());
@@ -162,6 +190,20 @@ test("HTTP 응답의 프로젝트 표식을 구분한다", async (context) => {
   assert.equal(typeof address, "object");
   assert.equal(await isPortFree(address.port), false);
   assert.equal(await inspectProject(address.port), "project");
+  assert.equal(requestedUrl, APP_PROBE_PATH);
+});
+
+test("HTTP 404는 다른 서버로 판정하고 연결 실패와 구분한다", async () => {
+  assert.equal(
+    await inspectProject(3100, async () => ({ ok: false })),
+    "other",
+  );
+  assert.equal(
+    await inspectProject(3100, async () => {
+      throw new Error("connection refused");
+    }),
+    "unavailable",
+  );
 });
 
 test("준비 확인은 프로젝트 응답이 나올 때까지 반복한다", async () => {
@@ -174,6 +216,33 @@ test("준비 확인은 프로젝트 응답이 나올 때까지 반복한다", as
   );
   assert.equal(ready, true);
   assert.equal(attempts, 3);
+});
+
+test("준비 주소가 404이면 반복 요청하지 않는다", async () => {
+  let attempts = 0;
+  const ready = await waitForProject(
+    3100,
+    100,
+    async () => {
+      attempts += 1;
+      return "other";
+    },
+    1,
+  );
+  assert.equal(ready, false);
+  assert.equal(attempts, 1);
+});
+
+test("정적 준비 표식 파일과 런처 계약이 일치한다", () => {
+  const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
+  const markerFile = path.join(
+    scriptsDir,
+    "..",
+    "web",
+    "public",
+    ...APP_PROBE_PATH.slice(1).split("/"),
+  );
+  assert.equal(fs.readFileSync(markerFile, "utf8").trim(), APP_MARKER);
 });
 
 test("브라우저 실행기는 URL을 한 번만 전달한다", () => {
@@ -215,6 +284,29 @@ test("시작 지연과 조기 종료는 한국어 해결 방법을 출력한다"
   assert.match(output, /npm\/Next\.js 오류/);
   assert.match(output, /포트 충돌/);
   assert.match(output, /npm run dev/);
+});
+
+test("다른 서버 응답은 한 번 보고한 뒤 방금 띄운 서버를 종료한다", async () => {
+  const child = new EventEmitter();
+  const messages = [];
+  let stops = 0;
+  const code = await runDevServer("unused", 3100, {
+    error: (message) => messages.push(message),
+    inspect: async () => "other",
+    intervalMs: 1,
+    log: () => {},
+    open: () => {
+      throw new Error("browser should not open");
+    },
+    spawnServer: () => child,
+    stop: () => {
+      stops += 1;
+      setImmediate(() => child.emit("exit", 0, null));
+    },
+  });
+  assert.equal(code, 1);
+  assert.equal(stops, 1);
+  assert.match(messages.join("\n"), /잘못된 주소를 반복 호출하지 않고/);
 });
 
 // iframe 시절에는 여기서 `npm run ui:watch` 조립 감시를 함께 띄웠다. 그 스크립트가
