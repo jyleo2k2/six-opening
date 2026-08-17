@@ -105,6 +105,8 @@ export function BottomNav({
         const on = tab.id === active;
         return (
           <div
+            // 튜토리얼이 짚고 대신 눌러 주는 자리다 — `lib/tutorial-steps.ts` 의 `nav-trade` 장.
+            id={tab.id === "trade" ? "tut-nav-trade" : undefined}
             key={tab.id}
             onClick={() => {
               if (!on || !atTabRoot) onLeave(tab.path);

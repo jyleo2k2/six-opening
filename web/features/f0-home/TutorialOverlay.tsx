@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   getPrototypeScreenRect,
   PROTOTYPE_PHONE,
@@ -18,12 +18,12 @@ import {
   toScreenRect,
 } from "./lib/tutorial-anchor";
 import {
+  enterPath,
   isSamePlace,
   nextStepIndex,
   stepIndexAt,
-  type TutorialLength,
+  TUTORIAL_STEPS,
   type TutorialPlace,
-  tutorialSteps,
 } from "./lib/tutorial-steps";
 
 /**
@@ -50,21 +50,27 @@ const { screenWidth: SCREEN_W, screenHeight: SCREEN_H } = PROTOTYPE_PHONE;
 const DIM = "rgba(0,30,90,0.58)";
 const RING = "#FFC7DE";
 
-/**
- * 말풍선은 앱 카드(전부 흰색)와 **구분되되 테마 안**에 있어야 한다. 원본 프로토타입의
- * 연회색·보랏빛 유리판을 그대로 쓰고, 글씨는 디자인 토큰 `navy`·`magenta` 다.
- */
-const BUBBLE_BG = "linear-gradient(157deg,#E9EBF3 0%,#E4E6F0 46%,#DCDFEC 100%)";
-const BUBBLE_TOP = "#E9EBF3";
-const BUBBLE_BOTTOM = "#DCDFEC";
-
-/** `globals.css` 의 `--color-navy`·`--color-magenta`. */
+/** `globals.css` 의 `--color-navy`. */
 const NAVY = "#001E5A";
-const MAGENTA = "#D70082";
-/** 옮겨 온 화면들이 본문·보조 글씨에 쓰는 회색 두 단계. */
-const BODY_INK = "#5C6280";
-const SUB_INK = "#6E7488";
-const MUTED = "#8E93A8";
+
+/**
+ * 말풍선은 **딤보다 어둡다.**
+ *
+ * 앱 카드가 전부 흰색이라 예전에는 연회색 유리판으로 구분했는데, 딤을 깐 화면에서 밝은
+ * 판은 그 자체가 가장 밝은 면이 돼 정작 짚은 버튼보다 먼저 눈에 들어왔다. 코치마크의
+ * 주인공은 설명이 아니라 **짚은 자리**다. 미니바가 이미 쓰는 네이비를 그대로 써서
+ * 말풍선을 배경으로 물리고 글씨만 띄운다.
+ */
+const BUBBLE_BG = NAVY;
+const BUBBLE_TOP = NAVY;
+const BUBBLE_BOTTOM = NAVY;
+
+/** 어두운 판 위 글씨. 개념 제목은 마젠타 대신 구멍 테두리와 같은 분홍이라야 읽힌다. */
+const TITLE_INK = "#FFFFFF";
+const BODY_INK = "rgba(255,255,255,0.86)";
+const SUB_INK = "rgba(255,255,255,0.72)";
+const MUTED = "rgba(255,255,255,0.58)";
+const TERM_INK = RING;
 
 /** 미니바가 하단 탭 위에 앉는 높이. */
 const MINIBAR_BOTTOM = 76;
@@ -82,18 +88,16 @@ function visibleNode(id: string) {
 
 export function TutorialOverlay({
   place,
-  length,
   onGo,
   onClose,
 }: {
   /** 지금 어느 화면의 어느 자리인지. 장은 이 값에서 읽는다 — 세지 않는다. */
   place: TutorialPlace;
-  length?: TutorialLength;
   /** 주소로 데려간다. `ConnectedPrototype` 의 `leaveToPath` 와 같은 경로다. */
   onGo: (path: string) => void;
   onClose: () => void;
 }) {
-  const steps = useMemo(() => tutorialSteps(length), [length]);
+  const steps = TUTORIAL_STEPS;
   const [index, setIndex] = useState(() => Math.max(0, stepIndexAt(steps, place)));
   /** 읽고 나면 접는다. 딤과 설명이 계속 떠 있으면 정작 버튼을 누를 수가 없다. */
   const [read, setRead] = useState(false);
@@ -105,7 +109,9 @@ export function TutorialOverlay({
 
   const step = steps[index];
 
-  const placeKey = `${place.screen}:${place.stage ?? ""}`;
+  // 매수 1단계와 매도 1단계는 화면·자리가 같고 `side` 만 다르다. 여기 빠지면 팔러 갔는데
+  // 사는 설명이 그대로 남는다.
+  const placeKey = `${place.screen}:${place.stage ?? ""}:${place.side ?? ""}`;
   const lastPlace = useRef(placeKey);
   useEffect(() => {
     if (lastPlace.current === placeKey) return;
@@ -201,7 +207,7 @@ export function TutorialOverlay({
     setRead(true);
     const enter = steps[next].enter;
     if (!enter) return;
-    if ("path" in enter) return onGo(enter.path);
+    if ("path" in enter) return onGo(enterPath(enter.path, place));
     const node = visibleNode(enter.anchor);
     if (node instanceof HTMLElement) node.click();
   };
@@ -283,7 +289,7 @@ export function TutorialOverlay({
             borderRadius: 24,
             padding: "17px 19px",
             boxShadow:
-              "0 20px 44px rgba(0,30,90,0.28),inset 0 1px 0 rgba(255,255,255,0.85),inset 0 0 0 1px rgba(255,255,255,0.5)",
+              "0 20px 44px rgba(0,12,40,0.42),inset 0 1px 0 rgba(255,255,255,0.16),inset 0 0 0 1px rgba(255,255,255,0.12)",
           }}
         >
           {placement.side !== "floor" && holes.length > 0 && (
@@ -306,7 +312,7 @@ export function TutorialOverlay({
               position: "relative",
               fontSize: 16.5,
               fontWeight: 800,
-              color: NAVY,
+              color: TITLE_INK,
               letterSpacing: "-0.01em",
             }}
           >
@@ -335,7 +341,7 @@ export function TutorialOverlay({
               position: "relative",
               marginTop: 12,
               paddingTop: 12,
-              borderTop: "1px solid rgba(0,30,90,0.10)",
+              borderTop: "1px solid rgba(255,255,255,0.16)",
             }}
           >
             <div
@@ -347,7 +353,7 @@ export function TutorialOverlay({
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 800,
-                color: MAGENTA,
+                color: TERM_INK,
               }}
             >
               <span style={{ fontSize: 14 }}>💡</span>
@@ -404,11 +410,11 @@ export function TutorialOverlay({
                 fontWeight: 800,
                 color: NAVY,
                 cursor: "pointer",
-                background: "linear-gradient(180deg,#FCFCFE 0%,#EDEEF5 100%)",
+                background: "linear-gradient(180deg,#EFF0F6 0%,#D9DBE7 100%)",
                 borderRadius: 999,
                 padding: "10px 20px",
                 boxShadow:
-                  "0 5px 10px -4px rgba(0,30,90,0.22),inset 0 1.5px 1px rgba(255,255,255,1),inset 0 0 0 1px rgba(0,30,90,0.08)",
+                  "0 5px 10px -4px rgba(0,12,40,0.34),inset 0 1.5px 1px rgba(255,255,255,0.9)",
               }}
             >
               {last ? "다 봤어요" : "다음"}
