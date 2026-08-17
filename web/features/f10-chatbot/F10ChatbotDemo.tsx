@@ -226,7 +226,10 @@ function defaultFloatingChatPosition(
       y: prototypeScreen.top + prototypeScreen.height - 108 * prototypeScreen.scale,
     };
   }
-  return { x: 390 - 44, y: 844 - 108 };
+  return {
+    x: PROTOTYPE_PHONE.screenWidth - 44,
+    y: PROTOTYPE_PHONE.screenHeight - 108,
+  };
 }
 
 function clampFloatingChatPosition(
@@ -235,8 +238,8 @@ function clampFloatingChatPosition(
 ): FloatingChatPosition {
   const left = prototypeScreen?.left ?? 0;
   const top = prototypeScreen?.top ?? 0;
-  const width = prototypeScreen?.width ?? 390;
-  const height = prototypeScreen?.height ?? 844;
+  const width = prototypeScreen?.width ?? PROTOTYPE_PHONE.screenWidth;
+  const height = prototypeScreen?.height ?? PROTOTYPE_PHONE.screenHeight;
   return {
     x: Math.min(left + width - FLOATING_CHAT_RADIUS, Math.max(left + FLOATING_CHAT_RADIUS, position.x)),
     y: Math.min(top + height - FLOATING_CHAT_RADIUS, Math.max(top + FLOATING_CHAT_RADIUS, position.y)),
