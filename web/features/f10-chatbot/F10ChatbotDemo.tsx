@@ -299,6 +299,7 @@ function TurnPrompt({ prompt, children }: { prompt: string; children: ReactNode 
 
 function MessageBubble({
   message,
+  avatarSrc,
   onAction,
   onQuestion,
   onExplainChoice,
@@ -307,6 +308,7 @@ function MessageBubble({
   actionsDisabled,
 }: {
   message: Message;
+  avatarSrc: string;
   onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
   onExplainChoice: (choice: ExplainChoice) => void;
@@ -321,7 +323,26 @@ function MessageBubble({
   const uiAction = isAllowedUiAction(message.uiAction) ? message.uiAction : undefined;
 
   return (
-    <div className={userMessage ? "flex justify-end" : "flex justify-start"}>
+    <div
+      className={
+        userMessage ? "flex justify-end" : "flex items-end justify-start gap-2"
+      }
+    >
+      {/*
+        프로필은 말풍선 묶음 왼쪽에 **하단 정렬**로 선다. 헤더에 한 번만 두면 대화가 길어질수록
+        누가 말하는지가 스크롤 밖으로 밀려나고, 상단 정렬하면 칩이 붙은 긴 답변에서 얼굴만
+        위로 떨어져 다음 말풍선 것처럼 보인다.
+      */}
+      {!userMessage && (
+        <img
+          alt=""
+          aria-hidden="true"
+          className="size-8 shrink-0 rounded-full object-cover"
+          height={32}
+          src={avatarSrc}
+          width={32}
+        />
+      )}
       <div className="max-w-[84%]">
         <p
           className={
@@ -1524,15 +1545,6 @@ export function F10ChatbotDemo({
                     {COPY.enableProactive}
                   </button>
                 )}
-                {/* 아바타는 시트와 함께 이동해 헤더가 뒤늦게 튀어나오지 않게 한다. */}
-                <img
-                  alt=""
-                  aria-hidden="true"
-                  className="size-8 shrink-0 rounded-full object-cover"
-                  height={32}
-                  src={floatingAvatar.src}
-                  width={32}
-                />
                 <button
                   className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
                   onClick={resetChat}
@@ -1551,6 +1563,7 @@ export function F10ChatbotDemo({
                     text: COPY.greeting,
                     suggestedQuestions: GREETING_SUGGESTED_QUESTIONS,
                   }}
+                  avatarSrc={floatingAvatar.src}
                   onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
@@ -1567,6 +1580,7 @@ export function F10ChatbotDemo({
                 <MessageBubble
                   key={index}
                   message={message}
+                  avatarSrc={floatingAvatar.src}
                   onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
