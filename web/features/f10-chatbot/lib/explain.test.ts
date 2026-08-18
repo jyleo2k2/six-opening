@@ -39,6 +39,34 @@ const per: ExplainScript = {
   example:
     "똑같이 한 해에 1000원을 버는 가게가 두 곳 있다고 해 보자. 한 곳은 1만원, 다른 곳은 2만원에 판다면 두 번째 가게의 PER이 더 높아.",
 };
+const noAdjust: ExplainScript = {
+  id: "term:no-adjust",
+  brief: "이것은 조정 질문이 없는 테스트용 용어예요.",
+  check: {
+    question: "이 용어를 이해했어요?",
+    choices: [
+      { id: "yes", label: "이해했어요" },
+      { id: "no", label: "아직 어려워요" },
+    ],
+    answerId: "yes",
+  },
+  detail: "이 용어의 자세한 뜻이에요.",
+  example: "간단한 예시예요.",
+};
+
+const noAdjustWrong = advanceExplain(noAdjust, {
+  scriptId: noAdjust.id,
+  stage: "brief",
+  choiceId: "no",
+});
+assert.deepEqual(
+  noAdjustWrong?.kind === "turn" ? noAdjustWrong.turn.choices : null,
+  [
+    { id: "yes", label: "알겠어요" },
+    { id: "no", label: "모르겠어요" },
+    { id: "unsure", label: "잘 모르겠어요" },
+  ],
+);
 
 // ① 시작하면 피드백·1줄 설명·이해 확인 질문이 함께 나온다. brief 선택지에는
 // "잘 모르겠어요"가 항상 따라붙는다(guiding 아닌 진단형 스크립트).

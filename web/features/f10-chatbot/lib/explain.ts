@@ -301,7 +301,7 @@ export function advanceExplain(
             "detail",
             `${FEEDBACK.unsure} ${script.detail}`,
             CONFIRM_PROMPT,
-            CONFIRM_CHOICES,
+            detailChoices(script),
           );
     }
     if (reply.choiceId === script.check.answerId) {
@@ -335,7 +335,7 @@ export function advanceExplain(
       "detail",
       `${FEEDBACK.wrong} ${script.detail}`,
       CONFIRM_PROMPT,
-      CONFIRM_CHOICES,
+      detailChoices(script),
     );
   }
 
