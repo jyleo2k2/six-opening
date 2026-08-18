@@ -30,7 +30,6 @@ export type SellDraft = {
   limitPct: number;
   reason: string | null;
   change: string | null;
-  memo: string;
 };
 
 export function blankBuyDraft(): BuyDraft {
@@ -57,7 +56,6 @@ export function blankSellDraft(availableQty: number): SellDraft {
     limitPct: 0,
     reason: null,
     change: null,
-    memo: "",
   };
 }
 
