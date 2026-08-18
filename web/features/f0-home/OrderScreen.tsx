@@ -408,14 +408,11 @@ export function OrderScreen({
    * 반응하므로, 표시가 없으면 안 눌린 줄 알고 한 번 더 눌러 주문이 두 번 들어간다.
    */
   const [submitting, setSubmitting] = useState(false);
-  const [memoSaved, setMemoSaved] = useState(false);
   /**
    * 회고 판정의 재료. **서버가 원본이다** — 예전에는 지갑 `records` 를 읽어서 이 브라우저에서
    * 산 것만 판정됐고, DB 시드 보유를 팔면 카드가 통째로 안 떴다.
    */
   const [history, setHistory] = useState<TradeHistoryRow[]>([]);
-  /** 방금 남긴 기록의 id. 완료 화면의 메모가 이 기록에 붙는다. */
-  const [doneTxId, setDoneTxId] = useState<string | null>(null);
   // 대기 목록 시트. `ui-src` 의 orderSheet 상태와 같다 — 매수·매도 어느 쪽에서든 연다.
   const [orderSheet, setOrderSheet] = useState(false);
   /** 고칠지 물어보는 중인 예약. 고치기는 취소를 겸하므로 한 번 확인하고 간다. */
@@ -965,13 +962,12 @@ export function OrderScreen({
 
     // 체결분만 지갑을 미리 움직인다 — 완료 화면의 `남은 지갑` 이 `refresh()` 를 기다리지
     // 않게 하는 화면용 값이고, 곧 서버 응답이 덮는다.
-    const finishBuy = (transactionId: string | null, fill: boolean, fake = false) => {
+    const finishBuy = (fill: boolean, fake = false) => {
       if (fill) {
         update((current) => ({
           acc: { ...current.acc, [account]: applyBuyFill(current.acc[account], code, price, math.qty, math.amount) },
         }));
       }
-      setDoneTxId(transactionId);
       setDone({
         name: stock.name,
         qty: math.qty,
@@ -999,7 +995,7 @@ export function OrderScreen({
       }
       if (tutorialMode) {
         // 튜토리얼의 `다음`은 실제 주문 CTA를 누르지만, 서버·지갑·거래내역에는 남기지 않는다.
-        finishBuy(null, false, true);
+        finishBuy(false, true);
         return;
       }
       const isLimit = draft.orderType === "limit";
@@ -1031,7 +1027,7 @@ export function OrderScreen({
             setOrderError(rejectionText(result?.reason));
             return;
           }
-          finishBuy(result.order_id, false);
+          finishBuy(false);
           // 접수가 잠근 현금은 서버가 안다. 계좌·주문 목록을 다시 읽어 화면을 맞춘다.
           refresh();
         });
@@ -1055,7 +1051,7 @@ export function OrderScreen({
           setOrderError(rejectionText(saved?.reason));
           return;
         }
-        finishBuy(saved.transaction_id, true);
+        finishBuy(true);
         // 상세·차트·뉴스에서 쌓인 유효 열람을 이 매수와 묶어 보낸다 (`app.html` 과 같은 시점).
         // 거절된 주문에는 붙이지 않는다 — 버퍼는 다음 체결까지 남는다.
         void flushTabViews(code, syncable);
@@ -1593,13 +1589,12 @@ export function OrderScreen({
           ? !!sellDraft.reason && (!showJudge || planMatch === true || !!sellDraft.change)
           : true;
 
-    const finishSell = (transactionId: string | null, fill: boolean, fake = false) => {
+    const finishSell = (fill: boolean, fake = false) => {
       if (fill) {
         update((current) => ({
           acc: { ...current.acc, [account]: applySellFill(current.acc[account], code, math.qty, math.proceeds) },
         }));
       }
-      setDoneTxId(transactionId);
       setDone({
         name: stock.name,
         qty: math.qty,
@@ -1608,8 +1603,6 @@ export function OrderScreen({
         scheduled: fake ? false : !fill && sellDraft.orderType !== "limit",
         scheduledFor: fake ? null : !fill && sellDraft.orderType !== "limit" ? scheduledFor : null,
       });
-      patchSell({ memo: "" });
-      setMemoSaved(false);
       setOrderError(null);
       setStep(3);
     };
@@ -1628,7 +1621,7 @@ export function OrderScreen({
       }
       if (tutorialMode) {
         // 매수와 같은 규칙이다. 완료 모양만 보여 주고 서버 주문·거래내역은 만들지 않는다.
-        finishSell(null, false, true);
+        finishSell(false, true);
         return;
       }
       retroMsRef.current = retroAtRef.current ? Date.now() - retroAtRef.current : 0;
@@ -1656,7 +1649,7 @@ export function OrderScreen({
             setOrderError(rejectionText(result?.reason));
             return;
           }
-          finishSell(result.order_id, false);
+          finishSell(false);
           refresh();
         });
         return;
@@ -1677,7 +1670,7 @@ export function OrderScreen({
           setOrderError(rejectionText(saved?.reason));
           return;
         }
-        finishSell(saved.transaction_id, true);
+        finishSell(true);
         const behavior: Record<string, unknown> = { kind: "trade_filled", stockId: `KRX:${code}`, side: "sell" };
         if (held && Number.isFinite(heldAvg) && heldAvg > 0 && Number.isFinite(price)) {
           behavior.realizedPnlPct = ((price - heldAvg) / heldAvg) * 100;
@@ -2089,30 +2082,6 @@ export function OrderScreen({
       </div>
     );
 
-    /**
-     * 완료 화면의 한 줄 메모를 방금 남긴 기록에 붙인다.
-     *
-     * 예전에는 지갑 `sellRecords` 의 마지막 줄에 적었고 다시 읽는 곳이 없었다 — 화면이
-     * 적어 둔 "나중에 다시 보여줄게요" 가 지켜진 적이 없었다. 이제 서버가 들고 있고
-     * 아카이브 피드가 그 메모를 그린다.
-     *
-     * 저장에 실패하면 버튼을 되돌린다. `저장됐어요 ✓` 를 띄워 놓고 아무것도 안 남기면
-     * 그게 예전과 같은 거짓말이다.
-     */
-    const saveMemo = () => {
-      if (memoSaved || !doneTxId) return;
-      setMemoSaved(true);
-      fetch("/api/trade", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transaction_id: doneTxId, memo: (sellDraft.memo || "").trim() }),
-      })
-        .then((response) => {
-          if (!response.ok) setMemoSaved(false);
-        })
-        .catch(() => setMemoSaved(false));
-    };
-
     const sdQty = done ? `${Math.round(done.qty * 100) / 100}주` : "";
     const step3 = done && (
       <div
@@ -2171,37 +2140,6 @@ export function OrderScreen({
           </div>
         </div>
 
-        <div style={{ width: "100%", marginTop: 16 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: "#5C6280" }}>
-            하고 싶은 말이 있으면 남겨주세요
-          </div>
-          <input
-            maxLength={50}
-            onChange={(e) => {
-              patchSell({ memo: e.target.value.slice(0, 50) });
-              setMemoSaved(false);
-            }}
-            placeholder="예: 목표까지 와서 팔았어요"
-            style={{ ...MEMO_INPUT, marginTop: 9 }}
-            value={sellDraft.memo}
-          />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8, gap: 10 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 500, color: "#A9AEC4", fontVariantNumeric: "tabular-nums" }}>
-              {sellDraft.memo.length} / 50
-            </span>
-            <div
-              className={memoSaved ? undefined : PRESSABLE}
-              onClick={saveMemo}
-              style={styleFromCss(
-                memoSaved
-                  ? "font-size:14px;font-weight:700;color:#8E93A8;padding:11px 18px;border-radius:999px;white-space:nowrap;background:#F1F2F8"
-                  : "font-size:14px;font-weight:700;color:#fff;padding:11px 20px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F5327F",
-              )}
-            >
-              {memoSaved ? "저장됐어요 ✓" : "저장하기"}
-            </div>
-          </div>
-        </div>
         </div>
       </div>
     );
