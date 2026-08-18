@@ -224,10 +224,9 @@ assert.equal(buy.sideValue, "130,000원");
 assert.equal(buy.positive, true);
 // 매수 카드의 손익은 **평가** 손익이다 — 지금 시세(120,000) − 산 가격(100,000), 2주.
 assert.equal(buy.pnlText, "▲ 40,000원 (+20.00%)");
-// 이유·계획·목표가가 한 문장으로 붙는다. **`담았어. `·`팔았어. ` 로 시작하지 않는다** —
-// 바로 위 날짜 라벨(`8월 14일 매수`)이 이미 방향을 말하고 있다.
-assert.equal(buy.text, "뉴스를 보고 결정했어. 목표 가격이 되면 가지려고 했어. 목표 130,000원.");
-assert.equal(buy.text.startsWith("담았어"), false);
+// 본문은 **피드에 올릴 때 쓴 글뿐이다.** 주문할 때 고른 이유·계획·목표가는 붙지 않는다 —
+// 이 거래는 `feedBody` 가 없으니 본문도 비어 있다.
+assert.equal(buy.text, "");
 assert.equal(buy.shortMent, "뉴스를 보고");
 assert.equal(buy.likeCount, 2);
 assert.equal(buy.liked, true);
@@ -254,17 +253,22 @@ const noAvg = feedCards(
 assert.equal(noAvg.bigValue, "비공개");
 assert.equal(noAvg.sideValue, "비공개");
 assert.equal(noAvg.pnlText, "");
-// 매도는 계획 변경 이유를 덧붙인다.
-assert.equal(sell.text, "더 떨어질까 봐 결정했어. 계획을 바꿨어 — 가격이 움직여서 불안해졌어");
-// 메모가 있으면 메모가 첫 문장이다 — 고른 이유 문구가 아이가 쓴 말을 밀어내지 않는다.
-const memoCard = feedCards(
-  [{ ...trades[0], memo: "과자 회사라 믿음이 가!" }],
+// 매도도 마찬가지다 — 계획 준수·변경 이유를 본문에 덧붙이지 않는다.
+assert.equal(sell.text, "");
+// 피드에 올릴 때 쓴 글이 본문 전부다. 주문 메모·이유·계획은 뒤에 따라붙지 않는다 —
+// 아카이브에서 피드에 올리며 쓴 말만 자기 글로 읽혀야 한다.
+const posted = feedCards(
+  [{ ...trades[0], feedBody: "과자 회사라 믿음이 가!", memo: "간식 좋아해서" }],
   members, {}, {}, {}, "all", now,
 )[0];
-assert.equal(memoCard.text, "과자 회사라 믿음이 가! 목표 가격이 되면 가지려고 했어. 목표 130,000원.");
-// 메모도 이유도 계획도 없으면 빈 문자열이다 — 앞뒤 공백만 남은 줄이 카드에 뜨면 안 된다.
+assert.equal(posted.text, "과자 회사라 믿음이 가!");
+// 계획·이유는 사라지지 않고 오른쪽 회색 판에 그대로 있다.
+assert.equal(posted.sideLabel, "목표 금액");
+assert.equal(posted.sideValue, "130,000원");
+assert.equal(posted.shortMent, "뉴스를 보고");
+// 올린 글이 없으면 빈 문자열이다 — 앞뒤 공백만 남은 줄이 카드에 뜨면 안 된다.
 const bare = feedCards(
-  [{ ...trades[0], memo: "", reasonCode: null, planCode: null, planTargetPrice: null }],
+  [{ ...trades[0], feedBody: "  ", memo: "과자 회사라 믿음이 가!" }],
   members, {}, {}, {}, "all", now,
 )[0];
 assert.equal(bare.text, "");
