@@ -186,7 +186,7 @@
   .chartmock .cm-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
   .chartmock .cm-legend i.pin-key { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
 
-  /* ── 종목 선정 파이프라인 · 50종목 표 ── */
+  /* ── 종목 선정 파이프라인 · 51종목 표 ── */
   .pipe { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 14px 0 8px; }
   .pipe-step { background: #f0f4ff; border: 1px solid #d6e0fb; border-radius: 10px; padding: 11px 12px; text-align: center; }
   .pipe-step .ps-n { font-size: 19px; font-weight: 800; color: var(--accent); line-height: 1.2; }
@@ -824,7 +824,7 @@
       <table>
         <tbody><tr><th>축</th><th>데이터 소스</th><th>산출물</th></tr>
         <tr><td><strong>① 매매지점 차트</strong></td><td>부모·자녀의 실거래 내역(매수·매도 시점)</td><td><strong>종목별 차트 위에 부모와 자녀의 매수/매도 지점을 함께 표시</strong></td></tr>
-        <tr><td><strong>② 투자성향 분석</strong></td><td>거래 데이터(보유 섹터 수 · 현금비중 · 매매 적중률) + 행동 데이터(매수 전 탭 유효 열람 수)</td><td><strong>능력치 5개 + 캐릭터 + 정확 등급</strong> (예: 🎯 저격수 ★★☆)</td></tr>
+        <tr><td><strong>② 투자성향 분석</strong></td><td>거래 데이터(유효 섹터수 · 현금비중 · 매매 적중률) + 행동 데이터(매수 전 탭 유효 열람 수)</td><td><strong>능력치 5개 + 캐릭터 + 정확 레벨</strong> (예: 🎯 저격수 LV2)</td></tr>
         <tr><td><strong>③ 거래내역 피드</strong></td><td>거래 이벤트 + 거래이유 + 가족 코멘트</td><td><strong>부모·자녀 거래가 한 줄로 흐르는 피드 · 서로 코멘트 작성 가능</strong></td></tr>
       </tbody></table>
       <p style="font-size:13.5px;margin:8px 0 0;">①은 <strong>결과를 겹쳐 보고</strong>, ②는 <strong>과정을 능력치와 캐릭터로 요약</strong>하고, ③은 <strong>그 위에 대화를 얹음</strong>. 세 축이 함께 있어야 "기록"이 아니라 <strong>"함께 만든 아카이브"</strong>가 됨</p>
@@ -953,9 +953,9 @@
         </div>
         <div class="radar-side">
           <div class="rs-tag">이 시즌 결과</div>
-          <div class="rs-title">🎯 저격수 <span style="color:#0f8a68;letter-spacing:2px;">★★☆</span></div>
+          <div class="rs-title">🎯 저격수 <span style="color:#0f8a68;">LV2</span></div>
           <p><strong>근거 7 &gt; 직관 3</strong> → 근거형 · <strong>집중 6 &gt; 분산 4</strong> → 집중형</p>
-          <p>두 우세를 조합해 <strong>저격수</strong>, 정확력 6점이라 <strong>★★☆</strong></p>
+          <p>두 우세를 조합해 <strong>저격수</strong>, 정확력 6점이라 <strong>LV2</strong> — 화면에는 <strong>저격수 LV2</strong>로 붙여 씀</p>
           <div class="stat-chips">
             <span>근거 <b>7</b></span><span>직관 <b>3</b></span><span>집중 <b>6</b></span><span>분산 <b>4</b></span><span>정확 <b>6</b></span>
           </div>
@@ -972,12 +972,20 @@
         <tr><td>⚡ 직관력</td><td>느낌으로 빠르게 결정하나</td>
             <td><strong>10 − 근거력</strong> — 유효 열람 0~1개 상태에서 매수한 비율</td></tr>
         <tr><td>🎯 집중력</td><td>확신한 곳에 몰아 담나</td>
-            <td>보유 종목이 걸쳐 있는 <strong>섹터 개수</strong>와 <strong>현금비중</strong>을 10점으로 환산 — 섹터 <strong>3개 이하</strong>면 높고, <strong>4개 이상</strong>이거나 현금비중 <strong>50% 이상</strong>이면 낮음</td></tr>
+            <td>보유 <strong>평가액 비중</strong>으로 계산한 <strong>유효 섹터수(1÷허핀달지수)</strong>를 로그로 10점에 환산 — 유효 <strong>1개=10점 · 3개=5점 · 9개=0점</strong>으로 계단 없이 이어짐<br><span style="color:var(--muted)">가짓수가 아니라 <strong>비중</strong>을 봄 — 반도체 900만 + 게임 1만은 섹터가 둘이어도 유효 섹터수는 1.0에 가까움. 아직 안 산 <strong>현금 비중만큼은 중립(5점)으로 끌어당김</strong></span></td></tr>
         <tr><td>🧺 분산력</td><td>여러 곳에 나눠 담나</td>
             <td><strong>10 − 집중력</strong></td></tr>
         <tr><td>🔮 정확력</td><td>사고판 시점이 맞았나</td>
-            <td>매수한 뒤 주가가 오르거나 매도한 뒤 내렸으면 '적중' — <strong>체결 후 5거래일 종가</strong> 기준 적중률 × 10</td></tr>
+            <td>매수한 뒤 주가가 오르거나 매도한 뒤 내렸으면 '적중' — <strong>체결 후 2거래일 종가</strong> 기준 적중률 × 10<br><span style="color:var(--muted)">2거래일이 아직 안 지났거나 종가가 없으면 <strong>채점하지 않고 보류</strong>함</span></td></tr>
       </tbody></table>
+
+      <h3>거래가 적은 아이는 판정하지 않음 — 보류 장치 3겹</h3>
+      <ul>
+        <li><strong>① 표본 축소</strong> — 기록이 적으면 점수를 중립(5점)으로 끌어당김. "미리 2번 적중, 2번 비적중을 봤다"고 두고 계산하므로 한 번 맞혔다고 10점이 나오지 않음</li>
+        <li><strong>② 점수까지 보류</strong> — 체결 매수가 최소 기준에 못 미치면 <strong>다섯 축을 전부 중립 5로</strong> 내보내고 유형은 <strong>관찰 중</strong>. 점수만 축소하면 화면에 근거력 4점이 또렷이 찍히는데 그 옆에서 유형은 "관찰 중"이라 <strong>화면이 스스로 모순된 말을 하게 됨</strong></li>
+        <li><strong>③ 동점대 보류</strong> — 보완쌍 차이가 1점 미만이면 캐릭터를 정하지 않음(위 동점 처리)</li>
+      </ul>
+      <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;">두세 번의 거래로 성향을 단정하면 분석이 아니라 점괘가 됨. <strong>모르면 모른다고 말하는 것</strong>이 이 엔진의 기본값임</p>
 
       <h3>4가지 캐릭터 — 두 쌍의 우세로 결정</h3>
       <div class="type4">
@@ -986,16 +994,17 @@
         <div class="t4 c"><div class="t4-e">⚡</div><div class="t4-n">승부사</div><div class="t4-c">직관 &gt; 근거 · 집중 &gt; 분산</div><div class="t4-d">마음에 들면 <strong>바로 한 곳에</strong> 건다. 빠르지만 기록이 얇음</div></div>
         <div class="t4 d"><div class="t4-e">🦋</div><div class="t4-n">탐험가</div><div class="t4-c">직관 &gt; 근거 · 분산 &gt; 집중</div><div class="t4-d">여기저기 <strong>가볍게 조금씩</strong> 담거나 현금을 남겨둠</div></div>
       </div>
-      <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;"><strong>동점 처리</strong> — 5:5로 갈리면 <strong>근거 · 집중</strong> 쪽으로 귀속함(기준을 하나로 고정해 시즌마다 결과가 흔들리지 않게)</p>
+      <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;"><strong>동점 처리</strong> — 한 쌍이라도 두 능력치 차이가 <strong>1점 미만</strong>이면 동점대로 보고 <strong>캐릭터를 정하지 않음</strong>(화면 표기: <strong>관찰 중</strong>). 5.4 대 4.6을 저격수라고 부르지 않음 — 우세를 꾸며내지 않는 것이 기준임</p>
 
-      <h3>정확 등급 — 캐릭터 옆에 별로 붙음</h3>
+      <h3>정확 레벨 — 캐릭터 옆에 LV로 붙음</h3>
       <div class="grade-row">
-        <div class="grade"><div class="g-s">★★★</div><div class="g-c">정확력 7점 이상</div></div>
-        <div class="grade"><div class="g-s">★★☆</div><div class="g-c">4 ~ 6점</div></div>
-        <div class="grade"><div class="g-s">★☆☆</div><div class="g-c">3점 이하</div></div>
+        <div class="grade"><div class="g-s">LV3</div><div class="g-c">정확력 약 6.7점 이상<br><span style="font-size:11.5px;color:var(--muted)">적중 2/3 이상</span></div></div>
+        <div class="grade"><div class="g-s">LV2</div><div class="g-c">약 3.3점 이상<br><span style="font-size:11.5px;color:var(--muted)">적중 1/3 이상</span></div></div>
+        <div class="grade"><div class="g-s">LV1</div><div class="g-c">그 미만<br><span style="font-size:11.5px;color:var(--muted)">적중 1/3 미만</span></div></div>
       </div>
+      <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;">표본이 모자라 레벨이 정해지지 않으면 <strong>레벨을 감춤</strong> — 2로 채우지 않음(실제로 판정된 LV2와 화면에서 구별되지 않기 때문). 유형만 있으면 <strong>저격수</strong>, 둘 다 있으면 <strong>저격수 LV2</strong></p>
       <ul>
-        <li><strong>캐릭터는 성향, 별은 실력</strong> — 캐릭터에는 우열이 없고(저격수가 탐험가보다 낫지 않음), 별은 분기마다 다시 계산돼 <strong>"다음 시즌엔 별을 하나 더"</strong>라는 재참여 동기가 됨</li>
+        <li><strong>캐릭터는 성향, 레벨은 별개 축</strong> — 캐릭터에는 우열이 없고(저격수가 탐험가보다 낫지 않음), <strong>정확력은 캐릭터 판정에 쓰지 않음</strong>. 맞힌 아이가 더 나은 유형이 되면 결국 수익률 줄 세우기가 되기 때문이며, 레벨은 분기마다 다시 계산돼 <strong>"다음 시즌엔 레벨을 하나 더"</strong>라는 재참여 동기가 됨</li>
         <li><strong>다섯 항목 모두 실제 기록에서 기계적으로 산출됨</strong> — 아이에게 성향 검사를 시키지 않고, 이미 한 행동으로만 계산함</li>
         <li>부모가 얻는 것: 자녀의 투자성향을 알고 싶어하는 니즈를 직접 충족함 — 캐릭터 한 단어로 요약되면서도, 오각형에서 <strong>어느 항목이 약한지</strong>까지 보임</li>
         <li>시즌별 오각형이 겹쳐 쌓이면 <strong>어느 능력치가 자랐는지</strong>가 그대로 성장 기록이 됨</li>
@@ -1109,9 +1118,9 @@
       <table class="trig-table">
         <tbody><tr><th>트리거</th><th>판정 조건</th></tr>
         <tr>
-          <td><span class="tt-tag">트리거 1</span><br><strong>매수·매도 반복 전환</strong></td>
-          <td>매수/매도 버튼을 눌렀다가 <span class="cond">"매수하시겠습니까?"</span> 확인창에서 <span class="cond">"아니요"</span>를 눌러 <strong>취소하기를 3회 연속 반복</strong><br>
-          <span style="font-size:12.5px;color:var(--muted)">→ 사고 싶은데 확신이 없어 손가락이 되돌아오는 상태</span></td>
+          <td><span class="tt-tag">트리거 1</span><br><strong>매수 직전에 되돌아옴</strong></td>
+          <td>매수 <span class="cond">최종 확인 화면</span>까지 가서 <span class="cond">주문 넣기</span>를 누르지 않고 <strong>뒤로가기로 이탈하기를 3회 연속</strong><br>
+          <span style="font-size:12.5px;color:var(--muted)">→ 사고 싶은데 확신이 없어 손가락이 되돌아오는 상태. <strong>30분 세션</strong> 안에서 세고 <strong>종목이 달라도 누적</strong>하며, 매수가 한 번 체결되면 기록을 <strong>초기화</strong>함. 매도 확인 이탈과 지정가 대기주문 취소는 포함하지 않음</span></td>
         </tr>
         <tr>
           <td><span class="tt-tag">트리거 2</span><br><strong>주문·상세 화면에 오래 머묾</strong></td>
@@ -1119,20 +1128,32 @@
           <span style="font-size:12.5px;color:var(--muted)">→ 읽고는 있으나 다음 단계로 나아가지 못하는 상태</span></td>
         </tr>
         <tr>
-          <td><span class="tt-tag">트리거 3</span><br><strong>손실을 실현한 종목을<br>여러 차례 다시 조회함</strong></td>
-          <td>
-            <ol>
-              <li><strong>관찰 시작 조건</strong> — 해당 종목에서 <span class="cond">-10% 이상</span>의 손실을 실현한 경우</li>
-              <li><strong>관찰 구간</strong> — 손실 매도 체결 직후부터 <span class="cond">5분간</span></li>
-              <li><strong>트리거 판정</strong> — 5분 이내 해당 종목 상세화면 <span class="cond">4회 이상 재진입</span></li>
-            </ol>
-            <span style="font-size:12.5px;color:var(--muted)">→ 판 뒤에도 미련이 남아 자꾸 확인하는 상태. <strong>감정적으로 가장 취약한 순간</strong>이라 개입 우선순위가 가장 높음</span>
+          <td><span class="tt-tag">트리거 3</span><br><strong>주문 방식을 못 고름</strong></td>
+          <td>같은 주문 흐름 안에서 <span class="cond">시장가</span>와 <span class="cond">지정가</span> 선택을 <strong>3회 연속 교차 변경</strong>하고 주문 확인으로 나아가지 않음<br>
+          <span style="font-size:12.5px;color:var(--muted)">→ 둘의 차이를 모르는 상태. 같은 주문 흐름에서 <strong>세 번째 변경 때 한 번만</strong> 발동하고, 새 주문 흐름에서는 다시 판정함<br>
+          <strong>제외한 신호</strong> — 손실 종목 재조회, 주문 수량 반복 수정, 차트 기간 반복 변경, 여러 종목 빠른 조회, 주문 오류 반복. 정상적인 탐색과 구분하기 어려워 개입 대상에서 뺌</span>
           </td>
         </tr>
       </tbody></table>
       <ul>
         <li>세 조건 모두 <strong>횟수·시간으로 딱 떨어지게 정의</strong>돼 있어 "어느 정도면 헤매는 건가"를 사람이 매번 판단하지 않아도 됨 — 구현·QA·튜닝이 모두 숫자 하나만 바꾸면 되는 구조</li>
-        <li>LLM은 트리거 발동 순간에만 소환되어 문구를 생성 — 상시 대기가 아닌 <strong>정해진 조건에서만 반응하는 관찰형 장치</strong> (비용·안전성 통제 목적)</li>
+        <li><strong>선제 문구는 LLM이 만들지 않음</strong> — 트리거마다 <strong>승인된 고정 발화</strong>가 정해져 있고("살지 말지 고민돼요?" · "뭐가 다른지 볼까요?" · "어디가 헷갈려요?"), 그 아래 붙는 추천 질문 칩도 미리 승인된 문장임. LLM은 <strong>아이가 직접 물었을 때만</strong> 호출됨 (비용·안전성 통제 목적)</li>
+        <li><strong>아이의 마음을 단정하지 않음</strong> — 신호가 아는 것은 행동뿐이고 마음은 모름. "후회되나요?" 같은 감정 단정 문구는 아이가 느끼지도 않은 감정을 나무라는 것처럼 읽히므로, <strong>관찰한 행동에만 붙는 문장</strong>만 씀</li>
+        <li><strong>질문을 대신 던지지 않음</strong> — 말을 걸고 답까지 주는 대신 물어볼 거리를 <strong>칩으로 내밀고 아이가 고르게</strong> 함. 대신 물으면 신호가 짚지 못한 진짜 궁금증을 덮어버림</li>
+        <li><strong>선제 문구는 부모에게 전달하지 않음</strong> — 감시 장치가 아니라 학습 도움임</li>
+      </ul>
+
+      <h3>먼저 말 거는 기능에는 끄는 방법이 같이 있음</h3>
+      <table class="kv-table">
+        <tbody><tr><th>아이 행동</th><th>결과</th><th>수명</th></tr>
+        <tr><td>말풍선에 <strong>네</strong></td><td>그 신호를 닫고 대화창을 엶</td><td>—</td></tr>
+        <tr><td>말풍선에 <strong>아니요</strong> 1회</td><td>그 신호만 재움 (다른 신호는 그대로 뜸)</td><td>30분 세션이 갈리면 풀림</td></tr>
+        <tr><td><strong>아니요</strong> 누적 3회</td><td>먼저 말 걸기를 <strong>전부 끔</strong></td><td>앱을 다시 열어도 유지</td></tr>
+        <tr><td>대화창 머리의 <strong>먼저 알려주기 켜기</strong></td><td>다시 켜면서 거절 이력도 함께 지움</td><td>—</td></tr>
+      </tbody></table>
+      <ul>
+        <li><strong>한 번은 "지금은 아니야", 세 번은 "그만해"</strong> — 8초짜리 말풍선을 치우려고 누른 버튼 하나가 기능을 통째로 없애면 말의 세기가 맞지 않음. 트리거 1이 이탈 3회를 망설임으로 읽는 것과 <strong>같은 저울을 반대 방향으로</strong> 씀</li>
+        <li>끄는 것은 <strong>먼저 말 거는 것뿐</strong>임 — 아이가 직접 물을 때의 안전 라우팅과 출력 검사는 그대로 작동함. 선제 도움은 보호 장치가 아니라 학습 도움이라서 아이가 끌 수 있음</li>
       </ul>
 
       <!-- 원칙 2 -->
@@ -1242,6 +1263,34 @@
       <p style="font-size:13.5px; margin:8px 0 0;">문장을 한 줄씩 읽어주는 기존 방식(대조군) 대비 수치임. <strong>체류시간·턴 수가 2.5~3배로 늘었다는 점</strong>은 이 서비스의 KPI(부모·자녀의 앱 체류시간)와 직접 연결되는 지표임.</p>
       <p class="cite">⚠️ 다만 원 실험은 <strong>만 5~7세 대상(N=16)</strong>이며, 이 서비스의 주 타깃인 초중등 자녀에 그대로 적용하려면 어휘 난이도와 질문 밀도를 상향 조정하는 검증이 별도로 필요함<br>
       출처: Lee, Kim, Kim, Yun, Kim. <em>DAPIE: Interactive Step-by-Step Explanatory Dialogues to Answer Children's Why and How Questions</em>, CHI 2023, KAIST — <a href="https://dl.acm.org/doi/10.1145/3544548.3581369">dl.acm.org/doi/10.1145/3544548.3581369</a></p>
+
+      <!-- 원칙 3 -->
+      <div class="principle">
+        <div class="p-kicker">설계 원칙 ③  무엇을 말하지 않는가</div>
+        <div class="p-title">"종목 추천 금지"를 프롬프트로 부탁하지 않고 구조로 막는다</div>
+      </div>
+      <p style="font-size:14px; margin:8px 0;">어린이용 금융 챗봇에서 가장 어려운 것은 설명이 아니라 <strong>안 하는 것</strong>임. "삼성전자 오를까?", "지금 팔까?"에 답하면 교육이 아니라 <strong>투자권유</strong>가 됨. 답변 하나가 화면에 나가기까지 아래 검사를 지남.</p>
+      <table class="kv-table">
+        <tbody><tr><th>지점</th><th>하는 일</th><th>실패하면</th></tr>
+        <tr><td><strong>입력 안전</strong><br><span style="font-size:12px;color:var(--muted)">모델 호출 <b>전</b></span></td>
+            <td>위기 → 개인정보 → 유해 → 추천 → 범위 밖 순으로 분류. 추천·예측 요구는 <strong>9개 하위 의도</strong>로 나눠 고정 거절</td>
+            <td>모델과 조회 도구를 <strong>아예 호출하지 않음</strong></td></tr>
+        <tr><td><strong>근거 검증</strong></td>
+            <td>답변에 실린 종목·기록·성향 값이 승인된 데이터에 실제로 있는지 대조</td>
+            <td>답변 전체 폐기</td></tr>
+        <tr><td><strong>출력 검사 1단</strong><br><span style="font-size:12px;color:var(--muted)">결정적 룰</span></td>
+            <td>완성된 <strong>최대 3문장</strong>에 금지 표현·화면에 없는 숫자가 없는지 정규식으로 검사</td>
+            <td>승인된 안전 응답으로 교체</td></tr>
+        <tr><td><strong>출력 검사 2단</strong><br><span style="font-size:12px;color:var(--muted)">모델 판정</span></td>
+            <td>모델이 생성한 답변만 다시 읽어 <strong>추천·우열·전망·목표가·투자 매력도 단정</strong>을 재확인</td>
+            <td>판정 실패·시간 초과도 <strong>막는 쪽</strong>으로 처리</td></tr>
+      </tbody></table>
+      <ul>
+        <li><strong>2단을 넣은 근거는 측정임</strong> — 표현만 바꾼 추천 문장 12개를 1단 룰에 넣었더니 <strong>0건</strong>을 막았고, 룰을 8개 더 늘려도 재표현 5문장은 여전히 <strong>0건</strong>이었음. 2단 모델 판정은 <strong>12건 전부·5건 전부</strong>를 막았고 정상 설명 8건에서 오탐은 <strong>0건</strong>, 단건 지연은 약 1.5초임</li>
+        <li><strong>규칙 라우팅을 질문 600개로 전수 검증함</strong> — 페르소나 30종 · 질문 600개를 라우터에 통과시켜, 위험 질문이 정보 답변으로 새어나가는 비율을 <strong>6.3%에서 0.2%(1건)</strong>로 줄이면서 <strong>정상 질문 과차단은 3.3%로 유지</strong>함(안전을 위해 정상 질문까지 막는 것은 해결이 아니므로). 남은 1건은 <span class="cond">"이거 꼭 해야 돼?"</span>로, 힘들다는 신호인지 참가 규칙 질문인지 문장만으로는 구분되지 않아 <strong>의도적으로 남겨 둠</strong></li>
+        <li><strong>LLM 키는 서버에만 있음</strong> — 모델은 <strong>gpt-5.6-luna</strong>이고 브라우저가 직접 호출하지 않음. 대화 원문 대신 요청 ID·경로·차단 결과 같은 <strong>구조화된 운영 정보만</strong> 로그에 남김</li>
+        <li>이 금지는 아이를 위한 교육 원칙이면서 동시에 <strong>투자권유 규제에 대한 방어 장치</strong>임</li>
+      </ul>
     </div>
   </section>
 
