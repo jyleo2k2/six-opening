@@ -58,7 +58,9 @@ import {
   remainingPreparationMs,
 } from "./lib/response-preparation";
 import {
+  collapsedFloatingAvatarPosition,
   FLOATING_AVATAR_IDLE_ROTATION_MS,
+  FLOATING_AVATAR_RADIUS_PX,
   DISMISS_TARGET_ARMED_DIAMETER_PX,
   DISMISS_TARGET_DIAMETER_PX,
   dismissTargetPosition,
@@ -161,6 +163,7 @@ type FloatingChatDragState = {
   startX: number;
   startY: number;
   origin: FloatingChatPosition;
+  position: FloatingChatPosition;
   moved: boolean;
   // 놓는 순간 판정에 쓴다. state 로만 두면 pointerup 이 한 프레임 뒤진 값을 볼 수 있다.
   overDismiss: boolean;
@@ -206,7 +209,6 @@ const GREETING_SUGGESTED_QUESTIONS: string[] = [
 ];
 
 const PROACTIVE_BUBBLE_VISIBLE_MS = 8_000;
-const FLOATING_CHAT_RADIUS = 28;
 const HERO_AVATARS = [hero01, hero02, hero03, hero04, hero05] as const;
 const VILLAIN_AVATARS = [
   villain01,
@@ -242,8 +244,8 @@ function clampFloatingChatPosition(
   const width = prototypeScreen?.width ?? PROTOTYPE_PHONE.screenWidth;
   const height = prototypeScreen?.height ?? PROTOTYPE_PHONE.screenHeight;
   return {
-    x: Math.min(left + width - FLOATING_CHAT_RADIUS, Math.max(left + FLOATING_CHAT_RADIUS, position.x)),
-    y: Math.min(top + height - FLOATING_CHAT_RADIUS, Math.max(top + FLOATING_CHAT_RADIUS, position.y)),
+    x: Math.min(left + width - FLOATING_AVATAR_RADIUS_PX, Math.max(left + FLOATING_AVATAR_RADIUS_PX, position.x)),
+    y: Math.min(top + height - FLOATING_AVATAR_RADIUS_PX, Math.max(top + FLOATING_AVATAR_RADIUS_PX, position.y)),
   };
 }
 
@@ -486,8 +488,8 @@ export function F10ChatbotDemo({
   const [idleAvatarIndex, setIdleAvatarIndex] = useState<number | null>(null);
   const [dragAvatarIndex, setDragAvatarIndex] = useState<number | null>(null);
   const [isFloatingChatDragging, setIsFloatingChatDragging] = useState(false);
-  // 삭제 타깃에 놓아 숨긴 상태. 되살리기는 홈 화면 버튼이 맡는다 (F10 SPEC §6.1).
-  const [isChatDismissed, setIsChatDismissed] = useState(false);
+  // 삭제 타깃에 놓으면 오른쪽 가장자리에 반쯤 접힌 채 남는다. 탭하면 기본 자리로 돌아온다.
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [isOverDismissTargetNow, setIsOverDismissTargetNow] = useState(false);
   // 닫힘→열림 전이에서만 슬라이드업을 재생한다. 이미 열린 채로 openChat()이 다시
   // 불려도(예: 메시지 전송마다) 시트가 또 오르내리지 않는다.
@@ -515,10 +517,13 @@ export function F10ChatbotDemo({
   const isProactiveOff = useChatBehaviorStore((state) => state.proactiveMute.off);
 
   const currentScreen = SCREENS[screen];
-  const resolvedFloatingChatPosition = clampFloatingChatPosition(
+  const clampedFloatingChatPosition = clampFloatingChatPosition(
     floatingChatPosition ?? defaultFloatingChatPosition(prototypeScreen),
     prototypeScreen,
   );
+  const resolvedFloatingChatPosition = isChatCollapsed
+    ? collapsedFloatingAvatarPosition(prototypeScreen, clampedFloatingChatPosition.y)
+    : clampedFloatingChatPosition;
   const dismissTarget = dismissTargetPosition(prototypeScreen);
   const dismissTargetScale = prototypeScreen?.scale ?? 1;
   const bubbleOpensLeft = resolvedFloatingChatPosition.x >=
@@ -670,14 +675,6 @@ export function F10ChatbotDemo({
     };
   }, [isSheetEntering]);
 
-  // 선제 도움 말풍선은 플로팅 버튼의 같은 중심 좌표를 앵커로 쓴다 (F10 SPEC §7).
-  // 숨겨진 상태에서 신호가 오면 붙일 곳이 없으므로 버튼을 기본 자리로 되살린다.
-  useEffect(() => {
-    if (!signal) return;
-    setIsChatDismissed(false);
-    setFloatingChatPosition(null);
-  }, [signal, signalVersion]);
-
   useEffect(() => {
     if (signal !== "buyHesitation") {
       setIsBuyHesitationBubbleVisible(false);
@@ -756,6 +753,7 @@ export function F10ChatbotDemo({
       startX: event.clientX,
       startY: event.clientY,
       origin,
+      position: origin,
       moved: false,
       overDismiss: false,
     };
@@ -786,6 +784,7 @@ export function F10ChatbotDemo({
     const overDismiss =
       drag.moved && isOverDismissTarget(next, dismissTarget, dismissTargetScale);
     drag.overDismiss = overDismiss;
+    drag.position = next;
     setIsOverDismissTargetNow(overDismiss);
     setFloatingChatPosition(next);
   }
@@ -806,9 +805,12 @@ export function F10ChatbotDemo({
       setIsFloatingChatDragging(false);
     }
     if (drag.overDismiss) {
-      // 되살리기는 홈 화면 버튼이 맡는다 (F10 SPEC §6.1). 여기서는 숨기기만 한다.
-      setIsChatDismissed(true);
-      setFloatingChatPosition(null);
+      // X는 삭제가 아니라 오른쪽 가장자리에 접는 동작이다. 호스트가 화면을 바꿔도
+      // 이 컴포넌트는 유지되므로 같은 퍽 자리와 상태가 주문 단계까지 이어진다.
+      setIsChatCollapsed(true);
+      setFloatingChatPosition(
+        collapsedFloatingAvatarPosition(prototypeScreen, drag.position.y),
+      );
       setIsOpen(false);
     }
   }
@@ -816,6 +818,11 @@ export function F10ChatbotDemo({
   function handleFloatingChatClick() {
     if (suppressFloatingChatClickRef.current) {
       suppressFloatingChatClickRef.current = false;
+      return;
+    }
+    if (isChatCollapsed) {
+      setIsChatCollapsed(false);
+      setFloatingChatPosition(null);
       return;
     }
     if (signal) openProactiveChat();
@@ -1314,7 +1321,7 @@ export function F10ChatbotDemo({
         </section>
       </div>
 
-      {signal && !isChatDismissed && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
+      {signal && !isChatCollapsed && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
         <aside
           aria-live="polite"
           className="fixed z-20"
@@ -1355,7 +1362,7 @@ export function F10ChatbotDemo({
         </aside>
       )}
 
-      {isFloatingChatDragging && !isChatDismissed && (
+      {isFloatingChatDragging && !isChatCollapsed && (
         <div
           aria-hidden="true"
           // 버튼과 같은 z-index 이고 DOM 에서 먼저 그려진다 — 끌고 있는 버튼이 항상 위에 온다.
@@ -1399,21 +1406,20 @@ export function F10ChatbotDemo({
       )}
 
       <button
-        aria-label={COPY.openChat}
-        className="fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg cursor-grab active:cursor-grabbing transition-[transform,opacity] duration-150"
-        hidden={isChatDismissed}
+        aria-label={isChatCollapsed ? "키웅이 챗봇 다시 보이기" : COPY.openChat}
+        className={`fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg transition-[transform,opacity] duration-150 ${isChatCollapsed ? "cursor-pointer opacity-90" : "cursor-grab active:cursor-grabbing"}`}
         onClick={handleFloatingChatClick}
-        onPointerCancel={finishFloatingChatDrag}
-        onPointerDown={handleFloatingChatPointerDown}
-        onPointerMove={handleFloatingChatPointerMove}
-        onPointerUp={finishFloatingChatDrag}
+        onPointerCancel={isChatCollapsed ? undefined : finishFloatingChatDrag}
+        onPointerDown={isChatCollapsed ? undefined : handleFloatingChatPointerDown}
+        onPointerMove={isChatCollapsed ? undefined : handleFloatingChatPointerMove}
+        onPointerUp={isChatCollapsed ? undefined : finishFloatingChatDrag}
         style={{
           bottom: "auto",
           left: resolvedFloatingChatPosition.x,
           top: resolvedFloatingChatPosition.y,
-          // 타깃 위에서는 작아지고 흐려져 "놓으면 사라진다"를 미리 보여준다.
+          // 타깃 위에서는 작아지고 흐려져 "놓으면 접힌다"를 미리 보여준다.
           transform: `translate(-50%, -50%) scale(${isOverDismissTargetNow ? 0.72 : 1})`,
-          opacity: isOverDismissTargetNow ? 0.55 : 1,
+          opacity: isOverDismissTargetNow ? 0.55 : undefined,
         }}
         type="button"
       >

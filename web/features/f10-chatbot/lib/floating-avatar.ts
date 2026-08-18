@@ -2,9 +2,10 @@ import { PROTOTYPE_PHONE, type PrototypeScreenRect } from "./bottom-sheet";
 
 export const FLOATING_AVATAR_IDLE_ROTATION_MS = 3 * 60 * 1_000;
 export const FLOATING_AVATAR_DRAG_THRESHOLD_PX = 4;
+export const FLOATING_AVATAR_RADIUS_PX = 28;
 
 // ── 삭제 타깃 ───────────────────────────────────────────────────────────────
-// 드래그 중에만 화면 하단 가운데에 나타나는 동그라미 X. 버튼을 그 위에 놓으면 사라진다.
+// 드래그 중에만 화면 하단 가운데에 나타나는 동그라미 X. 버튼을 그 위에 놓으면 가장자리에 접힌다.
 
 /** 타깃 지름. 버튼(56px)보다 커야 겨냥이 쉽다 */
 export const DISMISS_TARGET_DIAMETER_PX = 64;
@@ -35,6 +36,23 @@ export function dismissTargetPosition(screen: PrototypeScreenRect | null): Float
   return {
     x: screen.left + screen.width / 2,
     y: screen.top + screen.height - DISMISS_TARGET_BOTTOM_OFFSET_PX * screen.scale,
+  };
+}
+
+/** X 타깃에 놓은 뒤 버튼 중심을 화면 오른쪽 경계에 붙인다. 반쪽은 화면 clip에 가려진다. */
+export function collapsedFloatingAvatarPosition(
+  screen: PrototypeScreenRect | null,
+  y: number,
+): FloatingPoint {
+  const left = screen?.left ?? 0;
+  const top = screen?.top ?? 0;
+  const width = screen?.width ?? PROTOTYPE_PHONE.screenWidth;
+  const height = screen?.height ?? PROTOTYPE_PHONE.screenHeight;
+  const radius = FLOATING_AVATAR_RADIUS_PX * (screen?.scale ?? 1);
+
+  return {
+    x: left + width,
+    y: Math.min(top + height - radius, Math.max(top + radius, y)),
   };
 }
 

@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  collapsedFloatingAvatarPosition,
   DISMISS_TARGET_ARMED_DIAMETER_PX,
   DISMISS_TARGET_BOTTOM_OFFSET_PX,
   DISMISS_TARGET_SNAP_RADIUS_PX,
   dismissTargetPosition,
+  FLOATING_AVATAR_RADIUS_PX,
   FLOATING_AVATAR_DRAG_THRESHOLD_PX,
   FLOATING_AVATAR_IDLE_ROTATION_MS,
   hasFloatingAvatarDragStarted,
@@ -50,6 +52,24 @@ test("an empty avatar set is rejected", () => {
 });
 
 const screen = { left: 100, top: 40, width: 402, height: 874, scale: 1 };
+
+test("접힌 퍽은 MTS 화면 오른쪽 경계에 반쯤 걸린다", () => {
+  assert.deepEqual(collapsedFloatingAvatarPosition(screen, 400), {
+    x: 100 + 402,
+    y: 400,
+  });
+});
+
+test("접힌 퍽의 세로 자리는 화면 안에 남는다", () => {
+  assert.equal(
+    collapsedFloatingAvatarPosition(screen, -100).y,
+    screen.top + FLOATING_AVATAR_RADIUS_PX,
+  );
+  assert.equal(
+    collapsedFloatingAvatarPosition(screen, 2_000).y,
+    screen.top + screen.height - FLOATING_AVATAR_RADIUS_PX,
+  );
+});
 
 test("삭제 타깃은 MTS 화면의 아래 가운데에 놓인다", () => {
   assert.deepEqual(dismissTargetPosition(screen), {
