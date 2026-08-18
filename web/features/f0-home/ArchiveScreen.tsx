@@ -29,7 +29,7 @@ import {
   type WeekCard,
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
-import { closedWeekRows, seasonReport, thisSeasonWeeks } from "./lib/archive-season";
+import { lastSeasonRows, seasonReport, thisSeasonWeeks } from "./lib/archive-season";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
@@ -49,8 +49,9 @@ import { PhoneFrame } from "./PhoneFrame";
  *
  * **가족 성향 리포트도 Supabase 다**(2026-08-17, 2026-08-18 시즌 이름 변경). `/api/family`
  * 가 구성원마다 주차 카드를 함께 주고, `이번 시즌`은 그 전체를(진행 중인 이번 주 포함),
- * `지난 시즌`은 `archive-season.ts` 가 끝난 주만 골라 편다. 예전에 있던 4주 표본 픽스처는
- * 지웠다 — 되짚을 주가 없으면 빈 자리 문구를 세우고 가짜 값을 그리지 않는다.
+ * `지난 시즌`은 `archive-season.ts` 가 지난 시즌의 끝난 주만 골라 편다 — 그런 주가 아직
+ * 없으면 같은 파일의 데모 4주가 선다 — 지금 DB 에는 이번 시즌 기록뿐이라 그러지 않으면
+ * 그 탭이 늘 빈 자리 문구 한 줄이다. **기록이 있으면 데모는 안 쓴다.**
  * **`이번 시즌`에서 구성원을 누르면 그 사람의 주차별 흐름이 펼쳐진다** — `지난 시즌`
  * 카드의 `주차별` 펼침과 같은 모양이고 `thisSeasonWeeks`(`archive-season.ts`)가 편다.
  *
@@ -505,11 +506,12 @@ export function ArchiveScreen({
   const sheetPicks = buildTypePicks(sheetCard?.type.key ?? null, universe, quotes);
 
   /**
-   * 지난 시즌 — 서버가 구성원마다 준 주차 카드에서 **끝난 주만** 골라 되짚는다.
-   * 되짚을 것이 없으면 `null` 이고 그 자리에는 빈 자리 문구가 선다.
+   * 지난 시즌 — 서버가 구성원마다 준 주차 카드에서 **지난 시즌의 끝난 주만** 골라
+   * 되짚는다. 그런 주가 하나도 없으면 데모 4주가 대신 선다(`lastSeasonRows`).
+   * 구성원 자체가 없을 때만 `null` 이고 그 자리에는 빈 자리 문구가 선다.
    */
   const last = useMemo(
-    () => seasonReport(closedWeekRows(data.family?.members ?? [])),
+    () => seasonReport(lastSeasonRows(data.family?.members ?? [])),
     [data.family?.members],
   );
   const lastShown = last?.members.filter((m) => lastPick === "all" || m.key === lastPick) ?? [];

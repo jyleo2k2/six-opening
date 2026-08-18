@@ -19,7 +19,15 @@ import {
   weekCards,
   type FamilyRow,
 } from "./archive-profile-view";
-import { closedWeekRows, seasonReport, seasonTypeOf, thisSeasonWeeks } from "./archive-season";
+import {
+  closedWeekRows,
+  demoLastSeasonRows,
+  lastSeasonRows,
+  previousSeasonWindow,
+  seasonReport,
+  seasonTypeOf,
+  thisSeasonWeeks,
+} from "./archive-season";
 
 // ── 성향: 원본은 season-cards 누적 카드 하나다 ──────────────────────────────
 const card = {
@@ -416,6 +424,45 @@ assert.equal(
   }])),
   null,
 );
+
+// ── 지난 시즌 데모 4주 ────────────────────────────────────────────────────
+// 2026-08-18 은 시즌 3 의 16일째다. 지난 시즌은 그 앞 4주(7/6~8/2)여야 한다.
+const NOW_2026_08_18 = Date.parse("2026-08-18T12:00:00+09:00");
+const lastWindow = previousSeasonWindow(NOW_2026_08_18);
+assert.equal(lastWindow.start, "2026-07-06");
+assert.deepEqual(lastWindow.weeks.map((w) => w.label), [
+  "7/6 – 7/12", "7/13 – 7/19", "7/20 – 7/26", "7/27 – 8/2",
+]);
+
+// DB 에 지난 시즌 주차가 없으므로(이번 시즌 기록뿐) 데모 4주가 선다.
+const demo = lastSeasonRows(seasonMembers, NOW_2026_08_18);
+assert.deepEqual(demo.map((r) => r.name), seasonMembers.map((m) => m.name));
+for (const row of demo) {
+  assert.deepEqual(row.weeks.map((w) => w.label), lastWindow.weeks.map((w) => w.label));
+  // 요청의 핵심 — 한 사람의 네 주가 서로 다른 유형이다.
+  assert.equal(new Set(row.weeks.map((w) => w.type)).size, 4);
+}
+// 사람끼리도 같은 주에 같은 유형이 아니다 — 회전 시작 자리가 사람마다 다르다.
+assert.equal(new Set(demo.map((r) => r.weeks[0].type)).size, demo.length);
+// 오각형이 사람마다 달라야 겹쳐 보는 그림이 성립한다 — 순서만 바꾼 회전이면 평균이 같아진다.
+assert.equal(new Set(demo.map((r) => r.scores.join(","))).size, demo.length);
+// 같은 입력이면 늘 같은 값이다 — 새로 고칠 때마다 지난 시즌이 바뀌면 되짚을 수가 없다.
+assert.deepEqual(demoLastSeasonRows(seasonMembers, lastWindow), demo);
+
+const demoReport = seasonReport(demo);
+assert.ok(demoReport);
+// 네 주가 다 다르면 최빈이 없다 — `topOf` 가 첫 주 유형으로 가른다(브라우저마다 다르면 안 된다).
+assert.equal(demoReport.members[0].trend, "주차별로 보면 탐험가 → 승부사 → 전략가 → 저격수 순서였어요.");
+assert.equal(demoReport.members[0].title, "지난 시즌 성향 · 탐험가");
+
+// 진짜 지난 시즌 주차가 있으면 데모를 쓰지 않는다.
+const realLast = lastSeasonRows([{
+  id: 7, name: "지난시즌", role: "child",
+  weeks: [{ weekStart: "2026-07-06", label: "7/6 – 7/12", status: "closed", count: 4, card: weekCard("strategist", 6) }],
+}], NOW_2026_08_18);
+assert.deepEqual(realLast[0].weeks.map((w) => w.label), ["7/6 – 7/12"]);
+// 구성원이 없으면 데모도 없다 — 빈 자리 문구가 서야 한다.
+assert.deepEqual(lastSeasonRows([], NOW_2026_08_18), []);
 
 // ── 이번 시즌: 지난 시즌(closedWeekRows)과 달리 진행 중인 이번 주도 포함한다 ─────
 const thisSeason = thisSeasonWeeks(seasonMembers[0]);
