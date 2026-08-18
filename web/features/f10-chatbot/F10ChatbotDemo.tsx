@@ -330,20 +330,23 @@ function MessageBubble({
           프로필은 헤더가 아니라 답변 위에 이름표와 한 줄로 선다 — 헤더에 한 번만 두면 대화가
           길어질수록 누가 말하는지가 스크롤 밖으로 밀려난다.
 
-          아바타(32)는 `-mt-4` 로 이름줄 위로 16 올라가 **아래 절반만 이름줄에 걸친다.**
-          음수 위 여백이 flex 항목의 바깥 높이를 16 으로 줄이므로 이름줄은 글씨 높이를
-          유지하고 동그라미만 위로 삐져나온다. 목록의 `pt-4`(16)가 그 삐져나온 만큼을 이미
-          비워 두므로 첫 답변에서도 잘리지 않는다.
+          세로 자리는 두 값이 나눠 맡는다. `-mt-6`(24)은 **레이아웃**을 맡아 40 짜리 아바타의
+          바깥 높이를 글씨 높이(16)로 줄인다 — 이름줄이 얼굴만큼 두꺼워지지 않으니 아래
+          말풍선이 밀려 내려가지 않는다. `top-2`(8)는 **보이는 자리**만 맡아 동그라미를 8
+          내려 말풍선 위끝에 살짝 걸치게 한다.
+
+          그래서 이름줄 위로 삐져나오는 양은 40 - 16 - 8 = 16 이고, 목록의 `pt-4`(16)가 그
+          만큼을 이미 비워 두므로 첫 답변에서도 잘리지 않는다.
         */}
         {!userMessage && (
           <div className="flex items-end gap-2">
             <img
               alt=""
               aria-hidden="true"
-              className="-mt-4 size-8 shrink-0 rounded-full object-cover"
-              height={32}
+              className="relative top-2 -mt-6 size-10 shrink-0 rounded-full object-cover"
+              height={40}
               src={avatarSrc}
-              width={32}
+              width={40}
             />
             <span className="text-xs font-semibold text-ink/70">
               {COPY.botName}
@@ -354,14 +357,14 @@ function MessageBubble({
           className={
             userMessage
               ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
-              : "mt-1.5 ml-10 rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
+              : "mt-1.5 ml-12 rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
           }
         >
           {message.text}
         </p>
-        {/* 후속 칩·버튼은 아바타 폭(32)과 간격(8)만큼 들여써 말풍선 왼끝에 맞춘다. */}
+        {/* 후속 칩·버튼은 아바타 폭(40)과 간격(8)만큼 들여써 말풍선 왼끝에 맞춘다. */}
         {!userMessage && (
-          <div className="pl-10">
+          <div className="pl-12">
             {uiAction && (
               <button
                 className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy disabled:opacity-50"
