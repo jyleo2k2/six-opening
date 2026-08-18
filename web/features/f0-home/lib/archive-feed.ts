@@ -1,4 +1,4 @@
-import { CHANGES, choiceOf, PLANS, REASONS, SELL_REASONS } from "../../../shared/data/trade-copy.js";
+import { choiceOf, PLANS, REASONS, SELL_REASONS } from "../../../shared/data/trade-copy.js";
 import { basisTimeText } from "./home-view";
 import { won } from "./portfolio-view";
 import { faceOf, type FamilyRow } from "./archive-profile-view";
@@ -204,8 +204,8 @@ export const FEED_PER_MEMBER = 2;
  * `holdings` 로 거른 뒤라 한 페이지가 여섯 장을 못 채울 수 있다. 화면은 **여섯 장이 찰
  * 때까지만** 다음 페이지를 부른다(`ArchiveScreen` 의 `loadMoreOnScroll`).
  *
- * 매수는 보유 계획과 목표가를, 매도는 계획 준수 여부와 변경 이유를 덧붙인다(F2 SPEC §7.1).
- * 예전에는 `memo` 에 이유 코드를 그대로 넣어 카드에 `buy_news` 가 찍혔다 — 이제 진짜 메모가 온다.
+ * 카드 본문은 피드에 올릴 때 쓴 글(`feed_body`)뿐이다. 매수의 보유 계획·목표가는 오른쪽
+ * 회색 판(`sideLabel`·`sideValue`)이, 고른 이유는 `shortMent` 가 따로 든다.
  */
 export function feedCards(
   trades: FamilyTrade[],
@@ -260,13 +260,6 @@ export function feedCards(
       const date = new Date(trade.tradedAt);
       const reason = choiceOf(sell ? SELL_REASONS : REASONS, trade.reasonCode ?? null);
       const plan = !sell && trade.planCode ? choiceOf(PLANS, trade.planCode) : null;
-      const change =
-        sell && trade.planChangedReason ? choiceOf(CHANGES, trade.planChangedReason) : null;
-      const planText = plan
-        ? ` ${plan.short} 가지려고 했어.` +
-          (trade.planTargetPrice ? ` 목표 ${won(trade.planTargetPrice)}.` : "")
-        : (sell && trade.planMatch === true ? " 계획대로 팔았어." : "") +
-          (change ? ` 계획을 바꿨어 — ${change.label}` : "");
       const like = likes[trade.id];
       const poseKey =
         member.role === "child" ? "child" : /아빠|부/.test(member.name || "") ? "dad" : "mom";
@@ -323,18 +316,17 @@ export function feedCards(
         pnlColor: pnl === null || pnl === 0 ? "#9CA1B4" : pnl > 0 ? UP : DOWN,
         shortMent: reason ? reason.short : sell ? "팔았어" : "담았어",
         /**
-         * 본문은 **피드에 올린 글로 시작하고**, 그 뒤에 계획 문장이 붙는다.
+         * 본문은 **피드에 올릴 때 쓴 글 하나뿐이다**(`feed_body`).
          *
-         * 예전에는 메모(없으면 고른 이유)를 그 자리에 넣었다. 이제는 `feed_body` 하나가
-         * 원본이다 — 거래가 저절로 피드가 되지 않으므로 여기 설 글은 사람이 쓴 것뿐이고,
-         * 옮겨 오기 전 기록에는 그때 보이던 문장을 그대로 담아 뒀다(2026-08-17 마이그레이션).
-         * 옛 응답이 섞여 들어올 때만 메모·이유로 되돌아간다.
+         * 주문할 때 남긴 메모·고른 이유·계획 문장을 뒤에 이어 붙이지 않는다 — 피드에
+         * 올리는 화면이 "가족에게 남길 말" 을 따로 받는데, 그 뒤에 며칠 전 주문 화면에서
+         * 고른 문구가 저절로 따라붙으면 자기가 쓰지도 않은 말이 자기 글로 읽힌다
+         * (2026-08-18 유저 확정). 계획·이유는 오른쪽 회색 판(`sideValue`·`shortMent`)에
+         * 이미 제 자리로 나와 있다.
          *
-         * 빈 조각이 이어 붙어 생기는 앞뒤 공백은 여기서 턴다 — 카드가 한 칸 들여 쓴 것처럼 보였다.
+         * 앞뒤 공백은 여기서 턴다 — 카드가 한 칸 들여 쓴 것처럼 보였다.
          */
-        text: `${
-          trade.feedBody || trade.memo || (reason ? `${reason.short} 결정했어.` : "")
-        }${planText}`.trim(),
+        text: (trade.feedBody ?? "").trim(),
         liked: Boolean(like?.liked),
         likeCount: Number(like?.count ?? 0),
         comments: (comments[trade.id] ?? []).map((comment) => ({
