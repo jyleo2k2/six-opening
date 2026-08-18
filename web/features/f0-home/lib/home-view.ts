@@ -223,7 +223,7 @@ export type HomeView = {
   rateColor: string;
   /** 가운데 큰 그림. 수익률 방향과 `goalCount` 가 목표 그림과 무드 그림을 가른다(`moodArt`). */
   moodImg: string;
-  /** 그 그림에 걸 확대 배율. 무드 그림의 캐릭터를 목표 그림 캐릭터와 같은 높이로 맞춘다. */
+  /** 그 그림에 걸 확대 배율. 캔버스가 아니라 **캐릭터** 높이를 맞춘다(`moodArt`). */
   moodScale: number;
   /** 헤더 프로필 옆 "○○ 총자산". 총자산 금액이 수익금액처럼 읽히지 않게 이름을 붙인다. */
   totalAssetsLabel: string;
@@ -252,9 +252,9 @@ export const MOOD_SAD_IMG = "/ui/assets/mascot-bull-bear-sad.png";
  *   goal-dad       368×655 · 그림 353×411
  *   bull-flat      722×722 · 그림 417×499      bull-bear-sad  542×722 · 그림 473×356
  *
- * 무드 그림은 투명 여백이 훨씬 넓다. 고정 상자에 `contain` 만 하면 맞춰지는 것은 **캔버스**라,
- * 여백이 넓을수록 캐릭터가 작게 선다 — 손실 그림은 아이 목표 그림의 63% 크기였다. 같은
- * 자리에서 그림만 바뀌는데 캐릭터가 갑자기 쪼그라들면 화면이 한 번 더 주저앉아 보인다.
+ * 고정 상자에 `contain` 만 하면 맞춰지는 것은 **캔버스**라, 투명 여백이 넓을수록 캐릭터가
+ * 작게 선다 — 손실 그림은 아이 목표 그림의 63%, 아빠 목표 그림은 엄마 것의 86% 크기였다.
+ * 같은 자리에 서는 그림끼리 캐릭터만 쪼그라들면 화면이 한 번 더 주저앉아 보인다.
  */
 const ART_HEIGHT_RATIO: Record<string, number> = {
   "/ui/assets/goal-child.png": 509 / 654,
@@ -262,6 +262,23 @@ const ART_HEIGHT_RATIO: Record<string, number> = {
   "/ui/assets/goal-dad.png": 411 / 655,
   [MOOD_FLAT_IMG]: 499 / 722,
   [MOOD_SAD_IMG]: 356 / 722,
+};
+
+/**
+ * 보합·손실 그림이 설 캐릭터 높이 비율. 240px 상자에서 187px 이고 **역할을 타지 않는다** —
+ * 세 계정이 같은 그림을 쓰는 자리라 크기까지 같아야 같은 그림으로 읽힌다.
+ */
+const MOOD_ART_RATIO = 509 / 654;
+
+/**
+ * 목표 그림 중 캐릭터를 키울 것과 그 목표 높이. 여기 없는 그림은 원본 크기 그대로 선다.
+ *
+ * 아빠 그림만 위아래 여백이 244px 라(아이 145px·엄마 175px) 그냥 두면 캐릭터가 151px 로,
+ * 엄마 176px 옆에서 혼자 작다. 그림을 다시 내보내지 않고 이 표로 되돌린다 — 여백 규격을
+ * 사람이 지키게 하는 대신 원본 비율만 위 표에 적으면 되기 때문이다.
+ */
+const GOAL_ART_TARGET: Record<string, number> = {
+  "/ui/assets/goal-dad.png": 479 / 654, // 엄마 목표 그림 캐릭터 높이
 };
 
 /**
@@ -282,9 +299,10 @@ const ART_HEIGHT_RATIO: Record<string, number> = {
  * 방향은 `rate` 원값이 아니라 `Trend` 로 받는다 — 화면이 `+0.0%` 를 회색으로 적는 순간
  * 그림만 웃고 있으면 숫자·색·그림이 서로 다른 말을 한다(`pctTrend`).
  *
- * `scale` 은 무드 그림의 **캐릭터를 그 계정의 목표 그림 캐릭터와 같은 높이로** 키우는 값이다.
- * 기준이 계정마다 다르므로(아이 187px·엄마 176px·아빠 151px) 배율도 역할을 탄다 — 아빠는
- * 목표 그림 쪽이 작아서 1 보다 작아진다. 상자 크기가 아니라 그림 크기를 맞추는 게 목적이다.
+ * `scale` 은 상자가 아니라 **캐릭터**를 맞추는 값이다. 보합·손실 그림은 세 계정 모두 187px
+ * (`MOOD_ART_RATIO`), 목표 그림은 원본 크기 그대로 서되 아빠 것만 엄마와 같은 176px 로
+ * 키운다(`GOAL_ART_TARGET`). 키운 그림의 캔버스는 240px 상자를 넘지만 넘치는 것은 투명
+ * 여백뿐이라 캐릭터는 잘리지 않는다 — 그 검산이 `home-view.test.ts` 에 있다.
  *
  * 그림을 하나 더 얹지 않고 이 자리를 갈아 끼우는 이유는, 오른 상태에서 목표 그림과
  * 같은 황소가 크게 한 번 작게 한 번 두 번 나왔던 적이 있기 때문이다(2026-08-16 되돌림).
@@ -295,13 +313,21 @@ export function moodArt(
   /** 목표 아이템을 몇 개 살 수 있나(`homeView` 의 `goalCount`). 0 이면 목표 그림을 세우지 않는다. */
   goalCount: number,
 ): { src: string; scale: number } {
-  if (trend > 0 && goalCount >= 1) return { src: goalImg, scale: 1 };
+  if (trend > 0 && goalCount >= 1) {
+    return { src: goalImg, scale: artScale(goalImg, GOAL_ART_TARGET[goalImg]) };
+  }
   const src = trend < 0 ? MOOD_SAD_IMG : MOOD_FLAT_IMG;
-  const goalRatio = ART_HEIGHT_RATIO[goalImg];
-  const moodRatio = ART_HEIGHT_RATIO[src];
-  // 재 둔 그림이 아니면 배율을 지어내지 않는다 — 캔버스만 맞춘 예전 크기로 둔다.
-  if (!goalRatio || !moodRatio) return { src, scale: 1 };
-  return { src, scale: Math.round((goalRatio / moodRatio) * 1000) / 1000 };
+  return { src, scale: artScale(src, MOOD_ART_RATIO) };
+}
+
+/**
+ * 캔버스가 아니라 **캐릭터**를 `target` 높이 비율에 맞추는 배율.
+ * 재 두지 않은 그림에는 배율을 지어내지 않는다 — 캔버스만 맞춘 크기로 둔다.
+ */
+function artScale(src: string, target: number | undefined): number {
+  const ratio = ART_HEIGHT_RATIO[src];
+  if (!ratio || !target) return 1;
+  return Math.round((target / ratio) * 1000) / 1000;
 }
 
 /**
