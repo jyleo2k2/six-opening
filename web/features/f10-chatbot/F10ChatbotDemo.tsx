@@ -330,25 +330,31 @@ function MessageBubble({
           프로필은 헤더가 아니라 답변 위에 이름표와 한 줄로 선다 — 헤더에 한 번만 두면 대화가
           길어질수록 누가 말하는지가 스크롤 밖으로 밀려난다.
 
-          세로 자리는 두 값이 나눠 맡는다. `-mt-6`(24)은 **레이아웃**을 맡아 40 짜리 아바타의
-          바깥 높이를 글씨 높이(16)로 줄인다 — 이름줄이 얼굴만큼 두꺼워지지 않으니 아래
-          말풍선이 밀려 내려가지 않는다. `top-6`(24)는 **보이는 자리**만 맡는다.
+          세로 자리는 두 값이 나눠 맡는다. 음수 위 여백은 **레이아웃**을 맡아 아바타의 flex
+          바깥 높이를 이름표 줄높이(16)로 줄인다 — 이름줄이 얼굴만큼 두꺼워지지 않으니 아래
+          말풍선이 밀려 내려가지 않는다. `top` 은 **보이는 자리**만 맡는다.
 
-          맞추는 것은 **동그라미의 가운데**다. 이름줄(높이 16)이 끝나고 말풍선이 시작하기까지
-          (`mt-1.5`, 6) 사이는 y 16~22 이고, 아바타의 가운데는 16 + 24 - 20 = 20 으로 그 틈에
-          떨어진다. 위로는 아무것도 삐져나오지 않으므로(위끝 y = 0) 첫 답변에서도 잘릴 일이
-          없다. 아래 절반은 말풍선 왼쪽 여백(x 0~40, 말풍선은 48 부터)에 걸쳐 글씨를 가리지
-          않는다.
+          맞추는 것은 **동그라미의 가운데**다. 이름줄(16)이 끝나고 말풍선이 시작하기까지
+          (`mt-1.5`, 6) 사이 틈은 y 16~22 이고, 그 가운데 19 에 중심을 놓는다.
+
+          지름 D 를 바꿀 때 따라오는 네 값은 모두 기계적으로 나온다.
+            · 위 여백  = 16 - D            (지금 D=50 → `-mt-[34px]`)
+            · top      = D / 2 + 3         (지금 `top-7` = 28)
+            · 들여쓰기 = D + 8(`gap-2`)     (지금 `ml-[58px]` · `pl-[58px]`)
+            · 위로 삐져나오는 양 = D - 16 - top. 목록의 `pt-4`(16) 안에 들어와야 잘리지
+              않는다 — 지금은 6 이다.
+
+          아래 절반은 말풍선 왼쪽 여백(x 0~D, 말풍선은 D+8 부터)에 걸치므로 글씨를 가리지 않는다.
         */}
         {!userMessage && (
           <div className="flex items-end gap-2">
             <img
               alt=""
               aria-hidden="true"
-              className="relative top-6 -mt-6 size-10 shrink-0 rounded-full object-cover"
-              height={40}
+              className="relative top-7 -mt-[34px] size-[50px] shrink-0 rounded-full object-cover"
+              height={50}
               src={avatarSrc}
-              width={40}
+              width={50}
             />
             <span className="text-xs font-semibold text-ink/70">
               {COPY.botName}
@@ -359,14 +365,14 @@ function MessageBubble({
           className={
             userMessage
               ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
-              : "mt-1.5 ml-12 rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
+              : "mt-1.5 ml-[58px] rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
           }
         >
           {message.text}
         </p>
-        {/* 후속 칩·버튼은 아바타 폭(40)과 간격(8)만큼 들여써 말풍선 왼끝에 맞춘다. */}
+        {/* 후속 칩·버튼은 아바타 폭(50)과 간격(8)만큼 들여써 말풍선 왼끝에 맞춘다. */}
         {!userMessage && (
-          <div className="pl-12">
+          <div className="pl-[58px]">
             {uiAction && (
               <button
                 className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy disabled:opacity-50"
