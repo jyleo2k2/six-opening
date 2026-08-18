@@ -114,8 +114,14 @@ const BACK = styleFromCss(
  * ⓘ 안내가 서는 층. **카드 레일(`2`)보다 위**여야 한다 — 아래에 두면 확대된 가운데
  * 카드가 안내를 덮어 무슨 말인지 보이지 않는다. 시트(`6`·`7`)보다는 낮게 둔다:
  * 시트가 올라오면 안내는 그 뒤로 가려지는 것이 맞다.
+ *
+ * **챗봇 레이어(`.phone-stage__overlay`, `4`)보다도 낮아야 한다**(2026-08-18).
+ * 화면(`#kw-screen`)은 z-index 가 `auto` 라 쌓임 맥락을 만들지 않으므로, 안의
+ * 이 값이 그대로 밖 레이어들과 경쟁한다. `5` 였을 때는 키웅이를 불러도
+ * 안내만 챗봇 시트 위에 오려서, 뒤를 어둡히는 막(`bg-navy/20`)에도 혼자 남았다.
+ * `3` 은 카드 레일보다는 위이면서 그 막 아래라 배경과 같이 어두워진다.
  */
-const INFO_Z = 5;
+const INFO_Z = 3;
 const SHEET_RATIO = 0.82;
 const SHEET_HEIGHT = PROTOTYPE_PHONE.screenHeight * SHEET_RATIO;
 /**
