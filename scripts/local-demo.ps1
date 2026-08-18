@@ -66,8 +66,10 @@ $ErrorActionPreference = 'Stop'
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $WebDir   = Join-Path $RepoRoot 'web'
-$LogDir   = Join-Path $env:TEMP 'six-opening-demo'
-$PidFile  = Join-Path $LogDir 'server.pid'
+$LogDir        = Join-Path $env:TEMP 'six-opening-demo'
+$PidFile       = Join-Path $LogDir 'server.pid'
+$TunnelPidFile = Join-Path $LogDir 'tunnel.pid'
+$TunnelLog     = Join-Path $LogDir 'tunnel.log'
 
 function Write-Step($text)  { Write-Host "`n[단계] $text" -ForegroundColor Cyan }
 function Write-Ok($text)    { Write-Host "  OK   $text" -ForegroundColor Green }
@@ -110,6 +112,39 @@ function Resolve-EnvFile($root) {
     return $null
 }
 
+# 아직 열려 있는 로그 파일을 읽는다. 쓰는 쪽이 잡고 있으므로 공유 모드로 열어야 한다.
+function Read-SharedText($path) {
+    if (-not [System.IO.File]::Exists($path)) { return '' }
+    try {
+        $stream = New-Object System.IO.FileStream(
+            $path,
+            [System.IO.FileMode]::Open,
+            [System.IO.FileAccess]::Read,
+            [System.IO.FileShare]::ReadWrite)
+        $reader = New-Object System.IO.StreamReader($stream)
+        $text = $reader.ReadToEnd()
+        $reader.Dispose()
+        $stream.Dispose()
+        return $text
+    } catch {
+        return ''
+    }
+}
+
+# 기록해 둔 pid 하나만 종료한다. 이름으로 훑어 죽이면 사용자가 따로 띄운 터널까지 끊는다.
+function Stop-TrackedProcess($pidPath, $label) {
+    if (-not [System.IO.File]::Exists($pidPath)) { return }
+    $savedPid = ([System.IO.File]::ReadAllText($pidPath)).Trim()
+    if ($savedPid) {
+        $p = Get-Process -Id $savedPid -ErrorAction SilentlyContinue
+        if ($p) {
+            Stop-Process -Id $savedPid -Force -Confirm:$false -ErrorAction SilentlyContinue
+            Write-Ok "$label 종료 (PID $savedPid)"
+        }
+    }
+    [System.IO.File]::Delete($pidPath)
+}
+
 function Get-ListenerPid($portNumber) {
     $conn = Get-NetTCPConnection -LocalPort $portNumber -State Listen -ErrorAction SilentlyContinue
     if ($conn) { return @($conn)[0].OwningProcess }
@@ -121,26 +156,12 @@ function Stop-Demo {
     # $env:TEMP 는 보통 8.3 단축 이름(예: KDA35~1)을 포함한다. Remove-Item 은 그 `~` 를
     # 홈 경로로 해석해 -LiteralPath 를 줘도 PSArgumentException 을 낸다. 파일 조작은
     # 경로를 해석하지 않는 .NET API 로 처리한다.
-    if ([System.IO.File]::Exists($PidFile)) {
-        $savedPid = ([System.IO.File]::ReadAllText($PidFile)).Trim()
-        if ($savedPid) {
-            $p = Get-Process -Id $savedPid -ErrorAction SilentlyContinue
-            if ($p) {
-                Stop-Process -Id $savedPid -Force -Confirm:$false -ErrorAction SilentlyContinue
-                Write-Ok "앱 서버 종료 (PID $savedPid)"
-            }
-        }
-        [System.IO.File]::Delete($PidFile)
-    }
+    Stop-TrackedProcess $TunnelPidFile '터널'
+    Stop-TrackedProcess $PidFile '앱 서버'
     $listener = Get-ListenerPid $Port
     if ($listener) {
         Stop-Process -Id $listener -Force -Confirm:$false -ErrorAction SilentlyContinue
         Write-Ok "$Port 포트 점유 프로세스 종료 (PID $listener)"
-    }
-    $tunnels = Get-Process cloudflared -ErrorAction SilentlyContinue
-    if ($tunnels) {
-        $tunnels | Stop-Process -Force -Confirm:$false -ErrorAction SilentlyContinue
-        Write-Ok "cloudflared 종료"
     }
     Write-Host ''
 }
@@ -234,12 +255,19 @@ if ($SkipBuild) {
 } else {
     Write-Step '빌드 (next build)'
     Push-Location $WebDir
+    # next build 는 Turbopack 경고를 stderr 로 쓴다. 위의 $ErrorActionPreference='Stop'
+    # 아래에서 그 출력이 파이프를 타면 NativeCommandError 가 종료 오류가 돼 빌드가
+    # 성공했는데도 스크립트가 죽는다. 성공 여부는 $LASTEXITCODE 로만 판단한다.
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
     try {
         npm run build
-        if ($LASTEXITCODE -ne 0) { Write-Fail "빌드 실패 (exit $LASTEXITCODE)"; return }
+        $buildExit = $LASTEXITCODE
     } finally {
+        $ErrorActionPreference = $previousPreference
         Pop-Location
     }
+    if ($buildExit -ne 0) { Write-Fail "빌드 실패 (exit $buildExit)"; return }
     Write-Ok '빌드 완료'
 }
 
@@ -314,26 +342,51 @@ if (-not $Quic) { $cfArgs += @('--protocol', 'http2') }
 
 Write-Host ''
 Write-Host '터널을 여는 중. 주소가 나오면 아래에 크게 표시된다.' -ForegroundColor Cyan
-Write-Host '이 창을 닫거나 Ctrl+C 를 누르면 시연이 끝난다.' -ForegroundColor DarkGray
 Write-Host ''
+
+# cloudflared 는 안내문까지 전부 stderr 로 쓴다. PowerShell 5.1 에서 네이티브 exe 에
+# `2>&1` 을 걸면 로그 한 줄이 통째로 ErrorRecord 로 감싸져 빨간 NativeCommandError 로
+# 찍히고, 위의 $ErrorActionPreference='Stop' 과 만나면 주소가 나오기도 전에 파이프라인이
+# 끊긴다. 그래서 앱 서버와 같이 프로세스로 띄우고 로그 파일을 읽는다.
+[System.IO.File]::WriteAllText($TunnelLog, '')
+$tunnel = Start-Process -FilePath $cf `
+    -ArgumentList $cfArgs `
+    -PassThru -NoNewWindow `
+    -RedirectStandardOutput (Join-Path $LogDir 'tunnel.out.log') `
+    -RedirectStandardError $TunnelLog
+[System.IO.File]::WriteAllText($TunnelPidFile, [string]$tunnel.Id)
 
 $publicUrl = $null
 try {
-    & $cf @cfArgs 2>&1 | ForEach-Object {
-        $line = $_.ToString()
-        if ((-not $publicUrl) -and ($line -match 'https://[a-z0-9-]+\.trycloudflare\.com')) {
+    for ($i = 0; $i -lt 120; $i++) {
+        Start-Sleep -Milliseconds 500
+        if ($tunnel.HasExited) { break }
+        $log = Read-SharedText $TunnelLog
+        if ($log -match 'https://[a-z0-9-]+\.trycloudflare\.com') {
             $publicUrl = $matches[0]
-            Write-Host ''
-            Write-Host '  =========================================================' -ForegroundColor Green
-            Write-Host '   공개 주소 - 폰에서 이걸 열어라' -ForegroundColor Green
-            Write-Host '  =========================================================' -ForegroundColor Green
-            Write-Host "   $publicUrl" -ForegroundColor White
-            Write-Host ''
-            Write-Host '   확인: 로그인 화면 -> 로그인 -> 탐색 탭 가격이 5초마다 움직이는지' -ForegroundColor DarkGray
-            Write-Host ''
+            break
         }
-        Write-Host $line -ForegroundColor DarkGray
     }
+
+    if (-not $publicUrl) {
+        Write-Fail '터널 주소를 받지 못했다.'
+        Write-Host "       로그: $TunnelLog" -ForegroundColor Yellow
+        return
+    }
+
+    Write-Host '  =========================================================' -ForegroundColor Green
+    Write-Host '   공개 주소 - 폰에서 이걸 열어라' -ForegroundColor Green
+    Write-Host '  =========================================================' -ForegroundColor Green
+    Write-Host "   $publicUrl" -ForegroundColor White
+    Write-Host ''
+    Write-Host '   확인: 로그인 화면 -> 로그인 -> 탐색 탭 가격이 5초마다 움직이는지' -ForegroundColor DarkGray
+    Write-Host "   터널 로그: $TunnelLog" -ForegroundColor DarkGray
+    Write-Host ''
+    Write-Host '   Ctrl+C 를 누르거나 이 창을 닫으면 시연이 끝난다.' -ForegroundColor Cyan
+    Write-Host ''
+
+    while (-not $tunnel.HasExited) { Start-Sleep -Seconds 2 }
+    Write-Note '터널이 종료됐다.'
 } finally {
     Stop-Demo
 }
