@@ -138,22 +138,33 @@ function turnStep(
   };
 }
 
+/** 진단형 선택지에는 아이가 모를 때 고를 수 있는 카드를 항상 붙인다. */
+function withUnsureChoice(choices: readonly ExplainChoice[]) {
+  return choices.some((choice) => choice.id === UNSURE_CHOICE.id)
+    ? choices
+    : [...choices, UNSURE_CHOICE];
+}
+
 /**
- * brief 단계의 진단형 퀴즈(guiding 아님)에는 "잘 모르겠어요"를 항상 붙인다.
- * guiding 스크립트는 "더 쉽게 볼래요"가 이미 같은 역할을 한다.
+ * guiding 스크립트는 "더 쉽게 볼래요"가 같은 역할을 하므로 제외한다.
+ * 진단형 스크립트는 brief뿐 아니라 오답 뒤 detail을 다시 물을 때도
+ * "잘 모르겠어요"를 유지해야 한다.
  */
+function detailChoices(script: ExplainScript) {
+  if (script.check.kind === "guiding") return GUIDED_DETAIL_CHOICES;
+  return withUnsureChoice(script.adjust?.choices ?? CONFIRM_CHOICES);
+}
+
 function stageChoices(script: ExplainScript, stage: ExplainReply["stage"]) {
   if (stage === "brief") {
     return script.check.kind === "guiding"
       ? script.check.choices
-      : [...script.check.choices, UNSURE_CHOICE];
+      : withUnsureChoice(script.check.choices);
   }
   if (stage === "followup") {
     return [...relatedTermChoices(script.id, RELATED_CARD_LIMIT), ...FOLLOWUP_CHOICES];
   }
-  return script.check.kind === "guiding"
-    ? GUIDED_DETAIL_CHOICES
-    : script.adjust?.choices ?? CONFIRM_CHOICES;
+  return detailChoices(script);
 }
 
 function reaskChoices(script: ExplainScript, stage: ExplainReply["stage"]) {
@@ -283,14 +294,14 @@ export function advanceExplain(
             "detail",
             `${FEEDBACK.unsure} ${script.adjust.explanation}`,
             script.adjust.question,
-            script.adjust.choices,
+            detailChoices(script),
           )
         : turnStep(
             script,
             "detail",
             `${FEEDBACK.unsure} ${script.detail}`,
             CONFIRM_PROMPT,
-            CONFIRM_CHOICES,
+            detailChoices(script),
           );
     }
     if (reply.choiceId === script.check.answerId) {
@@ -316,7 +327,7 @@ export function advanceExplain(
         "detail",
         `${FEEDBACK.wrong} ${script.adjust.explanation}`,
         script.adjust.question,
-        script.adjust.choices,
+        detailChoices(script),
       );
     }
     return turnStep(
@@ -324,15 +335,12 @@ export function advanceExplain(
       "detail",
       `${FEEDBACK.wrong} ${script.detail}`,
       CONFIRM_PROMPT,
-      CONFIRM_CHOICES,
+      detailChoices(script),
     );
   }
 
   if (reply.stage === "detail") {
-    const choices =
-      script.check.kind === "guiding"
-        ? GUIDED_DETAIL_CHOICES
-        : script.adjust?.choices ?? CONFIRM_CHOICES;
+    const choices = detailChoices(script);
     if (
       reply.choiceId !== "unsure" &&
       !choices.some((choice) => choice.id === reply.choiceId)
@@ -361,7 +369,7 @@ export function advanceExplain(
         "detail",
         `${FEEDBACK.example} ${script.example}`,
         script.adjust.question,
-        script.adjust.choices,
+        detailChoices(script),
         (reply.reaskCount ?? 0) + 1,
       );
     }

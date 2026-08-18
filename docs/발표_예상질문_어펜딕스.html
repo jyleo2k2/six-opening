@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영웅 키움 — 발표 예상 Q&amp;A · Appendix 후보</title>
+<style>
+  :root{
+    --navy:#0B2B5B; --magenta:#F5327F; --ink:#1A2233; --gray:#E5E8EF;
+    --bg:#F7F8FB; --warn:#B3261E; --ok:#0F7B4F; --muted:#5A6478;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:84px}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:400 15px/1.7 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  header.top{
+    position:sticky; top:0; z-index:10; background:var(--navy); color:#fff;
+    padding:14px 24px; box-shadow:0 2px 10px rgba(11,43,91,.18);
+  }
+  header.top h1{margin:0; font-size:18px; font-weight:800; letter-spacing:-.2px}
+  header.top p{margin:3px 0 0; font-size:12px; color:#C9D6EC}
+  .tools{display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap}
+  .tools input{
+    flex:1 1 260px; min-width:200px; padding:7px 11px; border:0; border-radius:8px;
+    font:inherit; font-size:13px;
+  }
+  .tools a{
+    color:#fff; text-decoration:none; font-size:12px; font-weight:600;
+    background:rgba(255,255,255,.14); padding:6px 10px; border-radius:7px; white-space:nowrap;
+  }
+  .tools a:hover{background:rgba(255,255,255,.26)}
+  main{max-width:1080px; margin:0 auto; padding:28px 24px 80px}
+  section{
+    background:#fff; border:1px solid var(--gray); border-radius:14px;
+    padding:24px 26px; margin:0 0 22px;
+  }
+  h2{
+    margin:0 0 6px; font-size:20px; font-weight:800; color:var(--navy);
+    letter-spacing:-.3px;
+  }
+  h2 .num{
+    display:inline-grid; place-items:center; width:26px; height:26px; margin-right:9px;
+    background:var(--navy); color:#fff; border-radius:8px; font-size:13px; vertical-align:2px;
+  }
+  h3{margin:26px 0 10px; font-size:15px; font-weight:800; color:var(--navy)}
+  h3:first-of-type{margin-top:18px}
+  .lede{margin:0 0 4px; color:var(--muted); font-size:13.5px}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13.5px}
+  th,td{border:1px solid var(--gray); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:#F1F4FA; font-weight:700; color:var(--navy); font-size:12.5px}
+  td code, p code, li code{
+    background:#F1F4FA; padding:1px 5px; border-radius:4px;
+    font-family:ui-monospace,"Cascadia Mono",Consolas,monospace; font-size:.9em;
+  }
+  .qa{border-left:3px solid var(--gray); padding:0 0 0 16px; margin:0 0 20px}
+  .qa:last-child{margin-bottom:0}
+  .qa.new{border-left-color:var(--magenta)}
+  .qa .q{font-weight:800; color:var(--navy); margin:0 0 6px; font-size:14.5px}
+  .qa .a{margin:0 0 6px}
+  .qa .src{margin:0; font-size:12px; color:var(--muted)}
+  .tag{
+    display:inline-block; font-size:11px; font-weight:700; padding:1px 7px;
+    border-radius:20px; vertical-align:1px; margin-left:6px; white-space:nowrap;
+  }
+  .t-new{background:#FDE7F0; color:var(--magenta)}
+  .t-fix{background:#FBE9E7; color:var(--warn)}
+  .t-ok{background:#E4F4EC; color:var(--ok)}
+  .t-hold{background:#EEF0F6; color:var(--muted)}
+  .callout{
+    background:#FFF7F9; border:1px solid #F8C9DC; border-left:4px solid var(--magenta);
+    border-radius:10px; padding:14px 16px; margin:14px 0; font-size:13.5px;
+  }
+  .callout.warn{background:#FFF5F4; border-color:#F3C6C2; border-left-color:var(--warn)}
+  .callout strong{color:var(--navy)}
+  ul{margin:8px 0; padding-left:20px}
+  li{margin:4px 0}
+  .meta{font-size:12px; color:var(--muted); margin:18px 0 0; border-top:1px solid var(--gray); padding-top:12px}
+  .hidden{display:none !important}
+  .nores{display:none; padding:16px; color:var(--muted); font-size:13.5px}
+  @media print{
+    header.top{position:static; box-shadow:none}
+    .tools{display:none}
+    body{background:#fff; font-size:11pt}
+    main{max-width:none; padding:0}
+    section{border:0; border-top:1.5px solid var(--gray); border-radius:0; padding:14px 0; margin:0; break-inside:auto}
+    .qa{break-inside:avoid}
+    table{font-size:9.5pt}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>영웅 키움 — 발표 예상 Q&amp;A · Appendix 후보</h1>
+  <p>정리 2026-08-18 · 기준: 통합문서 v2 · 중간발표 대본 v2 · <code>web/</code> 실제 코드 · 컴플라이언스 8쟁점 v1</p>
+  <div class="tools">
+    <input id="filter" type="search" placeholder="질문·키워드로 거르기 (예: 도박, 자문업, 회귀, 51종)" autocomplete="off">
+    <a href="#s1">① 정정</a>
+    <a href="#s2">② 예상 Q&amp;A</a>
+    <a href="#s3">③ 한계</a>
+    <a href="#s4">④ Appendix</a>
+    <a href="#s5">⑤ 데모 불일치</a>
+  </div>
+</header>
+
+<main>
+
+<section id="s0">
+  <h2>TL;DR</h2>
+  <p class="lede">Q&amp;A 자산은 이미 두 곳에 있다 — 통합문서 v2 §23(11문항)과 중간발표 대본 v2 말미(7문항). 손볼 것은 세 가지다.</p>
+  <ul>
+    <li><strong>대본 쪽 답변 4건이 폐기된 기능을 방어 논리로 쓰고 있다</strong>(확신도 슬라이더 · 친화도 스코어). 오답은 무답보다 나쁘다 → §1</li>
+    <li><strong>가장 강한 기술 방어 카드가 어느 Q&amp;A에도 없다</strong> — F10 안전 회귀 303건 + 분포 게이트가 PR마다 상시 실행된다 → §2 AIX</li>
+    <li><strong>Appendix는 새로 만들 게 거의 없다.</strong> 리포에 있는 문서 자산 12종을 옮기면 된다 → §4</li>
+  </ul>
+  <div class="callout">
+    <strong>표기 규칙</strong> — 프로젝트 문서 관례를 따른다. <strong>[사실]</strong> 검증된 것 · <strong>[추론]</strong> 근거 있는 판단 · <strong>[가정]</strong> 초기 운영값·미검증. 발표에서 [추론]·[가정]을 [사실]처럼 말하지 않는다.
+  </div>
+</section>
+
+<section id="s1">
+  <h2><span class="num">1</span>즉시 정정할 기존 답변</h2>
+  <p class="lede">지금 대본대로 답하면 화면에 없는 기능을 설명하게 된다. 실물 시연이 붙어 있어 바로 들킨다.</p>
+  <table>
+    <thead><tr><th style="width:34%">스테일 답변</th><th style="width:33%">현행 확정</th><th>근거</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>"확신도 슬라이더로 표현"<br><span class="src">대본 슬라이드 7 + Q&amp;A 2건</span></td>
+        <td><strong>확신도 입력은 없다.</strong> 매수는 이유 6종 + 보유계획 4종, 매도는 이유 6종 + 계획 준수 기록</td>
+        <td>통합문서 §10 · 기능명세 §5.1</td>
+      </tr>
+      <tr>
+        <td>"친화도 스코어(ML)"<br><span class="src">대본 슬라이드 8·11 + Q&amp;A 2건</span></td>
+        <td>폐기. <strong>5능력치 · 4캐릭터 · 정확 레벨 룰 엔진</strong>으로 대체 (<code>shared/engine/behavior-profile.ts</code>)</td>
+        <td>통합문서 §11.2 · §22</td>
+      </tr>
+      <tr>
+        <td>"매도 후 30분 재매수 제한"을 도박 방어 논거로 사용</td>
+        <td><strong>미구현 [잠정].</strong> 말하려면 "설계값이며 데모에는 미적용"으로 구분</td>
+        <td>통합문서 §10 거래 규칙 · §14-6</td>
+      </tr>
+      <tr>
+        <td>"화이트리스트 50개"</td>
+        <td><strong>51종</strong> (자동 산출 49 + 수기 편입 2)</td>
+        <td>통합문서 §10</td>
+      </tr>
+      <tr>
+        <td>§23 성향 답변의 "체결 5거래일 뒤 종가"</td>
+        <td>로그인 엔진은 <strong>2거래일</strong>. 5거래일·0~100 산식은 폐기된 폴백</td>
+        <td>통합문서 §11.2 · 기능명세 §7</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <strong>스쿨락 주의</strong> — §23의 "장 시간에는 거래를 막는다"는 기획으로는 맞지만 <strong>데모는 꺼져 있다</strong>(<code>SCHOOL_LOCK_ENABLED = false</code>). 잠금 창(평일 09:00~15:30)이 정규장 창과 정확히 같아서, 켜 두면 자녀 계정으로 즉시 체결을 시연할 시간대가 아예 없기 때문이다. 질문이 오면 <strong>"기획 정책이며, 시연을 위해 데모에서는 해제"</strong>로 구분해 답한다. <span class="src">기능명세 §4.4</span>
+  </div>
+  <p class="src">대본 v2 정합화는 PR #439 <code>codex/이재용/발표대본-정합</code>에서 진행 중이다. 이 표는 그 PR과 같은 내용을 발표자 관점으로 다시 적은 것이다.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="num">2</span>예상 Q&amp;A — 심사 축별</h2>
+  <p class="lede">기존 §23·대본 문항은 유지하고, 비어 있는 자리를 채운다. <span class="tag t-new">신규</span>는 어느 문서에도 답이 없던 질문이다.</p>
+
+  <h3>AIX팀 — 여기가 제일 비어 있다</h3>
+
+  <div class="qa new">
+    <p class="q">Q. 챗봇 안전성을 어떻게 검증했나? <span class="tag t-new">신규</span></p>
+    <p class="a">아이 질문 회귀 세트 <strong>303건</strong>을 CI가 PR마다 돌린다. 세 세트가 서로 다른 축을 본다 — <code>questions-v2</code> 97건(신규 기능 영역), <code>questions-v3</code> 172건(같은 취지·다른 표현), <code>questions-v4</code> <strong>34건(적대적 우회 — 오타·자모 파괴·역할 사칭·복합 의도)</strong>. 여기에 legacy 600건에서 <strong>차단 분포 하한</strong>(<code>refusal + safety ≥ 258</code>)을 깨면 실행기가 exit 1 하고 CI가 실패한다.</p>
+    <p class="a"><strong>개별 케이스가 아니라 분포로 막는 이유</strong>는, 트리거를 넓히는 작업의 위험이 과차단이 아니라 <strong>과소차단</strong>이기 때문이다. 케이스 목록만 지키면 목록 밖 표현이 조용히 새 나간다.</p>
+    <p class="src">근거: 기능명세 §9.1 · <code>records/f10-child-sim/run-regression.ts</code> · 커버리지 리포트(페르소나 30종·600문항)</p>
+  </div>
+
+  <div class="qa new">
+    <p class="q">Q. 환각이나 수치 조작은 어떻게 막나? <span class="tag t-new">신규</span></p>
+    <p class="a">세 겹이다. ① <strong>엔진-LLM 분리</strong> — 수치는 전부 룰 엔진과 API 값이고 LLM은 수치를 만들지 않는다. ② <strong>출력 2단 필터</strong> — 1단은 정규식·키워드 결정적 룰, 2단은 모델이 만든 답변에만 도는 Luna 판정. ③ <strong>버퍼 후 전송</strong> — 스트림 델타를 서버 버퍼에 모아 3문장·출처·권한·수치 기준으로 검증한 뒤 완성문만 내보낸다. 판정 실패·시간 초과는 닫힌 실패로 처리해 고정 응답으로 대체한다.</p>
+    <p class="a"><strong>2단을 붙인 근거는 실측이다</strong> — 같은 의미를 다른 표현으로 쓴 추천·전망 문장을 1단 룰은 <strong>0/12</strong> 차단했고 룰을 8개 늘려도 <strong>0/5</strong>였다. Luna 판정은 12/12·5/5를 차단하고 정상 설명 8건은 오탐 0건이었다.</p>
+    <p class="src">근거: 통합문서 §13 · 기술스택 LLM 구현 규칙</p>
+  </div>
+
+  <div class="qa new">
+    <p class="q">Q. 왜 OpenAI인가, 비용은? <span class="tag t-new">신규</span></p>
+    <p class="a"><code>gpt-5.6-luna</code> 단일화 — 입력 $0.20 / 출력 $1.20 per 1M 토큰, 컨텍스트 105만. 프로바이더 추상화를 만들지 않고 모델 ID를 <code>shared/llm</code> 상수 하나로 고정했다. 대화는 <code>reasoning: low</code>·<code>max_output_tokens 800</code>으로 무대 지연을 줄였다. <strong>외부 LLM 국외 처리 고지는 컴플라이언스 쟁점 2로 이미 식별해 뒀다</strong> — 몰라서 안 한 게 아니라 법무 질의 목록에 올라가 있다.</p>
+    <p class="src">근거: 기술스택 LLM 단일화 · 컴플라이언스 쟁점 2</p>
+  </div>
+
+  <div class="qa new">
+    <p class="q">Q. 대화 원문을 저장하지 않으면 안전 감사는 어떻게 하나? <span class="tag t-new">신규</span></p>
+    <p class="a">원문 대신 <strong>구조화 운영 로그</strong>를 남긴다 — 입력 분류, 라우팅 경로, 조회 종류, 필터 결과, 선제 신호. 무엇이 왜 차단됐는지는 재구성되고 아이가 무슨 말을 했는지는 남지 않는다. 대화 목록은 브라우저 <code>sessionStorage</code>에만 최근 40건 있고 탭을 닫으면 사라진다. 이 형태를 정한 것은 F10 SPEC §11의 "대화 원문을 저장·전달하지 않는다"다.</p>
+    <p class="src">근거: 통합문서 §12 · F10 SPEC §11 · 기능명세 §6.1</p>
+  </div>
+
+  <div class="qa new">
+    <p class="q">Q. DAPIE 근거가 만 5~7세 N=16인데 초등 고학년에 그대로 쓰나? <span class="tag t-new">신규</span></p>
+    <p class="a"><strong>먼저 시인하는 게 유리하다.</strong> DAPIE는 CHI 2023, 참가자 N=16(만 5~7세)이고 결과는 즉시 이해도 <strong>7.43 vs 5.13</strong>(12점 만점, p&lt;0.05), 상호작용 시간 <strong>7.03분 vs 2.80분</strong>, 평균 <strong>20턴 vs 7턴</strong>이다. 표본 크기와 연령대가 우리 타깃(초4~초6)과 다르다는 것이 <strong>이 근거의 한계이며 PoC-2에서 상향 검증할 항목</strong>이다. 차용한 것은 효과 크기가 아니라 <strong>대화 구조</strong>(피드백→설명→질문 3단, 오답 시 정답을 주지 않고 더 쉬운 질문으로 분기)다.</p>
+    <p class="src">근거: DAPIE_논문_추출.md §6 · 통합문서 §12 B-2 · §19</p>
+  </div>
+
+  <h3>인사이트랩 — 데이터 · 프라이버시</h3>
+
+  <div class="qa new">
+    <p class="q">Q. 성향 카드에 종목 3개를 보여주면 그게 추천 아닌가? <span class="tag t-new">신규 · 나올 확률 높음</span></p>
+    <p class="a">§21 레드라인의 금지 대상은 <strong>AI가 만든 발화</strong>다. 이 목록은 화면이 갖는 고정 표본이고 LLM은 어느 경로로도 종목 이름을 말하지 않는다. 예외로 인정되는 <strong>네 조건을 전부 지킬 때만</strong> 유지한다 — ① AI 발화 아님 ② 목표가·매매 시점·수익률 전망 없음(이름·업종·현재가·등락까지) ③ 참고용임을 밝히고 매수 전 이유 입력으로 연결 ④ 유형이 아직 없으면 목록을 내지 않음.</p>
+    <p class="a"><strong>여기서 멈추지 말고 한 문장 더 붙인다</strong> — "자문업 해석 소지는 법무 검토 중이고[추론], 검토에서 뒤집히면 시트를 되돌립니다." 방어만 하면 방어처럼 들리고, 되돌릴 조건까지 말하면 절차로 들린다.</p>
+    <p class="src">근거: 통합문서 §21 예외 · §11.2 · §15</p>
+  </div>
+
+  <div class="qa">
+    <p class="q">Q. 매수 3건으로 성향을 판정하나?</p>
+    <p class="a">3건 미만이면 <strong>단정하지 않는다</strong> — 캐릭터와 레벨을 정하지 않고 '관찰 중'으로 둔다. 축은 중립값에서 시작하고 폐기된 구버전 산식으로 되짚지 않는다. 캐릭터에는 우열이 없고 유형 라벨은 주간 갱신이라 고정 낙인이 되지 않는다.</p>
+    <p class="src">근거: 통합문서 §11.2 · 기능명세 §7</p>
+  </div>
+
+  <div class="qa">
+    <p class="q">Q. 행동 데이터를 어디까지 모으고, 부모에게 무엇을 보여주나?</p>
+    <p class="a"><strong>상호 열람만</strong>이다 — 자녀도 부모의 거래 기록과 근거를 똑같이 본다. 단방향이면 감시가 되고, 감시로 인식되는 순간 아이의 근거 태깅이 방어적으로 바뀌어 데이터 품질이 함께 망가진다. <strong>챗봇 대화 원문과 행동 데이터는 부모에게 전달하지 않는다.</strong> 타인 카드의 수량·체결가는 서버 응답 단계에서 마스킹하고, 부모 코멘트의 추천·타이밍·훈계·채점 표현은 저장 전에 서버가 차단한다.</p>
+    <p class="src">근거: 통합문서 §11.4 · §21 · 기능명세 §8</p>
+  </div>
+
+  <h3>플랫폼전략 — 사업</h3>
+
+  <div class="qa">
+    <p class="q">Q. 토스가 이미 하고 있지 않나?</p>
+    <p class="a">토스는 <strong>부모 화면에서 자녀 계좌를 관리</strong>하는 축이고, 우리는 <strong>자녀가 직접 하는 경험</strong> + 행동 비교 AI 레이어다. 더 중요한 건 시장 구조다 — 증권계좌는 앱만 새로 까는 게 아니라 보유 주식과 현금을 실제로 옮겨야 해서 좀처럼 이관하지 않는다. 그래서 승부처가 "빼앗아 오기"가 아니라 <strong>"처음 선택될 때 선택받기"</strong>이고, 미성년·청소년기가 <strong>전환 비용이 사실상 0인 유일한 구간</strong>이다.</p>
+    <p class="src">근거: 통합문서 §5.1 · A-경쟁사검증 §0</p>
+  </div>
+
+  <div class="qa">
+    <p class="q">Q. 수익모델이 계좌 개설뿐인가?</p>
+    <p class="a">단기는 미성년 계좌 신설률(참가 조건에 개설이 포함되므로 직접 연결), 중장기는 <strong>부모 유저의 방문 빈도·체류시간</strong>이다. 분기마다 아카이브와 리포트가 생성되는 구조가 부모를 반복해 불러들이는 재소환 장치다. 여기에 부모 대상 <strong>로보마켓 프리미엄 체험권 → 유료 전환</strong> 경로가 붙는다.</p>
+    <p class="src">근거: 통합문서 §14 · §18</p>
+  </div>
+
+  <div class="qa new">
+    <p class="q">Q. 부모가 자녀 계정으로 대신 매매하면 데이터가 무의미해지지 않나? <span class="tag t-new">신규 · 현재 답 없음</span></p>
+    <p class="a">개인별 지갑을 쓰는 이유 자체가 부모 주도 방지라, 역으로 찔러오기 좋은 질문이다. 준비된 논거 두 개 <strong>[추론]</strong> — ① 시상이 수익률 1등만이 아니라 <strong>행동 부문</strong>으로 나뉘어 대리 매매의 유인이 희석된다. ② 질문식 기록과 성향 축적은 <strong>본인 데이터일 때만 가치가 생긴다</strong> — 대신 눌러 주면 아이의 아카이브가 부모의 성향으로 채워지고, 그건 이 서비스가 부모에게 주려는 것과 정반대다.</p>
+    <p class="a">기술적 완전 차단은 하지 않는다고 <strong>먼저 인정</strong>하는 편이 낫다. 가정 안에서 계정을 넘겨주는 것을 앱이 막을 방법은 없다.</p>
+    <p class="src">근거: 통합문서 §8 개인별 지갑 · §7 KPI 이원화 [추론 — 새로 정리한 논거]</p>
+  </div>
+
+  <h3>컴플라이언스</h3>
+
+  <div class="qa">
+    <p class="q">Q. 경품이 사행성 아닌가?</p>
+    <p class="a"><strong>"검토했냐"가 아니라 "법무에 물을 질문을 이미 써 뒀다"로 받는다.</strong> 8쟁점 자체 검토에서 경품 규제를 <strong>우선순위 1 · 발표 전 필수</strong>로 지정했다 — 미성년자 · 수익률 경쟁 · 실계좌 · 입금 연계 보상이 한 번에 결합되기 때문이다. 데모는 실지급이 없고, 8쟁점 전부 "법무 검토 필요, 결론 미확정" 상태를 유지한다. 현재 방어(필터·서버 분리·가상 지갑·본인 범위 조회)는 <strong>위험 저감 근거로 쓰되 적법성 결론으로 쓰지 않는다</strong>고 문서에 못박아 뒀다.</p>
+    <p class="src">근거: 컴플라이언스_8쟁점_검토_v1 우선순위 종합표 · 결론 상태</p>
+  </div>
+
+  <div class="qa">
+    <p class="q">Q. 애들한테 주식 도박을 가르치는 것 아닌가?</p>
+    <p class="a">FCA 9,000명+ 실험에서 포인트·경품은 거래 +12%·위험거래 +6%p였고, OSC는 "게임화 자체가 아니라 <strong>보상 대상</strong>이 문제"라고 정리했다. 그래서 방어를 보상이 아닌 구조에 뒀다 — ① 모의투자라 실손실 없음 ② 위험상품 원천 배제(검증된 51종) ③ 질문식 매매가 주문 플로우에 내장 ④ 챗봇은 종목이 아니라 기준을 가르치고 추천 요구는 거절 ⑤ 성향 리포트가 수익률 아닌 <strong>스타일 서사</strong>를 매주 제공 ⑥ 일간 수익률 푸시 없음 ⑦ 유형 라벨 주간 갱신, 실력 채점·등급 없음.</p>
+    <p class="a"><span class="tag t-fix">정정</span> 기존 6번의 "매도 후 30분 재매수 제한"은 <strong>[잠정] 설계값이고 데모에 없다.</strong> 방어 목록에서 빼거나 미적용을 밝히고 말한다.</p>
+    <p class="src">근거: 통합문서 §14 · FCA/OSC 출처 §24</p>
+  </div>
+
+  <h3>기존 §23 유지 문항 (통합문서 v2)</h3>
+  <table>
+    <thead><tr><th style="width:38%">질문</th><th>답변 골자</th></tr></thead>
+    <tbody>
+      <tr><td>고등학교 입시 이탈 공백은?</td><td>아동기 브랜드 친밀도는 공백기를 거쳐도 <strong>성인의 첫 선택에서 재소환</strong>된다 [추론]</td></tr>
+      <tr><td>왜 흥미 유발이 1차 기준인가?</td><td>안정성이 빠진 게 아니다. 지표 A(규모·섹터대표성·유동성·수익성·<strong>안정성</strong>)와 지표 B(접점등급)가 <strong>같은 점수판에서 반씩</strong> 겨룬다</td></tr>
+      <tr><td>51종을 누가 골랐나? 자의적이지 않나?</td><td>49종은 <strong>2,710 → 300 → 173 → 172 → 49</strong> 파이프라인이 고른다. 수기 2종은 표에 <code>수기</code>로 명시. 사람 판단은 "회사"가 아니라 <strong>"11개 유형에 접점등급 부여"</strong>에만 들어간다</td></tr>
+      <tr><td>경쟁 서비스인데 왜 챗봇이 필요한가?</td><td>챗봇은 경쟁이 아니라 <strong>개념 이해</strong>를 돕는다. 부모 부재 시에도 물을 대상이 필요하다</td></tr>
+      <tr><td>그냥 GPT 붙이면 되지 않나?</td><td>범용 챗봇은 <strong>아이가 먼저 질문할 수 있다</strong>는 전제 위에 선다. 저연령은 모르는 걸 모르고 그냥 앱을 닫는다 → ① 행동으로 <strong>먼저 말 걸기</strong> ② DAPIE 3단으로 <strong>되묻기</strong>. "정답 제공 금지"가 프롬프트가 아니라 <strong>대화 구조로 강제</strong>된다</td></tr>
+      <tr><td>결국 AI 활용능력 경쟁 아닌가?</td><td>전제가 어긋난다. 사용자가 체감하는 AI는 <strong>챗봇 하나</strong>이고 나머지는 백엔드 데이터 가공이다</td></tr>
+      <tr><td>학교 시간엔 어떻게 투자하나?</td><td>장중 거래를 막고 탐색·챗봇만 열되 <strong>24시간 예약 주문</strong>은 가능 <span class="tag t-fix">데모는 해제 — §1 참조</span></td></tr>
+      <tr><td>성공을 무엇으로 증명하나?</td><td>단기 미성년 계좌 신설률, 중장기 부모 방문 빈도·체류시간</td></tr>
+      <tr><td>교육인가 경쟁인가?</td><td><strong>체험·경험형</strong>. 교육 효과는 부수 효과(KPI 아님), 경쟁 구조는 재방문·체류(회사 목표에 직결)</td></tr>
+      <tr><td>투자성향은 설문인가?</td><td>설문이 아니다. 유효 탭 열람 · 보유 섹터/현금 비중 · 체결 후 <strong>2거래일</strong> 종가를 룰 엔진이 계산 <span class="tag t-fix">§23 원문의 "5거래일" 정정</span></td></tr>
+      <tr><td>부모가 기록 보는 건 감시 아닌가?</td><td><strong>상호 열람</strong>이라 자녀도 부모를 본다. 부모 코멘트는 출력 필터를 거친다 — 필터는 예의가 아니라 <strong>데이터 무결성 장치</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>기존 대본 v2 유지 문항</h3>
+  <table>
+    <thead><tr><th style="width:38%">질문</th><th>답변 골자</th></tr></thead>
+    <tbody>
+      <tr><td>실계좌 필수면 진입장벽 아닌가?</td><td>맞다 — 그래서 <strong>튜토리얼은 계좌 없이</strong> 열고 정식 참가에만 실계좌를 요구한다. 클로징의 피드백 요청 지점</td></tr>
+      <tr><td>AI가 종목 추천하면 자문업 아닌가?</td><td>추천·시점·가격·전망 전면 금지 + 출력 2단 필터. <strong>금지가 곧 규제 방어 장치</strong></td></tr>
+      <tr><td>가족마다 인원이 다른데 공정한가?</td><td>가족 성적은 구성원 수익률 <strong>평균</strong>으로 산정</td></tr>
+      <tr><td>질문식 매매가 번거롭지 않나?</td><td>매수는 <strong>이유 1탭 + 보유계획 1탭</strong>, 매도는 '사던 날의 나' 확인 후 이유 1탭. 계획과 다르게 팔 때만 변경 이유가 추가된다 <span class="tag t-fix">확신도 슬라이더 삭제 반영</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="s3">
+  <h2><span class="num">3</span>물으면 시인할 한계</h2>
+  <p class="lede">감추면 하나가 들킬 때 전부가 의심받는다. 먼저 말할 목록을 정해 둔다.</p>
+  <table>
+    <thead><tr><th style="width:32%">항목</th><th>어떻게 말할 것인가</th></tr></thead>
+    <tbody>
+      <tr><td>수수료·세금 미계산</td><td>데모 범위 밖. 계산하지 않는다고 화면에 드러내는 편이 정확한 수익률처럼 보이는 것보다 낫다</td></tr>
+      <tr><td>지정가 자동 체결 없음</td><td>지정가는 접수·예약까지다. 장외 시장가는 다음 거래일 시가로 정산된다</td></tr>
+      <tr><td>시즌 자동 리셋 없음</td><td>운영 스크립트 범위. 기획은 4주 × 연 4회</td></tr>
+      <tr><td>가입 마법사는 목업</td><td><strong>결함이 아니라 확정된 범위다.</strong> 계정은 콘솔에서 만들고 앱 안에 가입 저장 경로를 두지 않는다</td></tr>
+      <tr><td>스쿨락 해제</td><td>기획 정책이며 시연을 위해 껐다. 잠금 창이 정규장 창과 같아 켜면 즉시 체결 시연이 불가능하다</td></tr>
+      <tr><td>키움 REST API 모의투자 지원 범위</td><td><strong>[확인 필요]</strong> — 앱키 발급 절차와 함께 미확정. 시세는 프로바이더 실패 시 Supabase 보관 캔들 → 코드 픽스처로 내려가는 폴백이 있어 발표 중 죽지 않는다</td></tr>
+      <tr><td><code>profiles.login_password</code> 평문</td><td>데모 한정. 물어보지 않으면 먼저 꺼내지 않되, 보안 질문이 오면 숨기지 않는다</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="s4">
+  <h2><span class="num">4</span>Appendix 후보 12종</h2>
+  <p class="lede">전부 리포에 이미 있는 문서 자산이다. 새로 쓰는 게 아니라 <strong>옮기는</strong> 작업이다.</p>
+  <table>
+    <thead><tr><th style="width:4%">#</th><th style="width:26%">항목</th><th style="width:22%">원본</th><th>실을 이유 · 핵심 수치</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>51종 산출 파이프라인 전체표</td><td>통합문서 §10</td><td>"자의적이지 않냐"의 실물 증거. <strong>2,710 → 300 → 173 → 172 → 49 + 수기 2</strong>, 지표 A/B 항목, 300개 전건 "편입 또는 제외+사유"</td></tr>
+      <tr><td>2</td><td>경쟁사 검증 대장 22건</td><td>A-경쟁사검증.md</td><td>갭 주장의 출처. 확인/부분확인/미발견 라벨 + 2차 재검증. <strong>신한 = 1순위 추격자</strong>, StockTrak 25% 집중도 상한·매매노트 의무화 선례</td></tr>
+      <tr><td>3</td><td>컴플라이언스 8쟁점 우선순위표 + 법무 질의문</td><td>컴플라이언스_8쟁점_검토_v1</td><td>규제 질문의 결정타 한 장. 발표 전 필수 3건(경품·미성년 개인정보·투자자문 경계) + 쟁점별 법무 질의</td></tr>
+      <tr><td>4</td><td>DAPIE 실험 수치 + F10 적용 매핑 + 한계 고지</td><td>DAPIE_논문_추출.md</td><td>챗봇이 논문 기반임을 증명. 이해도 <strong>5.13→7.43</strong>(12점), 체류 <strong>2.80→7.03분</strong>, 턴 <strong>7→20</strong>, N=16 만 5~7세 한계 병기</td></tr>
+      <tr><td>5</td><td>F10 안전 회귀 구성 + 커버리지 리포트</td><td>기능명세 §9.1 · 커버리지리포트</td><td><strong>유일하게 아직 발표 자산화가 안 된 강점.</strong> 303건 3세트 + 600건 분포 게이트(≥258) + PR마다 CI. 실제 통과 누수 38건 → <strong>1건(0.2%)</strong></td></tr>
+      <tr><td>6</td><td>AI 분리 구조도 + 챗봇 라우팅 플로우</td><td>통합문서 §12C · §13</td><td>기술 완성도 축. 서버 전용 호출, 2단 출력 필터, 닫힌 실패</td></tr>
+      <tr><td>7</td><td>행동 프로필 산식표</td><td>통합문서 §11.2</td><td>"설문 아니냐" 방어. 5능력치 공식 · 4캐릭터 판정 · <strong>3건 미만 보류</strong> · 정확 레벨 1/3·2/3 경계</td></tr>
+      <tr><td>8</td><td>레드라인 "하지 않는 것" 13항</td><td>통합문서 §21</td><td>안전 포지셔닝 한 장 요약. 예외 1건(성향 카드 종목 목록)과 네 조건까지 함께 실어야 정직해진다</td></tr>
+      <tr><td>9</td><td>게임화 방어 7종 + FCA·OSC 근거</td><td>통합문서 §14</td><td>도박 질문 대비. FCA 9,000명+ 거래 +12%·위험거래 +6%p, OSC "보상 대상이 문제". <strong>6번은 [잠정] 표기 필수</strong></td></tr>
+      <tr><td>10</td><td>시장 수치 · 출처 링크 전체</td><td>통합문서 §5.1 · §24</td><td>수치 출처 명기 원칙 이행. 미성년 계좌 3사 <strong>11,873 → 34,590좌</strong>, 미성년 주주 <strong>72만 8,344명 · 약 2조 9,761억원</strong></td></tr>
+      <tr><td>11</td><td>선제 발화 채택 3종 + <strong>기각 6종과 사유</strong></td><td>통합문서 §12B<br>+ F10 SPEC §7.1 (§5 주의)</td><td>"절제 설계"의 증거 — <strong>기각 목록이 오히려 설득력이 있다</strong>. 주문 수량 반복 수정 · 매도 확인 이탈·지정가 취소 · 차트 기간 반복 변경 · 여러 종목 빠른 조회 · 순위·손실 확인 후 주문 · 주문 오류 반복. 사유는 "정상 탐색과 구분 불가" 또는 "감시 느낌"</td></tr>
+      <tr><td>12</td><td>데모 골든 패스 8단계 + 서버 API 실측</td><td>기능명세 §9 · 기술스택</td><td>구현 완성도. 로그인 → 탐색 → 상세 10초 → 챗봇 → 주문 → 예약 취소 → 아카이브 반응 → 재접속 로그인</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <strong>선택지</strong> — 어린이 뉴스 3역할 파이프라인과 모델 벤치마크(<code>docs/어린이뉴스_모델별_비교.md</code>, <code>records/child-news-harness/</code>)도 자산이 있다. <strong>발표에서 뉴스 기능을 다룰 때만</strong> 넣는다. 다루지 않을 거면 빼는 편이 낫다 — 설명하지 않은 기능의 부록은 "왜 이건 안 보여줬지"를 부른다.
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="num">5</span>문서와 데모가 어긋나는 지점</h2>
+  <p class="lede">Appendix에 문서를 그대로 옮기면 <strong>화면에 없는 것을 부록이 증명해 버린다.</strong> 옮기기 전에 이 네 곳을 고친다.</p>
+  <table>
+    <thead><tr><th style="width:24%">지점</th><th style="width:30%">문서가 말하는 것</th><th>코드가 하는 것</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>선제 발화 3번</strong><br><span class="src">Appendix #11 직결</span></td>
+        <td>통합문서 §12B: <strong>-10% 이하 손실 실현 후 5분 안에 같은 종목 4회 재진입</strong></td>
+        <td>구현된 세 번째 신호는 <strong><code>orderMethodConfusion</code> — 같은 주문 흐름에서 시장가·지정가 3회 교차 변경</strong>이다. 손실 후 재진입 신호는 코드에 없다. <strong>F10 SPEC §7이 코드와 맞는 쪽</strong>이므로 부록은 SPEC을 원본으로 쓴다</td>
+      </tr>
+      <tr>
+        <td>매수 단계 표기</td>
+        <td>"매수 <strong>5/5</strong> 최종 확인 화면"</td>
+        <td>현재 매수는 <strong>3단계</strong>(수량·방식 → 이유 → 보유계획)이고 이탈 감지는 2단계 뒤로가기다. "5/5"는 옛 화면의 표기</td>
+      </tr>
+      <tr>
+        <td>선제 발화 문구</td>
+        <td>"살지 말지 고민돼?" / "어디에서 막혔는지 같이 볼까?"</td>
+        <td>실제 문구는 해요체 — "살지 말지 고민돼요?" · "뭐가 다른지 볼까요?" · "어디가 헷갈려요?"</td>
+      </tr>
+      <tr>
+        <td>스쿨락</td>
+        <td>§23: 장중 거래를 막는다</td>
+        <td><code>SCHOOL_LOCK_ENABLED = false</code> — 꺼진 것이 현재 결정이다 (기능명세 §4.4)</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <strong>시연 중 이 질문이 나오면</strong> — "선제 도움은 어떤 순간에 뜨나요?"에 <strong>-10% 손실 재진입</strong>이라고 답하면, 그 자리에서 재현해 보일 수 없다. 무대에서 재현 가능한 것은 <strong>시장가·지정가 3회 교차</strong>다. 답변과 시연을 같은 신호로 맞춘다.
+  </div>
+</section>
+
+<p class="meta">
+  출처 문서: <code>docs/영웅키움_기획_통합문서_v2.md</code> · <code>docs/영웅키움_중간발표_대본_v2.md</code> · <code>docs/컴플라이언스_8쟁점_검토_v1.md</code> · <code>docs/A-경쟁사검증.md</code> · <code>docs/DAPIE_논문_추출.md</code> · <code>docs/F10_아이질문_시뮬레이션_커버리지리포트.md</code> · <code>docs/기능명세.md</code> · <code>docs/기술스택.md</code> · <code>web/features/f10-chatbot/SPEC.md</code><br>
+  §5의 코드 대조는 <code>web/shared/engine/proactive-help.ts</code> · <code>web/features/f0-home/OrderScreen.tsx</code> · <code>web/features/f0-home/lib/use-wallet.ts</code> 실측이다.
+</p>
+
+<div class="nores" id="nores">거른 조건에 맞는 항목이 없습니다.</div>
+
+</main>
+
+<script>
+  // 질의응답 중 키워드로 좁혀 보는 용도. 섹션·행·문답 단위로만 숨긴다.
+  var input = document.getElementById("filter");
+  var blocks = Array.prototype.slice.call(document.querySelectorAll(".qa, tbody tr, .callout, ul > li"));
+  var sections = Array.prototype.slice.call(document.querySelectorAll("main section"));
+  var nores = document.getElementById("nores");
+
+  input.addEventListener("input", function () {
+    var term = input.value.trim().toLowerCase();
+    blocks.forEach(function (block) {
+      block.classList.toggle("hidden", term !== "" && block.textContent.toLowerCase().indexOf(term) === -1);
+    });
+    var anyVisible = false;
+    sections.forEach(function (section) {
+      var hit = term === "" || section.textContent.toLowerCase().indexOf(term) !== -1;
+      section.classList.toggle("hidden", !hit);
+      anyVisible = anyVisible || hit;
+    });
+    nores.style.display = anyVisible ? "none" : "block";
+  });
+</script>
+
+</body>
+</html>
