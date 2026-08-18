@@ -332,18 +332,20 @@ function MessageBubble({
 
           세로 자리는 두 값이 나눠 맡는다. `-mt-6`(24)은 **레이아웃**을 맡아 40 짜리 아바타의
           바깥 높이를 글씨 높이(16)로 줄인다 — 이름줄이 얼굴만큼 두꺼워지지 않으니 아래
-          말풍선이 밀려 내려가지 않는다. `top-2`(8)는 **보이는 자리**만 맡아 동그라미를 8
-          내려 말풍선 위끝에 살짝 걸치게 한다.
+          말풍선이 밀려 내려가지 않는다. `top-6`(24)는 **보이는 자리**만 맡는다.
 
-          그래서 이름줄 위로 삐져나오는 양은 40 - 16 - 8 = 16 이고, 목록의 `pt-4`(16)가 그
-          만큼을 이미 비워 두므로 첫 답변에서도 잘리지 않는다.
+          맞추는 것은 **동그라미의 가운데**다. 이름줄(높이 16)이 끝나고 말풍선이 시작하기까지
+          (`mt-1.5`, 6) 사이는 y 16~22 이고, 아바타의 가운데는 16 + 24 - 20 = 20 으로 그 틈에
+          떨어진다. 위로는 아무것도 삐져나오지 않으므로(위끝 y = 0) 첫 답변에서도 잘릴 일이
+          없다. 아래 절반은 말풍선 왼쪽 여백(x 0~40, 말풍선은 48 부터)에 걸쳐 글씨를 가리지
+          않는다.
         */}
         {!userMessage && (
           <div className="flex items-end gap-2">
             <img
               alt=""
               aria-hidden="true"
-              className="relative top-2 -mt-6 size-10 shrink-0 rounded-full object-cover"
+              className="relative top-6 -mt-6 size-10 shrink-0 rounded-full object-cover"
               height={40}
               src={avatarSrc}
               width={40}
