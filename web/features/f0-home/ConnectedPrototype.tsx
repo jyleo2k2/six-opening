@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { ChatContext, ChatUiAction } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
 import type { OrderPrefill } from "./lib/order-view";
-import { usePhoneScreenRect } from "./PhoneFrame";
-import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
+import { PhoneFrame } from "./PhoneFrame";
+import { phoneScreenClipPath, PHONE_SCREEN_RECT } from "./lib/phone-frame";
 import type { PendingOrder } from "./lib/portfolio-view";
 import type { WalletAccountId } from "./lib/use-wallet";
 import { ArchiveScreen } from "./ArchiveScreen";
@@ -39,9 +39,8 @@ type ArchiveSheetOrigin = { sheetIndex: number };
 /**
  * 옮겨 온 화면을 그리는 호스트.
  *
- * 폰 화면 사각형은 현재 렌더된 `PhoneFrame` 안의 `#kw-screen`을 실측한다. CSS가 프레임을
- * 배율 조정하고, 이 호스트는 그 client rect를 F10·튜토리얼·상단 프레임 레이어에 그대로
- * 전달하므로 모바일 viewport 종류에 따라 별도 기하를 만들지 않는다.
+ * `PhoneFrame`을 이 호스트가 하나만 소유한다. 화면·챗봇·튜토리얼은 모두 그 프레임의
+ * transform 안에 렌더되고, 베젤은 같은 stacking context의 마지막 이미지가 덮는다.
  */
 export function ConnectedPrototype({
   route,
@@ -50,7 +49,6 @@ export function ConnectedPrototype({
   const [overlay, setOverlay] = useState<ScreenRoute | null>(route ?? null);
   /** 종목·탐색·주문 화면이 올리는 맥락. 없으면 홈으로 본다. */
   const [overlayContext, setOverlayContext] = useState<ChatContext | null>(null);
-  const screenRect = usePhoneScreenRect(overlay);
   /**
    * 튜토리얼. 오버레이를 화면 컴포넌트가 아니라 여기서 갖는 이유는 **화면을 건너다녀야**
    * 하기 때문이다 — 홈에서 켜고 탐색으로 넘어가도 설명이 따라와야 한다.
@@ -167,115 +165,103 @@ export function ConnectedPrototype({
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  const frame = phoneFrameRect(screenRect);
-
   return (
     <div className="h-dvh min-h-[640px] overflow-hidden bg-bg text-ink">
-      {overlay && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 5 }}>
-          {overlay.screen === "home" && (
-            <HomeScreen onLeave={leaveToPath} onStartTutorial={() => setTutorialOn(true)} />
-          )}
-          {overlay.screen === "archive" && (
-            <ArchiveScreen
-              account={account}
-              infoOpen={archiveInfoOpen}
-              onInfoOpenChange={setArchiveInfoOpen}
-              onLeave={leaveToPath}
-              onPickOrder={openOrderFromArchivePick}
-              reopenSheet={archiveSheetReopen}
-              view={overlay.view}
-            />
-          )}
-          {overlay.screen === "ranking" && <RankingScreen onLeave={leaveToPath} />}
-          {overlay.screen === "stock" && (
-            <DetailScreen
-              account={account}
-              closedCandleTips={closedCandleTips}
-              code={overlay.code}
-              onChatContext={setOverlayContext}
-              onCloseCandleTip={closeTip}
-              onLeave={leaveToPath}
-              onStage={setStage}
-            />
-          )}
-          {overlay.screen === "explore" && (
-            <ExploreScreen
-              account={account}
-              onChatContext={setOverlayContext}
-              onLeave={leaveToPath}
-              sector={overlay.sector}
-            />
-          )}
-          {overlay.screen === "order" && (
-            <OrderScreen
-              account={account}
-              archiveSheetOrigin={archiveSheetOrigin}
-              chatOrderRequest={chatOrderRequest}
-              code={overlay.code}
-              // 종목·방향이 바뀌면 단계·초안을 처음부터 시작한다.
-              key={`${overlay.side}-${overlay.code}`}
-              onChatContext={setOverlayContext}
-              onLeave={leaveToPath}
-              onReorder={reorderPending}
-              onReturnToArchivePicks={returnToArchivePicks}
-              onStage={setStage}
-              orderPrefill={orderPrefill}
-              side={overlay.side}
-              tutorialMode={tutorialOn}
-            />
-          )}
-        </div>
-      )}
-      <div
-        className="prototype-chat-overlay"
-        style={{ clipPath: phoneScreenClipPath(screenRect) }}
+      <PhoneFrame
+        overlay={
+          <>
+            <div
+              className="prototype-chat-overlay"
+              style={{ clipPath: phoneScreenClipPath(PHONE_SCREEN_RECT) }}
+            >
+              <F10ChatbotDemo
+                context={overlayContext ?? HOME_CONTEXT}
+                onUiAction={openChatAction}
+                screenRect={PHONE_SCREEN_RECT}
+              />
+            </div>
+            {tutorialOn && overlay && (
+              <TutorialOverlay
+                onClose={() => setTutorialOn(false)}
+                onGo={leaveToPath}
+                screenRect={PHONE_SCREEN_RECT}
+                // 매수·매도는 화면도 단계도 같아서 `side` 가 없으면 팔러 간 화면에 사는 설명이
+                // 뜬다. 어느 종목인지는 튜토리얼이 지갑을 보고 스스로 정한다.
+                place={{
+                  screen: overlay.screen,
+                  stage,
+                  side: overlay.screen === "order" ? overlay.side : undefined,
+                }}
+              />
+            )}
+          </>
+        }
       >
-        <F10ChatbotDemo
-          context={overlayContext ?? HOME_CONTEXT}
-          onUiAction={openChatAction}
-          screenRect={screenRect}
-        />
-      </div>
-      {/*
-        튜토리얼은 챗봇 오버레이 위, 프레임 아래다. 역할이 갈린다 — 코치마크는 지금 이
-        버튼이 뭘 하는지 짚어 주고, 깊은 설명은 키웅이가 맡는다.
-      */}
-      {tutorialOn && overlay && (
-        <TutorialOverlay
-          onClose={() => setTutorialOn(false)}
-          onGo={leaveToPath}
-          screenRect={screenRect}
-          // 매수·매도는 화면도 단계도 같아서 `side` 가 없으면 팔러 간 화면에 사는 설명이
-          // 뜬다. 어느 종목인지는 튜토리얼이 지갑을 보고 스스로 정한다.
-          place={{
-            screen: overlay.screen,
-            stage,
-            side: overlay.screen === "order" ? overlay.side : undefined,
-          }}
-        />
-      )}
-      {/*
-        폰 프레임을 맨 위에 한 겹 더 깐다. 챗봇 시트처럼 화면 위로 올라오는 것들은
-        `PhoneFrame` **밖**에 있어서 프레임 이미지보다 위에 그려진다. 화면 사각형으로
-        자르고 있지만 화면 라운드(40px)보다 프레임 개구부가 깊게 파여 있어 그 틈으로
-        베젤 위에 비친다. 여기 한 겹이 있으면 무엇이 올라오든 베젤이 이긴다.
-      */}
-      {frame && (
-        <img
-          alt=""
-          src="/ui/assets/iphone-frame.png"
-          style={{
-            position: "fixed",
-            left: frame.left,
-            top: frame.top,
-            width: frame.width,
-            height: frame.height,
-            zIndex: 20,
-            pointerEvents: "none",
-          }}
-        />
-      )}
+        {overlay && (
+          <>
+            {overlay.screen === "home" && (
+              <HomeScreen
+                embedded
+                onLeave={leaveToPath}
+                onStartTutorial={() => setTutorialOn(true)}
+              />
+            )}
+            {overlay.screen === "archive" && (
+              <ArchiveScreen
+                account={account}
+                embedded
+                infoOpen={archiveInfoOpen}
+                onInfoOpenChange={setArchiveInfoOpen}
+                onLeave={leaveToPath}
+                onPickOrder={openOrderFromArchivePick}
+                reopenSheet={archiveSheetReopen}
+                view={overlay.view}
+              />
+            )}
+            {overlay.screen === "ranking" && <RankingScreen embedded onLeave={leaveToPath} />}
+            {overlay.screen === "stock" && (
+              <DetailScreen
+                account={account}
+                closedCandleTips={closedCandleTips}
+                code={overlay.code}
+                embedded
+                onChatContext={setOverlayContext}
+                onCloseCandleTip={closeTip}
+                onLeave={leaveToPath}
+                onStage={setStage}
+              />
+            )}
+            {overlay.screen === "explore" && (
+              <ExploreScreen
+                account={account}
+                embedded
+                onChatContext={setOverlayContext}
+                onLeave={leaveToPath}
+                sector={overlay.sector}
+              />
+            )}
+            {overlay.screen === "order" && (
+              <OrderScreen
+                account={account}
+                archiveSheetOrigin={archiveSheetOrigin}
+                chatOrderRequest={chatOrderRequest}
+                code={overlay.code}
+                // 종목·방향이 바뀌면 단계·초안을 처음부터 시작한다.
+                embedded
+                key={`${overlay.side}-${overlay.code}`}
+                onChatContext={setOverlayContext}
+                onLeave={leaveToPath}
+                onReorder={reorderPending}
+                onReturnToArchivePicks={returnToArchivePicks}
+                onStage={setStage}
+                orderPrefill={orderPrefill}
+                side={overlay.side}
+                tutorialMode={tutorialOn}
+              />
+            )}
+          </>
+        )}
+      </PhoneFrame>
     </div>
   );
 }

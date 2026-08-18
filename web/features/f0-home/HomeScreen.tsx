@@ -9,7 +9,7 @@ import { shouldOpenSheetByPull } from "./lib/sheet-drag";
 import { accountReadAt, useAccount } from "./lib/use-account";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
-import { PhoneFrame, usePhoneScreenRect } from "./PhoneFrame";
+import { ScreenFrame, usePhoneScreenRect } from "./PhoneFrame";
 
 /**
  * 홈 화면. `ui-src/screens/home.html` 을 그대로 옮겨 왔다.
@@ -263,10 +263,13 @@ function HoldingRow({
 export function HomeScreen({
   onLeave,
   onStartTutorial,
+  embedded = false,
 }: {
   onLeave: (path: string) => void;
   /** 튜토리얼 `?`. 오버레이는 `ConnectedPrototype` 이 갖는다 — 화면 하나에 매이면 안 된다. */
   onStartTutorial?: () => void;
+  /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
+  embedded?: boolean;
 }) {
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
@@ -338,7 +341,7 @@ export function HomeScreen({
   };
 
   return (
-    <PhoneFrame>
+    <ScreenFrame embedded={embedded}>
       <div style={PAGE}>
         <div style={HEADER}>
           <img alt="" height={42} src={view.info.avatarImg} style={AVATAR} width={42} />
@@ -560,6 +563,6 @@ export function HomeScreen({
 
         <BottomNav active="home" onLeave={onLeave} />
       </div>
-    </PhoneFrame>
+    </ScreenFrame>
   );
 }

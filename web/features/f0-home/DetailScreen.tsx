@@ -9,7 +9,7 @@ import type { PrototypeChartPeriod } from "../f2-trade/chart-data";
 import { buildDetailChart, type DetailTrade } from "./lib/detail-chart";
 import { lastExplorePath } from "./lib/explore-memo";
 import { NewsScreen } from "./NewsScreen";
-import { PhoneFrame } from "./PhoneFrame";
+import { ScreenFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import {
   StockFooter,
@@ -131,6 +131,7 @@ export function DetailScreen({
   onStage,
   closedCandleTips,
   onCloseCandleTip,
+  embedded = false,
 }: {
   code: string;
   account: WalletAccountId;
@@ -145,8 +146,10 @@ export function DetailScreen({
   /**
    * 상세·차트·뉴스는 주소가 안 바뀌어(`useState`) 밖에서는 어디에 있는지 안 보인다.
    * 튜토리얼은 그 자리를 알아야 맞는 설명을 띄우므로 `onLeave` 와 같은 패턴으로 올린다.
-   */
+  */
   onStage?: (stage: TutorialStage) => void;
+  /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
+  embedded?: boolean;
 }) {
   const { wallet } = useWallet();
   const { codes: watchCodes, toggle: watchToggle } = useWatchlist();
@@ -242,7 +245,7 @@ export function DetailScreen({
   }, [code, stockName, account, wallet, live.price, onChatContext]);
   useEffect(() => () => onChatContext(null), [onChatContext]);
 
-  if (!wallet || !live.stock) return <PhoneFrame />;
+  if (!wallet || !live.stock) return <ScreenFrame embedded={embedded} />;
 
   const stock = live.stock;
   const locked = !canTrade(account);
@@ -462,5 +465,5 @@ export function DetailScreen({
       </div>
     );
 
-  return <PhoneFrame>{screen}</PhoneFrame>;
+  return <ScreenFrame embedded={embedded}>{screen}</ScreenFrame>;
 }

@@ -34,6 +34,15 @@
   transform-origin: center center;
 }
 
+/* 챗봇·튜토리얼은 이 레이어 안에서만 움직인다. 바깥 viewport에 fixed로 놓지 않아
+   프레임 베젤(z-index:5)이 같은 stacking context에서 항상 위에 남는다. */
+.phone-stage__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
 /* 폰 안에서는 스크롤바를 감춘다. */
 .phone-stage ::-webkit-scrollbar {
   width: 0;

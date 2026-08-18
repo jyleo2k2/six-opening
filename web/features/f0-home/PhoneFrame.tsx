@@ -12,11 +12,11 @@ import { SCREEN_BG } from "./lib/prototype-theme";
 import "./phone-frame.css";
 
 /**
- * 프레임 안 화면이 창 어디에 놓이는지. `#kw-screen`의 실제 client rect를 읽어 프레임과
- * 그 위에 겹치는 오버레이가 같은 좌표계를 쓰게 한다.
+ * 프레임 안 화면의 client rect를 읽는다.
  *
- * 서버에는 DOM이 없으므로 처음에는 `null` 이고, 마운트 뒤 `ResizeObserver`·viewport
- * 이벤트로 갱신한다.
+ * `ConnectedPrototype`의 챗봇·튜토리얼 배치는 `PHONE_SCREEN_RECT`라는 프레임 내부
+ * 좌표를 쓰지만, 화면 안의 손짓 계산은 실제 client rect가 필요하다. 서버에는 DOM이
+ * 없으므로 처음에는 `null` 이고, 마운트 뒤 `ResizeObserver`·viewport 이벤트로 갱신한다.
  */
 export function usePhoneScreenRect(remeasureKey?: unknown): PrototypeScreenRect | null {
   const [rect, setRect] = useState<PrototypeScreenRect | null>(null);
@@ -76,18 +76,21 @@ const NOISE =
 /**
  * 아이폰 프레임. 원본 목업과 같은 사각형을 React 로 그린다.
  *
- * 화면과 오버레이가 따로 그려져도 프레임 배율은 CSS가 하나만 정한다. 오버레이 쪽은
- * 이 컴포넌트 안의 `#kw-screen`을 실측한다.
+ * 화면과 오버레이는 이 컴포넌트 안에서 함께 그린다. 프레임 배율은 CSS가 하나만 정하고,
+ * `overlay`는 같은 `.phone-stage__content` 좌표계에 들어가므로 바깥 fixed 프레임이 필요 없다.
  *
  * 상태바는 화면 윗부분 색에 따라 고른다 — 위가 짙은 색인 화면만 `light` 로 흰 아이콘을 쓴다.
  */
 export function PhoneFrame({
   statusBar = "dark",
   children,
+  overlay,
 }: {
   statusBar?: "dark" | "light";
   /** 저장소를 읽기 전에는 프레임만 그린다 — 시드 지갑이 한 프레임 스치면 안 된다. */
   children?: ReactNode;
+  /** 챗봇·튜토리얼을 같은 transform 좌표계 안에 그린다. 로그인 화면은 넘기지 않는다. */
+  overlay?: ReactNode;
 }) {
   const screenBox = {
     position: "absolute",
@@ -144,6 +147,7 @@ export function PhoneFrame({
             backgroundImage: `url(${NOISE})`,
           }}
         />
+        {overlay && <div className="phone-stage__overlay">{overlay}</div>}
         <img
           alt=""
           height={PROTOTYPE_PHONE.frameHeight}
@@ -154,4 +158,15 @@ export function PhoneFrame({
       </div>
     </div>
   );
+}
+
+/** 화면 컴포넌트를 단독으로도 쓸 수 있게 하면서 ConnectedPrototype에서는 프레임을 하나만 둔다. */
+export function ScreenFrame({
+  embedded = false,
+  children,
+}: {
+  embedded?: boolean;
+  children?: ReactNode;
+}) {
+  return embedded ? <>{children}</> : <PhoneFrame>{children}</PhoneFrame>;
 }

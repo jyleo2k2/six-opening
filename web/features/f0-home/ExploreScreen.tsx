@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ChatContext } from "../../shared/types/chatbot";
 import { accountTotalAsset, SEED } from "../../shared/store/prototype-account.js";
 import { BottomNav } from "./BottomNav";
-import { PhoneFrame } from "./PhoneFrame";
+import { ScreenFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import {
   buildExploreCard,
@@ -256,11 +256,14 @@ export function ExploreScreen({
   account,
   onLeave,
   onChatContext,
+  embedded = false,
 }: {
   sector?: string;
   account: WalletAccountId;
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
+  /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
+  embedded?: boolean;
 }) {
   const { wallet } = useWallet();
   const { codes: watchCodes } = useWatchlist();
@@ -576,7 +579,7 @@ export function ExploreScreen({
    * `/api/account` + `GET /api/orders`(만기 예약 정산 포함)가 끝날 때까지 빈 폰이 보인다 —
    * 탐색으로 돌아올 때마다 그랬다. 맥락은 늦게 도착해도 그 effect 가 알아서 올린다.
    */
-  if (!universe) return <PhoneFrame />;
+  if (!universe) return <ScreenFrame embedded={embedded} />;
 
   const list = exploreList(universe, { quotes, sparks }, filter, query, watchCodes);
   const chips = sectorChips(universe, filter);
@@ -626,7 +629,7 @@ export function ExploreScreen({
   };
 
   return (
-    <PhoneFrame>
+    <ScreenFrame embedded={embedded}>
       <div style={PAGE}>
         <div style={HEADER}>
           <div style={HEADER_SPACER} />
@@ -739,6 +742,6 @@ export function ExploreScreen({
 
         <BottomNav active="trade" onLeave={onLeave} />
       </div>
-    </PhoneFrame>
+    </ScreenFrame>
   );
 }

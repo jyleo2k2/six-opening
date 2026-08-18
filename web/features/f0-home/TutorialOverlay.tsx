@@ -6,6 +6,7 @@ import {
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
 import { phoneScreenClipPath } from "./lib/phone-frame";
+import { PROTOTYPE_SCREEN_ID } from "./lib/prototype-bridge";
 import {
   type AnchorRect,
   BUBBLE_MARGIN,
@@ -120,7 +121,7 @@ export function TutorialOverlay({
   /** 주소로 데려간다. `ConnectedPrototype` 의 `leaveToPath` 와 같은 경로다. */
   onGo: (path: string) => void;
   onClose: () => void;
-  /** `ConnectedPrototype`이 `#kw-screen`에서 실측한 client 좌표. */
+  /** `PhoneFrame` 안에서 쓰는 450×920 프레임 내부 좌표. */
   screenRect: PrototypeScreenRect | null;
 }) {
   /**
@@ -207,14 +208,28 @@ export function TutorialOverlay({
 
   const measure = useCallback(() => {
     const rect = screenRect;
-    if (!rect) {
+    const screenNode = document.getElementById(PROTOTYPE_SCREEN_ID);
+    const clientScreen = screenNode?.getBoundingClientRect();
+    if (
+      !rect ||
+      !clientScreen ||
+      clientScreen.width <= 0 ||
+      clientScreen.height <= 0
+    ) {
       setBoxes([]);
       return;
     }
+    // 앵커는 브라우저 client 좌표로 재지만, 튜토리얼은 PhoneFrame 안에서 그린다.
+    // 실제 화면 요소를 기준으로 다시 안쪽 좌표로 바꿔야 CSS transform 배율이 한 번만 적용된다.
+    const clientRect = {
+      left: clientScreen.left,
+      top: clientScreen.top,
+      scale: clientScreen.width / SCREEN_W,
+    };
     const found: AnchorRect[] = [];
     for (const id of step?.anchors ?? []) {
       const node = visibleNode(id);
-      if (node) found.push(toScreenRect(node.getBoundingClientRect(), rect));
+      if (node) found.push(toScreenRect(node.getBoundingClientRect(), clientRect));
     }
     setBoxes(found);
   }, [screenRect, step]);
@@ -329,10 +344,10 @@ export function TutorialOverlay({
   return (
     <div
       style={{
-        position: "fixed",
+        position: "absolute",
         inset: 0,
-        // 챗봇 오버레이(10)보다 위, 프레임 이미지(20)보다 아래. 튜토리얼이 켜져 있는
-        // 동안은 키웅이도 함께 어두워져야 지금 짚는 곳으로 눈이 간다.
+        // 챗봇 오버레이보다 위, `.phone-stage__overlay`(z-index:4) 안에서 그린다.
+        // 프레임 이미지(z-index:5)는 부모 stacking context째로 튜토리얼보다 위에 남는다.
         zIndex: 15,
         pointerEvents: "none",
         clipPath: phoneScreenClipPath(screenRect),
