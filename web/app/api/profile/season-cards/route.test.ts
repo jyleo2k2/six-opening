@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { synthesizeTabViews, TAB_FLUSH_TOLERANCE_MS } from "./route";
+import {
+  closesCutoff,
+  CLOSE_LOOKBACK_DAYS,
+  CLOSE_MIN_WINDOW_DAYS,
+  synthesizeTabViews,
+  TAB_FLUSH_TOLERANCE_MS,
+} from "./route";
 import { computeEvidence, VALID_DWELL_MS } from "../../../../shared/engine/behavior-profile";
 import type { ProfileBuy } from "../../../../shared/types/behavior-profile";
 
@@ -52,5 +58,33 @@ assert.equal(paired.filter((view) => Date.parse(view.viewedAt) > boughtAt).lengt
 assert.equal(computeEvidence([buy({})], synthesizeTabViews([buy({})], rows([boughtAt, 2]))), 6);
 // 1탭뿐이면 근거 미인정 → shrink(0,1) = 4
 assert.equal(computeEvidence([buy({})], synthesizeTabViews([buy({})], rows([boughtAt, 1]))), 4);
+
+// ── 종가 조회 구간 ──────────────────────────────────────────────────────────
+// 예전에는 보관 구간 전체(1년)를 종목마다 받아 수십 행만 썼다. 엔진이 보는 구간은
+// 첫 거래일부터라 거기서 열흘만 앞서면 된다.
+
+const day = 24 * 60 * 60 * 1000;
+const at = (iso: string) => Math.floor(new Date(iso).getTime() / 1000);
+const asOf = new Date("2026-08-18T09:00:00+09:00");
+
+// 첫 거래 열흘 전부터 읽는다 — 연휴로 직전 거래일이 멀어도 매도가 대체가 짚을 종가가 있다
+assert.equal(
+  closesCutoff(["2026-06-01T02:00:00.000Z", "2026-05-01T02:00:00.000Z"], asOf),
+  at("2026-04-21T02:00:00.000Z"),
+);
+assert.equal(CLOSE_LOOKBACK_DAYS, 10);
+
+// 거래가 없으면 현재가만 쓰므로 최근 한 달이면 된다
+assert.equal(closesCutoff([], asOf), Math.floor((asOf.getTime() - CLOSE_MIN_WINDOW_DAYS * day) / 1000));
+
+// 첫 거래가 최근이어도 창은 한 달 아래로 줄지 않는다 — 마지막 종가가 한 개도 없으면
+// 평가금액이 평균단가로 떨어진다
+assert.equal(
+  closesCutoff(["2026-08-17T02:00:00.000Z"], asOf),
+  Math.floor((asOf.getTime() - CLOSE_MIN_WINDOW_DAYS * day) / 1000),
+);
+
+// 날짜로 못 읽는 값은 구간을 넓히지 않는다
+assert.equal(closesCutoff(["", "그런 날 없음"], asOf), closesCutoff([], asOf));
 
 console.log("season cards route tests passed");

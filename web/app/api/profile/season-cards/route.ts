@@ -14,7 +14,7 @@ import type {
 } from "../../../../shared/types/behavior-profile";
 import { computePortfolioReturn } from "../../../../shared/engine/portfolio-return";
 import { selectFilledTrades, selectRows, sessionUserId } from "../../supabase";
-import { chartRetentionCutoff, readStoredCandles } from "../../quote/stock-candles";
+import { readDailyCloses } from "../../quote/stock-candles";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -84,19 +84,51 @@ export function synthesizeTabViews(
 
 export type SeasonCardsDeps = {
   now(): Date;
-  loadDailyCloses(symbol: string): Promise<DailyClose[]>;
+  loadDailyCloses(symbols: string[], cutoff: number): Promise<Map<string, DailyClose[]>>;
 };
 
 const defaultDeps: SeasonCardsDeps = {
   now: () => new Date(),
-  async loadDailyCloses(symbol) {
-    const { points } = await readStoredCandles(symbol, "daily", chartRetentionCutoff("daily"));
-    return points.map((point) => ({
-      date: kstDateOf(new Date(point.time * 1000).toISOString()),
-      close: point.close,
-    }));
+  async loadDailyCloses(symbols, cutoff) {
+    const bySymbol = await readDailyCloses(symbols, cutoff);
+    return new Map(
+      symbols.map((symbol) => [
+        symbol,
+        (bySymbol.get(symbol) ?? []).map((point) => ({
+          date: kstDateOf(new Date(point.time * 1000).toISOString()),
+          close: point.close,
+        })),
+      ]),
+    );
   },
 };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * 종가를 언제부터 읽을지. **첫 거래 열흘 전**이다.
+ *
+ * 예전에는 보관 구간 전체(1년)를 종목마다 통째로 받아 종목당 250행 가까이 읽고 수십 행만
+ * 썼다. 엔진이 실제로 보는 구간은 첫 거래일부터다 — 채점(`settlementAfter`)은 체결일
+ * **뒤** 종가만, 매도가 대체(`closeOnOrBefore`)는 체결일 당일이나 **직전** 거래일만 본다.
+ * 연휴로 직전 거래일이 멀 수 있어 앞으로 열흘을 더 준다.
+ */
+export const CLOSE_LOOKBACK_DAYS = 10;
+/** 거래가 없으면 현재가만 쓴다. 한 달이면 마지막 종가가 반드시 한 개는 들어온다. */
+export const CLOSE_MIN_WINDOW_DAYS = 30;
+
+export function closesCutoff(tradedAt: string[], now: Date) {
+  const earliest = tradedAt.reduce((min, at) => {
+    const time = Date.parse(at);
+    return Number.isFinite(time) && time < min ? time : min;
+  }, now.getTime());
+  return Math.floor(
+    Math.min(
+      earliest - CLOSE_LOOKBACK_DAYS * DAY_MS,
+      now.getTime() - CLOSE_MIN_WINDOW_DAYS * DAY_MS,
+    ) / 1000,
+  );
+}
 
 /**
  * 로그인 사용자의 Supabase 기록으로 주차 결산 카드를 만든다.
@@ -179,17 +211,20 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
   const symbols = Array.from(
     new Set([...buys, ...sells].map((trade) => trade.symbol).concat(holdings.map((h) => h.symbol))),
   );
-  const dailyClosesBySymbol: Record<string, DailyClose[]> = {};
-  await Promise.all(
-    symbols.map(async (symbol) => {
-      try {
-        dailyClosesBySymbol[symbol] = await deps.loadDailyCloses(symbol);
-      } catch {
-        // 종가가 없으면 그 거래는 엔진이 판정 보류로 처리한다.
-        dailyClosesBySymbol[symbol] = [];
-      }
-    }),
+  const now = deps.now();
+  const dailyClosesBySymbol: Record<string, DailyClose[]> = Object.fromEntries(
+    symbols.map((symbol) => [symbol, [] as DailyClose[]]),
   );
+  if (symbols.length) {
+    try {
+      const cutoff = closesCutoff([...buys, ...sells].map((trade) => trade.tradedAt), now);
+      for (const [symbol, closes] of await deps.loadDailyCloses(symbols, cutoff)) {
+        dailyClosesBySymbol[symbol] = closes;
+      }
+    } catch {
+      // 종가가 없으면 그 거래는 엔진이 판정 보류로 처리한다.
+    }
+  }
   // 현재가는 보관 종가의 마지막 값을 쓴다. 없으면 엔진이 평균단가로 평가한다.
   const priceBySymbol: Record<string, number> = {};
   for (const [symbol, closes] of Object.entries(dailyClosesBySymbol)) {
@@ -200,7 +235,7 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
   const cash = accounts[0] ? asNumber(accounts[0].balance) : SEED_BALANCE;
   const snapshot = computeBehaviorProfile({
     userId: String(userId),
-    periodEnd: kstDateOf(deps.now().toISOString()),
+    periodEnd: kstDateOf(now.toISOString()),
     buys,
     sells,
     tabViews: synthesizeTabViews(buys, rowsBySymbol),
@@ -228,12 +263,33 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
   };
 }
 
+const inFlightByUser = new Map<number, Promise<Awaited<ReturnType<typeof buildSeasonCards>>>>();
+
+/**
+ * 같은 사용자의 주차 카드를 **동시에 두 번 계산하지 않는다.**
+ *
+ * 아카이브는 진입할 때 `GET /api/profile/season-cards` 와 `GET /api/family` 를 함께 부르고,
+ * `/api/family` 는 구성원마다 다시 `buildSeasonCards` 를 돈다 — 본인 몫이 늘 두 번 계산됐다.
+ *
+ * **묵은 값을 주는 캐시가 아니다.** 아직 끝나지 않은 계산에만 올라타고 끝나면 바로 버린다.
+ * 다음 요청은 처음부터 다시 계산하므로 방금 한 거래가 빠지는 일이 없다.
+ */
+export function buildSeasonCardsShared(userId: number) {
+  const running = inFlightByUser.get(userId);
+  if (running) return running;
+  const started = buildSeasonCards(userId).finally(() => {
+    inFlightByUser.delete(userId);
+  });
+  inFlightByUser.set(userId, started);
+  return started;
+}
+
 export async function GET(request: NextRequest) {
   const userId = sessionUserId(request);
   if (!userId) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
   try {
-    return Response.json(await buildSeasonCards(userId));
+    return Response.json(await buildSeasonCardsShared(userId));
   } catch (error) {
     console.error(
       JSON.stringify({ event: "profile_season_cards", result: "error", message: String(error) }),

@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { buildSeasonCards } from "../profile/season-cards/route";
+import { buildSeasonCards, buildSeasonCardsShared } from "../profile/season-cards/route";
 import { findProfileById, selectFilledTrades, selectRows, sessionUserId, type Profile } from "../supabase";
 
 export const runtime = "nodejs";
@@ -44,7 +44,11 @@ const defaultDeps: FamilyDataDeps = {
   selectProfiles: (params) => selectRows<Profile>("profiles", params),
   selectTransactions: (params) => selectFilledTrades<TransactionRow>(params),
   selectHoldings: (params) => selectRows<HoldingRow>("holdings", params),
-  buildProfile: buildSeasonCards,
+  /**
+   * 뷰어 몫은 `GET /api/profile/season-cards` 가 같은 순간에 계산하고 있다. 아카이브가 두
+   * 요청을 함께 던지므로 그 계산에 올라타 한 번만 돌린다 (`buildSeasonCardsShared`).
+   */
+  buildProfile: buildSeasonCardsShared,
 };
 
 /** 로그인 세션의 family_tag 로만 가족 범위를 정한다. */

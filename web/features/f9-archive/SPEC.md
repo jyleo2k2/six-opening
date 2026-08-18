@@ -369,6 +369,15 @@ WeekCard    = AbilityCard & { weekStart; weekEnd; label; status: "closed" | "cur
 | 근거력 입력 | `stock_tab_views` 복원 (§6.9) |
 | 계획 일치 | DB 에 없어 `actionAlignment` 는 항상 0 |
 | 현재가 | 보관 종가의 마지막 값 |
+| 종가 조회 | **첫 거래 열흘 전부터** (최소 30일), 종목 전체를 한 쿼리로 (아래) |
+
+**종가는 보관 구간 전체(1년)를 읽지 않는다** (2026-08-18). 엔진이 보는 구간은 첫 거래일부터다 — 채점(`settlementAfter`)은 체결일 **뒤** 종가만, 매도가 대체(`closeOnOrBefore`)는 체결일 당일이나 **직전** 거래일만 본다. 1년치를 종목마다 따로 받던 때는 종목당 250행 가까이 읽고 수십 행만 썼고, 그게 아카이브 첫 화면 대기시간의 대부분이었다. 되돌리지 않는다.
+
+- 구간은 `closesCutoff` 가 정한다: 첫 거래 `CLOSE_LOOKBACK_DAYS`(10일) 전. 연휴로 직전 거래일이 멀 수 있어 두는 여유다. 거래가 없으면 현재가만 쓰므로 `CLOSE_MIN_WINDOW_DAYS`(30일)로 잡고, 창은 그 아래로 줄지 않는다.
+- 조회는 `readDailyCloses` 가 종목 전체를 `stock_id=in.(…)` 한 쿼리로 묶는다. 행 수 상한은 **종목 수 × 달력 일수**(하루에 일봉은 하나)라 잘릴 여지가 없다 — `candle_time.asc` 로 잘리면 최신 종가부터 사라져 평가금액이 조용히 어긋난다.
+- 같은 종목을 동시에 찾는 호출은 그 요청 하나에 태우고, 받은 종가는 `DAILY_CLOSE_TTL_MS`(60초)만 기억한다. 한 종목이라도 못 읽으면 그 종목만 빈 배열이고 실패는 캐시에 남기지 않는다.
+
+**`buildSeasonCards` 는 한 사용자당 동시에 한 번만 돈다** (2026-08-18, `buildSeasonCardsShared`). 아카이브는 진입할 때 `GET /api/profile/season-cards` 와 `GET /api/family` 를 함께 부르고 `/api/family` 는 구성원마다 다시 이 함수를 돌려, 본인 몫이 늘 두 번 계산됐다. **묵은 값을 주는 캐시가 아니다** — 아직 끝나지 않은 계산에만 올라타고 끝나면 버리므로 다음 요청에 방금 한 거래가 빠지지 않는다.
 
 `season-cards` 응답의 `weeks[]` 는 `weekStart`·`weekEnd`·`label`·`status`·`count`와 신버전 카드 전체(`card: AbilityCard`, **0~10**)만 담는다. 0~100 호환 배열(`scores`)은 화면 이관이 끝나 없앴다 — §6.11.
 
