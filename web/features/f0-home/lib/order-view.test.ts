@@ -7,11 +7,17 @@ import {
   applySellFill,
   blankBuyDraft,
   blankSellDraft,
+  BUY_AMOUNT_PRESETS,
+  BUY_LIMIT_PCTS,
+  buyDraftFromPending,
   buyMath,
   buyStepOk,
   formatQty,
   judgePlanMatch,
+  nearestLimitPct,
   orderChatContext,
+  SELL_LIMIT_PCTS,
+  sellDraftFromPending,
   sellMath,
   sellRetrospect,
   shuffledIndexes,
@@ -312,4 +318,77 @@ test("내 매수 기록이 없으면 판정도 카드도 없다", () => {
 test("이유 섞기는 자리만 바꾸고 전부 남긴다", () => {
   const order = shuffledIndexes(6, () => 0.42);
   assert.deepEqual([...order].sort(), [0, 1, 2, 3, 4, 5]);
+});
+
+// 기다리는 주문 고치기 — 예약을 1단계 초안으로 되돌린다.
+
+test("금액 매수 예약은 금액과 지정가 칩으로 돌아온다", () => {
+  const draft = buyDraftFromPending(
+    { kind: "limit", side: "buy", code: "005930", price: 66_500, reservedAmount: 30_000, requestMode: "amount" },
+    70_000,
+  );
+  assert.equal(draft.buyBy, "amount");
+  assert.equal(draft.amount, 30_000);
+  assert.equal(draft.orderType, "limit");
+  // 66,500 은 지금 값(70,000)보다 5% 싸다 — 화면에 있는 칸이라 그대로 켜진다.
+  assert.equal(draft.limitPct, -5);
+  // 빠른선택에 있는 금액이면 그 칩이, 아니면 `직접` 이 켜진다.
+  assert.equal(draft.amountSource, "preset");
+  assert.equal(
+    buyDraftFromPending({ kind: "limit", side: "buy", price: 70_000, reservedAmount: 12_345 }, 70_000).amountSource,
+    "custom",
+  );
+  // 이유·계획은 예약에 실려 오지 않는다. 2단계에서 다시 고른다.
+  assert.equal(draft.reason, null);
+  assert.equal(draft.plan, null);
+});
+
+test("주 수 매수 예약은 주 수로 돌아오고 금액을 만들지 않는다", () => {
+  const draft = buyDraftFromPending(
+    {
+      kind: "next_open",
+      side: "buy",
+      code: "005930",
+      reservedAmount: 210_000,
+      requestMode: "qty",
+      requestedQty: 3,
+      scheduledFor: "2026-08-19",
+    },
+    70_000,
+  );
+  assert.equal(draft.buyBy, "qty");
+  assert.equal(draft.shares, 3);
+  assert.equal(draft.amount, 0);
+  // 장외 예약은 지정가가 아니다 — 가격 칸을 켜면 없던 조건이 생긴다.
+  assert.equal(draft.orderType, "market");
+  assert.equal(draft.limitPct, 0);
+});
+
+test("매도 예약은 잠겨 있던 수량 그대로 돌아온다", () => {
+  // 예약을 푼 뒤라 잠겨 있던 1.5 주가 그대로 팔 수 있는 수량으로 돌아와 있다.
+  const draft = sellDraftFromPending(
+    { kind: "limit", side: "sell", code: "259960", price: 253_000, reservedQty: 1.5 },
+    230_000,
+    2,
+  );
+  assert.equal(draft.sellBy, "qty");
+  assert.equal(draft.qty, 1.5);
+  assert.equal(draft.orderType, "limit");
+  // 253,000 은 지금 값(230,000)보다 10% 높다.
+  assert.equal(draft.limitPct, 10);
+  assert.equal(draft.reason, null);
+});
+
+test("옛 지정가는 지금 값 기준으로 가장 가까운 칸에 붙는다", () => {
+  // 화면이 가격을 %로만 받아서 옛 가격을 그대로는 못 살린다. -4.3% 는 -5% 칸이 가장 가깝다.
+  assert.equal(nearestLimitPct(67_000, 70_000, BUY_LIMIT_PCTS), -5);
+  assert.equal(nearestLimitPct(70_000, 70_000, BUY_LIMIT_PCTS), 0);
+  // 매도 칸은 부호가 반대다.
+  assert.equal(nearestLimitPct(72_000, 70_000, SELL_LIMIT_PCTS), 3);
+  // 시세를 아직 못 읽었으면 지금 값 그대로에 둔다 — 0 으로 나눈 값을 칩으로 삼지 않는다.
+  assert.equal(nearestLimitPct(70_000, 0, BUY_LIMIT_PCTS), 0);
+});
+
+test("빠른선택 금액은 화면과 같은 값이다", () => {
+  assert.deepEqual([...BUY_AMOUNT_PRESETS], [10_000, 30_000, 50_000]);
 });

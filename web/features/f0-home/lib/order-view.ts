@@ -1,7 +1,7 @@
 // 주문 화면(매수·매도)의 순수 계산. `ui-src/methods/renderVals-compute.js` 의
 // 매수·매도 부분과 `judgePlanMatch`·`lastBuy` 를 그대로 옮겨 왔다.
 import type { ChatContext } from "../../../shared/types/chatbot";
-import type { Account, Holding } from "./portfolio-view";
+import type { Account, Holding, PendingOrder } from "./portfolio-view";
 
 /** `ui-src/logic/constants.js` 와 같은 값 — 단기 계획(plan_short)의 실천 판정 기한. */
 export const SHORT_TERM_DAYS = 7;
@@ -56,6 +56,88 @@ export function blankSellDraft(availableQty: number): SellDraft {
     reason: null,
     change: null,
     memo: "",
+  };
+}
+
+/**
+ * 금액 매수의 빠른선택 칩. 예약을 되돌릴 때 어느 칩을 켤지 정하는 데 쓴다.
+ *
+ * 화면(`OrderScreen`)은 이 상수를 읽지 않고 같은 값을 직접 적는다 —
+ * `f2-trade/lib/buy-amount-ui.test.ts` 가 소스 글자 그대로 `[10000, "1만원"]` 을 지키는
+ * 계약이라 그렇다. 두 자리가 갈라지지 않도록 이 값도 `order-view.test.ts` 가 못 박는다.
+ */
+export const BUY_AMOUNT_PRESETS = [10000, 30000, 50000] as const;
+
+/**
+ * 지정가로 고를 수 있는 값. 화면은 가격을 직접 받지 않고 `현재가 × (1+%)` 로만 만든다.
+ * 매수는 싸게 사려고 내려 잡고 매도는 비싸게 팔려고 올려 잡아 부호가 반대다.
+ */
+export const BUY_LIMIT_PCTS = [-10, -5, -3, 0] as const;
+export const SELL_LIMIT_PCTS = [0, 3, 5, 10] as const;
+
+/**
+ * 기다리는 주문을 다시 고치러 갈 때 주문 화면에 넘기는 값.
+ *
+ * 같은 종목·같은 방향이면 주문 화면이 다시 마운트되지 않으므로(`key={side-code}`) 회차를
+ * 세어 새 요청을 가른다 — 챗봇의 `ChatOrderRequest` 가 같은 이유로 쓰는 방법이다.
+ */
+export type OrderPrefill = {
+  id: number;
+  code: string;
+  side: "buy" | "sell";
+  order: PendingOrder;
+};
+
+/**
+ * 예약해 둔 가격을 다시 고를 때 켜 둘 칩.
+ *
+ * 화면이 가격을 %로만 받아서 옛 지정가를 그대로 되살릴 수는 없다. 지금 가격 기준으로 가장
+ * 가까운 칸을 켜 두고 실제 가격은 `buyMath`·`sellMath` 가 다시 계산해 보여 준다.
+ */
+export function nearestLimitPct(limitPrice: number, price: number, choices: readonly number[]): number {
+  const want = price > 0 && limitPrice > 0 ? (limitPrice / price - 1) * 100 : 0;
+  return choices.reduce(
+    (best, pct) => (Math.abs(pct - want) < Math.abs(best - want) ? pct : best),
+    choices[0] ?? 0,
+  );
+}
+
+/**
+ * 매수 예약 → 1단계 초안.
+ *
+ * 이유·계획은 예약 주문에 실려 오지 않으므로(`pendingFromServerOrders`) 2단계에서 다시
+ * 고른다. 금액·주 수·주문 방식만 채워 두는 것이 지금 되살릴 수 있는 전부다.
+ */
+export function buyDraftFromPending(order: PendingOrder, price: number): BuyDraft {
+  const limit = order.kind === "limit";
+  const shares = Number(order.requestedQty ?? 0) || 0;
+  const byQty = order.requestMode === "qty" && shares > 0;
+  const amount = Math.round(Number(order.reservedAmount ?? order.amount) || 0);
+  const preset = !byQty && (BUY_AMOUNT_PRESETS as readonly number[]).includes(amount);
+  return {
+    ...blankBuyDraft(),
+    buyBy: byQty ? "qty" : "amount",
+    amount: byQty ? 0 : amount,
+    shares: byQty ? shares : 0,
+    amountSource: preset ? "preset" : "custom",
+    orderType: limit ? "limit" : "market",
+    limitPct: limit ? nearestLimitPct(Number(order.price) || 0, price, BUY_LIMIT_PCTS) : 0,
+  };
+}
+
+/** 매도 예약 → 1단계 초안. 잠겨 있던 수량은 예약을 취소한 뒤라 그대로 다시 팔 수 있다. */
+export function sellDraftFromPending(
+  order: PendingOrder,
+  price: number,
+  availableQty: number,
+): SellDraft {
+  const limit = order.kind === "limit";
+  return {
+    ...blankSellDraft(availableQty),
+    sellBy: "qty",
+    qty: Number(order.reservedQty ?? order.qty) || 0,
+    orderType: limit ? "limit" : "market",
+    limitPct: limit ? nearestLimitPct(Number(order.price) || 0, price, SELL_LIMIT_PCTS) : 0,
   };
 }
 

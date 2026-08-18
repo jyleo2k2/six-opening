@@ -150,14 +150,16 @@ export function pendingCards(account: Account) {
     const side = order.side || "buy";
     const reservedAmount = Number(order.reservedAmount ?? order.amount) || 0;
     const reservedQty = Number(order.reservedQty ?? order.qty) || 0;
+    // 두 줄 다 아직 체결되지 않은 예약이다. `예약` 을 뒤 분기에만 붙였더니 같은 목록에서
+    // 지정가는 `… 매수`, 장외는 `… 매도 예약` 으로 갈라져 지정가만 이미 산 것처럼 읽혔다.
     const target =
-      side === "sell" ? `${reservedQty.toFixed(2)}주 매도` : `${won(reservedAmount)} 매수`;
+      side === "sell" ? `${reservedQty.toFixed(2)}주 매도 예약` : `${won(reservedAmount)} 매수 예약`;
     return {
       order,
       name: stock ? stock.name : order.code ?? "",
       desc:
         order.kind === "next_open"
-          ? `${order.scheduledFor} 장 시작 시가 · ${target} 예약`
+          ? `${order.scheduledFor} 장 시작 시가 · ${target}`
           : `${(Number(order.price) || 0).toLocaleString("ko-KR")}원이 되면 ${target}`,
     };
   });
