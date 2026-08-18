@@ -861,8 +861,10 @@ export function OrderScreen({
           width={96}
         />
         <div style={BLOCK_TITLE}>주문을 다시 정할까요?</div>
-        <div style={BLOCK_BODY}>
-          {"기다리던 주문은 취소하고\n처음부터 다시 정하게 돼요."}
+        {/* 줄은 "취소하고" 뒤에서만 넘긴다. 폭이 좁아지면 한글이 음절 단위로 잘려 "정하게 돼요"
+            까지 갈라지므로, 낱말 단위로만 접게 하고 남은 두 낱말은 붙임 공백으로 묶는다. */}
+        <div style={{ ...BLOCK_BODY, wordBreak: "keep-all" }}>
+          {"기다리던 주문은 취소하고\n처음부터 다시 정하게\u00A0돼요."}
         </div>
         <div className={PRESSABLE} onClick={startReorder} style={BLOCK_CTA}>
           {reordering ? "잠깐만요…" : "다시 정할래요"}
