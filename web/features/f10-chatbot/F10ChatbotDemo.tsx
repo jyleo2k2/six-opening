@@ -502,7 +502,7 @@ export function F10ChatbotDemo({
     useState<StockExploreActionPayload | null>(null);
   const [sectorExploreAction, setSectorExploreAction] =
     useState<SectorExploreActionPayload | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageListRef = useRef<HTMLDivElement>(null);
   const requestAbortRef = useRef<AbortController | null>(null);
   const chatSessionVersionRef = useRef(0);
   const sheetDragRef = useRef<SheetDragState | null>(null);
@@ -649,9 +649,17 @@ export function F10ChatbotDemo({
     };
   }, [chatContext.stockId, recordBehaviorEvent, screen]);
 
+  /**
+   * 새 메시지가 붙으면 **대화 목록만** 맨 아래로 내린다. `scrollIntoView`를 쓰지 않는다 —
+   * 그 호출은 조상 스크롤러를 전부 움직여서, 시트가 아직 화면 밖(translateY)에 있는
+   * 열림 첫 프레임에 overflow 컨테이너와 문서까지 통째로 밀어 버린다. 데스크톱 크롬은
+   * 다음 레이아웃에서 밀린 값을 0으로 되돌리지만 iOS 사파리는 되돌리지 않아, 시트와
+   * 스크림이 위로 올라간 채 남는다.
+   */
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ block: "end" });
+      const list = messageListRef.current;
+      if (list) list.scrollTop = list.scrollHeight;
     });
     return () => window.cancelAnimationFrame(frame);
   }, [isOpen, messages]);
@@ -1436,7 +1444,10 @@ export function F10ChatbotDemo({
 
       {isOpen && prototypeScreen && (
         <div
-          className="pointer-events-auto absolute z-30 overflow-hidden"
+          // `hidden`이 아니라 `clip`: hidden 박스는 여전히 스크롤 컨테이너라 scrollIntoView·
+          // 포커스 복원 같은 프로그램적 스크롤에 밀릴 수 있고 iOS는 그 값을 되돌리지 않는다.
+          // clip은 스크롤 자체가 없는 잘라내기라 이 층이 밀릴 길이 원천적으로 사라진다.
+          className="pointer-events-auto absolute z-30 overflow-clip"
           style={{
             left: prototypeScreen.left,
             top: prototypeScreen.top,
@@ -1532,7 +1543,7 @@ export function F10ChatbotDemo({
               </div>
             </header>
 
-            <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4 pt-4">
+            <div ref={messageListRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 pb-4 pt-4">
               {messages.length === 0 && (
                 <MessageBubble
                   message={{
@@ -1569,7 +1580,6 @@ export function F10ChatbotDemo({
                 />
               ))}
               {isLoading && <ResponsePreparation status={status} />}
-              <div ref={messagesEndRef} aria-hidden="true" />
             </div>
 
             {/*
