@@ -517,7 +517,7 @@ export function OrderScreen({
     let quantityReady = false;
     let confirmationReady = false;
     if (side === "buy") {
-      const math = buyMath(draft, price, me.cash);
+      const math = buyMath(draft, price, me.cash, code);
       quantityReady = math.canConfirm;
       confirmationReady = quantityReady && buyStepOk(2, draft, math);
     } else if (sellDraft) {
@@ -527,6 +527,7 @@ export function OrderScreen({
         price,
         holding?.qty ?? 0,
         reservedHoldingQty(me, code),
+        code,
       );
       quantityReady = math.canConfirm;
       confirmationReady = quantityReady && Boolean(sellDraft.reason);
@@ -935,7 +936,7 @@ export function OrderScreen({
 
   // ── 매수 ──────────────────────────────────────────────────────────────
   const renderBuy = () => {
-    const math = buyMath(draft, price, me.cash);
+    const math = buyMath(draft, price, me.cash, code);
     const nextOk = buyStepOk(step, draft, math);
 
     const selectBuyMode = (buyBy: BuyDraft["buyBy"]) => {
@@ -1279,7 +1280,7 @@ export function OrderScreen({
             <div style={{ textAlign: "center", fontSize: 14, fontWeight: 500, color: "#7E849B", marginTop: 9, whiteSpace: "nowrap" }}>
               {draft.limitPct === 0
                 ? "지금 가격 그대로예요"
-                : `지금 ${price.toLocaleString("ko-KR")}원보다 ${Math.abs(draft.limitPct)}% 싸요`}
+                : `지금 ${price.toLocaleString("ko-KR")}원보다 약 ${Math.abs(draft.limitPct)}% 싸요`}
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
               {BUY_LIMIT_PCTS.map((pct) => (
@@ -1553,7 +1554,7 @@ export function OrderScreen({
     const heldPnl = held ? (price - heldAvg) * heldQty : 0;
     const heldPct = held && heldAvg > 0 ? ((price - heldAvg) / heldAvg) * 100 : 0;
     const reserved = reservedHoldingQty(me, code);
-    const math = sellMath(sellDraft, price, heldQty, reserved);
+    const math = sellMath(sellDraft, price, heldQty, reserved, code);
     const sellMaxHint =
       math.maxQty > 0
         ? `최대 ${Math.floor(math.maxQty * 100) / 100}주까지 팔 수 있어요 · ${won(math.maxQty * math.execPrice)}`
@@ -1864,7 +1865,9 @@ export function OrderScreen({
               <span style={{ fontSize: 18, fontWeight: 800, color: "#F5327F" }}>원</span>
             </div>
             <div style={{ textAlign: "center", fontSize: 14, fontWeight: 500, color: "#7E849B", marginTop: 9, whiteSpace: "nowrap" }}>
-              {math.limPct === 0 ? "지금 값 그대로예요" : `지금보다 ${math.limPct}% 높은 값이에요`}
+              {math.limPct === 0
+                ? "지금 값 그대로예요"
+                : `지금 ${price.toLocaleString("ko-KR")}원보다 약 ${math.limPct}% 비싸요`}
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
               {SELL_LIMIT_PCTS.map((pct) => (

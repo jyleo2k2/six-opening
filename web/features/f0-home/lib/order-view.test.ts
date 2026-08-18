@@ -12,6 +12,7 @@ import {
   buyDraftFromPending,
   buyMath,
   buyStepOk,
+  limitPriceFor,
   formatQty,
   judgePlanMatch,
   nearestLimitPct,
@@ -24,6 +25,11 @@ import {
   type TradeHistoryRow,
 } from "./order-view";
 
+/** 삼성전자. 27만원대라 500원 단위 구간이고 호가단위 회귀의 대표 종목이다. */
+const KOSPI = "005930";
+/** 에스엠. KOSDAQ 이라 5만원 위로 100원 단위가 고정된다. */
+const KOSDAQ = "041510";
+
 const account = (): Account => ({
   name: "김찬영",
   cash: 100_000,
@@ -32,12 +38,12 @@ const account = (): Account => ({
 });
 
 test("매수: 금액으로 넣으면 소수 수량, 주 수로 넣으면 금액이 따라온다", () => {
-  const byAmount = buyMath({ ...blankBuyDraft(), amount: 30_000 }, 60_000, 100_000);
+  const byAmount = buyMath({ ...blankBuyDraft(), amount: 30_000 }, 60_000, 100_000, KOSPI);
   assert.equal(byAmount.qty, 0.5);
   assert.equal(byAmount.amount, 30_000);
   assert.equal(byAmount.canConfirm, true);
 
-  const byQty = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 2 }, 60_000, 100_000);
+  const byQty = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 2 }, 60_000, 100_000, KOSPI);
   assert.equal(byQty.amount, 120_000);
   assert.equal(byQty.warn, "지갑으로 살 수 있는 주 수보다 많아!");
   assert.equal(byQty.canConfirm, false);
@@ -62,14 +68,14 @@ test("주 수 표시: 최소 단위까지만 남긴다", () => {
 });
 
 test("매수: 주 수도 0.01 주 단위로 살 수 있다", () => {
-  const half = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 0.5 }, 60_000, 100_000);
+  const half = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 0.5 }, 60_000, 100_000, KOSPI);
   assert.equal(half.amount, 30_000);
   assert.equal(half.qty, 0.5);
   assert.equal(half.warn, "");
   assert.equal(half.canConfirm, true);
 
   // 주가가 지갑보다 비싸도 소수로는 살 수 있다 — 상한이 0 이면 이 주문이 통째로 막혔다.
-  const pricey = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 0.5 }, 200_000, 100_000);
+  const pricey = buyMath({ ...blankBuyDraft(), buyBy: "qty", shares: 0.5 }, 200_000, 100_000, KOSPI);
   assert.equal(pricey.maxShares, 0.5);
   assert.equal(pricey.canConfirm, true);
 });
@@ -200,6 +206,7 @@ test("매수: 지정가는 주문 가격 기준으로 수량·최대 주 수를 
     { ...blankBuyDraft(), amount: 30_000, orderType: "limit", limitPct: -10 },
     60_000,
     100_000,
+    KOSPI,
   );
   assert.equal(math.limPrice, 54_000);
   assert.equal(math.execPrice, 54_000);
@@ -207,18 +214,18 @@ test("매수: 지정가는 주문 가격 기준으로 수량·최대 주 수를 
 });
 
 test("매수: 지갑 초과·티끌 주문은 경고와 함께 막힌다", () => {
-  const over = buyMath({ ...blankBuyDraft(), amount: 200_000 }, 60_000, 100_000);
+  const over = buyMath({ ...blankBuyDraft(), amount: 200_000 }, 60_000, 100_000, KOSPI);
   assert.equal(over.warn, "지갑보다 많이 살 수는 없어!");
   assert.equal(over.canConfirm, false);
 
-  const tiny = buyMath({ ...blankBuyDraft(), amount: 100 }, 60_000_000, 100_000_000);
+  const tiny = buyMath({ ...blankBuyDraft(), amount: 100 }, 60_000_000, 100_000_000, KOSPI);
   assert.equal(tiny.warn, "이 금액으로는 아직 살 수 없어. 조금 더 올려볼까?");
   assert.equal(tiny.canConfirm, false);
 });
 
 test("매수 2단계는 이유·계획(목표가는 퍼센트까지)이 있어야 넘어간다", () => {
   const draft = { ...blankBuyDraft(), amount: 30_000 };
-  const math = buyMath(draft, 60_000, 100_000);
+  const math = buyMath(draft, 60_000, 100_000, KOSPI);
   assert.equal(buyStepOk(2, draft, math), false);
   assert.equal(buyStepOk(2, { ...draft, reason: "buy_news", plan: "plan_target" }, math), false);
   assert.equal(
@@ -228,7 +235,7 @@ test("매수 2단계는 이유·계획(목표가는 퍼센트까지)이 있어�
 });
 
 test("매도: 예약이 잡은 수량은 팔 수 없고 초과는 경고한다", () => {
-  const math = sellMath(blankSellDraft(2), 240_000, 2, 1.5);
+  const math = sellMath(blankSellDraft(2), 240_000, 2, 1.5, KOSPI);
   assert.equal(math.maxQty, 0.5);
   assert.equal(math.qty, 0.5);
   assert.equal(math.warn, "가진 것보다 많이 팔 수는 없어!");
@@ -237,7 +244,7 @@ test("매도: 예약이 잡은 수량은 팔 수 없고 초과는 경고한다",
 
 test("매도: 금액으로 넣으면 주문 가격으로 수량을 되센다", () => {
   const draft = { ...blankSellDraft(0), sellBy: "amount" as const, amountInput: 120_000 };
-  const math = sellMath(draft, 240_000, 2, 0);
+  const math = sellMath(draft, 240_000, 2, 0, KOSPI);
   assert.equal(math.qty, 0.5);
   assert.equal(math.proceeds, 120_000);
   assert.equal(math.canConfirm, true);
@@ -391,4 +398,51 @@ test("옛 지정가는 지금 값 기준으로 가장 가까운 칸에 붙는다
 
 test("빠른선택 금액은 화면과 같은 값이다", () => {
   assert.deepEqual([...BUY_AMOUNT_PRESETS], [10_000, 30_000, 50_000]);
+});
+
+test("지정가: 칩이 고른 값을 그 종목의 호가단위로 맞춘다", () => {
+  // 삼성전자 270,750원 — 500원 단위. 고치기 전에는 8칩이 전부 실거래에 없는 값이었다.
+  const price = 270_750;
+  // 0%(`지금값`)는 시세를 그대로 쓰므로 스냅 대상이 아니다 — 아래 별도 테스트가 맡는다.
+  for (const pct of BUY_LIMIT_PCTS.filter((value) => value !== 0)) {
+    assert.equal(limitPriceFor(price, pct, "buy", KOSPI) % 500, 0, `매수 ${pct}%`);
+  }
+  for (const pct of SELL_LIMIT_PCTS.filter((value) => value !== 0)) {
+    assert.equal(limitPriceFor(price, pct, "sell", KOSPI) % 500, 0, `매도 ${pct}%`);
+  }
+  // 고치기 전 화면에 떠 있던 값(262,385원)이 더는 나오지 않는다.
+  assert.equal(limitPriceFor(270_500, -3, "buy", KOSPI), 262_000);
+});
+
+test("지정가: 매수는 내리고 매도는 올려 누른 칩보다 불리해지지 않는다", () => {
+  const price = 270_750;
+  assert.ok(limitPriceFor(price, -3, "buy", KOSPI) <= price * 0.97);
+  assert.ok(limitPriceFor(price, 3, "sell", KOSPI) >= price * 1.03);
+});
+
+test("지정가: `지금값`은 스냅하지 않는다", () => {
+  // 현재가는 이미 시장에 있던 유효 호가다. 한 틱 내리면 체결 가능성만 떨어진다.
+  // 270,750원은 그 자체가 500원 배수가 아니지만(적재 쪽 문제) 화면은 시세를 그대로 쓴다.
+  assert.equal(limitPriceFor(270_750, 0, "buy", KOSPI), 270_750);
+  assert.equal(limitPriceFor(270_750, 0, "sell", KOSPI), 270_750);
+});
+
+test("지정가: KOSDAQ 은 20만원 위에서 KOSPI 와 갈린다", () => {
+  // 5만원 위로 100원 하나뿐이라 500원으로 올라가지 않는다. 에스엠이 20만원을 넘으면 산다.
+  assert.equal(limitPriceFor(210_000, -3, "buy", KOSDAQ) % 100, 0);
+  assert.equal(limitPriceFor(210_000, -3, "buy", KOSDAQ), 203_700);
+  assert.equal(limitPriceFor(210_000, -3, "buy", KOSPI), 203_500);
+});
+
+test("지정가: 주문 가격이 바뀌면 수량·최대 주 수도 그 값을 따른다", () => {
+  // 스냅된 주문가로 나눠야 화면과 챗봇이 같은 수량을 말한다.
+  const math = buyMath(
+    { ...blankBuyDraft(), amount: 100_000, orderType: "limit", limitPct: -3 },
+    270_750,
+    1_000_000,
+    KOSPI,
+  );
+  assert.equal(math.limPrice, 262_500);
+  assert.equal(math.execPrice, 262_500);
+  assert.equal(math.qty, 100_000 / 262_500);
 });
