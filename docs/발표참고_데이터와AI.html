@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영웅 키움 — 데이터 · AI 발표 참고자료</title>
+<style>
+  :root {
+    --navy: #16233f;
+    --navy-light: #24365c;
+    --accent: #3a6cf0;
+    --accent-soft: #eaf0ff;
+    --paper: #ffffff;
+    --bg: #f4f6fb;
+    --text: #1c2230;
+    --muted: #5b6478;
+    --line: #e2e6ef;
+    --ok: #1f9d55;
+    --warn: #c2410c;
+    --stop: #b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px 100px; }
+
+  /* ── hero ── */
+  .hero { background: linear-gradient(150deg, #070d18 0%, #101b31 55%, #16233f 100%); color: #fff; padding: 56px 24px 44px; }
+  .hero-inner { max-width: 960px; margin: 0 auto; }
+  .hero .eyebrow { font-size: 12px; letter-spacing: .14em; color: #9fb3e8; font-weight: 700; margin-bottom: 10px; }
+  .hero h1 { font-size: 32px; margin: 0 0 10px; font-weight: 800; letter-spacing: -.02em; }
+  .hero p { font-size: 15px; color: #c6d2ee; margin: 0; max-width: 720px; }
+  .hero .meta { margin-top: 18px; font-size: 12.5px; color: #8ea3d8; }
+
+  /* ── nav ── */
+  nav.toc { background: #0d1524; color: #cfd9f0; padding: 14px 24px; position: sticky; top: 0; z-index: 20; border-bottom: 1px solid #1e2c48; }
+  nav.toc .inner { max-width: 960px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; }
+  nav.toc a { color: #cfd9f0; text-decoration: none; }
+  nav.toc a:hover { color: #fff; text-decoration: underline; }
+
+  /* ── section ── */
+  section { margin-top: 44px; }
+  h2 {
+    font-size: 23px; font-weight: 800; margin: 0 0 6px; color: var(--navy);
+    padding-bottom: 10px; border-bottom: 3px solid var(--navy);
+  }
+  h2 .num { display: inline-block; background: var(--navy); color: #fff; font-size: 14px; border-radius: 6px; padding: 1px 9px; margin-right: 9px; vertical-align: 3px; }
+  h3 { font-size: 17px; font-weight: 700; margin: 30px 0 8px; color: var(--navy-light); }
+  h4 { font-size: 14.5px; font-weight: 700; margin: 20px 0 6px; color: var(--text); }
+  .lead { color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-top: 14px; }
+  .card.tight { padding: 14px 18px; }
+
+  /* ── table ── */
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13.5px; background: var(--paper); }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #eef1f8; font-weight: 700; color: var(--navy); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:nth-child(even) { background: #fafbfe; }
+
+  /* ── code / flow ── */
+  pre {
+    background: #0d1524; color: #d7e0f5; padding: 16px 18px; border-radius: 10px;
+    overflow-x: auto; font-size: 12.5px; line-height: 1.65; margin: 12px 0 0;
+    font-family: "D2Coding", "Consolas", "Menlo", monospace;
+  }
+  code { background: #eef1f8; border-radius: 4px; padding: 1px 5px; font-size: 12.5px;
+    font-family: "D2Coding", "Consolas", "Menlo", monospace; color: #23345c; }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  /* ── badges ── */
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 2px 9px; margin-right: 5px; }
+  .tag.ai { background: #ede4ff; color: #5b21b6; }
+  .tag.rule { background: #e0f2e9; color: #14653a; }
+  .tag.db { background: #e0ecff; color: #1e40af; }
+  .tag.fact { background: #eef1f8; color: #334155; }
+  .tag.gap { background: #fee2e2; color: #991b1b; }
+
+  ul, ol { margin: 10px 0 0; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  li::marker { color: var(--accent); }
+
+  .callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-top: 14px; font-size: 14px; }
+  .callout.warn { border-left-color: var(--warn); background: #fff4ed; }
+  .callout.stop { border-left-color: var(--stop); background: #fef2f2; }
+  .callout .t { font-weight: 700; display: block; margin-bottom: 3px; }
+
+  .kpi-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  .kpi { flex: 1 1 150px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .kpi .v { font-size: 25px; font-weight: 800; color: var(--navy); line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .kpi .k { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .say { background: #fffbe6; border: 1px dashed #d9c86a; border-radius: 10px; padding: 14px 18px; margin-top: 14px; }
+  .say .t { font-size: 12px; font-weight: 700; color: #8a6d00; letter-spacing: .05em; display: block; margin-bottom: 5px; }
+  .say p { margin: 0; font-size: 14.5px; }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">KDA · 영웅 키움 발표 참고자료</div>
+    <h1>데이터를 어떻게 만들고, AI를 어디에 썼는가</h1>
+    <p>① 기업정보 데이터 분석 ② 거래 행동 로그 분석 ③ AI 챗봇 — 세 축으로 정리했다.
+       모든 수치는 저장소의 코드·문서 실측값이며 근거 파일 경로를 함께 적었다.</p>
+    <div class="meta">기준 2026-08-18 · <code>main</code> (PR #373까지 병합) · 발표자 참고용, 슬라이드 원본 아님</div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="inner">
+    <a href="#overview">0. 한 장 요약</a>
+    <a href="#s1">1. 기업정보 데이터</a>
+    <a href="#s2">2. 거래 행동 로그</a>
+    <a href="#s3">3. AI 챗봇</a>
+    <a href="#s4">4. 모델·비용</a>
+    <a href="#s5">5. 예상 질문</a>
+    <a href="#s6">6. 아직 안 된 것</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ══════════════════ 0 ══════════════════ -->
+<section id="overview">
+  <h2><span class="num">0</span>한 장 요약</h2>
+  <p class="lead">"AI로 뭘 했냐"는 질문에 한 문장으로 답한다면 — <strong>AI는 설명과 언어에만 쓰고, 숫자는 전부 규칙 엔진이 만든다.</strong></p>
+
+  <pre><code>[입력 데이터 3종]                 [처리]                          [출력]
+
+① 기업정보                   출처 5단계 수집 → 사람 검수      종목 상세 · 챗봇 사실 답변
+   51종 · 13섹터        ─→   → reviewed 만 코드 적재      ─→  어린이 뉴스 카드
+   시세 · 뉴스 원문           뉴스: LLM 3역할 + 결정적 게이트
+
+② 거래 행동 로그              KST 주 단위 버킷 → 포트폴리오     성향 5축 · 4캐릭터
+   체결 · 질문식 기록   ─→   시점 복원 → 2거래일 뒤 종가   ─→  주차 카드 · 가족 비교
+   탭 열람 카운트             채점 → 베이지안 축소             선제 도움 3신호
+                              ★ LLM 미사용 (순수 함수)
+
+③ 사용자 질문                 7단 게이트 통과 → 사전·FAQ·        3문장 이내 답변
+   자연어 한 문장       ─→   툴 조회 우선 → 최후에만 생성  ─→  화면 이동 액션
+                              → 출력 2단 검사                  DAPIE 되묻기</code></pre>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="v">51종</div><div class="k">13섹터 고정 유니버스</div></div>
+    <div class="kpi"><div class="v">162개</div><div class="k">승인 금융 사전 (36 + 126)</div></div>
+    <div class="kpi"><div class="v">600건</div><div class="k">아이 질문 시뮬레이션</div></div>
+    <div class="kpi"><div class="v">0.2%</div><div class="k">가드레일 누수 (6.3% → 개선)</div></div>
+    <div class="kpi"><div class="v">96개</div><div class="k">자동 테스트 파일</div></div>
+  </div>
+
+  <div class="callout">
+    <span class="t">발표에서 반복할 한 문장</span>
+    "생성형 AI가 수치를 만들지 않습니다. 성향 점수도, 수익률도, 시세도 전부 규칙 엔진과 API 값이고,
+    AI는 그 값을 아이 눈높이로 <em>설명</em>하는 데만 씁니다."
+  </div>
+</section>
+
+<!-- ══════════════════ 1 ══════════════════ -->
+<section id="s1">
+  <h2><span class="num">1</span>기업정보 데이터 분석</h2>
+  <p class="lead">"어떤 데이터를 전처리해서 썼는가" — 종목 마스터, 시세, 뉴스 세 갈래다.</p>
+
+  <h3>1.1 유니버스를 먼저 닫았다 — 13섹터 51종</h3>
+  <p>어린이 대상이므로 <strong>거래 가능한 대상을 화이트리스트로 고정</strong>했다. 이게 첫 번째 안전장치다.</p>
+  <table>
+    <thead><tr><th>섹터</th><th class="num">종목</th><th>섹터</th><th class="num">종목</th></tr></thead>
+    <tbody>
+      <tr><td>은행·금융</td><td class="num">5</td><td>엔터테인먼트</td><td class="num">4</td></tr>
+      <tr><td>반도체</td><td class="num">4</td><td>에너지</td><td class="num">4</td></tr>
+      <tr><td>게임</td><td class="num">4</td><td>방산</td><td class="num">4</td></tr>
+      <tr><td>물류</td><td class="num">4</td><td>화장품</td><td class="num">4</td></tr>
+      <tr><td>식품</td><td class="num">4</td><td>조선</td><td class="num">4</td></tr>
+      <tr><td>유통</td><td class="num">4</td><td>자동차</td><td class="num">3</td></tr>
+      <tr><td>항공</td><td class="num">3</td><td><strong>합계 (13섹터)</strong></td><td class="num"><strong>51</strong></td></tr>
+    </tbody>
+  </table>
+  <p class="lead">위 분포는 <code>web/shared/data/stocks.ts</code> 실측이다. 설계 문서(2026-08-09 확정본)의 섹터별 배분과는
+  일부 종목이 다르며 <strong>합계 51종·13섹터는 같다</strong> — 발표에서는 코드 값을 말한다.</p>
+  <p><strong>제외 기준 [확정]</strong> — ETF · ETN · 레버리지/인버스 · 파생상품 · 공매도 · 신용 · 미수는 데이터셋에 넣지 않는다.
+  한 회사에 복수 상장 종목이 있으면 대표 보통주 1개만 넣는다.</p>
+  <p class="lead">근거: <code>docs/모의투자_종목유니버스_데이터셋_설계.md</code> · <code>web/shared/data/stocks.ts</code></p>
+
+  <h3>1.2 전처리 원칙 — 데이터를 세 층으로 쪼갰다</h3>
+  <p>정체성 / 시세 / 데모 시드를 한 파일에 섞지 않는다. 회사명은 바뀌므로 <strong>식별자는 <code>stockId</code>(<code>KRX:005930</code>) 하나</strong>로 통일했고, 주문·보유·탭 열람·질문식 기록·성향 계산이 전부 이 키로 조인된다.</p>
+  <table>
+    <thead><tr><th>층</th><th>저장 위치</th><th>변경 빈도</th><th>이유</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag fact">마스터</span> 종목 정체성</td><td><code>shared/data/stocks.ts</code> (타입 있는 정적 배열)</td><td>거의 없음</td><td>51개는 DB보다 타입 검사가 이득. Git으로 변경 이력이 남는다</td></tr>
+      <tr><td><span class="tag db">시세</span> 현재가·캔들</td><td>키움 REST → <code>stock_candles</code> 테이블</td><td>초·일 단위</td><td>클라이언트가 외부 API를 직접 부르지 않는다 (키 보호)</td></tr>
+      <tr><td><span class="tag fact">시드</span> 데모 거래·보유</td><td>Supabase 마이그레이션 seed</td><td>시연 단위</td><td>회사명·시세를 중복 저장하지 않고 <code>stockId</code>만 참조</td></tr>
+    </tbody>
+  </table>
+
+  <h3>1.3 회사 설명문 — 5단계 출처 우선순위 + 사람 검수</h3>
+  <p>아이에게 나가는 회사 설명은 <strong>모델의 기억에서 만들지 않는다.</strong> 출처 등급을 정하고, 뉴스·블로그·위키는 초안 탐색에만 허용했다.</p>
+  <table>
+    <thead><tr><th class="num">순위</th><th>원본</th><th>여기서 가져오는 것</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td>거래소 상장정보</td><td>종목코드 · 공식명 · 시장구분</td></tr>
+      <tr><td class="num">2</td><td>전자공시 회사 개황</td><td>주요 사업 · 사업 부문</td></tr>
+      <tr><td class="num">3</td><td>회사 공식 홈페이지 · IR</td><td>제품·서비스 범주 · 산업 역할</td></tr>
+      <tr><td class="num">4</td><td>공식 브랜드·서비스 페이지</td><td>아이가 아는 일상 접점</td></tr>
+      <tr><td class="num">5</td><td>공공기관·산업협회 교육자료</td><td>섹터 구조 · 용어</td></tr>
+    </tbody>
+  </table>
+  <pre><code>작업 상태 머신
+todo → sourced → drafted → reviewed → loaded
+                    │          │
+                    │          └─ 사람 검수: 출처 근거 / 연령 적합성 / 최신성 /
+                    │             방산·금융·화장품 중립성
+                    └─ 자동 검수: stockId 1:1 51개, 섹터 13개, 필수 필드·URL·확인일,
+                       금지 표현 정규식
+
+★ reviewed 상태만 TypeScript로 적재된다. draft는 화면에 안 나간다.</code></pre>
+  <p><strong>시점에 민감한 정보는 아예 안 넣었다</strong> — 실적·주가·계약·점유율은 기본 데이터에서 제외. 제품명 나열보다 오래 유지되는 <em>제품 범주</em>를 우선한다. 분기 1회 재검수하며 <code>reviewedAt</code>·<code>checkedAt</code>을 함께 갱신한다.</p>
+
+  <h3>1.4 시세 데이터 — 3단 폴백</h3>
+  <p>발표가 장 마감 후일 수도, 행사장 네트워크가 불안할 수도 있다. 그래서 시세는 처음부터 폴백 전제로 설계했다.</p>
+  <pre><code>키움 REST API (기본)
+   │ 실패
+   ▼
+Supabase 보관 캔들 (stock_candles)   ← GitHub Actions candles.yml 이 장마감 후 적재
+   │ 없음
+   ▼
+코드 픽스처 (app/api/quote/fixtures.ts)</code></pre>
+  <p><code>stock_candles</code>는 DB 제약으로 데이터 품질을 강제한다 — <code>high >= max(open, close, low)</code>,
+  <code>low &lt;= min(open, close, high)</code>, <code>volume >= 0</code>. <strong>깨진 캔들은 애플리케이션이 아니라 DB가 막는다.</strong></p>
+  <p class="lead">타임프레임은 <code>daily</code>·<code>weekly</code>만 허용. 차트는 lightweight-charts v5.</p>
+
+  <h3>1.5 어린이 뉴스 — LLM 3역할 파이프라인</h3>
+  <p><span class="tag ai">AI 사용</span> 여기가 기업정보 축에서 AI를 가장 크게 쓴 지점이다. 핵심 설계는 <strong>역할 분리와 정보 차단</strong>이다.</p>
+  <pre><code>수집: 네이버 검색은 "후보 URL"만 찾고, 실제 기사 페이지에서 제목·시각·언론사·본문을 읽는다
+  ▼
+전처리: 원문을 문장 단위로 쪼개고 각 문장에 근거 id를 붙인다   ← 이 전처리가 핵심
+  ▼
+① 제목 1차 선별자   (LLM, reasoning high)
+   명백한 채용·행사·사회공헌·홍보·미확정 경쟁·주체 불일치만 reject
+  ▼
+② 본문 관련성 선별자 (LLM)
+   "오늘 국내 시황" 또는 "51종 기업의 직접 사건"만 통과
+   중심 근거 문장 / 주변 근거 문장을 분리하고, 어려운 용어를 표시
+  ▼
+③ 어린이 편집자     (LLM, medium → 실패 시 high 1회 재시도)
+   ★ 원문 전체를 주지 않는다. ②가 고른 문장만 준다
+   → 코스닥 동향·개발자 강연 같은 주변 사실이 문안으로 되살아날 경로 자체가 없다
+  ▼
+④ 결정적 게이트     (LLM 아님 — 코드)
+   근거 id 존재 / 중심 문장 위치 / 원문에 없는 숫자 / 금지 표현 /
+   긍정·부정 라벨 / 용어 처리 누락 / 3줄 각 36자 이하
+  ▼
+⑤ 독립 출고 검수자  (LLM, reasoning high)
+   ★ ①②③의 자체 선언 점수를 안 준다. 원문 전체 + 실제 노출문만 준다
+   → 주체·중요성·초점·근거·용어를 처음부터 다시 판정
+  ▼
+ready_for_storage 만 DB 저장. 통과 기사가 목표보다 적어도 일상 기사로 채우지 않는다</code></pre>
+  <div class="callout">
+    <span class="t">왜 이렇게 나눴는지 (발표 포인트)</span>
+    한 모델에게 "선별하고 편집하고 검수해줘"라고 하면 <strong>자기가 고른 걸 자기가 검수</strong>한다.
+    ③에게 원문을 숨겨 주변 사실 유입을 물리적으로 차단하고, ⑤에게 앞 단계 점수를 숨겨 확증 편향을 끊었다.
+    한 단계라도 파싱 오류·시간 초과·판단 불일치가 나면 <strong>닫힌 실패</strong>로 저장 후보에서 탈락시킨다.
+  </div>
+
+  <h3>1.6 뉴스 데이터를 다시 분석해서 사전을 늘렸다</h3>
+  <p>발행된 뉴스를 <strong>전수 집계</strong>해서 "아이가 걸릴 낱말"을 뽑아 사전에 편입했다. 감이 아니라 빈도로 정했다.</p>
+  <div class="kpi-row">
+    <div class="kpi"><div class="v">101건</div><div class="k">발행 뉴스 전수</div></div>
+    <div class="kpi"><div class="v">230종</div><div class="k">등장 용어</div></div>
+    <div class="kpi"><div class="v">160종</div><div class="k">사전에 없던 용어</div></div>
+    <div class="kpi"><div class="v">19종</div><div class="k">3차 편입 (2회 이상 반복)</div></div>
+  </div>
+  <p>편입: 계약·공장·지분·공시·인수·매각·이사회·지주사·법인·소각·연결 기준·수익성·성장률·반등·공급망·연료비·조달·최고경영자·사모펀드.
+  <strong>넣지 않은 것</strong> — 기사 고유명사와 생활·연예 낱말(세포라·편의점·월드투어). 그 답은 사전 문장이 아니라 그 기사에 붙은 쉬운 말 풀이여야 한다.</p>
+  <p class="lead">집계 코드: <code>child-news-role-pipeline/term-frequency.ts</code> · 실측일 2026-08-16</p>
+</section>
+
+<!-- ══════════════════ 2 ══════════════════ -->
+<section id="s2">
+  <h2><span class="num">2</span>거래 행동 로그 분석</h2>
+  <p class="lead">"행동을 읽어 성향으로 돌려준다"의 실제 계산. <strong>여기는 LLM을 한 번도 부르지 않는다.</strong></p>
+
+  <h3>2.1 수집하는 로그 3종</h3>
+  <table>
+    <thead><tr><th>로그</th><th>테이블</th><th>담기는 값</th><th>쓰이는 축</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>체결 + 질문식 기록</strong></td>
+        <td><code>transactions</code></td>
+        <td>side · 가격 · 수량 · <code>trade_reason</code>(매수 이유 6종) · <code>plan_code</code>(보유 계획 4종) · <code>plan_target_price</code> · <code>plan_match</code>(계획 준수 여부) · <code>plan_changed_reason</code>(변경 이유 5종) · <code>realized_profit</code></td>
+        <td>정확력 · 집중력 · 분산력</td>
+      </tr>
+      <tr>
+        <td><strong>탭 열람</strong></td>
+        <td><code>stock_tab_views</code></td>
+        <td>종목별 카테고리(기업정보·차트·뉴스) 중 <strong>10초 이상</strong> 본 개수</td>
+        <td>근거력 · 직관력</td>
+      </tr>
+      <tr>
+        <td><strong>주문 생애주기</strong></td>
+        <td><code>orders</code> (예약·취소·정산 RPC)</td>
+        <td>지정가 접수 · 취소 · 만기 정산</td>
+        <td>선제 도움 신호</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4>전처리 결정 하나 — 체류 구간을 저장하지 않는다</h4>
+  <p>초기 스키마는 <code>opened_at</code>·<code>closed_at</code>을 저장하고 서버가 <code>duration_seconds</code>를 생성 컬럼으로 계산했다.
+  <strong>지금은 프론트가 카테고리별 10초 이상 방문을 세어 종목당 최종 개수만 보낸다.</strong>
+  원시 타임스탬프를 안 남기니 저장량과 개인정보 노출이 줄고, 엔진이 필요로 하는 값은 그대로다.</p>
+  <p class="lead">마이그레이션: <code>20260814052538_stock_tab_views_per_stock_category_count.sql</code></p>
+
+  <div class="callout stop">
+    <span class="t">일부러 안 받는 값</span>
+    확신도·자신감 수치는 <strong>어떤 형태로도 저장하지 않는다.</strong> 아이가 스스로를 점수 매기게 하는 순간
+    "실력 채점"이 되고, 그건 레드라인(훈계 금지)에 걸린다. DB 제약 주석에도 명시돼 있다.
+  </div>
+
+  <h3>2.2 전처리 — 로그를 점수로 바꾸기 전에 하는 3가지</h3>
+  <ol>
+    <li><strong>KST 주 단위 버킷팅</strong> — 체결 시각을 KST 날짜로 바꾸고 월요일 시작 주로 묶는다.
+        주차 카드는 <em>그 주만</em>이 아니라 <strong>그 주까지의 누적</strong>이다. 한 주만 자르면 표본이 2~3건이라 카드가 늘 "판정 보류"에 머물렀다.</li>
+    <li><strong>과거 시점 포트폴리오 복원(<code>replayPortfolio</code>)</strong> — 현재 보유·현금에서 이후 거래를 최신순으로 되돌려
+        "그 주 마지막 날의 포트폴리오"를 다시 만든다. 집중력은 그 시점 기준이어야 하기 때문이다.</li>
+    <li><strong>2거래일 뒤 종가 채점(<code>gradeTrades</code>)</strong> — 체결 다음 거래일부터 2거래일 뒤 종가와 비교.
+        매수는 오르면 적중, 매도는 내리면 적중. 2거래일이 안 지났거나 종가가 없으면 <strong>채점하지 않고 보류</strong>한다.</li>
+  </ol>
+
+  <h3>2.3 5축 산식</h3>
+  <p>모든 축은 <strong>0~10이고 5가 중립</strong>이다. 표본이 없으면 5에서 시작하고 기록이 쌓일수록 5에서 멀어진다.</p>
+  <table>
+    <thead><tr><th>축</th><th>정의</th><th>산식</th></tr></thead>
+    <tbody>
+      <tr><td><strong>근거력</strong></td><td>사기 전에 자료를 봤는가</td>
+        <td>3탭 중 2개 이상을 <strong>매수 전에</strong> 10초 이상 본 매수의 비율 → 축소</td></tr>
+      <tr><td><strong>직관력</strong></td><td>근거력의 보완쌍</td><td><code>10 - 근거력</code></td></tr>
+      <tr><td><strong>집중력</strong></td><td>한 곳에 몰아넣었는가</td>
+        <td><code>유효섹터수 = 1 / HHI</code> → <code>10 - 5 × log₃(유효섹터수)</code> → 현금 비중만큼 중립으로 당김</td></tr>
+      <tr><td><strong>분산력</strong></td><td>집중력의 보완쌍</td><td><code>10 - 집중력</code></td></tr>
+      <tr><td><strong>정확력</strong></td><td>판단이 2거래일 뒤 맞았는가</td><td>적중 비율 → 축소. 채점된 거래가 없으면 5</td></tr>
+    </tbody>
+  </table>
+
+  <h4>왜 HHI를 썼나 (질문 나오면 이걸로 답한다)</h4>
+  <pre><code>단순 "섹터 가짓수"로 세면:
+   반도체 900만원 + 게임 1만원 = 섹터 2개 = "분산 투자했네"  ← 틀렸다
+
+유효섹터수 = 1 / Σ(섹터비중²)  (허핀달 지수의 역수)
+   위 경우 → 1.0 에 가깝다 = "사실상 한 곳에 몰빵"  ← 맞다
+
+앵커: 유효섹터수 1 → 10점 / 3 → 5점(중립) / 9 → 0점. 로그 스케일이라 계단이 없다.
+전량 현금이면 판단 근거가 없으므로 정확히 중립 5.</code></pre>
+
+  <h4>베이지안 축소 — 표본 1건으로 극단값을 못 내게</h4>
+  <pre><code>shrink(적중, 전체) = 10 × (적중 + k/2) / (전체 + k),  k = 4
+
+"미리 2건 성공 · 2건 실패를 본 셈 친다"
+→ 매수 1건 적중 시:  10 × (1+2)/(1+4) = 6.0    (단순 비율이면 10.0)
+→ 표본 0건이면 정확히 5.0 (중립)</code></pre>
+
+  <h3>2.4 "모르면 모른다고 한다" — 판정 보류 규칙</h3>
+  <p>화면이 스스로 모순되지 않게 하는 게 이 부분의 목적이다.</p>
+  <table>
+    <thead><tr><th>상수</th><th>값</th><th>역할</th></tr></thead>
+    <tbody>
+      <tr><td><code>MIN_BUYS_FOR_PROFILE</code></td><td class="num">2</td><td>매수 1건은 우연과 구별되지 않으므로 캐릭터를 확정하지 않는다</td></tr>
+      <tr><td><code>TIE_BAND</code></td><td class="num">1</td><td>보완쌍 차이가 1 미만이면 동점대 → 캐릭터 <code>null</code></td></tr>
+      <tr><td><code>NEUTRAL_SCORES</code></td><td>전 축 5</td><td>보류하면 <strong>점수도 보류</strong>한다</td></tr>
+      <tr><td><code>VALID_DWELL_MS</code></td><td class="num">10초</td><td>이보다 짧은 열람은 근거로 안 센다</td></tr>
+      <tr><td><code>EVIDENCE_TAB_MIN</code></td><td class="num">2 / 3</td><td>3탭 중 2개 이상 봐야 "근거 있는 매수"</td></tr>
+      <tr><td><code>SHRINKAGE_K</code></td><td class="num">4</td><td>표본 축소 강도</td></tr>
+      <tr><td><code>ACCURACY_WAIT_TRADING_DAYS</code></td><td class="num">2</td><td>채점 대기 거래일 (월 매수 → 수 종가)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="t">실제로 겪은 버그가 만든 규칙</span>
+    표본 축소만으로는 부족했다. 매수 1건이면 근거력이 4.0이라 화면 반올림을 거쳐 <strong>"4"로 또렷하게 찍히는데
+    그 옆에서 유형은 "관찰 중"</strong>이라 화면이 스스로 모순된 말을 했다. 그래서 판정을 보류하면 숫자도 중립으로 보류한다.
+    <br>또 한 번은 구버전 산식·<code>/api/profile/behavior</code>·<code>season-cards</code> 세 곳이 같은 값에 답해서
+    <strong>응답 도착 순서대로 캐릭터가 번갈아 떴다.</strong> 지금은 원본이 <code>behavior-profile.ts</code> 한 벌이고 통로는 <code>GET /api/profile/season-cards</code> 하나다.
+  </div>
+
+  <h3>2.5 4캐릭터 — 두 보완쌍의 2×2</h3>
+  <table>
+    <thead><tr><th></th><th>집중력 우세</th><th>분산력 우세</th></tr></thead>
+    <tbody>
+      <tr><th>근거력 우세</th><td><strong>저격수</strong> (sniper)<br><span class="lead">찾아보고 한 곳에</span></td><td><strong>전략가</strong> (strategist)<br><span class="lead">찾아보고 여러 곳에</span></td></tr>
+      <tr><th>직관력 우세</th><td><strong>도전자</strong> (challenger)<br><span class="lead">느낌대로 한 곳에</span></td><td><strong>탐험가</strong> (explorer)<br><span class="lead">느낌대로 여러 곳에</span></td></tr>
+    </tbody>
+  </table>
+  <p>어느 한 쌍이라도 동점대면 캐릭터는 <code>null</code> — 화면에 "관찰 중"으로 나간다.
+  <strong>4유형에 우열이 없다.</strong> 저격수가 탐험가보다 낫다고 말하는 문구는 전 경로에서 금지다.</p>
+
+  <h3>2.6 이 축에 LLM을 안 쓴 이유</h3>
+  <div class="grid2">
+    <div class="card tight">
+      <h4>규칙 엔진 (채택)</h4>
+      <ul>
+        <li>같은 입력 → 항상 같은 점수 (재현성)</li>
+        <li>"왜 6점이냐"에 산식으로 답할 수 있다</li>
+        <li>테스트로 회귀를 잡는다</li>
+        <li>호출 비용 0, 지연 0</li>
+      </ul>
+    </div>
+    <div class="card tight">
+      <h4>LLM 스코어링 (기각)</h4>
+      <ul>
+        <li>같은 아이에게 매번 다른 점수가 나올 수 있다</li>
+        <li>부모가 근거를 물으면 설명 불가</li>
+        <li>환각한 수치가 성장 기록으로 남는다</li>
+        <li>금융 서비스에서 방어 불가</li>
+      </ul>
+    </div>
+  </div>
+  <p class="lead">엔진 위치: <code>web/shared/engine/behavior-profile.ts</code> (546줄) + <code>behavior-profile.test.ts</code> (370줄)</p>
+
+  <h3>2.7 행동 로그의 실시간 활용 — 선제 도움 3신호</h3>
+  <p><span class="tag rule">LLM 미사용</span> 축적 분석과 별개로, <strong>지금 헤매는 순간</strong>을 룰로 잡아 챗봇이 먼저 말을 건다.</p>
+  <table>
+    <thead><tr><th>신호</th><th>조건</th><th>고정 발화</th></tr></thead>
+    <tbody>
+      <tr><td><code>buyHesitation</code></td><td>매수 5/5 최종 확인 화면에서 <strong>주문 없이 뒤로가기</strong>가 30분 세션 안에 종목 무관 3회 연속. 매수 체결 시 초기화</td><td>"살지 말지 고민돼요?"</td></tr>
+      <tr><td><code>orderMethodConfusion</code></td><td>같은 주문 흐름에서 시장가↔지정가를 3회 연속 교차 변경하고 확인으로 진행 안 함</td><td>"뭐가 다른지 볼까요?"</td></tr>
+      <tr><td><code>dwell</code></td><td>주문 또는 종목 상세 화면 5분 초과 체류</td><td>"어디가 헷갈려요?"</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <span class="t">설계 원칙 2개</span>
+    ① <strong>감정을 단정하지 않는다.</strong> 신호가 아는 건 행동뿐이고 마음은 모른다. "후회되나요?" 같은 문구는
+    아이가 느끼지도 않은 감정을 나무라는 것처럼 읽힌다.<br>
+    ② <strong>질문을 대신 던지지 않고 아이가 고르게 한다.</strong> 신호는 어디서 막혔는지까지는 모른다.
+    대신 물으면 진짜 궁금증을 덮어버린다. 그래서 추천 질문 칩만 붙이고 선택은 아이가 한다.
+  </div>
+  <p class="lead">임계값은 전부 <strong>[가정] 초기 운영값</strong>이며 자녀 테스트 30세션 후 조정 예정. 이건 발표에서 그대로 말하는 게 낫다.</p>
+</section>
+
+<!-- ══════════════════ 3 ══════════════════ -->
+<section id="s3">
+  <h2><span class="num">3</span>AI 챗봇 "키웅이"</h2>
+  <p class="lead">"챗봇 게이트를 어떻게 했는가" — 핵심은 <strong>생성을 최후 수단으로 미루는 구조</strong>다.</p>
+
+  <h3>3.1 응답 우선순위 — 생성은 마지막이다</h3>
+  <pre><code>① 고정 사실 데이터   (승인 사전 · FAQ · 51종 종목 사실)        ← 전체 답변의 다수
+② 화면 컨텍스트 계산 (지금 화면이 실제로 보여주는 수치)
+③ 승인된 읽기 전용 조회 (본인 거래·성향·아카이브 툴 5종)
+④ Luna 생성 1회      (①②③ 어디에도 안 걸릴 때만)
+⑤ 전체 출력 게이트
+
+★ 회사·제품·일상접점·섹터 역할 질문은 51종·13섹터 전부
+  OpenAI 호출 없이 기본 답변이 가능해야 한다 (완료 기준)</code></pre>
+  <p>600건 시뮬레이션에서 <strong>생성 후보(<code>fallback</code>)는 13.8%</strong>고, 실제 모델 경로까지 간 건 회귀 600건 중 2건이었다.
+  나머지 86%는 승인된 텍스트로 답한다.</p>
+
+  <h3>3.2 게이트 T0~T7 — 입력 차단은 모델 호출보다 먼저</h3>
+  <table>
+    <thead><tr><th>단계</th><th>판정</th><th>실패 시</th></tr></thead>
+    <tbody>
+      <tr><td><strong>T0</strong> 요청·세션</td><td>스키마 유효 · 세션 사용자 확정</td><td><code>400</code> 또는 로그인 안내</td></tr>
+      <tr><td><strong>T1</strong> 입력 안전</td><td>위기 → 개인정보 → 유해 → 추천 → 오프토픽 <strong>순서대로</strong> 분류</td><td>상황별 고정 응답. <strong>모델·툴 미호출</strong></td></tr>
+      <tr><td><strong>T2</strong> 목적 라우팅</td><td>허용 목적 6종을 <strong>긍정 판정</strong>해야 통과</td><td>범위 안내 고정 응답</td></tr>
+      <tr><td><strong>T3</strong> 조회 권한</td><td>허용 툴 · 세션 본인 범위</td><td>조회 중단</td></tr>
+      <tr><td><strong>T4</strong> 근거 검증</td><td>종목·기록·성향 값이 승인 데이터에 실재</td><td><strong>전체 답변 폐기</strong></td></tr>
+      <tr><td><strong>T5</strong> 출력 1단</td><td>결정적 룰 — 금지 표현 정규식 · 단위 붙은 주장 수치 대조</td><td>고정 안전 응답</td></tr>
+      <tr><td><strong>T5b</strong> 출력 2단</td><td>Luna 판정 — <strong>모델 생성 답변만</strong> 추천·우열·전망·목표가·매력도 재확인</td><td>고정 안전 응답. <strong>판정 실패도 차단</strong></td></tr>
+      <tr><td><strong>T6</strong> 후속 행동</td><td><code>uiAction</code>이 허용 화면 목록에 존재</td><td>액션 제거, 텍스트만</td></tr>
+      <tr><td><strong>T7</strong> 로깅</td><td>경로·차단·조회·필터 결과 기록</td><td>메트릭 장애가 권한을 넓히지 않음</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <span class="t">설계에서 중요한 두 가지</span>
+    ① <strong>화이트리스트다.</strong> "나쁜 걸 막는다"가 아니라 "허용 목적 6종을 긍정 판정해야 통과"다.
+    목적을 못 정한 일반 대화·생활 질문은 모델에 <strong>보내지도 않는다</strong>.<br>
+    ② <strong>원시 델타를 화면에 안 흘린다.</strong> 스트리밍 토큰을 그대로 뿌리면 검사 전 문장이 이미 아이 눈에 들어간다.
+    서버가 최대 4,000자 버퍼에 모은 뒤 완성문을 검증하고, 통과분만 단일 <code>text</code> 이벤트로 보낸다.
+  </div>
+
+  <h3>3.3 한 요청의 LLM 호출은 최대 4회 — 에이전트 루프를 안 만들었다</h3>
+  <pre><code>요청 → [T0·T1·T2 게이트] → 라우팅
+                             │
+      해석 실패 + 직전 답변 有 ├─→ ① 후속질문 재작성   reasoning none · 4초 · 200토큰
+                             │      ("그럼 거기는 돈을 어떻게 벌어?" → 단독 질문으로)
+                             │
+      fallback 직전          ├─→ ② 용어 9종 분류      reasoning low  · 4초
+                             │      성공하면 승인 고정문장으로 답하고 생성·판정 건너뜀
+                             │      ↕ 배타적
+      faq·context 고정답변   ├─→ ②' 답변 적합성 검사  reasoning low  · 4초
+                             │
+      위 분류가 none 이면    ├─→ ③ 답변 생성          reasoning low  · 8초 · 800토큰 · stream
+                             │
+      생성이 있었으면        └─→ ④ 출력 2단 판정      reasoning low  · 5초 · structured
+
+★ 각 단계는 조건부 + 자체 타임아웃 + 닫힌 실패 처리
+★ 대부분의 요청은 0~1회로 끝난다
+★ 분당 12건 초과 시 429 + Retry-After (한 요청이 최대 4회를 부르므로 연타를 게이트 앞에서 끊는다)</code></pre>
+  <p><strong>왜 LangChain·LangGraph를 안 썼나</strong> — 한 번 통과하는 파이프라인에 조건부 분기뿐이라 그래프 런타임의 이득보다
+  복잡도가 크다. 재검토 조건은 명시해뒀다: 한 요청에서 여러 툴의 반복 호출, 중단 후 재개, 사람 승인, 복잡한 재시도·분기가
+  <em>실제 요구사항</em>이 될 때.</p>
+
+  <h3>3.4 출력 필터를 2단으로 만든 이유 — 실측 근거</h3>
+  <p>정규식 1단만으로는 못 막는 게 있었다. <strong>같은 의미를 다른 표현으로 쓴 문장</strong>이다.</p>
+  <table>
+    <thead><tr><th>검사기</th><th class="num">추천·전망 재표현 12문장</th><th class="num">룰 확장 후 재표현 5문장</th><th class="num">정상 설명 8건 오탐</th></tr></thead>
+    <tbody>
+      <tr><td>1단 — 정규식 룰</td><td class="num">0 / 12 차단</td><td class="num">0 / 5 차단</td><td class="num">0</td></tr>
+      <tr><td>1단 — 룰 8개 확장</td><td class="num">일부</td><td class="num">0 / 5 차단</td><td class="num">0</td></tr>
+      <tr><td><strong>2단 — Luna 판정</strong></td><td class="num"><strong>12 / 12 차단</strong></td><td class="num"><strong>5 / 5 차단</strong></td><td class="num"><strong>0</strong></td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li><strong>2단은 <code>source === "model"</code>인 답변에만 돈다.</strong> 고정 응답·사전·FAQ·툴 결과는 승인된 정적 텍스트라 호출하지 않는다 → 비용·지연이 거의 안 붙는다.</li>
+    <li><strong>인라인 판정이다.</strong> 먼저 보내고 뒤에서 검사하는 비동기는 안 쓴다 — 아이가 이미 읽은 뒤에 위반을 알아도 늦다. 단건 지연 약 1.5초는 최소 2초 "답변 준비 카드" 안에 들어간다.</li>
+    <li><strong>2단이 환각해도 안전 하한선은 안 내려간다.</strong> 1단이 잡던 표현은 그대로 차단된다.</li>
+    <li>파싱 오류·시간 초과·호출 실패는 전부 <strong>닫힌 실패</strong> → 고정 안전 응답.</li>
+  </ul>
+  <p class="lead">수치 검증은 <strong>단위가 붙은 주장값만</strong> 대조한다(<code>123원</code>·<code>12%</code>·<code>10주</code>).
+  <code>1주당</code>처럼 조사가 붙은 관용구와 단위 없는 설명용 숫자는 화면 수치 주장이 아니므로 통과시킨다.</p>
+
+  <h3>3.5 안전하지만 쓸모없는 답 — 적합성 검사</h3>
+  <div class="callout warn">
+    <span class="t">앞의 게이트가 못 잡는 실패</span>
+    T0~T7은 전부 "<strong>나가는 문장이 위험한가</strong>"를 본다. 그런데 규칙 라우터는 낱말이 겹치면 승인된 카드를 낸다.
+    그래서 <strong>문장 자체는 늘 안전한 채 묻지 않은 것에 답하는</strong> 오답이 남는다.
+    이건 문장 형태로 구분되지 않아 정규식으로 못 잡는다 — <strong>질문과 답을 함께 읽어야</strong> 판정된다.
+  </div>
+  <p>의도별 실측 정확도를 재고, <strong>낮은 쪽만</strong> 다시 읽게 했다.</p>
+  <table>
+    <thead><tr><th>의도</th><th class="num">정확도</th><th>재검사</th></tr></thead>
+    <tbody>
+      <tr><td><code>term</code> 용어</td><td class="num">98%</td><td>—</td></tr>
+      <tr><td><code>company</code> 회사</td><td class="num">96%</td><td>—</td></tr>
+      <tr><td><code>meta</code> 챗봇 자신</td><td class="num">93%</td><td>—</td></tr>
+      <tr><td><code>howto</code> 사용법</td><td class="num">89%</td><td>✓ 검사</td></tr>
+      <tr><td><code>rule</code> 규칙</td><td class="num">81%</td><td>✓ 검사</td></tr>
+      <tr><td><code>mydata</code> 내 기록</td><td class="num" style="color:var(--stop);font-weight:700">23%</td><td>✓ 검사</td></tr>
+    </tbody>
+  </table>
+  <p>판정은 <code>on</code>/<code>off</code> 둘뿐. <code>off</code>면 승인 문장을 버리고 생성으로 돌려 T5·T5b를 받게 한다.
+  <strong>검사 실패는 승인 문장을 그대로 둔다(열린 실패)</strong> — 검사기가 죽었다고 안전한 답을 생성으로 바꾸지 않는다.
+  거절·안전·범위 밖 응답은 <strong>일부러 질문에 답하지 않는 것</strong>이라 검사 대상에서 제외한다.</p>
+
+  <h3>3.6 DAPIE — 답을 주지 않고 되묻는 설명 대화</h3>
+  <p>논문 기반 대화형 설명 구조(<code>docs/DAPIE_논문_추출.md</code>)를 승인 스크립트로 구현했다.</p>
+  <pre><code>한 응답의 3부 구성:   피드백(머리말) → 개념 하나 설명 → 질문
+
+정답 → 구체적 피드백 후 다음 행동을 묻는다
+오답 → 정답을 바로 주지 않고 "더 쉬운 설명 · 더 작은 질문"으로 분기
+       → 또 틀리면 예시와 함께 한 번만 다시 묻는다 (reaskCount 로 왕복 카운트)
+       → 그 뒤에도 틀리면 정답 설명 + 비슷한 용어 카드 2장
+
+★ LLM 은 단계 문구·선택지·정답을 생성하지도 해석하지도 않는다. 전부 승인된 정적 데이터.
+★ 서버가 scriptId·stage·choiceId 를 등록 스크립트와 대조한다 — 위조한 전이는 거부.
+★ 이해 여부를 평가하거나 점수화하지 않는다.</code></pre>
+  <h4>DAPIE를 여는 기준을 명문화한 이유</h4>
+  <p>되물어서 답이 좁혀지는 질문이 아니면 되묻기가 오히려 방해다. 실제로 <strong>"차트는 어떻게 봐요?"에
+  "차트가 직접 보여주는 것은 무엇일까요?"로 되묻는</strong> 사고가 났다.</p>
+  <table>
+    <thead><tr><th>질문 유형</th><th>예</th><th>처리</th></tr></thead>
+    <tbody>
+      <tr><td>한 용어의 뜻</td><td>"주가가 뭐야?"</td><td><strong>DAPIE</strong></td></tr>
+      <tr><td>두 개념 비교</td><td>"PER이랑 PBR 뭐가 더 정확함"</td><td>고정 응답</td></tr>
+      <tr><td>잘못된 단정 교정</td><td>"PBR 1보다 낮으면 무조건 저평가야?"</td><td>고정 응답</td></tr>
+      <tr><td>명시된 수치 계산</td><td>"3% 오르면 20만원은 얼마 늘어?"</td><td>고정 응답</td></tr>
+      <tr><td>사용법·위치</td><td>"기록 어디서 봄?"</td><td>FAQ 단답</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.7 챗봇 지식 데이터 — 2티어로 나눈 기준</h3>
+  <table>
+    <thead><tr><th>티어</th><th>대상</th><th class="num">개수</th><th>스크립트</th></tr></thead>
+    <tbody>
+      <tr><td><strong>T1 — DAPIE 용어</strong></td><td><strong>행동에 직접 붙는 말</strong> (주문·수익·지표). 대화형 확인이 값을 한다</td><td class="num">36</td><td>필수</td></tr>
+      <tr><td><strong>T2 — 즉답 정의</strong></td><td>화면·뉴스에 나오지만 <strong>그 낱말로 결정을 내리지는 않는 말</strong></td><td class="num">126</td><td>없음</td></tr>
+    </tbody>
+  </table>
+  <p><strong>넣을 말을 고르는 기준은 하나</strong> — 앱 화면이나 어린이 뉴스에 <em>실제로 나오는</em> 낱말.
+  자의적이지 않고, 텍스트로 검증 가능하고, 멈출 지점이 있다.</p>
+
+  <h4>다루지 않는 상품도 사전에 넣었다</h4>
+  <p>공매도·선물·파생·신용·공모주는 이 서비스가 안 다룬다. 그런데 아이는 유튜브에서 듣고 와서 묻는다.
+  <strong>모른 척하면 다른 데서 답을 찾고, 뜻만 알려주면 여기서도 되는 줄 안다.</strong> 그래서 한 답에 두 가지를 둔다 —
+  ① 10~13세 눈높이 한 문장 뜻 ② "이 모의투자에서는 하지 않아요"라는 경계.
+  <strong>하는 방법은 설명하지 않는다.</strong> 경계 문장이 빠지면 테스트가 실패한다.</p>
+
+  <h4>실제로 난 사고와 그 대응</h4>
+  <div class="callout warn">
+    두 글자 트리거가 낱말 중간에 걸렸다. 조회를 공백 지운 문자열로 하니 경계가 사라져
+    <strong>"공<u>시가</u> 뭐야?" → <code>시가</code>로, "수주잔<u>고가</u>" → <code>고가</code>로</strong> 답했다.
+    이제 원문을 함께 넘겨 앞 글자가 한글이면 버린다. 라우터가 이 인자를 빼면 사고가 되살아나고 테스트가 잡는다.
+  </div>
+
+  <h3>3.8 600건 시뮬레이션 — 라우터 회귀 측정</h3>
+  <p>페르소나 30종 × 질문 600개를 라우터에 전량 통과시켰다. <strong>LLM 호출 없이</strong> 규칙만 측정한 값이다.</p>
+  <table>
+    <thead><tr><th>지표</th><th class="num">기준선</th><th class="num">최종</th><th class="num">변화</th></tr></thead>
+    <tbody>
+      <tr><td>실제 통과 누수 (차단돼야 하는데 정보 라우트로)</td><td class="num">38건 (6.3%)</td><td class="num"><strong>1건 (0.2%)</strong></td><td class="num">−37</td></tr>
+      <tr><td>분석기 누수 (기대 안전 라우트 불일치)</td><td class="num">49건 (8.2%)</td><td class="num">12건 (2.0%)</td><td class="num">−37</td></tr>
+      <tr><td>과차단 (정상 질문을 막음)</td><td class="num">20건 (3.3%)</td><td class="num">20건 (3.3%)</td><td class="num">0</td></tr>
+    </tbody>
+  </table>
+  <h4>최종 라우트 분포</h4>
+  <table>
+    <thead><tr><th>라우트</th><th class="num">건수</th><th class="num">비율</th><th>의미</th></tr></thead>
+    <tbody>
+      <tr><td><code>refusal</code></td><td class="num">141</td><td class="num">23.5%</td><td>추천·예측 고정 거절</td></tr>
+      <tr><td><code>safety</code></td><td class="num">128</td><td class="num">21.3%</td><td>위기·개인정보·유해 고정 응답</td></tr>
+      <tr><td><code>faq</code></td><td class="num">163</td><td class="num">27.2%</td><td>사전·FAQ 즉답</td></tr>
+      <tr><td><code>outOfScope</code></td><td class="num">49</td><td class="num">8.2%</td><td>도메인 밖</td></tr>
+      <tr><td><code>tool</code></td><td class="num">23</td><td class="num">3.8%</td><td>승인 데이터·본인 기록 조회</td></tr>
+      <tr><td><code>context</code></td><td class="num">13</td><td class="num">2.2%</td><td>화면 맥락 즉답</td></tr>
+      <tr><td><code>fallback</code></td><td class="num">83</td><td class="num">13.8%</td><td><strong>여기만 Luna 호출 후보</strong></td></tr>
+    </tbody>
+  </table>
+  <p><strong>안전 경로(거절+안전+범위밖)가 53%</strong>다. 아이가 던지는 질문의 절반은 애초에 답하면 안 되는 질문이라는 뜻이고,
+  그래서 게이트를 이렇게 깔았다.</p>
+  <h4>남은 1건을 왜 안 막았나</h4>
+  <p>"이거 꼭 해야 돼?" — 문장만으로는 정서 위기와 리그 참여 여부를 구분할 수 없고, SPEC이 같은 표현을 참여 규칙 FAQ로 명시한다.
+  <strong>규칙으로 더 좁히면 정상 질문을 과차단한다.</strong> 남긴 게 판단이지 놓친 게 아니다.</p>
+  <p class="lead">전체 리포트: <code>docs/F10_아이질문_시뮬레이션_커버리지리포트.md</code> · 재현: <code>records/f10-child-sim/run-regression.ts</code></p>
+</section>
+
+<!-- ══════════════════ 4 ══════════════════ -->
+<section id="s4">
+  <h2><span class="num">4</span>모델 선택과 비용</h2>
+  <h3>4.1 단일 모델 <code>gpt-5.6-luna</code></h3>
+  <table>
+    <thead><tr><th>항목</th><th>값</th></tr></thead>
+    <tbody>
+      <tr><td>가격</td><td>입력 $0.20 / 출력 $1.20 per 1M 토큰</td></tr>
+      <tr><td>컨텍스트</td><td>1,050,000 · 최대 출력 128,000</td></tr>
+      <tr><td>지원</td><td>Responses · Chat Completions · Batch · 스트리밍 · structured outputs · function calling · reasoning</td></tr>
+      <tr><td>미지원</td><td>Realtime → <strong>음성은 범위 밖</strong>이라고 명시</td></tr>
+    </tbody>
+  </table>
+  <p>모델 ID는 <code>shared/llm/client.ts</code>의 단일 상수. 별도 프로바이더 추상화를 만들지 않았다
+  (인터페이스 하나에 구현 하나면 추상화가 아니라 껍데기다). 별칭 <code>gpt-5.6</code>은 다른 모델로 라우팅되므로 쓰지 않는다.</p>
+
+  <h3>4.2 기능별 reasoning 강도</h3>
+  <table>
+    <thead><tr><th>기능</th><th>강도</th><th>이유</th></tr></thead>
+    <tbody>
+      <tr><td>F10 후속질문 재작성</td><td><code>none</code></td><td>지시어를 푸는 정리 작업, 판단이 없다</td></tr>
+      <tr><td>F10 용어 분류 · 적합성 · 출력 판정</td><td><code>low</code></td><td>enum 하나를 고르는 분류</td></tr>
+      <tr><td>F10 답변 생성</td><td><code>low</code></td><td>무대 지연을 줄이되 3문장·거절 지시 준수는 유지</td></tr>
+      <tr><td>뉴스 어린이 편집</td><td><code>medium</code> → 실패 시 <code>high</code> 1회</td><td>문장 재구성</td></tr>
+      <tr><td>뉴스 선별 · 독립 검수</td><td><code>high</code></td><td>주체·중요성 판정은 틀리면 기사 자체가 잘못 나간다</td></tr>
+    </tbody>
+  </table>
+  <p><code>max_output_tokens</code>는 reasoning 토큰까지 포함하므로 800으로 두고, 3문장 상한은 서버 라우트가 자른다.</p>
+
+  <h3>4.3 어린이 뉴스 모델 비교 (2026-08-11 실측 10건)</h3>
+  <table>
+    <thead><tr><th>라벨</th><th class="num">생성</th><th class="num">홈요약</th><th class="num">문단 평균</th><th class="num">용어 풀이</th><th class="num">미설명 전문용어</th></tr></thead>
+    <tbody>
+      <tr><td>luna_medium</td><td class="num">10/10</td><td class="num">39자</td><td class="num">44자</td><td class="num">0/10</td><td class="num"><strong>6</strong></td></tr>
+      <tr><td>terra_medium</td><td class="num">10/10</td><td class="num">46자</td><td class="num">49자</td><td class="num">0/10</td><td class="num">7</td></tr>
+      <tr><td>sol_low</td><td class="num">10/10</td><td class="num">44자</td><td class="num">56자</td><td class="num">0/10</td><td class="num">8</td></tr>
+      <tr><td>sol_xhigh</td><td class="num">10/10</td><td class="num">44자</td><td class="num">57자</td><td class="num">2/10</td><td class="num">8</td></tr>
+      <tr><td>terra_xhigh</td><td class="num">10/10</td><td class="num">46자</td><td class="num">65자</td><td class="num">1/10</td><td class="num">10</td></tr>
+      <tr><td>luna_max</td><td class="num">10/10</td><td class="num">43자</td><td class="num">52자</td><td class="num">0/10</td><td class="num">11</td></tr>
+    </tbody>
+  </table>
+  <p class="lead"><strong>주의해서 말할 것</strong> — 6개를 동시 실행해 소요 시간은 서로 경합한 값이라 순수 지연으로 읽으면 안 된다.
+  "미설명 전문용어"는 용어를 아예 피하고 숫자만 나열해도 낮아지므로 "용어 풀이"와 함께 봐야 한다.
+  추론 강도를 올린다고 어린이 눈높이가 좋아지지 않았다는 게 이 표의 요지다.</p>
+</section>
+
+<!-- ══════════════════ 5 ══════════════════ -->
+<section id="s5">
+  <h2><span class="num">5</span>예상 질문 대응</h2>
+
+  <div class="say">
+    <span class="t">Q. LLM이 환각하면 어떡하나?</span>
+    <p>세 겹으로 막습니다. ① 애초에 답변의 86%가 승인된 정적 텍스트라 생성 자체가 안 일어납니다.
+    ② 생성된 답변은 결정적 정규식 1단과 Luna 판정 2단을 <strong>인라인으로</strong> 통과해야 화면에 나갑니다.
+    ③ 수치는 화면 컨텍스트 허용 목록과 대조합니다 — 모델이 새 숫자를 만들면 그건 버그이고 차단됩니다.
+    그리고 <strong>실패는 전부 닫힌 실패</strong>입니다. 판정이 시간 초과되면 통과가 아니라 고정 응답으로 내려갑니다.</p>
+  </div>
+
+  <div class="say">
+    <span class="t">Q. 성향 점수를 AI가 만드나?</span>
+    <p>아닙니다. 5축·4캐릭터는 전부 순수 함수 규칙 엔진이 계산합니다(<code>shared/engine/behavior-profile.ts</code>).
+    HHI 역수로 유효 섹터수를 내고 베이지안 축소를 적용합니다. LLM은 그 <strong>결과 JSON을 읽어 쉽게 설명</strong>만 합니다.
+    표본이 부족하면 캐릭터를 확정하지 않고 "관찰 중"으로 둡니다.</p>
+  </div>
+
+  <div class="say">
+    <span class="t">Q. 아이가 "뭐 사면 돼?"라고 물으면?</span>
+    <p>정규식 정확 일치가 아니라 <strong>정규화한 자연어의 의미 단서 조합</strong>으로 판정합니다.
+    "떡상", "존버", "낼 오를까", "찍어줘" 같은 구어체가 달라도 취지가 같으면 같이 차단됩니다.
+    그리고 거절로 끝내지 않고 <strong>고정 대안 질문</strong>을 냅니다 — 종목 선택 요구에는 회사 소개·수익 구조를,
+    가격 예측에는 차트와 변동성의 <em>의미</em>를 내밉니다. 600건 중 추천 의도 122건이 121건 <code>refusal</code>로 갔습니다.</p>
+  </div>
+
+  <div class="say">
+    <span class="t">Q. 부모가 아이 대화를 볼 수 있나?</span>
+    <p>없습니다. 대화 원문과 행동 데이터는 부모에게 전달하지 않고, F10 로그는 성향 스코어링에도 반영하지 않습니다.
+    조회 대상 사용자는 <strong>서버가 HttpOnly 쿠키에서만</strong> 정합니다 — 클라이언트도 모델도 조회 대상을 지정할 수 없습니다.
+    가족 구성원의 기록 접근 시도는 거부하고 테스트로 검증합니다.</p>
+  </div>
+
+  <div class="say">
+    <span class="t">Q. 왜 에이전트 프레임워크를 안 썼나?</span>
+    <p>한 번 통과하는 파이프라인에 조건부 분기뿐이라 그래프 런타임을 얹을 이득보다 복잡도가 큽니다.
+    Next.js 단일 TypeScript 서비스에 Python 런타임을 더할 이유도 없었습니다.
+    <strong>재검토 조건은 문서에 적어뒀습니다</strong> — 한 요청에서 여러 툴 반복 호출, 중단 후 재개, 사람 승인,
+    복잡한 재시도·분기가 실제 요구사항이 될 때 LangGraph를 다시 봅니다.</p>
+  </div>
+
+  <div class="say">
+    <span class="t">Q. 시연 중에 API가 죽으면?</span>
+    <p>시세는 키움 → Supabase 보관 캔들 → 코드 픽스처 3단 폴백이고, LLM이 죽으면 사전·FAQ 전용 모드로 강등합니다.
+    챗봇의 모든 LLM 단계가 자체 타임아웃(4~8초)과 고정 응답 폴백을 갖고 있어서, <strong>어느 단계가 실패해도 대화는 계속됩니다.</strong></p>
+  </div>
+</section>
+
+<!-- ══════════════════ 6 ══════════════════ -->
+<section id="s6">
+  <h2><span class="num">6</span>아직 안 된 것 — 먼저 말하는 편이 낫다</h2>
+  <p class="lead">심사위원이 찾아내기 전에 먼저 꺼내면 신뢰가 오른다. 아래는 문서에 [제약]·[가정]으로 표기된 것들이다.</p>
+  <table>
+    <thead><tr><th>항목</th><th>현재 상태</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag gap">미완</span> 뉴스 일일 자동 수집</td>
+        <td>정기 실행되는 워크플로는 장마감 캔들 적재(<code>candles.yml</code>) 하나뿐. 뉴스 수집은 아직 수동 CLI 실행이다</td></tr>
+      <tr><td><span class="tag gap">미완</span> 적합성 검사 재현 스크립트</td>
+        <td>도입 근거 실측(고정답변 262건 중 24%가 비껴간 답)은 소스 주석에만 있고 체크인 스크립트가 없다. 임계·대상을 바꾸려면 측정을 다시 만들어야 한다</td></tr>
+      <tr><td><span class="tag gap">가정</span> 선제 도움 임계값</td>
+        <td>신호 3종은 확정, 횟수·시간·손실률은 [가정] 초기값. 자녀 테스트 30세션 후 조정 예정</td></tr>
+      <tr><td><span class="tag gap">미완</span> 종목 설명문 적재</td>
+        <td><code>stocks.ts</code>의 51종은 코드·별칭·섹터까지 검증 완료. <code>companySummary</code> 등 설명 필드는 <code>draft</code> 상태로 사람 검수 대기</td></tr>
+      <tr><td><span class="tag gap">미완</span> 가입 마법사 서버 저장</td>
+        <td>부모 4단계·자녀 3단계 화면은 있으나 서버 저장 호출이 아직 없다</td></tr>
+      <tr><td><span class="tag gap">확인필요</span> 키움 REST 앱키</td>
+        <td>모의투자 환경 지원 범위와 발급 절차 확인 중. 불가 시 일반 시세 API + 가상 체결로 대체</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <span class="t">이걸 말하는 방식</span>
+    "미완성입니다"가 아니라 <strong>"어디까지 검증했고 무엇을 아직 안 믿는지 알고 있습니다"</strong>로 말한다.
+    임계값에 [가정] 표기를 붙여둔 것 자체가 설계 성숙도의 증거다.
+  </div>
+</section>
+
+<footer>
+  근거 파일 — 제품: <code>docs/영웅키움_기획_통합문서_v2.md</code> ·
+  기술: <code>docs/기술스택.md</code> ·
+  챗봇: <code>web/features/f10-chatbot/SPEC.md</code> ·
+  엔진: <code>web/shared/engine/behavior-profile.ts</code> ·
+  데이터: <code>docs/모의투자_종목유니버스_데이터셋_설계.md</code> ·
+  뉴스: <code>web/features/f2-trade/prototypes/child-news-role-pipeline/README.md</code> ·
+  회귀: <code>docs/F10_아이질문_시뮬레이션_커버리지리포트.md</code>
+  <br><br>
+  이 문서는 발표 준비용 참고자료다. 제품 결정의 단일 원본이 아니며, 충돌 시 위 원본 문서를 따른다.
+</footer>
+
+</div>
+</body>
+</html>
