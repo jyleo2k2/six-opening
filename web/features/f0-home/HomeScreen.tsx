@@ -228,10 +228,15 @@ const BANNER_SCRIM = styleFromCss(
 );
 const BANNER_SHEET = styleFromCss("width:100%;line-height:0");
 /**
- * 그림의 **위쪽 두 모서리는 이미 잘려 투명하다**(`home-banner.png`). 원본에는 그 자리에
- * 흰 아크가 남아 있어 짙은 딤 위에 흰 뿔로 튀었다 — CSS `border-radius` 로 덮지 않는
- * 이유는, 그림이 폭에 맞춰 늘어나므로 고정 radius 가 원본 아크와 어긋나 흰 실선이
- * 남기 때문이다. 자른 것은 자산 쪽이 원본이다.
+ * 그림의 **위쪽 두 모서리는 이미 잘려 투명하다**(`home-banner-first-step.png`). 원본에는
+ * 그 자리에 흰 아크가 남아 있어 짙은 딤 위에 흰 뿔로 튀었다 — CSS `border-radius` 로
+ * 덮지 않는 이유는, 그림이 폭에 맞춰 늘어나므로 고정 radius 가 원본 아크와 어긋나 흰
+ * 실선이 남기 때문이다. 자른 것은 자산 쪽이 원본이다.
+ *
+ * **파일 이름에 그림 내용을 담는다.** `public/` 은 `max-age=86400` 으로 나가므로 같은
+ * 이름으로 그림만 갈아 끼우면 하루 동안 브라우저가 옛 그림을 계속 보여 준다 — 바꾼
+ * 사람만 새 그림을 보고 나머지는 그대로인 채로 리뷰가 오간다. 그림을 바꿀 때는 이름도
+ * 함께 바꾼다.
  */
 const BANNER_IMG = styleFromCss("display:block;width:100%;height:auto");
 /**
@@ -617,7 +622,7 @@ export function HomeScreen({
             <div style={BANNER_SHEET}>
               <img
                 alt="우리 아이 투자 첫걸음 — 참가신청 7월 20일~8월 28일, 대회기간 8월 3일~8월 28일"
-                src="/ui/assets/home-banner.png"
+                src="/ui/assets/home-banner-first-step.png"
                 style={BANNER_IMG}
               />
               <div style={BANNER_ACTIONS}>
