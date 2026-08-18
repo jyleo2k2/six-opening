@@ -62,12 +62,6 @@ export function ConnectedPrototype({
   /** 아카이브 안내는 화면 이동 뒤에도 유지하고, 로그인 페이지로 나가면 새로 시작한다. */
   const [archiveInfoOpen, setArchiveInfoOpen] = useState(true);
   /**
-   * 홈 배너를 `오늘 그만 보기`로 껐는지. 아카이브 안내·캔들 안내와 같은 이유로 여기서
-   * 갖는다 — 홈은 오갈 때마다 다시 마운트돼 자기 상태를 잃는다. 로그아웃(`/`로 나가며
-   * 전체 새로고침)과 새 로그인에서 초기화된다.
-   */
-  const [homeBannerHiddenForSession, setHomeBannerHiddenForSession] = useState(false);
-  /**
    * 캔들 안내를 X 로 닫은 기간들. 아카이브 안내와 같은 이유로 여기 있다 — 상세 화면은
    * 종목을 떠나면 사라지므로 거기에 두면 닫아 놓은 안내가 다시 뜬다. 이 컴포넌트는 앱이
    * 살아 있는 동안 그대로이고 화면 이동은 `replaceState` 라 서버를 다시 타지 않으므로,
@@ -207,9 +201,7 @@ export function ConnectedPrototype({
           <>
             {overlay.screen === "home" && (
               <HomeScreen
-                bannerHiddenForSession={homeBannerHiddenForSession}
                 embedded
-                onHideBannerForSession={() => setHomeBannerHiddenForSession(true)}
                 onLeave={leaveToPath}
                 onStartTutorial={() => setTutorialOn(true)}
               />
