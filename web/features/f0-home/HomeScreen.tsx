@@ -186,6 +186,12 @@ const ROW_TICK = styleFromCss(
   "flex:none;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;" +
     "font-size:13px;font-weight:800;color:#5B23D6;background:#fff;box-shadow:0 4px 8px -5px rgba(35,25,80,0.3)",
 );
+/**
+ * 줄 앞의 로고. 종목코드로 유니버스 로고를 찾은 줄만 그린다 — 못 찾으면 `ROW_TICK` 의
+ * 두 글자가 그대로 선다. 흰 동그라미 안에 여백을 남기려 지름보다 작게 담고, 로고마다
+ * 가로세로 비가 달라 `contain` 으로 맞춘다.
+ */
+const ROW_LOGO = styleFromCss("width:26px;height:26px;object-fit:contain");
 const ROW_NAME = styleFromCss(
   "font-size:14.5px;font-weight:700;color:#01185A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis",
 );
@@ -279,9 +285,12 @@ const pctStyle = (holding: HomeHolding, size: number) =>
  */
 function HoldingRow({
   holding,
+  logoUrl,
   onOpen,
 }: {
   holding: HomeHolding;
+  /** 유니버스에서 찾은 로고 주소. 없으면 `null` 이라 두 글자 약칭이 그대로 선다. */
+  logoUrl: string | null;
   onOpen: (code: string) => void;
 }) {
   const code = holding.code;
@@ -297,7 +306,9 @@ function HoldingRow({
       }
       style={code ? { ...ROW, ...ROW_TAP } : ROW}
     >
-      <div style={ROW_TICK}>{holding.tick}</div>
+      <div style={ROW_TICK}>
+        {logoUrl ? <img alt="" src={logoUrl} style={ROW_LOGO} /> : holding.tick}
+      </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={ROW_NAME}>{holding.name}</div>
         <div style={ROW_QTY}>{holding.qty}</div>
@@ -350,6 +361,12 @@ export function HomeScreen({
   );
   // 유니버스는 데모 보유에 종목코드를 붙이는 데만 쓴다 — 실제 계좌 보유는 코드를 갖고 온다.
   const view = homeView(user, prices, universe?.stocks ?? []);
+  // 보유 줄 앞의 로고. 탐색 카드(`explore-cards`)·종목 상세와 같은 원본을 같은 방식으로
+  // 읽는다 — 유니버스가 주는 경로는 옛 `app.html` 기준 상대경로라 `/ui/` 를 붙인다.
+  const logoOf = (holding: HomeHolding) => {
+    const path = holding.code ? universe?.logos?.[holding.code] : undefined;
+    return path ? `/ui/${path}` : null;
+  };
   // 지갑 밑의 결제기준. 계좌 응답이 세워질 때 함께 다시 그려지므로 여기서 읽으면 최신이다.
   const readAt = accountReadAt();
 
@@ -589,6 +606,7 @@ export function HomeScreen({
                 <HoldingRow
                   holding={holding}
                   key={holding.name}
+                  logoUrl={logoOf(holding)}
                   onOpen={(code) => onLeave(`/stock/${code}`)}
                 />
               ))}
@@ -615,6 +633,7 @@ export function HomeScreen({
                   <HoldingRow
                     holding={holding}
                     key={holding.name}
+                    logoUrl={logoOf(holding)}
                     onOpen={(code) => onLeave(`/stock/${code}`)}
                   />
                 ))}
