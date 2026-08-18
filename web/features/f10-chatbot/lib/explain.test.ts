@@ -39,6 +39,34 @@ const per: ExplainScript = {
   example:
     "똑같이 한 해에 1000원을 버는 가게가 두 곳 있다고 해 보자. 한 곳은 1만원, 다른 곳은 2만원에 판다면 두 번째 가게의 PER이 더 높아.",
 };
+const noAdjust: ExplainScript = {
+  id: "term:no-adjust",
+  brief: "이것은 조정 질문이 없는 테스트용 용어예요.",
+  check: {
+    question: "이 용어를 이해했어요?",
+    choices: [
+      { id: "yes", label: "이해했어요" },
+      { id: "no", label: "아직 어려워요" },
+    ],
+    answerId: "yes",
+  },
+  detail: "이 용어의 자세한 뜻이에요.",
+  example: "간단한 예시예요.",
+};
+
+const noAdjustWrong = advanceExplain(noAdjust, {
+  scriptId: noAdjust.id,
+  stage: "brief",
+  choiceId: "no",
+});
+assert.deepEqual(
+  noAdjustWrong?.kind === "turn" ? noAdjustWrong.turn.choices : null,
+  [
+    { id: "yes", label: "알겠어요" },
+    { id: "no", label: "모르겠어요" },
+    { id: "unsure", label: "잘 모르겠어요" },
+  ],
+);
 
 // ① 시작하면 피드백·1줄 설명·이해 확인 질문이 함께 나온다. brief 선택지에는
 // "잘 모르겠어요"가 항상 따라붙는다(guiding 아닌 진단형 스크립트).
@@ -75,7 +103,10 @@ const wrong = advanceExplain(per, {
 });
 assert.equal(wrong?.kind, "turn");
 assert.equal(wrong?.text, toPoliteKorean(`그렇게 볼 수도 있어요. ${per.adjust?.explanation}`));
-assert.deepEqual(wrong?.kind === "turn" ? wrong.turn.choices : null, per.adjust?.choices);
+assert.deepEqual(
+  wrong?.kind === "turn" ? wrong.turn.choices : null,
+  [...per.adjust!.choices, { id: "unsure", label: "잘 모르겠어요" }],
+);
 assert.equal(wrong?.kind === "turn" ? wrong.turn.stage : null, "detail");
 
 // ④ 작은 질문의 정답이면 개념을 연결하고, 오답이면 예시 뒤 같은 작은 질문으로 돌아간다.
@@ -97,6 +128,18 @@ assert.equal(example?.text, toPoliteKorean(`예를 들면요, ${per.example}`));
 assert.equal(example?.kind === "turn" ? example.turn.stage : null, "detail");
 // 예시 재질문 턴에는 되묻기 횟수가 실린다 — 클라이언트가 다음 응답에 돌려보낸다.
 assert.equal(example?.kind === "turn" ? example.turn.reaskCount : null, 1);
+
+// 오답 뒤 "잘 모르겠어요"를 골라도 다음 역질문에 같은 카드가 유지된다.
+const unsureAtDetail = advanceExplain(per, {
+  scriptId: "term:per",
+  stage: "detail",
+  choiceId: "unsure",
+});
+assert.equal(unsureAtDetail?.kind, "turn");
+assert.deepEqual(
+  unsureAtDetail?.kind === "turn" ? unsureAtDetail.turn.choices : null,
+  [...per.adjust!.choices, { id: "unsure", label: "잘 모르겠어요" }],
+);
 
 // ④-1 예시 뒤에도 또 틀리면 같은 질문을 무한 반복하지 않는다 — 정답 설명을
 // 주고 followup으로 넘긴다.
@@ -212,6 +255,10 @@ assert.equal(
   toPoliteKorean(`괜찮아요! ${per.adjust?.explanation}`),
 );
 assert.equal(unsureAtBrief?.kind === "turn" ? unsureAtBrief.turn.stage : null, "detail");
+assert.deepEqual(
+  unsureAtBrief?.kind === "turn" ? unsureAtBrief.turn.choices : null,
+  [...per.adjust!.choices, { id: "unsure", label: "잘 모르겠어요" }],
+);
 assert.equal(gateChatOutput({ text: unsureAtBrief!.text, source: "fixed" }).ok, true);
 
 // 되묻기는 단계를 유지하고 선택지를 그대로 다시 준다.
@@ -220,7 +267,20 @@ assert.equal(reask.kind, "turn");
 assert.equal(reask.kind === "turn" ? reask.turn.stage : null, "detail");
 assert.deepEqual(
   reask.kind === "turn" ? reask.turn.choices : null,
-  [...(per.adjust?.choices ?? []), { id: "ask", label: "다른 걸 물어볼래요" }],
+  [
+    ...per.adjust!.choices,
+    { id: "unsure", label: "잘 모르겠어요" },
+    { id: "ask", label: "다른 걸 물어볼래요" },
+  ],
+);
+const secondReask = reaskExplain(per, "detail", 1);
+assert.deepEqual(
+  secondReask.kind === "turn" ? secondReask.turn.choices : null,
+  [
+    ...per.adjust!.choices,
+    { id: "unsure", label: "잘 모르겠어요" },
+    { id: "ask", label: "다른 걸 물어볼래요" },
+  ],
 );
 const briefReask = reaskExplain(per, "brief");
 assert.equal(briefReask.kind, "turn");
