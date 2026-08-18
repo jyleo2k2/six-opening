@@ -216,24 +216,40 @@ const SHEET_LIST = styleFromCss(
 const SHEET_REST = styleFromCss("flex:1;min-height:24px");
 
 /**
- * 홈 진입 배너. 가로는 화면 폭에 꽉 채우고 세로는 이미지 자체 비율(390:442)이 화면
- * 절반쯤을 채운다 — 별도로 높이를 못 박지 않는다. 뒤는 어둡게 깔아 배너를 도드라지게
- * 한다.
+ * 홈 진입 배너. **화면 맨 아래에 붙는다.** 가로는 화면 폭에 꽉 차고 세로는 그림 비율
+ * (390:408)이 정한다 — 아래 손잡이 줄까지 더해 화면 절반쯤이 된다. 높이를 px 로 못
+ * 박지 않는다: 그림을 갈아 끼우면 그 값이 조용히 틀려진다.
+ *
+ * 뒤는 어둡게 깔아 배너를 도드라지게 한다.
  */
 const BANNER_SCRIM = styleFromCss(
   "position:absolute;inset:0;z-index:20;background:rgba(12,9,26,0.62);" +
-    "display:flex;align-items:center;justify-content:center",
+    "display:flex;align-items:flex-end;justify-content:center",
 );
-const BANNER_IMG_WRAP = styleFromCss("position:relative;width:100%;line-height:0");
+const BANNER_SHEET = styleFromCss("width:100%;line-height:0");
+/**
+ * 그림의 **위쪽 두 모서리는 이미 잘려 투명하다**(`home-banner.png`). 원본에는 그 자리에
+ * 흰 아크가 남아 있어 짙은 딤 위에 흰 뿔로 튀었다 — CSS `border-radius` 로 덮지 않는
+ * 이유는, 그림이 폭에 맞춰 늘어나므로 고정 radius 가 원본 아크와 어긋나 흰 실선이
+ * 남기 때문이다. 자른 것은 자산 쪽이 원본이다.
+ */
 const BANNER_IMG = styleFromCss("display:block;width:100%;height:auto");
 /**
- * 이미지 안에 이미 그려진 `오늘 그만 보기`·`닫기` 글자 위에 투명 버튼을 얹는다. 그 문구
- * 자리는 이미지 바닥의 9.5%다 — 그림을 다시 그리지 않고 실제로 누를 수 있게만 만든다.
+ * 손잡이 줄은 그림이 아니라 **여기서 그린다.** 시안의 흰 띠는 글자가 박혀 있어 누를 수
+ * 있는 자리를 그림 비율로 어림해야 했고, 문구를 고치려면 그림을 다시 받아야 했다.
  */
-const BANNER_ACTIONS = styleFromCss("position:absolute;left:0;right:0;bottom:0;display:flex;height:9.5%");
-const BANNER_ACTION_BTN = styleFromCss(
-  "flex:1;background:transparent;border:none;padding:0;margin:0;cursor:pointer",
+const BANNER_ACTIONS = styleFromCss(
+  "display:flex;align-items:stretch;background:#fff;line-height:normal;padding-bottom:10px",
 );
+const BANNER_ACTION_BTN = styleFromCss(
+  "flex:1;display:flex;align-items:center;justify-content:center;height:48px;" +
+    "background:transparent;border:none;padding:0;margin:0;cursor:pointer;" +
+    "font-family:inherit;font-size:14.5px;font-weight:700;color:#8E93A8",
+);
+/** 오른쪽 `닫기` 는 기본 손짓이라 본문 색으로 세운다 — 둘이 같은 회색이면 무엇이 기본인지 안 읽힌다. */
+const BANNER_CLOSE_BTN = styleFromCss("color:#01185A");
+/** 두 손잡이를 가르는 선. 흰 띠 안에서만 서므로 위아래로 여백을 남긴다. */
+const BANNER_DIVIDER = styleFromCss("flex:none;width:1px;margin:12px 0;background:#ECECF3");
 
 const pctStyle = (holding: HomeHolding, size: number) =>
   styleFromCss(
@@ -598,7 +614,7 @@ export function HomeScreen({
 
         {showBanner && (
           <div style={BANNER_SCRIM}>
-            <div style={BANNER_IMG_WRAP}>
+            <div style={BANNER_SHEET}>
               <img
                 alt="우리 아이 투자 첫걸음 — 참가신청 7월 20일~8월 28일, 대회기간 8월 3일~8월 28일"
                 src="/ui/assets/home-banner.png"
@@ -606,20 +622,23 @@ export function HomeScreen({
               />
               <div style={BANNER_ACTIONS}>
                 <button
-                  aria-label="오늘 그만 보기"
                   onClick={() => {
                     onHideBannerForSession?.();
                     setBannerClosed(true);
                   }}
                   style={BANNER_ACTION_BTN}
                   type="button"
-                />
+                >
+                  오늘 그만 보기
+                </button>
+                <div style={BANNER_DIVIDER} />
                 <button
-                  aria-label="닫기"
                   onClick={() => setBannerClosed(true)}
-                  style={BANNER_ACTION_BTN}
+                  style={{ ...BANNER_ACTION_BTN, ...BANNER_CLOSE_BTN }}
                   type="button"
-                />
+                >
+                  닫기
+                </button>
               </div>
             </div>
           </div>
