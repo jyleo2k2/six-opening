@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   collapsedFloatingAvatarPosition,
+  COLLAPSED_AVATAR_RESERVATION_TAB_CENTER_Y_PX,
   DISMISS_TARGET_ARMED_DIAMETER_PX,
   DISMISS_TARGET_BOTTOM_OFFSET_PX,
   DISMISS_TARGET_SNAP_RADIUS_PX,
@@ -53,22 +54,17 @@ test("an empty avatar set is rejected", () => {
 
 const screen = { left: 100, top: 40, width: 402, height: 874, scale: 1 };
 
-test("접힌 퍽은 MTS 화면 오른쪽 경계에 반쯤 걸린다", () => {
-  assert.deepEqual(collapsedFloatingAvatarPosition(screen, 400), {
+test("접힌 퍽은 MTS 화면의 예약 탭 오른쪽에 반쯤 걸린다", () => {
+  assert.deepEqual(collapsedFloatingAvatarPosition(screen), {
     x: 100 + 402,
-    y: 400,
+    y: 40 + COLLAPSED_AVATAR_RESERVATION_TAB_CENTER_Y_PX,
   });
 });
 
-test("접힌 퍽의 세로 자리는 화면 안에 남는다", () => {
-  assert.equal(
-    collapsedFloatingAvatarPosition(screen, -100).y,
-    screen.top + FLOATING_AVATAR_RADIUS_PX,
-  );
-  assert.equal(
-    collapsedFloatingAvatarPosition(screen, 2_000).y,
-    screen.top + screen.height - FLOATING_AVATAR_RADIUS_PX,
-  );
+test("접힌 퍽의 예약 탭 기준 세로 자리는 화면 안에 남는다", () => {
+  const collapsed = collapsedFloatingAvatarPosition(screen);
+  assert.ok(collapsed.y >= screen.top + FLOATING_AVATAR_RADIUS_PX);
+  assert.ok(collapsed.y <= screen.top + screen.height - FLOATING_AVATAR_RADIUS_PX);
 });
 
 test("삭제 타깃은 MTS 화면의 아래 가운데에 놓인다", () => {

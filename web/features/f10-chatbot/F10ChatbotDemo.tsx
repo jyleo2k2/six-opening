@@ -523,7 +523,7 @@ export function F10ChatbotDemo({
     prototypeScreen,
   );
   const resolvedFloatingChatPosition = isChatCollapsed
-    ? collapsedFloatingAvatarPosition(prototypeScreen, clampedFloatingChatPosition.y)
+    ? collapsedFloatingAvatarPosition(prototypeScreen)
     : clampedFloatingChatPosition;
   const dismissTarget = dismissTargetPosition(prototypeScreen);
   const dismissTargetScale = prototypeScreen?.scale ?? 1;
@@ -810,9 +810,7 @@ export function F10ChatbotDemo({
       // X는 삭제가 아니라 오른쪽 가장자리에 접는 동작이다. 호스트가 화면을 바꿔도
       // 이 컴포넌트는 유지되므로 같은 퍽 자리와 상태가 주문 단계까지 이어진다.
       setIsChatCollapsed(true);
-      setFloatingChatPosition(
-        collapsedFloatingAvatarPosition(prototypeScreen, drag.position.y),
-      );
+      setFloatingChatPosition(collapsedFloatingAvatarPosition(prototypeScreen));
       setIsOpen(false);
     }
   }
@@ -1409,7 +1407,7 @@ export function F10ChatbotDemo({
 
       <button
         aria-label={isChatCollapsed ? "키웅이 챗봇 다시 보이기" : COPY.openChat}
-        className={`fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg transition-[transform,opacity] duration-150 ${isChatCollapsed ? "cursor-pointer opacity-90" : "cursor-grab active:cursor-grabbing"}`}
+        className={`fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg transition-[transform,opacity] duration-150 ${isChatCollapsed ? "cursor-pointer opacity-80" : "cursor-grab active:cursor-grabbing"}`}
         onClick={handleFloatingChatClick}
         onPointerCancel={isChatCollapsed ? undefined : finishFloatingChatDrag}
         onPointerDown={isChatCollapsed ? undefined : handleFloatingChatPointerDown}
