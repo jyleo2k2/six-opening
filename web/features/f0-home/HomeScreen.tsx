@@ -259,7 +259,7 @@ const BANNER_SHEET = styleFromCss("width:100%;line-height:0");
  * 사람만 새 그림을 보고 나머지는 그대로인 채로 리뷰가 오간다. 그림을 바꿀 때는 이름도
  * 함께 바꾼다.
  */
-const BANNER_IMG = styleFromCss("display:block;width:100%;height:auto");
+const BANNER_IMG = styleFromCss("display:block;width:100%;height:auto;cursor:pointer");
 /**
  * 손잡이 줄은 그림이 아니라 **여기서 그린다.** 시안의 흰 띠는 글자가 박혀 있어 누를 수
  * 있는 자리를 그림 비율로 어림해야 했고, 문구를 고치려면 그림을 다시 받아야 했다.
@@ -682,8 +682,14 @@ export function HomeScreen({
         {showBanner && (
           <div style={BANNER_SCRIM}>
             <div style={BANNER_SHEET}>
+              {/*
+                그림을 눌러도 배너가 닫히고 홈이 그대로 드러난다 — `닫기` 와 같은 손짓이라
+                `오늘 그만 보기` 처럼 세션 동안 숨기지는 않는다. 갈 곳이 없는 그림에
+                손가락 모양만 뜨지 않도록 커서도 함께 바꾼다.
+              */}
               <img
                 alt="우리 아이 투자 첫걸음 — 참가신청 7월 20일~8월 28일, 대회기간 8월 3일~8월 28일"
+                onClick={() => setBannerClosed(true)}
                 src="/ui/assets/home-banner-first-step.png"
                 style={BANNER_IMG}
               />
