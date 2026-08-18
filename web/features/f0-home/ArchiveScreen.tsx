@@ -1113,7 +1113,16 @@ export function ArchiveScreen({
               <div onClick={() => setFamDetailOpen(!famDetailOpen)} style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 8, cursor: "pointer" }}>
                 <div style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.03em", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: "#111524" }}>{walletHead.totalNumber}</div>
                 <div style={{ fontSize: 18, fontWeight: 700, color: "#111524" }}>원</div>
-                <div style={{ flex: "none", fontSize: 32, fontWeight: 800, color: "#111524", lineHeight: 1, width: 20, textAlign: "center" }}>{famDetailOpen ? "⌄" : "›"}</div>
+                {/*
+                  펼침표는 **글자를 바꾸지 않고 돌린다**. › 와 ⌄ 는 글자꼴에서 굵기·크기·기준선이 달라
+                  갈아 끼우면 화살표가 한 프레임에 튀고 자리까지 훅 옮겨 보인다. 같은 꺾쇠 하나를
+                  90° 돌리면 시트가 올라오는 곡선(`cubic-bezier(0.22,1,0.36,1)`)과 같은 결을 타도록 이어진다.
+                */}
+                <div style={{ flex: "none", alignSelf: "center", width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg fill="none" height="14" stroke="#111524" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" viewBox="0 0 24 24" width="14" style={{ display: "block", transform: famDetailOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.26s cubic-bezier(0.22,1,0.36,1)" }}>
+                    <path d="M9 4.5 L16.5 12 L9 19.5" />
+                  </svg>
+                </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 7, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", color: walletHead.pctColor }}>
                 <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pnlText}</span>
