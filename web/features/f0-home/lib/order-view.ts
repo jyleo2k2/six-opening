@@ -1,5 +1,7 @@
 // 주문 화면(매수·매도)의 순수 계산. `ui-src/methods/renderVals-compute.js` 의
 // 매수·매도 부분과 `judgePlanMatch`·`lastBuy` 를 그대로 옮겨 왔다.
+import { marketFor } from "../../../shared/data/stocks";
+import { snapToTick } from "../../../shared/engine/tick-size";
 import type { ChatContext } from "../../../shared/types/chatbot";
 import type { Account, Holding, PendingOrder } from "./portfolio-view";
 
@@ -177,10 +179,26 @@ export function formatQty(qty: number): string {
   return String(Math.round((qty || 0) * unit) / unit);
 }
 
+/**
+ * 지정가 한 칸. 칩이 고른 %를 가격으로 바꾸고 그 종목의 호가단위에 맞춘다.
+ *
+ * 방향이 반대인 이유: 매수는 내려야, 매도는 올려야 아이가 누른 칩보다 불리해지지 않는다.
+ * 반올림이면 절반의 경우 "3% 싸게" 를 눌렀는데 2.9% 밖에 안 싼 값이 잡힌다.
+ *
+ * **0%(`지금값`)는 스냅하지 않는다.** 현재가는 이미 시장에 있던 유효 호가이므로 손댈
+ * 이유가 없고, 한 틱 내리면 체결 가능성만 떨어진다. 시세가 호가단위에 어긋나 들어오는
+ * 예외(삼성전자 2026-08-17 종가 270,750원)까지 여기서 고치지는 않는다 — 그건 적재 쪽 문제다.
+ */
+export function limitPriceFor(price: number, pct: number, side: "buy" | "sell", code: string): number {
+  if (!(price > 0)) return 0;
+  if (!pct) return Math.round(price);
+  return snapToTick(price * (1 + pct / 100), marketFor(code), side === "buy" ? "down" : "up");
+}
+
 /** 매수 1단계의 돈 계산. `renderVals-compute.js` 의 amount·qty·warn 부분 그대로. */
-export function buyMath(draft: BuyDraft, price: number, cash: number) {
+export function buyMath(draft: BuyDraft, price: number, cash: number, code: string) {
   const availableCash = Math.max(0, Math.floor(cash));
-  const limPrice = Math.round(price * (1 + (draft.limitPct ?? 0) / 100));
+  const limPrice = limitPriceFor(price, draft.limitPct ?? 0, "buy", code);
   const execPrice = draft.orderType === "limit" ? limPrice : price;
   const byQty = draft.buyBy === "qty";
   const shares = draft.shares || 0;
@@ -221,9 +239,15 @@ export function buyStepOk(step: number, draft: BuyDraft, math: ReturnType<typeof
 }
 
 /** 매도 1단계의 돈 계산. 예약이 잡은 수량은 팔 수 없다. */
-export function sellMath(draft: SellDraft, price: number, heldQty: number, reservedQty: number) {
+export function sellMath(
+  draft: SellDraft,
+  price: number,
+  heldQty: number,
+  reservedQty: number,
+  code: string,
+) {
   const limPct = draft.limitPct ?? 0;
-  const limPrice = Math.round(price * (1 + limPct / 100));
+  const limPrice = limitPriceFor(price, limPct, "sell", code);
   const execPrice = draft.orderType === "limit" ? limPrice : price;
   const byQty = draft.sellBy !== "amount";
   const maxQty = Math.max(0, heldQty - reservedQty);
@@ -270,8 +294,8 @@ export function orderChatContext(input: {
   const held = account.holdings.find((holding) => holding.code === code);
   const math =
     side === "sell" && sellDraft
-      ? sellMath(sellDraft, price, held?.qty ?? 0, input.reservedQty)
-      : buyMath(draft, price, account.cash);
+      ? sellMath(sellDraft, price, held?.qty ?? 0, input.reservedQty, code)
+      : buyMath(draft, price, account.cash, code);
 
   if (Number.isFinite(math.qty) && math.qty > 0) context.quantity = math.qty;
   if (Number.isFinite(math.execPrice) && math.execPrice > 0) {

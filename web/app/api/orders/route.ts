@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { callRpc, selectRows, sessionUserId } from "../supabase";
 import { chartRetentionCutoff, readStoredCandles } from "../quote/stock-candles";
+import { marketFor } from "../../../shared/data/stocks";
+import { isOnTick, tickSize } from "../../../shared/engine/tick-size";
 import { planFields, rejectionReason } from "../trade/route";
 import { settleDueOrders, type ScheduledOrder } from "./settle";
 
@@ -167,6 +169,15 @@ export async function POST(request: NextRequest) {
 
   if (orderType === "limit" && !limitPrice) {
     return Response.json({ error: "지정가는 한도가격이 필요합니다.", reason: "invalid_amount" }, { status: 400 });
+  }
+  // 화면은 `limitPriceFor` 로 이미 맞춰 보내지만 게이트는 화면을 우회한 요청도 받는다.
+  // 실거래에 없는 가격을 예약해 두면 영영 닿지 않는 주문이 지갑만 잠근다.
+  if (orderType === "limit" && limitPrice && !isOnTick(limitPrice, marketFor(stockCode))) {
+    const unit = tickSize(limitPrice, marketFor(stockCode));
+    return Response.json(
+      { error: `지정가는 ${unit.toLocaleString("ko-KR")}원 단위로만 넣을 수 있습니다.`, reason: "invalid_amount" },
+      { status: 400 },
+    );
   }
   if (orderType === "market" && !scheduledFor) {
     return Response.json(

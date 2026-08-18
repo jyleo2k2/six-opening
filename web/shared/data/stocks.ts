@@ -86,3 +86,15 @@ const aliasesBySymbol = new Map(STOCKS.map((stock) => [stock.symbol, stock.searc
 export function searchAliasesFor(symbol: string): readonly string[] {
   return aliasesBySymbol.get(symbol) ?? [];
 }
+
+const marketBySymbol = new Map(STOCKS.map((stock) => [stock.symbol, stock.market]));
+
+/**
+ * 종목코드 기준 상장 시장. 호가단위가 20만원부터 갈리므로(`shared/engine/tick-size`)
+ * 지정가 계산과 접수 게이트가 이 값을 본다. 지금 KOSDAQ 은 에스엠·JYP·와이지 셋뿐이다.
+ *
+ * 모르는 코드는 `KOSPI` 로 본다 — 고가 구간에서 단위가 더 큰 쪽이라 더 깐깐하게 걸러진다.
+ */
+export function marketFor(symbol: string): StockEducation["market"] {
+  return marketBySymbol.get(symbol) ?? "KOSPI";
+}
