@@ -46,21 +46,68 @@ export type FeedCandidate = {
 
 const json = (response: Response) => (response.ok ? response.json() : null);
 
+/**
+ * 마지막으로 본 아카이브 화면.
+ *
+ * `ArchiveScreen` 은 다른 화면으로 나가면 통째로 언마운트된다(`ConnectedPrototype` 이
+ * 주소에 맞는 화면 하나만 그린다). 그래서 이 훅도 매번 다시 마운트되고, 예전에는 그때마다
+ * 상태가 빈칸에서 시작해 **되돌아올 때마다 `기록을 불러오고 있어요` 부터 다시** 봤다.
+ * 이미 받아 둔 것을 곧바로 다시 그리고 조회는 뒤에서 돌린다.
+ *
+ * 브라우저 저장소를 쓰지 않으므로 수명은 `candle-tip` 의 닫힘 표시와 같다 — **로그인
+ * 세션의 수명**이다. 로그아웃은 `/` 로 나가며 전체 새로고침이라 여기도 함께 비워진다.
+ */
+type ArchiveSnapshot = {
+  season: SeasonCards;
+  family: ArchiveData["family"];
+  comments: Record<string, FeedComment[]>;
+  likes: Record<string, FeedLike>;
+};
+let snapshot: ArchiveSnapshot | null = null;
+
+/** 지난번 화면. 아직 한 번도 안 봤으면 `null` 이다. */
+export function readArchiveSnapshot() {
+  return snapshot;
+}
+
+export function writeArchiveSnapshot(next: ArchiveSnapshot) {
+  snapshot = next;
+}
+
+/** 세션이 갈릴 때 비운다. 화면은 부르지 않고 테스트만 쓴다 — 로그아웃은 문서를 새로 받는다. */
+export function clearArchiveSnapshot() {
+  snapshot = null;
+}
+
 export function useArchiveData() {
-  const [season, setSeason] = useState<SeasonCards>(null);
+  const seeded = useRef(readArchiveSnapshot()).current;
+  const [season, setSeason] = useState<SeasonCards>(seeded?.season ?? null);
   /**
    * `season` 조회가 아직 안 끝났는지. 화면이 이걸로 "아직 안 왔다"와 "정말 없다"를
    * 가른다 — 없이는 응답을 기다리는 1초 동안 중립 카드(`관찰 중` · 전부 5)가 먼저
    * 떴다가 진짜 카드로 바뀌어 화면이 깜빡인다.
+   *
+   * **되돌아온 화면은 기다리는 중이 아니다.** 지난번 카드를 이미 들고 있으므로 조회가
+   * 다시 돌아도 안내 문구를 띄우지 않는다 — 띄우면 이미 그릴 수 있는 화면을 일부러 가린다.
+   *
+   * 남겨 둔 화면이 있는지가 아니라 **카드가 있는지**로 가른다. 첫 응답이 오기 전에 화면을
+   * 나갔다 오면 카드 없는 화면이 남는데, 그걸 "받아 둔 것" 으로 치면 위 깜빡임이 그대로
+   * 돌아온다 — 중립 카드가 먼저 뜨고 진짜 카드로 바뀐다.
    */
-  const [seasonLoading, setSeasonLoading] = useState(true);
-  const [family, setFamily] = useState<ArchiveData["family"]>(null);
-  const [comments, setComments] = useState<Record<string, FeedComment[]>>({});
-  const [likes, setLikes] = useState<Record<string, FeedLike>>({});
+  const [seasonLoading, setSeasonLoading] = useState(!seeded?.season);
+  const [family, setFamily] = useState<ArchiveData["family"]>(seeded?.family ?? null);
+  const [comments, setComments] = useState<Record<string, FeedComment[]>>(seeded?.comments ?? {});
+  const [likes, setLikes] = useState<Record<string, FeedLike>>(seeded?.likes ?? {});
   const [loadingMore, setLoadingMore] = useState(false);
   const [candidates, setCandidates] = useState<FeedCandidate[]>([]);
-  const familyRef = useRef<ArchiveData["family"]>(null);
+  const familyRef = useRef<ArchiveData["family"]>(seeded?.family ?? null);
   const loadingMoreRef = useRef(false);
+
+  // 화면에 있는 것을 그대로 남긴다. 좋아요·댓글·글 올리기처럼 화면에서 바꾼 것도 같이 남아
+  // 되돌아왔을 때 방금 한 일이 사라져 보이지 않는다.
+  useEffect(() => {
+    writeArchiveSnapshot({ season, family, comments, likes });
+  }, [season, family, comments, likes]);
 
   /** 한 페이지(최대 50건)의 댓글·좋아요를 묶어 읽고 기존 페이지 뒤에 합친다. */
   const loadReactions = useCallback((trades: FamilyTrade[]) => {
@@ -109,6 +156,13 @@ export function useArchiveData() {
     setCandidates(Array.isArray(data?.trades) ? (data.trades as FeedCandidate[]) : []);
   }, []);
 
+  /**
+   * 마운트할 때마다 서버에 다시 묻는다 — 지난번 화면은 **먼저 그리려고** 들고 있는 것이지
+   * 최신이라고 믿는 값이 아니다. 주문하고 돌아온 화면이 옛 기록을 보여 주면 안 된다.
+   *
+   * 피드는 첫 50건으로 갈아 끼운다. 더 내려 읽어 둔 뒷장은 이때 버려지는데, 되돌아온
+   * 화면은 어차피 맨 위부터 보므로 그 자리에서 다시 내려 읽으면 된다.
+   */
   useEffect(() => {
     let alive = true;
     fetch("/api/profile/season-cards", { cache: "no-store" })
