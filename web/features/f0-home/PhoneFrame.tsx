@@ -155,11 +155,21 @@ export function PhoneFrame({
           }}
         />
         {overlay && <div className="phone-stage__overlay">{overlay}</div>}
+        {/*
+         * 베젤은 **언제나 맨 위**다. 폰의 물리적인 테두리라 앱의 무엇도 그 위에 그려지면
+         * 안 된다 — 넘어가면 화면 `overflow:hidden`(반경 40)에만 잘려서, 그보다 깊게 파인
+         * 개구부 아래 코너(`FRAME_OPENING_BOTTOM_RADIUS`, 62)를 네모나게 덮는다.
+         *
+         * 값이 5 가 아니라 10 인 것은 **화면 안 오버레이와 챗봇 레이어 사이에 자리를 내주기
+         * 위해서**다. 챗봇·튜토리얼은 `.phone-stage__overlay`(z-index:4)가 만드는 쌓임 맥락
+         * 안에 갇히므로 그 레이어는 통째로 4 다. 홈 배너처럼 **챗봇보다 위**여야 하는 것은
+         * 4 와 베젤 사이의 정수를 써야 하는데, 베젤이 5 면 그 사이가 비어 있지 않다.
+         */}
         <img
           alt=""
           height={PROTOTYPE_PHONE.frameHeight}
           src="/ui/assets/iphone-frame.png"
-          style={{ position: "absolute", left: 0, top: 0, display: "block", zIndex: 5, pointerEvents: "none" }}
+          style={{ position: "absolute", left: 0, top: 0, display: "block", zIndex: 10, pointerEvents: "none" }}
           width={PROTOTYPE_PHONE.frameWidth}
         />
       </div>
