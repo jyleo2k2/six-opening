@@ -6,6 +6,7 @@ import { Jua } from "next/font/google";
 import iconChild from "./front UI/assets/icon-child.png";
 import iconParents from "./front UI/assets/icon-parents.png";
 import splashHero from "./front UI/assets/splash-hero.png";
+import { LoadingScreen } from "./LoadingScreen";
 // 폰 프레임은 로그인도 로그인 뒤 화면과 같은 것을 쓴다. 무대(`.phone-stage`)·배율·상태바·
 // 홈 막대가 전부 딸려 오므로 이 파일은 화면 안쪽만 그린다.
 import { PhoneFrame } from "../features/f0-home/PhoneFrame";
@@ -13,7 +14,7 @@ import { SignupWizard } from "./SignupWizard";
 
 const jua = Jua({ weight: "400", subsets: ["latin"], preload: false });
 
-type Screen = "splash" | "signin" | "soon";
+type Screen = "splash" | "signin" | "soon" | "loading";
 
 export const CTA_ON: React.CSSProperties = {
   borderRadius: 999,
@@ -97,13 +98,19 @@ export function LoginGate() {
         setError(data.error ?? "로그인에 실패했어요.");
         return;
       }
-      router.refresh();
+      // 곧바로 서버 렌더를 다시 부르지 않는다. 로딩 화면이 홈·아카이브가 읽을 것을
+      // 먼저 받아 두고, 다 받으면 그때 `router.refresh()` 로 앱 화면으로 넘어간다.
+      setScreen("loading");
     } catch {
       setError("네트워크 오류가 발생했어요. 다시 시도해 주세요.");
     } finally {
       setSubmitting(false);
     }
   }
+
+  // 로그인에 성공하면 이 파일의 화면 대신 로딩 화면이 통째로 선다 — 배경색도 상태바
+  // 색도 달라서 위의 보라 그라데이션 안에 끼워 넣지 않는다.
+  if (screen === "loading") return <LoadingScreen onDone={() => router.refresh()} />;
 
   // 프레임·배율·상태바·홈 막대는 로그인 뒤 화면과 **같은 컴포넌트**가 그린다. 예전에는 이
   // 파일이 프레임을 통째로 다시 그리면서 상태바와 홈 막대만 빠뜨렸다. 그래서 로그인에서

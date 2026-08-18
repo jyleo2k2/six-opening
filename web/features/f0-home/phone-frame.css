@@ -125,3 +125,9 @@
       scale(1) rotate(calc(var(--kwspin, 300deg) * 1.35));
   }
 }
+
+/* 로그인 뒤 로딩 화면(app/LoadingScreen.tsx)의 캐릭터가 위아래로 뜬다. */
+@keyframes kwFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}

@@ -132,8 +132,15 @@ export function PhoneFrame({
               pointerEvents: "none",
             }}
           >
+            {/* 홈 막대도 상태바와 같은 쪽을 본다 — 짙은 화면 위의 짙은 막대는 안 보인다. */}
             <div
-              style={{ width: 140, height: 5, borderRadius: 999, background: "#1A2233", opacity: 0.85 }}
+              style={{
+                width: 140,
+                height: 5,
+                borderRadius: 999,
+                background: statusBar === "light" ? "#fff" : "#1A2233",
+                opacity: statusBar === "light" ? 0.55 : 0.85,
+              }}
             />
           </div>
         </div>
