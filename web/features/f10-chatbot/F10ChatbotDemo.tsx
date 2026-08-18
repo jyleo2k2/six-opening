@@ -85,8 +85,8 @@ type F10ChatbotDemoProps = {
   /** 검증된 화면 버튼을 사용자가 눌렀을 때만 호스트가 실제 React 화면을 연다. */
   onUiAction?: (action: ChatUiAction) => void;
   /**
-   * `PhoneFrame` 안 `#kw-screen`의 실제 client rect. 호스트가 실측값을 넘기지 않으면
-   * 단독 데모에서만 창 크기로 근사한다.
+   * `PhoneFrame` 내부 450×920 좌표의 화면 rect. 호스트가 값을 넘기지 않으면 단독
+   * 데모에서만 창 크기로 근사한다.
    */
   screenRect?: PrototypeScreenRect | null;
 };
@@ -465,7 +465,7 @@ export function F10ChatbotDemo({
   const [isOpen, setIsOpen] = useState(false);
   const [measuredScreen, setMeasuredScreen] =
     useState<PrototypeScreenRect | null>(null);
-  // 호스트가 실측값을 주면 그것만 쓴다. 두 값을 섞으면 프레임과 어긋나는 원래 문제로 돌아간다.
+  // 호스트가 프레임 내부 좌표를 주면 그것만 쓴다. 두 좌표계를 섞으면 프레임과 어긋난다.
   const hostMeasures = screenRect !== undefined;
   const prototypeScreen = hostMeasures ? screenRect : measuredScreen;
   const [sheetDragY, setSheetDragY] = useState(0);
