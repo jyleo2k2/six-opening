@@ -1,4 +1,5 @@
 import { CHANGES, choiceOf, PLANS, REASONS, SELL_REASONS } from "../../../shared/data/trade-copy.js";
+import { basisTimeText } from "./home-view";
 import { won } from "./portfolio-view";
 import { faceOf, type FamilyRow } from "./archive-profile-view";
 
@@ -398,6 +399,10 @@ export type Holding = { code: string; qty: number; avg: number };
  *
  * `totalNumber` 는 단위를 뗀 숫자다. 카드가 `원` 을 따로 작게 붙이기 때문이다.
  * 예수금에는 예약 주문이 잠근 현금도 들어가고, 출금 가능 금액에서는 그만큼 뺀다.
+ *
+ * `settleText` 의 `now` 는 **서버 계좌를 읽은 시각**이어야 한다(`use-account` 의
+ * `accountReadAt`). 렌더 시각을 넣으면 상세를 열 때마다 시각만 새로 찍혀, 잔액은
+ * 그대로인데 방금 갱신된 것처럼 읽힌다 — 홈 지갑의 `결제기준` 과 같은 이유다.
  */
 export function returnSummary(
   cash: number,
@@ -414,8 +419,6 @@ export function returnSummary(
   }
   const pnl = value - cost;
   const pct = cost > 0 ? (pnl / cost) * 100 : 0;
-  const day = ["일", "월", "화", "수", "목", "금", "토"][now.getDay()];
-  const pad = (n: number) => String(n).padStart(2, "0");
   return {
     positive: pnl >= 0,
     pctText: (pnl > 0 ? "+" : pnl < 0 ? "−" : "") + Math.abs(pct).toFixed(2) + "%",
@@ -426,6 +429,6 @@ export function returnSummary(
     totalText: won(cash + reservedCash + value),
     cashText: won(cash + reservedCash),
     withdrawText: won(cash),
-    settleText: `결제기준 ${pad(now.getMonth() + 1)}.${pad(now.getDate())}(${day}) 15:30`,
+    settleText: `결제기준 ${basisTimeText(now.getTime())}`,
   };
 }
