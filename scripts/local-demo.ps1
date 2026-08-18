@@ -66,10 +66,13 @@ $ErrorActionPreference = 'Stop'
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $WebDir   = Join-Path $RepoRoot 'web'
+# pid·로그 이름에 포트를 넣는다. 이름을 공유하면 다른 포트로 띄운 시연을 정리할 때
+# 남의 서버와 터널까지 같이 내려간다 — 실제로 발생했다.
 $LogDir        = Join-Path $env:TEMP 'six-opening-demo'
-$PidFile       = Join-Path $LogDir 'server.pid'
-$TunnelPidFile = Join-Path $LogDir 'tunnel.pid'
-$TunnelLog     = Join-Path $LogDir 'tunnel.log'
+$PidFile       = Join-Path $LogDir "server-$Port.pid"
+$TunnelPidFile = Join-Path $LogDir "tunnel-$Port.pid"
+$TunnelLog     = Join-Path $LogDir "tunnel-$Port.log"
+$TunnelOutLog  = Join-Path $LogDir "tunnel-$Port.out.log"
 
 function Write-Step($text)  { Write-Host "`n[단계] $text" -ForegroundColor Cyan }
 function Write-Ok($text)    { Write-Host "  OK   $text" -ForegroundColor Green }
@@ -132,14 +135,24 @@ function Read-SharedText($path) {
 }
 
 # 기록해 둔 pid 하나만 종료한다. 이름으로 훑어 죽이면 사용자가 따로 띄운 터널까지 끊는다.
+# pid 는 OS 가 재사용하므로 이름까지 맞을 때만 종료한다 — 낡은 pid 파일 하나로 엉뚱한
+# 프로세스를 죽이지 않기 위해서다.
+function Save-TrackedProcess($pidPath, $process) {
+    [System.IO.File]::WriteAllText($pidPath, "$($process.Id)|$($process.ProcessName)")
+}
+
 function Stop-TrackedProcess($pidPath, $label) {
     if (-not [System.IO.File]::Exists($pidPath)) { return }
-    $savedPid = ([System.IO.File]::ReadAllText($pidPath)).Trim()
+    $parts = ([System.IO.File]::ReadAllText($pidPath)).Trim() -split '\|'
+    $savedPid = $parts[0]
+    $savedName = if ($parts.Count -gt 1) { $parts[1] } else { $null }
     if ($savedPid) {
         $p = Get-Process -Id $savedPid -ErrorAction SilentlyContinue
-        if ($p) {
+        if ($p -and ((-not $savedName) -or $p.ProcessName -eq $savedName)) {
             Stop-Process -Id $savedPid -Force -Confirm:$false -ErrorAction SilentlyContinue
             Write-Ok "$label 종료 (PID $savedPid)"
+        } elseif ($p) {
+            Write-Note "$label pid $savedPid 는 이제 다른 프로세스($($p.ProcessName))다 — 건드리지 않는다."
         }
     }
     [System.IO.File]::Delete($pidPath)
@@ -169,8 +182,8 @@ function Stop-Demo {
 if ($Stop) { Stop-Demo; return }
 
 [System.IO.Directory]::CreateDirectory($LogDir) | Out-Null
-$ServerOut = Join-Path $LogDir 'server.out.log'
-$ServerErr = Join-Path $LogDir 'server.err.log'
+$ServerOut = Join-Path $LogDir "server-$Port.out.log"
+$ServerErr = Join-Path $LogDir "server-$Port.err.log"
 
 Write-Host ''
 Write-Host '=== 영웅 키움 로컬 시연 ===' -ForegroundColor White
@@ -283,7 +296,7 @@ $server = Start-Process -FilePath $npm `
     -PassThru -NoNewWindow `
     -RedirectStandardOutput $ServerOut `
     -RedirectStandardError $ServerErr
-[System.IO.File]::WriteAllText($PidFile, [string]$server.Id)
+Save-TrackedProcess $PidFile $server
 
 $ready = $false
 for ($i = 0; $i -lt 60; $i++) {
@@ -352,9 +365,9 @@ Write-Host ''
 $tunnel = Start-Process -FilePath $cf `
     -ArgumentList $cfArgs `
     -PassThru -NoNewWindow `
-    -RedirectStandardOutput (Join-Path $LogDir 'tunnel.out.log') `
+    -RedirectStandardOutput $TunnelOutLog `
     -RedirectStandardError $TunnelLog
-[System.IO.File]::WriteAllText($TunnelPidFile, [string]$tunnel.Id)
+Save-TrackedProcess $TunnelPidFile $tunnel
 
 $publicUrl = $null
 try {
