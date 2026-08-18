@@ -40,6 +40,17 @@ assert.equal(pairs[0].split(",")[0], "0.0");
 assert.equal(pairs[39].split(",")[0], PLOT_W.toFixed(1));
 assert.equal(view!.candles.length, 0);
 
+// 시간축 라벨은 봉 자리에 선다. `chart-time-axis` 에 넘긴 배치식이 선·캔들과 같은 식이라는
+// 뜻이고, 갈리면 라벨이 가리키는 봉이 어긋난다. 어느 눈금을 고르는지는 그 파일의 테스트가 본다.
+assert.ok(view!.timeAxis.length > 0);
+const stride = PLOT_W / (40 - 1);
+for (const tick of view!.timeAxis) {
+  const at = tick.x / stride;
+  assert.ok(Math.abs(at - Math.round(at)) < 1e-9, `봉 자리가 아닌 라벨: ${tick.x}`);
+  assert.ok(tick.x > 0 && tick.x < PLOT_W);
+  assert.ok(tick.text.length > 0);
+}
+
 // 마지막 봉의 종가는 지금 가격으로 맞춘다 — 그래야 현재가 태그가 선 끝에 붙는다.
 assert.equal(view!.nowText, "10,500원");
 assert.equal(Number(pairs[39].split(",")[1]).toFixed(1), view!.nowY.toFixed(1));
