@@ -323,117 +323,122 @@ function MessageBubble({
   const uiAction = isAllowedUiAction(message.uiAction) ? message.uiAction : undefined;
 
   return (
-    <div
-      className={
-        userMessage ? "flex justify-end" : "flex items-end justify-start gap-2"
-      }
-    >
-      {/*
-        프로필은 말풍선 묶음 왼쪽에 **하단 정렬**로 선다. 헤더에 한 번만 두면 대화가 길어질수록
-        누가 말하는지가 스크롤 밖으로 밀려나고, 상단 정렬하면 칩이 붙은 긴 답변에서 얼굴만
-        위로 떨어져 다음 말풍선 것처럼 보인다.
-      */}
-      {!userMessage && (
-        <img
-          alt=""
-          aria-hidden="true"
-          className="size-8 shrink-0 rounded-full object-cover"
-          height={32}
-          src={avatarSrc}
-          width={32}
-        />
-      )}
+    <div className={userMessage ? "flex justify-end" : "flex justify-start"}>
       <div className="max-w-[84%]">
-        <p
-          className={
-            userMessage
-              ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
-              : "rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
-          }
-        >
-          {message.text}
-        </p>
-        {!userMessage && uiAction && (
-          <button
-            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy disabled:opacity-50"
-            disabled={actionsDisabled}
-            onClick={() => onAction(uiAction)}
-            type="button"
+        {/*
+          프로필은 헤더가 아니라 답변 옆에 선다 — 헤더에 한 번만 두면 대화가 길어질수록 누가
+          말하는지가 스크롤 밖으로 밀려난다. 맞추는 기준선은 **첫 말풍선의 아래끝**이다.
+          칩까지 포함한 묶음 바닥에 맞추면 칩이 여러 줄인 답변에서 얼굴만 저 아래로 떨어져
+          다음 차례 것처럼 읽힌다. 그래서 아바타는 아래 후속 요소들과 같은 칼럼이 아니라
+          말풍선과 같은 행에 둔다.
+        */}
+        <div className={userMessage ? undefined : "flex items-end gap-2"}>
+          {!userMessage && (
+            <img
+              alt=""
+              aria-hidden="true"
+              className="size-8 shrink-0 rounded-full object-cover"
+              height={32}
+              src={avatarSrc}
+              width={32}
+            />
+          )}
+          <p
+            className={
+              userMessage
+                ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
+                : "rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
+            }
           >
-            {uiAction.label ?? "관련 화면 보기"}
-          </button>
-        )}
-        {!userMessage && message.retryQuestion && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            <button
-              className={CHOICE_CHIP_CLASS}
-              disabled={actionsDisabled}
-              onClick={() => onQuestion(message.retryQuestion ?? "")}
-              type="button"
-            >
-              {COPY.retry}
-            </button>
+            {message.text}
+          </p>
+        </div>
+        {/* 후속 칩·버튼은 아바타 폭(32)과 간격(8)만큼 들여써 말풍선 왼끝에 맞춘다. */}
+        {!userMessage && (
+          <div className="pl-10">
+            {uiAction && (
+              <button
+                className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy disabled:opacity-50"
+                disabled={actionsDisabled}
+                onClick={() => onAction(uiAction)}
+                type="button"
+              >
+                {uiAction.label ?? "관련 화면 보기"}
+              </button>
+            )}
+            {message.retryQuestion && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  className={CHOICE_CHIP_CLASS}
+                  disabled={actionsDisabled}
+                  onClick={() => onQuestion(message.retryQuestion ?? "")}
+                  type="button"
+                >
+                  {COPY.retry}
+                </button>
+              </div>
+            )}
+            {Boolean(message.suggestedQuestions?.length) && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {message.suggestedQuestions?.map((question) => (
+                  <button
+                    className={CHOICE_CHIP_CLASS}
+                    disabled={actionsDisabled}
+                    key={question}
+                    onClick={() => onQuestion(question)}
+                    type="button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            )}
+            {message.explainTurn && (
+              <TurnPrompt prompt={message.explainTurn.prompt}>
+                {message.explainTurn.choices.map((choice) => (
+                  <button
+                    className={CHOICE_CHIP_CLASS}
+                    disabled={actionsDisabled}
+                    key={choice.id}
+                    onClick={() => onExplainChoice(choice)}
+                    type="button"
+                  >
+                    {choice.label}
+                  </button>
+                ))}
+              </TurnPrompt>
+            )}
+            {message.stockExploreTurn && (
+              <TurnPrompt prompt={message.stockExploreTurn.prompt}>
+                {message.stockExploreTurn.choices.map((choice) => (
+                  <button
+                    className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
+                    disabled={actionsDisabled}
+                    key={choice.id}
+                    onClick={() => onStockExploreChoice(choice.label, choice.id)}
+                    type="button"
+                  >
+                    {choice.label}
+                  </button>
+                ))}
+              </TurnPrompt>
+            )}
+            {message.sectorExploreTurn && (
+              <TurnPrompt prompt={message.sectorExploreTurn.prompt}>
+                {message.sectorExploreTurn.choices.map((choice) => (
+                  <button
+                    className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
+                    disabled={actionsDisabled}
+                    key={choice.id}
+                    onClick={() => onSectorExploreChoice(choice.label, choice.id)}
+                    type="button"
+                  >
+                    {choice.label}
+                  </button>
+                ))}
+              </TurnPrompt>
+            )}
           </div>
-        )}
-        {!userMessage && Boolean(message.suggestedQuestions?.length) && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {message.suggestedQuestions?.map((question) => (
-              <button
-                className={CHOICE_CHIP_CLASS}
-                disabled={actionsDisabled}
-                key={question}
-                onClick={() => onQuestion(question)}
-                type="button"
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        )}
-        {!userMessage && message.explainTurn && (
-          <TurnPrompt prompt={message.explainTurn.prompt}>
-            {message.explainTurn.choices.map((choice) => (
-              <button
-                className={CHOICE_CHIP_CLASS}
-                disabled={actionsDisabled}
-                key={choice.id}
-                onClick={() => onExplainChoice(choice)}
-                type="button"
-              >
-                {choice.label}
-              </button>
-            ))}
-          </TurnPrompt>
-        )}
-        {!userMessage && message.stockExploreTurn && (
-          <TurnPrompt prompt={message.stockExploreTurn.prompt}>
-            {message.stockExploreTurn.choices.map((choice) => (
-              <button
-                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
-                disabled={actionsDisabled}
-                key={choice.id}
-                onClick={() => onStockExploreChoice(choice.label, choice.id)}
-                type="button"
-              >
-                {choice.label}
-              </button>
-            ))}
-          </TurnPrompt>
-        )}
-        {!userMessage && message.sectorExploreTurn && (
-          <TurnPrompt prompt={message.sectorExploreTurn.prompt}>
-            {message.sectorExploreTurn.choices.map((choice) => (
-              <button
-                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
-                disabled={actionsDisabled}
-                key={choice.id}
-                onClick={() => onSectorExploreChoice(choice.label, choice.id)}
-                type="button"
-              >
-                {choice.label}
-              </button>
-            ))}
-          </TurnPrompt>
         )}
       </div>
     </div>
