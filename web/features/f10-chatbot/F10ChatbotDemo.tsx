@@ -189,6 +189,7 @@ const COPY = {
   input: "궁금한 것을 입력해 주세요",
   send: "\ubcf4\ub0b4\uae30",
   retry: "다시 보내기",
+  botName: "키웅AI",
   reset: "초기화",
   enableProactive: "먼저 알려주기 켜기",
 } as const;
@@ -299,6 +300,7 @@ function TurnPrompt({ prompt, children }: { prompt: string; children: ReactNode 
 
 function MessageBubble({
   message,
+  avatarSrc,
   onAction,
   onQuestion,
   onExplainChoice,
@@ -307,6 +309,7 @@ function MessageBubble({
   actionsDisabled,
 }: {
   message: Message;
+  avatarSrc: string;
   onAction: (action: ChatUiAction) => void;
   onQuestion: (question: string) => void;
   onExplainChoice: (choice: ExplainChoice) => void;
@@ -323,96 +326,136 @@ function MessageBubble({
   return (
     <div className={userMessage ? "flex justify-end" : "flex justify-start"}>
       <div className="max-w-[84%]">
+        {/*
+          프로필은 헤더가 아니라 답변 위에 이름표와 한 줄로 선다 — 헤더에 한 번만 두면 대화가
+          길어질수록 누가 말하는지가 스크롤 밖으로 밀려난다.
+
+          세로 자리는 두 값이 나눠 맡는다. 음수 위 여백은 **레이아웃**을 맡아 아바타의 flex
+          바깥 높이를 이름표 줄높이(16)로 줄인다 — 이름줄이 얼굴만큼 두꺼워지지 않으니 아래
+          말풍선이 밀려 내려가지 않는다. `top` 은 **보이는 자리**만 맡는다.
+
+          맞추는 것은 **동그라미의 가운데**다. 이름줄(16)이 끝나고 말풍선이 시작하기까지
+          (`mt-1.5`, 6) 사이 틈은 y 16~22 이고, 그 가운데 19 에 중심을 놓는다.
+
+          지름 D 를 바꿀 때 따라오는 네 값은 모두 기계적으로 나온다.
+            · 위 여백  = 16 - D            (지금 D=50 → `-mt-[34px]`)
+            · top      = D / 2 + 3         (지금 `top-7` = 28)
+            · 들여쓰기 = D + 8(`gap-2`)     (지금 `ml-[58px]` · `pl-[58px]`)
+            · 위로 삐져나오는 양 = D - 16 - top. 목록의 `pt-4`(16) 안에 들어와야 잘리지
+              않는다 — 지금은 6 이다.
+
+          아래 절반은 말풍선 왼쪽 여백(x 0~D, 말풍선은 D+8 부터)에 걸치므로 글씨를 가리지 않는다.
+        */}
+        {!userMessage && (
+          <div className="flex items-end gap-2">
+            <img
+              alt=""
+              aria-hidden="true"
+              className="relative top-7 -mt-[34px] size-[50px] shrink-0 rounded-full object-cover"
+              height={50}
+              src={avatarSrc}
+              width={50}
+            />
+            <span className="text-xs font-semibold text-ink/70">
+              {COPY.botName}
+            </span>
+          </div>
+        )}
         <p
           className={
             userMessage
               ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
-              : "rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
+              : "mt-1.5 ml-[58px] rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
           }
         >
           {message.text}
         </p>
-        {!userMessage && uiAction && (
-          <button
-            className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy disabled:opacity-50"
-            disabled={actionsDisabled}
-            onClick={() => onAction(uiAction)}
-            type="button"
-          >
-            {uiAction.label ?? "관련 화면 보기"}
-          </button>
-        )}
-        {!userMessage && message.retryQuestion && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            <button
-              className={CHOICE_CHIP_CLASS}
-              disabled={actionsDisabled}
-              onClick={() => onQuestion(message.retryQuestion ?? "")}
-              type="button"
-            >
-              {COPY.retry}
-            </button>
+        {/* 후속 칩·버튼은 아바타 폭(50)과 간격(8)만큼 들여써 말풍선 왼끝에 맞춘다. */}
+        {!userMessage && (
+          <div className="pl-[58px]">
+            {uiAction && (
+              <button
+                className="mt-2 w-full rounded-xl border border-navy/20 bg-white px-3 py-2 text-sm font-semibold text-navy disabled:opacity-50"
+                disabled={actionsDisabled}
+                onClick={() => onAction(uiAction)}
+                type="button"
+              >
+                {uiAction.label ?? "관련 화면 보기"}
+              </button>
+            )}
+            {message.retryQuestion && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  className={CHOICE_CHIP_CLASS}
+                  disabled={actionsDisabled}
+                  onClick={() => onQuestion(message.retryQuestion ?? "")}
+                  type="button"
+                >
+                  {COPY.retry}
+                </button>
+              </div>
+            )}
+            {Boolean(message.suggestedQuestions?.length) && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {message.suggestedQuestions?.map((question) => (
+                  <button
+                    className={CHOICE_CHIP_CLASS}
+                    disabled={actionsDisabled}
+                    key={question}
+                    onClick={() => onQuestion(question)}
+                    type="button"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            )}
+            {message.explainTurn && (
+              <TurnPrompt prompt={message.explainTurn.prompt}>
+                {message.explainTurn.choices.map((choice) => (
+                  <button
+                    className={CHOICE_CHIP_CLASS}
+                    disabled={actionsDisabled}
+                    key={choice.id}
+                    onClick={() => onExplainChoice(choice)}
+                    type="button"
+                  >
+                    {choice.label}
+                  </button>
+                ))}
+              </TurnPrompt>
+            )}
+            {message.stockExploreTurn && (
+              <TurnPrompt prompt={message.stockExploreTurn.prompt}>
+                {message.stockExploreTurn.choices.map((choice) => (
+                  <button
+                    className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
+                    disabled={actionsDisabled}
+                    key={choice.id}
+                    onClick={() => onStockExploreChoice(choice.label, choice.id)}
+                    type="button"
+                  >
+                    {choice.label}
+                  </button>
+                ))}
+              </TurnPrompt>
+            )}
+            {message.sectorExploreTurn && (
+              <TurnPrompt prompt={message.sectorExploreTurn.prompt}>
+                {message.sectorExploreTurn.choices.map((choice) => (
+                  <button
+                    className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
+                    disabled={actionsDisabled}
+                    key={choice.id}
+                    onClick={() => onSectorExploreChoice(choice.label, choice.id)}
+                    type="button"
+                  >
+                    {choice.label}
+                  </button>
+                ))}
+              </TurnPrompt>
+            )}
           </div>
-        )}
-        {!userMessage && Boolean(message.suggestedQuestions?.length) && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {message.suggestedQuestions?.map((question) => (
-              <button
-                className={CHOICE_CHIP_CLASS}
-                disabled={actionsDisabled}
-                key={question}
-                onClick={() => onQuestion(question)}
-                type="button"
-              >
-                {question}
-              </button>
-            ))}
-          </div>
-        )}
-        {!userMessage && message.explainTurn && (
-          <TurnPrompt prompt={message.explainTurn.prompt}>
-            {message.explainTurn.choices.map((choice) => (
-              <button
-                className={CHOICE_CHIP_CLASS}
-                disabled={actionsDisabled}
-                key={choice.id}
-                onClick={() => onExplainChoice(choice)}
-                type="button"
-              >
-                {choice.label}
-              </button>
-            ))}
-          </TurnPrompt>
-        )}
-        {!userMessage && message.stockExploreTurn && (
-          <TurnPrompt prompt={message.stockExploreTurn.prompt}>
-            {message.stockExploreTurn.choices.map((choice) => (
-              <button
-                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
-                disabled={actionsDisabled}
-                key={choice.id}
-                onClick={() => onStockExploreChoice(choice.label, choice.id)}
-                type="button"
-              >
-                {choice.label}
-              </button>
-            ))}
-          </TurnPrompt>
-        )}
-        {!userMessage && message.sectorExploreTurn && (
-          <TurnPrompt prompt={message.sectorExploreTurn.prompt}>
-            {message.sectorExploreTurn.choices.map((choice) => (
-              <button
-                className={`${CHOICE_CHIP_CLASS} disabled:opacity-50`}
-                disabled={actionsDisabled}
-                key={choice.id}
-                onClick={() => onSectorExploreChoice(choice.label, choice.id)}
-                type="button"
-              >
-                {choice.label}
-              </button>
-            ))}
-          </TurnPrompt>
         )}
       </div>
     </div>
@@ -1514,7 +1557,17 @@ export function F10ChatbotDemo({
                 대화창을 여는 사람은 이미 도움을 원하는 상태라 맥락이 맞다. 켜져 있을 때는
                 보이지 않는다. 끄지도 않은 기능의 스위치가 늘 떠 있을 이유가 없다.
               */}
-              <div className="flex items-center justify-end gap-1 border-b border-gray/40 px-5 pb-3">
+              {/*
+                글씨는 **구분선 위 빈 자리의 가운데**에 놓는다. 버튼의 `py-2` 만으로는 위쪽에
+                드래그 핸들 줄(`h-7` 안의 6 짜리 막대)이 남긴 11 이 더 얹혀, 글씨가 위로는
+                19 아래로는 8 떨어진 채 선에 붙어 보인다.
+
+                그래서 `-mt-1.5` 로 줄을 6 올리고 `pb-1.5` 로 선을 6 내려 제자리에 돌려놓는다.
+                두 값이 상쇄되므로 헤더 높이와 선 위치는 그대로고 글씨만 올라간다 — 위 13,
+                아래 14 로 눈에 가운데다. 아래 여백을 그냥 두면 선이 버튼 패딩만큼 내려앉아
+                헤더가 내용보다 두꺼워 보이고 그만큼 대화 목록이 눌린다.
+              */}
+              <div className="-mt-1.5 flex items-center justify-end gap-1 border-b border-gray/40 px-5 pb-1.5">
                 {isProactiveOff && (
                   <button
                     className="mr-auto rounded-lg px-3 py-2 text-sm font-semibold text-navy"
@@ -1524,15 +1577,6 @@ export function F10ChatbotDemo({
                     {COPY.enableProactive}
                   </button>
                 )}
-                {/* 아바타는 시트와 함께 이동해 헤더가 뒤늦게 튀어나오지 않게 한다. */}
-                <img
-                  alt=""
-                  aria-hidden="true"
-                  className="size-8 shrink-0 rounded-full object-cover"
-                  height={32}
-                  src={floatingAvatar.src}
-                  width={32}
-                />
                 <button
                   className="rounded-lg px-3 py-2 text-sm font-semibold text-navy"
                   onClick={resetChat}
@@ -1551,6 +1595,7 @@ export function F10ChatbotDemo({
                     text: COPY.greeting,
                     suggestedQuestions: GREETING_SUGGESTED_QUESTIONS,
                   }}
+                  avatarSrc={floatingAvatar.src}
                   onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
@@ -1567,6 +1612,7 @@ export function F10ChatbotDemo({
                 <MessageBubble
                   key={index}
                   message={message}
+                  avatarSrc={floatingAvatar.src}
                   onAction={handleUiAction}
                   onQuestion={(question) => {
                     if (!isLoading) void ask(question);
