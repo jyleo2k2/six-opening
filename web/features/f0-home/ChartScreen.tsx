@@ -10,6 +10,7 @@ import {
 } from "./lib/stock-chrome";
 import { styleFromCss } from "./lib/css-style";
 import { buildTradeLegend, type PinRole } from "./lib/chart-trade-legend";
+import { candleTipCopy, isCandleTipClosed, type CandleTipDismissals } from "./lib/candle-tip";
 import {
   AXIS_LEFT,
   buildChartView,
@@ -200,6 +201,8 @@ export function ChartScreen({
   onStartBuy,
   watched,
   onToggleWatch,
+  closedCandleTips,
+  onCloseCandleTip,
 }: {
   code: string;
   name: string;
@@ -225,12 +228,16 @@ export function ChartScreen({
    */
   watched: boolean;
   onToggleWatch: () => void;
+  /**
+   * 지금까지 X 로 닫은 캔들 안내. 화면을 오가도 남아야 해서 `ConnectedPrototype` 이 갖고
+   * 상세를 거쳐 내려온다 — 여기에 지역 상태로 두면 종목을 떠날 때마다 안내가 되살아난다.
+   */
+  closedCandleTips: CandleTipDismissals;
+  onCloseCandleTip: (period: ChartPeriod) => void;
 }) {
   const [period, setPeriod] = useState<ChartPeriod>("daily");
   const [chartType, setChartType] = useState<ChartType>("line");
   const [tfMenuOpen, setTfMenuOpen] = useState(false);
-  // 캔들 설명은 캔들차트를 켰을 때만 말풍선으로 뜬다. 닫으면 다시 켤 때까지 숨는다.
-  const [candleTipClosed, setCandleTipClosed] = useState(false);
   const [points, setPoints] = useState<ChartPoint[] | null>(null);
   const [state, setState] = useState<LoadState>("loading");
   /**
@@ -385,13 +392,18 @@ export function ChartScreen({
               </div>
             )}
           </div>
-          {chartType === "candlestick" && !candleTipClosed && (
+          {/*
+            캔들 설명은 캔들차트를 켰을 때만 뜨고, 문구는 기간마다 다르다 — 막대 하나가
+            덮는 시간이 분 1분·일 하루·주 1주일로 갈리기 때문이다. X 로 닫으면 그 기간만
+            숨고 나머지 둘은 한 번씩 더 보여 준다(`lib/candle-tip.ts`).
+          */}
+          {chartType === "candlestick" && !isCandleTipClosed(closedCandleTips, period) && (
             <div style={CANDLE_TIP}>
               <div style={CANDLE_TIP_ARROW} />
               <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14.5, fontWeight: 800, color: "#B3286B", letterSpacing: "-0.01em" }}>
-                    막대 하나가 하루예요
+                    {candleTipCopy(period).title}
                   </div>
                   <div
                     style={styleFromCss(
@@ -399,12 +411,12 @@ export function ChartScreen({
                     )}
                   >
                     시작한 값보다 끝난 값이 높으면 <b style={{ color: UP }}>빨간 막대</b>, 낮으면{" "}
-                    <b style={{ color: DOWN }}>파란 막대</b>예요. 위아래로 나온 선은 그날 가장 비쌌던
-                    값과 가장 쌌던 값이에요.
+                    <b style={{ color: DOWN }}>파란 막대</b>예요. 위아래로 나온 선은{" "}
+                    {candleTipCopy(period).span} 가장 비쌌던 값과 가장 쌌던 값이에요.
                   </div>
                 </div>
                 <div
-                  onClick={() => setCandleTipClosed(true)}
+                  onClick={() => onCloseCandleTip(period)}
                   style={{
                     flex: "none",
                     width: 22,
