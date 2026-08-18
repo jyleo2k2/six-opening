@@ -786,12 +786,14 @@ export function OrderScreen({
     const finish = (ok: boolean) => {
       setReordering(false);
       setReorderTarget(null);
+      // 실패해도 시트를 닫는다 — 거절 문구는 시트 뒤에 그려져서, 열어 두면 아무 일도
+      // 일어나지 않은 것처럼 보인다.
+      setOrderSheet(false);
       if (!ok) {
         setOrderError("주문을 고치지 못했어. 잠깐 뒤에 다시 해볼까?");
         return;
       }
       refresh();
-      setOrderSheet(false);
       onReorder?.(order);
     };
     if (!order.id) {
