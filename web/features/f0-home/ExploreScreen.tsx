@@ -59,7 +59,7 @@ const SEARCH_INPUT_WRAP = styleFromCss(
 );
 const SEARCH_INPUT = styleFromCss(
   "flex:1;min-width:0;box-sizing:border-box;border:0;outline:none;background:transparent;" +
-    "font-family:'Pretendard',sans-serif;font-size:14.5px;font-weight:600;color:#01185A",
+    "font-family:'Pretendard',sans-serif;font-size:16px;font-weight:600;color:#01185A",
 );
 const CHIPS_ROW = styleFromCss("flex:none;display:flex;align-items:flex-start;gap:4px;padding:2px 0 12px");
 /**

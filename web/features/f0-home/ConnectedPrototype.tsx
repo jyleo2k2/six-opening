@@ -3,11 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChatContext, ChatUiAction } from "../../shared/types/chatbot";
 import { F10ChatbotDemo } from "../f10-chatbot/F10ChatbotDemo";
-import {
-  getPrototypeScreenRect,
-  type PrototypeScreenRect,
-} from "../f10-chatbot/lib/bottom-sheet";
 import type { OrderPrefill } from "./lib/order-view";
+import { usePhoneScreenRect } from "./PhoneFrame";
 import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
 import type { PendingOrder } from "./lib/portfolio-view";
 import type { WalletAccountId } from "./lib/use-wallet";
@@ -39,10 +36,9 @@ const HOME_CONTEXT: ChatContext = { screen: "home" };
 /**
  * 옮겨 온 화면을 그리는 호스트.
  *
- * 예전에는 `/ui/app.html` iframe 을 깔고 그 위에 React 화면을 얹었다. 사용자 화면이 전부
- * React 로 넘어온 뒤에도 문서를 살려 둔 이유는 **폰 화면 사각형의 실측 기준**이었기
- * 때문인데, 실측해 보니 `app.html` 의 배율식과 `getPrototypeScreenRect` 가 항등이라
- * (여백이 대칭이다 — 24+402+24=450, 23+874+23=920) 잴 이유가 없었다. 그래서 걷어냈다.
+ * 폰 화면 사각형은 현재 렌더된 `PhoneFrame` 안의 `#kw-screen`을 실측한다. CSS가 프레임을
+ * 배율 조정하고, 이 호스트는 그 client rect를 F10·튜토리얼·상단 프레임 레이어에 그대로
+ * 전달하므로 모바일 viewport 종류에 따라 별도 기하를 만들지 않는다.
  */
 export function ConnectedPrototype({
   route,
@@ -51,7 +47,7 @@ export function ConnectedPrototype({
   const [overlay, setOverlay] = useState<ScreenRoute | null>(route ?? null);
   /** 종목·탐색·주문 화면이 올리는 맥락. 없으면 홈으로 본다. */
   const [overlayContext, setOverlayContext] = useState<ChatContext | null>(null);
-  const [screenRect, setScreenRect] = useState<PrototypeScreenRect | null>(null);
+  const screenRect = usePhoneScreenRect(overlay);
   /**
    * 튜토리얼. 오버레이를 화면 컴포넌트가 아니라 여기서 갖는 이유는 **화면을 건너다녀야**
    * 하기 때문이다 — 홈에서 켜고 탐색으로 넘어가도 설명이 따라와야 한다.
@@ -84,25 +80,6 @@ export function ConnectedPrototype({
    * 화면이 그대로 남는다. 회차(`id`)가 새 요청임을 알려 준다.
    */
   const [orderPrefill, setOrderPrefill] = useState<OrderPrefill | null>(null);
-
-  // 챗봇 시트와 폰 프레임은 화면 사각형에 딱 맞아야 한다. 기하의 원본은 `PROTOTYPE_PHONE`
-  // 상수 하나이고, 옮겨 온 화면(`PhoneFrame`)도 같은 함수로 자기 자리를 잡는다.
-  useEffect(() => {
-    let frameId = 0;
-    const measure = () =>
-      setScreenRect(getPrototypeScreenRect(window.innerWidth, window.innerHeight));
-    const remeasure = () => {
-      cancelAnimationFrame(frameId);
-      frameId = requestAnimationFrame(measure);
-    };
-
-    measure();
-    window.addEventListener("resize", remeasure);
-    return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener("resize", remeasure);
-    };
-  }, []);
 
   // 화면 이동은 여기 하나로 모인다. 히스토리를 쌓지 않는다(replaceState) — 앱 안에 자체
   // 뒤로가기 버튼이 있어서 pushState 로 쌓으면 두 개의 뒤로가기가 서로 어긋난다.
@@ -242,6 +219,7 @@ export function ConnectedPrototype({
         <TutorialOverlay
           onClose={() => setTutorialOn(false)}
           onGo={leaveToPath}
+          screenRect={screenRect}
           // 매수·매도는 화면도 단계도 같아서 `side` 가 없으면 팔러 간 화면에 사는 설명이
           // 뜬다. 어느 종목인지는 튜토리얼이 지갑을 보고 스스로 정한다.
           place={{

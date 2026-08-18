@@ -85,8 +85,8 @@ type F10ChatbotDemoProps = {
   /** 검증된 화면 버튼을 사용자가 눌렀을 때만 호스트가 실제 React 화면을 연다. */
   onUiAction?: (action: ChatUiAction) => void;
   /**
-   * 폰 프레임 안 화면의 실제 사각형. 프로토타입 호스트가 `app.html` 요소를 재서 준다.
-   * 넘기지 않으면(단독 데모) 창 크기로 같은 값을 근사한다 — 그 경우 iframe 이 없어 어긋날 일이 없다.
+   * `PhoneFrame` 안 `#kw-screen`의 실제 client rect. 호스트가 실측값을 넘기지 않으면
+   * 단독 데모에서만 창 크기로 근사한다.
    */
   screenRect?: PrototypeScreenRect | null;
 };
@@ -1585,7 +1585,7 @@ export function F10ChatbotDemo({
               <form className="flex gap-2" onSubmit={submit}>
                 <input
                   aria-label={COPY.input}
-                  className="min-w-0 flex-1 rounded-xl bg-bg px-3 py-3 text-sm outline-none ring-magenta focus:ring-2"
+                  className="min-w-0 flex-1 rounded-xl bg-bg px-3 py-3 text-base outline-none ring-magenta focus:ring-2"
                   onChange={(event) => setInput(event.target.value)}
                   placeholder={COPY.input}
                   value={input}

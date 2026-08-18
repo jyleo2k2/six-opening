@@ -35,8 +35,8 @@ export const TAIL_SIZE = 20;
 /**
  * 창 좌표로 잰 요소를 폰 화면 안쪽 좌표로 고친다.
  *
- * 창이 아주 좁으면 `getPrototypeScreenRect` 의 배율이 0 까지 내려간다. 그대로 나누면
- * 좌표가 무한이 되므로 0 이하는 1 로 본다 — `sheet-drag` 가 같은 이유로 같은 처리를 한다.
+ * 화면이 아주 좁아도 실측 rect의 배율이 0보다 작거나 같으면 1을 사용해 좌표를
+ * 나누지 않는다. `sheet-drag`도 같은 이유로 같은 처리를 한다.
  */
 export function toScreenRect(
   node: { left: number; top: number; width: number; height: number },
