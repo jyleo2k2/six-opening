@@ -8,8 +8,10 @@ import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { shouldOpenSheetByPull } from "./lib/sheet-drag";
 import { accountReadAt, useAccount } from "./lib/use-account";
 import { useSheetDrag } from "./lib/use-sheet-drag";
+import { restrictionSummary, type TradeRestriction } from "./lib/trade-restriction";
 import { useUniverseLive } from "./lib/use-universe";
 import { ScreenFrame, usePhoneScreenRect } from "./PhoneFrame";
+import { TradeRestrictionSheet } from "./TradeRestrictionSheet";
 
 /**
  * 홈 화면. `ui-src/screens/home.html` 을 그대로 옮겨 왔다.
@@ -80,6 +82,8 @@ const MENU = styleFromCss(
 const MENU_ITEM = styleFromCss(
   "display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#01185A;cursor:pointer",
 );
+/** 메뉴 줄 밑에 붙는 지금 설정. `꺼짐` 인지 몇 시부터인지를 열어 보지 않고 안다. */
+const MENU_NOTE = styleFromCss("font-size:11.5px;font-weight:600;color:#8E94AE;margin-top:3px");
 const MENU_LOGOUT = styleFromCss(
   "display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;" +
     "color:#D5327A;cursor:pointer;border-top:1px solid #F1F1F7",
@@ -327,6 +331,8 @@ export function HomeScreen({
   embedded = false,
   bannerHiddenForSession = false,
   onHideBannerForSession,
+  tradeRestriction,
+  onChangeTradeRestriction,
 }: {
   onLeave: (path: string) => void;
   /** 튜토리얼 `?`. 오버레이는 `ConnectedPrototype` 이 갖는다 — 화면 하나에 매이면 안 된다. */
@@ -340,10 +346,17 @@ export function HomeScreen({
    */
   bannerHiddenForSession?: boolean;
   onHideBannerForSession?: () => void;
+  /**
+   * 학교 시간 거래 제한(목업). 배너의 `오늘 그만 보기` 와 같은 이유로 `ConnectedPrototype`
+   * 이 들고 있다가 물려준다 — 홈은 오갈 때마다 다시 마운트돼 자기 상태를 잃는다.
+   */
+  tradeRestriction: TradeRestriction;
+  onChangeTradeRestriction: (rule: TradeRestriction) => void;
 }) {
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [restrictionOpen, setRestrictionOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [popped, setPopped] = useState(false);
@@ -512,6 +525,19 @@ export function HomeScreen({
               >
                 알림
               </div>
+              {/* 제한을 정하는 자리는 **부모 계정에만** 있다. 아이 화면에는 이 줄이 없다. */}
+              {user?.parent_child === "parent" && (
+                <div
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setRestrictionOpen(true);
+                  }}
+                  style={{ ...MENU_ITEM, display: "block" }}
+                >
+                  학교 시간 거래 제한
+                  <div style={MENU_NOTE}>{restrictionSummary(tradeRestriction)}</div>
+                </div>
+              )}
               <div onClick={logout} style={MENU_LOGOUT}>
                 로그아웃
               </div>
@@ -641,6 +667,14 @@ export function HomeScreen({
               <div onClick={sheet.closeSheet} style={SHEET_REST} />
             </div>
           </>
+        )}
+
+        {restrictionOpen && (
+          <TradeRestrictionSheet
+            onClose={() => setRestrictionOpen(false)}
+            onSave={onChangeTradeRestriction}
+            rule={tradeRestriction}
+          />
         )}
 
         <BottomNav active="home" onLeave={onLeave} />
