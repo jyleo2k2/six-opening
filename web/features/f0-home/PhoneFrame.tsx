@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { PrototypeScreenRect } from "../f10-chatbot/lib/bottom-sheet";
 import { PROTOTYPE_SCREEN_ID } from "./lib/prototype-bridge";
 import {
@@ -92,6 +92,41 @@ export function PhoneFrame({
   /** 챗봇·튜토리얼을 같은 transform 좌표계 안에 그린다. 로그인 화면은 넘기지 않는다. */
   overlay?: ReactNode;
 }) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    let frameId = 0;
+    const resetScroll = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        frameId = 0;
+        stage.scrollTop = 0;
+        stage.scrollLeft = 0;
+        window.scrollTo(0, 0);
+      });
+    };
+    const isChatbotInput = (target: EventTarget | null) =>
+      target instanceof HTMLInputElement &&
+      target.closest(".prototype-chat-overlay") !== null;
+    const handleFocusChange = (event: FocusEvent) => {
+      if (isChatbotInput(event.target)) resetScroll();
+    };
+
+    stage.addEventListener("focusin", handleFocusChange);
+    stage.addEventListener("focusout", handleFocusChange);
+    window.addEventListener("resize", resetScroll);
+    window.visualViewport?.addEventListener("resize", resetScroll);
+    return () => {
+      cancelAnimationFrame(frameId);
+      stage.removeEventListener("focusin", handleFocusChange);
+      stage.removeEventListener("focusout", handleFocusChange);
+      window.removeEventListener("resize", resetScroll);
+      window.visualViewport?.removeEventListener("resize", resetScroll);
+    };
+  }, []);
+
   const screenBox = {
     position: "absolute",
     left: PHONE_SCREEN.left,
@@ -102,7 +137,7 @@ export function PhoneFrame({
   } as const;
 
   return (
-    <div className="phone-stage">
+    <div ref={stageRef} className="phone-stage">
       <div className="phone-stage__content">
         {/*
          * 바탕색은 여기 하나가 정한다 — 원본의 폰 화면 컨테이너가 하던 일이다. 화면들은
@@ -155,11 +190,21 @@ export function PhoneFrame({
           }}
         />
         {overlay && <div className="phone-stage__overlay">{overlay}</div>}
+        {/*
+         * 베젤은 **언제나 맨 위**다. 폰의 물리적인 테두리라 앱의 무엇도 그 위에 그려지면
+         * 안 된다 — 넘어가면 화면 `overflow:hidden`(반경 40)에만 잘려서, 그보다 깊게 파인
+         * 개구부 아래 코너(`FRAME_OPENING_BOTTOM_RADIUS`, 62)를 네모나게 덮는다.
+         *
+         * 값이 5 가 아니라 10 인 것은 **화면 안 오버레이와 챗봇 레이어 사이에 자리를 내주기
+         * 위해서**다. 챗봇·튜토리얼은 `.phone-stage__overlay`(z-index:4)가 만드는 쌓임 맥락
+         * 안에 갇히므로 그 레이어는 통째로 4 다. 홈 배너처럼 **챗봇보다 위**여야 하는 것은
+         * 4 와 베젤 사이의 정수를 써야 하는데, 베젤이 5 면 그 사이가 비어 있지 않다.
+         */}
         <img
           alt=""
           height={PROTOTYPE_PHONE.frameHeight}
           src="/ui/assets/iphone-frame.png"
-          style={{ position: "absolute", left: 0, top: 0, display: "block", zIndex: 5, pointerEvents: "none" }}
+          style={{ position: "absolute", left: 0, top: 0, display: "block", zIndex: 10, pointerEvents: "none" }}
           width={PROTOTYPE_PHONE.frameWidth}
         />
       </div>

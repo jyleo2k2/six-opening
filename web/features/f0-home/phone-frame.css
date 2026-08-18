@@ -35,7 +35,12 @@
 }
 
 /* 챗봇·튜토리얼은 이 레이어 안에서만 움직인다. 바깥 viewport에 fixed로 놓지 않아
-   프레임 베젤(z-index:5)이 같은 stacking context에서 항상 위에 남는다. */
+   프레임 베젤(z-index:10)이 같은 stacking context에서 항상 위에 남는다.
+
+   이 4는 레이어 **전체**의 값이다. 안쪽 `.prototype-chat-overlay`가 z-index:10을 써도
+   여기서 만든 stacking context에 갇히므로 베젤 위로 올라오지 못한다. 뒤집어 말하면
+   화면 안에서 챗봇보다 위에 서야 하는 것(홈 배너)은 4보다 큰 값을 써야 한다 —
+   이 레이어는 DOM에서 화면(`#kw-screen`)보다 뒤에 있어 같은 값이면 이쪽이 이긴다. */
 .phone-stage__overlay {
   position: absolute;
   inset: 0;
