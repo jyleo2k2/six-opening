@@ -588,8 +588,13 @@ export function ArchiveScreen({
         */}
         {/* 안내도 카드가 선 뒤에 띄운다 — 가리킬 카드가 아직 없는데 꼬리만 서면 이상하다. */}
         {view === "cards" && infoOpen && !data.seasonLoading && (
-          // `top` 은 제목 줄 바로 아래다 — 첫 화면은 뒤로가기 줄이 없어 제목이 위에 붙는다.
-          <div style={{ position: "absolute", left: 20, right: 20, top: 130, zIndex: INFO_Z, borderRadius: 20, padding: "12px 18px 13px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
+          // `top` 은 제목 줄 **위**다 — 가운데 카드가 1.16배로 커지면서 카드 머리(주차·날짜)가
+          // 화면 210px 까지 올라왔다. 안내는 높이가 118px 이라 제목 줄 아래(130)에 두면 그
+          // 카드 머리를 39px 덮는다. 안내는 ⓘ 로 여닫는 잠깐짜리이고 카드가 이 화면의
+          // 주인공이므로, 제목을 잠깐 가리더라도 카드는 온전히 보이는 쪽을 고른다.
+          // 72 는 꼬리(-7)까지 197px 이라 카드 위로 12px 이 남는 값이다 — 카드 배율을
+          // 올리거나 안내 문구를 늘리면 이 값부터 다시 잰다.
+          <div style={{ position: "absolute", left: 20, right: 20, top: 72, zIndex: INFO_Z, borderRadius: 20, padding: "12px 18px 13px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
             {/*
               꼬리는 **아래로** 내려 가운데 성향 카드를 가리킨다. 안내가 말하는 대상이
               ⓘ 가 아니라 그 아래 카드이기 때문이다. 카드는 레일 한가운데에 서므로
