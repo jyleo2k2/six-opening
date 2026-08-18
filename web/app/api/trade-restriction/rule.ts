@@ -60,10 +60,13 @@ export function blockedSides(rule: TradeRestriction, now: Date): { buy: boolean;
 
 const bool = (value: unknown, fallback: boolean) => (typeof value === "boolean" ? value : fallback);
 
-const minute = (value: unknown): number | null =>
-  typeof value === "number" && Number.isInteger(value) && value >= 0 && value < MINUTES_PER_DAY
-    ? value
-    : null;
+/**
+ * 자정부터의 분. **종료만 24:00(=1440)까지 받는다** — 화면의 `›` 가 종료를 거기까지
+ * 올릴 수 있고(`lib/trade-restriction.ts` 의 `stepMinute`), DB 의 창 제약도 같은 값이다.
+ * 시작이 1440 이면 시작=끝이라 창이 비므로 하루 안에서 끝난다.
+ */
+const minute = (value: unknown, max: number): number | null =>
+  typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= max ? value : null;
 
 /**
  * 저장 요청을 규칙으로 옮긴다. 하나라도 어긋나면 `null` 이고 라우트가 400 으로 거절한다 —
@@ -78,8 +81,8 @@ export function parseRestriction(payload: unknown): TradeRestriction | null {
     : null;
   if (!weekdays || weekdays.length !== (Array.isArray(raw.weekdays) ? raw.weekdays.length : -1)) return null;
 
-  const start = minute(raw.start_minute);
-  const end = minute(raw.end_minute);
+  const start = minute(raw.start_minute, MINUTES_PER_DAY - 1);
+  const end = minute(raw.end_minute, MINUTES_PER_DAY);
   if (start === null || end === null || start >= end) return null;
 
   return {

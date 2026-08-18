@@ -41,6 +41,12 @@ test("parseRestriction 은 창이 뒤집힌 값과 범위 밖 요일을 거절�
   assert.equal(parseRestriction({ start_minute: 900, end_minute: 540, weekdays: [1] }), null);
   assert.equal(parseRestriction({ start_minute: 540, end_minute: 900, weekdays: [0] }), null);
   assert.equal(parseRestriction({ start_minute: 540, end_minute: 1500, weekdays: [1] }), null);
+  // 종료만 24:00 을 받는다 — 화면의 `›` 가 거기까지 올릴 수 있다.
+  assert.equal(parseRestriction({ start_minute: 1440, end_minute: 1440, weekdays: [1] }), null);
+  assert.equal(
+    parseRestriction({ start_minute: 1380, end_minute: 1440, weekdays: [1] })?.end_minute,
+    1440,
+  );
   assert.equal(parseRestriction(null), null);
 });
 
