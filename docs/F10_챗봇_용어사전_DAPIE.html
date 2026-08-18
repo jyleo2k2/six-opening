@@ -1,0 +1,3080 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>키웅이 용어 사전 — 질문과 대답 (DAPIE)</title>
+<style>
+  :root {
+    --ink: #111826; --dim: #5b6478; --line: #e3e7ef; --bg: #f6f7fb;
+    --card: #fff; --accent: #12874f; --ask: #0b4fd0; --warn: #b0304a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.7 "Pretendard", "Malgun Gothic", system-ui, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .sub { color: var(--dim); margin: 0 0 20px; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 22px; }
+  .stat { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .stat b { font-size: 20px; display: block; line-height: 1.2; }
+  .stat span { color: var(--dim); font-size: 12px; }
+  .how { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 0 0 24px; }
+  .how h2 { font-size: 15px; margin: 0 0 8px; }
+  .how ol { margin: 0; padding-left: 20px; color: var(--dim); }
+  .how em { color: var(--ink); font-style: normal; font-weight: 600; }
+  .toolbar { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 10px 0 12px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+  #q { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; font: inherit; background: #fff; }
+  .filters { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .filters button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; color: var(--dim); }
+  .filters button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  nav a { font-size: 12px; color: var(--dim); text-decoration: none; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 10px; }
+  nav a b { color: var(--ink); }
+  .cat { margin: 0 0 34px; }
+  .cat h2 { font-size: 19px; margin: 0 0 2px; }
+  .cat .count { font-size: 13px; color: var(--dim); font-weight: 400; }
+  .cat .note { margin: 0 0 14px; color: var(--dim); font-size: 13px; }
+  .cards { display: grid; gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+  .card header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .card h3 { font-size: 17px; margin: 0; letter-spacing: -0.01em; }
+  .tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tag { font-size: 11px; border-radius: 5px; padding: 2px 7px; border: 1px solid var(--line); color: var(--dim); }
+  .tag.dapie-tag { background: #eaf5ef; color: var(--accent); border-color: #cfe7da; font-weight: 600; }
+  .tag.glossary { background: #eef2fb; color: #33478c; border-color: #d8e0f4; }
+  .tag.draft { background: #fdeef1; color: var(--warn); border-color: #f6d5dc; }
+  .qa p { margin: 0 0 6px; }
+  .who { display: inline-block; min-width: 46px; font-size: 11px; color: var(--dim); border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; margin-right: 8px; text-align: center; vertical-align: 2px; }
+  .q code { background: #f1f3f9; border-radius: 5px; padding: 2px 7px; font-size: 13px; font-family: inherit; margin-right: 4px; display: inline-block; }
+  .a { color: var(--ink); }
+  .dapie { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; display: grid; gap: 10px; }
+  .stage { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; }
+  .stage.s2, .stage.s3 { border-left-color: #bcd0f5; }
+  .stage.s1 { border-left-color: #b9dcc8; }
+  .stage-head { font-size: 12px; color: var(--dim); margin-bottom: 4px; }
+  .stage-head .num { display: inline-block; width: 17px; height: 17px; line-height: 17px; text-align: center; background: var(--ink); color: #fff; border-radius: 5px; font-size: 11px; margin-right: 6px; }
+  .stage-head em { font-style: normal; opacity: .75; }
+  .say { margin: 0; }
+  .ask { margin: 0; color: var(--ask); font-weight: 600; }
+  .choices { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 3px; }
+  .choices li { font-size: 14px; color: var(--dim); }
+  .choices li.right { color: var(--accent); font-weight: 600; }
+  .choices .mark { display: inline-block; width: 14px; }
+  .card footer { margin-top: 12px; }
+  .id { font-size: 11px; color: #9aa2b4; font-family: ui-monospace, monospace; }
+  .empty { display: none; color: var(--dim); padding: 30px 0; }
+  @media print {
+    .toolbar { position: static; } body { background: #fff; }
+    .card { break-inside: avoid; }
+  }
+</style>
+<div class="wrap">
+  <h1>키웅이 용어 사전 — 질문과 대답</h1>
+  <p class="sub">F10 챗봇이 아이에게 실제로 내보내는 답변 전부. DAPIE 4단계 스크립트가 붙은 용어는 단계까지 펼쳐 적었다.</p>
+
+  <div class="stats">
+    <div class="stat"><b>162</b><span>전체 항목</span></div>
+    <div class="stat"><b>62</b><span>DAPIE 스크립트</span></div>
+    <div class="stat"><b>36</b><span>용어 사전</span></div>
+    <div class="stat"><b>126</b><span>질문 답변</span></div>
+    <div class="stat"><b>8</b><span>묶음</span></div>
+  </div>
+
+  <div class="how">
+    <h2>DAPIE 는 한 번에 다 쏟지 않는다</h2>
+    <ol>
+      <li><em>brief</em> — 한 문장으로 먼저 답한다.</li>
+      <li><em>check</em> — 알아들었는지 객관식으로 되묻는다. <span style="color:var(--accent)">○</span> 가 정답 선택지다.</li>
+      <li><em>adjust</em> — 틀렸을 때만 다르게 설명하고 한 번 더 묻는다.</li>
+      <li><em>detail</em> — 그다음에야 자세히 말한다.</li>
+      <li><em>example</em> — 아이 생활 속 예로 닫는다.</li>
+    </ol>
+  </div>
+
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="용어·트리거·답변 안에서 찾기 (예: 배당, 손절, 시즌)" autocomplete="off">
+    <div class="filters">
+      <button data-f="all" class="on">전체</button>
+      <button data-f="dapie">DAPIE 있는 것만</button>
+    </div>
+    <nav><a href="#cat-basics">기본 개념 <b>6</b></a><a href="#cat-order">주문 <b>11</b></a><a href="#cat-profit">수익·손익 <b>8</b></a><a href="#cat-indicator">회사를 재는 숫자 <b>9</b></a><a href="#cat-chart">차트 <b>9</b></a><a href="#cat-risk">위험 <b>4</b></a><a href="#cat-service">서비스 규칙 <b>11</b></a><a href="#cat-profile">성향·아카이브 <b>4</b></a><a href="#cat-_none">묶음 없음 <b>100</b></a></nav>
+  </div>
+
+  <section class="cat" id="cat-basics">
+    <h2>기본 개념 <span class="count">6</span></h2>
+    <p class="note">주식·주주·종목처럼 가장 먼저 만나는 말</p>
+    <div class="cards"><article class="card" data-name="주식" data-triggers="주식" data-answer="주식은 회사의 작은 조각이라고 생각하면 돼요. 주식을 가진 사람은 그 회사의 주주가 돼요." data-dapie="1">
+  <header>
+    <h3>주식</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>주식</code></p>
+    <p class="a"><span class="who">키웅이</span>주식은 회사의 작은 조각이라고 생각하면 돼요. 주식을 가진 사람은 그 회사의 주주가 돼요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">주식은 회사를 잘게 나눈 작은 조각이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주식 한 주는 무엇을 뜻할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사의 작은 조각</li><li class=""><span class="mark">·</span>회사에 빌려준 돈</li><li class=""><span class="mark">·</span>회사가 파는 물건</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">회사를 피자처럼 여러 조각으로 나눈 것이 주식이에요. 그래서 조각 하나를 가진 사람은 회사의 일부를 가진 거예요.</p>
+      <p class="ask">주식 한 조각을 가진 사람은 회사의 일부를 가진 걸까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>회사의 일부를 가져요</li><li class=""><span class="mark">·</span>회사에 돈을 빌려준 거예요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">회사는 필요한 돈을 모으려고 주식을 만들고, 그 조각을 가진 사람을 주주라고 불러요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">반 친구 스무 명이 돈을 모아 축구공 하나를 샀다고 해 봐요. 돈을 낸 사람마다 그 공의 일부를 가진 셈이에요.</p>
+  </div></div>
+  <footer><code class="id">stock</code></footer>
+</article><article class="card" data-name="주주" data-triggers="주주" data-answer="주주는 회사의 주식을 가진 사람이에요. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼요." data-dapie="1">
+  <header>
+    <h3>주주</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>주주</code></p>
+    <p class="a"><span class="who">키웅이</span>주주는 회사의 주식을 가진 사람이에요. 회사의 작은 조각을 함께 가진 사람이라고 생각하면 돼요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">주주는 그 회사의 주식을 가진 사람이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">누구를 주주라고 부를까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사의 주식을 가진 사람</li><li class=""><span class="mark">·</span>회사에서 일하는 모든 사람</li><li class=""><span class="mark">·</span>물건을 산 모든 손님</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주주가 되는 조건은 딱 하나, 그 회사의 주식을 가지는 거예요. 회사에서 일하거나 물건을 샀다고 주주가 되는 것은 아니에요.</p>
+      <p class="ask">주주가 되려면 무엇을 가지고 있어야 할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>그 회사의 주식</li><li class=""><span class="mark">·</span>그 회사에서 일한 경력</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">직원이나 손님이라는 이유만으로 주주가 되지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">피자 조각을 가진 사람이 그 조각의 주인인 것과 비슷해요. 회사의 주식 조각을 가진 사람이 주주예요.</p>
+  </div></div>
+  <footer><code class="id">shareholder</code></footer>
+</article><article class="card" data-name="종목" data-triggers="종목" data-answer="종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해요. 여기서는 각 회사의 주식이 하나의 종목이에요." data-dapie="1">
+  <header>
+    <h3>종목</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>종목</code></p>
+    <p class="a"><span class="who">키웅이</span>종목은 거래 화면에서 구분하는 회사나 상품 하나를 말해요. 여기서는 각 회사의 주식이 하나의 종목이에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">종목은 거래 화면에서 구분하는 회사나 상품 하나예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">거래 화면에서 종목 하나는 무엇을 가리킬까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사나 상품 하나</li><li class=""><span class="mark">·</span>주식시장 전체</li><li class=""><span class="mark">·</span>같은 업종 묶음</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">검색 결과에는 회사 이름이 한 줄씩 나뉘어 나와요. 그 한 줄 한 줄이 회사나 상품 하나, 곧 종목 하나예요.</p>
+      <p class="ask">검색 결과의 한 줄은 무엇을 구분할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>회사나 상품 하나</li><li class=""><span class="mark">·</span>모든 회사를 한꺼번에</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">종목마다 구분하는 이름과 코드가 따로 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">도서관에서 책마다 제목과 번호가 있는 것과 비슷해요. 거래 화면도 종목 이름과 코드로 회사를 구분해요.</p>
+  </div></div>
+  <footer><code class="id">stock-item</code></footer>
+</article><article class="card" data-name="업종" data-triggers="업종 섹터" data-answer="업종은 비슷한 일을 하는 회사들을 묶은 이름이에요. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어요." data-dapie="1">
+  <header>
+    <h3>업종</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>업종</code> <code>섹터</code></p>
+    <p class="a"><span class="who">키웅이</span>업종은 비슷한 일을 하는 회사들을 묶은 이름이에요. 예를 들어 게임 회사나 식품 회사처럼 나눌 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">업종은 주로 하는 일이 비슷한 회사들을 묶은 이름이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">같은 업종의 회사들은 무엇이 비슷할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>주로 하는 일</li><li class=""><span class="mark">·</span>회사의 크기</li><li class=""><span class="mark">·</span>주가의 높낮이</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">업종은 회사가 하는 일에 따라 묶어요. 게임을 만드는 회사는 게임 업종, 음식을 만드는 회사는 식품 업종이 되는 식이에요.</p>
+      <p class="ask">업종은 회사를 무엇으로 나눌까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>하는 일</li><li class=""><span class="mark">·</span>이름의 첫 글자</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">같은 업종이라도 회사마다 사업 내용과 결과는 다를 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">도서관에서 과학책과 역사책을 분야별로 묶는 것과 비슷해요. 회사도 하는 일이 비슷하면 같은 업종으로 묶어요.</p>
+  </div></div>
+  <footer><code class="id">sector</code></footer>
+</article><article class="card" data-name="etf" data-triggers="etf" data-answer="etf는 여러 회사의 주식을 한 바구니에 담아 둔 상품이에요. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어요." data-dapie="1">
+  <header>
+    <h3>ETF</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>etf</code></p>
+    <p class="a"><span class="who">키웅이</span>ETF는 여러 회사의 주식을 한 바구니에 담아 둔 상품이에요. 어떤 회사들이 담겼는지는 상품 설명에서 확인할 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">ETF는 여러 회사의 주식 같은 자산을 한 바구니에 담아 거래하는 상품이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">ETF 한 상품 안에는 무엇이 담길 수 있을까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>여러 주식이나 자산</li><li class=""><span class="mark">·</span>한 회사의 주식만</li><li class=""><span class="mark">·</span>미래 가격의 정답</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">ETF는 여러 종류의 자산을 한 상자에 모아 둔 묶음 상품이에요. 물건 하나가 아니라 여러 자산이 함께 들어 있어요.</p>
+      <p class="ask">ETF는 하나만 담은 물건일까요, 여러 자산을 묶은 상품일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>여러 자산을 묶은 상품</li><li class=""><span class="mark">·</span>한 회사의 주식</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">여기서 자산은 주식이나 금처럼 값을 매길 수 있는 것을 뜻하고, 무엇이 얼마나 담겼는지는 상품 설명에서 확인해요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">여러 맛 과자가 함께 든 묶음 상자와 비슷해요. 상자마다 들어 있는 과자의 종류와 비율이 다를 수 있어요.</p>
+  </div></div>
+  <footer><code class="id">etf</code></footer>
+</article><article class="card" data-name="지수" data-triggers="지수" data-answer="지수는 여러 주식의 가격 움직임을 한눈에 보기 위해 만든 숫자예요. 시장 전체나 특정 업종의 흐름을 살펴볼 때 써요." data-dapie="1">
+  <header>
+    <h3>지수</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>지수</code></p>
+    <p class="a"><span class="who">키웅이</span>지수는 여러 주식의 가격 움직임을 한눈에 보기 위해 만든 숫자예요. 시장 전체나 특정 업종의 흐름을 살펴볼 때 써요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">지수는 여러 주식의 가격 움직임을 한눈에 보려고 만든 숫자예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주가지수는 보통 무엇의 움직임을 묶어 보여줄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>여러 주식의 가격</li><li class=""><span class="mark">·</span>한 사람의 수익률</li><li class=""><span class="mark">·</span>한 종목의 가격</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">지수는 한 종목이 아니라 여러 종목의 움직임을 묶어 하나의 숫자로 나타내요. 반 친구들의 기록을 모아 반 평균을 내는 것과 같은 방식이에요.</p>
+      <p class="ask">지수는 한 종목만 볼까요, 여러 종목을 묶어 볼까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>여러 종목을 묶어 봐요</li><li class=""><span class="mark">·</span>한 종목만 봐요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">시장이나 업종의 흐름을 요약할 뿐 한 회사의 값이나 방향을 정해 주지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">여러 과일의 값을 한 숫자로 묶어 이번 달 과일값이 올랐는지 보는 것과 비슷해요. 사과 한 알의 값이 얼마인지는 따로 봐야 해요.</p>
+  </div></div>
+  <footer><code class="id">index</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-order">
+    <h2>주문 <span class="count">11</span></h2>
+    <p class="note">매수·매도·체결처럼 주문 화면에서 쓰는 말</p>
+    <div class="cards"><article class="card" data-name="매수" data-triggers="매수 주식 사기" data-answer="매수는 주식을 사는 거래예요. 주문 전에 수량과 예상 금액, 그리고 고른 이유를 확인하면 돼요." data-dapie="1">
+  <header>
+    <h3>매수</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>매수</code> <code>주식 사기</code></p>
+    <p class="a"><span class="who">키웅이</span>매수는 주식을 사는 거래예요. 주문 전에 수량과 예상 금액, 그리고 고른 이유를 확인하면 돼요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">매수는 주식을 사서 보유 주식이 늘어나는 거래예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">매수 주문이 체결되면 가진 주식은 어떻게 될까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>주식 수가 늘어나요</li><li class=""><span class="mark">·</span>주식 수가 줄어들어요</li><li class=""><span class="mark">·</span>종목이 사라져요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">매수는 물건을 사서 내 것으로 만드는 것과 같은 방향이에요. 그래서 매수가 체결되면 그 주식이 내 보유 목록에 들어와요.</p>
+      <p class="ask">주식을 사면 내 보유 목록에 들어올까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>체결되면 들어와요</li><li class=""><span class="mark">·</span>주문을 넣는 순간 바로 들어와요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">주문을 냈다고 바로 늘어나지는 않고 조건이 맞아 체결되어야 해요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">가게에서 물건을 사겠다고 말한 것은 주문이고, 돈을 내고 물건을 받은 때가 체결이에요. 주식 매수도 체결 뒤에 보유 목록에 들어와요.</p>
+  </div></div>
+  <footer><code class="id">buy</code></footer>
+</article><article class="card" data-name="매도" data-triggers="매도 팔기" data-answer="매도는 가지고 있던 주식을 파는 거래예요. 팔고 나면 그 거래의 결과가 실현손익으로 기록돼요." data-dapie="1">
+  <header>
+    <h3>매도</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>매도</code> <code>팔기</code></p>
+    <p class="a"><span class="who">키웅이</span>매도는 가지고 있던 주식을 파는 거래예요. 팔고 나면 그 거래의 결과가 실현손익으로 기록돼요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">매도는 가지고 있던 주식을 팔아 보유 주식이 줄어드는 거래예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">매도 주문이 체결되면 가진 주식은 어떻게 될까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>주식 수가 줄어들어요</li><li class=""><span class="mark">·</span>주식 수가 늘어나요</li><li class=""><span class="mark">·</span>언제나 그대로예요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">매도는 내가 가진 것을 다른 사람에게 파는 방향이에요. 그래서 매도가 체결되면 판 만큼 보유 목록에서 빠져나가요.</p>
+      <p class="ask">가지고 있던 주식을 팔면 내 보유 목록은 어떻게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>체결된 만큼 줄어들어요</li><li class=""><span class="mark">·</span>체결된 만큼 늘어나요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">체결된 수량만큼 줄어들고 그 거래 결과가 실현손익으로 기록돼요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">가지고 있던 카드를 친구에게 팔면 내 카드 수가 줄어드는 것과 비슷해요. 주식도 매도가 체결된 만큼 줄어들어요.</p>
+  </div></div>
+  <footer><code class="id">sell</code></footer>
+</article><article class="card" data-name="주문" data-triggers="주문" data-answer="주문은 주식을 사고팔겠다고 거래소에 알리는 과정이에요. 주문을 넣었다고 바로 거래가 끝나는 것은 아니에요." data-dapie="1">
+  <header>
+    <h3>주문</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>주문</code></p>
+    <p class="a"><span class="who">키웅이</span>주문은 주식을 사고팔겠다고 거래소에 알리는 과정이에요. 주문을 넣었다고 바로 거래가 끝나는 것은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">주문은 주식을 사고팔겠다고 거래소에 알리는 요청이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주문을 넣으면 거래가 언제나 바로 끝날까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>조건이 맞아야 끝나요</li><li class=""><span class="mark">·</span>언제나 바로 끝나요</li><li class=""><span class="mark">·</span>절대 끝나지 않아요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주문은 사거나 팔고 싶다고 알리는 요청이에요. 사고 싶은 사람과 팔고 싶은 사람의 조건이 맞아야 거래가 끝나요.</p>
+      <p class="ask">주문은 거래 완료일까요, 거래 요청일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>거래 요청</li><li class=""><span class="mark">·</span>거래 완료</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">주문에 담은 수량과 가격 조건이 맞아야 거래가 체결돼요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">식당에서 음식을 부탁한 순간이 주문이고, 음식이 나온 순간이 완료에 가까워요. 주식도 주문과 체결은 다른 단계예요.</p>
+  </div></div>
+  <footer><code class="id">order</code></footer>
+</article><article class="card" data-name="체결" data-triggers="체결" data-answer="체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태예요. 체결된 뒤에 보유 수량이 바뀌어요." data-dapie="1">
+  <header>
+    <h3>체결</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>체결</code></p>
+    <p class="a"><span class="who">키웅이</span>체결은 사고 싶은 사람과 팔고 싶은 사람이 만나 거래가 완료된 상태예요. 체결된 뒤에 보유 수량이 바뀌어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">체결은 조건이 맞아 거래가 끝나고 보유 수량이 바뀌는 순간이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">보유 수량은 보통 언제 바뀔까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>주문이 체결됐을 때</li><li class=""><span class="mark">·</span>검색어를 적었을 때</li><li class=""><span class="mark">·</span>화면을 열었을 때</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주문은 사고팔겠다는 요청이고, 체결은 조건이 맞아 거래가 실제로 끝난 순간이에요. 거래가 끝난 상태를 부르는 말이 체결이에요.</p>
+      <p class="ask">사고파는 거래가 실제로 끝난 상태를 무엇이라고 할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>체결</li><li class=""><span class="mark">·</span>주문</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">체결되기 전까지 주문은 기다리는 상태로 남아 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">중고 장터에서 사고 싶은 사람과 팔고 싶은 사람이 조건에 동의한 순간과 비슷해요. 약속이 맞아 거래가 끝난 상태가 체결이에요.</p>
+  </div></div>
+  <footer><code class="id">execution</code></footer>
+</article><article class="card" data-name="시장가" data-triggers="시장가 지금 가격에 바로" data-answer="시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이에요. 주문을 넣는 순간의 가격과 조금 달라질 수 있어요." data-dapie="1">
+  <header>
+    <h3>시장가</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>시장가</code> <code>지금 가격에 바로</code></p>
+    <p class="a"><span class="who">키웅이</span>시장가는 지금 시장에서 거래되는 가격으로 주문하는 방법이에요. 주문을 넣는 순간의 가격과 조금 달라질 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">시장가는 지금 시장에 나와 있는 값으로 바로 주문하는 방법이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">시장가로 주문하면 값은 어떻게 정해질까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>지금 시장에 있는 값으로</li><li class=""><span class="mark">·</span>내가 적어 낸 값으로</li><li class=""><span class="mark">·</span>회사가 정해 준 값으로</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">지정가는 내가 값을 적어 두지만, 시장가는 그 자리에서 시장에 나와 있는 값을 그대로 받아요.</p>
+      <p class="ask">그럼 시장가는 어느 값을 받을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>시장에 나와 있는 값</li><li class=""><span class="mark">·</span>내가 적어 둔 값</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">값을 그대로 받는 대신 주문을 넣는 순간과 조금 달라질 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">가게에 붙은 값표를 그대로 보고 고르는 것과 비슷해요. 값을 깎지 않는 대신 기다리지 않아도 돼요.</p>
+  </div></div>
+  <footer><code class="id">market-order</code></footer>
+</article><article class="card" data-name="지정가" data-triggers="지정가 내가 정한 가격에" data-answer="지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이에요. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어요." data-dapie="1">
+  <header>
+    <h3>지정가</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>지정가</code> <code>내가 정한 가격에</code></p>
+    <p class="a"><span class="who">키웅이</span>지정가는 내가 정한 가격에만 주문이 되도록 하는 방법이에요. 그 가격에 거래 상대가 없으면 바로 체결되지 않을 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">지정가는 내가 정한 값에만 주문이 되도록 하는 방법이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">지정가로 주문하면 값은 어떻게 정해질까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>내가 적어 낸 값으로</li><li class=""><span class="mark">·</span>지금 시장에 있는 값으로</li><li class=""><span class="mark">·</span>회사가 정해 준 값으로</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">시장가는 시장에 나와 있는 값을 그대로 받지만, 지정가는 내가 적어 둔 값에만 거래돼요.</p>
+      <p class="ask">그럼 지정가는 어느 값에 거래될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>내가 적어 둔 값</li><li class=""><span class="mark">·</span>시장에 나와 있는 값</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">그 값에 거래할 상대가 없으면 주문이 바로 끝나지 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">친구에게 이만큼이면 바꾸겠다고 미리 말해 두는 것과 비슷해요. 친구가 동의해야 바꿀 수 있어요.</p>
+  </div></div>
+  <footer><code class="id">limit-order</code></footer>
+</article><article class="card" data-name="수량" data-triggers="수량 몇 주 주 수" data-answer="수량은 사고팔 주식의 개수예요. 한 주 가격과 곱하면 대략의 거래 금액을 확인할 수 있어요." data-dapie="1">
+  <header>
+    <h3>수량</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>수량</code> <code>몇 주</code> <code>주 수</code></p>
+    <p class="a"><span class="who">키웅이</span>수량은 사고팔 주식의 개수예요. 한 주 가격과 곱하면 대략의 거래 금액을 확인할 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">수량은 가격이 아니라 사고팔 주식의 개수를 세는 숫자예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주식 수량은 무엇을 세는 숫자일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>사고팔 주식의 개수</li><li class=""><span class="mark">·</span>한 주의 가격</li><li class=""><span class="mark">·</span>전체 주문 금액</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주문할 때는 몇 주를 사고팔지 적는 칸이 있어요. 그 칸에 적는 숫자는 가격이 아니라 주식의 개수예요.</p>
+      <p class="ask">주문 칸에 적는 수량은 가격일까요, 개수일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>주식의 개수</li><li class=""><span class="mark">·</span>한 주의 가격</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">수량에 한 주 가격을 곱하면 대략 필요한 금액을 볼 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">연필을 몇 자루 살지 정하는 것과 비슷해요. 연필 수가 수량이고, 한 자루 값은 가격이에요.</p>
+  </div></div>
+  <footer><code class="id">quantity</code></footer>
+</article><article class="card" data-name="예상 금액" data-triggers="예상 금액 주문 금액" data-answer="예상 금액은 주문 수량과 가격으로 계산한 돈이에요. 주문을 확정하기 전 최종 금액을 다시 확인해 주세요." data-dapie="1">
+  <header>
+    <h3>예상 금액</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>예상 금액</code> <code>주문 금액</code></p>
+    <p class="a"><span class="who">키웅이</span>예상 금액은 주문 수량과 가격으로 계산한 돈이에요. 주문을 확정하기 전 최종 금액을 다시 확인해 주세요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">예상 금액은 주문 수량과 가격을 곱해 미리 계산해 본 돈이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">예상 금액을 계산할 때 무엇이 필요할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>수량과 주문 가격</li><li class=""><span class="mark">·</span>수량만</li><li class=""><span class="mark">·</span>쓸 수 있는 현금</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">한 개의 가격과 몇 개를 살지 알면 전체 금액을 미리 계산할 수 있어요. 주식도 한 주 가격과 수량을 곱해 예상 금액을 구해요.</p>
+      <p class="ask">전체 금액을 알려면 개수와 무엇이 필요할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>한 개의 가격</li><li class=""><span class="mark">·</span>쓸 수 있는 현금</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">시장가처럼 체결 값이 달라지는 주문은 실제 금액과 차이가 날 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">연필 한 자루 값에 살 자루 수를 곱해 미리 필요한 돈을 보는 것과 같아요. 주식도 수량과 가격으로 예상 금액을 계산해요.</p>
+  </div></div>
+  <footer><code class="id">estimated-amount</code></footer>
+</article><article class="card" data-name="기다리는 주문" data-triggers="기다리는 주문" data-answer="기다리는 주문은 아직 체결되지 않은 지정가 주문이에요. 매수 주문의 금액이나 매도 주문의 수량은 체결되거나 취소될 때까지 잠시 예약돼요." data-dapie="1">
+  <header>
+    <h3>기다리는 주문</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>기다리는 주문</code></p>
+    <p class="a"><span class="who">키웅이</span>기다리는 주문은 아직 체결되지 않은 지정가 주문이에요. 매수 주문의 금액이나 매도 주문의 수량은 체결되거나 취소될 때까지 잠시 예약돼요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">기다리는 주문은 아직 체결되지 않은 지정가 주문이에요. 매수 주문의 금액이나 매도 주문의 수량은 체결되거나 취소될 때까지 잠시 예약돼요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">기다리는 주문은 어떤 상태일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>아직 체결되지 않은 상태</li><li class=""><span class="mark">·</span>이미 체결이 끝난 상태</li><li class=""><span class="mark">·</span>취소가 끝난 상태</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">기다리는 주문은 정한 조건이 아직 맞지 않아 체결되지 않았어요. 기다리는 동안 금액이나 수량이 잠시 예약돼요.</p>
+      <p class="ask">기다리는 동안 그 금액이나 수량은 어떻게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>잠시 예약돼요</li><li class=""><span class="mark">·</span>그냥 없어져요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">정한 값에 거래할 상대가 나타나지 않으면 계속 기다리는 상태로 남아 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">빈자리가 날 때까지 이름을 적어 두고 기다리는 것과 비슷해요. 차례가 와야 자리에 앉을 수 있어요.</p>
+  </div></div>
+  <footer><code class="id">pending-order</code></footer>
+</article><article class="card" data-name="주문 취소" data-triggers="주문 취소 주문취소" data-answer="기다리는 주문을 취소하면 예약된 가상 돈이나 주식은 돌아와요. 이미 체결된 주문은 취소할 수 없어요." data-dapie="1">
+  <header>
+    <h3>주문 취소</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>주문 취소</code> <code>주문취소</code></p>
+    <p class="a"><span class="who">키웅이</span>기다리는 주문을 취소하면 예약된 가상 돈이나 주식은 돌아와요. 이미 체결된 주문은 취소할 수 없어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">기다리는 주문을 취소하면 예약된 가상 돈이나 주식은 돌아와요. 이미 체결된 주문은 취소할 수 없어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">이미 체결된 주문도 취소할 수 있을까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>취소할 수 없어요</li><li class=""><span class="mark">·</span>언제든 취소할 수 있어요</li><li class=""><span class="mark">·</span>다음 날 취소돼요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">체결은 거래가 이미 끝난 상태라 되돌릴 수 없어요. 취소는 아직 기다리는 주문에만 할 수 있어요.</p>
+      <p class="ask">그럼 취소할 수 있는 주문은 어떤 것일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>아직 기다리는 주문</li><li class=""><span class="mark">·</span>이미 체결된 주문</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">취소는 기다리는 주문 목록에서 하고, 돌아온 돈은 다시 쓸 수 있는 돈에 더해져요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">아직 안 보낸 메시지는 지울 수 있지만 이미 보낸 메시지는 되돌릴 수 없는 것과 비슷해요.</p>
+  </div></div>
+  <footer><code class="id">order-cancel</code></footer>
+</article><article class="card" data-name="받게 되는 돈" data-triggers="받게 되는 돈" data-answer="받게 되는 돈은 팔 수량과 예상 체결 가격을 곱해 계산한 금액이에요. 현재 데모는 세금과 수수료를 따로 계산하지 않아요." data-dapie="1">
+  <header>
+    <h3>받게 되는 돈</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>받게 되는 돈</code></p>
+    <p class="a"><span class="who">키웅이</span>받게 되는 돈은 팔 수량과 예상 체결 가격을 곱해 계산한 금액이에요. 현재 데모는 세금과 수수료를 따로 계산하지 않아요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">받게 되는 돈은 팔 수량과 예상 체결 가격을 곱해 계산한 금액이에요. 현재 데모는 세금과 수수료를 따로 계산하지 않아요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">받게 되는 돈은 무엇을 곱해 계산할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>팔 수량과 예상 체결 가격</li><li class=""><span class="mark">·</span>남은 현금과 가진 회사 수</li><li class=""><span class="mark">·</span>처음 산 가격과 지금 가격</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">받게 되는 돈은 몇 주를 얼마에 파는지로 계산해요. 그래서 팔 수량과 예상 체결 가격이 함께 필요해요.</p>
+      <p class="ask">계산에 꼭 필요한 두 가지는 무엇일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>팔 수량과 가격</li><li class=""><span class="mark">·</span>처음 산 가격과 지금 가격</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">예상해 본 값이라 실제로 체결된 가격이 다르면 받는 돈도 달라져요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">붕어빵 몇 개에 얼마인지 곱해서 낼 돈을 미리 세어 보는 것과 비슷해요. 가게에 가면 값이 올라 있기도 해요.</p>
+  </div></div>
+  <footer><code class="id">sell-proceeds</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-profit">
+    <h2>수익·손익 <span class="count">8</span></h2>
+    <p class="note">수익률·평가손익처럼 내 돈이 얼마인지 보는 말</p>
+    <div class="cards"><article class="card" data-name="평가금액" data-triggers="평가금액 지금 값어치" data-answer="평가금액은 지금 가지고 있는 주식이 현재 가격으로 얼마인지 보여주는 금액이에요. 아직 팔지 않았다면 가격에 따라 바뀔 수 있어요." data-dapie="1">
+  <header>
+    <h3>평가금액</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>평가금액</code> <code>지금 값어치</code></p>
+    <p class="a"><span class="who">키웅이</span>평가금액은 지금 가지고 있는 주식이 현재 가격으로 얼마인지 보여주는 금액이에요. 아직 팔지 않았다면 가격에 따라 바뀔 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">평가금액은 지금 가진 주식을 현재 가격으로 계산한 금액이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">평가금액은 무엇을 현재 가격으로 계산할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>지금 가진 주식</li><li class=""><span class="mark">·</span>내일 넣을 주문</li><li class=""><span class="mark">·</span>쓸 수 있는 현금</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">평가금액은 보유 수량에 지금의 한 주 가격을 곱해 계산해요. 그래서 현재가가 바뀌면 평가금액도 함께 바뀔 수 있어요.</p>
+      <p class="ask">현재가가 바뀌면 평가금액도 바뀔 수 있을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>함께 바뀔 수 있어요</li><li class=""><span class="mark">·</span>언제나 그대로예요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">보유 수량에 현재가를 곱해 내므로 가격이 움직이면 함께 바뀌어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">가지고 있는 카드들을 오늘의 카드 값으로 다시 계산하는 것과 비슷해요. 카드 값이 바뀌면 전체 평가금액도 달라져요.</p>
+  </div></div>
+  <footer><code class="id">evaluation-amount</code></footer>
+</article><article class="card" data-name="평가손익" data-triggers="평가손익 번 돈" data-answer="평가손익은 아직 가진 주식의 값이 산 뒤보다 얼마나 달라졌는지 보여줘요. 아직 팔지 않은 변화라서 계속 바뀔 수 있어요." data-dapie="1">
+  <header>
+    <h3>평가손익</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>평가손익</code> <code>번 돈</code></p>
+    <p class="a"><span class="who">키웅이</span>평가손익은 아직 가진 주식의 값이 산 뒤보다 얼마나 달라졌는지 보여줘요. 아직 팔지 않은 변화라서 계속 바뀔 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">평가손익은 아직 팔지 않은 주식의 값이 얼마나 달라졌는지 보여줘요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">평가손익은 언제 볼 수 있을까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>아직 가지고 있을 때</li><li class=""><span class="mark">·</span>팔고 난 뒤에</li><li class=""><span class="mark">·</span>처음 살 때만</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">평가손익은 아직 팔지 않고 가지고 있는 주식의 값 변화예요. 거래가 끝나지 않아서 숫자가 계속 움직여요.</p>
+      <p class="ask">아직 가지고 있는 주식의 평가손익은 어떤 상태일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>계속 움직이는 중</li><li class=""><span class="mark">·</span>이미 끝난 상태</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">아직 거래가 끝나지 않아서 숫자가 계속 바뀌어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">서랍에 넣어 둔 카드의 요즘 값을 적어 둔 쪽지와 비슷해요. 아직 바꾸지 않았으니 숫자는 계속 달라져요.</p>
+  </div></div>
+  <footer><code class="id">unrealized-profit</code></footer>
+</article><article class="card" data-name="실현손익" data-triggers="실현손익" data-answer="실현손익은 주식을 팔아 거래가 끝난 뒤 기록되는 결과예요. 평가손익과 달리 이미 끝난 거래의 기록이에요." data-dapie="1">
+  <header>
+    <h3>실현손익</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>실현손익</code></p>
+    <p class="a"><span class="who">키웅이</span>실현손익은 주식을 팔아 거래가 끝난 뒤 기록되는 결과예요. 평가손익과 달리 이미 끝난 거래의 기록이에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">실현손익은 주식을 팔아서 거래가 끝난 뒤에 남는 결과예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">실현손익은 언제 정해질까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>팔고 난 뒤에</li><li class=""><span class="mark">·</span>아직 가지고 있을 때</li><li class=""><span class="mark">·</span>주문을 넣을 때</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">실현손익은 주식을 팔아서 거래가 끝난 뒤에 남는 결과예요. 거래가 이미 끝났기 때문에 숫자가 그대로 기록으로 남아요.</p>
+      <p class="ask">끝난 거래의 결과는 어떻게 남을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>그대로 기록돼요</li><li class=""><span class="mark">·</span>계속 바뀌어요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">거래가 이미 끝나 더는 바뀌지 않는 지나간 기록이에요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">친구와 카드를 바꾸고 나서 적어 둔 결과표와 비슷해요. 바꾼 뒤에는 숫자가 그대로 남아요.</p>
+  </div></div>
+  <footer><code class="id">realized-profit</code></footer>
+</article><article class="card" data-name="수익률" data-triggers="수익률 손실률" data-answer="수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이에요. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아요." data-dapie="1">
+  <header>
+    <h3>수익률</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>수익률</code> <code>손실률</code></p>
+    <p class="a"><span class="who">키웅이</span>수익률은 처음 금액과 지금 금액이 얼마나 달라졌는지 비율로 보는 방법이에요. 숫자뿐 아니라 왜 골랐는지도 같이 돌아보면 좋아요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">수익률은 처음 금액에 비해 지금 금액이 얼마나 달라졌는지 비율로 보는 값이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">수익률은 무엇을 비교할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>처음 금액과 지금 금액</li><li class=""><span class="mark">·</span>지금 금액과 남은 현금</li><li class=""><span class="mark">·</span>산 주식 수와 판 주식 수</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">수익률의 기준은 처음 출발한 금액이에요. 지금 금액이 처음 금액에서 얼마나 달라졌는지를 비율로 나타내요.</p>
+      <p class="ask">수익률은 지금 금액을 무엇과 비교할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>처음 출발한 금액</li><li class=""><span class="mark">·</span>지갑에 남은 현금</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">크기가 다른 투자도 비율로 견줄 수 있지만 앞으로의 결과를 알려주지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">서로 다른 길이의 달리기에서 출발점부터 얼마나 이동했는지 비율로 비교하는 것과 비슷해요. 출발한 금액이 기준이 돼요.</p>
+  </div></div>
+  <footer><code class="id">return</code></footer>
+</article><article class="card" data-name="평균 매수가" data-triggers="평균 매수가 평균매수가 평균" data-answer="평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이에요." data-dapie="1">
+  <header>
+    <h3>평균 매수가</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>평균 매수가</code> <code>평균매수가</code> <code>평균</code></p>
+    <p class="a"><span class="who">키웅이</span>평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 얼마에 샀는지 보여주는 가격이에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">평균 매수가는 같은 종목을 여러 번 샀을 때 한 주당 평균으로 낸 가격이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">평균 매수가는 무엇을 보여줄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>한 주당 평균으로 산 가격</li><li class=""><span class="mark">·</span>지금 시장의 현재가</li><li class=""><span class="mark">·</span>팔린 주식의 개수</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">같은 종목을 서로 다른 가격에 여러 번 살 수 있어요. 그때 쓴 돈 전체를 산 주식 수로 나눠 한 주당 평균을 낸 값이 평균 매수가예요.</p>
+      <p class="ask">여러 번 산 가격을 한 주당 평균으로 나타낸 값은 무엇일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>평균 매수가</li><li class=""><span class="mark">·</span>지금의 현재가</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">그 종목에 쓴 전체 금액을 산 주식 수로 나눠 구하고, 지금의 현재가와는 달라요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">같은 연필을 다른 날 서로 다른 값에 샀다고 해 봐요. 산 연필 전체의 한 자루당 평균값이 평균 매수가와 비슷해요.</p>
+  </div></div>
+  <footer><code class="id">average-price</code></footer>
+</article><article class="card" data-name="전체 자산" data-triggers="내 지갑 전체 전체 자산 지금 내 돈 전부" data-answer="전체 자산은 쓸 수 있는 가상 현금과 가진 주식의 현재 값어치, 기다리는 주문에 맡겨 둔 금액을 합친 값이에요. 가격이 움직이면 달라질 수 있어요." data-dapie="1">
+  <header>
+    <h3>전체 자산</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>내 지갑 전체</code> <code>전체 자산</code> <code>지금 내 돈 전부</code></p>
+    <p class="a"><span class="who">키웅이</span>전체 자산은 쓸 수 있는 가상 현금과 가진 주식의 현재 값어치, 기다리는 주문에 맡겨 둔 금액을 합친 값이에요. 가격이 움직이면 달라질 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">전체 자산은 쓸 수 있는 가상 현금과 가진 주식의 현재 값어치, 기다리는 주문에 맡겨 둔 금액을 합친 값이에요. 가격이 움직이면 달라질 수 있어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">전체 자산에는 무엇이 함께 들어갈까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>현금과 주식 값어치를 합친 값</li><li class=""><span class="mark">·</span>쓸 수 있는 현금만</li><li class=""><span class="mark">·</span>가진 주식만</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">전체 자산은 쓸 수 있는 현금과 가진 주식의 값어치, 기다리는 주문에 맡겨 둔 금액을 모두 더한 값이에요. 한 가지만 보는 값이 아니에요.</p>
+      <p class="ask">전체 자산은 한 가지만 볼까요, 모두 더할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>모두 더해요</li><li class=""><span class="mark">·</span>현금만 봐요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">주식을 사고팔지 않아도 가진 주식의 값이 움직이면 이 숫자는 달라져요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">저금통에 든 동전과 서랍에 넣어 둔 지폐를 함께 세어 보는 것과 비슷해요. 한쪽만 세면 실제보다 적어 보여요.</p>
+  </div></div>
+  <footer><code class="id">total-assets</code></footer>
+</article><article class="card" data-name="쓸 수 있는 돈" data-triggers="쓸 수 있는 돈 남은 지갑 현금" data-answer="쓸 수 있는 돈은 지금 새 주문에 사용할 수 있는 가상 돈이에요. 기다리는 주문에 맡겨 둔 돈은 취소되기 전까지 여기서 빠져 있어요." data-dapie="1">
+  <header>
+    <h3>쓸 수 있는 돈</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>쓸 수 있는 돈</code> <code>남은 지갑</code> <code>현금</code></p>
+    <p class="a"><span class="who">키웅이</span>쓸 수 있는 돈은 지금 새 주문에 사용할 수 있는 가상 돈이에요. 기다리는 주문에 맡겨 둔 돈은 취소되기 전까지 여기서 빠져 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">쓸 수 있는 돈은 지금 새 주문에 사용할 수 있는 가상 돈이에요. 기다리는 주문에 맡겨 둔 돈은 취소되기 전까지 여기서 빠져 있어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">기다리는 주문에 맡겨 둔 돈도 쓸 수 있는 돈에 들어 있을까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>빠져 있어요</li><li class=""><span class="mark">·</span>그대로 들어 있어요</li><li class=""><span class="mark">·</span>두 번 들어가요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">기다리는 주문에 맡긴 돈은 체결되거나 취소되기 전까지 잠겨 있어요. 그래서 지금 쓸 수 있는 돈에서는 빠져 있어요.</p>
+      <p class="ask">그 주문을 취소하면 맡긴 돈은 어떻게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>다시 쓸 수 있게 돌아와요</li><li class=""><span class="mark">·</span>그대로 없어져요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">그래서 전체 자산보다 작을 수 있고, 새 주문을 넣을 수 있는지는 이 숫자로 확인해요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">용돈 중에 이미 친구와 쓰기로 약속한 몫을 빼고 남은 돈만 오늘 쓸 수 있는 것과 비슷해요.</p>
+  </div></div>
+  <footer><code class="id">available-cash</code></footer>
+</article><article class="card" data-name="보유 종목" data-triggers="가진 회사 보유 종목" data-answer="가진 회사는 지금 내 계좌에 주식을 가지고 있는 회사를 뜻해요. 아직 체결되지 않은 기다리는 주문은 보유 종목이 아니에요." data-dapie="1">
+  <header>
+    <h3>보유 종목</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>가진 회사</code> <code>보유 종목</code></p>
+    <p class="a"><span class="who">키웅이</span>가진 회사는 지금 내 계좌에 주식을 가지고 있는 회사를 뜻해요. 아직 체결되지 않은 기다리는 주문은 보유 종목이 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">가진 회사는 지금 내 계좌에 주식을 가지고 있는 회사를 뜻해요. 아직 체결되지 않은 기다리는 주문은 보유 종목이 아니에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">아직 체결되지 않은 주문도 가진 회사에 들어갈까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>들어가지 않아요</li><li class=""><span class="mark">·</span>들어가요</li><li class=""><span class="mark">·</span>절반만 들어가요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">가진 회사는 체결이 끝나 실제로 주식을 갖게 된 회사만 세요. 기다리는 주문은 아직 체결 전이라 여기에 없어요.</p>
+      <p class="ask">가진 회사에 들어가려면 무엇이 끝나야 할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>주문이 체결되어야 해요</li><li class=""><span class="mark">·</span>주문만 넣으면 돼요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">같은 회사를 여러 번 나눠 사도 가진 회사에는 하나로 모여서 보여요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">택배를 주문한 것과 상자가 집에 도착한 것은 달라요. 지금 열어 볼 수 있는 것은 도착한 상자뿐이에요.</p>
+  </div></div>
+  <footer><code class="id">holdings</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-indicator">
+    <h2>회사를 재는 숫자 <span class="count">9</span></h2>
+    <p class="note">PER·배당처럼 회사를 재는 숫자</p>
+    <div class="cards"><article class="card" data-name="시가총액" data-triggers="시가총액 시총" data-answer="시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기예요. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니에요." data-dapie="1">
+  <header>
+    <h3>시가총액</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>시가총액</code> <code>시총</code></p>
+    <p class="a"><span class="who">키웅이</span>시가총액은 회사의 주식 전체를 현재 가격으로 계산한 크기예요. 회사가 하는 일이나 성적을 모두 보여주는 숫자는 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">시가총액은 현재가에 전체 주식 수를 곱해 낸 회사의 전체 크기예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">시가총액을 계산할 때 무엇을 함께 볼까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>현재가와 전체 주식 수</li><li class=""><span class="mark">·</span>현재가와 거래량</li><li class=""><span class="mark">·</span>매출과 직원 수</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주식 한 조각의 현재 값에 전체 조각 수를 곱하면 조각 전체의 값이 나와요. 그 값이 시장에서 본 회사의 전체 크기예요.</p>
+      <p class="ask">모든 조각의 현재 값을 합치면 무엇을 볼 수 있을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>시장에서 본 회사의 전체 크기</li><li class=""><span class="mark">·</span>주식 한 주의 값</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">시장에서 본 크기일 뿐 회사의 장점과 단점을 다 말해 주지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">퍼즐 한 조각의 현재 값에 전체 조각 수를 곱해 퍼즐 전체 값을 보는 것과 비슷해요. 주식 조각 전체의 값이 시가총액이에요.</p>
+  </div></div>
+  <footer><code class="id">market-cap</code></footer>
+</article><article class="card" data-name="매출" data-triggers="매출" data-answer="매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모예요. 매출이 모두 회사의 이익은 아니에요." data-dapie="1">
+  <header>
+    <h3>매출</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>매출</code></p>
+    <p class="a"><span class="who">키웅이</span>매출은 회사가 물건이나 서비스를 팔아 받은 돈의 규모예요. 매출이 모두 회사의 이익은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">매출은 물건이나 서비스를 팔아 받은 돈을 비용 빼기 전에 모두 더한 값이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">매출에서 비용은 이미 모두 빠졌을까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>아직 비용을 빼기 전이에요</li><li class=""><span class="mark">·</span>모든 비용을 뺀 뒤예요</li><li class=""><span class="mark">·</span>판매와 관계없어요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">매출은 물건을 팔아 들어온 돈을 먼저 모두 더한 값이에요. 재료비나 월급 같은 비용은 아직 빼지 않은 상태예요.</p>
+      <p class="ask">매출은 둘 중 무엇을 가리킬까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>팔아서 들어온 돈 전체</li><li class=""><span class="mark">·</span>비용을 빼고 남은 돈</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">재료비나 월급을 아직 빼지 않아서 매출과 이익은 서로 달라요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">학교 장터에서 물건을 팔아 받은 돈을 모두 더한 것이 매출과 비슷해요. 재료를 산 돈을 빼기 전의 값이에요.</p>
+  </div></div>
+  <footer><code class="id">revenue</code></footer>
+</article><article class="card" data-name="영업이익" data-triggers="영업이익" data-answer="영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요. 회사의 공개된 과거 성적을 볼 때 쓰는 말이에요." data-dapie="1">
+  <header>
+    <h3>영업이익</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>영업이익</code></p>
+    <p class="a"><span class="who">키웅이</span>영업이익은 회사가 본업으로 번 돈에서 본업에 든 비용을 뺀 결과예요. 회사의 공개된 과거 성적을 볼 때 쓰는 말이에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">영업이익은 회사가 원래 하는 일, 곧 본업으로 번 돈에서 그 일에 든 비용을 뺀 결과예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">영업이익을 볼 때 매출에서 무엇을 뺄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>본업에 든 비용</li><li class=""><span class="mark">·</span>전체 주식 수</li><li class=""><span class="mark">·</span>판 물건의 개수</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">물건을 팔아 받은 돈에서 재료비와 월급처럼 본업에 쓴 돈을 빼 봐요. 그렇게 남은 본업의 결과가 영업이익이에요.</p>
+      <p class="ask">본업으로 번 돈에서 본업 비용을 빼고 남은 결과는 무엇일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>영업이익</li><li class=""><span class="mark">·</span>매출</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">본업의 지난 성적을 보는 값이라 회사의 모든 돈 흐름을 뜻하지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">주스 가게의 판매금에서 과일값과 가게 운영비를 뺀 결과와 비슷해요. 본업을 운영하고 남은 돈을 보는 거예요.</p>
+  </div></div>
+  <footer><code class="id">operating-profit</code></footer>
+</article><article class="card" data-name="배당" data-triggers="배당" data-answer="배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해요. 모든 회사가 배당하는 것은 아니에요." data-dapie="1">
+  <header>
+    <h3>배당</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>배당</code></p>
+    <p class="a"><span class="who">키웅이</span>배당은 회사가 번 이익 일부를 주주에게 나누어 주는 것을 말해요. 모든 회사가 배당하는 것은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">배당은 회사가 이익의 일부를 주주에게 나누어 주는 일이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">배당을 받는 대상은 누구일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사의 주주</li><li class=""><span class="mark">·</span>물건을 산 모든 손님</li><li class=""><span class="mark">·</span>회사에서 일하는 사람</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">회사가 이익의 일부를 나눠 주는 일을 배당이라고 해요. 받는 사람은 그 회사의 주식을 가진 주주예요.</p>
+      <p class="ask">회사가 이익 일부를 주주에게 나누어 주는 일을 무엇이라고 할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>배당</li><li class=""><span class="mark">·</span>매출</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">정해진 절차를 거쳐 정하기 때문에 모든 회사가 언제나 배당하지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">동아리 활동으로 남은 돈 일부를 구성원에게 나누는 모습과 비슷해요. 회사는 이익 일부를 주주에게 나눌 수 있어요.</p>
+  </div></div>
+  <footer><code class="id">dividend</code></footer>
+</article><article class="card" data-name="예대마진" data-triggers="예대마진" data-answer="예대마진은 은행이 빌려주고 받은 이자와, 맡아 주고 준 이자의 차이예요. 은행이 돈을 버는 방법 가운데 하나예요." data-dapie="1">
+  <header>
+    <h3>예대마진</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>예대마진</code></p>
+    <p class="a"><span class="who">키웅이</span>예대마진은 은행이 빌려주고 받은 이자와, 맡아 주고 준 이자의 차이예요. 은행이 돈을 버는 방법 가운데 하나예요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">예대마진은 은행이 받은 이자와 준 이자의 차이예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">예대마진은 무엇의 차이일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>받은 이자와 준 이자</li><li class=""><span class="mark">·</span>은행이 번 돈 전체</li><li class=""><span class="mark">·</span>예금과 대출의 크기</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">은행은 맡아 준 돈에 이자를 주고, 빌려준 돈에서 이자를 받아요. 그 두 이자의 차이가 예대마진이에요.</p>
+      <p class="ask">그럼 예대마진은 이자끼리의 차이일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>이자끼리의 차이예요</li><li class=""><span class="mark">·</span>돈의 크기 차이예요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">은행이 돈을 버는 방법 가운데 하나이고 수익 구성은 은행마다 달라요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">연필을 빌리며 사탕 하나를 주고, 다른 친구에게 빌려주며 사탕 둘을 받으면 그 차이가 남는 몫이에요.</p>
+  </div></div>
+  <footer><code class="id">net-interest-margin</code></footer>
+</article><article class="card" data-name="per" data-triggers="per 퍼 주가수익비율 비싼지 싼지 비싼회사" data-answer="per은 회사가 번 이익과 주가를 비교해 보는 숫자예요. 같은 업종 회사끼리 함께 보면 이해하기 쉬워요." data-dapie="1">
+  <header>
+    <h3>PER</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>per</code> <code>퍼</code> <code>주가수익비율</code> <code>비싼지</code> <code>싼지</code> <code>비싼회사</code></p>
+    <p class="a"><span class="who">키웅이</span>PER은 회사가 번 이익과 주가를 비교해 보는 숫자예요. 같은 업종 회사끼리 함께 보면 이해하기 쉬워요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">PER은 회사가 번 이익과 주가를 비교해 보는 숫자예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">PER은 무엇을 비교하는 숫자일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사가 번 이익과 주가</li><li class=""><span class="mark">·</span>회사가 가진 재산과 주가</li><li class=""><span class="mark">·</span>회사의 직원 수와 주가</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">PER이 비교하는 것은 딱 두 가지, 회사가 번 이익과 주가예요. 가진 재산을 주가와 견주는 것은 PBR 이라 서로 다른 숫자예요.</p>
+      <p class="ask">그럼 PER 은 주가를 무엇과 견줄까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>회사가 번 이익</li><li class=""><span class="mark">·</span>회사가 가진 재산</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">같은 업종 회사끼리 함께 보면 이익에 비해 주가가 어떻게 보이는지 견줄 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">같은 업종의 두 회사가 비슷한 이익을 냈다고 해 봐요. 한 회사의 주가가 더 높다면 두 회사의 PER은 다르게 보여요.</p>
+  </div></div>
+  <footer><code class="id">per</code></footer>
+</article><article class="card" data-name="pbr" data-triggers="pbr 주가순자산비율" data-answer="pbr은 회사가 가진 자산과 주가를 비교해 보는 숫자예요. 이 숫자 하나만으로 좋고 나쁜 회사를 정할 수는 없어요." data-dapie="1">
+  <header>
+    <h3>PBR</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>pbr</code> <code>주가순자산비율</code></p>
+    <p class="a"><span class="who">키웅이</span>PBR은 회사가 가진 자산과 주가를 비교해 보는 숫자예요. 이 숫자 하나만으로 좋고 나쁜 회사를 정할 수는 없어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">PBR은 회사 값이 회사가 가진 재산에 비해 높은지 보는 숫자예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">PBR은 회사 값을 무엇과 비교할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사가 가진 재산</li><li class=""><span class="mark">·</span>회사가 번 이익</li><li class=""><span class="mark">·</span>회사의 직원 수</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">회사가 가진 건물과 기계, 남은 돈을 모두 모은 것이 회사의 재산이에요. PBR은 회사 값을 이 재산과 견주는 숫자예요.</p>
+      <p class="ask">그럼 PBR은 회사 값을 무엇과 견줄까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>회사가 가진 재산</li><li class=""><span class="mark">·</span>회사가 번 이익</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">회사 값이 재산보다 크면 PBR은 1보다 커지고, 재산보다 작으면 1보다 작아져요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">가진 물건이 똑같은 가게가 두 곳 있는데 한 곳의 값이 세 배라고 해 봐요. 값이 비싼 쪽의 PBR이 더 커요.</p>
+  </div></div>
+  <footer><code class="id">pbr</code></footer>
+</article><article class="card" data-name="eps" data-triggers="eps 주당순이익" data-answer="eps는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자예요. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자예요." data-dapie="1">
+  <header>
+    <h3>EPS</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>eps</code> <code>주당순이익</code></p>
+    <p class="a"><span class="who">키웅이</span>EPS는 회사가 번 이익을 주식 한 주당으로 나누어 본 숫자예요. 회사의 과거 성적을 읽을 때 쓰는 비교용 숫자예요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">EPS는 회사가 번 돈을 주식 한 조각 몫으로 나눈 값이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">EPS는 회사가 번 돈을 무엇으로 나눌까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>전체 주식 수</li><li class=""><span class="mark">·</span>주주의 수</li><li class=""><span class="mark">·</span>회사의 직원 수</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">EPS는 회사가 번 돈을 주식 조각마다 얼마씩인지 나눈 값이에요. 나누려면 전체 주식 수가 필요해요.</p>
+      <p class="ask">번 돈을 조각마다 나눌 때 무엇의 수가 필요할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>전체 주식 수</li><li class=""><span class="mark">·</span>주주의 수</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">주식 조각 하나가 얼마씩 벌었는지 보는 숫자예요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">피자 한 판을 여덟 조각으로 나누면 한 조각 몫이 정해져요. EPS도 번 돈을 조각 수로 나눈 몫이에요.</p>
+  </div></div>
+  <footer><code class="id">eps</code></footer>
+</article><article class="card" data-name="거래량" data-triggers="거래량" data-answer="거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자예요. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어요." data-dapie="1">
+  <header>
+    <h3>거래량</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>거래량</code></p>
+    <p class="a"><span class="who">키웅이</span>거래량은 얼마나 많은 주식이 사고팔렸는지 나타내는 숫자예요. 거래량이 많다고 앞으로 가격이 어떻게 될지는 알 수 없어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">거래량은 일정한 동안 사고팔린 주식 수를 나타내는 숫자예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">거래량은 무엇을 셀까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>사고팔린 주식 수</li><li class=""><span class="mark">·</span>회사가 번 이익</li><li class=""><span class="mark">·</span>앞으로의 주가</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">거래량은 사고팔린 주식 수를 모두 더한 값이에요. 그래서 주식이 많이 거래될수록 거래량은 커져요.</p>
+      <p class="ask">많은 주식이 거래되면 거래량은 어떻게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>거래량이 커져요</li><li class=""><span class="mark">·</span>거래량이 작아져요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">거래가 얼마나 활발했는지 알려 줄 뿐 가격 방향까지 알려주지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">장터에서 하루 동안 주인이 바뀐 카드 수를 세는 것과 비슷해요. 많이 오가면 거래량은 크지만 카드 값의 다음 방향은 따로 알 수 없어요.</p>
+  </div></div>
+  <footer><code class="id">volume</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-chart">
+    <h2>차트 <span class="count">9</span></h2>
+    <p class="note">차트·봉·현재가처럼 그래프를 읽는 말</p>
+    <div class="cards"><article class="card" data-name="현재가" data-triggers="현재가 지금 가격" data-answer="현재가는 지금 화면에 표시된 최근 거래 가격이에요. 시간이 지나면 달라질 수 있어요." data-dapie="1">
+  <header>
+    <h3>현재가</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>현재가</code> <code>지금 가격</code></p>
+    <p class="a"><span class="who">키웅이</span>현재가는 지금 화면에 표시된 최근 거래 가격이에요. 시간이 지나면 달라질 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">현재가는 화면에 표시된 가장 최근 거래 가격이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">현재가는 무엇을 보여줄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>최근 거래된 가격</li><li class=""><span class="mark">·</span>내일 정해질 가격</li><li class=""><span class="mark">·</span>절대 바뀌지 않는 가격</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">현재가는 가장 최근에 거래가 이루어진 값이에요. 그래서 새 거래가 생길 때마다 값이 달라질 수 있어요.</p>
+      <p class="ask">새 거래가 생기면 현재가는 달라질 수 있을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>달라질 수 있어요</li><li class=""><span class="mark">·</span>바뀌지 않아요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">새 거래가 생길 때마다 달라지는 기록이라 미리 정해 둔 값이 아니에요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">운동 경기의 현재 점수가 경기 중에 계속 바뀌는 것과 비슷해요. 화면을 본 시각에 따라 표시된 값이 다를 수 있어요.</p>
+  </div></div>
+  <footer><code class="id">current-price</code></footer>
+</article><article class="card" data-name="주가" data-triggers="주가가 뭐 주가 뜻 주가라는 말 주가가 무엇" data-answer="주가는 주식 한 주에 붙은 지금 가격이에요. 사고팔려는 주문이 만나 정해지고 하루에도 여러 번 바뀌어요." data-dapie="1">
+  <header>
+    <h3>주가</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>주가가 뭐</code> <code>주가 뜻</code> <code>주가라는 말</code> <code>주가가 무엇</code></p>
+    <p class="a"><span class="who">키웅이</span>주가는 주식 한 주에 붙은 지금 가격이에요. 사고팔려는 주문이 만나 정해지고 하루에도 여러 번 바뀌어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">주가는 주식 한 주에 붙은 지금 가격이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주가는 무엇의 가격일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>주식 한 주</li><li class=""><span class="mark">·</span>회사 건물</li><li class=""><span class="mark">·</span>회사가 파는 물건</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주가는 회사 전체 값이 아니라 주식 한 주에 붙은 값이에요.</p>
+      <p class="ask">그럼 주가는 한 주에 붙는 값일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>한 주에 붙어요</li><li class=""><span class="mark">·</span>회사 전체 값이에요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">사고팔려는 주문이 만나 정해지기 때문에 하루에도 여러 번 바뀌어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">문구점에서 같은 공책 값이 날마다 달라진다고 생각해 봐요. 주가도 그날의 거래에 따라 달라져요.</p>
+  </div></div>
+  <footer><code class="id">stock-price</code></footer>
+</article><article class="card" data-name="차트" data-triggers="차트" data-answer="차트는 과거 가격 변화를 그림으로 보여줘요. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니에요." data-dapie="1">
+  <header>
+    <h3>차트</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>차트</code></p>
+    <p class="a"><span class="who">키웅이</span>차트는 과거 가격 변화를 그림으로 보여줘요. 과거 기록을 보는 도구이지, 미래 가격을 알려주는 그림은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">차트는 가격이 어떻게 움직였는지 그림으로 보여주는 지나간 기록이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주가 차트가 직접 보여주는 것은 무엇일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>지나간 가격 움직임</li><li class=""><span class="mark">·</span>미래 가격의 정답</li><li class=""><span class="mark">·</span>회사가 번 돈</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">차트에는 이미 지나간 시각과 그때의 가격이 점과 선으로 남아요. 지나간 기록이라서 미래 가격까지 알려 주지는 못해요.</p>
+      <p class="ask">지나간 기록만으로 미래 가격을 확정할 수 있을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>확정할 수 없어요</li><li class=""><span class="mark">·</span>언제나 맞힐 수 있어요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">가로축은 시간, 세로축은 가격이지만 지나간 기록이라 미래를 보장하지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">지난날의 기온을 선으로 그린 날씨 기록과 비슷해요. 지나간 변화는 볼 수 있지만 다음 날 기온의 정답은 아니에요.</p>
+  </div></div>
+  <footer><code class="id">chart</code></footer>
+</article><article class="card" data-name="선차트" data-triggers="선차트" data-answer="선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요. 과거 가격의 흐름을 보는 그림이지 다음 가격을 알려 주지는 않아요." data-dapie="1">
+  <header>
+    <h3>선차트</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>선차트</code></p>
+    <p class="a"><span class="who">키웅이</span>선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요. 과거 가격의 흐름을 보는 그림이지 다음 가격을 알려 주지는 않아요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">선차트는 정해 둔 시간마다의 가격을 선으로 이어 보여주는 차트예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">선차트에서 이어지는 것은 무엇일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>가격의 흐름</li><li class=""><span class="mark">·</span>거래량의 흐름</li><li class=""><span class="mark">·</span>뉴스가 나온 때</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">선차트는 시간마다의 가격 점을 선으로 이은 그림이에요. 선을 따라가면 가격이 어떻게 움직였는지 흐름을 읽기 쉬워요.</p>
+      <p class="ask">선차트의 선은 무엇의 흐름을 보여줄까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>가격</li><li class=""><span class="mark">·</span>거래량</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">선차트는 가격이 어떻게 움직였는지 보기 위한 그림이에요. 다음 가격을 알려 주는 그림은 아니에요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">점들을 연필로 이어 그린 선처럼, 시간마다의 가격 점을 연결한 모습이에요.</p>
+  </div></div>
+  <footer><code class="id">line-chart</code></footer>
+</article><article class="card" data-name="캔들차트" data-triggers="캔들차트 캔들" data-answer="캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요. 막대 하나가 담는 시간은 분봉·일봉·주봉으로 따로 고를 수 있어요." data-dapie="1">
+  <header>
+    <h3>캔들차트</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>캔들차트</code> <code>캔들</code></p>
+    <p class="a"><span class="who">키웅이</span>캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요. 막대 하나가 담는 시간은 분봉·일봉·주봉으로 따로 고를 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">캔들차트는 한 기간의 시작값, 끝값, 가장 높고 낮은 값을 막대로 보여주는 차트예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">캔들 하나는 무엇을 함께 보여줄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>시작·끝·높음·낮음</li><li class=""><span class="mark">·</span>시작값과 끝값만</li><li class=""><span class="mark">·</span>그 기간의 거래량</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">캔들 하나에는 한 기간 안에서 가격이 어디서 시작해 어디까지 움직였는지 담겨요. 그 기간의 가격 움직임을 막대 하나로 보는 거예요.</p>
+      <p class="ask">캔들 하나가 담는 것은 무엇일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>그 기간의 가격 움직임</li><li class=""><span class="mark">·</span>그 기간의 거래량</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">캔들의 몸통과 꼬리는 과거 한 기간 안의 가격 범위를 보여줘요. 다음 가격을 알려 주지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">하루 동안 가장 높았던 곳과 낮았던 곳을 표시한 막대라고 보면 돼요.</p>
+  </div></div>
+  <footer><code class="id">candle-chart</code></footer>
+</article><article class="card" data-name="분봉" data-triggers="분봉" data-answer="분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요. 짧은 시간 단위로 과거 가격을 살펴볼 때 써요." data-dapie="1">
+  <header>
+    <h3>분봉</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>분봉</code></p>
+    <p class="a"><span class="who">키웅이</span>분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요. 짧은 시간 단위로 과거 가격을 살펴볼 때 써요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">분봉은 막대 하나가 몇 분 동안의 가격 움직임을 보여주는 차트예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">분봉 한 개는 어느 기간을 나타낼까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>몇 분</li><li class=""><span class="mark">·</span>하루</li><li class=""><span class="mark">·</span>한 주</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">분봉의 '분'은 시계의 분처럼 짧은 시간을 뜻해요. 그래서 분봉은 시간을 짧은 몇 분 단위로 나눠서 봐요.</p>
+      <p class="ask">분봉은 시간을 어떻게 나눌까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>짧은 몇 분</li><li class=""><span class="mark">·</span>몇 달</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">몇 분으로 나누는 방법만 다를 뿐, 과거 가격을 보는 차트라는 점은 같아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">수업 시간을 몇 분 단위로 나눠 보는 시간표와 비슷해요.</p>
+  </div></div>
+  <footer><code class="id">minute-chart</code></footer>
+</article><article class="card" data-name="일봉" data-triggers="일봉" data-answer="일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요. 하루의 시작값과 끝값, 높고 낮은 값을 함께 볼 수 있어요." data-dapie="1">
+  <header>
+    <h3>일봉</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>일봉</code></p>
+    <p class="a"><span class="who">키웅이</span>일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요. 하루의 시작값과 끝값, 높고 낮은 값을 함께 볼 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">일봉은 막대 하나가 하루 동안의 가격 움직임을 보여주는 차트예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">일봉 한 개는 어느 기간을 나타낼까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>하루</li><li class=""><span class="mark">·</span>몇 분</li><li class=""><span class="mark">·</span>한 주</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">일봉의 '일'은 하루를 뜻해요. 그래서 일봉은 하루의 가격 움직임을 막대 하나로 묶어서 봐요.</p>
+      <p class="ask">일봉은 무엇을 한 묶음으로 볼까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>하루</li><li class=""><span class="mark">·</span>한 달</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">하루 안의 시작값과 끝값, 높고 낮은 값을 한 막대에 담아요. 지나간 하루의 흐름을 보는 그림이에요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">하루 일기를 한 장으로 정리하듯, 하루 가격 움직임을 막대 하나로 보는 거예요.</p>
+  </div></div>
+  <footer><code class="id">daily-chart</code></footer>
+</article><article class="card" data-name="주봉" data-triggers="주봉" data-answer="주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요. 여러 날의 과거 흐름을 한 묶음으로 살펴볼 수 있어요." data-dapie="1">
+  <header>
+    <h3>주봉</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>주봉</code></p>
+    <p class="a"><span class="who">키웅이</span>주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요. 여러 날의 과거 흐름을 한 묶음으로 살펴볼 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">주봉은 막대 하나가 한 주 동안의 가격 움직임을 보여주는 차트예요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주봉 한 개는 어느 기간을 나타낼까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>한 주</li><li class=""><span class="mark">·</span>하루</li><li class=""><span class="mark">·</span>몇 분</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주봉의 '주'는 한 주를 뜻해요. 그래서 주봉은 한 주의 가격 움직임을 막대 하나로 묶어서 봐요.</p>
+      <p class="ask">주봉은 무엇을 한 묶음으로 볼까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>한 주</li><li class=""><span class="mark">·</span>한 시간</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">한 주의 가격 움직임을 한 막대에 담아요. 더 긴 과거 흐름을 살펴볼 때 써요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">한 주 동안의 기록을 한 칸에 모아 보는 달력과 비슷해요.</p>
+  </div></div>
+  <footer><code class="id">weekly-chart</code></footer>
+</article><article class="card" data-name="15분 지연 시세" data-triggers="15분 지연 시세" data-answer="15분 지연 시세는 실제 시장 가격이 화면에 약 15분 늦게 표시된다는 뜻이에요. 지금 시장에서 거래되는 가격과 다를 수 있어요." data-dapie="1">
+  <header>
+    <h3>15분 지연 시세</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>15분 지연 시세</code></p>
+    <p class="a"><span class="who">키웅이</span>15분 지연 시세는 실제 시장 가격이 화면에 약 15분 늦게 표시된다는 뜻이에요. 지금 시장에서 거래되는 가격과 다를 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">15분 지연 시세는 실제 시장 가격이 화면에 약 15분 늦게 표시된다는 뜻이에요. 지금 시장에서 거래되는 가격과 다를 수 있어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">화면에 보이는 값은 지금 시장 값과 같을까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>약 15분 늦어서 다를 수 있어요</li><li class=""><span class="mark">·</span>언제나 똑같아요</li><li class=""><span class="mark">·</span>15분 빨라요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">화면의 값은 실제 시장보다 약 15분 늦게 도착해요. 그래서 지금 시장에서 거래되는 값과 다를 수 있어요.</p>
+      <p class="ask">그럼 화면의 값은 시장보다 빠를까요, 늦을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>약 15분 늦어요</li><li class=""><span class="mark">·</span>약 15분 빨라요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">그래서 화면을 새로 고쳐도 방금 시장에서 정해진 값이 바로 보이지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">멀리서 오는 편지처럼 소식이 도착하는 데 시간이 걸리는 것과 비슷해요. 읽는 순간에는 이미 조금 지난 이야기예요.</p>
+  </div></div>
+  <footer><code class="id">delayed-price</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-risk">
+    <h2>위험 <span class="count">4</span></h2>
+    <p class="note">변동성·분산투자처럼 잃을 수 있음을 다루는 말</p>
+    <div class="cards"><article class="card" data-name="분산투자" data-triggers="분산투자 분산 투자" data-answer="분산투자는 한 곳에만 담지 않고 여러 곳에 나누어 보는 방법이에요. 결과를 보장하지는 않지만 한 종목에만 의존하는 정도는 줄일 수 있어요." data-dapie="1">
+  <header>
+    <h3>분산투자</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>분산투자</code> <code>분산 투자</code></p>
+    <p class="a"><span class="who">키웅이</span>분산투자는 한 곳에만 담지 않고 여러 곳에 나누어 보는 방법이에요. 결과를 보장하지는 않지만 한 종목에만 의존하는 정도는 줄일 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">분산투자는 한 곳에 몰아 두지 않고 여러 곳에 나눠 두는 방법이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">여러 곳에 나눠 두면 무엇이 달라질까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>한 곳이 나빠져도 덜 흔들려요</li><li class=""><span class="mark">·</span>언제나 돈이 늘어나요</li><li class=""><span class="mark">·</span>수수료가 사라져요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">달걀을 여러 바구니에 나눠 담았다고 생각해 봐요. 바구니 하나를 떨어뜨려도 다른 바구니의 달걀은 남아 있어요.</p>
+      <p class="ask">바구니 하나를 떨어뜨리면 나머지 달걀은 어떻게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>나머지는 남아요</li><li class=""><span class="mark">·</span>모두 깨져요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">대신 한 곳이 아주 잘돼도 전체는 그만큼 크게 달라지지 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">소풍 갈 때 간식을 가방 한 칸에만 넣지 않고 여러 칸에 나눠 담는 것과 비슷해요. 한 칸이 젖어도 다른 칸은 남아요.</p>
+  </div></div>
+  <footer><code class="id">diversification</code></footer>
+</article><article class="card" data-name="변동성" data-triggers="변동성" data-answer="변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해요. 가격은 늘 움직일 수 있다는 점을 기억하면 돼요." data-dapie="1">
+  <header>
+    <h3>변동성</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>변동성</code></p>
+    <p class="a"><span class="who">키웅이</span>변동성은 가격이 오르내리는 폭이 얼마나 큰지 말해요. 가격은 늘 움직일 수 있다는 점을 기억하면 돼요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">변동성은 가격이 오르내리는 폭이 얼마나 큰지 나타내는 말이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">가격이 크게 오르내리면 변동성은 어떻게 보일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>변동성이 커 보여요</li><li class=""><span class="mark">·</span>변동성이 작아 보여요</li><li class=""><span class="mark">·</span>변동성이 사라져요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">변동성은 가격이 움직인 폭의 크기예요. 폭이 크면 변동성이 크고, 폭이 작으면 변동성도 작아요.</p>
+      <p class="ask">가격 변화 폭이 작으면 변동성은 어떨까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>작아 보여요</li><li class=""><span class="mark">·</span>더 커 보여요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">움직임의 폭을 말할 뿐 오를지 내릴지를 알려주지는 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">잔잔한 산책길과 높낮이가 큰 놀이기구를 비교해 봐요. 오르내림의 폭이 큰 쪽이 변동성이 큰 모습과 비슷해요.</p>
+  </div></div>
+  <footer><code class="id">volatility</code></footer>
+</article><article class="card" data-name="손절" data-triggers="손절" data-answer="손절은 손해를 더 키우지 않으려고 파는 것을 부르는 말이에요. 언제 파는지는 사람마다 다르고 제가 정해 줄 수는 없어요." data-dapie="1">
+  <header>
+    <h3>손절</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>손절</code></p>
+    <p class="a"><span class="who">키웅이</span>손절은 손해를 더 키우지 않으려고 파는 것을 부르는 말이에요. 언제 파는지는 사람마다 다르고 제가 정해 줄 수는 없어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">손절은 손해를 더 키우지 않으려고 파는 것을 부르는 말이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">손절은 어떤 상황을 부르는 말일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>손해를 줄이려고 파는 것</li><li class=""><span class="mark">·</span>이익이 나서 파는 것</li><li class=""><span class="mark">·</span>그대로 갖고 있는 것</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">손절은 산 값보다 값이 내려갔을 때 파는 쪽을 가리키는 말이에요.</p>
+      <p class="ask">그럼 손절은 값이 내려갔을 때 쓰는 말일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>내려갔을 때예요</li><li class=""><span class="mark">·</span>올랐을 때예요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">언제 파는지는 사람마다 달라서 저는 파는 때를 정해 줄 수 없어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">놀이에서 더 지기 전에 판을 접는 것과 비슷해요. 다만 언제 접을지는 스스로 정해요.</p>
+  </div></div>
+  <footer><code class="id">stop-loss</code></footer>
+</article><article class="card" data-name="위험" data-triggers="위험" data-answer="투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해요." data-dapie="1">
+  <header>
+    <h3>위험</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>위험</code></p>
+    <p class="a"><span class="who">키웅이</span>투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요. 그래서 이유를 기록하고 여러 정보를 함께 보는 연습이 중요해요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">투자에서 위험은 생각한 것과 다른 결과가 생길 수 있다는 뜻이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">투자 위험은 무엇을 뜻할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>예상과 다른 결과 가능성</li><li class=""><span class="mark">·</span>이익이 확정됐다는 뜻</li><li class=""><span class="mark">·</span>가격이 고정됐다는 뜻</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">투자 결과는 미리 확정되지 않고 가격이나 회사 상황에 따라 달라질 수 있어요. 이렇게 생각과 다른 결과가 생길 가능성을 위험이라고 불러요.</p>
+      <p class="ask">생각과 다른 결과가 생길 가능성을 무엇이라고 할까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>위험</li><li class=""><span class="mark">·</span>수익률</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">값이 줄거나 원하는 때 거래되지 않는 것처럼 무엇이 달라질 수 있는지 살펴보면 돼요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">소풍날 비가 올 수도 있는 것처럼 결과가 계획과 달라질 가능성이 있어요. 가능성을 미리 알고 살펴보는 것이 위험을 이해하는 출발점이에요.</p>
+  </div></div>
+  <footer><code class="id">risk</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-service">
+    <h2>서비스 규칙 <span class="count">11</span></h2>
+    <p class="note">시즌·랭킹처럼 이 서비스의 규칙</p>
+    <div class="cards"><article class="card" data-name="모의투자" data-triggers="모의투자" data-answer="모의투자는 실제 돈 대신 가상 돈으로 주식 거래를 연습하는 활동이에요. 실제 주식을 가지거나 실제 돈이 출금되지는 않아요." data-dapie="1">
+  <header>
+    <h3>모의투자</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>모의투자</code></p>
+    <p class="a"><span class="who">키웅이</span>모의투자는 실제 돈 대신 가상 돈으로 주식 거래를 연습하는 활동이에요. 실제 주식을 가지거나 실제 돈이 출금되지는 않아요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">모의투자는 실제 돈 대신 가상 돈으로 주식 거래를 연습하는 활동이에요. 실제 주식을 가지거나 실제 돈이 출금되지는 않아요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">모의투자에서는 어떤 돈을 쓸까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>연습용 가상 돈</li><li class=""><span class="mark">·</span>내 통장의 진짜 돈</li><li class=""><span class="mark">·</span>받은 상금</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">모의투자는 연습이라 실제 돈이 빠져나가지 않아요. 화면에 보이는 금액은 모두 연습용 가상 돈이에요.</p>
+      <p class="ask">모의투자로 산 주식은 실제로 갖게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>실제로는 갖지 않아요</li><li class=""><span class="mark">·</span>실제로 갖게 돼요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">돈은 연습용이지만 사고판 기록은 그대로 남아서 나중에 내가 어떻게 했는지 다시 볼 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">체육 시간에 진짜 경기 전에 연습 경기를 해 보는 것과 비슷해요. 점수는 남지만 진짜 대회 기록이 되지는 않아요.</p>
+  </div></div>
+  <footer><code class="id">mock-investing</code></footer>
+</article><article class="card" data-name="내가 적어 둔 가격" data-triggers="목표 가격" data-answer="이 값은 나중에 확인하려고 사용자가 스스로 적어 둔 가격이에요. 지정가 주문이나 자동 매도 예약과는 달라요." data-dapie="1">
+  <header>
+    <h3>내가 적어 둔 가격</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>목표 가격</code></p>
+    <p class="a"><span class="who">키웅이</span>이 값은 나중에 확인하려고 사용자가 스스로 적어 둔 가격이에요. 지정가 주문이나 자동 매도 예약과는 달라요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">이 값은 나중에 확인하려고 사용자가 스스로 적어 둔 가격이에요. 지정가 주문이나 자동 매도 예약과는 달라요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">이 값을 적어 두면 그 값이 됐을 때 자동으로 팔릴까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>자동으로 팔리지 않아요</li><li class=""><span class="mark">·</span>그 값이 되면 자동으로 팔려요</li><li class=""><span class="mark">·</span>적는 순간 바로 팔려요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">이 값은 나중에 다시 보려고 스스로 적어 두는 기록이에요. 주문이 아니라서 저절로 거래되지 않아요.</p>
+      <p class="ask">그럼 이 값은 주문일까요, 나를 위한 기록일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>나를 위한 기록</li><li class=""><span class="mark">·</span>저절로 도는 주문</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">적어 둔 값은 가족 기록에도 함께 보이고, 그 값이 되어도 알림이 오거나 주문이 나가지 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">공책에 '여기까지 오면 다시 생각해 보자'고 적어 두는 것과 비슷해요. 적었다고 저절로 무슨 일이 생기지는 않아요.</p>
+  </div></div>
+  <footer><code class="id">goal-price</code></footer>
+</article><article class="card" data-name="예상 보유기간" data-triggers="예상 보유기간 보유 기간 언제까지 가질 생각" data-answer="보유 기간은 주식을 얼마나 오래 가지고 있을지 생각해 본 기간이에요. 꼭 지켜야 하는 약속이나 자동 매도 조건은 아니에요." data-dapie="1">
+  <header>
+    <h3>예상 보유기간</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>예상 보유기간</code> <code>보유 기간</code> <code>언제까지 가질 생각</code></p>
+    <p class="a"><span class="who">키웅이</span>보유 기간은 주식을 얼마나 오래 가지고 있을지 생각해 본 기간이에요. 꼭 지켜야 하는 약속이나 자동 매도 조건은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">보유 기간은 주식을 얼마나 오래 가지고 있을지 생각해 본 기간이에요. 꼭 지켜야 하는 약속이나 자동 매도 조건은 아니에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">적어 둔 보유 기간이 지나면 자동으로 팔릴까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>자동으로 팔리지 않아요</li><li class=""><span class="mark">·</span>그날 자동으로 팔려요</li><li class=""><span class="mark">·</span>주문이 취소돼요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">보유 기간은 얼마나 오래 가질지 스스로 생각해 둔 계획이에요. 꼭 지켜야 하는 약속도, 자동으로 파는 조건도 아니에요.</p>
+      <p class="ask">그럼 보유 기간은 약속일까요, 내 계획일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>내 계획</li><li class=""><span class="mark">·</span>꼭 지켜야 하는 약속</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">기간이 지나도 알림이 오지 않고, 생각이 바뀌면 언제든 다시 정할 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">방학 계획표에 며칠 동안 무엇을 할지 적어 두는 것과 비슷해요. 계획이라서 바꿔도 괜찮아요.</p>
+  </div></div>
+  <footer><code class="id">holding-period</code></footer>
+</article><article class="card" data-name="사던 날의 나" data-triggers="사던 날의 나" data-answer="사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간, 처음 정한 가격을 다시 보여주는 화면이에요. 지금 생각과 어떻게 달라졌는지 돌아보게 도와줘요." data-dapie="1">
+  <header>
+    <h3>사던 날의 나</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>사던 날의 나</code></p>
+    <p class="a"><span class="who">키웅이</span>사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간, 처음 정한 가격을 다시 보여주는 화면이에요. 지금 생각과 어떻게 달라졌는지 돌아보게 도와줘요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간, 처음 정한 가격을 다시 보여주는 화면이에요. 지금 생각과 어떻게 달라졌는지 돌아보게 도와줘요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">사던 날의 나는 무엇을 다시 보여줄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>처음 주문할 때 남긴 내 기록</li><li class=""><span class="mark">·</span>앞으로의 가격</li><li class=""><span class="mark">·</span>다른 사람의 기록</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">사던 날의 나는 처음 주문할 때 남긴 이유와 보유기간을 그대로 다시 보여줘요. 지금 생각과 무엇이 달라졌는지 돌아보는 화면이에요.</p>
+      <p class="ask">여기 보이는 것은 누구의 기록일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>처음 주문할 때의 내 기록</li><li class=""><span class="mark">·</span>다른 사람의 기록</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">그때 적은 내용은 고쳐 쓰지 않고 그대로 두기 때문에 지금 생각과 나란히 견줄 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">학기 초에 쓴 목표 쪽지를 학기 말에 다시 꺼내 읽는 것과 비슷해요. 그때와 지금이 얼마나 달라졌는지 보여요.</p>
+  </div></div>
+  <footer><code class="id">buy-day-record</code></footer>
+</article><article class="card" data-name="계획 실천 배지" data-triggers="계획 실천 배지" data-answer="계획 실천 배지는 처음 남긴 매도 계획과 맞게 팔았을 때 받는 기록용 배지예요. 수익이나 투자 실력을 평가하는 상은 아니에요." data-dapie="1">
+  <header>
+    <h3>계획 실천 배지</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>계획 실천 배지</code></p>
+    <p class="a"><span class="who">키웅이</span>계획 실천 배지는 처음 남긴 매도 계획과 맞게 팔았을 때 받는 기록용 배지예요. 수익이나 투자 실력을 평가하는 상은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">계획 실천 배지는 처음 남긴 매도 계획과 맞게 팔았을 때 받는 기록용 배지예요. 수익이나 투자 실력을 평가하는 상은 아니에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">계획 실천 배지는 무엇을 보고 줄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>처음 계획대로 팔았는지</li><li class=""><span class="mark">·</span>얼마나 많이 벌었는지</li><li class=""><span class="mark">·</span>얼마나 빨리 팔았는지</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">이 배지는 처음 남긴 매도 계획과 맞게 팔았는지만 봐요. 얼마를 벌었는지는 배지와 상관없어요.</p>
+      <p class="ask">그럼 많이 벌면 배지를 받을 수 있을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>계획대로 팔아야 받아요</li><li class=""><span class="mark">·</span>많이 벌면 받아요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">손해가 난 거래여도 처음 계획대로 팔았다면 이 배지를 받을 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">정해 둔 시간에 맞춰 숙제를 끝냈는지만 확인하는 표와 비슷해요. 몇 점을 받았는지는 따로예요.</p>
+  </div></div>
+  <footer><code class="id">plan-badge</code></footer>
+</article><article class="card" data-name="어린이 뉴스" data-triggers="어린이 뉴스 오늘 국내 시황 원문 보기" data-answer="어린이 뉴스는 회사나 시장에서 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 기사나 자료를 직접 확인할 수 있고, 뉴스는 매수·매도 답을 주지 않아요." data-dapie="1">
+  <header>
+    <h3>어린이 뉴스</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>어린이 뉴스</code> <code>오늘 국내 시황</code> <code>원문 보기</code></p>
+    <p class="a"><span class="who">키웅이</span>어린이 뉴스는 회사나 시장에서 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 기사나 자료를 직접 확인할 수 있고, 뉴스는 매수·매도 답을 주지 않아요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">어린이 뉴스는 회사나 시장에서 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 기사나 자료를 직접 확인할 수 있고, 뉴스는 매수·매도 답을 주지 않아요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">어린이 뉴스는 무엇을 알려 줄까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사와 시장에서 있었던 일</li><li class=""><span class="mark">·</span>앞으로의 가격</li><li class=""><span class="mark">·</span>사고파는 답</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">어린이 뉴스는 있었던 일을 쉽게 풀어 요약한 내용이에요. 원문 보기에서 참고한 자료도 직접 확인할 수 있어요.</p>
+      <p class="ask">뉴스에서 확인할 수 있는 것은 무엇일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>있었던 일과 참고한 자료</li><li class=""><span class="mark">·</span>사고파는 답</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">같은 일이라도 뉴스마다 다루는 부분이 달라서 원문까지 보면 더 자세히 알 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">학교 소식지가 지난주에 있었던 행사를 알려 주는 것과 비슷해요. 무엇을 할지까지 정해 주지는 않아요.</p>
+  </div></div>
+  <footer><code class="id">child-news</code></footer>
+</article><article class="card" data-name="시즌" data-triggers="시즌 진행 남은 시즌 시즌" data-answer="시즌은 가족이 같은 기간 동안 모의투자하고 기록을 쌓는 활동 기간이에요. 현재 한 시즌은 4주이고, 남은 기간은 홈의 시즌 진행 표시에서 확인할 수 있어요." data-dapie="1">
+  <header>
+    <h3>시즌</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>시즌 진행</code> <code>남은 시즌</code> <code>시즌</code></p>
+    <p class="a"><span class="who">키웅이</span>시즌은 가족이 같은 기간 동안 모의투자하고 기록을 쌓는 활동 기간이에요. 현재 한 시즌은 4주이고, 남은 기간은 홈의 시즌 진행 표시에서 확인할 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">시즌은 가족이 같은 기간 동안 모의투자하고 기록을 쌓는 활동 기간이에요. 현재 한 시즌은 4주이고, 남은 기간은 홈의 시즌 진행 표시에서 확인할 수 있어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">지금 한 시즌은 얼마 동안일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>4주</li><li class=""><span class="mark">·</span>하루</li><li class=""><span class="mark">·</span>1년</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">지금 한 시즌은 4주 동안 이어져요. 남은 기간은 홈의 시즌 진행 표시에서 볼 수 있어요.</p>
+      <p class="ask">남은 기간은 어디에서 볼 수 있을까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>홈의 시즌 진행 표시</li><li class=""><span class="mark">·</span>주문 화면</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">시즌이 끝나면 그동안 쌓인 기록을 모아 한 번에 다시 볼 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">한 학기처럼 시작과 끝이 정해진 기간과 비슷해요. 그 사이의 기록이 모여 하나로 남아요.</p>
+  </div></div>
+  <footer><code class="id">season</code></footer>
+</article><article class="card" data-name="주문 잠금" data-triggers="학교 시간엔 매매 쉬기 주문 잠금" data-answer="주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요." data-dapie="1">
+  <header>
+    <h3>주문 잠금</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>학교 시간엔 매매 쉬기</code> <code>주문 잠금</code></p>
+    <p class="a"><span class="who">키웅이</span>주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">주문 잠금은 보호자가 정한 시간 동안 자녀 계정의 주문만 잠시 막는 기능이에요. 회사·차트·뉴스를 보는 것은 계속할 수 있어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">주문 잠금 동안에도 할 수 있는 것은 무엇일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>회사와 차트, 뉴스 보기</li><li class=""><span class="mark">·</span>새 주문 넣기</li><li class=""><span class="mark">·</span>아무것도 못 해요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">주문 잠금은 정해진 시간 동안 새 주문만 잠시 막아요. 회사와 차트, 뉴스를 보는 것은 그대로 할 수 있어요.</p>
+      <p class="ask">그럼 주문 잠금이 막는 것은 무엇일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>새 주문</li><li class=""><span class="mark">·</span>화면 보기 전부</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">정한 시간이 지나면 잠금이 풀리고 새 주문을 다시 넣을 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">도서관에서 책은 계속 읽을 수 있지만 대출 창구만 잠시 닫아 두는 것과 비슷해요.</p>
+  </div></div>
+  <footer><code class="id">trade-lock</code></footer>
+</article><article class="card" data-name="랭킹" data-triggers="랭킹 이번 주 시즌 전체" data-answer="랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요." data-dapie="1">
+  <header>
+    <h3>랭킹</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>랭킹</code> <code>이번 주</code> <code>시즌 전체</code></p>
+    <p class="a"><span class="who">키웅이</span>랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">랭킹은 가족들의 기간별 수익률을 순서로 보여주는 화면이에요. 높은 순위가 더 좋은 투자 습관이나 성향을 뜻하지는 않아요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">랭킹에서 높은 순위는 무엇을 뜻할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>그 기간 수익률이 높았다는 것</li><li class=""><span class="mark">·</span>더 좋은 투자 습관</li><li class=""><span class="mark">·</span>더 좋은 성향</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">랭킹은 그 기간의 수익률을 순서대로 늘어놓은 것뿐이에요. 순위가 높다고 습관이나 성향이 더 좋다는 뜻은 아니에요.</p>
+      <p class="ask">그럼 순위가 높으면 습관도 더 좋은 걸까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>그런 뜻은 아니에요</li><li class=""><span class="mark">·</span>습관도 더 좋아요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">보는 기간을 바꾸면 순서도 달라져서 한 번의 순위가 끝을 뜻하지 않아요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">달리기 한 번의 등수와 비슷해요. 그날의 결과일 뿐 다음에는 달라질 수 있어요.</p>
+  </div></div>
+  <footer><code class="id">ranking</code></footer>
+</article><article class="card" data-name="가족 기록" data-triggers="가족 기록 거래 가격 차트에서 이 지점 보기" data-answer="가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요." data-dapie="1">
+  <header>
+    <h3>가족 기록</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>가족 기록</code> <code>거래 가격</code> <code>차트에서 이 지점 보기</code></p>
+    <p class="a"><span class="who">키웅이</span>가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">가족 기록은 가족의 거래와 생각을 함께 보는 화면이에요. 현재 거래 가격은 한 주당 가격이고, 차트에서 이 지점 보기는 해당 종목 상세 화면을 열어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">가족 기록에 보이는 거래 가격은 무엇일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>주식 한 주당 가격</li><li class=""><span class="mark">·</span>전체 거래 금액</li><li class=""><span class="mark">·</span>남은 현금</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">가족 기록의 거래 가격은 한 주에 얼마였는지를 보여줘요. 수량까지 곱한 전체 거래 금액과는 다른 값이에요.</p>
+      <p class="ask">그럼 그 값은 한 주 값일까요, 전체 금액일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>한 주 값</li><li class=""><span class="mark">·</span>전체 금액</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">가격만이 아니라 가족이 그때 남긴 생각도 함께 보여서 같은 회사를 왜 다르게 봤는지 알 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">같은 영화를 본 가족이 각자 감상을 적어 둔 공책과 비슷해요. 같은 것을 봐도 남긴 말은 서로 달라요.</p>
+  </div></div>
+  <footer><code class="id">family-feed</code></footer>
+</article><article class="card" data-name="투자 근거" data-triggers="투자 근거 고른 이유 근거 태그" data-answer="투자 근거는 그 회사를 고른 이유를 골라 두는 기록이에요. 정답을 맞히는 시험이 아니라 나중에 생각을 돌아보기 위한 거예요." data-dapie="1">
+  <header>
+    <h3>투자 근거</h3>
+    <div class="tags"><span class="tag kind glossary">용어 사전</span><span class="tag dapie-tag">DAPIE</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>투자 근거</code> <code>고른 이유</code> <code>근거 태그</code></p>
+    <p class="a"><span class="who">키웅이</span>투자 근거는 그 회사를 고른 이유를 골라 두는 기록이에요. 정답을 맞히는 시험이 아니라 나중에 생각을 돌아보기 위한 거예요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">투자 근거는 그 회사를 고른 이유를 골라 두는 기록이에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">투자 근거는 무엇을 남기는 걸까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>고른 이유</li><li class=""><span class="mark">·</span>앞으로의 가격</li><li class=""><span class="mark">·</span>산 날짜</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">투자 근거는 정답을 맞히는 칸이 아니라 그때 생각을 적어 두는 칸이에요.</p>
+      <p class="ask">그럼 투자 근거는 점수를 매기는 걸까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>점수가 아니에요</li><li class=""><span class="mark">·</span>점수를 매겨요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">나중에 아카이브에서 그때 생각을 다시 볼 수 있어요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">일기에 왜 그렇게 했는지 한 줄 적어 두는 것과 비슷해요. 나중에 읽으면 그때 마음이 보여요.</p>
+  </div></div>
+  <footer><code class="id">reason-tag</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-profile">
+    <h2>성향·아카이브 <span class="count">4</span></h2>
+    <p class="note">성향 축·캐릭터처럼 아카이브에서 보는 말</p>
+    <div class="cards"><article class="card" data-name="성향 축" data-triggers="정확력 근거력 집중력 분산력 직관력" data-answer="근거력·직관력은 살 회사를 정하기 전에 자료를 얼마나 살펴봤는지, 집중력·분산력은 어떤 업종에 나눠 담고 현금을 얼마나 남겼는지 보여줘요. 정확력은 거래한 뒤 장이 두 번 열리는 동안 가격이 어느 쪽으로 갔는지 보며, 어느 방향이 더 좋다는 뜻은 아니에요." data-dapie="1">
+  <header>
+    <h3>성향 축</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>정확력</code> <code>근거력</code> <code>집중력</code> <code>분산력</code> <code>직관력</code></p>
+    <p class="a"><span class="who">키웅이</span>근거력·직관력은 살 회사를 정하기 전에 자료를 얼마나 살펴봤는지, 집중력·분산력은 어떤 업종에 나눠 담고 현금을 얼마나 남겼는지 보여줘요. 정확력은 거래한 뒤 장이 두 번 열리는 동안 가격이 어느 쪽으로 갔는지 보며, 어느 방향이 더 좋다는 뜻은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">근거력·직관력은 살 회사를 정하기 전에 자료를 얼마나 살펴봤는지, 집중력·분산력은 어떤 업종에 나눠 담고 현금을 얼마나 남겼는지 보여줘요. 정확력은 거래한 뒤 장이 두 번 열리는 동안 가격이 어느 쪽으로 갔는지 보며, 어느 방향이 더 좋다는 뜻은 아니에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">정확력은 무엇을 바탕으로 볼까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>거래 뒤 가격이 간 방향</li><li class=""><span class="mark">·</span>번 돈의 크기</li><li class=""><span class="mark">·</span>거래한 횟수</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">정확력은 거래하고 장이 두 번 열린 뒤 가격이 어느 쪽으로 갔는지를 봐요. 얼마를 벌었는지로 매기는 값이 아니에요.</p>
+      <p class="ask">그럼 정확력은 번 돈으로 정해질까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>가격 방향으로 봐요</li><li class=""><span class="mark">·</span>번 돈으로 정해요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">다섯 가지 모두 이번 시즌 기록으로만 계산해서, 기록이 없으면 5점이에요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">운동회 기록표에 달리기·던지기를 따로 적어 두는 것과 비슷해요. 항목마다 보는 것이 달라서 하나로 합쳐 순위를 매기지 않아요.</p>
+  </div></div>
+  <footer><code class="id">profile-abilities</code></footer>
+</article><article class="card" data-name="성향" data-triggers="성향이 뭐 성향 뜻 능력치 오각형" data-answer="성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요." data-dapie="1">
+  <header>
+    <h3>성향</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>성향이 뭐</code> <code>성향 뜻</code> <code>능력치 오각형</code></p>
+    <p class="a"><span class="who">키웅이</span>성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">성향은 이번 시즌 행동 기록을 몇 가지 특징으로 나눠 보여주는 결과예요. 실력이나 성격 검사가 아니며 기록이 쌓이면 바뀔 수 있어요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">성향은 실력을 재는 검사일까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>검사가 아니라 행동 기록이에요</li><li class=""><span class="mark">·</span>실력을 재는 검사예요</li><li class=""><span class="mark">·</span>성격을 재는 검사예요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">성향은 이번 시즌에 어떻게 행동했는지를 몇 가지 특징으로 나눈 결과예요. 실력이나 성격을 채점하는 검사가 아니에요.</p>
+      <p class="ask">그럼 기록이 더 쌓이면 성향은 어떻게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>바뀔 수 있어요</li><li class=""><span class="mark">·</span>한 번 정해지면 그대로예요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">다음 시즌에 다르게 움직이면 결과도 다르게 나와요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">이번 달에 어떤 책을 많이 읽었는지 정리해 둔 표와 비슷해요. 다음 달에 다른 책을 읽으면 표도 달라져요.</p>
+  </div></div>
+  <footer><code class="id">profile-definition</code></footer>
+</article><article class="card" data-name="관찰 중" data-triggers="관찰 중 관찰 초기 2거래일" data-answer="관찰 중은 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족한 상태예요. 정확력은 거래 뒤 2거래일이 지나야 계산돼서 그전에는 lv 표기가 붙지 않아요." data-dapie="1">
+  <header>
+    <h3>관찰 중</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>관찰 중</code> <code>관찰 초기</code> <code>2거래일</code></p>
+    <p class="a"><span class="who">키웅이</span>관찰 중은 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족한 상태예요. 정확력은 거래 뒤 2거래일이 지나야 계산돼서 그전에는 LV 표기가 붙지 않아요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">관찰 중은 아직 성향 캐릭터를 정할 만큼 체결 매수 기록이 부족한 상태예요. 정확력은 거래 뒤 2거래일이 지나야 계산돼서 그전에는 LV 표기가 붙지 않아요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">관찰 중은 어떤 상태를 뜻할까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>아직 매수 기록이 부족한 상태</li><li class=""><span class="mark">·</span>성향이 나쁘다는 뜻</li><li class=""><span class="mark">·</span>계정이 잠긴 상태</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">관찰 중은 성향을 정할 만큼 체결된 매수 기록이 아직 쌓이지 않았다는 뜻이에요. 잘못했다는 표시가 아니에요.</p>
+      <p class="ask">그럼 관찰 중은 무엇이 부족하다는 뜻일까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>쌓인 기록</li><li class=""><span class="mark">·</span>투자 실력</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">2거래일은 장이 열리는 날로 이틀이라는 뜻이라, 사이에 주말이나 쉬는 날이 끼면 더 걸려요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">사진이 몇 장 모여야 앨범을 만들 수 있는 것과 비슷해요. 장수가 차면 앨범이 만들어져요.</p>
+  </div></div>
+  <footer><code class="id">profile-status</code></footer>
+</article><article class="card" data-name="성향 캐릭터" data-triggers="저격수 전략가 승부사 탐험가 성향 캐릭터" data-answer="성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요." data-dapie="1">
+  <header>
+    <h3>성향 캐릭터</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag dapie-tag">DAPIE</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>저격수</code> <code>전략가</code> <code>승부사</code> <code>탐험가</code> <code>성향 캐릭터</code></p>
+    <p class="a"><span class="who">키웅이</span>성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.</p>
+  </div>
+  <div class="dapie"><div class="stage s1">
+    <div class="stage-head"><span class="num">1</span> 짧은 답 <em>brief</em></div>
+    <p class="say">성향 캐릭터는 근거·직관과 집중·분산의 조합으로 이번 시즌 행동을 표현한 것이에요. 시즌마다 달라질 수 있고, 네 모습 중 어느 것이 더 좋다는 뜻은 아니에요.</p>
+  </div><div class="stage s2">
+    <div class="stage-head"><span class="num">2</span> 되묻기 <em>check · 확인 질문</em></div>
+    <p class="ask">네 가지 성향 캐릭터 중에 더 좋은 것이 있을까요?</p>
+    <ul class="choices"><li class="right"><span class="mark">○</span>더 좋은 것은 없어요</li><li class=""><span class="mark">·</span>마지막 것이 가장 좋아요</li><li class=""><span class="mark">·</span>첫 번째가 가장 좋아요</li></ul>
+  </div><div class="stage s3">
+      <div class="stage-head"><span class="num">3</span> 다시 설명 <em>adjust · 틀렸을 때만</em></div>
+      <p class="say">성향 캐릭터는 이번 시즌 행동을 근거·직관과 집중·분산의 조합으로 표현한 모습이에요. 네 모습 사이에 더 좋고 나쁨은 없어요.</p>
+      <p class="ask">그럼 캐릭터는 시즌마다 어떻게 될까요?</p>
+      <ul class="choices"><li class="right"><span class="mark">○</span>달라질 수 있어요</li><li class=""><span class="mark">·</span>한 번 정해지면 그대로예요</li></ul>
+    </div><div class="stage s4">
+    <div class="stage-head"><span class="num">4</span> 더 깊이 <em>detail</em></div>
+    <p class="say">두 축을 각각 어느 쪽으로 많이 움직였는지에 따라 네 모습 가운데 하나가 정해져요.</p>
+  </div><div class="stage s5">
+    <div class="stage-head"><span class="num">5</span> 예시 <em>example</em></div>
+    <p class="say">좋아하는 색과 좋아하는 계절을 짝지어 이름을 붙이는 것과 비슷해요. 짝이 다르면 이름이 다를 뿐 더 좋은 짝은 없어요.</p>
+  </div></div>
+  <footer><code class="id">profile-character</code></footer>
+</article></div>
+  </section><section class="cat" id="cat-_none">
+    <h2>묶음 없음 <span class="count">100</span></h2>
+    <p class="note">추천 카드에 올리지 않는 답변 — 없는 화면을 알리거나 트리거가 너무 넓어 용어로 묶지 않은 것들</p>
+    <div class="cards"><article class="card" data-name="chart-read" data-triggers="차트 보는 법 차트 읽는 법 차트 어떻게 차트" data-answer="종목 상세에서 차트를 열면 위에 지금 가격이, 아래에 기간을 고르는 버튼과 선차트·캔들차트 버튼이 있어요. 분·일·주 중 하나를 고르면 막대나 선 하나가 담는 시간이 바뀌고, 가로는 시간 세로는 가격이라 오른쪽으로 갈수록 최근 기록이에요. 지나간 기록을 보는 화면이라 다음 가격을 알려 주지는 않아요." data-dapie="0">
+  <header>
+    <h3>chart-read</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>차트 보는 법</code> <code>차트 읽는 법</code> <code>차트 어떻게</code> <code>차트</code></p>
+    <p class="a"><span class="who">키웅이</span>종목 상세에서 차트를 열면 위에 지금 가격이, 아래에 기간을 고르는 버튼과 선차트·캔들차트 버튼이 있어요. 분·일·주 중 하나를 고르면 막대나 선 하나가 담는 시간이 바뀌고, 가로는 시간 세로는 가격이라 오른쪽으로 갈수록 최근 기록이에요. 지나간 기록을 보는 화면이라 다음 가격을 알려 주지는 않아요.</p>
+  </div>
+  
+  <footer><code class="id">chart-read</code></footer>
+</article><article class="card" data-name="orderbook-unsupported" data-triggers="호가창 매수호가 매도호가 호가" data-answer="이 서비스는 모의투자라서 호가창은 제공하지 않아요. 종목 상세에서 15분 늦게 표시되는 지금 가격과 차트로 가격이 어떻게 움직였는지 볼 수 있어요." data-dapie="0">
+  <header>
+    <h3>orderbook-unsupported</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>호가창</code> <code>매수호가</code> <code>매도호가</code> <code>호가</code></p>
+    <p class="a"><span class="who">키웅이</span>이 서비스는 모의투자라서 호가창은 제공하지 않아요. 종목 상세에서 15분 늦게 표시되는 지금 가격과 차트로 가격이 어떻게 움직였는지 볼 수 있어요.</p>
+  </div>
+  
+  <footer><code class="id">orderbook-unsupported</code></footer>
+</article><article class="card" data-name="season-record" data-triggers="시즌 기록이 뭐야 기록 카드" data-answer="매수·매도와 메모를 몇 번 했는지 세어 주는 화면은 아직 없어요. 대신 아카이브에서 주차별 성향 카드와 지난 시즌 리포트를 볼 수 있어요." data-dapie="0">
+  <header>
+    <h3>season-record</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>시즌 기록이 뭐야</code> <code>기록 카드</code></p>
+    <p class="a"><span class="who">키웅이</span>매수·매도와 메모를 몇 번 했는지 세어 주는 화면은 아직 없어요. 대신 아카이브에서 주차별 성향 카드와 지난 시즌 리포트를 볼 수 있어요.</p>
+  </div>
+  
+  <footer><code class="id">season-record</code></footer>
+</article><article class="card" data-name="reason" data-triggers="기록" data-answer="기록에서는 고른 이유를 남길 수 있어요. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거예요." data-dapie="0">
+  <header>
+    <h3>reason</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>기록</code></p>
+    <p class="a"><span class="who">키웅이</span>기록에서는 고른 이유를 남길 수 있어요. 정답을 맞히는 시험이 아니라, 나중에 내 생각을 돌아보기 위한 거예요.</p>
+  </div>
+  
+  <footer><code class="id">reason</code></footer>
+</article><article class="card" data-name="archive" data-triggers="아카이브" data-answer="아카이브에서는 남긴 거래와 생각을 다시 볼 수 있어요. 점수표가 아니라 투자 스타일을 관찰하는 기록이에요." data-dapie="0">
+  <header>
+    <h3>archive</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>아카이브</code></p>
+    <p class="a"><span class="who">키웅이</span>아카이브에서는 남긴 거래와 생각을 다시 볼 수 있어요. 점수표가 아니라 투자 스타일을 관찰하는 기록이에요.</p>
+  </div>
+  
+  <footer><code class="id">archive</code></footer>
+</article><article class="card" data-name="stock-search" data-triggers="종목 검색 회사 찾기 종목 찾기" data-answer="종목 화면의 검색창에 회사 이름을 입력하거나 업종 칩을 눌러 찾아볼 수 있어요. 이 서비스가 제공하는 종목 안에서만 검색돼요." data-dapie="0">
+  <header>
+    <h3>stock-search</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>종목 검색</code> <code>회사 찾기</code> <code>종목 찾기</code></p>
+    <p class="a"><span class="who">키웅이</span>종목 화면의 검색창에 회사 이름을 입력하거나 업종 칩을 눌러 찾아볼 수 있어요. 이 서비스가 제공하는 종목 안에서만 검색돼요.</p>
+  </div>
+  
+  <footer><code class="id">stock-search</code></footer>
+</article><article class="card" data-name="buy-flow" data-triggers="매수 어떻게 사는 방법 매수 방법 매수" data-answer="종목 상세에서 매수를 누르고 수량과 예상 금액을 확인해요. 고른 이유·예상 보유기간을 기록한 뒤 주문 확인을 누르면 돼요." data-dapie="0">
+  <header>
+    <h3>buy-flow</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>매수 어떻게</code> <code>사는 방법</code> <code>매수 방법</code> <code>매수</code></p>
+    <p class="a"><span class="who">키웅이</span>종목 상세에서 매수를 누르고 수량과 예상 금액을 확인해요. 고른 이유·예상 보유기간을 기록한 뒤 주문 확인을 누르면 돼요.</p>
+  </div>
+  
+  <footer><code class="id">buy-flow</code></footer>
+</article><article class="card" data-name="sell-flow" data-triggers="매도 어떻게 파는 방법 매도 방법" data-answer="보유 종목에서 매도를 누르고 수량과 파는 이유를 확인해요. 주문 내용을 마지막으로 확인한 뒤 체결하면 기록에 남아요." data-dapie="0">
+  <header>
+    <h3>sell-flow</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>매도 어떻게</code> <code>파는 방법</code> <code>매도 방법</code></p>
+    <p class="a"><span class="who">키웅이</span>보유 종목에서 매도를 누르고 수량과 파는 이유를 확인해요. 주문 내용을 마지막으로 확인한 뒤 체결하면 기록에 남아요.</p>
+  </div>
+  
+  <footer><code class="id">sell-flow</code></footer>
+</article><article class="card" data-name="order-check" data-triggers="주문 전에 주문 확인 주문 전 확인" data-answer="주문 전에는 종목 이름, 매수·매도 구분, 수량과 예상 금액을 확인해요. 남긴 이유도 맞는지 한 번 더 보면 돼요." data-dapie="0">
+  <header>
+    <h3>order-check</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 주문</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>주문 전에</code> <code>주문 확인</code> <code>주문 전 확인</code></p>
+    <p class="a"><span class="who">키웅이</span>주문 전에는 종목 이름, 매수·매도 구분, 수량과 예상 금액을 확인해요. 남긴 이유도 맞는지 한 번 더 보면 돼요.</p>
+  </div>
+  
+  <footer><code class="id">order-check</code></footer>
+</article><article class="card" data-name="stock-pick-criteria" data-triggers="종목 고를 때 주식 고를 때 회사 고를 때 투자 기준" data-answer="회사가 무슨 일을 하는지, 어떻게 돈을 버는지, 최근에 무슨 일이 있었는지를 봐요." data-dapie="0">
+  <header>
+    <h3>stock-pick-criteria</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>종목 고를 때</code> <code>주식 고를 때</code> <code>회사 고를 때</code> <code>투자 기준</code></p>
+    <p class="a"><span class="who">키웅이</span>회사가 무슨 일을 하는지, 어떻게 돈을 버는지, 최근에 무슨 일이 있었는지를 봐요.</p>
+  </div>
+  
+  <footer><code class="id">stock-pick-criteria</code></footer>
+</article><article class="card" data-name="portfolio" data-triggers="포트폴리오 보유 종목 내가 가진 주식" data-answer="홈의 포트폴리오에서 가진 종목과 남은 모의투자 금액을 볼 수 있어요. 화면의 수치는 가격에 따라 달라질 수 있어요." data-dapie="0">
+  <header>
+    <h3>portfolio</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>포트폴리오</code> <code>보유 종목</code> <code>내가 가진 주식</code></p>
+    <p class="a"><span class="who">키웅이</span>홈의 포트폴리오에서 가진 종목과 남은 모의투자 금액을 볼 수 있어요. 화면의 수치는 가격에 따라 달라질 수 있어요.</p>
+  </div>
+  
+  <footer><code class="id">portfolio</code></footer>
+</article><article class="card" data-name="family-comparison" data-triggers="가족 비교 부모 비교 엄마랑 비교 아빠랑 비교" data-answer="아카이브의 가족 비교에서는 서로 동의한 경우에만 투자 스타일을 나란히 볼 수 있어요. 누가 더 잘했는지 점수를 매기는 기능은 아니에요." data-dapie="0">
+  <header>
+    <h3>family-comparison</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>가족 비교</code> <code>부모 비교</code> <code>엄마랑 비교</code> <code>아빠랑 비교</code></p>
+    <p class="a"><span class="who">키웅이</span>아카이브의 가족 비교에서는 서로 동의한 경우에만 투자 스타일을 나란히 볼 수 있어요. 누가 더 잘했는지 점수를 매기는 기능은 아니에요.</p>
+  </div>
+  
+  <footer><code class="id">family-comparison</code></footer>
+</article><article class="card" data-name="privacy-chat" data-triggers="너랑 한 얘기 엄마 너랑 나눈 얘기 엄마 키웅이랑 한 채팅 채팅을 볼 수 대화 엄마 엄마한테 말" data-answer="우리가 나눈 얘기는 엄마한테 안 보여요." data-dapie="0">
+  <header>
+    <h3>privacy-chat</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>너랑 한 얘기 엄마</code> <code>너랑 나눈 얘기 엄마</code> <code>키웅이랑 한 채팅</code> <code>채팅을 볼 수</code> <code>대화 엄마</code> <code>엄마한테 말</code></p>
+    <p class="a"><span class="who">키웅이</span>우리가 나눈 얘기는 엄마한테 안 보여요.</p>
+  </div>
+  
+  <footer><code class="id">privacy-chat</code></footer>
+</article><article class="card" data-name="privacy-trade" data-triggers="내가 뭐 샀는지 엄마 내가 산 주식을 확인 내 거래 기록 엄마 내 거래 내역 가족 내 매수 기록 부모" data-answer="거래 기록은 가족끼리 볼 수 있어요." data-dapie="0">
+  <header>
+    <h3>privacy-trade</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>내가 뭐 샀는지 엄마</code> <code>내가 산 주식을 확인</code> <code>내 거래 기록 엄마</code> <code>내 거래 내역 가족</code> <code>내 매수 기록 부모</code></p>
+    <p class="a"><span class="who">키웅이</span>거래 기록은 가족끼리 볼 수 있어요.</p>
+  </div>
+  
+  <footer><code class="id">privacy-trade</code></footer>
+</article><article class="card" data-name="league-rule" data-triggers="리그 규칙 가족 리그 모의투자 리그" data-answer="가족 리그에서는 각자 받은 모의투자금으로 투자하고 기록을 남겨요. 실제 돈을 주문하는 서비스가 아니에요." data-dapie="0">
+  <header>
+    <h3>league-rule</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>리그 규칙</code> <code>가족 리그</code> <code>모의투자 리그</code></p>
+    <p class="a"><span class="who">키웅이</span>가족 리그에서는 각자 받은 모의투자금으로 투자하고 기록을 남겨요. 실제 돈을 주문하는 서비스가 아니에요.</p>
+  </div>
+  
+  <footer><code class="id">league-rule</code></footer>
+</article><article class="card" data-name="stock-universe" data-triggers="지원 종목 종목 목록 몇 개 종목" data-answer="이 데모에서는 정해진 국내 종목 51개만 살펴볼 수 있어요. 종목 화면에서 이름이나 업종으로 찾아봐요." data-dapie="0">
+  <header>
+    <h3>stock-universe</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>지원 종목</code> <code>종목 목록</code> <code>몇 개 종목</code></p>
+    <p class="a"><span class="who">키웅이</span>이 데모에서는 정해진 국내 종목 51개만 살펴볼 수 있어요. 종목 화면에서 이름이나 업종으로 찾아봐요.</p>
+  </div>
+  
+  <footer><code class="id">stock-universe</code></footer>
+</article><article class="card" data-name="trade-history" data-triggers="거래 내역 지난 주문 체결 내역 지난 기록" data-answer="지난 거래와 그때 남긴 생각은 아카이브에서 다시 볼 수 있어요. 다른 가족의 원문 기록은 볼 수 없어요." data-dapie="0">
+  <header>
+    <h3>trade-history</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 아카이브</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>거래 내역</code> <code>지난 주문</code> <code>체결 내역</code> <code>지난 기록</code></p>
+    <p class="a"><span class="who">키웅이</span>지난 거래와 그때 남긴 생각은 아카이브에서 다시 볼 수 있어요. 다른 가족의 원문 기록은 볼 수 없어요.</p>
+  </div>
+  
+  <footer><code class="id">trade-history</code></footer>
+</article><article class="card" data-name="price-location" data-triggers="현재가 어디 가격 어디 주가 어디" data-answer="종목 상세 화면에서 현재가와 가격 변화를 볼 수 있어요. 현재가는 계속 바뀔 수 있으니 화면에 표시된 시각도 함께 확인해요." data-dapie="0">
+  <header>
+    <h3>price-location</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 종목 상세</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>현재가 어디</code> <code>가격 어디</code> <code>주가 어디</code></p>
+    <p class="a"><span class="who">키웅이</span>종목 상세 화면에서 현재가와 가격 변화를 볼 수 있어요. 현재가는 계속 바뀔 수 있으니 화면에 표시된 시각도 함께 확인해요.</p>
+  </div>
+  
+  <footer><code class="id">price-location</code></footer>
+</article><article class="card" data-name="cash-balance" data-triggers="남은 돈 잔액 모의투자금" data-answer="홈의 포트폴리오에서 남은 모의투자금을 확인할 수 있어요. 가족이 함께 쓰는 돈이 아니라 계정마다 따로 관리돼요." data-dapie="0">
+  <header>
+    <h3>cash-balance</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>남은 돈</code> <code>잔액</code> <code>모의투자금</code></p>
+    <p class="a"><span class="who">키웅이</span>홈의 포트폴리오에서 남은 모의투자금을 확인할 수 있어요. 가족이 함께 쓰는 돈이 아니라 계정마다 따로 관리돼요.</p>
+  </div>
+  
+  <footer><code class="id">cash-balance</code></footer>
+</article><article class="card" data-name="chatbot-role" data-triggers="키웅이가 뭘 키웅이는 무엇을 챗봇이 뭘 뭘 도와줘 무엇을 도와주" data-answer="저는 금융 기초, 화면 사용법, 검수된 회사 정보와 기록을 쉽게 설명해 줘요. 종목을 골라 주거나 언제 사고팔지 정해 주지는 않아요. 🐻" data-dapie="0">
+  <header>
+    <h3>chatbot-role</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>키웅이가 뭘</code> <code>키웅이는 무엇을</code> <code>챗봇이 뭘</code> <code>뭘 도와줘</code> <code>무엇을 도와주</code></p>
+    <p class="a"><span class="who">키웅이</span>저는 금융 기초, 화면 사용법, 검수된 회사 정보와 기록을 쉽게 설명해 줘요. 종목을 골라 주거나 언제 사고팔지 정해 주지는 않아요. 🐻</p>
+  </div>
+  
+  <footer><code class="id">chatbot-role</code></footer>
+</article><article class="card" data-name="chatbot-restore" data-triggers="챗봇 다시 키웅이 다시 챗봇 없앴 키웅이 없앴 챗봇 사라졌 키웅이 사라졌 챗봇 숨겼 키웅이 숨겼 챗봇 안 보여 키웅이 안 보여 챗봇 어떻게 켜 플로팅 챗봇" data-answer="플로팅 키웅이를 숨겼다면 홈 화면의 키웅이 버튼을 눌러 다시 부를 수 있어요. 숨긴 동안에도 기록은 그대로 남아 있어요. 🐻" data-dapie="0">
+  <header>
+    <h3>chatbot-restore</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span><span class="tag go">→ 홈</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>챗봇 다시</code> <code>키웅이 다시</code> <code>챗봇 없앴</code> <code>키웅이 없앴</code> <code>챗봇 사라졌</code> <code>키웅이 사라졌</code> <code>챗봇 숨겼</code> <code>키웅이 숨겼</code> <code>챗봇 안 보여</code> <code>키웅이 안 보여</code> <code>챗봇 어떻게 켜</code> <code>플로팅 챗봇</code></p>
+    <p class="a"><span class="who">키웅이</span>플로팅 키웅이를 숨겼다면 홈 화면의 키웅이 버튼을 눌러 다시 부를 수 있어요. 숨긴 동안에도 기록은 그대로 남아 있어요. 🐻</p>
+  </div>
+  
+  <footer><code class="id">chatbot-restore</code></footer>
+</article><article class="card" data-name="open-price" data-triggers="시가" data-answer="시가는 그날 거래가 시작될 때 처음 정해진 가격이에요. 차트에서 하루를 나타내는 막대의 시작점이에요." data-dapie="0">
+  <header>
+    <h3>open-price</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>시가</code></p>
+    <p class="a"><span class="who">키웅이</span>시가는 그날 거래가 시작될 때 처음 정해진 가격이에요. 차트에서 하루를 나타내는 막대의 시작점이에요.</p>
+  </div>
+  
+  <footer><code class="id">open-price</code></footer>
+</article><article class="card" data-name="close-price" data-triggers="종가" data-answer="종가는 그날 거래가 끝날 때 마지막으로 정해진 가격이에요. 다음 날 거래가 시작되면 가격은 또 달라져요." data-dapie="0">
+  <header>
+    <h3>close-price</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>종가</code></p>
+    <p class="a"><span class="who">키웅이</span>종가는 그날 거래가 끝날 때 마지막으로 정해진 가격이에요. 다음 날 거래가 시작되면 가격은 또 달라져요.</p>
+  </div>
+  
+  <footer><code class="id">close-price</code></footer>
+</article><article class="card" data-name="high-price" data-triggers="고가" data-answer="고가는 그날 거래된 가격 중에서 가장 높았던 가격이에요." data-dapie="0">
+  <header>
+    <h3>high-price</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>고가</code></p>
+    <p class="a"><span class="who">키웅이</span>고가는 그날 거래된 가격 중에서 가장 높았던 가격이에요.</p>
+  </div>
+  
+  <footer><code class="id">high-price</code></footer>
+</article><article class="card" data-name="low-price" data-triggers="저가" data-answer="저가는 그날 거래된 가격 중에서 가장 낮았던 가격이에요." data-dapie="0">
+  <header>
+    <h3>low-price</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>저가</code></p>
+    <p class="a"><span class="who">키웅이</span>저가는 그날 거래된 가격 중에서 가장 낮았던 가격이에요.</p>
+  </div>
+  
+  <footer><code class="id">low-price</code></footer>
+</article><article class="card" data-name="upper-limit" data-triggers="상한가" data-answer="상한가는 하루에 오를 수 있는 가장 높은 가격이에요. 국내 주식은 하루에 30%까지만 오르내릴 수 있게 정해져 있어요." data-dapie="0">
+  <header>
+    <h3>upper-limit</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>상한가</code></p>
+    <p class="a"><span class="who">키웅이</span>상한가는 하루에 오를 수 있는 가장 높은 가격이에요. 국내 주식은 하루에 30%까지만 오르내릴 수 있게 정해져 있어요.</p>
+  </div>
+  
+  <footer><code class="id">upper-limit</code></footer>
+</article><article class="card" data-name="lower-limit" data-triggers="하한가" data-answer="하한가는 하루에 내릴 수 있는 가장 낮은 가격이에요. 상한가와 똑같이 하루 30% 한도가 정해져 있어요." data-dapie="0">
+  <header>
+    <h3>lower-limit</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>하한가</code></p>
+    <p class="a"><span class="who">키웅이</span>하한가는 하루에 내릴 수 있는 가장 낮은 가격이에요. 상한가와 똑같이 하루 30% 한도가 정해져 있어요.</p>
+  </div>
+  
+  <footer><code class="id">lower-limit</code></footer>
+</article><article class="card" data-name="kospi" data-triggers="코스피" data-answer="코스피는 국내를 대표하는 주식시장이에요. 그 시장 전체가 어떻게 움직이는지 보여 주는 숫자를 뜻하기도 해요." data-dapie="0">
+  <header>
+    <h3>kospi</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>코스피</code></p>
+    <p class="a"><span class="who">키웅이</span>코스피는 국내를 대표하는 주식시장이에요. 그 시장 전체가 어떻게 움직이는지 보여 주는 숫자를 뜻하기도 해요.</p>
+  </div>
+  
+  <footer><code class="id">kospi</code></footer>
+</article><article class="card" data-name="kosdaq" data-triggers="코스닥" data-answer="코스닥은 코스피보다 작거나 새로 자라는 회사들이 모여 있는 주식시장이에요." data-dapie="0">
+  <header>
+    <h3>kosdaq</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>코스닥</code></p>
+    <p class="a"><span class="who">키웅이</span>코스닥은 코스피보다 작거나 새로 자라는 회사들이 모여 있는 주식시장이에요.</p>
+  </div>
+  
+  <footer><code class="id">kosdaq</code></footer>
+</article><article class="card" data-name="listing" data-triggers="상장" data-answer="상장은 회사의 주식을 시장에서 누구나 사고팔 수 있게 되는 것을 말해요." data-dapie="0">
+  <header>
+    <h3>listing</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>상장</code></p>
+    <p class="a"><span class="who">키웅이</span>상장은 회사의 주식을 시장에서 누구나 사고팔 수 있게 되는 것을 말해요.</p>
+  </div>
+  
+  <footer><code class="id">listing</code></footer>
+</article><article class="card" data-name="delisting" data-triggers="상장폐지" data-answer="상장폐지는 회사의 주식을 더 이상 시장에서 사고팔 수 없게 되는 것이에요. 시장이 정한 조건을 지키지 못했을 때 일어나요." data-dapie="0">
+  <header>
+    <h3>delisting</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>상장폐지</code></p>
+    <p class="a"><span class="who">키웅이</span>상장폐지는 회사의 주식을 더 이상 시장에서 사고팔 수 없게 되는 것이에요. 시장이 정한 조건을 지키지 못했을 때 일어나요.</p>
+  </div>
+  
+  <footer><code class="id">delisting</code></footer>
+</article><article class="card" data-name="ipo-share" data-triggers="공모주" data-answer="공모주는 회사가 상장할 때 처음으로 사람들에게 파는 주식이에요. 이 모의투자에서는 공모주를 다루지 않아요." data-dapie="0">
+  <header>
+    <h3>ipo-share</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>공모주</code></p>
+    <p class="a"><span class="who">키웅이</span>공모주는 회사가 상장할 때 처음으로 사람들에게 파는 주식이에요. 이 모의투자에서는 공모주를 다루지 않아요.</p>
+  </div>
+  
+  <footer><code class="id">ipo-share</code></footer>
+</article><article class="card" data-name="trading-halt" data-triggers="거래정지" data-answer="거래정지는 어떤 이유로 그 종목을 잠시 사고팔 수 없게 막아 둔 상태예요. 풀릴 때까지 주문이 들어가지 않아요." data-dapie="0">
+  <header>
+    <h3>trading-halt</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>거래정지</code></p>
+    <p class="a"><span class="who">키웅이</span>거래정지는 어떤 이유로 그 종목을 잠시 사고팔 수 없게 막아 둔 상태예요. 풀릴 때까지 주문이 들어가지 않아요.</p>
+  </div>
+  
+  <footer><code class="id">trading-halt</code></footer>
+</article><article class="card" data-name="market-close" data-triggers="장마감 장 마감" data-answer="장마감은 그날의 주식 거래가 끝나는 것이에요. 국내 주식시장은 평일 오후 3시 30분에 마감해요." data-dapie="0">
+  <header>
+    <h3>market-close</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>장마감</code> <code>장 마감</code></p>
+    <p class="a"><span class="who">키웅이</span>장마감은 그날의 주식 거래가 끝나는 것이에요. 국내 주식시장은 평일 오후 3시 30분에 마감해요.</p>
+  </div>
+  
+  <footer><code class="id">market-close</code></footer>
+</article><article class="card" data-name="market-holiday" data-triggers="휴장" data-answer="휴장은 주식시장이 문을 열지 않는 날이에요. 주말과 공휴일에는 거래가 없어요." data-dapie="0">
+  <header>
+    <h3>market-holiday</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>휴장</code></p>
+    <p class="a"><span class="who">키웅이</span>휴장은 주식시장이 문을 열지 않는 날이에요. 주말과 공휴일에는 거래가 없어요.</p>
+  </div>
+  
+  <footer><code class="id">market-holiday</code></footer>
+</article><article class="card" data-name="net-income" data-triggers="순이익" data-answer="순이익은 회사가 번 돈에서 쓴 돈과 세금까지 모두 빼고 마지막에 남은 돈이에요." data-dapie="0">
+  <header>
+    <h3>net-income</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>순이익</code></p>
+    <p class="a"><span class="who">키웅이</span>순이익은 회사가 번 돈에서 쓴 돈과 세금까지 모두 빼고 마지막에 남은 돈이에요.</p>
+  </div>
+  
+  <footer><code class="id">net-income</code></footer>
+</article><article class="card" data-name="deficit" data-triggers="적자" data-answer="적자는 번 돈보다 쓴 돈이 많아서 남은 것이 마이너스인 상태를 말해요." data-dapie="0">
+  <header>
+    <h3>deficit</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>적자</code></p>
+    <p class="a"><span class="who">키웅이</span>적자는 번 돈보다 쓴 돈이 많아서 남은 것이 마이너스인 상태를 말해요.</p>
+  </div>
+  
+  <footer><code class="id">deficit</code></footer>
+</article><article class="card" data-name="surplus" data-triggers="흑자" data-answer="흑자는 번 돈이 쓴 돈보다 많아서 이익이 남은 상태를 말해요." data-dapie="0">
+  <header>
+    <h3>surplus</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>흑자</code></p>
+    <p class="a"><span class="who">키웅이</span>흑자는 번 돈이 쓴 돈보다 많아서 이익이 남은 상태를 말해요.</p>
+  </div>
+  
+  <footer><code class="id">surplus</code></footer>
+</article><article class="card" data-name="first-half" data-triggers="상반기" data-answer="상반기는 한 해를 둘로 나눈 앞쪽 여섯 달, 1월부터 6월까지예요. 뒤쪽 여섯 달은 하반기라고 해요." data-dapie="0">
+  <header>
+    <h3>first-half</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>상반기</code></p>
+    <p class="a"><span class="who">키웅이</span>상반기는 한 해를 둘로 나눈 앞쪽 여섯 달, 1월부터 6월까지예요. 뒤쪽 여섯 달은 하반기라고 해요.</p>
+  </div>
+  
+  <footer><code class="id">first-half</code></footer>
+</article><article class="card" data-name="quarter" data-triggers="분기" data-answer="분기는 한 해를 넷으로 나눈 석 달이에요. 1분기는 1월부터 3월까지이고, 회사는 보통 분기마다 실적을 알려요." data-dapie="0">
+  <header>
+    <h3>quarter</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>분기</code></p>
+    <p class="a"><span class="who">키웅이</span>분기는 한 해를 넷으로 나눈 석 달이에요. 1분기는 1월부터 3월까지이고, 회사는 보통 분기마다 실적을 알려요.</p>
+  </div>
+  
+  <footer><code class="id">quarter</code></footer>
+</article><article class="card" data-name="subsidiary" data-triggers="자회사" data-answer="자회사는 어떤 회사가 주식을 많이 가지고 있어서 그 회사에 속하게 된 다른 회사예요." data-dapie="0">
+  <header>
+    <h3>subsidiary</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>자회사</code></p>
+    <p class="a"><span class="who">키웅이</span>자회사는 어떤 회사가 주식을 많이 가지고 있어서 그 회사에 속하게 된 다른 회사예요.</p>
+  </div>
+  
+  <footer><code class="id">subsidiary</code></footer>
+</article><article class="card" data-name="order-received" data-triggers="수주" data-answer="수주는 만들어 달라거나 해 달라는 주문을 받는 것이에요. 배나 공장 설비처럼 큰 물건에서 자주 쓰는 말이에요." data-dapie="0">
+  <header>
+    <h3>order-received</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>수주</code></p>
+    <p class="a"><span class="who">키웅이</span>수주는 만들어 달라거나 해 달라는 주문을 받는 것이에요. 배나 공장 설비처럼 큰 물건에서 자주 쓰는 말이에요.</p>
+  </div>
+  
+  <footer><code class="id">order-received</code></footer>
+</article><article class="card" data-name="principal" data-triggers="원금" data-answer="원금은 처음에 넣은 돈이에요. 여기에 이익이 더해지거나 손해가 빠져요." data-dapie="0">
+  <header>
+    <h3>principal</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>원금</code></p>
+    <p class="a"><span class="who">키웅이</span>원금은 처음에 넣은 돈이에요. 여기에 이익이 더해지거나 손해가 빠져요.</p>
+  </div>
+  
+  <footer><code class="id">principal</code></footer>
+</article><article class="card" data-name="interest" data-triggers="이자" data-answer="이자는 돈을 맡기거나 빌릴 때 원금에 더 붙는 돈이에요." data-dapie="0">
+  <header>
+    <h3>interest</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>이자</code></p>
+    <p class="a"><span class="who">키웅이</span>이자는 돈을 맡기거나 빌릴 때 원금에 더 붙는 돈이에요.</p>
+  </div>
+  
+  <footer><code class="id">interest</code></footer>
+</article><article class="card" data-name="compound-interest" data-triggers="복리" data-answer="복리는 이자에 다시 이자가 붙는 방식이에요. 맡겨 두는 기간이 길수록 차이가 커져요." data-dapie="0">
+  <header>
+    <h3>compound-interest</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>복리</code></p>
+    <p class="a"><span class="who">키웅이</span>복리는 이자에 다시 이자가 붙는 방식이에요. 맡겨 두는 기간이 길수록 차이가 커져요.</p>
+  </div>
+  
+  <footer><code class="id">compound-interest</code></footer>
+</article><article class="card" data-name="deposit" data-triggers="예금" data-answer="예금은 은행에 돈을 맡겨 두고 이자를 받는 거예요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>deposit</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>예금</code></p>
+    <p class="a"><span class="who">키웅이</span>예금은 은행에 돈을 맡겨 두고 이자를 받는 거예요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">deposit</code></footer>
+</article><article class="card" data-name="installment-savings" data-triggers="적금" data-answer="적금은 정해진 기간 동안 매달 조금씩 모아서 맡기는 거예요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>installment-savings</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>적금</code></p>
+    <p class="a"><span class="who">키웅이</span>적금은 정해진 기간 동안 매달 조금씩 모아서 맡기는 거예요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">installment-savings</code></footer>
+</article><article class="card" data-name="tax" data-triggers="세금" data-answer="세금은 나라에 내는 돈이에요. 실제 주식 거래에는 세금이 붙지만 이 모의투자에서는 계산하지 않아요." data-dapie="0">
+  <header>
+    <h3>tax</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>세금</code></p>
+    <p class="a"><span class="who">키웅이</span>세금은 나라에 내는 돈이에요. 실제 주식 거래에는 세금이 붙지만 이 모의투자에서는 계산하지 않아요.</p>
+  </div>
+  
+  <footer><code class="id">tax</code></footer>
+</article><article class="card" data-name="fee" data-triggers="수수료" data-answer="수수료는 거래를 도와주는 곳에 내는 값이에요. 실제 거래에는 수수료가 붙지만 이 모의투자에서는 계산하지 않아요." data-dapie="0">
+  <header>
+    <h3>fee</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>수수료</code></p>
+    <p class="a"><span class="who">키웅이</span>수수료는 거래를 도와주는 곳에 내는 값이에요. 실제 거래에는 수수료가 붙지만 이 모의투자에서는 계산하지 않아요.</p>
+  </div>
+  
+  <footer><code class="id">fee</code></footer>
+</article><article class="card" data-name="interest-rate" data-triggers="금리" data-answer="금리는 돈을 맡기거나 빌릴 때 붙는 이자의 비율이에요. 뉴스에서 금리가 오르내린다는 말이 자주 나와요." data-dapie="0">
+  <header>
+    <h3>interest-rate</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>금리</code></p>
+    <p class="a"><span class="who">키웅이</span>금리는 돈을 맡기거나 빌릴 때 붙는 이자의 비율이에요. 뉴스에서 금리가 오르내린다는 말이 자주 나와요.</p>
+  </div>
+  
+  <footer><code class="id">interest-rate</code></footer>
+</article><article class="card" data-name="exchange-rate" data-triggers="환율" data-answer="환율은 우리나라 돈과 다른 나라 돈을 바꾸는 비율이에요." data-dapie="0">
+  <header>
+    <h3>exchange-rate</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>환율</code></p>
+    <p class="a"><span class="who">키웅이</span>환율은 우리나라 돈과 다른 나라 돈을 바꾸는 비율이에요.</p>
+  </div>
+  
+  <footer><code class="id">exchange-rate</code></footer>
+</article><article class="card" data-name="price-level" data-triggers="물가" data-answer="물가는 물건과 서비스의 값이 전체적으로 어느 정도인지를 말해요." data-dapie="0">
+  <header>
+    <h3>price-level</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>물가</code></p>
+    <p class="a"><span class="who">키웅이</span>물가는 물건과 서비스의 값이 전체적으로 어느 정도인지를 말해요.</p>
+  </div>
+  
+  <footer><code class="id">price-level</code></footer>
+</article><article class="card" data-name="inflation" data-triggers="인플레이션" data-answer="인플레이션은 물가가 계속 올라서 같은 돈으로 살 수 있는 것이 줄어드는 것이에요." data-dapie="0">
+  <header>
+    <h3>inflation</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>인플레이션</code></p>
+    <p class="a"><span class="who">키웅이</span>인플레이션은 물가가 계속 올라서 같은 돈으로 살 수 있는 것이 줄어드는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">inflation</code></footer>
+</article><article class="card" data-name="bond" data-triggers="채권" data-answer="채권은 돈을 빌려주고 정해진 날에 이자와 함께 돌려받기로 한 증서예요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>bond</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>채권</code></p>
+    <p class="a"><span class="who">키웅이</span>채권은 돈을 빌려주고 정해진 날에 이자와 함께 돌려받기로 한 증서예요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">bond</code></footer>
+</article><article class="card" data-name="fund" data-triggers="펀드" data-answer="펀드는 여러 사람의 돈을 모아 전문가가 대신 굴리는 상품이에요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>fund</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>펀드</code></p>
+    <p class="a"><span class="who">키웅이</span>펀드는 여러 사람의 돈을 모아 전문가가 대신 굴리는 상품이에요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">fund</code></footer>
+</article><article class="card" data-name="change-rate" data-triggers="등락률" data-answer="등락률은 어제 마지막 가격에 견줘 오늘 가격이 몇 퍼센트 오르거나 내렸는지 나타내요." data-dapie="0">
+  <header>
+    <h3>change-rate</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>등락률</code></p>
+    <p class="a"><span class="who">키웅이</span>등락률은 어제 마지막 가격에 견줘 오늘 가격이 몇 퍼센트 오르거나 내렸는지 나타내요.</p>
+  </div>
+  
+  <footer><code class="id">change-rate</code></footer>
+</article><article class="card" data-name="vs-yesterday" data-triggers="전일대비" data-answer="전일대비는 어제 마지막 가격과 견준 차이예요. 화면에서 빨간색은 오른 것, 파란색은 내린 것을 뜻해요." data-dapie="0">
+  <header>
+    <h3>vs-yesterday</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>전일대비</code></p>
+    <p class="a"><span class="who">키웅이</span>전일대비는 어제 마지막 가격과 견준 차이예요. 화면에서 빨간색은 오른 것, 파란색은 내린 것을 뜻해요.</p>
+  </div>
+  
+  <footer><code class="id">vs-yesterday</code></footer>
+</article><article class="card" data-name="trading-value" data-triggers="거래대금" data-answer="거래대금은 하루 동안 그 종목이 사고팔린 금액을 모두 더한 값이에요." data-dapie="0">
+  <header>
+    <h3>trading-value</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>거래대금</code></p>
+    <p class="a"><span class="who">키웅이</span>거래대금은 하루 동안 그 종목이 사고팔린 금액을 모두 더한 값이에요.</p>
+  </div>
+  
+  <footer><code class="id">trading-value</code></footer>
+</article><article class="card" data-name="regular-session" data-triggers="정규장" data-answer="정규장은 평일 오전 9시부터 오후 3시 30분까지 주식을 사고팔 수 있는 시간이에요." data-dapie="0">
+  <header>
+    <h3>regular-session</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>정규장</code></p>
+    <p class="a"><span class="who">키웅이</span>정규장은 평일 오전 9시부터 오후 3시 30분까지 주식을 사고팔 수 있는 시간이에요.</p>
+  </div>
+  
+  <footer><code class="id">regular-session</code></footer>
+</article><article class="card" data-name="after-hours" data-triggers="장외" data-answer="장외는 정규장 시간이 아닐 때를 말해요. 이때 넣은 시장가 주문은 다음 거래일 첫 가격으로 예약돼요." data-dapie="0">
+  <header>
+    <h3>after-hours</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>장외</code></p>
+    <p class="a"><span class="who">키웅이</span>장외는 정규장 시간이 아닐 때를 말해요. 이때 넣은 시장가 주문은 다음 거래일 첫 가격으로 예약돼요.</p>
+  </div>
+  
+  <footer><code class="id">after-hours</code></footer>
+</article><article class="card" data-name="earnings" data-triggers="실적이 뭐 실적 뭐 실적 뜻 실적이란 실적은 뭐" data-answer="실적은 회사가 정해진 기간 동안 얼마를 벌고 얼마가 남았는지 정리한 결과예요." data-dapie="0">
+  <header>
+    <h3>earnings</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>실적이 뭐</code> <code>실적 뭐</code> <code>실적 뜻</code> <code>실적이란</code> <code>실적은 뭐</code></p>
+    <p class="a"><span class="who">키웅이</span>실적은 회사가 정해진 기간 동안 얼마를 벌고 얼마가 남았는지 정리한 결과예요.</p>
+  </div>
+  
+  <footer><code class="id">earnings</code></footer>
+</article><article class="card" data-name="treasury-stock" data-triggers="자사주" data-answer="자사주는 회사가 자기 회사의 주식을 사서 가지고 있는 것을 말해요." data-dapie="0">
+  <header>
+    <h3>treasury-stock</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>자사주</code></p>
+    <p class="a"><span class="who">키웅이</span>자사주는 회사가 자기 회사의 주식을 사서 가지고 있는 것을 말해요.</p>
+  </div>
+  
+  <footer><code class="id">treasury-stock</code></footer>
+</article><article class="card" data-name="year-over-year" data-triggers="전년비 전년 대비 전년 동기 대비 전년동기 대비 전년 동기 전년동기" data-answer="전년비는 작년 같은 기간과 견줘 얼마나 늘거나 줄었는지 나타내요." data-dapie="0">
+  <header>
+    <h3>year-over-year</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>전년비</code> <code>전년 대비</code> <code>전년 동기 대비</code> <code>전년동기 대비</code> <code>전년 동기</code> <code>전년동기</code></p>
+    <p class="a"><span class="who">키웅이</span>전년비는 작년 같은 기간과 견줘 얼마나 늘거나 줄었는지 나타내요.</p>
+  </div>
+  
+  <footer><code class="id">year-over-year</code></footer>
+</article><article class="card" data-name="merger" data-triggers="인수합병 합병" data-answer="인수합병은 한 회사가 다른 회사를 사거나, 두 회사가 하나로 합치는 것이에요." data-dapie="0">
+  <header>
+    <h3>merger</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>인수합병</code> <code>합병</code></p>
+    <p class="a"><span class="who">키웅이</span>인수합병은 한 회사가 다른 회사를 사거나, 두 회사가 하나로 합치는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">merger</code></footer>
+</article><article class="card" data-name="new-product" data-triggers="신제품" data-answer="신제품은 회사가 새로 만들어 내놓은 물건이나 서비스예요." data-dapie="0">
+  <header>
+    <h3>new-product</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>신제품</code></p>
+    <p class="a"><span class="who">키웅이</span>신제품은 회사가 새로 만들어 내놓은 물건이나 서비스예요.</p>
+  </div>
+  
+  <footer><code class="id">new-product</code></footer>
+</article><article class="card" data-name="recall" data-triggers="리콜" data-answer="리콜은 팔았던 물건에 문제가 있어서 회사가 다시 거둬들여 고쳐 주는 것이에요." data-dapie="0">
+  <header>
+    <h3>recall</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>리콜</code></p>
+    <p class="a"><span class="who">키웅이</span>리콜은 팔았던 물건에 문제가 있어서 회사가 다시 거둬들여 고쳐 주는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">recall</code></footer>
+</article><article class="card" data-name="bonus-issue" data-triggers="무상증자" data-answer="무상증자는 회사가 주주에게 돈을 받지 않고 주식을 더 나눠 주는 것이에요." data-dapie="0">
+  <header>
+    <h3>bonus-issue</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>무상증자</code></p>
+    <p class="a"><span class="who">키웅이</span>무상증자는 회사가 주주에게 돈을 받지 않고 주식을 더 나눠 주는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">bonus-issue</code></footer>
+</article><article class="card" data-name="rights-issue" data-triggers="유상증자" data-answer="유상증자는 회사가 새 주식을 만들어 팔아서 필요한 돈을 모으는 것이에요." data-dapie="0">
+  <header>
+    <h3>rights-issue</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>유상증자</code></p>
+    <p class="a"><span class="who">키웅이</span>유상증자는 회사가 새 주식을 만들어 팔아서 필요한 돈을 모으는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">rights-issue</code></footer>
+</article><article class="card" data-name="affiliate" data-triggers="계열사" data-answer="계열사는 같은 그룹에 속해 서로 이어져 있는 회사들을 말해요." data-dapie="0">
+  <header>
+    <h3>affiliate</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>계열사</code></p>
+    <p class="a"><span class="who">키웅이</span>계열사는 같은 그룹에 속해 서로 이어져 있는 회사들을 말해요.</p>
+  </div>
+  
+  <footer><code class="id">affiliate</code></footer>
+</article><article class="card" data-name="operating-loss" data-triggers="영업손실" data-answer="영업손실은 회사가 본업으로 번 돈보다 쓴 돈이 많아서 남은 것이 마이너스인 상태예요." data-dapie="0">
+  <header>
+    <h3>operating-loss</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>영업손실</code></p>
+    <p class="a"><span class="who">키웅이</span>영업손실은 회사가 본업으로 번 돈보다 쓴 돈이 많아서 남은 것이 마이너스인 상태예요.</p>
+  </div>
+  
+  <footer><code class="id">operating-loss</code></footer>
+</article><article class="card" data-name="export" data-triggers="수출" data-answer="수출은 우리나라에서 만든 물건을 다른 나라에 파는 것이에요." data-dapie="0">
+  <header>
+    <h3>export</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>수출</code></p>
+    <p class="a"><span class="who">키웅이</span>수출은 우리나라에서 만든 물건을 다른 나라에 파는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">export</code></footer>
+</article><article class="card" data-name="tariff" data-triggers="관세" data-answer="관세는 다른 나라에서 들어오는 물건에 매기는 세금이에요." data-dapie="0">
+  <header>
+    <h3>tariff</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>관세</code></p>
+    <p class="a"><span class="who">키웅이</span>관세는 다른 나라에서 들어오는 물건에 매기는 세금이에요.</p>
+  </div>
+  
+  <footer><code class="id">tariff</code></footer>
+</article><article class="card" data-name="trade" data-triggers="무역" data-answer="무역은 나라와 나라 사이에 물건을 사고파는 것이에요." data-dapie="0">
+  <header>
+    <h3>trade</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>무역</code></p>
+    <p class="a"><span class="who">키웅이</span>무역은 나라와 나라 사이에 물건을 사고파는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">trade</code></footer>
+</article><article class="card" data-name="boom-bust" data-triggers="호황 불황" data-answer="호황은 경제가 활발해서 물건이 잘 팔리는 때예요. 반대로 잘 안 팔리는 때는 불황이라고 해요." data-dapie="0">
+  <header>
+    <h3>boom-bust</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>호황</code> <code>불황</code></p>
+    <p class="a"><span class="who">키웅이</span>호황은 경제가 활발해서 물건이 잘 팔리는 때예요. 반대로 잘 안 팔리는 때는 불황이라고 해요.</p>
+  </div>
+  
+  <footer><code class="id">boom-bust</code></footer>
+</article><article class="card" data-name="short-selling" data-triggers="공매도" data-answer="공매도는 주식을 빌려서 먼저 팔고 나중에 다시 사서 갚는 방법이에요. 이 모의투자에서는 하지 않아요." data-dapie="0">
+  <header>
+    <h3>short-selling</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>공매도</code></p>
+    <p class="a"><span class="who">키웅이</span>공매도는 주식을 빌려서 먼저 팔고 나중에 다시 사서 갚는 방법이에요. 이 모의투자에서는 하지 않아요.</p>
+  </div>
+  
+  <footer><code class="id">short-selling</code></footer>
+</article><article class="card" data-name="futures" data-triggers="선물거래 선물 거래" data-answer="선물거래는 나중 날짜의 가격을 미리 정해 두고 사고파는 방법이에요. 이 모의투자에서는 회사 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>futures</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>선물거래</code> <code>선물 거래</code></p>
+    <p class="a"><span class="who">키웅이</span>선물거래는 나중 날짜의 가격을 미리 정해 두고 사고파는 방법이에요. 이 모의투자에서는 회사 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">futures</code></footer>
+</article><article class="card" data-name="derivatives" data-triggers="파생상품" data-answer="파생상품은 주식이나 환율 같은 것의 값에 따라 값이 정해지는 상품이에요. 이 모의투자에서는 다루지 않아요." data-dapie="0">
+  <header>
+    <h3>derivatives</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>파생상품</code></p>
+    <p class="a"><span class="who">키웅이</span>파생상품은 주식이나 환율 같은 것의 값에 따라 값이 정해지는 상품이에요. 이 모의투자에서는 다루지 않아요.</p>
+  </div>
+  
+  <footer><code class="id">derivatives</code></footer>
+</article><article class="card" data-name="margin-trading" data-triggers="신용거래" data-answer="신용거래는 증권사에서 돈을 빌려 주식을 사는 것이에요. 이 모의투자에서는 빌리지 않고 가진 가상 현금으로만 주문해요." data-dapie="0">
+  <header>
+    <h3>margin-trading</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>신용거래</code></p>
+    <p class="a"><span class="who">키웅이</span>신용거래는 증권사에서 돈을 빌려 주식을 사는 것이에요. 이 모의투자에서는 빌리지 않고 가진 가상 현금으로만 주문해요.</p>
+  </div>
+  
+  <footer><code class="id">margin-trading</code></footer>
+</article><article class="card" data-name="crypto-asset" data-triggers="가상자산 비트코인" data-answer="가상자산은 비트코인처럼 인터넷에서만 오가는 자산이에요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>crypto-asset</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>가상자산</code> <code>비트코인</code></p>
+    <p class="a"><span class="who">키웅이</span>가상자산은 비트코인처럼 인터넷에서만 오가는 자산이에요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">crypto-asset</code></footer>
+</article><article class="card" data-name="pension" data-triggers="연금" data-answer="연금은 일을 그만둔 뒤에 받을 돈을 미리 조금씩 모아 두는 것이에요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>pension</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>연금</code></p>
+    <p class="a"><span class="who">키웅이</span>연금은 일을 그만둔 뒤에 받을 돈을 미리 조금씩 모아 두는 것이에요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">pension</code></footer>
+</article><article class="card" data-name="insurance" data-triggers="보험" data-answer="보험은 여럿이 조금씩 돈을 모아 두었다가 누가 사고를 당하면 도와주는 것이에요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>insurance</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>보험</code></p>
+    <p class="a"><span class="who">키웅이</span>보험은 여럿이 조금씩 돈을 모아 두었다가 누가 사고를 당하면 도와주는 것이에요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">insurance</code></footer>
+</article><article class="card" data-name="contract" data-triggers="계약" data-answer="계약은 무엇을 언제까지 해 주기로 서로 약속하고 문서로 남기는 것이에요. 회사끼리 맺은 계약은 정해진 기간 동안 지켜야 해요." data-dapie="0">
+  <header>
+    <h3>contract</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>계약</code></p>
+    <p class="a"><span class="who">키웅이</span>계약은 무엇을 언제까지 해 주기로 서로 약속하고 문서로 남기는 것이에요. 회사끼리 맺은 계약은 정해진 기간 동안 지켜야 해요.</p>
+  </div>
+  
+  <footer><code class="id">contract</code></footer>
+</article><article class="card" data-name="factory" data-triggers="공장" data-answer="공장은 물건을 많이 만들어 내는 큰 건물이에요. 공장을 새로 지으면 만들 수 있는 양이 늘어나요." data-dapie="0">
+  <header>
+    <h3>factory</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>공장</code></p>
+    <p class="a"><span class="who">키웅이</span>공장은 물건을 많이 만들어 내는 큰 건물이에요. 공장을 새로 지으면 만들 수 있는 양이 늘어나요.</p>
+  </div>
+  
+  <footer><code class="id">factory</code></footer>
+</article><article class="card" data-name="stake" data-triggers="지분" data-answer="지분은 회사 전체 주식 가운데 어떤 사람이나 회사가 가진 몫이에요. 지분이 많을수록 회사 일을 정할 때 낼 수 있는 목소리도 커져요." data-dapie="0">
+  <header>
+    <h3>stake</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>지분</code></p>
+    <p class="a"><span class="who">키웅이</span>지분은 회사 전체 주식 가운데 어떤 사람이나 회사가 가진 몫이에요. 지분이 많을수록 회사 일을 정할 때 낼 수 있는 목소리도 커져요.</p>
+  </div>
+  
+  <footer><code class="id">stake</code></footer>
+</article><article class="card" data-name="disclosure" data-triggers="공시" data-answer="공시는 회사가 투자자에게 알려야 할 중요한 일을 공개하는 것이에요. 실적이나 큰 계약이 정해지면 정해진 곳에 올려 누구나 볼 수 있게 해요." data-dapie="0">
+  <header>
+    <h3>disclosure</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>공시</code></p>
+    <p class="a"><span class="who">키웅이</span>공시는 회사가 투자자에게 알려야 할 중요한 일을 공개하는 것이에요. 실적이나 큰 계약이 정해지면 정해진 곳에 올려 누구나 볼 수 있게 해요.</p>
+  </div>
+  
+  <footer><code class="id">disclosure</code></footer>
+</article><article class="card" data-name="acquisition" data-triggers="인수" data-answer="인수는 다른 회사나 사업을 사서 넘겨받는 것이에요." data-dapie="0">
+  <header>
+    <h3>acquisition</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>인수</code></p>
+    <p class="a"><span class="who">키웅이</span>인수는 다른 회사나 사업을 사서 넘겨받는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">acquisition</code></footer>
+</article><article class="card" data-name="divestiture" data-triggers="매각" data-answer="매각은 가지고 있던 회사나 사업, 재산을 파는 것이에요." data-dapie="0">
+  <header>
+    <h3>divestiture</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>매각</code></p>
+    <p class="a"><span class="who">키웅이</span>매각은 가지고 있던 회사나 사업, 재산을 파는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">divestiture</code></footer>
+</article><article class="card" data-name="board-of-directors" data-triggers="이사회" data-answer="이사회는 회사의 중요한 일을 모여서 정하는 모임이에요." data-dapie="0">
+  <header>
+    <h3>board-of-directors</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>이사회</code></p>
+    <p class="a"><span class="who">키웅이</span>이사회는 회사의 중요한 일을 모여서 정하는 모임이에요.</p>
+  </div>
+  
+  <footer><code class="id">board-of-directors</code></footer>
+</article><article class="card" data-name="holding-company" data-triggers="지주사 지주회사" data-answer="지주사는 다른 회사들의 주식을 가지고 그 회사들을 거느리는 회사예요." data-dapie="0">
+  <header>
+    <h3>holding-company</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>지주사</code> <code>지주회사</code></p>
+    <p class="a"><span class="who">키웅이</span>지주사는 다른 회사들의 주식을 가지고 그 회사들을 거느리는 회사예요.</p>
+  </div>
+  
+  <footer><code class="id">holding-company</code></footer>
+</article><article class="card" data-name="corporation" data-triggers="법인" data-answer="법인은 사람처럼 계약을 맺고 재산을 가질 수 있게 만든 회사나 단체예요." data-dapie="0">
+  <header>
+    <h3>corporation</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>법인</code></p>
+    <p class="a"><span class="who">키웅이</span>법인은 사람처럼 계약을 맺고 재산을 가질 수 있게 만든 회사나 단체예요.</p>
+  </div>
+  
+  <footer><code class="id">corporation</code></footer>
+</article><article class="card" data-name="share-cancellation" data-triggers="자사주 소각 주식 소각 소각" data-answer="소각은 회사가 사 둔 자기 주식을 아예 없애는 것이에요. 없앤 만큼 남은 주식 수가 줄어들어요." data-dapie="0">
+  <header>
+    <h3>share-cancellation</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>자사주 소각</code> <code>주식 소각</code> <code>소각</code></p>
+    <p class="a"><span class="who">키웅이</span>소각은 회사가 사 둔 자기 주식을 아예 없애는 것이에요. 없앤 만큼 남은 주식 수가 줄어들어요.</p>
+  </div>
+  
+  <footer><code class="id">share-cancellation</code></footer>
+</article><article class="card" data-name="consolidated-basis" data-triggers="연결 기준 연결기준 연결 실적" data-answer="연결 기준은 본사와 본사가 거느린 회사들의 실적을 하나로 합쳐 계산하는 방법이에요. 본사만 따로 계산한 것은 별도 기준이라고 해요." data-dapie="0">
+  <header>
+    <h3>consolidated-basis</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>연결 기준</code> <code>연결기준</code> <code>연결 실적</code></p>
+    <p class="a"><span class="who">키웅이</span>연결 기준은 본사와 본사가 거느린 회사들의 실적을 하나로 합쳐 계산하는 방법이에요. 본사만 따로 계산한 것은 별도 기준이라고 해요.</p>
+  </div>
+  
+  <footer><code class="id">consolidated-basis</code></footer>
+</article><article class="card" data-name="profitability" data-triggers="수익성" data-answer="수익성은 번 돈에서 비용을 빼고 얼마나 남는지를 보여주는 정도예요." data-dapie="0">
+  <header>
+    <h3>profitability</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>수익성</code></p>
+    <p class="a"><span class="who">키웅이</span>수익성은 번 돈에서 비용을 빼고 얼마나 남는지를 보여주는 정도예요.</p>
+  </div>
+  
+  <footer><code class="id">profitability</code></footer>
+</article><article class="card" data-name="growth-rate" data-triggers="성장률" data-answer="성장률은 매출이나 이익이 지난 기간보다 얼마나 늘었는지 비율로 나타낸 값이에요." data-dapie="0">
+  <header>
+    <h3>growth-rate</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>성장률</code></p>
+    <p class="a"><span class="who">키웅이</span>성장률은 매출이나 이익이 지난 기간보다 얼마나 늘었는지 비율로 나타낸 값이에요.</p>
+  </div>
+  
+  <footer><code class="id">growth-rate</code></footer>
+</article><article class="card" data-name="rebound" data-triggers="반등" data-answer="반등은 내려가던 값이 다시 올라간 것을 뒤에서 부르는 말이에요." data-dapie="0">
+  <header>
+    <h3>rebound</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>반등</code></p>
+    <p class="a"><span class="who">키웅이</span>반등은 내려가던 값이 다시 올라간 것을 뒤에서 부르는 말이에요.</p>
+  </div>
+  
+  <footer><code class="id">rebound</code></footer>
+</article><article class="card" data-name="supply-chain" data-triggers="공급망" data-answer="공급망은 재료를 구해 물건을 만들고 파는 곳까지 이어진 회사와 과정이에요." data-dapie="0">
+  <header>
+    <h3>supply-chain</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>공급망</code></p>
+    <p class="a"><span class="who">키웅이</span>공급망은 재료를 구해 물건을 만들고 파는 곳까지 이어진 회사와 과정이에요.</p>
+  </div>
+  
+  <footer><code class="id">supply-chain</code></footer>
+</article><article class="card" data-name="fuel-cost" data-triggers="연료비" data-answer="연료비는 배나 자동차, 발전소를 움직이는 연료에 드는 돈이에요." data-dapie="0">
+  <header>
+    <h3>fuel-cost</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>연료비</code></p>
+    <p class="a"><span class="who">키웅이</span>연료비는 배나 자동차, 발전소를 움직이는 연료에 드는 돈이에요.</p>
+  </div>
+  
+  <footer><code class="id">fuel-cost</code></footer>
+</article><article class="card" data-name="funding" data-triggers="조달" data-answer="조달은 사업에 필요한 돈이나 재료를 마련하는 것이에요." data-dapie="0">
+  <header>
+    <h3>funding</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>조달</code></p>
+    <p class="a"><span class="who">키웅이</span>조달은 사업에 필요한 돈이나 재료를 마련하는 것이에요.</p>
+  </div>
+  
+  <footer><code class="id">funding</code></footer>
+</article><article class="card" data-name="chief-executive" data-triggers="최고경영자 ceo" data-answer="최고경영자는 회사의 일을 가장 크게 책임지고 결정하는 사람이에요. 영어 약자로 ceo라고 불러요." data-dapie="0">
+  <header>
+    <h3>chief-executive</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>최고경영자</code> <code>ceo</code></p>
+    <p class="a"><span class="who">키웅이</span>최고경영자는 회사의 일을 가장 크게 책임지고 결정하는 사람이에요. 영어 약자로 CEO라고 불러요.</p>
+  </div>
+  
+  <footer><code class="id">chief-executive</code></footer>
+</article><article class="card" data-name="private-equity" data-triggers="사모펀드 pef" data-answer="사모펀드는 정해진 소수의 투자자에게만 돈을 모아 굴리는 펀드예요. 이 서비스에서는 주식만 다뤄요." data-dapie="0">
+  <header>
+    <h3>private-equity</h3>
+    <div class="tags"><span class="tag kind faq">질문 답변</span></div>
+  </header>
+  <div class="qa">
+    <p class="q"><span class="who">아이</span><code>사모펀드</code> <code>pef</code></p>
+    <p class="a"><span class="who">키웅이</span>사모펀드는 정해진 소수의 투자자에게만 돈을 모아 굴리는 펀드예요. 이 서비스에서는 주식만 다뤄요.</p>
+  </div>
+  
+  <footer><code class="id">private-equity</code></footer>
+</article></div>
+  </section>
+  <p class="empty">찾는 말이 없어요.</p>
+</div>
+<script>
+  const q = document.getElementById("q");
+  const cards = [...document.querySelectorAll(".card")];
+  const cats = [...document.querySelectorAll(".cat")];
+  const empty = document.querySelector(".empty");
+  let onlyDapie = false;
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    for (const c of cards) {
+      const hitText =
+        !term ||
+        c.dataset.name.includes(term) ||
+        c.dataset.triggers.includes(term) ||
+        c.dataset.answer.includes(term);
+      const hitDapie = !onlyDapie || c.dataset.dapie === "1";
+      const on = hitText && hitDapie;
+      c.style.display = on ? "" : "none";
+      if (on) shown++;
+    }
+    for (const s of cats) {
+      s.style.display = [...s.querySelectorAll(".card")].some((c) => c.style.display !== "none") ? "" : "none";
+    }
+    empty.style.display = shown ? "none" : "block";
+  }
+
+  q.addEventListener("input", apply);
+  for (const b of document.querySelectorAll(".filters button")) {
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".filters button").forEach((x) => x.classList.remove("on"));
+      b.classList.add("on");
+      onlyDapie = b.dataset.f === "dapie";
+      apply();
+    });
+  }
+</script>
+</html>
