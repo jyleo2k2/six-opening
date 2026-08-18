@@ -33,6 +33,9 @@ import type { TutorialStage } from "./lib/tutorial-steps";
 /** 화면이 맥락을 올리기 전의 기본값. 상세·탐색·주문만 자기 맥락을 올린다. */
 const HOME_CONTEXT: ChatContext = { screen: "home" };
 
+/** 아카이브 추천종목 시트가 있던 주차 카드 자리. 주문 화면 X 가 이 자리로 되짚는다. */
+type ArchiveSheetOrigin = { sheetIndex: number };
+
 /**
  * 옮겨 온 화면을 그리는 호스트.
  *
@@ -80,6 +83,10 @@ export function ConnectedPrototype({
    * 화면이 그대로 남는다. 회차(`id`)가 새 요청임을 알려 준다.
    */
   const [orderPrefill, setOrderPrefill] = useState<OrderPrefill | null>(null);
+  /** 추천종목 시트를 누르고 들어온 주문 화면에 물려 준다 — 주소로 표현할 수 없어 여기서 들고 있다. */
+  const [archiveSheetOrigin, setArchiveSheetOrigin] = useState<ArchiveSheetOrigin | null>(null);
+  /** 주문 화면 X 가 되짚어 달라는 아카이브 시트. `ArchiveScreen` 이 다시 마운트되며 한 번만 연다. */
+  const [archiveSheetReopen, setArchiveSheetReopen] = useState<ArchiveSheetOrigin | null>(null);
 
   // 화면 이동은 여기 하나로 모인다. 히스토리를 쌓지 않는다(replaceState) — 앱 안에 자체
   // 뒤로가기 버튼이 있어서 pushState 로 쌓으면 두 개의 뒤로가기가 서로 어긋난다.
@@ -96,11 +103,15 @@ export function ConnectedPrototype({
     next: ScreenRoute,
     orderRequest: ChatOrderRequest | null = null,
     prefill: OrderPrefill | null = null,
+    sheetOrigin: ArchiveSheetOrigin | null = null,
+    sheetReopen: ArchiveSheetOrigin | null = null,
   ) => {
     setOverlay(next);
     setStage(undefined);
     setChatOrderRequest(next.screen === "order" ? orderRequest : null);
     setOrderPrefill(next.screen === "order" ? prefill : null);
+    setArchiveSheetOrigin(next.screen === "order" ? sheetOrigin : null);
+    setArchiveSheetReopen(next.screen === "archive" ? sheetReopen : null);
     writePath(next);
   };
 
@@ -108,6 +119,17 @@ export function ConnectedPrototype({
   const leaveToPath = (path: string) => {
     const next = routeFromPath(path);
     if (next) openRoute(next);
+  };
+
+  /** 추천종목 시트에서 종목을 눌러 주문 화면으로 나간다. 그 시트 자리를 함께 물려 준다. */
+  const openOrderFromArchivePick = (path: string, sheetIndex: number) => {
+    const next = routeFromPath(path);
+    if (next) openRoute(next, null, null, { sheetIndex });
+  };
+
+  /** 주문 화면 1단계 X — 추천종목 시트를 누르고 들어왔을 때, 그 시트를 다시 열며 아카이브로 돌아간다. */
+  const returnToArchivePicks = (sheetIndex: number) => {
+    openRoute({ screen: "archive" }, null, null, null, { sheetIndex });
   };
 
   /**
@@ -160,6 +182,8 @@ export function ConnectedPrototype({
               infoOpen={archiveInfoOpen}
               onInfoOpenChange={setArchiveInfoOpen}
               onLeave={leaveToPath}
+              onPickOrder={openOrderFromArchivePick}
+              reopenSheet={archiveSheetReopen}
               view={overlay.view}
             />
           )}
@@ -186,6 +210,7 @@ export function ConnectedPrototype({
           {overlay.screen === "order" && (
             <OrderScreen
               account={account}
+              archiveSheetOrigin={archiveSheetOrigin}
               chatOrderRequest={chatOrderRequest}
               code={overlay.code}
               // 종목·방향이 바뀌면 단계·초안을 처음부터 시작한다.
@@ -193,6 +218,7 @@ export function ConnectedPrototype({
               onChatContext={setOverlayContext}
               onLeave={leaveToPath}
               onReorder={reorderPending}
+              onReturnToArchivePicks={returnToArchivePicks}
               onStage={setStage}
               orderPrefill={orderPrefill}
               side={overlay.side}
