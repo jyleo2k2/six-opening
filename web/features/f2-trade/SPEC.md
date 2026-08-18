@@ -13,6 +13,7 @@
 | 화면 호스트 | `web/features/f0-home/ConnectedPrototype.tsx` | 화면 선택과 F10 오버레이 조립. iframe은 철거했다 |
 | 상세 차트 | `web/features/f0-home/ChartScreen.tsx`와 `web/features/f0-home/lib/chart-view.ts` | 시안대로 화면이 직접 그리는 인라인 SVG. 분·일·주, 선·캔들 전환과 가족 체결 핀 |
 | 차트 시간축 | `web/features/f0-home/lib/chart-time-axis.ts` | 플롯 아래 시각 글자. 기준 단위는 분봉 15분·일봉 1개월·주봉 3개월이고 확대·축소에 따라 배수·약수로 오르내린다. 선·캔들 공통이고 세로 눈금선은 없다 |
+| 캔들 안내 문구 | `web/features/f0-home/lib/candle-tip.ts` | 캔들차트 말풍선. 막대 하나가 덮는 시간을 기간별로 말한다(분 1분·일 하루·주 1주일). X 로 닫으면 그 기간만 숨고, 닫힘은 로그인 세션 동안 메모리로 유지된다 |
 | 차트 변환 | `web/features/f2-trade/chart-data.ts` | `/api/quote/{symbol}/chart` 응답을 봉 목록으로 검증·정렬한다. 화면이 이것만 읽는다 |
 | 은퇴 대기 | `web/features/f2-trade/TradingViewChart.tsx`, `web/app/tradingview-chart/page.tsx` | **어느 화면도 열지 않는다.** `lightweight-charts`는 축선·시간축을 늘 그려 시안과 달라 걷어냈다. 삭제는 `docs/기술스택.md`·`docs/기능명세.md`(오케스트레이터 소유)를 같이 고쳐야 해서 남겨 두었다 |
 | 유니버스·시세 | `web/app/api/universe/`, `web/app/api/quote/` | 51종 데이터, 현재가·캔들, 키움/캐시/픽스처 폴백 |

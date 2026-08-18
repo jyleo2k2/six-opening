@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { ChatContext } from "../../shared/types/chatbot";
 import { accountTotalAsset, SEED } from "../../shared/store/prototype-account.js";
 import { ChartScreen } from "./ChartScreen";
+import type { CandleTipDismissals } from "./lib/candle-tip";
+import type { PrototypeChartPeriod } from "../f2-trade/chart-data";
 import { buildDetailChart, type DetailTrade } from "./lib/detail-chart";
 import { lastExplorePath } from "./lib/explore-memo";
 import { NewsScreen } from "./NewsScreen";
@@ -127,11 +129,19 @@ export function DetailScreen({
   onLeave,
   onChatContext,
   onStage,
+  closedCandleTips,
+  onCloseCandleTip,
 }: {
   code: string;
   account: WalletAccountId;
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
+  /**
+   * 캔들 안내의 닫힘 표시. 상세는 갖지 않고 지나 보내기만 한다 — 종목을 떠나면 이 화면이
+   * 통째로 사라지므로 여기에 두면 닫아 놓은 안내가 되살아난다(`ConnectedPrototype` 이 갖는다).
+   */
+  closedCandleTips: CandleTipDismissals;
+  onCloseCandleTip: (period: PrototypeChartPeriod) => void;
   /**
    * 상세·차트·뉴스는 주소가 안 바뀌어(`useState`) 밖에서는 어디에 있는지 안 보인다.
    * 튜토리얼은 그 자리를 알아야 맞는 설명을 띄우므로 `onLeave` 와 같은 패턴으로 올린다.
@@ -311,12 +321,14 @@ export function DetailScreen({
         changeStyle={changeStyle}
         changeText={changeText}
         changeUp={changeUp}
+        closedCandleTips={closedCandleTips}
         code={code}
         diffStyle={diffStyle}
         diffText={diffText}
         locked={locked}
         name={stock.name}
         onBack={() => setView("detail")}
+        onCloseCandleTip={onCloseCandleTip}
         onLeave={onLeave}
         onStartBuy={startBuy}
         // 하트는 상세와 같은 상태 하나를 본다. 차트가 `useWatchlist` 를 따로 부르면 두

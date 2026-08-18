@@ -13,6 +13,12 @@ import type { PendingOrder } from "./lib/portfolio-view";
 import type { WalletAccountId } from "./lib/use-wallet";
 import { ArchiveScreen } from "./ArchiveScreen";
 import { DetailScreen } from "./DetailScreen";
+import {
+  closeCandleTip,
+  NO_CANDLE_TIPS_CLOSED,
+  type CandleTipDismissals,
+} from "./lib/candle-tip";
+import type { PrototypeChartPeriod } from "../f2-trade/chart-data";
 import { ExploreScreen } from "./ExploreScreen";
 import { HomeScreen } from "./HomeScreen";
 import { OrderScreen } from "./OrderScreen";
@@ -58,6 +64,16 @@ export function ConnectedPrototype({
   const [stage, setStage] = useState<TutorialStage | undefined>(undefined);
   /** 아카이브 안내는 화면 이동 뒤에도 유지하고, 로그인 페이지로 나가면 새로 시작한다. */
   const [archiveInfoOpen, setArchiveInfoOpen] = useState(true);
+  /**
+   * 캔들 안내를 X 로 닫은 기간들. 아카이브 안내와 같은 이유로 여기 있다 — 상세 화면은
+   * 종목을 떠나면 사라지므로 거기에 두면 닫아 놓은 안내가 다시 뜬다. 이 컴포넌트는 앱이
+   * 살아 있는 동안 그대로이고 화면 이동은 `replaceState` 라 서버를 다시 타지 않으므로,
+   * 닫힘은 **로그인 세션의 수명**을 따른다: 로그아웃(`/` 로 나가며 전체 새로고침)과 새
+   * 로그인에서 초기화된다. 브라우저 저장소는 쓰지 않는다.
+   */
+  const [closedCandleTips, setClosedCandleTips] = useState<CandleTipDismissals>(NO_CANDLE_TIPS_CLOSED);
+  const closeTip = (period: PrototypeChartPeriod) =>
+    setClosedCandleTips((closed) => closeCandleTip(closed, period));
   const orderRequestId = useRef(0);
   /** 챗봇이 지정한 주문 단계. 주소로 표현할 수 없어 주문 화면에 한 번만 전달한다. */
   const [chatOrderRequest, setChatOrderRequest] = useState<ChatOrderRequest | null>(null);
@@ -174,8 +190,10 @@ export function ConnectedPrototype({
           {overlay.screen === "stock" && (
             <DetailScreen
               account={account}
+              closedCandleTips={closedCandleTips}
               code={overlay.code}
               onChatContext={setOverlayContext}
+              onCloseCandleTip={closeTip}
               onLeave={leaveToPath}
               onStage={setStage}
             />
