@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { PrototypeScreenRect } from "../f10-chatbot/lib/bottom-sheet";
 import { PROTOTYPE_SCREEN_ID } from "./lib/prototype-bridge";
 import {
@@ -92,6 +92,41 @@ export function PhoneFrame({
   /** 챗봇·튜토리얼을 같은 transform 좌표계 안에 그린다. 로그인 화면은 넘기지 않는다. */
   overlay?: ReactNode;
 }) {
+  const stageRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    let frameId = 0;
+    const resetScroll = () => {
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        frameId = 0;
+        stage.scrollTop = 0;
+        stage.scrollLeft = 0;
+        window.scrollTo(0, 0);
+      });
+    };
+    const isChatbotInput = (target: EventTarget | null) =>
+      target instanceof HTMLInputElement &&
+      target.closest(".prototype-chat-overlay") !== null;
+    const handleFocusChange = (event: FocusEvent) => {
+      if (isChatbotInput(event.target)) resetScroll();
+    };
+
+    stage.addEventListener("focusin", handleFocusChange);
+    stage.addEventListener("focusout", handleFocusChange);
+    window.addEventListener("resize", resetScroll);
+    window.visualViewport?.addEventListener("resize", resetScroll);
+    return () => {
+      cancelAnimationFrame(frameId);
+      stage.removeEventListener("focusin", handleFocusChange);
+      stage.removeEventListener("focusout", handleFocusChange);
+      window.removeEventListener("resize", resetScroll);
+      window.visualViewport?.removeEventListener("resize", resetScroll);
+    };
+  }, []);
+
   const screenBox = {
     position: "absolute",
     left: PHONE_SCREEN.left,
@@ -102,7 +137,7 @@ export function PhoneFrame({
   } as const;
 
   return (
-    <div className="phone-stage">
+    <div ref={stageRef} className="phone-stage">
       <div className="phone-stage__content">
         {/*
          * 바탕색은 여기 하나가 정한다 — 원본의 폰 화면 컨테이너가 하던 일이다. 화면들은

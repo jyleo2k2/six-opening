@@ -1324,7 +1324,7 @@ export function F10ChatbotDemo({
       {signal && !isChatCollapsed && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
         <aside
           aria-live="polite"
-          className="fixed z-20"
+          className="absolute z-20"
           style={{
             left: resolvedFloatingChatPosition.x + (bubbleOpensLeft ? 24 : -24),
             top: resolvedFloatingChatPosition.y - 36,
@@ -1366,7 +1366,7 @@ export function F10ChatbotDemo({
         <div
           aria-hidden="true"
           // 버튼과 같은 z-index 이고 DOM 에서 먼저 그려진다 — 끌고 있는 버튼이 항상 위에 온다.
-          className="pointer-events-none fixed z-10 grid place-items-center rounded-full border-[1.5px] text-white transition-all duration-150"
+          className="pointer-events-none absolute z-10 grid place-items-center rounded-full border-[1.5px] text-white transition-all duration-150"
           style={{
             left: dismissTarget.x,
             top: dismissTarget.y,
@@ -1407,7 +1407,7 @@ export function F10ChatbotDemo({
 
       <button
         aria-label={isChatCollapsed ? "키웅이 챗봇 다시 보이기" : COPY.openChat}
-        className={`fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg transition-[transform,opacity] duration-150 ${isChatCollapsed ? "cursor-pointer opacity-80" : "cursor-grab active:cursor-grabbing"}`}
+        className={`absolute z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg transition-[transform,opacity] duration-150 ${isChatCollapsed ? "cursor-pointer opacity-80" : "cursor-grab active:cursor-grabbing"}`}
         onClick={handleFloatingChatClick}
         onPointerCancel={isChatCollapsed ? undefined : finishFloatingChatDrag}
         onPointerDown={isChatCollapsed ? undefined : handleFloatingChatPointerDown}
@@ -1436,7 +1436,7 @@ export function F10ChatbotDemo({
 
       {isOpen && prototypeScreen && (
         <div
-          className="pointer-events-auto fixed z-30 overflow-hidden"
+          className="pointer-events-auto absolute z-30 overflow-hidden"
           style={{
             left: prototypeScreen.left,
             top: prototypeScreen.top,
