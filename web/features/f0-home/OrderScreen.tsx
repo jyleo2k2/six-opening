@@ -1909,7 +1909,6 @@ export function OrderScreen({
           { label: "언제까지", value: choiceOf(PLANS, buyRec.planCode)?.label ?? "기록 없음" },
         ]
           .concat(buyRec.planTargetPrice ? [{ label: "목표 가격", value: won(buyRec.planTargetPrice) }] : [])
-          .concat(buyRec.memo ? [{ label: "그때 한 말", value: buyRec.memo }] : [])
       : [];
 
     const step2 = (
@@ -1937,17 +1936,21 @@ export function OrderScreen({
           >
             {heldDays === 0 ? "오늘의 나" : `${heldDays}일 전의 나`}
           </span>
-          <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
-            <span style={{ fontSize: 26, fontWeight: 800, color: "#F5327F", lineHeight: 0.85 }}>“</span>
-            <div style={{ flex: 1, fontSize: 20, fontWeight: 800, color: "#01185A", lineHeight: 1.5, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
-              {buyRec
-                ? `${[choiceOf(REASONS, buyRec.reasonCode)?.short, choiceOf(PLANS, buyRec.planCode)?.short]
-                    .filter(Boolean)
-                    .join(",\n")} 샀어요.`
-                : "기록이 없어요."}
-              <span style={{ fontSize: 26, color: "#F5327F", lineHeight: 0.85, marginLeft: 3 }}>”</span>
+          {/*
+            인용문은 아이가 매수 때 직접 쓴 말만 싣는다. 메모를 안 남겼으면 큰따옴표째 비운다 —
+            이유·계획은 바로 아래 `왜 샀는지`·`언제까지` 행이 이미 말하므로 그것을 문장으로
+            바꿔 넣으면 카드가 같은 말을 두 번 한다. 매수 기록 자체가 없을 때만 예외다: 그때는
+            아래 행도 비어 뱃지만 남으므로 `기록이 없어요.` 가 카드의 유일한 내용이다.
+          */}
+          {(!buyRec || buyRec.memo) && (
+            <div style={{ display: "flex", gap: 6, marginTop: 14 }}>
+              <span style={{ fontSize: 26, fontWeight: 800, color: "#F5327F", lineHeight: 0.85 }}>“</span>
+              <div style={{ flex: 1, fontSize: 20, fontWeight: 800, color: "#01185A", lineHeight: 1.5, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
+                {buyRec ? buyRec.memo : "기록이 없어요."}
+                <span style={{ fontSize: 26, color: "#F5327F", lineHeight: 0.85, marginLeft: 3 }}>”</span>
+              </div>
             </div>
-          </div>
+          )}
           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 16 }}>
             {retroRows.map((row) => (
               <div
