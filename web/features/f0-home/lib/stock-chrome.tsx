@@ -23,6 +23,14 @@ const BACK = styleFromCss(
 const TITLE = styleFromCss(
   "flex:1;text-align:center;font-size:19px;font-weight:800;color:#01185A;letter-spacing:-0.01em",
 );
+// 하트는 뒤로가기와 같은 크기의 상자다. 헤더 양 끝이 서로 다르면 가운데 제목이 밀린다 —
+// 하트가 없는 화면이 `SubScreenHeader` 에서 폭 38px 짜리 빈 칸을 두는 것도 같은 이유다.
+const WATCH_BTN = styleFromCss(
+  "width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;" +
+    "background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
+);
+const WATCH_ON = "#F5327F";
+const WATCH_OFF = "#B8BDD0";
 // 원본 상세·차트의 푸터 여백이다 (`padding:14px 16px 12px`). 탭바(`BottomNav`)는 원본
 // `navStyleX` 와 같이 `margin:0 12px 12px` 로 **위 여백이 없으므로**, CTA ↔ 알약 사이는 이
 // 12px 하나가 만든다. 한때 `12px 16px 6px` 로 줄여 둔 적이 있는데, 그 근거였던 "탭바가 위
@@ -59,6 +67,31 @@ export function SubScreenHeader({
       </div>
       <div style={TITLE}>{title}</div>
       {right ?? <div style={{ width: 38 }} />}
+    </div>
+  );
+}
+
+/**
+ * 관심 종목 하트. 헤더 오른쪽 끝에 선다.
+ *
+ * **상세와 차트가 같은 것 하나를 쓴다.** 차트 화면에도 하트가 생기면서 두 곳이 되었는데,
+ * 각자 그리면 색·크기·그림자가 조용히 갈린다(`watch-button.test.ts` 가 그것을 막는다).
+ *
+ * 켜고 끄는 판단은 하지 않는다 — 원본은 `/api/watchlist` 이고 서버가 돌려준 목록이 와야
+ * 하트가 바뀐다(`use-watchlist`). 그래서 이 컴포넌트는 지금 상태와 누름만 받는다.
+ */
+export function WatchButton({ watched, onToggle }: { watched: boolean; onToggle: () => void }) {
+  return (
+    <div onClick={onToggle} style={WATCH_BTN}>
+      <svg height={19} style={{ display: "block" }} viewBox="0 0 21 19" width={21}>
+        <path
+          d="M10.5 17.5 2.6 9.9a4.6 4.6 0 1 1 7.9-4.4 4.6 4.6 0 1 1 7.9 4.4z"
+          fill={watched ? WATCH_ON : "none"}
+          stroke={watched ? WATCH_ON : WATCH_OFF}
+          strokeLinejoin="round"
+          strokeWidth={1.6}
+        />
+      </svg>
     </div>
   );
 }

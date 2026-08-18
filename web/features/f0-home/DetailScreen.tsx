@@ -13,6 +13,7 @@ import {
   StockFooter,
   SUB_PAGE,
   SubScreenHeader,
+  WatchButton,
 } from "./lib/stock-chrome";
 import { validNewsItem, type NewsItem } from "./lib/stock-news";
 import { recordTabView } from "./lib/tab-views";
@@ -59,10 +60,6 @@ const CARD_BODY = styleFromCss(
 );
 // 원본은 이 줄에 캡션 없이 버튼만 오른쪽에 둔다.
 const CARD_FOOT = styleFromCss("display:flex;align-items:center;justify-content:flex-end;margin-top:14px");
-const WATCH_BTN = styleFromCss(
-  "width:38px;height:38px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;" +
-    "background:#FFFFFF;box-shadow:0 1px 3px rgba(30,25,60,0.08)",
-);
 const MORE_BTN = styleFromCss(
   "font-size:13px;font-weight:700;color:#01185A;padding:9px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;background:#F1F2F8",
 );
@@ -322,10 +319,14 @@ export function DetailScreen({
         onBack={() => setView("detail")}
         onLeave={onLeave}
         onStartBuy={startBuy}
+        // 하트는 상세와 같은 상태 하나를 본다. 차트가 `useWatchlist` 를 따로 부르면 두
+        // 하트가 각자 서버 응답을 기다려, 상세에서 담고 들어간 차트가 잠깐 비어 보인다.
+        onToggleWatch={toggleWatch}
         price={live.price}
         priceText={priceText}
         sectorName={stock.sectorName}
         sectorStyle={badgeFor(stock.sector)}
+        watched={watched}
       />
     ) : view === "news" && activeNews ? (
       <NewsScreen
@@ -342,19 +343,7 @@ export function DetailScreen({
         <SubScreenHeader
           // 떠날 때 보던 목록으로 돌아간다 — 늘 `/explore` 로 보내면 고른 섹터가 풀린다.
           onBack={() => onLeave(lastExplorePath())}
-          right={
-            <div onClick={toggleWatch} style={WATCH_BTN}>
-              <svg height={19} style={{ display: "block" }} viewBox="0 0 21 19" width={21}>
-                <path
-                  d="M10.5 17.5 2.6 9.9a4.6 4.6 0 1 1 7.9-4.4 4.6 4.6 0 1 1 7.9 4.4z"
-                  fill={watched ? "#F5327F" : "none"}
-                  stroke={watched ? "#F5327F" : "#B8BDD0"}
-                  strokeLinejoin="round"
-                  strokeWidth={1.6}
-                />
-              </svg>
-            </div>
-          }
+          right={<WatchButton onToggle={toggleWatch} watched={watched} />}
           // 원본 헤더 제목은 종목 이름이 아니라 화면 이름이다 — 이름은 아래 카드가 말한다.
           title="종목 상세"
         />

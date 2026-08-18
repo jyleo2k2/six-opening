@@ -6,6 +6,7 @@ import {
   SUB_PAGE,
   SUB_SCROLL,
   SubScreenHeader,
+  WatchButton,
 } from "./lib/stock-chrome";
 import { styleFromCss } from "./lib/css-style";
 import { buildTradeLegend, type PinRole } from "./lib/chart-trade-legend";
@@ -188,6 +189,8 @@ export function ChartScreen({
   onBack,
   onLeave,
   onStartBuy,
+  watched,
+  onToggleWatch,
 }: {
   code: string;
   name: string;
@@ -207,6 +210,12 @@ export function ChartScreen({
   /** 하단 탭바가 쓴다. 뒤로가기(`onBack`)는 상세로 돌아가지만 탭은 앱의 다른 화면으로 나간다. */
   onLeave: (path: string) => void;
   onStartBuy: () => void;
+  /**
+   * 헤더 오른쪽 하트. 상태도 누름도 상세(`DetailScreen`)가 갖는다 — 두 화면의 하트가
+   * 같은 `useWatchlist` 하나를 봐야 오갈 때 켜짐이 어긋나지 않는다.
+   */
+  watched: boolean;
+  onToggleWatch: () => void;
 }) {
   const [period, setPeriod] = useState<ChartPeriod>("daily");
   const [chartType, setChartType] = useState<ChartType>("line");
@@ -319,7 +328,11 @@ export function ChartScreen({
 
   return (
     <div style={SUB_PAGE}>
-      <SubScreenHeader onBack={onBack} title={`${name} 차트`} />
+      <SubScreenHeader
+        onBack={onBack}
+        right={<WatchButton onToggle={onToggleWatch} watched={watched} />}
+        title={`${name} 차트`}
+      />
       <div style={SUB_SCROLL}>
         <div style={CARD}>
           <div style={NAME_ROW}>
