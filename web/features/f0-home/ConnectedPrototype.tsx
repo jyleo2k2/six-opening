@@ -7,7 +7,9 @@ import {
   getPrototypeScreenRect,
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
+import type { OrderPrefill } from "./lib/order-view";
 import { phoneFrameRect, phoneScreenClipPath } from "./lib/phone-frame";
+import type { PendingOrder } from "./lib/portfolio-view";
 import type { WalletAccountId } from "./lib/use-wallet";
 import { ArchiveScreen } from "./ArchiveScreen";
 import { DetailScreen } from "./DetailScreen";
@@ -59,6 +61,13 @@ export function ConnectedPrototype({
   const orderRequestId = useRef(0);
   /** 챗봇이 지정한 주문 단계. 주소로 표현할 수 없어 주문 화면에 한 번만 전달한다. */
   const [chatOrderRequest, setChatOrderRequest] = useState<ChatOrderRequest | null>(null);
+  const orderPrefillId = useRef(0);
+  /**
+   * 고치러 가는 예약. 챗봇 단계 지시와 같은 이유로 주소가 아니라 여기서 들고 있다 —
+   * 주문 화면은 `key={side-code}` 로만 다시 마운트돼서, 같은 회사의 예약을 고칠 때는
+   * 화면이 그대로 남는다. 회차(`id`)가 새 요청임을 알려 준다.
+   */
+  const [orderPrefill, setOrderPrefill] = useState<OrderPrefill | null>(null);
 
   // 챗봇 시트와 폰 프레임은 화면 사각형에 딱 맞아야 한다. 기하의 원본은 `PROTOTYPE_PHONE`
   // 상수 하나이고, 옮겨 온 화면(`PhoneFrame`)도 같은 함수로 자기 자리를 잡는다.
@@ -90,10 +99,15 @@ export function ConnectedPrototype({
     window.history.replaceState(null, "", path);
   };
 
-  const openRoute = (next: ScreenRoute, orderRequest: ChatOrderRequest | null = null) => {
+  const openRoute = (
+    next: ScreenRoute,
+    orderRequest: ChatOrderRequest | null = null,
+    prefill: OrderPrefill | null = null,
+  ) => {
     setOverlay(next);
     setStage(undefined);
     setChatOrderRequest(next.screen === "order" ? orderRequest : null);
+    setOrderPrefill(next.screen === "order" ? prefill : null);
     writePath(next);
   };
 
@@ -101,6 +115,22 @@ export function ConnectedPrototype({
   const leaveToPath = (path: string) => {
     const next = routeFromPath(path);
     if (next) openRoute(next);
+  };
+
+  /**
+   * 기다리는 주문을 고치러 간다. 예약을 푸는 것은 주문 화면이 이미 했고, 여기서는 그 값을
+   * 들고 알맞은 매수·매도 화면으로 옮기기만 한다 — 다른 회사의 예약일 수 있다.
+   */
+  const reorderPending = (order: PendingOrder) => {
+    const code = order.code;
+    if (!code) return;
+    const side = order.side === "sell" ? "sell" : "buy";
+    openRoute({ screen: "order", code, side }, null, {
+      id: ++orderPrefillId.current,
+      code,
+      side,
+      order,
+    });
   };
 
   const openChatAction = (action: ChatUiAction) => {
@@ -167,7 +197,9 @@ export function ConnectedPrototype({
               key={`${overlay.side}-${overlay.code}`}
               onChatContext={setOverlayContext}
               onLeave={leaveToPath}
+              onReorder={reorderPending}
               onStage={setStage}
+              orderPrefill={orderPrefill}
               side={overlay.side}
               tutorialMode={tutorialOn}
             />

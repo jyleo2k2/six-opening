@@ -12,7 +12,13 @@ import {
 import { PhoneFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import { parseBehaviorEvent } from "./lib/prototype-bridge";
-import { availableHoldingQty, pendingCards, reservedHoldingQty, won } from "./lib/portfolio-view";
+import {
+  availableHoldingQty,
+  pendingCards,
+  reservedHoldingQty,
+  won,
+  type PendingOrder,
+} from "./lib/portfolio-view";
 import { flushTabViews } from "./lib/tab-views";
 import {
   appendQtyKey,
@@ -20,15 +26,20 @@ import {
   applySellFill,
   blankBuyDraft,
   blankSellDraft,
+  BUY_LIMIT_PCTS,
+  buyDraftFromPending,
   buyMath,
   buyStepOk,
   formatQty,
   judgePlanMatch,
   orderChatContext,
+  SELL_LIMIT_PCTS,
+  sellDraftFromPending,
   sellMath,
   sellRetrospect,
   shuffledIndexes,
   type BuyDraft,
+  type OrderPrefill,
   type SellDraft,
   type TradeHistoryRow,
 } from "./lib/order-view";
@@ -149,10 +160,12 @@ const TARGET_INPUT = styleFromCss(
 );
 const TARGET_HINT = styleFromCss("font-size:12.5px;font-weight:500;color:#9B94C4;margin-top:-4px");
 // 갖고 있지 않은 회사를 팔려 할 때 뜨는 안내 — 프로토타입의 sellBlockScrim·sellBlockCard 와 같은 값이다.
-const BLOCK_SCRIM = styleFromCss(
-  "position:absolute;left:0;top:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;justify-content:center;" +
-    "padding:0 32px;background:rgba(20,16,45,0.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)",
-);
+const SCRIM_CSS =
+  "position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;" +
+  "padding:0 32px;background:rgba(20,16,45,0.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)";
+const BLOCK_SCRIM = styleFromCss(`z-index:20;${SCRIM_CSS}`);
+/** 예약 시트(z-index 41) 에서 눌러 여는 확인이라 시트보다 위에 떠야 한다. */
+const REORDER_SCRIM = styleFromCss(`z-index:42;${SCRIM_CSS}`);
 const BLOCK_CARD = styleFromCss(
   "display:flex;flex-direction:column;align-items:center;width:100%;box-sizing:border-box;background:#FFFFFF;" +
     "border-radius:30px;padding:26px 24px 24px;box-shadow:0 24px 48px -16px rgba(30,25,60,0.32)",
@@ -168,13 +181,18 @@ const BLOCK_CTA = styleFromCss(
   "width:100%;box-sizing:border-box;margin-top:20px;border-radius:999px;padding:16px;text-align:center;" +
     "font-size:16.5px;font-weight:800;color:#FFFFFF;cursor:pointer;background:#F5327F;box-shadow:0 8px 18px -8px rgba(245,50,127,0.6)",
 );
+const BLOCK_SUB_CTA = styleFromCss(
+  "width:100%;box-sizing:border-box;margin-top:9px;border-radius:999px;padding:16px;text-align:center;" +
+    "font-size:16.5px;font-weight:800;color:#7E849B;cursor:pointer;background:#F1F2F8",
+);
 const SHEET_ROW = styleFromCss(
   "display:flex;align-items:center;gap:11px;background:#F4F4FA;border-radius:18px;padding:12px 14px;box-shadow:inset 0 0 0 1px #E4E6F1",
 );
-const SHEET_CANCEL = styleFromCss(
-  "flex:none;font-size:13px;font-weight:600;color:#8E93A8;padding:9px 13px;border-radius:999px;cursor:pointer;" +
-    "background:#FFFFFF;box-shadow:0 4px 9px -4px rgba(35,25,80,0.2)",
-);
+const SHEET_PILL =
+  "flex:none;font-size:13px;font-weight:600;padding:9px 13px;border-radius:999px;cursor:pointer;" +
+  "background:#FFFFFF;box-shadow:0 4px 9px -4px rgba(35,25,80,0.2)";
+const SHEET_CANCEL = styleFromCss(`${SHEET_PILL};color:#8E93A8`);
+const SHEET_EDIT = styleFromCss(`${SHEET_PILL};color:#01185A`);
 
 function sheetTabStyle(on: boolean) {
   return styleFromCss(
@@ -317,8 +335,10 @@ export function OrderScreen({
   side,
   account,
   chatOrderRequest,
+  orderPrefill,
   onLeave,
   onChatContext,
+  onReorder,
   onStage,
   tutorialMode = false,
 }: {
@@ -326,8 +346,15 @@ export function OrderScreen({
   side: "buy" | "sell";
   account: WalletAccountId;
   chatOrderRequest?: ChatOrderRequest | null;
+  /** 고치러 온 예약. 값이 채워진 1단계로 시작한다. */
+  orderPrefill?: OrderPrefill | null;
   onLeave: (path: string) => void;
   onChatContext: (context: ChatContext | null) => void;
+  /**
+   * 기다리는 주문을 고치러 간다. 다른 회사의 예약일 수도 있어 화면을 옮기는 것은
+   * 호스트가 하고(`onLeave` 와 같은 결), 화면은 어떤 주문인지만 올린다.
+   */
+  onReorder?: (order: PendingOrder) => void;
   /**
    * 주문 1/2/3 단계는 주소가 안 바뀌어(`useState`) 밖에서는 어디에 있는지 안 보인다.
    * 튜토리얼은 그 자리를 알아야 맞는 설명을 띄우므로 `onLeave` 와 같은 패턴으로 올린다.
@@ -343,6 +370,7 @@ export function OrderScreen({
 
   const [step, setStep] = useState(1);
   const handledChatOrderRequest = useRef(0);
+  const handledOrderPrefill = useRef(0);
   useEffect(() => {
     onStage?.(`order-${step}` as TutorialStage);
   }, [step, onStage]);
@@ -384,6 +412,9 @@ export function OrderScreen({
   const [doneTxId, setDoneTxId] = useState<string | null>(null);
   // 대기 목록 시트. `ui-src` 의 orderSheet 상태와 같다 — 매수·매도 어느 쪽에서든 연다.
   const [orderSheet, setOrderSheet] = useState(false);
+  /** 고칠지 물어보는 중인 예약. 고치기는 취소를 겸하므로 한 번 확인하고 간다. */
+  const [reorderTarget, setReorderTarget] = useState<PendingOrder | null>(null);
+  const [reordering, setReordering] = useState(false);
   const retroAtRef = useRef(0);
   const retroMsRef = useRef(0);
   const flowIdRef = useRef(`${side}_${Date.now().toString(36)}`);
@@ -512,6 +543,47 @@ export function OrderScreen({
     setOrderSheet(false);
     setOrderError(null);
   }, [chatOrderRequest, code, draft, me, price, sellDraft, side]);
+
+  /**
+   * 고치러 온 예약을 1단계 초안에 얹는다.
+   *
+   * 화면은 `key={side-code}` 로만 다시 마운트되므로 같은 회사·같은 방향이면 초안이 그대로
+   * 남는다. 회차(`id`)를 세어 새 요청만 한 번 적용한다 — 챗봇 단계 지시와 같은 방법이다.
+   *
+   * 풀린 예약이 아직 목록에 남아 있으면 기다린다. 취소가 계좌에 반영되기 전에는 잠긴
+   * 현금·수량이 그대로라, 방금 넣었던 금액을 다시 채워도 "지갑보다 많다" 고 막힌다.
+   */
+  useEffect(() => {
+    const prefill = orderPrefill;
+    if (
+      !prefill ||
+      handledOrderPrefill.current === prefill.id ||
+      prefill.code !== code ||
+      prefill.side !== side ||
+      !me ||
+      !price ||
+      (side === "sell" && !sellDraft)
+    ) {
+      return;
+    }
+    if (prefill.order.id && me.pending.some((item) => item.id === prefill.order.id)) return;
+
+    handledOrderPrefill.current = prefill.id;
+    if (side === "buy") {
+      setDraft(buyDraftFromPending(prefill.order, price));
+      setBuyQtyStr("");
+    } else {
+      setSellDraftState(sellDraftFromPending(prefill.order, price, availableHoldingQty(me, code)));
+      // 예약해 둔 수량은 `전부`·`절반` 이 아니라 그 아이가 정한 값이다.
+      setSellPick("custom");
+      setSellQtyStr("");
+    }
+    setStep(1);
+    setShowPad(false);
+    setOrderSheet(false);
+    setOrderError(null);
+    setDone(null);
+  }, [code, me, orderPrefill, price, sellDraft, side]);
 
   if (!wallet || !me || !stock || (side === "sell" && !sellDraft)) return <PhoneFrame />;
 
@@ -700,6 +772,60 @@ export function OrderScreen({
       side: order.side || "buy",
     });
   };
+  /**
+   * 고치기는 취소를 겸한다 — 예약을 새 값으로 바꾸는 서버 경로가 없어(`POST`·`DELETE` 뿐)
+   * 먼저 풀고 다시 넣는다. 되돌릴 수 없는 취소가 섞여 있으므로 한 번 물어보고 간다.
+   *
+   * 취소와 달리 `order_confirmation_cancelled` 를 보내지 않는다. 고치는 것은 무르는 것이
+   * 아닌데 같은 신호를 보내면 F9 성향 판정이 "주문을 자주 무른다" 쪽으로 기운다.
+   */
+  const startReorder = () => {
+    const order = reorderTarget;
+    if (!order || reordering) return;
+    setReordering(true);
+    const finish = (ok: boolean) => {
+      setReordering(false);
+      setReorderTarget(null);
+      // 실패해도 시트를 닫는다 — 거절 문구는 시트 뒤에 그려져서, 열어 두면 아무 일도
+      // 일어나지 않은 것처럼 보인다.
+      setOrderSheet(false);
+      if (!ok) {
+        setOrderError("주문을 고치지 못했어. 잠깐 뒤에 다시 해볼까?");
+        return;
+      }
+      refresh();
+      onReorder?.(order);
+    };
+    if (!order.id) {
+      finish(true);
+      return;
+    }
+    fetch(`/api/orders?id=${encodeURIComponent(order.id)}`, { method: "DELETE" })
+      .then((response) => finish(response.ok))
+      .catch(() => finish(false));
+  };
+  const reorderModal = reorderTarget && (
+    <div onClick={() => !reordering && setReorderTarget(null)} style={REORDER_SCRIM}>
+      <div onClick={(event) => event.stopPropagation()} style={BLOCK_CARD}>
+        <img
+          alt="키웅이"
+          src="/ui/assets/mascot-bear.png"
+          style={{ display: "block", filter: "drop-shadow(0 10px 16px rgba(35,25,80,0.16))" }}
+          width={96}
+        />
+        <div style={BLOCK_TITLE}>주문을 다시 정할까요?</div>
+        <div style={BLOCK_BODY}>
+          {"기다리던 주문은 취소하고\n처음부터 다시 정하게 돼요."}
+        </div>
+        <div className={PRESSABLE} onClick={startReorder} style={BLOCK_CTA}>
+          {reordering ? "잠깐만요…" : "다시 정할래요"}
+        </div>
+        <div className={PRESSABLE} onClick={() => !reordering && setReorderTarget(null)} style={BLOCK_SUB_CTA}>
+          그냥 둘래요
+        </div>
+      </div>
+    </div>
+  );
   // 스크림을 눌러도 닫힌다. 카드 안쪽 클릭은 스크림까지 올라가면 안 되므로 여기서 멈춘다
   // (프로토타입의 `stopTap`).
   const sellBlockModal = sellBlocked && (
@@ -730,22 +856,39 @@ export function OrderScreen({
         <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
           {pending.map((p, index) => (
             <div key={p.order.id ?? index} style={SHEET_ROW}>
-              <div
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  color: "#01185A",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {p.name}
+              {/*
+                이름과 설명을 한 칸에 쌓는다. `수정` 이 늘면서 셋을 가로로 나란히 두면 설명이
+                석 줄로 접혀 어느 주문인지 읽기 어려워진다.
+              */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    color: "#01185A",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {p.name}
+                </div>
+                <div
+                  style={{
+                    marginTop: 3,
+                    fontSize: 12.5,
+                    fontWeight: 500,
+                    color: "#8E93A8",
+                    lineHeight: 1.45,
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {p.desc}
+                </div>
               </div>
-              <div style={{ flex: 2, minWidth: 0, fontSize: 12.5, fontWeight: 500, color: "#8E93A8", fontVariantNumeric: "tabular-nums" }}>
-                {p.desc}
+              {/* 아직 체결되지 않은 주문이라 값을 다시 정할 수 있다. */}
+              <div className={PRESSABLE} onClick={() => setReorderTarget(p.order)} style={SHEET_EDIT}>
+                수정
               </div>
               <div className={PRESSABLE} onClick={() => cancelPending(p.order)} style={SHEET_CANCEL}>
                 취소
@@ -1139,7 +1282,7 @@ export function OrderScreen({
                 : `지금 ${price.toLocaleString("ko-KR")}원보다 ${Math.abs(draft.limitPct)}% 싸요`}
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
-              {[-10, -5, -3, 0].map((pct) => (
+              {BUY_LIMIT_PCTS.map((pct) => (
                 <div className={PRESSABLE} key={pct} onClick={() => patchDraft({ limitPct: pct })} style={chipStyle(draft.limitPct === pct)}>
                   {pct === 0 ? "지금값" : `${pct}%`}
                 </div>
@@ -1395,6 +1538,7 @@ export function OrderScreen({
         </div>
         {stepFooter(nextOk, step === 2 ? "주문하기" : "다음", placeBuy)}
         {waitSheet}
+        {reorderModal}
         {sellBlockModal}
       </div>
     );
@@ -1723,7 +1867,7 @@ export function OrderScreen({
               {math.limPct === 0 ? "지금 값 그대로예요" : `지금보다 ${math.limPct}% 높은 값이에요`}
             </div>
             <div style={{ display: "flex", gap: 7, marginTop: 15 }}>
-              {[0, 3, 5, 10].map((pct) => (
+              {SELL_LIMIT_PCTS.map((pct) => (
                 <div className={PRESSABLE} key={pct} onClick={() => patchSell({ limitPct: pct })} style={chipStyle(math.limPct === pct)}>
                   {pct === 0 ? "지금값" : `+${pct}%`}
                 </div>
@@ -2068,6 +2212,7 @@ export function OrderScreen({
         </div>
         {stepFooter(sellOk, step === 2 ? "팔기" : "다음", placeSell)}
         {waitSheet}
+        {reorderModal}
         {sellBlockModal}
       </div>
     );

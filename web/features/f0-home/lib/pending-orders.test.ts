@@ -60,9 +60,14 @@ assert.equal(sell.reservationMode, "held");
 assert.equal(reservedSellQty([buy, sell], "259960"), 2);
 assert.equal(reservedSellQty([buy, sell], "005930"), 0);
 
-// 계좌 화면 카드도 같은 목록으로 그려진다.
+// 기다리는 주문 시트도 같은 목록으로 그려진다.
 const cards = pendingCards({ cash: 0, holdings: [], pending: [buy, sell] });
 assert.equal(cards.length, 2);
+
+// 두 줄 다 아직 체결되지 않은 예약이다. 한쪽만 `예약` 이 빠지면 지정가는 이미 산 것처럼
+// 읽힌다 — 같은 목록에 `… 매수` 와 `… 매도 예약` 이 나란히 서 있었다.
+assert.equal(cards[0].desc, "70,000원이 되면 210,000원 매수 예약");
+assert.equal(cards[1].desc, "2026-08-17 장 시작 시가 · 2.00주 매도 예약");
 
 // 서버는 quantity, 화면은 qty 다. 매수 수량 예약이 금액 예약으로 읽히면 안 된다.
 const qtyBuy = pendingFromServerOrders([
