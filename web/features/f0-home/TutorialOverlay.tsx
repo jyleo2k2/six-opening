@@ -28,6 +28,7 @@ import {
   stepIndexAt,
   tutorialSteps,
   type TutorialPlace,
+  type TutorialStage,
 } from "./lib/tutorial-steps";
 
 /**
@@ -128,6 +129,7 @@ function clickThrough([head, ...rest]: string[]) {
 export function TutorialOverlay({
   place,
   onGo,
+  onStage,
   onClose,
   screenRect,
 }: {
@@ -135,6 +137,8 @@ export function TutorialOverlay({
   place: TutorialPlace;
   /** 주소로 데려간다. `ConnectedPrototype` 의 `leaveToPath` 와 같은 경로다. */
   onGo: (path: string) => void;
+  /** 주소가 바뀌지 않는 화면의 내부 단계를 되돌릴 때 부모에 알린다. */
+  onStage?: (stage: TutorialStage | undefined) => void;
   onClose: () => void;
   /** `PhoneFrame` 안에서 쓰는 450×920 프레임 내부 좌표. */
   screenRect: PrototypeScreenRect | null;
@@ -345,11 +349,11 @@ export function TutorialOverlay({
 
   const prevStep = index > 0 ? steps[index - 1] : null;
   const prevPath = prevStep && backPath(prevStep, stock ?? FALLBACK_STOCK);
-  /** 되돌아갈 수 있는가. 주문 화면 밖으로 나가는 뒤로가기는 없다(`backPath` 참고). */
-  const canRetreat = prevStep !== null && (isSamePlace(step, prevStep) || prevPath !== null);
+  /** 첫 장을 제외하면 이전 장으로 이동할 수 있다. 주문 단계도 주소와 내부 단계를 함께 복원한다. */
+  const canRetreat = prevStep !== null;
 
   /**
-   * `이전`. 같은 자리면 설명만 되돌리고, 화면이 다르면 그 화면 주소로만 되돌아간다.
+   * `이전`. 같은 자리면 설명만 되돌리고, 화면이나 주문 단계가 다르면 주소와 단계를 함께 되돌린다.
    *
    * 앞으로 갈 때 쓰는 `enter.anchors` 는 여기서 쓰지 않는다 — 그건 누르는 순서라
    * 되감으려고 다시 실행하면 앞선 입력이나 완료 화면이 반복된다.
@@ -357,16 +361,15 @@ export function TutorialOverlay({
   const retreat = () => {
     if (!prevStep) return;
     setOpenConcept(false);
+    setIndex(index - 1);
 
     if (isSamePlace(step, prevStep)) {
-      setIndex(index - 1);
       return;
     }
-    if (!prevPath) return;
+    if (prevPath) onGo(prevPath);
+    onStage?.(prevStep.stage);
     // 자리를 먼저 되돌려 놔야 화면이 바뀔 때 `place` 를 읽는 쪽이 "순서에 없는 화면" 으로
     // 보고 튜토리얼을 닫아 버리지 않는다.
-    setIndex(index - 1);
-    onGo(prevPath);
   };
 
   return (
@@ -463,13 +466,30 @@ export function TutorialOverlay({
           <div
             style={{
               position: "relative",
+              display: "flex",
+              alignItems: "baseline",
+              gap: 8,
               fontSize: 16.5,
               fontWeight: 800,
               color: TITLE_INK,
               letterSpacing: "-0.01em",
             }}
           >
-            {step.title}
+            <span>{step.title}</span>
+            <span
+              aria-label={`튜토리얼 ${index + 1}/${steps.length}`}
+              style={{
+                flex: "none",
+                fontSize: 12.5,
+                fontWeight: 800,
+                letterSpacing: "0.01em",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span style={{ color: MAGENTA }}>{index + 1}</span>
+              <span style={{ color: MUTED }}> / </span>
+              <span style={{ color: NAVY }}>{steps.length}</span>
+            </span>
           </div>
           <div
             style={{

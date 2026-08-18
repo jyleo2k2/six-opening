@@ -190,6 +190,7 @@ export function ConnectedPrototype({
               <TutorialOverlay
                 onClose={() => setTutorialOn(false)}
                 onGo={leaveToPath}
+                onStage={setStage}
                 screenRect={PHONE_SCREEN_RECT}
                 // 매수·매도는 화면도 단계도 같아서 `side` 가 없으면 팔러 간 화면에 사는 설명이
                 // 뜬다. 어느 종목인지는 튜토리얼이 지갑을 보고 스스로 정한다.
@@ -265,6 +266,7 @@ export function ConnectedPrototype({
                 orderPrefill={orderPrefill}
                 side={overlay.side}
                 tutorialMode={tutorialOn}
+                tutorialStage={tutorialOn ? stage : undefined}
               />
             )}
           </>
