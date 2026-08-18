@@ -111,6 +111,33 @@ async function main() {
   assert.equal(isExplainAction(unclear.action), true);
   assert.equal(modelCalls, 0);
 
+  const quizExit = await createChatOutcome(
+    { message: "다른거", context, explain: { scriptId: "term:per", stage: "detail" } },
+    session,
+    { generateAnswer: async () => "좋아요. 다른 질문을 도와줄게요." },
+  );
+  assert.equal(quizExit.route, "outOfScope");
+  assert.equal(quizExit.source, "fixed");
+  assert.equal(isExplainAction(quizExit.action), false);
+
+  const reaskButtonExit = await createChatOutcome(
+    {
+      message: "다른 걸 물어볼래요",
+      context,
+      explain: {
+        scriptId: "term:per",
+        stage: "detail",
+        choiceId: "ask",
+        reaskCount: 1,
+      },
+    },
+    session,
+    { generateAnswer: async () => "좋아요. 다른 질문을 도와줄게요." },
+  );
+  assert.equal(reaskButtonExit.route, "outOfScope");
+  assert.equal(reaskButtonExit.source, "fixed");
+  assert.equal(isExplainAction(reaskButtonExit.action), false);
+
   const refusal = await createChatOutcome(
     { message: "뭐 사면 돼?", context },
     session,

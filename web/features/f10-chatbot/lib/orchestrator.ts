@@ -26,7 +26,7 @@ import { generateChatAnswer } from "./openai";
 import { judgeChatOutput } from "./output-judge";
 import { rewriteFollowUp } from "./rewrite";
 import { classifyTermKind, type ClassifiedTermKind } from "./term-classify";
-import { looksLikeNewQuestion } from "./colloquial";
+import { looksLikeNewQuestion, looksLikeQuizExitIntent } from "./colloquial";
 import { isHaeyoKorean, toPoliteKorean, withoutSecondPerson } from "./polite";
 import {
   isComparisonQuestion,
@@ -206,11 +206,17 @@ function resolveExplainStep(
       // 새 전용 설명 질문이면 해당 스크립트를 시작하고, 그 밖의 새 질문은 일반 라우팅으로 넘긴다.
       if (routed.explainScript) return startExplain(routed.explainScript);
       return looksLikeNewQuestion(request.message) ||
+        looksLikeQuizExitIntent(request.message) ||
         (routed.route !== "fallback" && !isGenericOutOfScope(routed))
         ? null
         : reaskExplain(script, request.explain.stage, request.explain.reaskCount ?? 0);
     }
-    if (choiceId === "ask" && looksLikeNewQuestion(request.message)) {
+    if (
+      choiceId === "ask" &&
+      (looksLikeNewQuestion(request.message) ||
+        looksLikeQuizExitIntent(request.message) ||
+        (request.explain.reaskCount ?? 0) > 0)
+    ) {
       return routed.explainScript ? startExplain(routed.explainScript) : null;
     }
     if (
