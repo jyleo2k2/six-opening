@@ -31,6 +31,8 @@ let holdingFilter = "";
 let transactionOffset = "";
 let transactionLimit = "";
 let transactionFeedFilter = "";
+/** 성향 계산이 몇 번, 누구를 묶어 도는지. 사람마다 따로 돌면 그만큼 왕복이 늘어난다. */
+const profileBatches: number[][] = [];
 const deps: FamilyDataDeps = {
   findProfileById: async (id) => profiles.find((profile) => profile.id === id) ?? null,
   selectProfiles: async (params) => {
@@ -76,19 +78,22 @@ const deps: FamilyDataDeps = {
       { user_id: 1, stock_id: 3, quantity: 0, avg_price: "130300" },
     ];
   },
-  buildProfile: async (userId) => ({
-    // 주차 카드도 구성원마다 다르게 줘서 어느 사람 것이 어디로 가는지 구분한다.
-    weeks: [
-      weekOf("2026-08-03", "2026-08-09", "8/3 – 8/9", "closed", userId),
-      weekOf("2026-08-10", "2026-08-16", "8/10 – 8/16", "current", 0),
-    ],
-    cumulative: { ...neutral, samples: { ...neutral.samples, buys: userId } },
-    // 구성원마다 다른 수익률을 줘서 어느 값이 어디로 가는지 구분한다.
-    valuation: {
-      marketValue: 1_000_000 + userId, cost: 1_000_000, cash: 500_000,
-      profit: userId, returnRate: userId * 1.5, valuedCount: 1, pricelessCount: 0,
-    },
-  }),
+  buildProfiles: async (userIds) => {
+    profileBatches.push(userIds);
+    return new Map(userIds.map((userId) => [userId, {
+      // 주차 카드도 구성원마다 다르게 줘서 어느 사람 것이 어디로 가는지 구분한다.
+      weeks: [
+        weekOf("2026-08-03", "2026-08-09", "8/3 – 8/9", "closed", userId),
+        weekOf("2026-08-10", "2026-08-16", "8/10 – 8/16", "current", 0),
+      ],
+      cumulative: { ...neutral, samples: { ...neutral.samples, buys: userId } },
+      // 구성원마다 다른 수익률을 줘서 어느 값이 어디로 가는지 구분한다.
+      valuation: {
+        marketValue: 1_000_000 + userId, cost: 1_000_000, cash: 500_000,
+        profit: userId, returnRate: userId * 1.5, valuedCount: 1, pricelessCount: 0,
+      },
+    }]));
+  },
 };
 
 async function main() {
@@ -122,17 +127,21 @@ async function main() {
   // 수익률은 타인 것도 내려간다 — 트랙이 구성원을 나란히 세우는 화면이라 필요하다.
   assert.deepEqual(family.members.map((member) => member.returnRate), [1.5, 3, 4.5]);
 
+  // 성향 계산은 구성원 전체를 **한 묶음**으로 돈다. 사람마다 따로 돌면 성향 입력 표 네
+  // 개를 인원 수만큼 다시 읽어, 그것만으로 Supabase 왕복이 네 배가 된다.
+  assert.deepEqual(profileBatches, [[1, 2, 3]]);
+
   // 원금이 0이면 0% 가 아니라 null 이다. 본전인 사람과 아직 안 산 사람을 구분해야
   // 화면이 "아직" 으로 그린다.
   const noCost = await buildFamilyData(1, {
     ...deps,
-    buildProfile: async () => ({
+    buildProfiles: async (userIds) => new Map(userIds.map((userId) => [userId, {
       weeks: [], cumulative: neutral,
       valuation: {
         marketValue: 0, cost: 0, cash: 10_000_000,
         profit: 0, returnRate: 0, valuedCount: 0, pricelessCount: 0,
       },
-    }),
+    }])),
   });
   assert.deepEqual(noCost?.members.map((member) => member.returnRate), [null, null, null]);
   // 자산 규모는 **구성원 줄에서는** 계속 가린다. 평가금액·원금·현금은 실리지 않는다.

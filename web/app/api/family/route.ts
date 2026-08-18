@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { buildSeasonCards, buildSeasonCardsShared } from "../profile/season-cards/route";
+import { buildSeasonCards, buildSeasonCardsFor } from "../profile/season-cards/route";
 import { findProfileById, selectFilledTrades, selectRows, sessionUserId, type Profile } from "../supabase";
 
 export const runtime = "nodejs";
@@ -36,7 +36,7 @@ export type FamilyDataDeps = {
   selectProfiles(params: Record<string, string>): Promise<Profile[]>;
   selectTransactions(params: Record<string, string>): Promise<TransactionRow[]>;
   selectHoldings(params: Record<string, string>): Promise<HoldingRow[]>;
-  buildProfile(userId: number): Promise<Awaited<ReturnType<typeof buildSeasonCards>>>;
+  buildProfiles(userIds: number[]): Promise<Map<number, Awaited<ReturnType<typeof buildSeasonCards>>>>;
 };
 
 const defaultDeps: FamilyDataDeps = {
@@ -45,10 +45,10 @@ const defaultDeps: FamilyDataDeps = {
   selectTransactions: (params) => selectFilledTrades<TransactionRow>(params),
   selectHoldings: (params) => selectRows<HoldingRow>("holdings", params),
   /**
-   * 뷰어 몫은 `GET /api/profile/season-cards` 가 같은 순간에 계산하고 있다. 아카이브가 두
-   * 요청을 함께 던지므로 그 계산에 올라타 한 번만 돌린다 (`buildSeasonCardsShared`).
+   * 구성원 전체를 한 묶음으로 계산한다. 사람마다 따로 돌리면 성향 입력 표 네 개를 인원
+   * 수만큼 다시 읽어, 4인 가족이면 그것만으로 왕복이 16번이었다.
    */
-  buildProfile: buildSeasonCardsShared,
+  buildProfiles: buildSeasonCardsFor,
 };
 
 /** 로그인 세션의 family_tag 로만 가족 범위를 정한다. */
@@ -94,11 +94,11 @@ export async function buildFamilyData(
       select: "user_id,stock_id,quantity,avg_price",
       user_id: `in.(${memberIds.join(",")})`,
     }),
-    Promise.all(members.map(async (member) => {
-      const profile = await deps.buildProfile(member.id);
+    deps.buildProfiles(memberIds).then((profiles) => members.map((member) => {
+      const profile = profiles.get(member.id);
       return {
         userId: member.id,
-        behavior: profile.cumulative,
+        behavior: profile?.cumulative,
         /**
          * 주차 카드도 함께 넘긴다 (2026-08-17). 지난 주차 리포트(F9 아카이브)가 구성원마다
          * 끝난 주를 되짚는데, 그 값을 여기서 이미 계산해 놓고 버리고 있었다 — 화면은
@@ -108,14 +108,14 @@ export async function buildFamilyData(
          * 이미 내려보내던 누적 카드(`behavior`)와 같은 종류다. 자산 규모를 드러내는
          * 평가금액·원금·현금은 계속 `total` 합계로만 나간다.
          */
-        weeks: profile.weeks,
+        weeks: profile?.weeks ?? [],
         // 원금이 0이면 잰 것이 없다는 뜻이라 0% 가 아니라 null 이다 — 화면은 이걸 "아직" 으로
         // 그린다. 0% 로 내려보내면 본전인 사람과 아직 안 산 사람이 같아 보인다.
-        returnRate: profile.valuation && profile.valuation.cost > 0
+        returnRate: profile?.valuation && profile.valuation.cost > 0
           ? profile.valuation.returnRate
           : null,
         // 금액은 **합계를 내는 데만** 쓰고 구성원 줄에는 싣지 않는다 (아래 `total` 주석).
-        valuation: profile.valuation ?? null,
+        valuation: profile?.valuation ?? null,
       };
     })),
   ]);

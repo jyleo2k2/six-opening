@@ -22,6 +22,7 @@ export const dynamic = "force-dynamic";
 const SEED_BALANCE = 10_000_000;
 
 type TransactionRow = {
+  user_id: number;
   id: string;
   stock_id: number;
   side: "buy" | "sell";
@@ -32,9 +33,24 @@ type TransactionRow = {
   created_at: string;
 };
 type StockRow = { stock_id: number; stock_code: string; category: string | null };
-type HoldingRow = { stock_id: number; quantity: number | string; avg_price: number | string };
-type AccountRow = { balance: number | string };
-type TabViewRow = { stock_id: number; tab_count: number; created_at: string };
+type HoldingRow = { user_id: number; stock_id: number; quantity: number | string; avg_price: number | string };
+type AccountRow = { user_id: number; balance: number | string };
+type TabViewRow = { user_id: number; stock_id: number; tab_count: number; created_at: string };
+
+/** 한 사람의 성향 입력 원본. `loadProfileRows` 가 구성원 전체분을 한 번에 읽어 나눈다. */
+export type ProfileRows = {
+  transactions: TransactionRow[];
+  holdings: HoldingRow[];
+  balance: number | null;
+  tabViews: TabViewRow[];
+};
+
+const emptyRows = (): ProfileRows => ({
+  transactions: [],
+  holdings: [],
+  balance: null,
+  tabViews: [],
+});
 
 const asNumber = (value: number | string) => Number(value) || 0;
 const byTime = (a: { at: number }, b: { at: number }) => a.at - b.at;
@@ -84,11 +100,67 @@ export function synthesizeTabViews(
 
 export type SeasonCardsDeps = {
   now(): Date;
+  loadStocks(): Promise<StockRow[]>;
+  loadProfileRows(userIds: number[]): Promise<Map<number, ProfileRows>>;
   loadDailyCloses(symbols: string[], cutoff: number): Promise<Map<string, DailyClose[]>>;
 };
 
+/**
+ * 51종 유니버스는 시즌 내내 그대로다. 구성원마다·요청마다 전체를 다시 읽을 이유가 없다 —
+ * `/api/family` 한 번에 이 표만 다섯 번 나가고 있었다. 종가 배치가 종목코드를 id 로 바꿀
+ * 때도 같은 표를 보므로, 캐시가 있으면 그 왕복 하나가 통째로 사라진다.
+ */
+export const STOCKS_TTL_MS = 60_000;
+let stocksCache: { at: number; rows: StockRow[] } | null = null;
+
 const defaultDeps: SeasonCardsDeps = {
   now: () => new Date(),
+  async loadStocks() {
+    if (!stocksCache || Date.now() - stocksCache.at > STOCKS_TTL_MS) {
+      stocksCache = {
+        at: Date.now(),
+        rows: await selectRows<StockRow>("stocks", { select: "stock_id,stock_code,category" }),
+      };
+    }
+    return stocksCache.rows;
+  },
+  /**
+   * 구성원 전체의 입력을 **표마다 한 쿼리**로 읽는다 (`user_id=in.(…)`).
+   *
+   * 사람마다 따로 읽으면 네 표 × 인원 수 만큼 왕복이 생긴다. 4인 가족이면 16번이고,
+   * 그만큼 동시 요청이 몰려 한 요청당 지연까지 함께 늘었다.
+   */
+  async loadProfileRows(userIds) {
+    const scope = `in.(${userIds.join(",")})`;
+    const [transactions, holdings, accounts, tabViews] = await Promise.all([
+      selectFilledTrades<TransactionRow>({
+        select: "user_id,id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_match,created_at",
+        user_id: scope,
+        order: "created_at.asc",
+      }),
+      selectRows<HoldingRow>("holdings", {
+        select: "user_id,stock_id,quantity,avg_price",
+        user_id: scope,
+      }),
+      selectRows<AccountRow>("account", { select: "user_id,balance", user_id: scope }),
+      selectRows<TabViewRow>("stock_tab_views", {
+        select: "user_id,stock_id,tab_count,created_at",
+        user_id: scope,
+        order: "created_at.asc",
+      }),
+    ]);
+
+    const byUser = new Map(userIds.map((id) => [id, emptyRows()]));
+    for (const row of transactions) byUser.get(row.user_id)?.transactions.push(row);
+    for (const row of holdings) byUser.get(row.user_id)?.holdings.push(row);
+    for (const row of tabViews) byUser.get(row.user_id)?.tabViews.push(row);
+    // 계좌는 한 사람에 한 행이다. 여러 행이 있어도 먼저 온 것만 쓴다 — 예전 `limit=1` 과 같다.
+    for (const row of accounts) {
+      const rows = byUser.get(row.user_id);
+      if (rows && rows.balance === null) rows.balance = asNumber(row.balance);
+    }
+    return byUser;
+  },
   async loadDailyCloses(symbols, cutoff) {
     const bySymbol = await readDailyCloses(symbols, cutoff);
     return new Map(
@@ -131,30 +203,10 @@ export function closesCutoff(tradedAt: string[], now: Date) {
 }
 
 /**
- * 로그인 사용자의 Supabase 기록으로 주차 결산 카드를 만든다.
- * 산식은 로컬 경로(`POST /api/profile`)와 **같은 엔진**을 쓴다 — F9-archive SPEC §6.
- * 지난 주 정확도 실제로 채점된다(구현 전에는 기본값이었다).
+ * 한 사람의 원본 행을 엔진 입력으로 옮긴다. Supabase 조회는 하지 않는다 —
+ * 구성원 여러 명을 한 번에 계산하려면 읽기와 계산이 갈라져 있어야 한다.
  */
-export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = defaultDeps) {
-  const [transactions, stocks, holdingRows, accounts, tabViewRows] = await Promise.all([
-    selectFilledTrades<TransactionRow>({
-      select: "id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_match,created_at",
-      user_id: `eq.${userId}`,
-      order: "created_at.asc",
-    }),
-    selectRows<StockRow>("stocks", { select: "stock_id,stock_code,category" }),
-    selectRows<HoldingRow>("holdings", {
-      select: "stock_id,quantity,avg_price",
-      user_id: `eq.${userId}`,
-    }),
-    selectRows<AccountRow>("account", { select: "balance", user_id: `eq.${userId}`, limit: "1" }),
-    selectRows<TabViewRow>("stock_tab_views", {
-      select: "stock_id,tab_count,created_at",
-      user_id: `eq.${userId}`,
-      order: "created_at.asc",
-    }),
-  ]);
-
+function toEngineInput(rows: ProfileRows, stocks: StockRow[]) {
   const stockById = new Map(stocks.map((row) => [row.stock_id, row]));
   const codeOf = (stockId: number) => stockById.get(stockId)?.stock_code ?? String(stockId);
   const sectorBySymbol: Record<string, string> = {};
@@ -164,7 +216,7 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
 
   const buys: ProfileBuy[] = [];
   const sells: ProfileSell[] = [];
-  for (const row of transactions) {
+  for (const row of rows.transactions) {
     const symbol = codeOf(row.stock_id);
     const quantity = asNumber(row.trade_quantity);
     const price = asNumber(row.trade_price);
@@ -193,14 +245,14 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
   }
 
   const rowsBySymbol = new Map<string, { at: number; count: number }[]>();
-  for (const row of tabViewRows) {
+  for (const row of rows.tabViews) {
     const symbol = codeOf(row.stock_id);
     const bucket = rowsBySymbol.get(symbol) ?? [];
     bucket.push({ at: Date.parse(row.created_at), count: Number(row.tab_count) || 0 });
     rowsBySymbol.set(symbol, bucket);
   }
 
-  const holdings: ProfileHolding[] = holdingRows
+  const holdings: ProfileHolding[] = rows.holdings
     .map((row) => ({
       symbol: codeOf(row.stock_id),
       quantity: asNumber(row.quantity),
@@ -211,45 +263,53 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
   const symbols = Array.from(
     new Set([...buys, ...sells].map((trade) => trade.symbol).concat(holdings.map((h) => h.symbol))),
   );
-  const now = deps.now();
-  const dailyClosesBySymbol: Record<string, DailyClose[]> = Object.fromEntries(
-    symbols.map((symbol) => [symbol, [] as DailyClose[]]),
-  );
-  if (symbols.length) {
-    try {
-      const cutoff = closesCutoff([...buys, ...sells].map((trade) => trade.tradedAt), now);
-      for (const [symbol, closes] of await deps.loadDailyCloses(symbols, cutoff)) {
-        dailyClosesBySymbol[symbol] = closes;
-      }
-    } catch {
-      // 종가가 없으면 그 거래는 엔진이 판정 보류로 처리한다.
-    }
-  }
+
+  return {
+    buys,
+    sells,
+    holdings,
+    symbols,
+    sectorBySymbol,
+    tabViews: synthesizeTabViews(buys, rowsBySymbol),
+    cash: rows.balance ?? SEED_BALANCE,
+  };
+}
+
+type EngineInput = ReturnType<typeof toEngineInput>;
+
+function composeCards(
+  userId: number,
+  input: EngineInput,
+  closesBySymbol: Map<string, DailyClose[]>,
+  now: Date,
+) {
+  const dailyClosesBySymbol: Record<string, DailyClose[]> = {};
   // 현재가는 보관 종가의 마지막 값을 쓴다. 없으면 엔진이 평균단가로 평가한다.
   const priceBySymbol: Record<string, number> = {};
-  for (const [symbol, closes] of Object.entries(dailyClosesBySymbol)) {
+  for (const symbol of input.symbols) {
+    const closes = closesBySymbol.get(symbol) ?? [];
+    dailyClosesBySymbol[symbol] = closes;
     const last = closes[closes.length - 1];
     if (last) priceBySymbol[symbol] = last.close;
   }
 
-  const cash = accounts[0] ? asNumber(accounts[0].balance) : SEED_BALANCE;
   const snapshot = computeBehaviorProfile({
     userId: String(userId),
     periodEnd: kstDateOf(now.toISOString()),
-    buys,
-    sells,
-    tabViews: synthesizeTabViews(buys, rowsBySymbol),
-    holdings,
-    cash,
+    buys: input.buys,
+    sells: input.sells,
+    tabViews: input.tabViews,
+    holdings: input.holdings,
+    cash: input.cash,
     priceBySymbol,
-    sectorBySymbol,
+    sectorBySymbol: input.sectorBySymbol,
     dailyClosesBySymbol,
   });
 
   return {
     // 가족 달리기 트랙(F9 수익률 탭)이 쓰는 평가값. `/api/family` 는 이 중 비율만
     // 타인에게 넘기고 금액은 본인에게만 준다 — 자산 규모 마스킹 규칙 그대로다.
-    valuation: computePortfolioReturn(holdings, priceBySymbol, cash),
+    valuation: computePortfolioReturn(input.holdings, priceBySymbol, input.cash),
     // 화면은 `card`(0~10, 신버전 그대로)를 읽는다. 호환용 0~100 배열은 없앴다.
     weeks: snapshot.weeks.map((week) => ({
       weekStart: week.weekStart,
@@ -263,25 +323,51 @@ export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = d
   };
 }
 
-const inFlightByUser = new Map<number, Promise<Awaited<ReturnType<typeof buildSeasonCards>>>>();
-
 /**
- * 같은 사용자의 주차 카드를 **동시에 두 번 계산하지 않는다.**
+ * 여러 사람의 주차 결산 카드를 **한 번의 조회 묶음으로** 만든다.
+ * 산식은 로컬 경로(`POST /api/profile`)와 **같은 엔진**을 쓴다 — F9-archive SPEC §6.
  *
- * 아카이브는 진입할 때 `GET /api/profile/season-cards` 와 `GET /api/family` 를 함께 부르고,
- * `/api/family` 는 구성원마다 다시 `buildSeasonCards` 를 돈다 — 본인 몫이 늘 두 번 계산됐다.
- *
- * **묵은 값을 주는 캐시가 아니다.** 아직 끝나지 않은 계산에만 올라타고 끝나면 바로 버린다.
- * 다음 요청은 처음부터 다시 계산하므로 방금 한 거래가 빠지는 일이 없다.
+ * 가족 아카이브가 구성원마다 이 계산을 돌린다. 사람마다 따로 읽으면 표 네 개 × 인원 수
+ * 만큼 왕복이 생기므로, 읽기는 `loadProfileRows` 한 묶음으로 모으고 종가도 구성원 전체의
+ * 종목을 합쳐 한 번만 읽는다.
  */
-export function buildSeasonCardsShared(userId: number) {
-  const running = inFlightByUser.get(userId);
-  if (running) return running;
-  const started = buildSeasonCards(userId).finally(() => {
-    inFlightByUser.delete(userId);
-  });
-  inFlightByUser.set(userId, started);
-  return started;
+export async function buildSeasonCardsFor(userIds: number[], deps: SeasonCardsDeps = defaultDeps) {
+  const ids = [...new Set(userIds)];
+  const [rowsByUser, stocks] = await Promise.all([deps.loadProfileRows(ids), deps.loadStocks()]);
+  const now = deps.now();
+  const inputs = ids.map((userId) => ({
+    userId,
+    input: toEngineInput(rowsByUser.get(userId) ?? emptyRows(), stocks),
+  }));
+
+  /**
+   * 종가는 구성원 전체의 종목을 합쳐 한 번에 읽는다. 구간은 **가장 이른 거래** 기준이라
+   * 늦게 시작한 사람에게는 앞쪽 종가가 더 붙지만, 채점은 체결일 뒤만 보고 현재가는 마지막
+   * 값만 보므로 결과가 달라지지 않는다.
+   */
+  const symbols = [...new Set(inputs.flatMap((entry) => entry.input.symbols))];
+  const tradedAt = inputs.flatMap((entry) =>
+    [...entry.input.buys, ...entry.input.sells].map((trade) => trade.tradedAt),
+  );
+  let closesBySymbol = new Map<string, DailyClose[]>();
+  if (symbols.length) {
+    try {
+      closesBySymbol = await deps.loadDailyCloses(symbols, closesCutoff(tradedAt, now));
+    } catch {
+      // 종가가 없으면 그 거래는 엔진이 판정 보류로 처리한다.
+    }
+  }
+
+  return new Map(
+    inputs.map(({ userId, input }) => [userId, composeCards(userId, input, closesBySymbol, now)]),
+  );
+}
+
+/** 로그인 사용자 한 사람의 주차 결산 카드. */
+export async function buildSeasonCards(userId: number, deps: SeasonCardsDeps = defaultDeps) {
+  const cards = (await buildSeasonCardsFor([userId], deps)).get(userId);
+  if (!cards) throw new Error("주차 카드를 만들지 못했습니다.");
+  return cards;
 }
 
 export async function GET(request: NextRequest) {
@@ -289,7 +375,7 @@ export async function GET(request: NextRequest) {
   if (!userId) return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
 
   try {
-    return Response.json(await buildSeasonCardsShared(userId));
+    return Response.json(await buildSeasonCards(userId));
   } catch (error) {
     console.error(
       JSON.stringify({ event: "profile_season_cards", result: "error", message: String(error) }),
