@@ -145,15 +145,24 @@ const HOLD_CARD = styleFromCss(
  * 카드를 위로 미는 손잡이. 시트가 쓰는 `SHEET_GRIP` 과 같은 모양이라 "이 막대를 밀면
  * 그게 올라온다" 가 눌러 보기 전에 읽힌다.
  *
- * 잡는 자리는 5px 막대가 아니라 그 위아래 여백까지다 — 막대만 손잡이면 손가락이 거의
- * 닿지 않는다. 손잡이를 카드 전체로 넓히지 않는 이유는 포인터를 잡으면 그 안의 click 이
- * 손잡이로 재타깃되기 때문이다: 카드가 손잡이면 종목 줄과 `전체보기` 가 죽는다.
+ * 잡는 자리는 막대가 아니라 **막대 줄 + 제목 줄**이다. 막대와 그 위아래 여백만 잡는 자리로
+ * 두면 19px 인데 `PhoneFrame` 이 `scale()` 로 줄여 그리므로 폰에서는 13~16px 로 내려간다 —
+ * 마우스 커서는 맞출 수 있어도 손가락은 거의 못 맞춘다. 제목 줄까지 넣으면 그림은 그대로인
+ * 채로 잡는 자리가 두 배가 된다. 그래서 잡는 상자(`HOLD_GRAB_ZONE`)와 막대를 가운데 세우는
+ * 그림 상자(`HOLD_GRIP_ZONE`)를 나눠 둔다.
+ *
+ * 카드 전체로 넓히지는 않는다 — 포인터를 잡으면 그 안의 click 이 손잡이로 재타깃돼 죽기
+ * 때문이다: 카드가 손잡이면 종목 줄이 죽는다. 잡는 자리 안에서 눌러야 하는 `전체보기` 에는
+ * 시트 손잡이가 쓰는 것과 같은 `data-sheet-static` 을 달아 `grabCard` 가 비켜 가게 한다.
  *
  * `touch-action:none` 은 세로 손짓을 브라우저에 뺏기지 않으려고 둔다. 뺏기면 끌던 중에
  * `pointercancel` 이 와서 손짓이 통째로 사라진다.
  */
+const HOLD_GRAB_ZONE = styleFromCss(
+  "cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none",
+);
 const HOLD_GRIP_ZONE = styleFromCss(
-  "display:flex;align-items:center;justify-content:center;padding:2px 0 12px;cursor:grab;touch-action:none",
+  "display:flex;align-items:center;justify-content:center;padding:2px 0 12px",
 );
 const HOLD_GRIP = styleFromCss("width:44px;height:5px;border-radius:999px;background:#DCD8EC");
 const HOLD_HEAD = styleFromCss(
@@ -302,6 +311,9 @@ export function HomeScreen({
    */
   const grabCard = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0) return;
+    // 잡는 자리 안에 눌러야 하는 것(`전체보기`)이 있다. 포인터를 잡으면 그 click 이
+    // 손잡이로 재타깃돼 죽으므로 시트 손잡이와 같은 표식이 붙은 곳에서는 비켜 간다.
+    if (event.target instanceof HTMLElement && event.target.closest("[data-sheet-static]")) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     pull.current = { pointerId: event.pointerId, y: event.clientY, at: event.timeStamp };
   };
@@ -472,26 +484,32 @@ export function HomeScreen({
           <div style={SPACER} />
 
           <div style={HOLD_CARD}>
-            {view.holdings.length > 0 && (
-              <div
-                onPointerCancel={() => {
-                  pull.current = null;
-                }}
-                onPointerDown={grabCard}
-                onPointerMove={dragCard}
-                onPointerUp={releaseCard}
-                style={HOLD_GRIP_ZONE}
-              >
-                <div style={HOLD_GRIP} />
-              </div>
-            )}
-            <div style={HOLD_HEAD}>
-              <div style={HOLD_TITLE}>내 보유 종목</div>
+            <div
+              {...(view.holdings.length > 0
+                ? {
+                    onPointerCancel: () => {
+                      pull.current = null;
+                    },
+                    onPointerDown: grabCard,
+                    onPointerMove: dragCard,
+                    onPointerUp: releaseCard,
+                    style: HOLD_GRAB_ZONE,
+                  }
+                : null)}
+            >
               {view.holdings.length > 0 && (
-                <div onClick={openHoldings} style={HOLD_MORE}>
-                  전체보기
+                <div style={HOLD_GRIP_ZONE}>
+                  <div style={HOLD_GRIP} />
                 </div>
               )}
+              <div style={HOLD_HEAD}>
+                <div style={HOLD_TITLE}>내 보유 종목</div>
+                {view.holdings.length > 0 && (
+                  <div data-sheet-static onClick={openHoldings} style={HOLD_MORE}>
+                    전체보기
+                  </div>
+                )}
+              </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 12 }}>
               {view.noHoldings && (

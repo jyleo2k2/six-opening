@@ -127,6 +127,11 @@ export function useSheetDrag(sheetHeight: number) {
       onPointerDown: grab,
       onPointerMove: move,
       onPointerUp: (event: ReactPointerEvent<HTMLDivElement>) => release(event),
+      /**
+       * 모바일: 세로 pan 을 브라우저에 넘기면 끌던 중에 `pointercancel` 이 온다.
+       * 시트 핸들은 자체 pointer 이벤트로 드래그를 처리하므로 브라우저에 넘길 것이 없다.
+       */
+      style: { touchAction: "none" as const, cursor: "grab" as const },
     },
   };
 }

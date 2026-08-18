@@ -34,7 +34,7 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-html { background: var(--color-bg); }
+html { background: var(--color-bg); overflow: hidden; }
 
 body {
   margin: 0;
@@ -42,6 +42,10 @@ body {
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: "Pretendard", "Segoe UI", "Malgun Gothic", sans-serif;
+  /* 모바일: 폰 프레임 밖의 body 스크롤·pull-to-refresh를 차단한다. 앱은 프레임 안의
+     overflow 로만 스크롤하고, body 가 움직이면 pointer event 가 pointercancel 로 끊긴다. */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 /* `button, input { font: inherit }` 를 여기에 두지 않는다. 이 파일의 규칙은 레이어 밖이라
