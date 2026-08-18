@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영웅키움 — Q&amp;A 대비 · 어펜딕스 정리 (2026-08-19)</title>
+<style>
+  :root{
+    --navy:#001E5A; --magenta:#D70082; --bg:#F7F8FB; --card:#FFFFFF;
+    --ink:#1a2233; --sub:#5b6577; --line:#E3E7EF; --warn-bg:#FFF7ED; --warn-bd:#F59E0B;
+    --ok:#0E7A4A; --hole:#B42318;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    line-height:1.65;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px}
+  header.hero{background:var(--navy);color:#fff;border-radius:16px;padding:28px 32px;margin-bottom:20px}
+  header.hero h1{margin:0 0 6px;font-size:26px}
+  header.hero h1 em{color:#FF7ac2;font-style:normal}
+  header.hero p{margin:2px 0;color:#c6d2ee;font-size:13.5px}
+  nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 28px}
+  nav.toc a{text-decoration:none;background:#fff;border:1px solid var(--line);color:var(--navy);
+    padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600}
+  nav.toc a:hover{border-color:var(--magenta);color:var(--magenta)}
+  h2.sec{font-size:20px;margin:40px 0 4px;color:var(--navy);border-left:5px solid var(--magenta);padding-left:12px}
+  p.secdesc{margin:0 0 16px;color:var(--sub);font-size:13.5px;padding-left:17px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:12px}
+  .q{font-weight:800;font-size:15.5px;color:var(--navy);margin:0 0 8px}
+  .q .stars{color:var(--magenta);letter-spacing:2px;margin-right:6px}
+  .a{margin:0 0 8px}
+  .a b{color:var(--navy)}
+  .meta{font-size:12.5px;color:var(--sub);border-top:1px dashed var(--line);padding-top:8px;margin-top:8px}
+  .meta .apx{color:var(--magenta);font-weight:700}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:5px;padding:1px 7px;margin-right:6px;vertical-align:1px}
+  .tag.ok{background:#E8F5EE;color:var(--ok)}
+  .tag.hole{background:#FDECEC;color:var(--hole)}
+  .warnbox{background:var(--warn-bg);border:1.5px solid var(--warn-bd);border-radius:12px;padding:16px 20px;margin-bottom:12px}
+  .warnbox h3{margin:0 0 8px;font-size:15.5px;color:#92400E}
+  .warnbox ol{margin:0;padding-left:20px}
+  .warnbox li{margin-bottom:8px}
+  table{width:100%;border-collapse:collapse;background:#fff;font-size:13.5px;margin:8px 0}
+  th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-weight:700}
+  td{border-bottom:1px solid var(--line);padding:8px 10px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .prio{font-weight:800;color:var(--magenta);white-space:nowrap}
+  code{background:#EEF1F7;border-radius:4px;padding:1px 5px;font-size:12.5px}
+  .foot{margin-top:36px;color:var(--sub);font-size:12px;text-align:center}
+  .legend{font-size:12.5px;color:var(--sub);margin:0 0 16px;padding-left:17px}
+  @media print{
+    body{background:#fff;font-size:12px}
+    .wrap{max-width:none;padding:0}
+    .card,.warnbox{break-inside:avoid}
+    nav.toc{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>영웅키움 — <em>Q&amp;A 대비 · 어펜딕스</em> 정리</h1>
+  <p>작성 2026-08-19 · 심사: 키움증권 현직자 (인사이트랩팀 / 플랫폼전략팀 / AIX팀)</p>
+  <p>근거: 기획 통합문서 v2(§23 예상질문 승계) · 기술스택 문서 · 컴플라이언스 8쟁점 v1 · 최종 발표덱(33p) 대조</p>
+</header>
+
+<nav class="toc">
+  <a href="#check">⚠ 발표 전 정합 체크</a>
+  <a href="#plan">① 기획 Q&amp;A</a>
+  <a href="#data">② 데이터 Q&amp;A</a>
+  <a href="#tech">③ 기술 Q&amp;A</a>
+  <a href="#appendix">④ 어펜딕스 슬라이드 후보</a>
+</nav>
+
+<p class="legend">★ 개수 = 나올 확률·타격 크기. <span class="tag ok">방어 있음</span> = 문서에 답이 이미 있어 골자만 외우면 됨 / <span class="tag hole">보강 필요</span> = 답이 약해서 이 문서의 골자로 준비. 표기 원칙([사실]/[추론]/[가정])은 답변에서도 유지.</p>
+
+<!-- ══════════════════ 정합 체크 ══════════════════ -->
+<h2 class="sec" id="check">발표 전 정합 체크 — Q&amp;A 이전에 덱부터</h2>
+<p class="secdesc">질문이 나와서 터지는 게 아니라, 발표자끼리 다른 숫자를 말해서 터지는 항목들.</p>
+
+<div class="warnbox">
+  <h3>⚠ 숫자·표기 불일치 6건 (팀 확인 필수)</h3>
+  <ol>
+    <li><b>정확력 채점 기준일이 3곳에서 다르다.</b> 실제 코드(<code>behavior-profile.ts</code>)는 <b>2거래일</b>, 구버전 덱 슬라이드는 3거래일/5거래일 혼재, 통합문서도 §11.2(2일)와 §23(5일)이 어긋남. → <b>"2거래일(월 매수 → 수 종가)"로 통일</b>하고, 근거는 "4주 시즌 안에서 회고가 돌아오는 최소 주기" 한 줄로.</li>
+    <li><b>자체 설문 수치가 두 벌.</b> 본편 p7: 걱정 43/35/21%(3항목)·선호 46/43/11% ↔ 임시 p32: 걱정 44/35/16/5%(4항목)·선호 46/44/4%. 원본 집계 하나를 확정하고 본편·어펜딕스 모두 그 수치로. 어펜딕스에 설문 원문을 실으면 자동 해소.</li>
+    <li><b>접점등급 표기.</b> 구버전 Method 슬라이드는 "5개 범주", 마스터는 <b>11개 접점유형 → 5개 등급</b>. "11개 유형을 5개 등급으로"로 통일.</li>
+    <li><b>섹터 균등 배분 문구.</b> "전 섹터 3~4종목"이 아니라 실제로는 <b>3~5종목</b>(은행·금융 5). </li>
+    <li><b>본편 미완 2장.</b> p8 페인포인트("아직 미완" 문구 노출), p17 기술설명 01(본문 비어 있음). 기술설명 02(행동 로그)·03(챗봇) 채울 때 이 문서 어펜딕스 후보 D2·T1 재사용 가능.</li>
+    <li><b>구버전 유니버스 목록 인용 금지.</b> 카카오뱅크·오뚜기·이마트 등이 든 51종 표(유니버스 설계 문서)는 폐기본. 정본은 통합문서 §10 = <code>stocks.ts</code>의 51종(수기 2종: 와이지엔터·키움증권 표기 포함).</li>
+  </ol>
+</div>
+
+<!-- ══════════════════ 기획 ══════════════════ -->
+<h2 class="sec" id="plan">① 기획 Q&amp;A</h2>
+<p class="secdesc">플랫폼전략팀 관점 — 사업성·포지셔닝·리스크.</p>
+
+<div class="card">
+  <p class="q"><span class="stars">★★★</span>Q. 애들한테 주식 도박을 가르치는 것 아닌가?</p>
+  <p class="a"><span class="tag ok">방어 있음</span><b>"게임화 자체가 아니라 보상 대상이 문제"(OSC)라는 연구 프레임 위에 안전장치를 겹으로 설계했다</b>고 답한다. ① 모의투자라 실손실 없음(FCA 실험은 실거래 맥락) ② 유니버스 51종 한정 — 레버리지·인버스·파생·신용·미수 원천 배제 ③ 질문식 매매가 주문 플로우에 내장돼 "왜 사는지"를 매번 기록 ④ 챗봇은 종목 추천·시점·가격·전망 전면 금지, 기준만 교육 ⑤ 성향 리포트가 수익률이 아닌 '스타일' 서사 제공 ⑥ 수익률 알림은 주간만[잠정] ⑦ 캐릭터·능력치에 우열 없음.</p>
+  <p class="meta"><span class="apx">어펜딕스 → A1 안전장치 맵</span> · FCA 9,000명 실험·OSC 보고서를 근거로 직접 인용 (출처 §24)</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★★</span>Q. 키움 입장에서 이게 돈이 되나? 개발·운영·경품 비용 대비 뭘 얻나?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>수익이 아니라 <b>고객 획득 비용(CAC) 구조</b>로 답한다. 증권계좌는 자산 이동 부담 때문에 한 번 정착하면 좀처럼 안 옮긴다 — 그래서 이미 타사에 정착한 고객을 빼오려면 현금성 이벤트로 비싸게 사와야 한다. <b>주거래 증권사가 없는 미성년기는 전환 비용이 사실상 0인 유일한 구간</b>이고, 이 시기에 "처음 선택받는" 비용이 성인 고객 CAC보다 구조적으로 싸다. 단기 KPI는 미성년 계좌 신설·활성화(참가 조건에 내장돼 직접 측정), 중장기는 부모의 앱 방문 빈도·체류시간(분기 아카이브가 반복 방문을 만든다). 경품·운영비는 시즌 단위로 통제 가능하고 상한은 법무 검토와 함께 확정[가정].</p>
+  <p class="meta"><span class="apx">어펜딕스 → A8 KPI 퍼널</span> · §5.1 "처음 선택될 때 선택받기" + §7 KPI 이원화 + §18 시간축</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. FCA는 경품이 위험거래를 늘린다고 했는데, 아이패드·Robux를 거는 건 자기모순 아닌가?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>모순을 인지하고 설계에 반영했다고 답한다. ① FCA 실험은 <b>실거래</b> 맥락 — 여긴 모의투자라 위험거래가 실손실로 이어지지 않는다 ② 보상이 거래 행동을 왜곡하지 않도록 <b>시상을 다각화</b>했다 — 수익률 1등만 받는 구조 금지, 행동 부문(분산투자상·진득이상·질문왕[잠정])을 병행해 "많이 거래할수록 유리"를 끊는다 ③ 경품 종류·한도·수익률 연동 적정성은 <b>법무 검토를 전제로 한 후보안</b>이라고 선을 긋는다(컴플라이언스 쟁점 4).</p>
+  <p class="meta"><span class="apx">어펜딕스 → A9 컴플라이언스 8쟁점</span> · §14 리워드 B안 + §15-4</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 부모가 자녀 기록을 보는 건 감시 아닌가?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>그래서 <b>상호 열람</b>으로 설계했다 — 자녀도 부모의 거래와 근거를 똑같이 본다. 단방향이면 감시가 되고, 감시로 인식되는 순간 아이의 매매 이유 기록이 방어적으로 바뀌어 데이터 품질이 함께 망가진다. 부모 코멘트는 필터를 거쳐 훈계·매매 지시·채점 표현을 차단한다 — <b>필터는 예의 장치가 아니라 데이터 무결성 장치</b>. 챗봇 대화 원문과 행동 원데이터는 부모에게 전달하지 않는다(아이가 안심하고 묻는 공간).</p>
+  <p class="meta">§11.4 열람 경계 + §21 레드라인 · 챗봇 대화 미전달은 §15-3</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 고등학생 되면 입시로 이탈할 텐데, 그 공백은?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>이 서비스의 목표는 고교 시기 리텐션이 아니라 <b>성인 전환 시점의 재소환</b>이다. 아동기에 형성된 브랜드 애착은 공백기를 거쳐도 첫 선택 순간에 되살아난다는 게 브랜드 임프린팅 논지(Paper 1: 애착→충성 β=.307, 최대 동인은 '과거의 나와 지금의 나'를 잇는 자기연속성 β=.347)[추론]. 시즌 아카이브가 그 자기연속성의 물리적 증거물 — "15살의 내가 산 SK하이닉스"를 성인이 된 뒤 다시 보는 구조다.</p>
+  <p class="meta">§23 + Paper 1 · 덱 p27(15살의 나) 스토리와 연결해 답하면 자연스러움</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 신한 '우리아이 자산관리'가 출시되면? 퍼핀·토스와 뭐가 다른가?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>경쟁사는 ① 가족·청소년 금융(퍼핀·아이부자·Greenlight): 순위 비교까지만, 성향 이해 없음 ② 모의투자(키움 상시·KB): 개인 단위 ③ AI 투자정보(DB 스윙스타·Cortex): 성인용 추천·자문형. <b>'가족 단위 + 아이 눈높이 AI + 행동 성향 아카이브'의 교집합은 국내외 미발견</b>(2026-08-09 검증, 국내 9건+영어권 4쿼리)[사실]. 신한은 발표만 있고 미출시 — 그리고 우리는 모의→실계좌→성인 전환의 전 퍼널이 영웅문 앱 하나 안에서 끊기지 않는다는 인프라 차별이 있다.</p>
+  <p class="meta"><span class="apx">어펜딕스 → A10 경쟁 구도표</span> · §5 경쟁 구도 [사실]</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 참가 조건이 자녀 실계좌라니, 결국 계좌 개설 이벤트 아닌가?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>순서를 뒤집었다. 계좌를 만들라고 광고하는 게 아니라 <b>튜토리얼·구경 모드를 계좌 없이 전면 개방</b>해 "재밌어 보여서 계좌를 만든다"는 순서를 만든다(2단 퍼널). 그리고 기존 이벤트와 달리 개설 이후가 있다 — "계좌를 만들게 하는 이벤트는 많지만, 그 계좌를 <b>가족이 함께 쓸 이유</b>를 만드는 서비스는 없었다." 방치 계좌 활성화율을 KPI ②로 따로 두는 것도 개설 실적만 노리는 게 아니라는 증거.</p>
+  <p class="meta">§7 2단 퍼널 · 덱 p9 인사이트 카피와 동일 프레임</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 교육 서비스인가 경쟁 서비스인가?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>어느 쪽도 아닌 <b>체험·경험형 서비스</b>. 경쟁(리그·순위)은 가족 단위 참여 동기를 만드는 장치까지만 쓰고, 교육 효과(판단-행동-회고 루프)는 부수 효과로 얻는다 — 교육 성과를 KPI로 내세우지 않는다(효능 과장 금지, §15-7과도 연결).</p>
+  <p class="meta">§23 · "교육 효과는 KPI가 아니다"까지 말해야 AI 워싱 질문 예방</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 가족 성적이 구성원 평균이면, 아이가 못했을 때 가족 순위가 떨어져 부담·갈등이 생기지 않나?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>세 겹으로 완화한다. ① 비교 단위를 금액이 아닌 <b>수익률</b>로, 리그를 30~50가족[잠정]으로 잘라 "전국 꼴찌"가 아닌 체감 가능한 단위로 ② 시상 다각화로 수익률 외의 인정 경로(행동 부문)를 아이에게 열어줌 ③ 성향 리포트가 "못했다"가 아니라 "너는 이런 스타일"이라는 서사를 매주 제공. 그래도 가족 갈등 접수는 안전 지표로 모니터링한다(§18). 솔직히 실사용 검증이 필요한 지점이라 PoC-1 인터뷰 항목(감시·채점 느낌 여부)에 포함돼 있다.</p>
+  <p class="meta">§8 공정성 + §18 안전 지표 + §19 PoC-1</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 한부모·조부모 가정, 형제 여러 명이면?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>참가 단위는 부모 1 + 자녀 1 필수, 최대 4인[잠정] — 한부모 가정은 그대로 충족한다. 형제는 각자 지갑으로 최대 인원까지 참여 가능. 조부모·후견인은 법정대리인 요건 문제라 <b>법정대리인이면 참여 가능한 방향으로 검토 중</b>이라고 답하고 확정처럼 말하지 않는다[가정]. 핵심 설계 제약은 "법정대리인 동의 + 개인별 지갑" 두 가지뿐이라 가족 형태 확장에 구조적 장벽은 없다.</p>
+  <p class="meta">§8 [잠정] 항목 — 미결정 사항임을 인정하는 게 안전</p>
+</div>
+
+<!-- ══════════════════ 데이터 ══════════════════ -->
+<h2 class="sec" id="data">② 데이터 Q&amp;A</h2>
+<p class="secdesc">인사이트랩팀 관점 — 방법론·표본·타당성.</p>
+
+<div class="card">
+  <p class="q"><span class="stars">★★★</span>Q. 51개 종목은 누가 어떻게 골랐나? 자의적이지 않나?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>49개는 사람이 안 고른다. <b>KRX 2,710 → 시총 상위 300(우선주·스팩·리츠 제외) → 13섹터 173 라벨링 → 172 채점 → 섹터 균등 49</b>, 다시 돌려도 같은 결과가 나오는 파이프라인이다. 종합점수 = (지표 A: 시총·섹터 내 순위·거래대금·ROE·배당·변동성·최대낙폭 + 지표 B: 아이 접점등급) ÷ 2. 사람 판단이 들어가는 유일한 지점은 접점등급을 <b>회사가 아닌 11개 유형에</b> 부여하는 것 — 같은 유형이면 반드시 같은 점수라 논쟁이 "이 회사를 이 유형에 넣은 게 맞나"로 좁혀진다. 수기 편입 2종(와이지엔터: 아이 인지도 최상위지만 지표 A 미달 / 키움증권: 제공사)은 표에 '수기'로 명시해 숨기지 않는다.</p>
+  <p class="meta"><span class="apx">어펜딕스 → D1 유니버스 파이프라인</span> · §10 + §23</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 아이 흥미 위주로 골랐다면 안정성은 버린 것 아닌가?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>안정성은 별도 필터가 아니라 <b>지표 A 안에 변동성·최대낙폭으로 들어가 흥미(지표 B)와 같은 점수판에서 겨룬다</b>. 흥미만 높고 안정성이 부족한 종목은 상위에 못 오르고, 반대로 SK하이닉스처럼 우량하지만 아이 접점이 없는 종목도 섹터 정원 안에서 들어온다. 결과적으로 등급 5~4(아이가 아는 회사)가 22종·43%, 나머지는 조선·방산·물류처럼 아이는 모르지만 한국 경제 설명에 빠질 수 없는 산업.</p>
+  <p class="meta">§10 · "2단 필터 폐기, 같은 점수판" 문구 그대로 쓰면 됨</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★★</span>Q. 투자성향 분석은 설문인가? AI가 판정하나?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>둘 다 아니다. <b>행동 로그를 룰·통계 엔진이 계산한다 — LLM은 성향 산출에 관여하지 않는다.</b> 입력은 ① 매수 전 정보 탭 10초 이상 '유효 열람' 여부 ② 보유 섹터 수·현금 비중 ③ 체결 후 2거래일 종가. 산출은 근거력(유효열람 후 매수 비율×10), 직관력(10−근거력), 집중력(섹터·현금 환산), 분산력(10−집중력), 정확력(적중률×10). <b>캐릭터(저격수·전략가·승부사·탐험가)는 근거↔직관, 집중↔분산 조합으로만 정하고</b> 매수 3건 미만이면 '관찰 중'으로 판정을 보류한다 — 없는 데이터로 단정하지 않는다.</p>
+  <p class="meta"><span class="apx">어펜딕스 → D2 능력치 산식 카드</span> · §11.2 [사실 — 현재 구현]</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 2거래일 뒤 주가로 '정확력'을 채점하는 건 단기 예측 게임을 가르치는 것 아닌가? 그 기간 주가는 거의 운인데.</p>
+  <p class="a"><span class="tag hole">보강 필요</span>이 파트 최대 급소. 골자: ① 정확력은 <b>예측 실력 점수가 아니라 "내 판단이 단기적으로 어떻게 됐는지 돌아보는 회고 장치"</b> — 그래서 캐릭터 산정에서 제외돼 있고(캐릭터는 근거·집중 축만 사용), 우열 표현도 금지다(§21) ② 짧은 기간을 쓰는 이유는 4주 시즌 안에서 회고가 여러 번 돌아와야 "계획-결과-회고" 루프가 학습 리듬이 되기 때문 ③ 운 성분이 크다는 건 인정 — 그래서 표본 미달 시 중립값에서 시작하고 레벨도 3단계로만 뭉갠다. "단기 적중률이 실력이 아니라는 것 자체가 아이가 이 서비스에서 배웠으면 하는 것"으로 마무리하면 역공이 교육 포인트로 바뀐다.</p>
+  <p class="meta">기준일은 <b>2거래일로 통일</b>(정합 체크 1번) · §11.2 + §21</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★★</span>Q. 자체 설문 N=37이 통계적으로 유의한가?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>유의성을 주장하지 않고 지위를 정확히 말한다. <b>"모수 추정용이 아니라 방향 확인용 정성 조사"</b>다. 대신 방향이 공개 통계와 일치한다: 기재부 2024 경제이해력(초·중·고 평균 하락, 체험식 선호 1위), 예탁결제원 미성년 주주 72.8만 명, 미성년 계좌 1년 새 약 3배[사실]. 페르소나와 페인포인트 가설의 출발점으로 쓴 것이고, 정식 검증은 PoC-1(부모 8~12명 심층 인터뷰)로 설계돼 있다. <b>N은 물어보기 전에 슬라이드에 먼저 적어두는 게 방어</b>(이미 p7에 N=37 표기 — 유지).</p>
+  <p class="meta"><span class="apx">어펜딕스 → D3 설문 원문+공개 통계 병기</span> · 수치 두 벌 문제는 정합 체크 2번</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 말레이시아 성인 211명 논문으로 한국 금융 브랜드 충성을 주장할 수 있나? 상관이지 인과 아니지 않나?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>수치를 이식하는 게 아니라 <b>메커니즘(자기연속성이 애착→충성을 매개)을 빌린다</b>고 답한다[추론]. β=.307을 한국 예측치로 쓰지 않는다. 그리고 국내 맥락은 Paper 2(투자기간 3개월↑ 청소년 28명 심층면담, 서울대)가 보완 — 부모가 계좌를 열어준 경우가 투자 시작 경로 1위, 부모의 시장 해석이 자녀 판단 기준으로 전이. 정량(해외)+정성(국내) 조합이고, 인과 검증은 서비스 운영 데이터로 해야 한다는 걸 인정한다.</p>
+  <p class="meta">덱 p19 · 질문 받기 전에 발표에서 "메커니즘 참조"라고 선제 언급하면 더 안전</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. DAPIE 실험은 만 5~7세 16명인데 타깃(10~13세)에 그대로 먹히나?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>한계를 이미 문서에 [확인 필요]로 박아뒀다. 빌리는 것은 연령 규범이 아니라 <b>대화 구조</b>(피드백→개념 하나→질문 종결, 오답 시 더 쉬운 질문으로 분기) — 초중등에는 어휘 난이도·질문 밀도를 상향해야 하고, 그 검증이 PoC-2(아동 시나리오 50개)에 들어 있다. 원 실험 효과 크기(이해도 5.13→7.43, 체류 2.8→7.0분, 턴 수 7→20)는 방향 근거로 인용.</p>
+  <p class="meta"><span class="apx">어펜딕스 → T2 DAPIE 근거·한계</span> · 정직한 한계 인정이 오히려 점수</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 아이가 "탭 10초 열어두면 근거력 오른다"를 알게 되면 지표가 오염되지 않나? (굿하트 법칙)</p>
+  <p class="a"><span class="tag hole">보강 필요</span>완전 방지는 불가능하고, 완화 장치로 답한다. ① 유효 열람은 단독 점수가 아니라 <b>매수 체결과 결합된 조건부 지표</b>(열람만 하고 안 사면 집계 안 됨) ② 성향에는 우열이 없어서 지표를 게이밍할 유인 자체가 약하다 — 근거력이 높다고 "이기는" 게 아니다 ③ 산식은 시즌 반복으로 재계산돼 일회성 조작의 효과가 희석된다. 오히려 아이가 산식을 이해하고 "이렇게 하면 근거형이 되네"를 아는 것은 <b>행동 변화라는 목적에 부합</b>하는 면도 있다.</p>
+  <p class="meta">§11.2 · "게이밍 유인이 약한 설계"가 핵심 논거</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 유니버스는 언제 갱신하나? 상장폐지·거래정지가 나면?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>파이프라인이 재현 가능하므로 <b>시즌(분기) 단위로 재실행</b>하는 운영을 전제한다[가정]. 시즌 중 거래정지·상폐는 종목 마스터의 <code>isActive</code> 플래그로 신규 주문만 차단하고 보유분은 결산 규칙을 따른다 — 시즌 중 목록이 바뀌지 않아야 공정성이 유지되기 때문. 세부 결산 규칙은 운영 정책으로 확정 예정.</p>
+  <p class="meta">데이터셋 설계 문서의 isActive 필드 + §8 시즌 구조에서 유도</p>
+</div>
+
+<!-- ══════════════════ 기술 ══════════════════ -->
+<h2 class="sec" id="tech">③ 기술 Q&amp;A</h2>
+<p class="secdesc">AIX팀 관점 — LLM 안전·아키텍처·운영.</p>
+
+<div class="card">
+  <p class="q"><span class="stars">★★★</span>Q. 그냥 GPT(범용 챗봇)를 붙이면 되는 것 아닌가?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>범용 챗봇은 "아이가 먼저 질문할 수 있다"는 전제 위에 서 있는데, 저연령은 자기가 뭘 모르는지 몰라 질문을 못 하고 그냥 앱을 닫는다. 차별점 5가지: ① <b>행동 데이터로 헤매는 순간을 감지해 먼저 말을 건다</b>(매수 확인 이탈 3회, 5분 체류, 손실 후 재진입 — 트리거는 룰, LLM은 발동 시에만) ② 답을 한 덩어리로 주지 않고 피드백→개념 하나→질문의 3단으로 되묻는다(DAPIE) — "정답 제공 금지"가 프롬프트 문구가 아니라 <b>대화 구조로 강제</b>됨 ③ 화면·종목 맥락 인지 ④ 미성년 가드레일 내장(추천·시점·가격·전망 차단) ⑤ 본인 거래·성향 기록을 안다.</p>
+  <p class="meta">§23 + §12 · 시연에서 PER 대화(덱 p14)로 ②를 직접 보여줄 수 있음</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★★</span>Q. "사라"는 말만 안 하면 되나? 표현만 바꾼 추천("지금 담아볼 만하지 않아?")은 어떻게 막나?</p>
+  <p class="a"><span class="tag ok">방어 있음 — 최강 카드</span>실측으로 답한다. 표현을 바꾼 추천·전망 12문장을 정규식 룰은 <b>0/12</b> 차단했고, 룰을 8개 늘려도 우회 5문장은 0/5였다. 그래서 출력 검사를 2단으로: 1단 결정적 룰(하한선) + 2단 LLM 판정 — 같은 12문장을 <b>12/12 차단, 정상 설명 8건 오탐 0</b>. 판정 실패·타임아웃은 닫힌 실패로 고정 응답 대체라 안전 하한선이 내려가지 않는다. 추가로 입력 게이트가 추천·예측 요구를 9개 하위 의도로 분류해 모델 호출 전에 고정 거절한다.</p>
+  <p class="meta"><span class="apx">어펜딕스 → T1 챗봇 안전 파이프라인(실측 표 포함)</span> · 기술스택 문서 [사실]</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 환각은 어떻게 막나? 챗봇이 수치를 지어내면?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>구조로 막는다. <b>수치·스코어는 룰 엔진(shared/engine)만 만들고, LLM은 엔진·API가 준 값만 인용한다 — LLM이 수치를 만들면 그 자체가 버그.</b> 출력 게이트가 단위 붙은 주장값(원·%·주)을 화면 맥락값과 대조해 미검증 숫자를 차단하고, 종목 사실은 승인된 데이터 조회(읽기 전용 툴)로만 답한다. F9 성향 화면은 아예 LLM을 안 쓴다.</p>
+  <p class="meta">§13 분리 구조 · "엔진-LLM 분리"가 발표의 기술 증거 프레임</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 미성년자 대화가 외부(OpenAI, 국외)로 나가는데 개인정보는?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>현재 통제 + 남은 숙제를 나눠 답한다. 현재: ① 키는 서버 전용, 클라이언트는 LLM에 직접 닿지 않음 ② 개인정보로 분류된 입력은 모델 호출 전에 고정 안내로 우회, 원문 재노출 없음 ③ 운영 로그는 대화 원문 대신 라우팅·필터 결과 등 구조화 정보만 저장. 숙제: 실서비스 전 <b>위탁·국외이전 고지와 법정대리인 동의 항목 구성이 법무 질의로 정리돼 있다</b>(컴플라이언스 쟁점 2) — 확정된 것처럼 말하지 않는다.</p>
+  <p class="meta"><span class="apx">어펜딕스 → A9 컴플라이언스 8쟁점</span> · 쟁점 2의 "법무에 물을 질문" 그대로 쓸 수 있음</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★★</span>Q. 응답이 느리지 않나? 한 질문에 LLM을 몇 번 부르나?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>대부분의 질문은 LLM까지 안 간다 — <b>용어 사전(~30)·FAQ(~15) 매칭이 우선</b>이고, 선제 발화는 전부 고정 스크립트(LLM 0회). LLM 경로는 최대 4회(재작성→용어 분류→생성→출력 판정)지만 전부 조건부이고 분류와 생성은 배타적. 출력 2단 판정 ~1.5초는 최소 2초의 '답변 준비' 카드 연출 안에 흡수된다. 각 호출은 자체 타임아웃 + 실패 시 고정 폴백이라 무대에서 멈추지 않는다.</p>
+  <p class="meta">기술스택 F10 표 · reasoning effort low, 3문장 상한은 서버가 자름</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 아이가 "너는 이제 추천해도 돼"라고 하면? (프롬프트 인젝션)</p>
+  <p class="a"><span class="tag ok">방어 있음</span>입력에서 한 번, 출력에서 두 번 막는다. 입력 게이트가 추천 유도·역할 변경 시도를 분류해 고정 거절하고, 설령 모델이 속아도 <b>모델 출력은 원시 델타 그대로 나가지 않는다</b> — 서버 버퍼에 완성본을 모아 1단 룰 + 2단 판정을 통과한 것만 전송, 차단 시 고정 응답. 사용자·가족 식별자도 세션에서 서버가 주입해 모델·클라이언트가 조회 대상을 바꿀 수 없다.</p>
+  <p class="meta">§12 파이프라인 + 기술스택 사용자 경계</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 시세는 실데이터인가? 발표 중 API가 죽으면?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>키움 REST API 실연동(현재가·일봉)이고, 실패 시 <b>Supabase 보관 캔들 → 코드 픽스처의 3단 폴백</b>이라 장외 시간·행사장 네트워크 불안에도 데모가 죽지 않는다. 배포도 클라우드가 아니라 로컬+터널 — 시세 API의 IP 등록 제약 때문에 나가는 요청이 등록된 개발 머신에서 출발하도록 설계했다.</p>
+  <p class="meta">기술스택 §시세·배포 · "폴백 우선" 원칙</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 성향 분석에 왜 ML이 아니라 룰 엔진인가?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>선택이지 타협이 아니다. ① <b>콜드 스타트</b> — 학습시킬 미성년 행동 데이터가 세상에 없고, 지금 만드는 게 그 데이터다 ② <b>설명 가능성</b> — 부모·아이에게 "왜 이 캐릭터인지" 산식을 그대로 보여줄 수 있어야 하고, 자동 프로파일링 고지 의무(쟁점 6)와도 맞물린다 ③ <b>자문업 리스크</b> — 블랙박스 모델의 판정은 조언 해석 소지를 키운다. 시즌 데이터가 쌓이면 룰의 임계값 보정부터 통계적으로 고도화하는 게 순서.</p>
+  <p class="meta">§13 + 쟁점 6 · "지금 만드는 게 그 데이터"가 킬러 문장</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. LLM 비용은 감당 가능한가?</p>
+  <p class="a"><span class="tag hole">보강 필요</span>단가는 입력 $0.20 / 출력 $1.20 per 1M 토큰[사실 — 모델 스펙]. 대화 1건이 조건부 호출을 다 타도 토큰 합계 기준 <b>건당 약 1~2원 수준[추정]</b>이고, 사전·FAQ 우선 라우팅 덕에 상당수 질문은 LLM 호출 0회라 실효 단가는 더 낮다. 비용 폭주 방어로는 호출 상한(요청당 최대 4회)·타임아웃·비상 시 사전·FAQ 전용 모드 강등 스위치가 있다.</p>
+  <p class="meta">기술스택 모델 스펙 · 정확한 월 비용은 운영 트래픽 가정이 필요해 [추정] 표기 유지</p>
+</div>
+
+<div class="card">
+  <p class="q"><span class="stars">★</span>Q. 데모는 웹인데 실서비스는 어떻게 올리나?</p>
+  <p class="a"><span class="tag ok">방어 있음</span>처음부터 신규 앱이 아니라 <b>영웅문S# 내 신규 메뉴 이식</b>이 전제다. 데모(Next.js+Supabase)는 화면·데이터 흐름·안전 게이트를 검증하는 레퍼런스 구현이고, 온보딩은 키움이 이미 운영 중인 미성년 비대면 개설 플로우(2023-04~)에 연결만 하면 된다 — 새로 만들 인프라보다 재사용할 인프라가 많다는 게 실현 가능성 근거. API 20개가 전부 서버 전용·세션 기반이라 MTS 백엔드로 옮겨도 구조가 유지된다.</p>
+  <p class="meta">§1 형태 + §4 키움 인프라 [사실] + 기술스택 API 표</p>
+</div>
+
+<!-- ══════════════════ 어펜딕스 ══════════════════ -->
+<h2 class="sec" id="appendix">④ 어펜딕스 슬라이드 후보 (우선순위순)</h2>
+<p class="secdesc">p18 뒤 임시페이지 자리에 넣을 장표. ●=Q&amp;A 직결이라 필수, ○=여유 있으면. 각 장은 "질문 받으면 이 장을 띄운다"가 기준.</p>
+
+<table>
+  <tr><th style="width:34px"></th><th style="width:230px">슬라이드</th><th>들어갈 내용</th><th style="width:180px">대응 질문</th></tr>
+  <tr>
+    <td class="prio">● A1</td><td><b>안전장치 7종 맵</b></td>
+    <td>모의(실손실 0) / 51종 화이트리스트·파생 배제 / 질문식 매매 내장 / 챗봇 추천 금지 / 성향=스타일 서사 / 주간 알림 / 우열 없는 캐릭터 — 한 장 다이어그램. 하단에 FCA·OSC 출처 명기</td>
+    <td>기획★★★ 도박, ★★ 리워드</td>
+  </tr>
+  <tr>
+    <td class="prio">● D1</td><td><b>유니버스 산출 파이프라인</b></td>
+    <td>깔때기: 2,710→300→173→172→51 + 지표 A/B 구성 + 접점 11유형→5등급 표 + <b>수기 2종 별도 표기</b> + "재실행해도 같은 결과". 섹터 배분은 3~5로 수정</td>
+    <td>데이터★★★ 51종, ★★ 안정성</td>
+  </tr>
+  <tr>
+    <td class="prio">● D2</td><td><b>성향 엔진 산식 카드</b></td>
+    <td>로그 수집(탭 체류·거래·시세) → 유효 열람 판정(10초·2탭) → 5개 능력치 환산식 → 캐릭터 매트릭스(근거↔직관 × 집중↔분산) + "매수 3건 미만 = 관찰 중" + <b>채점 2거래일 통일</b> + "LLM 미관여" 뱃지</td>
+    <td>데이터★★★ 성향, ★★ 정확력</td>
+  </tr>
+  <tr>
+    <td class="prio">● T1</td><td><b>챗봇 안전 파이프라인 + 실측</b></td>
+    <td>입력 게이트(9개 의도) → 사전·FAQ 우선 → 조건부 LLM(최대 4회) → 출력 1단 룰 + 2단 판정 흐름도. 실측 표: 우회 표현 차단 룰 0/12 → 2단 12/12, 오탐 0/8, 판정 1.5초</td>
+    <td>기술★★★ 추천 우회, 인젝션, 환각</td>
+  </tr>
+  <tr>
+    <td class="prio">● D3</td><td><b>설문 원문 + 공개 통계 병기</b></td>
+    <td>좌: 자체 설문 문항·N=37·수치(확정본 하나로) + "방향 확인용 정성 조사" 명기 / 우: 기재부 경제이해력 하락, 예탁원 미성년 주주 72.8만, 미성년 계좌 3배 — "방향 일치" 구도</td>
+    <td>데이터★★★ N=37</td>
+  </tr>
+  <tr>
+    <td class="prio">● A8</td><td><b>KPI 퍼널 &amp; 왜 지금인가</b></td>
+    <td>2단 퍼널(튜토리얼 무계좌 → 시즌 실계좌) + KPI 이원화(신설/활성화) + 북극성(동반 활성 가족) + "전환비용 0인 유일한 구간" 논리 한 줄</td>
+    <td>기획★★★ ROI, 계좌 장사</td>
+  </tr>
+  <tr>
+    <td class="prio">○ A9</td><td><b>컴플라이언스 8쟁점 현황표</b></td>
+    <td>쟁점(자문 경계·미성년 개인정보·가족 공유·경품·전환 권유·프로파일링 고지·AI 과장 금지·대화형 AI 통제) × 현재 방어 × 법무 질의 상태. "규제를 우회하지 않았다 — 법정대리인 동의가 온보딩의 출발점" 카피</td>
+    <td>기획 리워드, 기술 개인정보</td>
+  </tr>
+  <tr>
+    <td class="prio">○ A10</td><td><b>경쟁 구도 2×2</b></td>
+    <td>축: 개인↔가족 / 정보제공↔행동이해. 퍼핀·토스틴즈·DB 스윙스타·신한(미출시)·Greenlight 배치 → 우상단 공백에 영웅키움. 검증 일자·쿼리 수 각주</td>
+    <td>기획★★ 경쟁·차별</td>
+  </tr>
+  <tr>
+    <td class="prio">○ T2</td><td><b>DAPIE 근거와 한계</b></td>
+    <td>대조군 대비: 이해도 5.13→7.43 / 시선 이탈 29→11.9% / 체류 2.8→7.0분 / 턴 7→20 / 재이용 2.31→3.38 (CHI 2023, KAIST). 하단에 [확인 필요] 5~7세 N=16 → 초중등 상향은 PoC-2</td>
+    <td>데이터 DAPIE, 기술 챗봇 차별</td>
+  </tr>
+  <tr>
+    <td class="prio">○ T3</td><td><b>시스템 아키텍처</b></td>
+    <td>구 덱 아키텍처 장 재사용: Next.js 서버 전용 API 20개 / Supabase(RPC 트랜잭션) / 키움 REST + 3단 폴백 / LLM 서버 전용 + 공통 필터. "키는 전부 서버, 브라우저 저장소 미사용" 강조</td>
+    <td>기술 시세·확장성</td>
+  </tr>
+  <tr>
+    <td class="prio">○ A11</td><td><b>시즌 운영 설계</b></td>
+    <td>4주×연 4회(어닝시즌 걸치기) / 1인 1,000만 개인 지갑(공동이면 자녀 행동 데이터 소멸 — 데이터가 구조를 강제) / 시상 다각화(가족·개인·행동 부문) / 리그 30~50가족[잠정]</td>
+    <td>기획 갈등·부담, 교육vs경쟁</td>
+  </tr>
+  <tr>
+    <td class="prio">○ A12</td><td><b>근거 위계 한 장</b></td>
+    <td>[사실] 공개 통계·논문·규제 사례 / [자체] N=37 설문·차단 실측 / [가정] 선제 신호 임계값·목표치 — "시뮬레이션을 실측처럼 발표하지 않는다" 원칙 명시. 심사자 신뢰 획득용</td>
+    <td>전 영역 공통</td>
+  </tr>
+</table>
+
+<div class="card" style="margin-top:16px">
+  <p class="q">Q&amp;A 슬라이드(p33 템플릿) 채우기 제안</p>
+  <p class="a">질문 2칸에는 <b>가장 확률 높은 두 개</b>를 미리 박아두는 걸 추천: ① "애들한테 도박 가르치는 것 아닌가요?" → A1 요약 답변 ② "그냥 GPT 붙이면 되지 않나요?" → 능동 트리거 + DAPIE + 가드레일 3종 요약. 나머지는 현장 대응하되, 이 문서의 골자를 발표자별로 분담(기획/데이터/기술 각 1인)해 두면 누가 받을지 헤매지 않는다.</p>
+</div>
+
+<p class="foot">영웅키움 · 육개장(六開場) — Q&amp;A 대비 문서 · 2026-08-19 · 근거 문서: 영웅키움_기획_통합문서_v2.md(§23 승계) · 기술스택.md · 컴플라이언스_8쟁점_검토_v1.md · 최종 발표덱 33p 대조</p>
+
+</div>
+</body>
+</html>
