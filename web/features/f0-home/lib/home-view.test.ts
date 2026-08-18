@@ -121,7 +121,8 @@ assert.equal(view.goalCount, Math.floor(20000 / 12000)); // 1개
 // 수익률 = 20,000 / (240,000+180,000) * 100 = 4.8%
 assert.equal(view.rateText, "+4.8%");
 assert.equal(view.rateColor, "#D5327A");
-assert.equal(view.profitText, "+20,000원");
+// 수익금액 앞은 부호가 아니라 아카이브 가족 시트와 같은 ▲▼ 다.
+assert.equal(view.profitText, "▲ 20,000원");
 // 올랐으면 가운데 그림은 역할별 목표 그림 그대로고 배율도 건드리지 않는다.
 assert.equal(view.moodImg, "/ui/assets/goal-child.png");
 assert.equal(view.moodScale, 1);
@@ -147,7 +148,7 @@ const losing = homeView(held, { "005930": 50000, "259960": 100000 });
 assert.ok(losing.rateText.startsWith("−"));
 assert.equal(losing.rateColor, "#2E6BE6");
 assert.equal(losing.goalCount, 0);
-assert.ok(losing.profitText.startsWith("−"));
+assert.ok(losing.profitText.startsWith("▼ "));
 // 내렸으면 목표 그림 대신 우는 황소·곰이다. 살 수 있는 개수가 0인데 목표를 든 그림이
 // 웃고 있으면 화면이 앞뒤가 다른 말을 한다 — 2026-08-16 에 이 분기가 통째로 지워진 적 있다.
 assert.equal(losing.moodImg, MOOD_SAD_IMG);
@@ -162,7 +163,8 @@ assert.deepEqual(empty.holdings, []);
 assert.deepEqual(empty.topHoldings, []);
 assert.equal(empty.goalCount, 0);
 assert.equal(empty.rateText, "+0.0%");
-assert.equal(empty.profitText, "+0원");
+// 본전에는 도형이 없다 — `▲ 0원` 은 오르지 않았는데 오른 것처럼 읽힌다.
+assert.equal(empty.profitText, "0원");
 // 오르지도 내리지도 않았으면 회색이다 — `+0.0%` 를 핑크로 적으면 숫자와 색이 다른 말을 한다.
 assert.equal(empty.rateColor, "#8E93A8");
 assert.equal(empty.moodImg, MOOD_FLAT_IMG);

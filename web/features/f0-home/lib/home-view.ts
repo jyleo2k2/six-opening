@@ -373,7 +373,13 @@ export function homeView(
       (info.brand ? info.brand + " " : "") + info.unit + " " + goalCount + "개 살 수 있어요",
     // 실제 계좌를 붙이면 손실도 나온다. 부호와 색을 함께 바꾼다.
     rateText: (rate >= 0 ? "+" : "−") + Math.abs(rate).toFixed(1) + "%",
-    profitText: (profit >= 0 ? "+" : "−") + won(Math.abs(profit)),
+    // 수익금액 앞은 부호가 아니라 ▲▼ 다 — 아카이브 `familySummary` 와 같은 표시라, 한 앱에서
+    // 같은 뜻을 두 기호로 말하지 않는다. 도형은 글자이므로 줄에 걸린 `rateColor` 를 그대로
+    // 물려받는다. 따로 칠하면 숫자와 도형의 색이 갈린다.
+    //
+    // 본전에는 아무 것도 안 붙인다. `▲ 0원` 은 오르지 않았는데 오른 것처럼 읽힌다.
+    profitText:
+      (profit > 0 ? "▲ " : profit < 0 ? "▼ " : "") + won(Math.abs(profit)),
     rateColor: trendColor(trend),
     moodImg: art.src,
     moodScale: art.scale,
