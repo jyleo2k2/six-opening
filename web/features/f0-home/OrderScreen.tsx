@@ -334,17 +334,21 @@ export function OrderScreen({
   code,
   side,
   account,
+  archiveSheetOrigin,
   chatOrderRequest,
   orderPrefill,
   onLeave,
   onChatContext,
   onReorder,
+  onReturnToArchivePicks,
   onStage,
   tutorialMode = false,
 }: {
   code: string;
   side: "buy" | "sell";
   account: WalletAccountId;
+  /** 아카이브 추천종목 시트를 누르고 들어왔으면 그 시트 자리. 1단계 X 가 그리로 되짚는다. */
+  archiveSheetOrigin?: { sheetIndex: number } | null;
   chatOrderRequest?: ChatOrderRequest | null;
   /** 고치러 온 예약. 값이 채워진 1단계로 시작한다. */
   orderPrefill?: OrderPrefill | null;
@@ -355,6 +359,8 @@ export function OrderScreen({
    * 호스트가 하고(`onLeave` 와 같은 결), 화면은 어떤 주문인지만 올린다.
    */
   onReorder?: (order: PendingOrder) => void;
+  /** `archiveSheetOrigin` 이 있을 때 1단계 X 가 부른다 — 종목 상세가 아니라 그 시트로 돌아간다. */
+  onReturnToArchivePicks?: (sheetIndex: number) => void;
   /**
    * 주문 1/2/3 단계는 주소가 안 바뀌어(`useState`) 밖에서는 어디에 있는지 안 보인다.
    * 튜토리얼은 그 자리를 알아야 맞는 설명을 띄우므로 `onLeave` 와 같은 패턴으로 올린다.
@@ -1068,8 +1074,11 @@ export function OrderScreen({
         onLeave("/");
         return;
       }
-      if (step === 1) onLeave(`/stock/${code}`);
-      else {
+      if (step === 1) {
+        // 추천종목 시트를 누르고 들어왔으면 종목 상세가 아니라 그 시트로 돌아간다.
+        if (archiveSheetOrigin) onReturnToArchivePicks?.(archiveSheetOrigin.sheetIndex);
+        else onLeave(`/stock/${code}`);
+      } else {
         setStep(step - 1);
         setShowPad(false);
       }
@@ -1688,7 +1697,9 @@ export function OrderScreen({
         return;
       }
       if (step === 1) {
-        onLeave(`/stock/${code}`);
+        // 추천종목 시트를 누르고 들어왔으면 종목 상세가 아니라 그 시트로 돌아간다.
+        if (archiveSheetOrigin) onReturnToArchivePicks?.(archiveSheetOrigin.sheetIndex);
+        else onLeave(`/stock/${code}`);
         return;
       }
       setStep(step - 1);

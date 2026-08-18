@@ -336,12 +336,18 @@ export function ArchiveScreen({
   infoOpen,
   onInfoOpenChange,
   onLeave,
+  onPickOrder,
+  reopenSheet,
   view: requested,
 }: {
   account: WalletAccountId;
   infoOpen: boolean;
   onInfoOpenChange: (open: boolean) => void;
   onLeave: (path: string) => void;
+  /** 추천종목 시트에서 종목을 눌러 주문 화면으로 나간다. 시트 자리를 함께 올려 X 로 돌아올 수 있게 한다. */
+  onPickOrder: (path: string, sheetIndex: number) => void;
+  /** 주문 화면 X 가 되짚어 달라는 시트 자리. 마운트 때 한 번만 그 시트를 다시 연다. */
+  reopenSheet?: { sheetIndex: number } | null;
   /** 주소가 가리킨 자리(`/archive/return` 등). 챗봇 점프가 이 길로 들어온다. */
   view?: string;
 }) {
@@ -453,6 +459,17 @@ export function ArchiveScreen({
     setSheetIndex(index);
     sheet.openSheet();
   };
+
+  /**
+   * 주문 화면 X 로 돌아왔으면 그 시트를 다시 연다. 이 화면은 다른 화면으로 나가면 통째로
+   * 언마운트되므로(§6.11) 마운트마다 한 번만 확인하면 된다.
+   */
+  const sheetReopened = useRef(false);
+  useEffect(() => {
+    if (!reopenSheet || sheetReopened.current) return;
+    sheetReopened.current = true;
+    openSheetAt(reopenSheet.sheetIndex);
+  }, [reopenSheet]);
   const snapTo = (index: number) => {
     const node = rail.ref.current?.children[index] as HTMLElement | undefined;
     node?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
@@ -505,7 +522,8 @@ export function ArchiveScreen({
     }
   };
 
-  const sheetCard: WeekCard | undefined = cards[sheetIndex ?? activeCard] ?? cards[cards.length - 1];
+  const sheetCardIndex = sheetIndex ?? activeCard;
+  const sheetCard: WeekCard | undefined = cards[sheetCardIndex] ?? cards[cards.length - 1];
   /** 그 주 유형의 종목 세 개. 유형이 아직 없는 주(`관찰 중`)면 빈 배열이다. */
   const sheetPicks = buildTypePicks(sheetCard?.type.key ?? null, universe, quotes);
 
@@ -1383,7 +1401,7 @@ export function ArchiveScreen({
                     {sheetPicks.map((pick) => (
                       <div
                         key={pick.code}
-                        onClick={() => onLeave(pick.path)}
+                        onClick={() => onPickOrder(pick.path, sheetCardIndex)}
                         style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 13px", borderRadius: 17, cursor: "pointer" }}
                       >
                         <div style={{ flex: "none", width: 40, height: 40, borderRadius: 999, backgroundColor: "#FFFFFF", backgroundImage: pick.logo ? `url(${pick.logo})` : undefined, backgroundSize: "30px auto", backgroundPosition: "center", backgroundRepeat: "no-repeat", boxShadow: "0 1px 3px rgba(30,25,60,0.14)" }} />
