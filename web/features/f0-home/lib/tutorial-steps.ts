@@ -392,5 +392,6 @@ export function backPath(step: TutorialStep, code: string | null) {
   if (step.screen === "home") return "/";
   if (step.screen === "explore") return "/explore";
   if (step.screen === "stock" && code) return `/stock/${code}`;
+  if (step.screen === "order" && step.side && code) return `/${step.side}/${code}`;
   return null;
 }

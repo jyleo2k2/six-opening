@@ -141,11 +141,21 @@ const DARK_VALUE = styleFromCss(
 );
 // 구매·판매·대기 탭과 대기 목록 시트 — `renderVals-compute.js` 의 sheetTab·sheetStyle 과 같은 값이다.
 const TAB_ROW = styleFromCss("flex:none;display:flex;gap:4px;background:#EFEEF6;border-radius:999px;padding:4px");
+/**
+ * 이 화면의 겹치는 것들은 **베젤(`PhoneFrame` 의 프레임 이미지, z-index 10) 아래**에
+ * 머문다. `#kw-screen` 은 `z-index:auto` 라 쌓임 맥락을 만들지 않으므로 여기 적은 값은
+ * `.phone-stage__content` 안에서 프레임 이미지와 **직접** 겨룬다 — 예전의 40·41·42 는
+ * 그 겨룸에서 이겨 시트가 폰 테두리 위로 올라섰고, 화면의 `overflow:hidden`(반경 40)
+ * 에만 잘려 그보다 깊은 개구부 아래 코너(반경 62)를 네모나게 덮었다.
+ *
+ * 값은 홈·아카이브 시트와 같은 층(딤 6, 시트 7)을 쓴다. 4 보다 커야 챗봇 오버레이를
+ * 덮는다 — 시트를 열어 둔 채 챗봇 버튼이 위로 비치면 안 된다.
+ */
 const SHEET_SCRIM = styleFromCss(
-  "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(18,14,40,0.34);z-index:40",
+  "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(18,14,40,0.34);z-index:6",
 );
 const SHEET = styleFromCss(
-  "position:absolute;left:0;right:0;bottom:0;z-index:41;max-height:70%;overflow-y:auto;background:#FFFFFF;" +
+  "position:absolute;left:0;right:0;bottom:0;z-index:7;max-height:70%;overflow-y:auto;background:#FFFFFF;" +
     "border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -14px 34px -12px rgba(20,16,50,0.28)",
 );
 const SHEET_GRAB = styleFromCss("width:42px;height:4px;border-radius:999px;background:#E1E0EC;margin:0 auto 14px");
@@ -163,9 +173,9 @@ const TARGET_HINT = styleFromCss("font-size:12.5px;font-weight:500;color:#9B94C4
 const SCRIM_CSS =
   "position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;" +
   "padding:0 32px;background:rgba(20,16,45,0.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)";
-const BLOCK_SCRIM = styleFromCss(`z-index:20;${SCRIM_CSS}`);
-/** 예약 시트(z-index 41) 에서 눌러 여는 확인이라 시트보다 위에 떠야 한다. */
-const REORDER_SCRIM = styleFromCss(`z-index:42;${SCRIM_CSS}`);
+const BLOCK_SCRIM = styleFromCss(`z-index:6;${SCRIM_CSS}`);
+/** 예약 시트(z-index 7) 에서 눌러 여는 확인이라 시트보다 위, 베젤(10) 아래여야 한다. */
+const REORDER_SCRIM = styleFromCss(`z-index:8;${SCRIM_CSS}`);
 const BLOCK_CARD = styleFromCss(
   "display:flex;flex-direction:column;align-items:center;width:100%;box-sizing:border-box;background:#FFFFFF;" +
     "border-radius:30px;padding:26px 24px 24px;box-shadow:0 24px 48px -16px rgba(30,25,60,0.32)",
@@ -343,6 +353,7 @@ export function OrderScreen({
   onReturnToArchivePicks,
   onStage,
   tutorialMode = false,
+  tutorialStage,
   embedded = false,
 }: {
   code: string;
@@ -369,6 +380,8 @@ export function OrderScreen({
   onStage?: (stage: TutorialStage) => void;
   /** 튜토리얼에서는 완료 화면만 보여 주고 실제 주문·거래 기록은 만들지 않는다. */
   tutorialMode?: boolean;
+  /** 튜토리얼이 이전 장으로 이동할 때 주문 화면의 내부 단계를 맞춘다. */
+  tutorialStage?: TutorialStage;
   /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
   embedded?: boolean;
 }) {
@@ -383,6 +396,12 @@ export function OrderScreen({
   useEffect(() => {
     onStage?.(`order-${step}` as TutorialStage);
   }, [step, onStage]);
+  useEffect(() => {
+    if (!tutorialMode || !tutorialStage || !tutorialStage.startsWith("order-")) return;
+    const requested = Number(tutorialStage.slice("order-".length));
+    if (!Number.isInteger(requested) || requested < 1 || requested > 3) return;
+    setStep((current) => (current === requested ? current : requested));
+  }, [tutorialMode, tutorialStage]);
   const [draft, setDraft] = useState<BuyDraft>(blankBuyDraft);
   const [sellDraft, setSellDraftState] = useState<SellDraft | null>(null);
   // 갖고 있지 않은 회사를 팔려고 했을 때 뜨는 안내. 프로토타입의 `sellBlocked` 와 같다.
@@ -396,6 +415,11 @@ export function OrderScreen({
   const [reasonOrder] = useState(() => shuffledIndexes(6));
   const [sellReasonOrder] = useState(() => shuffledIndexes(5).concat([5]));
   const [orderError, setOrderError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!tutorialMode || !tutorialStage || !tutorialStage.startsWith("order-")) return;
+    setShowPad(false);
+    setOrderError(null);
+  }, [tutorialMode, tutorialStage]);
   const [done, setDone] = useState<{
     name: string;
     qty: number;
@@ -484,6 +508,20 @@ export function OrderScreen({
   // 챗봇 맥락. 값 계산은 `lib/order-view.ts` 의 `orderChatContext` 가 소유한다 — 화면이
   // 쓰는 `buyMath`·`sellMath` 를 그대로 거쳐야 화면과 챗봇이 같은 수량을 말한다.
   const stockName = stock?.name ?? "";
+  // 매도 화면에서 매수 완료 장으로 되돌아갈 때도 튜토리얼 완료 카드의 자리를 보여 준다.
+  useEffect(() => {
+    if (!tutorialMode || tutorialStage !== "order-3" || done || !stockName || price <= 0) return;
+    setDone({
+      name: stockName,
+      qty: 1,
+      amount: price,
+      proceeds: price,
+      limit: null,
+      scheduled: false,
+      scheduledFor: null,
+      requestMode: side === "buy" ? "qty" : undefined,
+    });
+  }, [done, price, side, stockName, tutorialMode, tutorialStage]);
   const walletRef = useRef(wallet);
   walletRef.current = wallet;
   useEffect(() => {
@@ -1465,26 +1503,33 @@ export function OrderScreen({
             }}
             width={128}
           />
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#F5327F", letterSpacing: "0.08em", marginTop: 14 }}>
-            {done.limit ? "기다리는 주문에 넣었어요" : done.scheduled ? "다음 장 주문을 맡아뒀어요" :"주문 완료!"}
-          </div>
+          {/*
+            상태 라벨(`주문 완료!`·`기다리는 주문에 넣었어요`)은 띄우지 않는다 — 바로 아래
+            제목이 무엇을 언제 사는지 이미 다 말한다.
+          */}
           <div
             style={{
               fontSize: 26,
               fontWeight: 800,
               color: "#01185A",
-              marginTop: 6,
+              marginTop: 14,
               textAlign: "center",
               letterSpacing: "-0.01em",
               lineHeight: 1.4,
-              whiteSpace: "pre-line",
+              wordBreak: "keep-all",
+              overflowWrap: "break-word",
             }}
           >
+            {/*
+              줄바꿈 자리를 `\n` 으로 못 박지 않는다 — 종목 이름과 수량 길이가 제각각이라
+              고정 줄바꿈은 짧은 이름에서 어색하게 끊기고 긴 이름에서는 넘친다. `keep-all` 이
+              낱말 단위로만 접고 화면을 벗어날 때만 새 줄로 내린다.
+            */}
             {done.limit
-              ? `${done.limit.toLocaleString("ko-KR")}원이 되면\n${done.name} ${doneQtyText}를 살게요!`
+              ? `${done.limit.toLocaleString("ko-KR")}원이 되면 ${done.name} ${doneQtyText}를 살게요!`
               : done.scheduled
-                ? `${done.scheduledFor} 장이 열리면\n${done.name}을 시가로 살게요!`
-                : `${done.name} ${doneQtyText}를\n주문했어요!`}
+                ? `장이 열리면 ${done.name} ${doneQtyText}를 살게요`
+                : `${done.name} ${doneQtyText}를 주문했어요!`}
           </div>
           <div
             style={{
@@ -1494,7 +1539,8 @@ export function OrderScreen({
               marginTop: 12,
               textAlign: "center",
               lineHeight: 1.6,
-              whiteSpace: "pre-line",
+              wordBreak: "keep-all",
+              overflowWrap: "break-word",
             }}
           >
             {/*
@@ -1505,10 +1551,10 @@ export function OrderScreen({
               "아카이브에서 오늘의 나를 다시 만나요" 라고 없는 자리를 가리켰다.
             */}
             {done.limit
-              ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 돈은 잠깐 맡아둘게요!"
+              ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요. 그동안 그 돈은 잠깐 맡아둘게요!"
               : done.scheduled
-                ? "지금은 장이 닫혀 있어서 자리만 맡아뒀어요.\n주문과 체결은 달라요 — 거래가 열리는 첫날 시가로 사고, 안 열리면 돈은 그대로 있어요."
-                : "왜 샀는지까지 남긴 건 정말 잘한 거예요.\n나중에 팔 때 오늘의 마음을 다시 보여줄게요!"}
+                ? "주문과 체결은 달라요. 거래가 열리는 첫날 시가로 사고, 안 열리면 돈은 그대로 있어요"
+                : "왜 샀는지까지 남긴 건 정말 잘한 거예요. 나중에 팔 때 오늘의 마음을 다시 보여줄게요!"}
           </div>
           <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 22 }}>
             <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>
@@ -2115,22 +2161,20 @@ export function OrderScreen({
           }}
           width={150}
         />
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", letterSpacing: "0.08em", marginTop: 14 }}>
-          {done.limit ? "기다리는 주문에 넣었어요" : done.scheduled ? "다음 장 주문을 맡아뒀어요" :"매도 완료"}
-        </div>
-        <div style={{ fontSize: 24, fontWeight: 800, color: "#01185A", marginTop: 6, textAlign: "center", letterSpacing: "-0.01em", lineHeight: 1.4, whiteSpace: "pre-line" }}>
+        {/* 매수 완료와 같은 이유로 상태 라벨은 띄우지 않고, 줄바꿈도 낱말 단위로만 맡긴다. */}
+        <div style={{ fontSize: 24, fontWeight: 800, color: "#01185A", marginTop: 14, textAlign: "center", letterSpacing: "-0.01em", lineHeight: 1.4, wordBreak: "keep-all", overflowWrap: "break-word" }}>
           {done.limit
-            ? `${done.limit.toLocaleString("ko-KR")}원이 되면\n${done.name} ${sdQty}를 팔게요`
+            ? `${done.limit.toLocaleString("ko-KR")}원이 되면 ${done.name} ${sdQty}를 팔게요`
             : done.scheduled
-              ? `${done.scheduledFor} 장이 열리면\n${done.name} ${sdQty}를 시가로 팔게요`
-              : `${done.name} ${sdQty}를\n팔았어요`}
+              ? `장이 열리면 ${done.name} ${sdQty}를 팔게요`
+              : `${done.name} ${sdQty}를 팔았어요`}
         </div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#5C6280", marginTop: 12, textAlign: "center", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: "#5C6280", marginTop: 12, textAlign: "center", lineHeight: 1.6, wordBreak: "keep-all", overflowWrap: "break-word" }}>
           {done.limit
-            ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 주식은 잠깐 맡아둘게요."
+            ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요. 그동안 그 주식은 잠깐 맡아둘게요."
             : done.scheduled
-              ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게요."
-              : "왜 팔았는지까지 남겨뒀어요.\n종목 차트에서 산 날과 판 날을 함께 볼 수 있어요."}
+              ? "주문 접수와 체결은 달라요. 거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게요."
+              : "왜 팔았는지까지 남겨뒀어요. 종목 차트에서 산 날과 판 날을 함께 볼 수 있어요."}
         </div>
 
         <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 20 }}>

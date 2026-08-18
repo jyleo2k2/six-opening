@@ -104,7 +104,7 @@ async function run() {
   flow(18, "market", "buy_2");
   assert.equal(useChatBehaviorStore.getState().activeSignal, null);
 
-  // ── 끄기는 세션이 갈려도 유지된다 — 아이가 직접 켤 때까지다 ─────────────
+  // ── 끄기는 30분 세션이 갈려도 유지된다 (앱을 다시 켜면 풀린다 — 아래) ───
   const later = start + PROACTIVE_LIMITS.sessionIdleMs + 1000;
   useChatBehaviorStore.getState().recordEvent({
     type: "screen_dwell_completed",
@@ -123,6 +123,50 @@ async function run() {
     screen: "order",
     durationMs: 5 * 60 * 1000 + 1,
     at: later + 1,
+  });
+  assert.equal(useChatBehaviorStore.getState().activeSignal, "dwell");
+
+  // ── 끄기는 저장하지 않는다 — 앱을 다시 켜면 켜진 채로 시작한다 ──────────
+  const PERSIST_KEY = "kiwoom-chat-behavior-unlimited-v1";
+  useChatBehaviorStore.getState().acceptActiveSignal();
+  for (const signal of ["dwell", "buyHesitation", "orderMethodConfusion"] as const) {
+    useChatBehaviorStore.setState({ activeSignal: signal });
+    useChatBehaviorStore.getState().dismissActiveSignal(signal);
+  }
+  assert.equal(useChatBehaviorStore.getState().proactiveMute.off, true);
+
+  const saved = JSON.parse(storage.get(PERSIST_KEY) ?? "{}") as {
+    state?: Record<string, unknown>;
+    version?: number;
+  };
+  assert.equal(saved.version, 2);
+  assert.equal("proactiveMute" in (saved.state ?? {}), false);
+  // 이탈 기록과 30분 세션은 계속 저장한다. 새로고침으로 사라지면 신호가 조건을 못 채운다.
+  assert.ok(Array.isArray(saved.state?.events));
+  assert.ok(saved.state?.proactiveSession);
+
+  // ── 이미 꺼 둔 브라우저의 v1 저장본도 끄기를 되살리지 못한다 ────────────
+  useChatBehaviorStore.getState().enableProactiveHelp();
+  storage.set(
+    PERSIST_KEY,
+    JSON.stringify({
+      state: {
+        events: [],
+        proactiveSession: { lastActivityAt: later },
+        activeSignal: null,
+        activeSignalVersion: 0,
+        proactiveMute: { declines: 0, mutedSignals: [], off: true },
+      },
+      version: 0,
+    }),
+  );
+  await useChatBehaviorStore.persist.rehydrate();
+  assert.equal(useChatBehaviorStore.getState().proactiveMute.off, false);
+  useChatBehaviorStore.getState().recordEvent({
+    type: "screen_dwell_completed",
+    screen: "order",
+    durationMs: 5 * 60 * 1000 + 1,
+    at: later + 2,
   });
   assert.equal(useChatBehaviorStore.getState().activeSignal, "dwell");
 

@@ -23,6 +23,9 @@ import type {
 
 const MAX_SESSION_EVENTS = 100;
 
+/** `proactiveMute` 를 저장본에서 뺀 판. v1 저장본은 `migrate` 가 걸러 낸다. */
+const PERSIST_VERSION = 2;
+
 type ChatBehaviorStore = {
   events: ChatBehaviorEvent[];
   proactiveSession: ProactiveSessionState;
@@ -38,6 +41,12 @@ type ChatBehaviorStore = {
   enableProactiveHelp: () => void;
   clearSession: (now: number) => void;
 };
+
+/** localStorage 에 남기는 부분. 끄기 상태(`proactiveMute`)는 여기 없다. */
+type PersistedChatBehavior = Pick<
+  ChatBehaviorStore,
+  "events" | "proactiveSession" | "activeSignal" | "activeSignalVersion"
+>;
 
 export const useChatBehaviorStore = create<ChatBehaviorStore>()(
   persist(
@@ -106,6 +115,35 @@ export const useChatBehaviorStore = create<ChatBehaviorStore>()(
     {
       name: "kiwoom-chat-behavior-unlimited-v1",
       storage: createJSONStorage(() => localStorage),
+      version: PERSIST_VERSION,
+      /**
+       * **선제 도움 끄기는 저장하지 않는다.** 앱을 다시 켜거나 다시 로그인하면 켜진 채로
+       * 시작한다(로그아웃은 `window.location.href = "/"` 라 그때도 새 로드다).
+       *
+       * 예전에는 전체 상태를 통째로 저장해 `off` 가 브라우저에 영구히 남았다. 그런데 되살릴
+       * 스위치는 대화창 머리에 **꺼져 있을 때만** 보이는 버튼 하나뿐이고, 말풍선은
+       * `buyHesitation` 을 빼면 스스로 사라지지 않는다 — 8초짜리를 치우려고 누른 `아니요` 가
+       * 세 번 쌓이면 그 브라우저에서는 선제 도움이 두 번 다시 뜨지 않았다. 끄기의 수명을
+       * 한 번의 앱 사용으로 줄여 되살릴 길을 앱 재시작으로 넓힌다.
+       *
+       * 행동 이벤트와 30분 세션은 그대로 저장한다. 새로고침으로 이탈 기록이 사라지면
+       * 신호가 조건을 채울 수 없다.
+       */
+      partialize: ({
+        events,
+        proactiveSession,
+        activeSignal,
+        activeSignalVersion,
+      }) => ({ events, proactiveSession, activeSignal, activeSignalVersion }),
+      /**
+       * v1 저장본에는 `proactiveMute` 가 들어 있다. 되읽기는 얕은 병합이라 그대로 두면
+       * 이미 꺼 둔 브라우저가 이 변경 뒤에도 꺼진 채로 뜬다 — 남은 값을 여기서 떨어뜨린다.
+       */
+      migrate: (persisted) => {
+        if (!persisted || typeof persisted !== "object") return persisted as PersistedChatBehavior;
+        const { proactiveMute: _legacyMute, ...rest } = persisted as Record<string, unknown>;
+        return rest as PersistedChatBehavior;
+      },
     },
   ),
 );

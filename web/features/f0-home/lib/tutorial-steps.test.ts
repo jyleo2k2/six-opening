@@ -31,6 +31,8 @@ assert.equal(
 
 const tutorialOverlaySource = readFileSync(path.resolve("features/f0-home/TutorialOverlay.tsx"), "utf8");
 assert.match(tutorialOverlaySource, /pointerEvents: "auto"/u);
+assert.match(tutorialOverlaySource, /튜토리얼 \$\{index \+ 1\}\/\$\{steps\.length\}/u);
+assert.match(tutorialOverlaySource, /const canRetreat = prevStep !== null/u);
 
 // ── 순서 ────────────────────────────────────────────────────────────────────
 
@@ -218,7 +220,7 @@ assert.equal(backPath(stepOf("detail-news"), "259960"), "/stock/259960");
 
 // 주문 화면으로는 되돌아가지 않는다 — 지나간 입력을 되감아 다시 누르게 하지 않는다.
 for (const step of TUTORIAL_STEPS.filter((step) => step.screen === "order")) {
-  assert.equal(backPath(step, "259960"), null, step.id);
+  assert.equal(backPath(step, "259960"), `/${step.side}/259960`, step.id);
 }
 // 종목을 모르면 상세로도 못 간다. 빈 주소로 보내느니 버튼을 흐리게 둔다.
 assert.equal(backPath(stepOf("detail-chart"), null), null);
