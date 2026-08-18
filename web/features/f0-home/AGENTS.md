@@ -12,6 +12,9 @@
 - 매수·매도 이유와 보유 계획 문구는 `shared/data/trade-copy.js` 하나가 원본이다. 주문 화면(`OrderScreen`)과 아카이브 피드가 같은 코드를 읽어야 하므로 여기에 다시 적지 않는다.
 - 화면끼리의 이동은 `onLeave(path)`로 올려 `ConnectedPrototype`이 처리한다. 컴포넌트가 직접 주소를 바꾸지 않는다.
 - **앱에 `postMessage` 계약은 남아 있지 않다.** 차트는 `ChartScreen`이 시안대로 인라인 SVG를 직접 그리므로 마지막 iframe 계약(`kiwoom:chart-options`·`kiwoom:chart-ready`)도 함께 사라졌다. 새 메시지 계약을 늘리지 않는다.
+- **차트 상세(`ChartScreen`)는 끌어 옮기고 오므려 확대할 수 있다.** 무엇을 보고 있는지는 `lib/chart-window.ts`의 창(`ChartWindow`) 하나가 정하고, `chart-view`는 받은 구간을 좌표로 바꾸기만 한다 — `slice(-N)` 상수로 되돌리지 않는다. 서버는 일봉 1년·주봉 3년·분봉 이틀치를 주는데 기본 창은 그중 72·43·99개만 쓰므로 **나머지 과거는 새 API 없이 이미 손에 있다.** 손짓 배선은 `lib/use-chart-gesture.ts`이고 계산과 나누는 방식은 `rail-drag` ↔ `use-rail-drag`와 같다. 상세 화면 미니차트는 이 손짓을 받지 않는다 — 그 차트의 원본은 시각도 없고 값도 근사인 `spark`라 확대해도 새로 보이는 것이 없다.
+- **창은 인덱스가 아니라 봉의 시각(`endTime`)으로 붙잡는다.** 차트 화면은 1초마다 봉 전체를 다시 받으므로 인덱스로 잡으면 새 봉이 붙을 때마다 창이 한 칸씩 과거로 밀려 가만히 있어도 화면이 흔들린다. `endTime === null`은 "맨 오른쪽에 붙어 있다"는 뜻이고, **이때만** 현재가 태그를 띄우고 마지막 봉의 종가를 지금 가격으로 맞춘다 — 과거 구간에 지금 가격을 얹으면 없던 값이 생긴다.
+- **창은 늘 데이터 안에서 접힌다.** 시세 제공자도 보관 DB도 없으면 한 종목의 봉은 픽스처 16개(분봉 6개)뿐이라, 담을 개수의 하한을 `MIN_CHART_BARS`로 못 박으면 창이 데이터보다 커진다. 축소 상한은 캔들 몸통 최소 폭(`chart-view`의 `MIN_BODY_W`)에서 나오고 두 파일이 같은 값을 보는지는 `chart-window.test.ts`가 대조한다.
 - **폰 화면 위에 겹치는 오버레이는 `phoneScreenClipPath`로 화면 사각형에 가둔다.** 오버레이는 iframe·`PhoneFrame` 밖에 있어 프레임 이미지와 스태킹 컨텍스트가 갈리므로 z-index로는 순서를 정할 수 없다. 좌표가 어긋나도 프레임 밖으로 나가지 않게 하는 수단은 자르기뿐이다.
 - 화면 사각형은 `ConnectedPrototype`과 `usePhoneScreenRect`가 **같은 `getPrototypeScreenRect(창너비, 창높이)`** 로 잡는다. 기하 상수의 원본은 `f10-chatbot/lib/bottom-sheet`의 `PROTOTYPE_PHONE` 하나다.
 - **가족 피드는 `ArchiveScreen` 수익률 탭이 소유한다.** 별도 F11 화면이나 진입 버튼을 다시 만들지 않는다. 반응(댓글·좋아요)은 서버가 원본이고 화면에서 개수를 세지 않는다.

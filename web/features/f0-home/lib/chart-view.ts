@@ -14,10 +14,15 @@
  * (`0.22 + 0.68 * …`) 체결일과 무관한 자리에 찍는데, 우리 봉에는 시각이 있으므로
  * `buildTradeMarkers` 로 **체결 시각의 봉**에 붙인다 — 그래야 아래 범례의 날짜와
  * 핀 자리가 서로 맞는다(`chart-trade-legend` 의 같은 결정).
+ *
+ * **어느 구간을 그릴지는 여기서 정하지 않는다.** 예전에는 `slice(-N)` 으로 늘 최근 N 개를
+ * 잡았는데 확대·축소와 좌우 이동이 생기면서 그 구간이 손짓에 따라 바뀐다. 구간 계산은
+ * `chart-window.ts` 가 갖고 이 파일은 받은 구간을 좌표로 바꾸기만 한다.
  */
 import type { PrototypeChartPeriod, PrototypeChartType } from "../../f2-trade/chart-data";
 import { buildTradeMarkers, type ChartTrade } from "../../../shared/engine/trade-markers";
 import type { PinRole } from "./chart-trade-legend";
+import { defaultChartWindow, resolveChartWindow, type ChartWindow } from "./chart-window";
 import { PIN_COLORS } from "./detail-chart";
 import { won } from "./portfolio-view";
 
@@ -83,6 +88,12 @@ export type ChartView = {
   /** 현재가 태그의 y 와 글자. */
   nowY: number;
   nowText: string;
+  /**
+   * 현재가 태그를 띄울지. 창이 맨 오른쪽(가장 최근 봉)에 붙어 있을 때만 참이다.
+   * 과거로 끌어다 놓은 구간에 지금 가격표가 떠 있으면 그 구간의 값과 섞여 읽히고,
+   * 지금 가격이 그 구간의 눈금 범위 밖이면 태그가 아예 플롯 밖으로 나간다.
+   */
+  nowVisible: boolean;
   hi: ChartViewMark;
   lo: ChartViewMark;
   pins: ChartViewPin[];
@@ -111,18 +122,14 @@ const HI_LABEL_UP = 24;
 const LO_LABEL_DOWN = 9;
 
 /**
- * 화면에 띄우는 봉 개수.
- *
- * 시안이 기간마다 정해 둔 밀도 그대로다 — 선은 `spec[0] * tfMul`(분 62×1.6, 일 72×1,
- * 주 78×0.55), 캔들은 `G`(분 34, 일 24, 주 16). 봉을 전부 278px 에 밀어 넣으면
- * 일봉 1년치가 실오라기로 뭉개지므로 **최근 구간만** 자른다.
+ * 캔들 몸통의 최소 폭. 이보다 좁아지면 몸통끼리 붙어 한 덩어리로 보이므로, 축소해서
+ * 담을 수 있는 캔들 개수의 상한(`chart-window` 의 `MAX_CANDLE_BARS`)이 여기서 나온다.
  */
-const LINE_BARS: Record<PrototypeChartPeriod, number> = { minute: 99, daily: 72, weekly: 43 };
-const CANDLE_BARS: Record<PrototypeChartPeriod, number> = { minute: 34, daily: 24, weekly: 16 };
+export const MIN_BODY_W = 3.5;
 
 /** 몸통 폭 — 봉 간격의 60%, 최소 3.5px. 시안의 `bw` 와 같은 식이다. */
 function bodyWidth(count: number) {
-  return Math.max(3.5, (PLOT_W / count) * 0.6);
+  return Math.max(MIN_BODY_W, (PLOT_W / count) * 0.6);
 }
 
 export function buildChartView(options: {
@@ -132,13 +139,22 @@ export function buildChartView(options: {
   period: PrototypeChartPeriod;
   chartType: PrototypeChartType;
   trades: readonly ChartViewTrade[];
+  /**
+   * 볼 구간. 주지 않으면 기간마다 정해진 기본 창(맨 오른쪽에 붙은 최근 N개)이라
+   * 확대·축소가 없던 때와 같은 그림이 나온다.
+   */
+  window?: ChartWindow;
 }): ChartView | null {
   const { points, price, period, chartType, trades } = options;
   const candle = chartType === "candlestick";
 
-  const want = candle ? CANDLE_BARS[period] : LINE_BARS[period];
-  const window = points.slice(-want);
-  const n = window.length;
+  const { start, end, live } = resolveChartWindow(
+    points.map((point) => point.time),
+    options.window ?? defaultChartWindow(period, chartType),
+    chartType,
+  );
+  const visible = points.slice(start, end);
+  const n = visible.length;
   // 봉이 하나뿐이면 x 를 나눌 수 없다. 선도 캔들도 그리지 않는다.
   if (n < 2) return null;
 
@@ -149,9 +165,12 @@ export function buildChartView(options: {
    * 가격과 몇 원 갈릴 수 있다. 그대로 두면 현재가 태그가 선 끝에서 떠 있고, 값이 눈금
    * 범위를 벗어나면 태그가 플롯 밖으로 나간다. 고가·저가도 같이 넓혀 캔들 몸통이
    * 꼬리를 뚫지 않게 한다.
+   *
+   * **맨 오른쪽에 붙어 있을 때만** 그렇게 한다. 과거로 끌어다 놓은 구간의 마지막 봉은
+   * 지금 봉이 아니므로 거기에 지금 가격을 얹으면 없던 값이 생긴다.
    */
-  const bars = window.map((point, i) =>
-    i === n - 1
+  const bars = visible.map((point, i) =>
+    live && i === n - 1
       ? {
           ...point,
           close: price,
@@ -194,7 +213,9 @@ export function buildChartView(options: {
     const gy = y(value);
     grid.push(gy);
     // 현재가 태그와 겹치는 눈금은 글자만 지운다. 선은 남겨야 칸이 고르게 보인다.
-    if (Math.abs(gy - nowY) < NOW_TAG_GAP) continue;
+    // 태그를 띄우지 않는 과거 구간에서는 지울 이유가 없다 — 지우면 가격 글자 한 줄이
+    // 까닭 없이 비어 눈금 다섯 줄 중 하나를 읽지 못한다.
+    if (live && Math.abs(gy - nowY) < NOW_TAG_GAP) continue;
     axis.push({ y: gy, text: won(value) });
   }
 
@@ -251,12 +272,14 @@ export function buildChartView(options: {
     candles,
     nowY,
     nowText: won(price),
+    nowVisible: live,
     hi: {
       x: x(hiIndex),
       y: y(hi),
       text: `최고 ${won(hi)}`,
-      // 최고가 곧 현재가면 현재가 태그가 같은 말을 이미 하고 있다.
-      visible: !candle && Math.round(hi) !== Math.round(price),
+      // 최고가 곧 현재가면 현재가 태그가 같은 말을 이미 하고 있다. 태그가 없는 과거
+      // 구간에서는 그 말을 대신 해 줄 것이 없으므로 값이 같아도 이름표를 남긴다.
+      visible: !candle && (!live || Math.round(hi) !== Math.round(price)),
       labelX: clampX(x(hiIndex)),
       labelY: y(hi) - HI_LABEL_UP,
     },
@@ -264,7 +287,7 @@ export function buildChartView(options: {
       x: x(loIndex),
       y: y(lo),
       text: `최저 ${won(lo)}`,
-      visible: !candle && Math.round(lo) !== Math.round(price),
+      visible: !candle && (!live || Math.round(lo) !== Math.round(price)),
       labelX: clampX(x(loIndex)),
       labelY: y(lo) + LO_LABEL_DOWN,
     },

@@ -104,3 +104,52 @@ assert.equal(pinned!.pins[0].y.toFixed(1), onLine[1]);
 // 잘려 나간 구간의 체결은 핀도 없다 — 안 보이는 봉을 가리킬 수 없다.
 const old: ChartViewTrade[] = [{ ...trades[0], tradedAt: "2020-01-01T00:00:00Z" }];
 assert.equal(buildChartView({ ...daily, points: bars(40), price: 10_500, trades: old })!.pins.length, 0);
+
+// ── 확대·축소와 좌우 이동이 바꾸는 것 ────────────────────────────────────────
+// 구간 계산 자체는 `chart-window.test.ts` 가 지킨다. 여기서는 **그 구간이 좌표와 글자에
+// 어떻게 닿는지**만 본다.
+
+// 창을 주면 그만큼만 그린다. 안 주면 기본 창이라 위의 단정이 그대로 산다.
+const zoomed = buildChartView({ ...daily, points: many, price: 10_299, window: { endTime: null, barCount: 20 } });
+assert.equal(zoomed!.linePoints.split(" ").length, 20);
+assert.equal(zoomed!.nowVisible, true);
+
+// 과거로 끌어다 놓으면 현재가 태그를 감춘다 — 그 구간의 값이 아니기 때문이다.
+const past = buildChartView({
+  ...daily,
+  points: many,
+  price: 10_299,
+  window: { endTime: many[199].time, barCount: 20 },
+});
+assert.equal(past!.nowVisible, false);
+assert.equal(past!.linePoints.split(" ").length, 20);
+
+// 마지막 봉의 종가를 지금 가격으로 맞추는 것도 맨 오른쪽에 붙어 있을 때뿐이다.
+// 200번째 봉의 종가는 `10_000 + 199` 이고, 지금 가격 10,299 원이 얹히면 안 된다.
+const lastY = Number(past!.linePoints.split(" ")[19].split(",")[1]);
+assert.notEqual(lastY.toFixed(1), past!.nowY.toFixed(1));
+
+// 태그가 없으면 그 자리 가격 글자를 지울 이유도 없다 — 눈금 다섯 줄이 모두 값을 갖는다.
+assert.equal(past!.axis.length, 5);
+assert.equal(zoomed!.axis.length < 5, true);
+
+// 태그가 없는 구간에서는 최고·최저 이름표가 값이 같아도 남는다. 대신 말해 줄 것이 없다.
+const flat = Array.from({ length: 300 }, (_, i) => ({
+  time: START + i * DAY,
+  open: 10_000,
+  high: 10_000,
+  low: 10_000,
+  close: 10_000,
+}));
+const flatPast = buildChartView({
+  ...daily,
+  points: flat,
+  price: 10_000,
+  window: { endTime: flat[199].time, barCount: 20 },
+});
+assert.equal(flatPast!.hi.visible, true);
+assert.equal(flatPast!.lo.visible, true);
+
+// 봉이 몇 개 없는 종목(픽스처 폴백 16개)도 기본 창 그대로 그려진다 — 51종 어디서나 열린다.
+const few = buildChartView({ ...daily, points: bars(16), price: 10_015 });
+assert.equal(few!.linePoints.split(" ").length, 16);
