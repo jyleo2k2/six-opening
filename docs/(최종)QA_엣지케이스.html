@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영웅 키움 — QA 엣지 케이스 (최종)</title>
+<style>
+  :root{
+    --navy:#0B2B5B; --magenta:#F5327F; --ink:#1A2233; --gray:#E5E8EF;
+    --bg:#F7F8FB; --warn:#B3261E; --ok:#0F7B4F; --muted:#5A6478;
+    --crit:#8B0000; --high:#B3261E; --mid:#B26A00; --low:#5A6478;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:96px}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:400 15px/1.7 "Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  header.top{
+    position:sticky; top:0; z-index:10; background:var(--navy); color:#fff;
+    padding:14px 24px; box-shadow:0 2px 10px rgba(11,43,91,.18);
+  }
+  header.top h1{margin:0; font-size:18px; font-weight:800; letter-spacing:-.2px}
+  header.top p{margin:3px 0 0; font-size:12px; color:#C9D6EC}
+  .tools{display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap}
+  .tools input{
+    flex:1 1 260px; min-width:200px; padding:7px 11px; border:0; border-radius:8px;
+    font:inherit; font-size:13px;
+  }
+  .tools a{
+    color:#fff; text-decoration:none; font-size:12px; font-weight:600;
+    background:rgba(255,255,255,.14); padding:6px 10px; border-radius:7px; white-space:nowrap;
+  }
+  .tools a:hover{background:rgba(255,255,255,.26)}
+  main{max-width:1080px; margin:0 auto; padding:28px 24px 80px}
+  section{
+    background:#fff; border:1px solid var(--gray); border-radius:14px;
+    padding:24px 26px; margin:0 0 22px;
+  }
+  h2{
+    margin:0 0 6px; font-size:20px; font-weight:800; color:var(--navy);
+    letter-spacing:-.3px;
+  }
+  h2 .num{
+    display:inline-grid; place-items:center; width:26px; height:26px; margin-right:9px;
+    background:var(--navy); color:#fff; border-radius:8px; font-size:13px; vertical-align:2px;
+  }
+  h3{margin:26px 0 10px; font-size:15px; font-weight:800; color:var(--navy)}
+  h3:first-of-type{margin-top:18px}
+  .lede{margin:0 0 4px; color:var(--muted); font-size:13.5px}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:13.5px}
+  th,td{border:1px solid var(--gray); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:#F1F4FA; font-weight:700; color:var(--navy); font-size:12.5px}
+  td code, p code, li code, dd code{
+    background:#F1F4FA; padding:1px 5px; border-radius:4px;
+    font-family:ui-monospace,"Cascadia Mono",Consolas,monospace; font-size:.9em;
+  }
+  pre{
+    background:#0F1B30; color:#DCE6F5; border-radius:10px; padding:12px 14px; margin:10px 0;
+    font-family:ui-monospace,"Cascadia Mono",Consolas,monospace; font-size:12.5px; line-height:1.6;
+    overflow-x:auto;
+  }
+  pre .cm{color:#7E93B5}
+  .bug{border-left:3px solid var(--gray); padding:0 0 0 16px; margin:0 0 22px}
+  .bug:last-child{margin-bottom:0}
+  .bug.sev-crit{border-left-color:var(--crit)}
+  .bug.sev-high{border-left-color:var(--high)}
+  .bug.sev-mid{border-left-color:var(--mid)}
+  .bug.sev-low{border-left-color:var(--low)}
+  .bug .t{font-weight:800; color:var(--navy); margin:0 0 8px; font-size:14.5px}
+  .bug dl{margin:0; display:grid; grid-template-columns:64px 1fr; gap:4px 12px}
+  .bug dt{font-size:12px; font-weight:700; color:var(--muted); padding-top:2px}
+  .bug dd{margin:0}
+  .bug .src{font-size:12.5px; color:var(--muted)}
+  .tag{
+    display:inline-block; font-size:11px; font-weight:700; padding:1px 7px;
+    border-radius:20px; vertical-align:1px; margin-left:6px; white-space:nowrap;
+  }
+  .t-crit{background:#F6DCDC; color:var(--crit)}
+  .t-high{background:#FBE9E7; color:var(--high)}
+  .t-mid{background:#FCF0DC; color:var(--mid)}
+  .t-low{background:#EEF0F6; color:var(--muted)}
+  .t-repro{background:#FDE7F0; color:var(--magenta)}
+  .t-read{background:#E8EDF6; color:var(--navy)}
+  .t-doc{background:#E4F4EC; color:var(--ok)}
+  .callout{
+    background:#FFF7F9; border:1px solid #F8C9DC; border-left:4px solid var(--magenta);
+    border-radius:10px; padding:14px 16px; margin:14px 0; font-size:13.5px;
+  }
+  .callout.warn{background:#FFF5F4; border-color:#F3C6C2; border-left-color:var(--warn)}
+  .callout.ok{background:#F1F9F5; border-color:#C6E4D5; border-left-color:var(--ok)}
+  .callout strong{color:var(--navy)}
+  ul{margin:8px 0; padding-left:20px}
+  li{margin:4px 0}
+  .meta{font-size:12px; color:var(--muted); margin:18px 0 0; border-top:1px solid var(--gray); padding-top:12px}
+  .hidden{display:none !important}
+  .nores{display:none; padding:16px; color:var(--muted); font-size:13.5px}
+  @media (max-width:640px){ .bug dl{grid-template-columns:1fr; gap:2px} .bug dt{padding-top:8px} }
+  @media print{
+    header.top{position:static; box-shadow:none}
+    .tools{display:none}
+    body{background:#fff; font-size:11pt}
+    main{max-width:none; padding:0}
+    section{border:0; border-top:1.5px solid var(--gray); border-radius:0; padding:14px 0; margin:0; break-inside:auto}
+    .bug{break-inside:avoid}
+    pre{background:#F1F4FA; color:#1A2233; border:1px solid var(--gray)}
+    table{font-size:9.5pt}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>영웅 키움 — QA 엣지 케이스 (최종)</h1>
+  <p>정리 2026-08-19 · 기준: <code>main</code> = PR #446까지 병합 · <code>web/</code> 실제 코드 정독 + <code>npm test</code> 242/242 통과 상태</p>
+  <div class="tools">
+    <input id="filter" type="search" placeholder="증상·파일·키워드로 거르기 (예: 체결가, DEMO_USER_ID, 휴장, 챗봇)" autocomplete="off">
+    <a href="#s0">TL;DR</a>
+    <a href="#s1">① 치명</a>
+    <a href="#s2">② 높음</a>
+    <a href="#s3">③ 중간</a>
+    <a href="#s4">④ 낮음·드리프트</a>
+    <a href="#s5">⑤ 재현</a>
+    <a href="#s6">⑥ 발표 대응</a>
+  </div>
+</header>
+
+<main>
+
+<section id="s0">
+  <h2>TL;DR</h2>
+  <p class="lede">테스트 242건이 전부 통과하는 상태에서 나온 목록이다. 즉 <strong>회귀가 아니라 커버리지 공백</strong>이고, 지금 테스트를 다 돌려도 아래 19건 중 어느 것도 잡히지 않는다.</p>
+  <ul>
+    <li><strong>서버가 클라이언트를 믿는 자리가 세 곳 있다</strong> — 체결가·세션·예약일. 셋 다 브라우저에서 값을 바꾸면 자산과 랭킹이 그대로 뒤집힌다 → §1</li>
+    <li><strong>공휴일 판정이 코드베이스 어디에도 없다.</strong> <code>휴장</code>이라는 낱말은 챗봇 답변 문구로만 존재한다 → §2-4</li>
+    <li><strong>시세가 가짜여도 화면이 말해 주지 않는다.</strong> 폴백 사다리는 잘 만들어져 있는데 <code>source</code>를 그리는 화면이 없다 → §2-6</li>
+    <li>나머지는 데모 중 실제로 터질 확률 순으로 §2~§4에 있다. §6은 심사위원이 물었을 때 그대로 읽을 답변이다.</li>
+  </ul>
+  <div class="callout">
+    <strong>표기 규칙</strong> — <span class="tag t-read">코드확인</span> 코드 정독으로 확인 · <span class="tag t-repro">재현필요</span> 런타임 재현 스크립트를 짜서 검증할 것 · <span class="tag t-doc">문서</span> 코드는 정상이고 문서가 어긋난 것.
+    라이브 Supabase에 실제 쓰기는 하지 않았다 — 데모 계정 자산을 바꾸게 되므로 검증은 코드 경로 추적으로 했다.
+  </div>
+
+  <h3>한 장 요약</h3>
+  <table>
+    <thead><tr><th style="width:46px">#</th><th style="width:82px">등급</th><th>증상</th><th style="width:210px">1차 소유</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><span class="tag t-crit">치명</span></td><td>체결가를 클라이언트가 정한다 — 서버·DB 어디에도 시세 대조가 없다</td><td><code>app/api/trade</code> · <code>apply_trade</code></td></tr>
+      <tr><td>2</td><td><span class="tag t-crit">치명</span></td><td><code>DEMO_USER_ID=1</code> 폴백으로 비로그인 API가 열려 있다</td><td><code>app/api/supabase.ts</code></td></tr>
+      <tr><td>3</td><td><span class="tag t-crit">치명</span></td><td>예약 체결일(<code>scheduled_for</code>)에 과거 날짜 검증이 없다</td><td><code>app/api/orders</code></td></tr>
+      <tr><td>4</td><td><span class="tag t-high">높음</span></td><td>공휴일에 "즉시 체결"이 된다 — 휴장일 판정이 없다</td><td><code>f2-trade/lib/scheduled-orders.js</code></td></tr>
+      <tr><td>5</td><td><span class="tag t-high">높음</span></td><td>51장 중 한 종목만 live면 화면 전체가 "실시간"이 된다</td><td><code>app/api/universe/service.ts</code></td></tr>
+      <tr><td>6</td><td><span class="tag t-high">높음</span></td><td>시세 폴백이 나이 제한 없는 stale·픽스처를 실체결로 흘린다</td><td><code>app/api/quote/quotes.ts</code></td></tr>
+      <tr><td>7</td><td><span class="tag t-high">높음</span></td><td>챗봇 수치 게이트가 클라이언트 신고값을 화이트리스트로 쓴다</td><td><code>f10-chatbot/lib/orchestrator.ts</code></td></tr>
+      <tr><td>8</td><td><span class="tag t-high">높음</span></td><td><code>lastAnswer</code> 800자가 검증 없이 모델로 되돌아간다</td><td><code>f10-chatbot/lib/contracts.ts</code></td></tr>
+      <tr><td>9</td><td><span class="tag t-mid">중간</span></td><td>챗봇 분당 한도 키가 <code>DEMO_USER_ID</code>로 뭉쳐 자녀 할당량을 잡아먹는다</td><td><code>app/api/chat</code></td></tr>
+      <tr><td>10</td><td><span class="tag t-mid">중간</span></td><td>Supabase가 한 번 흔들리면 부모가 자녀용 답변을 받는다</td><td><code>app/api/chat</code></td></tr>
+      <tr><td>11</td><td><span class="tag t-mid">중간</span></td><td>PostgREST 필터에 형식 미검증 문자열이 들어간다</td><td><code>app/api/feed/access.ts</code></td></tr>
+      <tr><td>12</td><td><span class="tag t-mid">중간</span></td><td>코멘트 필터가 자기 안내 문구와 모순된다 (<code>왜 샀어?</code> 차단)</td><td><code>shared/engine/comment-filter.ts</code></td></tr>
+      <tr><td>13</td><td><span class="tag t-mid">중간</span></td><td>지정가는 체결되지 않는데 현금·수량은 계속 잠근다</td><td><code>app/api/orders</code> · <code>PortfolioScreen</code></td></tr>
+      <tr><td>14</td><td><span class="tag t-mid">중간</span></td><td>지정가 예약의 <code>reserved_amount</code>와 <code>limit_price × quantity</code>가 무관하다</td><td><code>app/api/orders</code></td></tr>
+      <tr><td>15</td><td><span class="tag t-mid">중간</span></td><td><code>GET /api/orders</code>가 쓰기를 한다 — 프리페치가 체결을 확정시킨다</td><td><code>app/api/orders</code></td></tr>
+      <tr><td>16</td><td><span class="tag t-low">낮음</span></td><td><code>기능명세 §6.2</code>가 이미 삭제된 <code>PATCH /api/trade</code>를 설명한다</td><td><code>docs/기능명세.md</code></td></tr>
+      <tr><td>17</td><td><span class="tag t-low">낮음</span></td><td><code>isSchoolTime</code>은 브라우저 로컬시간, <code>isRegularMarketOpen</code>은 KST</td><td><code>f0-home/lib/use-wallet.ts</code></td></tr>
+      <tr><td>18</td><td><span class="tag t-low">낮음</span></td><td>수량은 소수인데 <code>realized_profit</code>만 정수 반올림</td><td><code>apply_trade</code> · <code>settle_order</code></td></tr>
+      <tr><td>19</td><td><span class="tag t-low">낮음</span></td><td>매수 메모 200자 초과가 조용히 버려진다</td><td><code>app/api/trade/route.ts</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="s1">
+  <h2><span class="num">1</span>치명 — 자산·랭킹 무결성</h2>
+  <p class="lede">셋 다 "서버가 클라이언트를 믿는다"는 같은 뿌리다. 가족 랭킹·수익률 트랙·F9 성향 카드가 전부 이 값을 읽으므로, 하나가 뚫리면 리그 전체가 오염된다.</p>
+
+  <div class="bug sev-crit">
+    <p class="t">1. 체결가를 클라이언트가 정한다 — 서버·DB 어디에도 시세 대조가 없다 <span class="tag t-crit">치명</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>매수·매도 체결가가 브라우저가 보낸 <code>price</code> 그대로 DB에 들어간다. 현재 시세와 대조하는 코드가 서버에도 DB 함수에도 없다.</dd>
+      <dt>경로</dt>
+      <dd><code>OrderScreen.tsx:1084</code>이 화면의 <code>price</code>를 그대로 실어 보내고 →
+        <code>app/api/trade/route.ts:104</code>는 <code>positiveNumber()</code>(0보다 큰 유한수)만 검사하고 →
+        <code>apply_trade</code>(<code>20260815033308_order_lifecycle_db_ownership.sql</code>)도 <code>p_price &lt;= 0</code>만 막는다.</dd>
+      <dt>재현</dt>
+      <dd><pre><span class="cm"># 1) 헐값에 대량 매수</span>
+POST /api/trade
+{"side":"buy","stock_code":"005930","price":1,"quantity":9000000}
+<span class="cm">→ 900만원으로 삼성전자 900만주 보유</span>
+
+<span class="cm"># 2) 실제 시세로 매도 → 무한 수익</span>
+POST /api/trade
+{"side":"sell","stock_code":"005930","price":78000,"quantity":9000000}</pre></dd>
+      <dt>영향</dt>
+      <dd>가족 랭킹, 아카이브 수익률 탭의 달리기 트랙, <code>GET /api/family</code>의 구성원 수익률, F9 성향 카드의 정확 축이 모두 <code>transactions</code>를 원본으로 읽는다. 리그의 존재 이유가 무너진다.</dd>
+      <dt>조치</dt>
+      <dd>서버가 <code>getQuote(stock_code)</code>를 다시 읽어 체결가를 <strong>서버 값으로 덮거나</strong>, 최소한 허용 괴리(예: ±3%)를 벗어나면 <code>invalid_amount</code>로 거절한다. 클라이언트 <code>price</code>는 표시용으로만 받는다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-crit">
+    <p class="t">2. <code>DEMO_USER_ID=1</code> 폴백으로 비로그인 API가 열려 있다 <span class="tag t-crit">치명</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>쿠키가 <strong>아예 없는</strong> 요청은 <code>DEMO_USER_ID</code> 사용자로 처리된다. 저장소 루트 <code>.env:19</code>에 <code>DEMO_USER_ID=1</code>(김찬영)이 실제로 들어 있다.</dd>
+      <dt>경로</dt>
+      <dd><code>app/api/supabase.ts:180</code>. 바로 위 주석은 <em>"화면은 로그인인데 API만 열려 있으면 안 된다"</em>고 적었지만, 그 방어는 <strong>낡은 쿠키를 들고 온 경우</strong>만 막는다(<code>if (raw) return sessionUserIdFromCookie(raw)</code>). 쿠키가 없으면 그 분기 자체를 지나간다.</dd>
+      <dt>재현</dt>
+      <dd><pre><span class="cm"># 쿠키 없이</span>
+GET  /api/account    <span class="cm">→ 자녀 잔액·보유 노출</span>
+GET  /api/trades     <span class="cm">→ 매매 기록·이유 노출</span>
+POST /api/trade      <span class="cm">→ user 1 명의로 체결</span>
+POST /api/chat       <span class="cm">→ 자녀 개인 데이터 툴 실행</span></pre></dd>
+      <dt>영향</dt>
+      <dd><code>page.tsx</code>는 폴백 없는 <code>sessionUserIdFromCookie</code>를 쓰므로 <strong>화면만</strong> 로그인 게이트로 잠긴다. 시연을 Cloudflare 터널로 외부 공개하는 구조라 주소를 아는 사람이면 누구나 닿는다. 1번과 결합하면 외부인이 자녀 계좌를 임의로 조작할 수 있다.</dd>
+      <dt>조치</dt>
+      <dd><code>NODE_ENV === "production"</code>에서는 <code>DEMO_USER_ID</code>를 읽지 않는다. 또는 <code>.env</code>에서 지우고 개발용 로그인으로 대체한다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-crit">
+    <p class="t">3. 예약 체결일(<code>scheduled_for</code>)에 과거 날짜 검증이 없다 <span class="tag t-crit">치명</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>장외 시장가 예약의 체결 예정일을 클라이언트가 정하는데, 서버는 <code>typeof === "string"</code>만 본다.</dd>
+      <dt>경로</dt>
+      <dd><code>app/api/orders/route.ts:166</code>에서 무검증 통과 → 정산기 <code>scheduled-orders.js</code>의 <code>findConfirmedOpeningCandle</code>은 <code>scheduledFor</code> <strong>이후 가장 이른</strong> 확정 일봉을 고른다(<code>.sort((l,r) =&gt; l.time - r.time)[0]</code>).</dd>
+      <dt>재현</dt>
+      <dd><pre>POST /api/orders
+{"order_type":"market","side":"buy","stock_code":"005930",
+ "scheduled_for":"2026-01-02","reserved_amount":10000000,
+ "request_mode":"amount"}
+
+<span class="cm"># 다음 GET /api/orders 가 정산을 겸하므로 화면만 한 번 열면</span>
+<span class="cm">→ 2026-01-02 이후 첫 거래일 시가로 체결된다</span></pre></dd>
+      <dt>영향</dt>
+      <dd>보관 캔들 범위(<code>chartRetentionCutoff</code>) 안에서 가장 유리한 시가를 골라잡을 수 있다. 1번보다 은밀하다 — 체결가가 <strong>실제로 존재했던 가격</strong>이라 기록만 봐서는 이상해 보이지 않는다.</dd>
+      <dt>조치</dt>
+      <dd><code>scheduled_for</code>를 서버가 <code>nextOpeningDate()</code>로 직접 계산한다. 클라이언트 값을 받아야 한다면 <code>&gt;= 오늘(KST)</code>을 강제한다. 1번을 고칠 때 한 줄로 같이 끝난다.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="num">2</span>높음 — 시연 중 실제로 터질 것</h2>
+  <p class="lede">악의가 없어도 나온다. 4·5·6번은 발표 당일 무대에서 그대로 보일 수 있다.</p>
+
+  <div class="bug sev-high">
+    <p class="t">4. 공휴일에 "즉시 체결"이 된다 — 휴장일 판정이 없다 <span class="tag t-high">높음</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd><code>isRegularMarketOpen</code>이 요일과 시각만 본다. 평일 공휴일을 정규장으로 판단해 <strong>직전 영업일 종가로 즉시 체결</strong>한다.</dd>
+      <dt>근거</dt>
+      <dd><code>f2-trade/lib/scheduled-orders.js</code> — <code>day &gt;= 1 &amp;&amp; day &lt;= 5 &amp;&amp; minute &gt;= 540 &amp;&amp; minute &lt; 930</code>. 저장소 전체에서 <code>휴장</code>·<code>holiday</code>·<code>공휴일</code>을 검색하면 <strong>챗봇 용어 사전의 답변 문구 하나</strong>만 나온다("휴장은 주식시장이 문을 열지 않는 날이에요"). 즉 챗봇은 휴장을 설명하는데 앱은 휴장을 모른다.</dd>
+      <dt>파생</dt>
+      <dd><code>nextOpeningDate</code>도 주말만 건너뛰므로 예약 체결일이 공휴일로 잡힌다. 이쪽은 <code>findConfirmedOpeningCandle</code>이 거래량 있는 봉만 고르므로 자동으로 다음 영업일로 밀린다 — <strong>즉시 체결 경로만</strong> 위험하다.</dd>
+      <dt>조치</dt>
+      <dd>KRX 휴장일 상수 배열(연 15일 남짓)을 <code>scheduled-orders.js</code>에 두고 <code>isRegularMarketOpen</code>·<code>nextOpeningDate</code>·<code>isWeekdayKey</code>가 함께 본다. 배열 하나로 끝난다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-high">
+    <p class="t">5. 51장 중 한 종목만 live면 화면 전체가 "실시간"이 된다 <span class="tag t-high">높음</span> <span class="tag t-repro">재현필요</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>유니버스 응답의 <code>source</code>가 <code>live</code>인 조건이 <em>51종 중 하나라도 live</em>다. 나머지 50장은 전일 종가 또는 픽스처인데 같은 화면에 섞여 나온다.</dd>
+      <dt>근거</dt>
+      <dd><code>app/api/universe/service.ts:170</code> — <code>const live = Object.values(warmQuotes).find(q =&gt; q.source === "live")</code>.
+        키움 어댑터는 초당 1건 큐(<code>REQUEST_INTERVAL_MS = 2600</code>)에 <strong>한 폴링당 한 종목만</strong> 데운다(<code>providers/kiwoom.ts</code> 주석: "카드 51장을 초당 1건으로 다 데우려면 2분이 넘는다").</dd>
+      <dt>영향</dt>
+      <dd>탐색 화면의 기본 정렬이 <strong>"오늘 많이 오른 순"</strong>이다. 워밍업 구간에서는 이 순위가 실시간 등락률과 전일 종가 기준 등락률을 섞어 매긴다. 시연 시작 직후 2분이 정확히 그 구간이고, 그때가 심사위원이 탐색 화면을 처음 보는 순간이다.</dd>
+      <dt>조치</dt>
+      <dd>단기 — <code>local-demo.ps1</code>에 워밍업 대기를 넣어 시연 전에 51종을 다 채운다. 근본 — <code>source</code>를 종목별로 화면에 내려 정렬에서 미확인 종목을 뒤로 보내거나, 헤더 라벨을 <code>live n/51</code>로 바꾼다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-high">
+    <p class="t">6. 시세 폴백이 나이 제한 없는 stale·픽스처를 실체결로 흘린다 <span class="tag t-high">높음</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>제공자 조회가 전부 실패하면 <code>anyCached()</code>가 <strong>신선도와 무관하게</strong> 남은 값을 돌려주고, 그것도 없으면 코드 픽스처를 돌려준다. 사용자는 가짜 가격인 줄 모른 채 그 가격으로 실제 체결한다.</dd>
+      <dt>근거</dt>
+      <dd><code>app/api/quote/quotes.ts:173</code> <code>anyCached(quoteCache, symbol)?.value ?? fixtureQuote(fixture)</code>.
+        폴백 사다리 자체는 잘 설계돼 있고 <code>source</code> 필드도 정확히 실린다 — 문제는 <strong>그 필드를 그리는 화면이 없다는 것</strong>이다(<code>source === "fixture"</code> 참조는 <code>universe/service.ts</code> 내부에서만 발견).</dd>
+      <dt>영향</dt>
+      <dd>발표 중 시세 API가 죽어도 화면이 멀쩡해 보이는 것은 설계 의도(강점)지만, 그 상태에서 이뤄진 체결이 <strong>진짜 거래 기록으로 남아</strong> 아카이브·랭킹에 들어간다. "발표 중 죽지 않는다"와 "가짜 가격으로 자산이 바뀐다"는 다른 문제다.</dd>
+      <dt>조치</dt>
+      <dd>주문 화면에 <code>source !== "live"</code>일 때 배지 한 줄("지금은 참고 시세예요"). 체결 자체를 막을지는 제품 결정 — 데모에서는 막지 않는 편이 낫다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-high">
+    <p class="t">7. 챗봇 수치 게이트가 클라이언트 신고값을 화이트리스트로 쓴다 <span class="tag t-high">높음</span> <span class="tag t-repro">재현필요</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>출력 게이트의 <code>unverified_number</code> 검사는 "허용 목록에 없는 수치를 말하면 폐기"다. 그런데 그 허용 목록이 <strong>요청 본문의 <code>context</code></strong>에서 온다.</dd>
+      <dt>근거</dt>
+      <dd><code>f10-chatbot/lib/orchestrator.ts:761</code> <code>allowedNumbers: allowedContextNumbers(request)</code>.
+        <code>contracts.ts</code>는 범위만 검사한다 — <code>MAX_CASH = 1_000_000_000_000</code>, <code>MAX_UNIT_PRICE = 1_000_000_000</code>, <code>MAX_PNL_PERCENT = 100_000</code>. 서버 계좌와 대조하지 않는다.</dd>
+      <dt>영향</dt>
+      <dd>"수치는 LLM이 아니라 서버 도구 값만 사용한다"는 F10 레드라인이 <strong>클라이언트가 정직할 때만</strong> 성립한다. 위조된 <code>context</code>로 키웅이가 임의 손익률을 말하게 만들 수 있다. 실제 아이가 할 일은 아니지만, AIX 심사에서 "게이트를 어디서 검증하나"를 물으면 정면으로 걸리는 자리다.</dd>
+      <dt>조치</dt>
+      <dd><code>allowedContextNumbers</code>가 이미 서버에 있는 <code>createSupabasePersonalData</code> 값을 함께 쓰도록 합친다. 최소한 현금·손익만이라도 서버 값으로 교체.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-high">
+    <p class="t">8. <code>lastAnswer</code> 800자가 검증 없이 모델로 되돌아간다 <span class="tag t-high">높음</span> <span class="tag t-repro">재현필요</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>지시어 해소(재작성)용으로 받는 <code>lastAnswer</code>가 <strong>실제로 서버가 보낸 답인지 확인되지 않는다.</strong></dd>
+      <dt>근거</dt>
+      <dd><code>f10-chatbot/lib/contracts.ts:37</code> <code>MAX_PREVIOUS_ANSWER_LENGTH = 800</code>.
+        타입 주석은 <em>"아이가 쓴 말은 담지 않으므로 입력 게이트를 통과한 적 없는 텍스트가 모델로 되돌아가지 않는다"</em>고 적었는데, 그 보장은 <strong>클라이언트가 규약을 지킬 때만</strong> 참이다. 서명·해시·서버 세션 대조가 없다.</dd>
+      <dt>영향</dt>
+      <dd>출력 게이트가 최종 방어선이라 피해는 제한적이다. 다만 <code>questions-v4</code>(적대적 우회 34건)는 <strong>사용자 메시지</strong> 축만 본다 — 컨텍스트 필드를 통한 주입 축이 회귀 세트에 없다.</dd>
+      <dt>조치</dt>
+      <dd>회귀 세트에 컨텍스트 주입 케이스를 추가하는 것이 먼저다. 코드는 <code>lastAnswer</code>를 서버 세션에 잠깐 보관하고 클라이언트에게서 받지 않는 쪽이 정석이지만, 지금 구조(무상태)에서는 비용이 크다.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="num">3</span>중간</h2>
+
+  <div class="bug sev-mid">
+    <p class="t">9. 챗봇 분당 한도 키가 <code>DEMO_USER_ID</code>로 뭉친다 <span class="tag t-mid">중간</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd><code>app/api/chat/route.ts:72</code> <code>String(userId ?? "anonymous")</code>. 그런데 <code>sessionUserId</code>가 비로그인에 <code>1</code>을 주므로(§1-2), 비로그인 요청 전부가 <strong>자녀 계정의 분당 12건 할당량</strong>을 함께 쓴다.</dd>
+      <dt>영향</dt>
+      <dd>외부인 몇 명이 터널 주소를 열어 보는 것만으로 정작 무대 위 아이가 429를 받는다. 화면은 "키웅이가 잠깐 낮잠 중이에요"만 보여 준다.</dd>
+      <dt>조치</dt>
+      <dd>§1-2를 고치면 자동 해소된다. 그때 익명 키는 IP 기반으로 나눈다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-mid">
+    <p class="t">10. Supabase가 한 번 흔들리면 부모가 자녀용 답변을 받는다 <span class="tag t-mid">중간</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd><code>loadSessionProfile</code>이 예외를 삼키고 <code>null</code>을 준다(<code>app/api/chat/route.ts:60</code>) → <code>resolveChatSession(null)</code>은 데모 세션으로 낮춰 잡고 <strong>역할이 항상 <code>child</code></strong>다.</dd>
+      <dt>영향</dt>
+      <dd><code>f10-chatbot/lib/role-copy.ts</code>의 <code>tradingLock</code> 분기가 뒤집혀 부모에게 자녀용 문구·버튼이 나간다. 로그에는 <code>sessionSource</code>로 남지만 화면은 조용하다. 폴백 방향 자체는 안전한 쪽(자녀 기준이 더 보수적)이라 설계 판단으로 볼 여지가 있으나, <strong>부모 시연 중 한 번 흔들리면 그대로 보인다.</strong></dd>
+      <dt>조치</dt>
+      <dd>프로필 조회 실패를 답변 차단 사유로 올리지는 말되, 역할 의존 문구(<code>role-copy</code>)만은 <code>unknown</code> 분기를 따로 둔다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-mid">
+    <p class="t">11. PostgREST 필터에 형식 미검증 문자열이 들어간다 <span class="tag t-mid">중간</span> <span class="tag t-repro">재현필요</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd><code>app/api/feed/access.ts:88</code> <code>id: `in.(${ids.join(",")})`</code>. 검증자 <code>isTransactionId</code>는 <strong>"빈 값 아님 + 64자 이하"</strong>만 본다. 실제 값은 UUID인데 <code>)</code>·<code>"</code>·<code>*</code> 같은 PostgREST 문법 문자를 그대로 통과시킨다.</dd>
+      <dt>영향</dt>
+      <dd>같은 패턴이 <code>authorizeFeedTarget</code>의 <code>id: eq.${transactionId}</code>, <code>comments/route.ts:88</code>의 <code>in.(...)</code>에도 있다. 대부분 PostgREST가 400을 내 502로 끝날 가능성이 높지만, <strong>가족 범위 스코프를 우회하는 필터를 만들 수 있는지</strong>는 실제로 쏴 봐야 안다.</dd>
+      <dt>조치</dt>
+      <dd><code>isTransactionId</code>를 UUID 정규식으로 좁힌다. 한 줄이고 부작용이 없다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-mid">
+    <p class="t">12. 코멘트 필터가 자기 안내 문구와 모순된다 <span class="tag t-mid">중간</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>추천 차단 메시지가 <em>"왜 그렇게 생각했는지 물어보는 건 어떨까요?"</em>인데,
+        <code>shared/engine/comment-filter.ts</code>의 <code>/(왜그랬어|왜샀어|왜팔았어)/</code>가 그 말을 <code>scolding</code>으로 차단한다. 안내대로 따라 쓰면 또 막힌다.</dd>
+      <dt>파생 오탐</dt>
+      <dd><code>normalize()</code>가 공백·문장부호를 전부 지우고 매칭하므로 <code>(한심|답답|바보|멍청|어이없|실망이)</code>에 <strong>"실망이 아니라 자랑스러워"</strong>가 걸린다. <code>(못했|잘못했|틀렸어|실패했|망했)</code>도 "실패했어도 괜찮아"를 막는다.</dd>
+      <dt>영향</dt>
+      <dd>F11의 목적이 "대화 거리를 만든다"인데 필터가 대화를 막는다. 필터의 의도(데이터 무결성)는 옳고 구현이 과차단이다.</dd>
+      <dt>조치</dt>
+      <dd><code>왜샀어</code> 계열을 <code>scolding</code>에서 빼거나 <code>왜샀어대체</code> 같은 어미 조건을 붙인다. 부정 문맥(<code>~아니라</code>·<code>~어도</code>)은 정규식으로 못 잡으니 해당 규칙만 완화하는 편이 정직하다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-mid">
+    <p class="t">13. 지정가는 체결되지 않는데 현금·수량은 계속 잠근다 <span class="tag t-mid">중간</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd><code>reserve_order</code>가 <code>account.reserved_balance</code>·<code>holdings.reserved_quantity</code>를 잠그는데, 정산기(<code>orders/route.ts:112</code>)는 <code>order_status === "scheduled"</code>만 본다. 지정가(<code>pending</code>)는 어느 경로로도 체결되지 않는다.</dd>
+      <dt>영향</dt>
+      <dd>"지정가 자동 체결 없음"은 이미 문서화된 범위(<code>기능명세 §4</code>)지만, <strong>사용자 체감은 "돈이 사라졌다"</strong>다. 취소 버튼은 <code>PortfolioScreen</code>에만 있어 홈만 보는 사용자는 못 찾는다. 아이가 지정가로 전액을 걸면 그 세션 동안 아무것도 못 산다.</dd>
+      <dt>조치</dt>
+      <dd>홈의 지갑 줄에 <code>잠긴 돈 n원 · 기다리는 주문 n건</code>을 노출하고 탭하면 계좌로 보낸다. 코드보다 화면 문제다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-mid">
+    <p class="t">14. 지정가 예약의 <code>reserved_amount</code>와 <code>limit_price × quantity</code>가 무관하다 <span class="tag t-mid">중간</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd><code>POST /api/orders</code>가 <code>limit_price</code>·<code>reserved_amount</code>·<code>requested_quantity</code>를 각각 독립적으로 받고 <strong>서로 대조하지 않는다.</strong> 호가단위 검사(<code>isOnTick</code>)는 하는데 금액 정합은 안 한다.</dd>
+      <dt>영향</dt>
+      <dd>지금은 지정가가 체결되지 않아(§13) 무해하다. 자동 체결을 붙이는 순간 결제 금액과 예약 금액이 어긋난다 — <strong>기능을 켜는 PR이 이 결함을 상속한다.</strong></dd>
+      <dt>조치</dt>
+      <dd>지금 고칠 필요는 없다. 지정가 체결을 구현하는 SPEC에 "접수 시 <code>reserved_amount &gt;= limit_price × quantity</code>" 계약을 먼저 적어 둔다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-mid">
+    <p class="t">15. <code>GET /api/orders</code>가 쓰기를 한다 <span class="tag t-mid">중간</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>증상</dt>
+      <dd>조회가 정산을 겸한다(<code>settleDueOrders</code>를 먼저 돌림). 의도된 설계이고 <code>settle_order</code>가 멱등이라 중복 체결은 막히지만, <strong>체결 시점을 브라우저 프리페치·크롤러·프리렌더가 정한다.</strong></dd>
+      <dt>영향</dt>
+      <dd>사용자가 앱을 열지 않은 채 링크 미리보기만 떠도 예약이 확정될 수 있다. 데모 범위에서는 실질 피해가 없으나 "언제 체결됐나"를 설명할 수 없게 된다.</dd>
+      <dt>조치</dt>
+      <dd>남긴다. 대안(크론·엣지 함수)이 데모 인프라에 없고, 문서(<code>기능명세 §6.4</code>)가 이미 이 트레이드오프를 명시한다. <strong>다만 심사에서 물으면 "의도했고 대안은 크론"이라고 답할 준비만 해 둔다.</strong></dd>
+    </dl>
+  </div>
+</section>
+
+<section id="s4">
+  <h2><span class="num">4</span>낮음 · 문서 드리프트</h2>
+
+  <div class="bug sev-low">
+    <p class="t">16. <code>기능명세 §6.2</code>가 이미 삭제된 API를 설명한다 <span class="tag t-low">낮음</span> <span class="tag t-doc">문서</span></p>
+    <dl>
+      <dt>내용</dt>
+      <dd>§6.2가 <em>"<code>/api/trade</code> PATCH는 매도 완료 화면의 한 줄 메모를 … <code>set_trade_memo</code>가 <code>user_id</code>를 대조해 남의 기록을 막는다"</em>고 적었다.</dd>
+      <dt>실제</dt>
+      <dd><code>app/api/trade/route.ts</code>에 <code>PATCH</code> 핸들러가 없고, <code>set_trade_memo</code>는 <code>20260818082500_drop_sell_memo.sql</code>이 <strong>2026-08-18에 drop</strong>했다(라이브 적용 완료). 기능명세 v24의 갱신 날짜와 <strong>같은 날</strong>인데 §6.2만 남았다.</dd>
+      <dt>조치</dt>
+      <dd>§6.2의 <code>/api/trade</code> 행에서 PATCH 문장을 지운다. 이 문서 범위 밖이라 별도 세션으로 처리.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-low">
+    <p class="t">17. <code>isSchoolTime</code>은 브라우저 로컬시간, <code>isRegularMarketOpen</code>은 KST <span class="tag t-low">낮음</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>내용</dt>
+      <dd><code>f0-home/lib/use-wallet.ts:139</code>가 <code>now.getDay()</code>·<code>now.getHours()</code>(로컬 TZ)를 쓰고, <code>scheduled-orders.js</code>는 <code>KST_OFFSET_MS</code>를 더해 계산한다.</dd>
+      <dt>영향</dt>
+      <dd>"두 창이 정확히 같다"는 주석과 그것을 지킨다는 <code>use-wallet.test.ts</code>는 <strong>고정 TZ에서만 참</strong>이다. 지금은 <code>SCHOOL_LOCK_ENABLED = false</code>라 무해하다. 되살리는 순간 해외 TZ 기기에서 어긋난다 — 공교롭게도 <code>TradeRestrictionSheet</code>의 주석이 정확히 이 위험을 예언해 뒀다("브라우저 시계가 다른 나라에 맞춰져 있을 때 화면은 열려 있는데 주문만 거절당한다").</dd>
+      <dt>조치</dt>
+      <dd>되살릴 때 <code>kstMinute</code>를 쓰도록 바꾼다. 지금은 남긴다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-low">
+    <p class="t">18. 수량은 소수인데 <code>realized_profit</code>만 정수 반올림 <span class="tag t-low">낮음</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>내용</dt>
+      <dd><code>apply_trade</code>·<code>settle_order</code> 양쪽 모두 <code>v_realized := round((p_price - v_avg) * p_quantity)</code>이고 컬럼 타입이 <code>integer</code>다. 금액 매수는 소수 수량을 만든다.</dd>
+      <dt>영향</dt>
+      <dd>잘게 반복 매매하면 반올림 오차가 누적된다. F9의 정확 축과 F11 매도 카드의 실현 수익률이 이 값을 읽는다. 데모 규모(10,000,000원 · 거래 수십 건)에서는 무시할 수준.</dd>
+      <dt>조치</dt>
+      <dd>남긴다. 실계좌로 갈 때 <code>numeric</code>으로 바꾼다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-low">
+    <p class="t">19. 매수 메모 200자 초과가 조용히 버려진다 <span class="tag t-low">낮음</span> <span class="tag t-read">코드확인</span></p>
+    <dl>
+      <dt>내용</dt>
+      <dd><code>app/api/trade/route.ts:44</code> — 길면 <code>null</code>로 만들고 주문은 성공시킨다. 주석은 <em>"메모 한 줄 때문에 체결 기록 전체를 잃는 쪽이 더 나쁘다"</em>고 근거를 적었고 판단 자체는 옳다.</dd>
+      <dt>영향</dt>
+      <dd>다만 아이는 <strong>자기가 쓴 이유가 사라진 걸 모른다.</strong> F3(매매 이유 기록)이 제품의 핵심 축이라 "조용히"가 문제다.</dd>
+      <dt>조치</dt>
+      <dd>화면에서 <code>maxLength=200</code>으로 입력 자체를 제한한다. 서버 동작은 그대로 둔다.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="num">5</span>재현 절차</h2>
+  <p class="lede">라이브 DB에 쓰면 데모 계정 자산이 바뀐다. <strong>로컬 Supabase 또는 별도 시드 계정</strong>에서만 돌린다.</p>
+
+  <h3>준비</h3>
+  <pre><span class="cm"># 세션 worktree에서</span>
+node scripts/git-session-manager.mjs serve   <span class="cm"># 배정 포트 사용</span>
+<span class="cm"># 로그인해 kw_uid 쿠키를 얻거나, .env 의 DEMO_USER_ID 로 쿠키 없이 시험(§1-2 자체가 검증 대상)</span></pre>
+
+  <h3>#1 · 체결가 위조</h3>
+  <pre>curl -X POST http://localhost:3101/api/trade \
+  -H 'Content-Type: application/json' \
+  -d '{"side":"buy","stock_code":"005930","price":1,"quantity":1000}'
+
+<span class="cm"># 기대(수정 후): 400 invalid_amount 또는 서버 시세로 덮인 체결</span>
+<span class="cm"># 현재:         200 + transaction_id — 1원에 1000주</span></pre>
+
+  <h3>#2 · 비로그인 접근</h3>
+  <pre>curl -i http://localhost:3101/api/account      <span class="cm"># 쿠키 없음</span>
+<span class="cm"># 기대(수정 후): 401</span>
+<span class="cm"># 현재:         200 + user 1 잔액·보유</span></pre>
+
+  <h3>#3 · 과거 예약일</h3>
+  <pre>curl -X POST http://localhost:3101/api/orders \
+  -H 'Content-Type: application/json' \
+  -d '{"order_type":"market","side":"buy","stock_code":"005930",
+       "scheduled_for":"2026-01-02","reserved_amount":1000000,
+       "request_mode":"amount"}'
+curl http://localhost:3101/api/orders           <span class="cm"># 조회가 정산을 겸한다</span>
+
+<span class="cm"># 기대(수정 후): 400 — 과거 날짜 거절</span>
+<span class="cm"># 현재:         1월 시가로 filled</span></pre>
+
+  <h3>#4 · 공휴일 즉시 체결</h3>
+  <pre><span class="cm"># scheduled-orders.test.ts 에 케이스를 추가하는 편이 빠르다</span>
+isRegularMarketOpen(new Date("2026-10-03T02:00:00Z"))  <span class="cm">// 개천절 11:00 KST</span>
+<span class="cm">// 기대: false   현재: true</span></pre>
+
+  <h3>#7 · 챗봇 수치 위조</h3>
+  <pre>POST /api/chat
+{"message":"내 수익률 얼마야?",
+ "context":{ ... , "pnlPercent": 4242, "cash": 999999999 }}
+
+<span class="cm"># 게이트가 4242 를 허용 목록으로 받아들이는지 확인한다</span></pre>
+
+  <div class="callout ok">
+    <strong>회귀에 남길 것</strong> — #1·#2·#3은 라우트 단위 테스트로 고정한다(<code>app/api/trade/route.test.ts</code>·<code>orders/route.test.ts</code>에 이미 파일이 있다).
+    #4는 <code>scheduled-orders.test.ts</code> 한 줄. #7은 <code>records/f10-child-sim</code>의 새 축(<code>questions-v5</code> 또는 v4 확장)으로 남긴다.
+  </div>
+</section>
+
+<section id="s6">
+  <h2><span class="num">6</span>발표 대응 — 물으면 이렇게 답한다</h2>
+  <p class="lede">감추면 하나가 들킬 때 전부가 의심받는다. 아래 세 질문은 기술 심사에서 나올 확률이 높고, 지금 준비된 답이 없다.</p>
+
+  <div class="bug sev-high">
+    <p class="t">Q. 서버가 클라이언트를 어디까지 믿나요?</p>
+    <dl>
+      <dt>답</dt>
+      <dd>"세 곳에서 믿고 있고 <strong>알고 있습니다</strong> — 체결가·세션 폴백·예약일입니다. 지금 구조는 <em>가족 안에서 서로 속일 이유가 없다</em>는 데모 전제 위에 서 있고, 실서비스로 가면 체결가는 서버 시세로 덮고 <code>DEMO_USER_ID</code> 폴백은 프로덕션에서 잠급니다. 진짜 자산이 아니라 모의 지갑이라 지금은 위험 등급이 다릅니다."</dd>
+      <dt>왜</dt>
+      <dd>모른 채 넘어가면 "검증 안 했다"가 되고, 알고 남겨 뒀다고 하면 "범위를 정했다"가 된다. 우리 문서 관례(<code>[사실]/[추론]/[가정]</code>)와 같은 태도다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-high">
+    <p class="t">Q. 시세 API가 죽으면 어떻게 되나요?</p>
+    <dl>
+      <dt>답</dt>
+      <dd>"토스 → 키움 → Supabase 보관 캔들 → 코드 픽스처 4단 폴백이 있어 <strong>화면은 죽지 않습니다.</strong> 대신 지금은 그게 대체 시세라는 걸 화면이 알려 주지 않는 것이 남은 과제이고, 배지 한 줄로 해결할 자리로 정리해 뒀습니다."</dd>
+      <dt>왜</dt>
+      <dd>폴백 사다리는 명백한 강점이다. 강점을 말하면서 그 강점의 그림자까지 같이 짚으면 "설계자"로 들린다.</dd>
+    </dl>
+  </div>
+
+  <div class="bug sev-high">
+    <p class="t">Q. QA는 어떻게 했나요?</p>
+    <dl>
+      <dt>답</dt>
+      <dd>"자동 검증은 세 겹입니다 — <code>npm test</code> 242건, F10 안전 회귀 303건 + 분포 게이트, PR마다 CI. 여기에 <strong>사람이 도는 엣지 케이스 감사</strong>를 별도로 했고, 그 결과가 이 문서 19건입니다. 등급·재현 절차·소유 파일까지 붙여 두었고 치명 3건은 같은 뿌리(서버가 클라이언트를 믿는 자리)라 한 PR로 묶어 처리합니다."</dd>
+      <dt>왜</dt>
+      <dd>"버그가 없다"는 검증 안 한 팀의 말이다. <strong>등급이 매겨진 목록을 내미는 것</strong>이 검증했다는 유일한 증거다. 이 문서 자체가 Appendix 후보 #13이다.</dd>
+    </dl>
+  </div>
+</section>
+
+<section id="s7">
+  <h2><span class="num">7</span>조치 순서</h2>
+  <table>
+    <thead><tr><th style="width:60px">순번</th><th>묶음</th><th style="width:180px">대상</th><th style="width:120px">예상 규모</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>서버 신뢰 경계</strong> — #1 체결가 서버 대조 + #2 <code>DEMO_USER_ID</code> 프로덕션 차단 + #3 <code>scheduled_for</code> 검증. 뿌리가 같으므로 반드시 한 세션</td><td><code>app/api/trade</code> · <code>app/api/orders</code> · <code>app/api/supabase.ts</code></td><td>중 (+ 라우트 테스트 3건)</td></tr>
+      <tr><td>2</td><td><strong>휴장일</strong> — #4. 상수 배열 하나 + 세 함수 연결 + #17 KST 통일까지 같이</td><td><code>f2-trade/lib/scheduled-orders.js</code></td><td>소</td></tr>
+      <tr><td>3</td><td><strong>시연 안정</strong> — #5 워밍업 대기 + #6 대체 시세 배지 + #13 잠긴 돈 노출</td><td><code>local-demo.ps1</code> · <code>f0-home</code></td><td>소~중</td></tr>
+      <tr><td>4</td><td><strong>챗봇 게이트</strong> — #7 서버 값 병합 + #8 회귀 축 추가 + #10 역할 <code>unknown</code> 분기</td><td><code>f10-chatbot</code> · <code>records/f10-child-sim</code></td><td>중</td></tr>
+      <tr><td>5</td><td><strong>잔손질</strong> — #11 UUID 검증 · #12 필터 완화 · #19 <code>maxLength</code> · #16 문서 정정</td><td>여러 곳</td><td>소</td></tr>
+      <tr><td>—</td><td><strong>남긴다</strong> — #14(기능이 없어 무해) · #15(의도된 트레이드오프) · #18(데모 규모에서 무시 가능)</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <strong>발표 전에 최소한 이것만</strong> — 1번(서버 신뢰 경계)과 3번(시연 안정). 1번은 심사에서 물으면 걸리는 자리이고, 3번은 무대에서 그냥 보인다.
+    2·4·5는 물었을 때 "알고 있고 순서를 정해 뒀다"로 답할 수 있으면 충분하다.
+  </div>
+
+  <p class="meta">
+    검증 기준: <code>main</code> @ 5049974 · <code>web</code> <code>npm test</code> 242 pass / 0 fail (2026-08-19 실측) · 라이브 Supabase 쓰기 없음.<br>
+    근거 파일: <code>web/app/api/{trade,orders,chat,comments,feed,quote,universe}</code> · <code>web/features/{f0-home,f2-trade,f10-chatbot}/lib</code> · <code>web/shared/{engine,llm}</code> · <code>supabase/migrations/20260815033308_order_lifecycle_db_ownership.sql</code> · <code>supabase/migrations/20260818082500_drop_sell_memo.sql</code>
+  </p>
+</section>
+
+<div class="nores" id="nores">거른 조건에 맞는 항목이 없습니다.</div>
+
+</main>
+
+<script>
+  // 발표·리뷰 중 키워드로 좁혀 보는 용도. 섹션·행·항목 단위로만 숨긴다.
+  var input = document.getElementById("filter");
+  var blocks = Array.prototype.slice.call(document.querySelectorAll(".bug, tbody tr, .callout, ul > li"));
+  var sections = Array.prototype.slice.call(document.querySelectorAll("main section"));
+  var nores = document.getElementById("nores");
+  input.addEventListener("input", function () {
+    var term = input.value.trim().toLowerCase();
+    blocks.forEach(function (block) {
+      block.classList.toggle("hidden", term !== "" && block.textContent.toLowerCase().indexOf(term) === -1);
+    });
+    var anyVisible = false;
+    sections.forEach(function (section) {
+      var hit = term === "" || section.textContent.toLowerCase().indexOf(term) !== -1;
+      section.classList.toggle("hidden", !hit);
+      anyVisible = anyVisible || hit;
+    });
+    nores.style.display = anyVisible ? "none" : "block";
+  });
+</script>
+
+</body>
+</html>
