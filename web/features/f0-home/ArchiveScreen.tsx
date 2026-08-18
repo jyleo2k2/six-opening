@@ -381,6 +381,8 @@ export function ArchiveScreen({
   /** 고칠 댓글 하나. 두 개를 동시에 열 수 없다 — 열려 있던 쪽은 저장 없이 닫힌다. */
   const [editing, setEditing] = useState<{ id: string; body: string } | null>(null);
   const returnScrollTop = useRef(0);
+  /** 이번에 첫 화면에 들어와서 레일을 최근 카드로 이미 옮겼는가. 자리를 뜨면 지운다. */
+  const railCentered = useRef(false);
   const sheet = useSheetDrag(SHEET_HEIGHT);
   /**
    * 가족 시트도 카드 시트와 **같은 배선**을 쓴다. 한 폰 안에서 시트마다 쓸어내려 닫는
@@ -450,6 +452,36 @@ export function ArchiveScreen({
     const node = rail.ref.current?.children[index] as HTMLElement | undefined;
     node?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   };
+
+  /**
+   * 첫 화면에 **들어올 때마다 가장 최근 주 카드**에 서 있는다(2026-08-18 유저 요청).
+   *
+   * 카드는 오래된 순으로 서고(`weekCards`) 켜진 카드는 이미 마지막 장이지만, 레일
+   * 스크롤은 0 에서 시작한다 — 그래서 확대된 최근 카드는 화면 밖 오른쪽에 있고 눈에는
+   * 제일 오래된 주가 보였다. 자리를 옮겨야 하는 쪽은 켜진 카드가 아니라 레일이다.
+   *
+   * **한 번 들어올 때 한 번만** 옮긴다(`railCentered`). 조건을 "고른 카드가 없을 때"로
+   * 두면 두 가지가 어긋난다. 넘길 때마다 `cardActive` 가 바뀌므로 이 효과가 다시 돌아
+   * 레일을 마지막 장으로 되돌려 아예 넘길 수 없고, 반대로 가족 화면에 갔다 돌아왔을
+   * 때는 고른 카드가 남아 있어 최근 카드로 돌아오지 않는다. 기준은 고른 카드가 아니라
+   * **자리에 들어왔는가** 다 — 그래서 `view` 가 첫 화면을 떠날 때 표시를 지운다.
+   *
+   * `behavior` 를 주지 않아 즉시 옮기는 것은, 들어오자마자 레일이 주르륵 흐르면 누가
+   * 넘긴 것처럼 보이기 때문이다.
+   */
+  useEffect(() => {
+    if (view !== "cards") {
+      railCentered.current = false;
+      return;
+    }
+    if (data.seasonLoading || railCentered.current) return;
+    railCentered.current = true;
+    // 확대되는 카드도 마지막 장으로 되돌린다. 레일만 옮기면 가족 화면에 다녀온 뒤
+    // 가운데에는 최근 카드가 서는데 커져 있는 것은 아까 고른 카드다.
+    setCardActive(null);
+    const node = rail.ref.current?.children[cards.length - 1] as HTMLElement | undefined;
+    node?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [view, data.seasonLoading, cards.length]);
 
   /**
    * 끝까지 내렸는데 **카드가 아직 여섯 장을 못 채웠을 때만** 다음 페이지를 부른다.
@@ -530,7 +562,7 @@ export function ArchiveScreen({
         {/* 안내도 카드가 선 뒤에 띄운다 — 가리킬 카드가 아직 없는데 꼬리만 서면 이상하다. */}
         {view === "cards" && infoOpen && !data.seasonLoading && (
           // `top` 은 제목 줄 바로 아래다 — 첫 화면은 뒤로가기 줄이 없어 제목이 위에 붙는다.
-          <div style={{ position: "absolute", left: 20, right: 20, top: 136, zIndex: INFO_Z, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
+          <div style={{ position: "absolute", left: 20, right: 20, top: 130, zIndex: INFO_Z, borderRadius: 20, padding: "12px 18px 13px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
             {/*
               꼬리는 **아래로** 내려 가운데 성향 카드를 가리킨다. 안내가 말하는 대상이
               ⓘ 가 아니라 그 아래 카드이기 때문이다. 카드는 레일 한가운데에 서므로
@@ -543,7 +575,7 @@ export function ArchiveScreen({
               <div style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 800, color: ACCENT, letterSpacing: "-0.02em" }}>매주 새로운 카드가 쌓여요</div>
               <div onClick={() => onInfoOpenChange(false)} style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1, cursor: "pointer", padding: "0 2px" }}>✕</div>
             </div>
-            <div style={{ position: "relative", fontSize: 13.5, fontWeight: 600, color: "#5C6280", lineHeight: 1.65, marginTop: 8, whiteSpace: "pre-line" }}>
+            <div style={{ position: "relative", fontSize: 13.5, fontWeight: 600, color: "#5C6280", lineHeight: 1.6, marginTop: 6, whiteSpace: "pre-line" }}>
               {"좌우로 넘기면 지난주의 나를 볼 수 있어요.\n가운데 카드를 누르면 다섯 가지 투자 성향을 자세히 확인할 수 있어요."}
             </div>
           </div>
@@ -712,12 +744,22 @@ export function ArchiveScreen({
         {view === "cards" && !data.seasonLoading && (
           <>
             <div style={{ position: "relative", zIndex: 2, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              {/*
+                좌우 `44px` 은 **첫 장과 마지막 장이 정확히 가운데 서는 값**이다. 카드 폭
+                296 에 좌우 여백 9 씩이라, (402 - 314) ÷ 2 = 44 보다 좁으면 스크롤이 끝에
+                걸려 끝 카드만 그만큼 옆으로 밀린 채 멈춘다.
+
+                위아래 `32px` 은 장식이 아니라 **확대한 카드가 잘리지 않을 만큼**이다.
+                여기는 `overflow-y:hidden` 이라, 가운데 카드가 `scale` 로 넘치는 만큼
+                (카드 높이 × (배율-1) ÷ 2) 이 여백보다 크면 위아래가 그대로 잘린다.
+                배율을 더 올릴 생각이면 이 값부터 같이 올린다.
+              */}
               <div
                 className="kwcardrail"
                 onPointerDown={rail.onPointerDown}
                 onScroll={rail.onScroll}
                 ref={rail.ref}
-                style={{ flex: "none", display: "flex", alignItems: "center", gap: 4, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "14px 36px", scrollbarWidth: "none", cursor: "grab", touchAction: "pan-x", userSelect: "none", WebkitUserSelect: "none" }}
+                style={{ flex: "none", display: "flex", alignItems: "center", gap: 4, overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", padding: "32px 44px", scrollbarWidth: "none", cursor: "grab", touchAction: "pan-x", userSelect: "none", WebkitUserSelect: "none" }}
               >
                 {cards.map((card, index) => {
                   const on = index === activeCard;
@@ -728,7 +770,10 @@ export function ArchiveScreen({
                       style={{
                         flex: "none", scrollSnapAlign: "center", width: 296, margin: "0 9px", cursor: "pointer",
                         transition: "transform 0.28s ease", transformOrigin: "center",
-                        transform: on ? "scale(1.05)" : "scale(0.9)",
+                        // 가운데 카드를 키워 남던 위아래 빈자리를 채운다(2026-08-18 유저 요청).
+                        // 옆 카드와 부딪히지 않는 한계는 배율 1.2 근처다 — 카드 사이 중심
+                        // 거리가 318px 이라 (296×배율 + 296×0.93) ÷ 2 가 그보다 커지면 겹친다.
+                        transform: on ? "scale(1.16)" : "scale(0.93)",
                         boxShadow: on
                           ? `inset 0 1px 0 rgba(255,255,255,0.7),0 0 0 1.5px ${rgba(ink, 0.3)},0 2px 3px ${rgba(ink, 0.2)},0 14px 18px -8px ${rgba(ink, 0.35)}`
                           : `inset 0 1px 0 rgba(255,255,255,0.5),0 1px 2px ${rgba(ink, 0.14)},0 7px 10px -7px ${rgba(ink, 0.22)}`,
