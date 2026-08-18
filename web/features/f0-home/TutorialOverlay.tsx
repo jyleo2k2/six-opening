@@ -95,6 +95,21 @@ function visibleNode(id: string) {
   return null;
 }
 
+/** 앵커를 품은, `#kw-screen` 안쪽의 세로 스크롤 컨테이너. 화면 경계 밖은 보지 않는다. */
+function innerScroller(node: Element): HTMLElement | null {
+  for (let el = node.parentElement; el; el = el.parentElement) {
+    if (el.id === PROTOTYPE_SCREEN_ID) return null;
+    const { overflowY } = getComputedStyle(el);
+    if (
+      (overflowY === "auto" || overflowY === "scroll") &&
+      el.scrollHeight > el.clientHeight
+    ) {
+      return el;
+    }
+  }
+  return null;
+}
+
 /**
  * 적힌 순서대로 **한 프레임에 하나씩** 누른다.
  *
@@ -246,7 +261,20 @@ export function TutorialOverlay({
   useEffect(() => {
     const id = step?.anchors[0];
     if (!id) return;
-    visibleNode(id)?.scrollIntoView({ block: "center", behavior: "smooth" });
+    const node = visibleNode(id);
+    const box = node && innerScroller(node);
+    if (!node || !box) return;
+
+    const anchor = node.getBoundingClientRect();
+    const scroller = box.getBoundingClientRect();
+    if (anchor.top >= scroller.top && anchor.bottom <= scroller.bottom) return;
+
+    const center = anchor.top - scroller.top - (scroller.height - anchor.height) / 2;
+    const top = Math.max(
+      0,
+      Math.min(box.scrollTop + center, box.scrollHeight - box.clientHeight),
+    );
+    box.scrollTo({ top, behavior: "smooth" });
   }, [step]);
 
   // 원본은 200ms 마다 DOM 을 전수 검색했다. 화면이 React 로 넘어온 지금은 장이 바뀔 때와
