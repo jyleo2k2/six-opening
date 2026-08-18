@@ -52,6 +52,10 @@ assert.deepEqual(first.kind === "turn" ? first.turn : null, {
   prompt: per.check.question,
   choices: [...per.check.choices, { id: "unsure", label: "잘 모르겠어요" }],
 });
+assert.equal(
+  first.kind === "turn" ? first.turn.choices.some((choice) => choice.id === "ask") : false,
+  false,
+);
 
 // ② 정답이면 구체적으로 피드백하고 다음 행동을 묻는다.
 const correct = advanceExplain(per, {
@@ -214,7 +218,16 @@ assert.equal(gateChatOutput({ text: unsureAtBrief!.text, source: "fixed" }).ok, 
 const reask = reaskExplain(per, "detail");
 assert.equal(reask.kind, "turn");
 assert.equal(reask.kind === "turn" ? reask.turn.stage : null, "detail");
-assert.deepEqual(reask.kind === "turn" ? reask.turn.choices : null, per.adjust?.choices);
+assert.deepEqual(
+  reask.kind === "turn" ? reask.turn.choices : null,
+  [...(per.adjust?.choices ?? []), { id: "ask", label: "다른 걸 물어볼래요" }],
+);
+const briefReask = reaskExplain(per, "brief");
+assert.equal(briefReask.kind, "turn");
+assert.deepEqual(
+  briefReask.kind === "turn" ? briefReask.turn.choices.at(-1) : null,
+  { id: "ask", label: "다른 걸 물어볼래요" },
+);
 // 되물을 때마다 turn에 횟수를 실어 보낸다 — 클라이언트가 다음 요청에 그대로
 // 돌려보내야 상한을 셀 수 있다.
 assert.equal(reask.kind === "turn" ? reask.turn.reaskCount : null, 1);

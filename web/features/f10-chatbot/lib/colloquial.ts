@@ -93,6 +93,33 @@ export function looksLikeNewQuestion(input: string) {
   return /[?？]|뭐|무엇|왜|어떻게|어디|누가|언제|알려\s*줘|설명/.test(input);
 }
 
+/**
+ * 진행 중인 설명을 그만두고 다른 질문으로 넘어가려는 표현이다.
+ *
+ * 새 질문 판정과 섞지 않고, 정규화한 전체 입력이 사전 항목과 같을 때만
+ * 인식한다. 따라서 "다른 거 궁금해" 같은 문장은 추측으로 이탈시키지 않는다.
+ */
+const QUIZ_EXIT_INTENTS = lexicon([
+  "그만",
+  "그만할래",
+  "그만할래요",
+  "됐어",
+  "됐어요",
+  "안 할래",
+  "안 할래요",
+  "안할래",
+  "안할래요",
+  "다른 거",
+  "다른거",
+  "딴 거",
+  "딴거",
+]);
+
+export function looksLikeQuizExitIntent(input: string) {
+  const normalized = normalizeReply(input);
+  return Boolean(normalized) && QUIZ_EXIT_INTENTS.has(normalized);
+}
+
 export type ColloquialIntent = "yes" | "no" | "unsure";
 
 /**

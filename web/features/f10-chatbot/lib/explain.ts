@@ -8,6 +8,7 @@ import type {
 import { CHATBOT_KNOWLEDGE } from "../../../shared/data/chatbot-knowledge";
 import {
   looksLikeNewQuestion,
+  looksLikeQuizExitIntent,
   matchColloquialIntent,
   normalizeChoiceLabel,
   normalizeReply,
@@ -33,6 +34,10 @@ const FOLLOWUP_CHOICES: readonly ExplainChoice[] = [
   { id: "done", label: "여기까지 볼래요" },
 ];
 const UNSURE_CHOICE: ExplainChoice = { id: "unsure", label: "잘 모르겠어요" };
+const REASK_EXIT_CHOICE: ExplainChoice = {
+  id: "ask",
+  label: "다른 걸 물어볼래요",
+};
 
 /**
  * 설명이 끝난 자리에 붙이는 비슷한 용어 추천 (SPEC §3.4.1).
@@ -151,6 +156,14 @@ function stageChoices(script: ExplainScript, stage: ExplainReply["stage"]) {
     : script.adjust?.choices ?? CONFIRM_CHOICES;
 }
 
+function reaskChoices(script: ExplainScript, stage: ExplainReply["stage"]) {
+  const choices = stageChoices(script, stage);
+  // 이미 ask가 있는 단계(detail guiding/followup)는 그 버튼이 같은 이탈 문이다.
+  return choices.some((choice) => choice.id === REASK_EXIT_CHOICE.id)
+    ? choices
+    : [...choices, REASK_EXIT_CHOICE];
+}
+
 /**
  * ① 피드백 머리말 + ② 한 조각 설명 + ③ 이해 확인 재질문.
  *
@@ -208,7 +221,7 @@ export function resolveTextReply(
   stage: ExplainReply["stage"],
   message: string,
 ): string | null {
-  if (looksLikeNewQuestion(message)) return null;
+  if (looksLikeNewQuestion(message) || looksLikeQuizExitIntent(message)) return null;
 
   const normalized = normalizeReply(message);
   if (!normalized) return null;
@@ -407,7 +420,7 @@ export function reaskExplain(
           : script.adjust
             ? script.adjust.question
             : CONFIRM_PROMPT,
-    stageChoices(script, stage),
+    reaskChoices(script, stage),
     reaskCount + 1,
   );
 }
