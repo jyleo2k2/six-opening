@@ -189,6 +189,7 @@ const COPY = {
   input: "궁금한 것을 입력해 주세요",
   send: "\ubcf4\ub0b4\uae30",
   retry: "다시 보내기",
+  botName: "키웅AI",
   reset: "초기화",
   enableProactive: "먼저 알려주기 켜기",
 } as const;
@@ -326,33 +327,38 @@ function MessageBubble({
     <div className={userMessage ? "flex justify-end" : "flex justify-start"}>
       <div className="max-w-[84%]">
         {/*
-          프로필은 헤더가 아니라 답변 옆에 선다 — 헤더에 한 번만 두면 대화가 길어질수록 누가
-          말하는지가 스크롤 밖으로 밀려난다. 맞추는 기준선은 **첫 말풍선의 아래끝**이다.
-          칩까지 포함한 묶음 바닥에 맞추면 칩이 여러 줄인 답변에서 얼굴만 저 아래로 떨어져
-          다음 차례 것처럼 읽힌다. 그래서 아바타는 아래 후속 요소들과 같은 칼럼이 아니라
-          말풍선과 같은 행에 둔다.
+          프로필은 헤더가 아니라 답변 위에 이름표와 한 줄로 선다 — 헤더에 한 번만 두면 대화가
+          길어질수록 누가 말하는지가 스크롤 밖으로 밀려난다.
+
+          아바타(32)는 `-mt-4` 로 이름줄 위로 16 올라가 **아래 절반만 이름줄에 걸친다.**
+          음수 위 여백이 flex 항목의 바깥 높이를 16 으로 줄이므로 이름줄은 글씨 높이를
+          유지하고 동그라미만 위로 삐져나온다. 목록의 `pt-4`(16)가 그 삐져나온 만큼을 이미
+          비워 두므로 첫 답변에서도 잘리지 않는다.
         */}
-        <div className={userMessage ? undefined : "flex items-end gap-2"}>
-          {!userMessage && (
+        {!userMessage && (
+          <div className="flex items-end gap-2">
             <img
               alt=""
               aria-hidden="true"
-              className="size-8 shrink-0 rounded-full object-cover"
+              className="-mt-4 size-8 shrink-0 rounded-full object-cover"
               height={32}
               src={avatarSrc}
               width={32}
             />
-          )}
-          <p
-            className={
-              userMessage
-                ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
-                : "rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
-            }
-          >
-            {message.text}
-          </p>
-        </div>
+            <span className="text-xs font-semibold text-ink/70">
+              {COPY.botName}
+            </span>
+          </div>
+        )}
+        <p
+          className={
+            userMessage
+              ? "rounded-2xl bg-magenta px-4 py-3 text-sm leading-6 text-white"
+              : "mt-1.5 ml-10 rounded-2xl bg-bg px-4 py-3 text-sm leading-6 text-ink"
+          }
+        >
+          {message.text}
+        </p>
         {/* 후속 칩·버튼은 아바타 폭(32)과 간격(8)만큼 들여써 말풍선 왼끝에 맞춘다. */}
         {!userMessage && (
           <div className="pl-10">
