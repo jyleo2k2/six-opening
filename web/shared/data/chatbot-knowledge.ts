@@ -314,7 +314,7 @@ const GLOSSARY_EXPLAIN_SCRIPTS = {
       ],
       answerId: "start",
     },
-    detail: "크기가 다른 투자도 비율로 견줄 수 있지만 앞으로의 결과를 알려주지는 않아요.",
+    detail: "수익률은 지금까지 얼마나 달라졌는지를 보여줄 뿐, 앞으로 오를지 내릴지는 알려주지 않아요.",
     example: "서로 다른 길이의 달리기에서 출발점부터 얼마나 이동했는지 비율로 비교하는 것과 비슷해요. 출발한 금액이 기준이 돼요.",
   }),
   "average-price": termScript("average-price", {
@@ -681,7 +681,7 @@ const SCREEN_TERM_QUIZZES: Record<string, ScreenTermQuiz> = {
       ],
       answerId: "back",
     },
-    detail: "그래서 전체 자산보다 작을 수 있고, 새 주문을 넣을 수 있는지는 이 숫자로 확인해요.",
+    detail: "새로 주문을 넣을 수 있는지는 전체 자산이 아니라 이 숫자를 보면 돼요.",
     example: "용돈 중에 이미 친구와 쓰기로 약속한 몫을 빼고 남은 돈만 오늘 쓸 수 있는 것과 비슷해요.",
   },
   holdings: {

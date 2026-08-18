@@ -206,7 +206,7 @@ const CHOICE_CHIP_CLASS =
 
 const GREETING_SUGGESTED_QUESTIONS: string[] = [
   "매수는 어떻게 하나요?",
-  "수익률이 무엇인가요?",
+  "주식이 무엇인가요?",
   "키웅이는 무엇을 도와주나요?",
 ];
 
