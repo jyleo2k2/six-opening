@@ -6,6 +6,7 @@ import {
   SUB_PAGE,
   SUB_SCROLL,
   SubScreenHeader,
+  WatchButton,
 } from "./lib/stock-chrome";
 import { styleFromCss } from "./lib/css-style";
 import { buildTradeLegend, type PinRole } from "./lib/chart-trade-legend";
@@ -18,6 +19,8 @@ import {
   SVG_W,
   type ChartViewTrade,
 } from "./lib/chart-view";
+import { defaultChartWindow, type ChartWindow } from "./lib/chart-window";
+import { useChartGesture } from "./lib/use-chart-gesture";
 import { parseChartPoints, type ChartPoint } from "../f2-trade/chart-data";
 
 const UP = "#E8322E";
@@ -81,8 +84,14 @@ const CANDLE_TIP_ARROW = styleFromCss(
  * 차트가 앉는 자리. 안쪽 글자(가격 눈금·현재가 태그·최고/최저 이름표·핀)는 전부 여기에
  * `position:absolute` 로 얹히므로, 이 상자의 좌표계가 곧 SVG 의 좌표계여야 한다 —
  * 카드 안쪽 폭(화면 402 − 좌우 16 − 카드 18 = 334)이 SVG 폭과 정확히 같다.
+ *
+ * 끌어 옮기고 오므려 확대하는 손짓도 이 상자가 받는다(`useChartGesture`). `touch-action:none`
+ * 이 있어야 손가락이 차트를 끌 때 브라우저가 페이지를 대신 스크롤하지 않고, `user-select`
+ * 를 꺼야 옆으로 끄는 동안 가격 글자가 파랗게 잡히지 않는다.
  */
-const CHART_WRAP = styleFromCss("position:relative;margin-top:14px");
+const CHART_WRAP = styleFromCss(
+  "position:relative;margin-top:14px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab",
+);
 /**
  * 오른쪽 가격 글자. SVG `<text>` 를 쓰지 않는 이유는 시안과 같다 — 값 구멍이 들어간
  * `<text>` 는 편집기가 span 을 끼워 넣어 글자가 사라진다.
@@ -180,6 +189,8 @@ export function ChartScreen({
   onBack,
   onLeave,
   onStartBuy,
+  watched,
+  onToggleWatch,
 }: {
   code: string;
   name: string;
@@ -199,6 +210,12 @@ export function ChartScreen({
   /** 하단 탭바가 쓴다. 뒤로가기(`onBack`)는 상세로 돌아가지만 탭은 앱의 다른 화면으로 나간다. */
   onLeave: (path: string) => void;
   onStartBuy: () => void;
+  /**
+   * 헤더 오른쪽 하트. 상태도 누름도 상세(`DetailScreen`)가 갖는다 — 두 화면의 하트가
+   * 같은 `useWatchlist` 하나를 봐야 오갈 때 켜짐이 어긋나지 않는다.
+   */
+  watched: boolean;
+  onToggleWatch: () => void;
 }) {
   const [period, setPeriod] = useState<ChartPeriod>("daily");
   const [chartType, setChartType] = useState<ChartType>("line");
@@ -213,6 +230,19 @@ export function ChartScreen({
    * 같은 API 를 따로 불러 둘이 어긋날 자리가 있었다.
    */
   const [trades, setTrades] = useState<ChartViewTrade[]>([]);
+  /**
+   * 지금 보고 있는 구간. 손짓이 이 값을 옮기고 넓힌다.
+   *
+   * 종목·기간·차트종류가 바뀌면 기본 구간으로 되돌린다 — 담는 봉 개수가 셋마다 다르고
+   * (`DEFAULT_CHART_BARS`), 다른 종목의 창을 물려받으면 보던 자리와 무관한 데서 시작한다.
+   */
+  // 이름을 `window` 로 줄이지 않는다 — 아래 폴링이 쓰는 전역 `window.setInterval` 을 가린다.
+  const [chartWindow, setChartWindow] = useState<ChartWindow>(() =>
+    defaultChartWindow(period, chartType),
+  );
+  useEffect(() => {
+    setChartWindow(defaultChartWindow(period, chartType));
+  }, [code, period, chartType]);
 
   /**
    * 봉 데이터. 종목·기간에만 달려 있고 선↔캔들 전환은 여기를 다시 타지 않는다.
@@ -284,11 +314,25 @@ export function ChartScreen({
   const tfLabel = TF_OPTIONS.find((option) => option.id === period)?.label ?? "일";
   const legend = buildTradeLegend(trades);
   const line = changeUp ? UP : DOWN;
-  const chart = points ? buildChartView({ points, price, period, chartType, trades }) : null;
+  const chart = points
+    ? buildChartView({ points, price, period, chartType, trades, window: chartWindow })
+    : null;
+  const gesture = useChartGesture({
+    chartType,
+    defaults: defaultChartWindow(period, chartType),
+    onWindow: setChartWindow,
+    plotWidth: PLOT_W,
+    times: points?.map((point) => point.time) ?? [],
+    window: chartWindow,
+  });
 
   return (
     <div style={SUB_PAGE}>
-      <SubScreenHeader onBack={onBack} title={`${name} 차트`} />
+      <SubScreenHeader
+        onBack={onBack}
+        right={<WatchButton onToggle={onToggleWatch} watched={watched} />}
+        title={`${name} 차트`}
+      />
       <div style={SUB_SCROLL}>
         <div style={CARD}>
           <div style={NAME_ROW}>
@@ -380,7 +424,7 @@ export function ChartScreen({
             긋고, 가격은 그 오른쪽 여백에 HTML 글자로 얹는다. 값을 어느 눈금과 맞춰 읽을지는
             현재가 태그와 최고·최저 이름표가 대신 짚어 준다.
           */}
-          <div style={CHART_WRAP}>
+          <div ref={gesture.ref} style={CHART_WRAP}>
             <svg
               height={PLOT_H}
               style={{ display: "block", overflow: "visible" }}
@@ -457,7 +501,8 @@ export function ChartScreen({
                 {tick.text}
               </div>
             ))}
-            {chart && (
+            {/* 과거 구간을 보고 있을 때는 지금 가격표를 띄우지 않는다 — 그 구간의 값이 아니다. */}
+            {chart?.nowVisible && (
               <div style={{ ...NOW_TAG, left: NOW_LEFT, top: chart.nowY - 10, background: line }}>
                 {chart.nowText}
               </div>
