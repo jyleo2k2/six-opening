@@ -215,6 +215,26 @@ const SHEET_LIST = styleFromCss(
 /** 목록 아래 빈 자리. 여기를 눌러도 시트가 닫힌다 — 배경을 누른 것과 같은 손짓이다. */
 const SHEET_REST = styleFromCss("flex:1;min-height:24px");
 
+/**
+ * 홈 진입 배너. 가로는 화면 폭에 꽉 채우고 세로는 이미지 자체 비율(390:442)이 화면
+ * 절반쯤을 채운다 — 별도로 높이를 못 박지 않는다. 뒤는 어둡게 깔아 배너를 도드라지게
+ * 한다.
+ */
+const BANNER_SCRIM = styleFromCss(
+  "position:absolute;inset:0;z-index:20;background:rgba(12,9,26,0.62);" +
+    "display:flex;align-items:center;justify-content:center",
+);
+const BANNER_IMG_WRAP = styleFromCss("position:relative;width:100%;line-height:0");
+const BANNER_IMG = styleFromCss("display:block;width:100%;height:auto");
+/**
+ * 이미지 안에 이미 그려진 `오늘 그만 보기`·`닫기` 글자 위에 투명 버튼을 얹는다. 그 문구
+ * 자리는 이미지 바닥의 9.5%다 — 그림을 다시 그리지 않고 실제로 누를 수 있게만 만든다.
+ */
+const BANNER_ACTIONS = styleFromCss("position:absolute;left:0;right:0;bottom:0;display:flex;height:9.5%");
+const BANNER_ACTION_BTN = styleFromCss(
+  "flex:1;background:transparent;border:none;padding:0;margin:0;cursor:pointer",
+);
+
 const pctStyle = (holding: HomeHolding, size: number) =>
   styleFromCss(
     `font-size:${size}px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:${trendColor(holding.trend)}`,
@@ -264,12 +284,21 @@ export function HomeScreen({
   onLeave,
   onStartTutorial,
   embedded = false,
+  bannerHiddenForSession = false,
+  onHideBannerForSession,
 }: {
   onLeave: (path: string) => void;
   /** 튜토리얼 `?`. 오버레이는 `ConnectedPrototype` 이 갖는다 — 화면 하나에 매이면 안 된다. */
   onStartTutorial?: () => void;
   /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
   embedded?: boolean;
+  /**
+   * `오늘 그만 보기` 로 배너를 껐는지. 홈 화면은 오갈 때마다 다시 마운트돼 자기 상태를
+   * 잃으므로, 로그인 세션이 끝날 때까지 유지해야 하는 이 값은 `ConnectedPrototype` 이
+   * 들고 있다가 물려준다.
+   */
+  bannerHiddenForSession?: boolean;
+  onHideBannerForSession?: () => void;
 }) {
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
@@ -277,6 +306,10 @@ export function HomeScreen({
   const [walletOpen, setWalletOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [popped, setPopped] = useState(false);
+  // 이번에 들어와서 닫았는지. 홈을 나갔다 다시 들어오면 새로 마운트되며 초기화된다 —
+  // "다시 들어오면 배너가 다시 뜬다"는 그 초기화 하나로 이미 이뤄진다.
+  const [bannerClosed, setBannerClosed] = useState(false);
+  const showBanner = !bannerHiddenForSession && !bannerClosed;
   const sheet = useSheetDrag(SHEET_HEIGHT);
   const scale = usePhoneScreenRect()?.scale ?? 1;
   // 카드를 위로 밀기 시작한 자리. 손을 뗄 때 얼마나 올렸는지로 시트를 열지 정한다.
@@ -562,6 +595,35 @@ export function HomeScreen({
         )}
 
         <BottomNav active="home" onLeave={onLeave} />
+
+        {showBanner && (
+          <div style={BANNER_SCRIM}>
+            <div style={BANNER_IMG_WRAP}>
+              <img
+                alt="우리 아이 투자 첫걸음 — 참가신청 7월 20일~8월 28일, 대회기간 8월 3일~8월 28일"
+                src="/ui/assets/home-banner.png"
+                style={BANNER_IMG}
+              />
+              <div style={BANNER_ACTIONS}>
+                <button
+                  aria-label="오늘 그만 보기"
+                  onClick={() => {
+                    onHideBannerForSession?.();
+                    setBannerClosed(true);
+                  }}
+                  style={BANNER_ACTION_BTN}
+                  type="button"
+                />
+                <button
+                  aria-label="닫기"
+                  onClick={() => setBannerClosed(true)}
+                  style={BANNER_ACTION_BTN}
+                  type="button"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ScreenFrame>
   );
