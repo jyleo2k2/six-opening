@@ -1129,15 +1129,31 @@ export function ArchiveScreen({
                 <span style={{ width: 1, height: 13, background: "#DFE1EB" }} />
                 <span style={{ fontSize: 15, fontWeight: 700 }}>{walletHead.pctText}</span>
               </div>
-              {famDetailOpen && (
-                <>
+              {/*
+                펼쳐지는 속은 **DOM에 늘 두고 높이만 여닫는다**. 조건부로 붙였다 떼면 화살표만
+                부드럽고 속은 한 프레임에 튀어나와, 같은 손짓이 두 가지 속도로 보인다.
+
+                높이를 재지 않고 `grid-template-rows` 를 `0fr↔1fr` 로 옮긴다 — 내용이 몇 줄이든
+                제 높이만큼만 열리므로 `max-height` 처럼 어림값을 박아 둘 필요가 없다. 속을 감싼
+                칸은 `minHeight: 0` 이어야 접힌다 — 그리드 칸의 기본 최소 크기가 내용 높이라서다.
+                곡선·시간은 화살표와 **같은 값**이다. 한 손짓이니 한 속도로 움직여야 한다.
+              */}
+              <div
+                aria-hidden={!famDetailOpen}
+                style={{
+                  display: "grid", gridTemplateRows: famDetailOpen ? "1fr" : "0fr",
+                  opacity: famDetailOpen ? 1 : 0,
+                  transition: "grid-template-rows 0.26s cubic-bezier(0.22,1,0.36,1), opacity 0.2s ease",
+                }}
+              >
+                <div style={{ minHeight: 0, overflow: "hidden" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 16, paddingTop: 15, borderTop: "1px solid #EFF0F6" }}>
                     <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 600, color: "#8E93A8" }}>투자 가능 금액</div>
                     <div style={{ flex: "none", fontSize: 15.5, fontWeight: 700, color: "#2C3245", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{walletHead.cashText ?? summary.cashText}</div>
                   </div>
                   <div style={{ textAlign: "right", fontSize: 12, fontWeight: 600, color: "#A9AEC4", marginTop: 6, whiteSpace: "nowrap" }}>{summary.settleText}</div>
-                </>
-              )}
+                </div>
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 18 }}>
                 <div onClick={() => { setView("family"); setSeason("now"); setFamPick("all"); famSheet.closeSheet(); }} style={FAMILY_ROW}>
                   <svg fill="none" height="22" stroke="#1A1F4B" style={{ display: "block", flex: "none" }} viewBox="0 0 24 24" width="22">
