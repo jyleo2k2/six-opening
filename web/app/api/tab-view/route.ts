@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { insertRow, selectRows, sessionUserId } from "../supabase";
+import { invalidateSeasonCards } from "../profile/season-cards/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
     console.info(
       JSON.stringify({ event: "tab_view_saved", userId, stockCode, id: row.id, tabCount: row.tab_count }),
     );
+    invalidateSeasonCards([userId]);
     return Response.json({ id: row.id, tab_count: row.tab_count });
   } catch (error) {
     console.error(JSON.stringify({ event: "tab_view_saved", result: "error", message: String(error) }));

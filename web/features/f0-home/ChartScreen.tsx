@@ -23,7 +23,7 @@ import {
 } from "./lib/chart-view";
 import { defaultChartWindow, type ChartWindow } from "./lib/chart-window";
 import { useChartGesture } from "./lib/use-chart-gesture";
-import { parseChartPoints, type ChartPoint } from "../f2-trade/chart-data";
+import { mergeChartPoints, parseChartPoints, type ChartPoint } from "../f2-trade/chart-data";
 
 const UP = "#E8322E";
 const DOWN = "#1668DC";
@@ -239,6 +239,7 @@ export function ChartScreen({
   const [chartType, setChartType] = useState<ChartType>("line");
   const [tfMenuOpen, setTfMenuOpen] = useState(false);
   const [points, setPoints] = useState<ChartPoint[] | null>(null);
+  const pointsRef = useRef<ChartPoint[]>([]);
   const [state, setState] = useState<LoadState>("loading");
   /**
    * 이 종목의 가족 체결. `GET /api/trades` 가 유일한 출처다 (F11 SPEC §6.1).
@@ -270,20 +271,28 @@ export function ChartScreen({
     const controller = new AbortController();
     setPoints(null);
     setState("loading");
+    pointsRef.current = [];
 
     let fetching = false;
     const load = () => {
       if (fetching) return;
       fetching = true;
-      fetch(`/api/quote/${encodeURIComponent(code)}/chart?period=${period}`, {
+      const lastTime = pointsRef.current[pointsRef.current.length - 1]?.time;
+      const query = new URLSearchParams({ period });
+      if (lastTime !== undefined) query.set("since", String(lastTime));
+      fetch(`/api/quote/${encodeURIComponent(code)}/chart?${query.toString()}`, {
         signal: controller.signal,
         cache: "no-store",
       })
         .then((response) => (response.ok ? response.json() : Promise.reject(new Error("chart request failed"))))
         .then((payload: unknown) => {
           const received = parseChartPoints(payload);
-          if (!received.length) throw new Error("empty chart");
-          setPoints(received);
+          const next = lastTime === undefined
+            ? received
+            : mergeChartPoints(pointsRef.current, received);
+          if (!next.length) throw new Error("empty chart");
+          pointsRef.current = next;
+          setPoints(next);
           setState("ready");
         })
         .catch(() => {

@@ -14,26 +14,41 @@ function cacheControl(period: ChartPeriod) {
     : "public, max-age=60, stale-while-revalidate=240";
 }
 
+function parseSince(value: string | null) {
+  if (value === null) return null;
+  if (!/^\d+$/.test(value)) return undefined;
+  const since = Number(value);
+  return Number.isSafeInteger(since) ? since : undefined;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ symbol: string }> },
 ) {
   try {
     const { symbol } = await params;
-    const requestedPeriod =
-      new URL(request.url).searchParams.get("period") ?? "daily";
+    const searchParams = new URL(request.url).searchParams;
+    const requestedPeriod = searchParams.get("period") ?? "daily";
+    const since = parseSince(searchParams.get("since"));
     if (!(["minute", "daily", "weekly"] as const).includes(requestedPeriod as ChartPeriod)) {
       return NextResponse.json(
         { error: "지원하지 않는 차트 기간입니다." },
         { status: 400 },
       );
     }
+    if (since === undefined) {
+      return NextResponse.json(
+        { error: "since 파라미터가 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
     const period = requestedPeriod as ChartPeriod;
     const points = await getChart(symbol, period);
+    const responsePoints = since === null ? points : points.filter((point) => point.time >= since);
     // 응답을 먼저 보내고 보관 DB의 최신 구간을 뒤에서 채운다.
     if (period !== "minute") after(() => refreshStoredChart(symbol, period));
     return NextResponse.json(
-      { symbol, period, points },
+      { symbol, period, points: responsePoints },
       { headers: { "Cache-Control": cacheControl(period) } },
     );
   } catch (error) {

@@ -5,6 +5,7 @@ import { marketFor } from "../../../shared/data/stocks";
 import { isOnTick, tickSize } from "../../../shared/engine/tick-size";
 import { planFields, rejectionReason } from "../trade/route";
 import { settleDueOrders, type ScheduledOrder } from "./settle";
+import { invalidateSeasonCards } from "../profile/season-cards/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -128,6 +129,7 @@ export async function GET(request: NextRequest) {
     );
 
     const reconciled = await reconcileOpenOrders(before, due.length > 0, () => openOrders(userId));
+    if (settled.length > 0 || reconciled.changed) invalidateSeasonCards([userId]);
     return Response.json({
       orders: reconciled.rows.map(toOrder),
       settled,
@@ -207,6 +209,7 @@ export async function POST(request: NextRequest) {
       ...plan,
     });
     console.info(JSON.stringify({ event: "order_reserved", userId, stockCode, side, ...result }));
+    invalidateSeasonCards([userId]);
     return Response.json(result);
   } catch (error) {
     // 예약도 즉시 체결과 같은 사유를 낸다 — 매도 예약은 `보유 수량이 부족합니다` 로 막힌다.
@@ -229,6 +232,7 @@ export async function DELETE(request: NextRequest) {
       p_order_id: orderId,
       p_user_id: userId,
     });
+    invalidateSeasonCards([userId]);
     return Response.json(result);
   } catch (error) {
     console.error(JSON.stringify({ event: "order_cancelled", result: "error", message: String(error) }));

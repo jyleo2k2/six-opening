@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { callRpc, sessionUserId } from "../supabase";
+import { invalidateSeasonCards } from "../profile/season-cards/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -115,6 +116,7 @@ export async function POST(request: NextRequest) {
     console.info(
       JSON.stringify({ event: "trade_saved", userId, stockCode, side, transactionId: result.transaction_id }),
     );
+    invalidateSeasonCards([userId]);
     return Response.json(result);
   } catch (error) {
     // 잔액 부족·수량 부족·미등록 종목은 함수가 예외로 막는다. 어느 쪽이었는지 화면도 알아야 한다.

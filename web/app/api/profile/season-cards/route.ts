@@ -15,6 +15,7 @@ import type {
 import { computePortfolioReturn } from "../../../../shared/engine/portfolio-return";
 import { selectFilledTrades, selectRows, sessionUserId } from "../../supabase";
 import { readDailyCloses } from "../../quote/stock-candles";
+import { getSeasonCardsCached } from "./cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -331,7 +332,7 @@ function composeCards(
  * 만큼 왕복이 생기므로, 읽기는 `loadProfileRows` 한 묶음으로 모으고 종가도 구성원 전체의
  * 종목을 합쳐 한 번만 읽는다.
  */
-export async function buildSeasonCardsFor(userIds: number[], deps: SeasonCardsDeps = defaultDeps) {
+async function buildSeasonCardsForUncached(userIds: number[], deps: SeasonCardsDeps) {
   const ids = [...new Set(userIds)];
   const [rowsByUser, stocks] = await Promise.all([deps.loadProfileRows(ids), deps.loadStocks()]);
   const now = deps.now();
@@ -361,6 +362,12 @@ export async function buildSeasonCardsFor(userIds: number[], deps: SeasonCardsDe
   return new Map(
     inputs.map(({ userId, input }) => [userId, composeCards(userId, input, closesBySymbol, now)]),
   );
+}
+
+export async function buildSeasonCardsFor(userIds: number[], deps: SeasonCardsDeps = defaultDeps) {
+  const ids = [...new Set(userIds)];
+  if (deps !== defaultDeps) return buildSeasonCardsForUncached(ids, deps);
+  return getSeasonCardsCached(ids, () => buildSeasonCardsForUncached(ids, deps));
 }
 
 /** 로그인 사용자 한 사람의 주차 결산 카드. */
