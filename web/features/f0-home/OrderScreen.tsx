@@ -141,11 +141,21 @@ const DARK_VALUE = styleFromCss(
 );
 // 구매·판매·대기 탭과 대기 목록 시트 — `renderVals-compute.js` 의 sheetTab·sheetStyle 과 같은 값이다.
 const TAB_ROW = styleFromCss("flex:none;display:flex;gap:4px;background:#EFEEF6;border-radius:999px;padding:4px");
+/**
+ * 이 화면의 겹치는 것들은 **베젤(`PhoneFrame` 의 프레임 이미지, z-index 10) 아래**에
+ * 머문다. `#kw-screen` 은 `z-index:auto` 라 쌓임 맥락을 만들지 않으므로 여기 적은 값은
+ * `.phone-stage__content` 안에서 프레임 이미지와 **직접** 겨룬다 — 예전의 40·41·42 는
+ * 그 겨룸에서 이겨 시트가 폰 테두리 위로 올라섰고, 화면의 `overflow:hidden`(반경 40)
+ * 에만 잘려 그보다 깊은 개구부 아래 코너(반경 62)를 네모나게 덮었다.
+ *
+ * 값은 홈·아카이브 시트와 같은 층(딤 6, 시트 7)을 쓴다. 4 보다 커야 챗봇 오버레이를
+ * 덮는다 — 시트를 열어 둔 채 챗봇 버튼이 위로 비치면 안 된다.
+ */
 const SHEET_SCRIM = styleFromCss(
-  "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(18,14,40,0.34);z-index:40",
+  "position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(18,14,40,0.34);z-index:6",
 );
 const SHEET = styleFromCss(
-  "position:absolute;left:0;right:0;bottom:0;z-index:41;max-height:70%;overflow-y:auto;background:#FFFFFF;" +
+  "position:absolute;left:0;right:0;bottom:0;z-index:7;max-height:70%;overflow-y:auto;background:#FFFFFF;" +
     "border-radius:28px 28px 0 0;padding:10px 18px 22px;box-shadow:0 -14px 34px -12px rgba(20,16,50,0.28)",
 );
 const SHEET_GRAB = styleFromCss("width:42px;height:4px;border-radius:999px;background:#E1E0EC;margin:0 auto 14px");
@@ -163,9 +173,9 @@ const TARGET_HINT = styleFromCss("font-size:12.5px;font-weight:500;color:#9B94C4
 const SCRIM_CSS =
   "position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;" +
   "padding:0 32px;background:rgba(20,16,45,0.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)";
-const BLOCK_SCRIM = styleFromCss(`z-index:20;${SCRIM_CSS}`);
-/** 예약 시트(z-index 41) 에서 눌러 여는 확인이라 시트보다 위에 떠야 한다. */
-const REORDER_SCRIM = styleFromCss(`z-index:42;${SCRIM_CSS}`);
+const BLOCK_SCRIM = styleFromCss(`z-index:6;${SCRIM_CSS}`);
+/** 예약 시트(z-index 7) 에서 눌러 여는 확인이라 시트보다 위, 베젤(10) 아래여야 한다. */
+const REORDER_SCRIM = styleFromCss(`z-index:8;${SCRIM_CSS}`);
 const BLOCK_CARD = styleFromCss(
   "display:flex;flex-direction:column;align-items:center;width:100%;box-sizing:border-box;background:#FFFFFF;" +
     "border-radius:30px;padding:26px 24px 24px;box-shadow:0 24px 48px -16px rgba(30,25,60,0.32)",
