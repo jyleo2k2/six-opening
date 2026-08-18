@@ -1,6 +1,4 @@
-/* `ui-src/template/shell-0.html` 의 <style> 중 폰 프레임 안에서 쓰는 것만 옮겼다.
-   아직 app.html 이 그리는 화면은 그쪽 <style> 을 계속 쓴다. 마지막 화면이 옮겨 오면
-   그 블록은 사라진다. */
+/* `ui-src/template/shell-0.html` 의 <style> 중 폰 프레임 안에서 쓰던 값을 옮겼다. */
 
 @font-face{font-family:'Pretendard';src:url('/ui/assets/fonts/Pretendard-Regular.otf') format('opentype');font-weight:400;font-display:swap}
 @font-face{font-family:'Pretendard';src:url('/ui/assets/fonts/Pretendard-Medium.otf') format('opentype');font-weight:500;font-display:swap}
@@ -9,8 +7,7 @@
 @font-face{font-family:'Pretendard';src:url('/ui/assets/fonts/Pretendard-ExtraBold.otf') format('opentype');font-weight:800;font-display:swap}
 @font-face{font-family:'Pretendard';src:url('/ui/assets/fonts/Pretendard-Black.otf') format('opentype');font-weight:900;font-display:swap}
 
-/* 프레임을 창 가운데 놓고 넘치는 부분은 자른다. app.html 은 body 에 overflow:hidden 을
-   걸어 같은 일을 했다 — 여기서는 무대 안으로만 좁힌다. */
+/* 프레임을 창 가운데 놓고 넘치는 부분은 자른다. 무대 안으로만 좁힌다. */
 .phone-stage {
   height: 100dvh;
   display: flex;
@@ -18,6 +15,23 @@
   justify-content: center;
   overflow: hidden;
   background: #f6f7fa;
+}
+
+/* 배율·중앙 위치의 원본. JS viewport 측정값을 다시 만들지 않아 주소창·키보드·핀치 줌
+   때문에 layout viewport와 client 좌표가 갈라져도 프레임 자체는 CSS 한 곳에서 움직인다. */
+.phone-stage__content {
+  position: relative;
+  width: 450px;
+  height: 920px;
+  flex: none;
+  transform: scale(
+    min(
+      1,
+      calc((100vw - 8px) / 450px),
+      calc((100dvh - 8px) / 920px)
+    )
+  );
+  transform-origin: center center;
 }
 
 /* 폰 안에서는 스크롤바를 감춘다. */

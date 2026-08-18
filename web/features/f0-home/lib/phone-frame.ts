@@ -1,5 +1,4 @@
 import {
-  getPrototypeScreenRect,
   PROTOTYPE_PHONE,
   type PrototypeScreenRect,
 } from "../../f10-chatbot/lib/bottom-sheet";
@@ -7,10 +6,9 @@ import {
 /**
  * 폰 프레임의 기하. `ui-src/template/shell-0.html`·`shell-20.html` 이 쓰던 값이다.
  *
- * 화면을 하나씩 React 로 옮기는 동안 프레임은 두 곳에 존재한다 — 아직 안 옮긴 화면은
- * `app.html` 이, 옮긴 화면은 `PhoneFrame` 이 그린다. 두 프레임이 어긋나면 화면을
- * 오갈 때 폰이 튀고, 챗봇 시트가 프레임 밖으로 나온다. 그래서 배율은 새로 계산하지 않고
- * 챗봇이 쓰는 `getPrototypeScreenRect` 의 값을 그대로 쓴다 — 기하의 원본은 하나다.
+ * 화면은 `PhoneFrame` 안에서 CSS 배율로 줄어들고, 오버레이는 그 안의 `#kw-screen`을
+ * 실측한다. 두 좌표계를 다시 계산해 맞추지 않고 실제 client rect 하나를 전달해야
+ * 모바일 주소창·키보드·핀치 줌에서도 fixed 오버레이와 프레임이 같은 자리를 본다.
  */
 export const PHONE_SCREEN = Object.freeze({
   left: 24,
@@ -18,17 +16,32 @@ export const PHONE_SCREEN = Object.freeze({
   borderRadius: 40,
 });
 
-/** `--runtime-scale` — 창에 맞춰 450×920 프레임을 줄인다. 키우지는 않는다. */
-export function phoneFrameScale(viewportWidth: number, viewportHeight: number) {
-  return getPrototypeScreenRect(viewportWidth, viewportHeight).scale;
+export function prototypeScreenRectFromClientRect(
+  rect: { left: number; top: number; width: number; height: number },
+): PrototypeScreenRect | null {
+  if (
+    ![rect.left, rect.top, rect.width, rect.height].every(Number.isFinite) ||
+    rect.width <= 0 ||
+    rect.height <= 0
+  ) {
+    return null;
+  }
+
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    scale: rect.width / PROTOTYPE_PHONE.screenWidth,
+  };
 }
 
 /**
  * 폰 화면 사각형 밖으로 나간 오버레이를 잘라내는 `clip-path`.
  *
- * 챗봇 오버레이는 `app.html` iframe **밖**에 있고 프레임 이미지는 그 **안**에 있다.
- * 스태킹 컨텍스트가 갈리므로 z-index 로는 누가 위인지 정할 수 없다. 그래서 순서를 정하는
- * 대신 화면 사각형으로 잘라, 좌표가 어떤 이유로 어긋나도 프레임 밖으로는 못 나가게 한다.
+ * 챗봇 오버레이와 프레임 이미지는 서로 다른 스태킹 컨텍스트에 있다. z-index 로는
+ * 순서를 정할 수 없으므로 화면 사각형으로 잘라, 오버레이가 프레임 밖으로 나가지
+ * 않게 한다.
  * 오버레이 하나에 걸면 그 안의 시트·플로팅 버튼·삭제 타깃·말풍선이 전부 함께 갇힌다.
  *
  * 오버레이는 `position:fixed; inset:0` 이라 `100%` 가 곧 뷰포트다. 아직 화면을 재지 못했으면
@@ -50,8 +63,8 @@ export function phoneScreenClipPath(screen: PrototypeScreenRect | null) {
  * 파여 있어, 화면 사각형에 딱 맞춰 잘라도 그 사이 틈으로 오버레이가 베젤 위에 비친다.
  * 프레임을 맨 위에 한 겹 더 깔면 무엇이 올라오든 베젤이 항상 이긴다.
  *
- * 화면과 프레임은 둘 다 창 가운데 놓이므로(24+402+24=450, 23+874+23=920) 화면 사각형에서
- * 바로 구한다 — 배율을 다시 계산하면 프레임과 화면이 어긋난다.
+ * 화면 사각형에서 바로 구한다 — 배율·위치를 viewport에서 다시 계산하면 프레임과
+ * 화면이 어긋날 수 있다.
  */
 export function phoneFrameRect(screen: PrototypeScreenRect | null) {
   if (!screen) return null;

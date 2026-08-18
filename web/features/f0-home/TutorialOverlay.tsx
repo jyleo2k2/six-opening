@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
-  getPrototypeScreenRect,
   PROTOTYPE_PHONE,
   type PrototypeScreenRect,
 } from "../f10-chatbot/lib/bottom-sheet";
@@ -114,12 +113,15 @@ export function TutorialOverlay({
   place,
   onGo,
   onClose,
+  screenRect,
 }: {
   /** 지금 어느 화면의 어느 자리인지. 장은 이 값에서 읽는다 — 세지 않는다. */
   place: TutorialPlace;
   /** 주소로 데려간다. `ConnectedPrototype` 의 `leaveToPath` 와 같은 경로다. */
   onGo: (path: string) => void;
   onClose: () => void;
+  /** `ConnectedPrototype`이 `#kw-screen`에서 실측한 client 좌표. */
+  screenRect: PrototypeScreenRect | null;
 }) {
   /**
    * 이번 튜토리얼이 사고팔 회사. 아이가 갖고 있는 것 중 팔 수 있는 첫 종목이다.
@@ -154,7 +156,6 @@ export function TutorialOverlay({
   const steps = tutorialSteps(stock !== null);
   const [index, setIndex] = useState(() => Math.max(0, stepIndexAt(steps, place)));
   const [openConcept, setOpenConcept] = useState(false);
-  const [screen, setScreen] = useState<PrototypeScreenRect | null>(null);
   const [boxes, setBoxes] = useState<AnchorRect[]>([]);
   const [bubbleHeight, setBubbleHeight] = useState(240);
   const bubbleRef = useRef<HTMLDivElement | null>(null);
@@ -205,15 +206,18 @@ export function TutorialOverlay({
   }, [placeKey, place, steps, index, onClose]);
 
   const measure = useCallback(() => {
-    const rect = getPrototypeScreenRect(window.innerWidth, window.innerHeight);
-    setScreen(rect);
+    const rect = screenRect;
+    if (!rect) {
+      setBoxes([]);
+      return;
+    }
     const found: AnchorRect[] = [];
     for (const id of step?.anchors ?? []) {
       const node = visibleNode(id);
       if (node) found.push(toScreenRect(node.getBoundingClientRect(), rect));
     }
     setBoxes(found);
-  }, [step]);
+  }, [screenRect, step]);
 
   /**
    * 장이 바뀌면 짚을 자리를 **화면 안으로 끌어온다.**
@@ -243,10 +247,14 @@ export function TutorialOverlay({
     remeasure();
     window.addEventListener("resize", remeasure);
     window.addEventListener("scroll", remeasure, true);
+    window.visualViewport?.addEventListener("resize", remeasure);
+    window.visualViewport?.addEventListener("scroll", remeasure);
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", remeasure);
       window.removeEventListener("scroll", remeasure, true);
+      window.visualViewport?.removeEventListener("resize", remeasure);
+      window.visualViewport?.removeEventListener("scroll", remeasure);
     };
   }, [measure]);
 
@@ -259,7 +267,7 @@ export function TutorialOverlay({
     setBubbleHeight((current) => (current === next ? current : next));
   }, [step, openConcept]);
 
-  if (!step || !screen) return null;
+  if (!step || !screenRect) return null;
 
   const holes = boxes.map((box) => holeOf(box));
   // 짚을 것을 못 찾으면 구멍 없이 설명만 띄운다. 화면 전체를 span 으로 주면 위아래
@@ -327,17 +335,17 @@ export function TutorialOverlay({
         // 동안은 키웅이도 함께 어두워져야 지금 짚는 곳으로 눈이 간다.
         zIndex: 15,
         pointerEvents: "none",
-        clipPath: phoneScreenClipPath(screen),
+        clipPath: phoneScreenClipPath(screenRect),
       }}
     >
       <div
         style={{
           position: "absolute",
-          left: screen.left,
-          top: screen.top,
+          left: screenRect.left,
+          top: screenRect.top,
           width: SCREEN_W,
           height: SCREEN_H,
-          transform: `scale(${screen.scale})`,
+          transform: `scale(${screenRect.scale})`,
           transformOrigin: "top left",
         }}
       >

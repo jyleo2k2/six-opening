@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
-import { getPrototypeScreenRect } from "../../f10-chatbot/lib/bottom-sheet";
 import {
   PHONE_SCREEN,
   PROTOTYPE_PHONE,
-  phoneFrameScale,
+  phoneFrameRect,
   phoneScreenClipPath,
+  prototypeScreenRectFromClientRect,
 } from "./phone-frame";
 
 function main() {
@@ -14,21 +14,30 @@ function main() {
     PROTOTYPE_PHONE.frameWidth,
   );
 
-  // 배율은 챗봇이 시트를 맞출 때 쓰는 값과 같아야 한다. 어긋나면 시트가 프레임 밖으로 나온다.
-  for (const [w, h] of [
-    [1440, 900],
-    [900, 1600],
-    [400, 700],
-    [2000, 2000],
-  ]) {
-    assert.equal(phoneFrameScale(w, h), getPrototypeScreenRect(w, h).scale);
-  }
-
-  // 창이 넉넉하면 원래 크기 그대로다 (1 을 넘겨 키우지 않는다).
-  assert.equal(phoneFrameScale(2000, 2000), 1);
-  // 좁으면 짧은 쪽에 맞춰 줄어든다.
-  assert.equal(phoneFrameScale(458, 5000), 1);
-  assert.equal(phoneFrameScale(233, 5000), 0.5);
+  // 오버레이 rect는 viewport 계산값이 아니라 #kw-screen 실측 client rect에서 파생한다.
+  const measured = prototypeScreenRectFromClientRect({
+    left: 20,
+    top: 30,
+    width: 201,
+    height: 437,
+  });
+  assert.deepEqual(measured, {
+    left: 20,
+    top: 30,
+    width: 201,
+    height: 437,
+    scale: 0.5,
+  });
+  assert.deepEqual(phoneFrameRect(measured), {
+    left: 8,
+    top: 18.5,
+    width: 225,
+    height: 460,
+  });
+  assert.equal(
+    prototypeScreenRectFromClientRect({ left: 0, top: 0, width: 0, height: 437 }),
+    null,
+  );
 
   // 아직 화면을 재지 못했으면 자를 사각형도 없다.
   assert.equal(phoneScreenClipPath(null), undefined);
