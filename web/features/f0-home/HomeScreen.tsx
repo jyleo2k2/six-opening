@@ -222,14 +222,19 @@ const SHEET_REST = styleFromCss("flex:1;min-height:24px");
  *
  * 뒤는 어둡게 깔아 배너를 도드라지게 한다.
  *
- * **`z-index` 는 베젤(5)보다 낮아야 한다.** `#kw-screen` 은 `z-index:auto` 라 쌓임 맥락을
- * 만들지 않으므로, 여기 적은 값은 `.phone-stage__content` 안에서 프레임 이미지와 직접
- * 겨룬다 — 5 를 넘기면 배너가 폰 베젤 **위에** 그려진다. 그러면 화면의 `overflow:hidden`
- * (반경 40)에만 잘려서, 그보다 깊게 파인 프레임 개구부 아래 코너(반경 62)를 흰 띠가
- * 네모나게 덮는다. 챗봇·튜토리얼 레이어가 4 를 쓰는 것과 같은 이유다(`phone-frame.css`).
+ * **`z-index` 는 챗봇(4)보다 높고 베젤(10)보다 낮아야 한다.** `#kw-screen` 은
+ * `z-index:auto` 라 쌓임 맥락을 만들지 않으므로, 여기 적은 값은 `.phone-stage__content`
+ * 안에서 챗봇 레이어·프레임 이미지와 직접 겨룬다.
+ *
+ * - 베젤을 넘기면 배너가 폰 테두리 **위에** 그려진다. 그러면 화면의 `overflow:hidden`
+ *   (반경 40)에만 잘려서, 그보다 깊게 파인 개구부 아래 코너(반경 62)를 흰 띠가 네모나게
+ *   덮는다.
+ * - 4 로 두면 **챗봇에 가린다.** `.phone-stage__overlay` 도 4 인데 DOM 에서 화면보다
+ *   뒤에 있어 같은 값이면 그쪽이 이긴다(그 안의 `z-index:10` 은 그 레이어가 만든 쌓임
+ *   맥락에 갇혀 밖으로 나오지 못한다).
  */
 const BANNER_SCRIM = styleFromCss(
-  "position:absolute;inset:0;z-index:4;background:rgba(12,9,26,0.62);" +
+  "position:absolute;inset:0;z-index:6;background:rgba(12,9,26,0.62);" +
     "display:flex;align-items:flex-end;justify-content:center",
 );
 const BANNER_SHEET = styleFromCss("width:100%;line-height:0");
