@@ -324,7 +324,8 @@ assert.equal(summary.totalNumber, "740,000");
 assert.equal(summary.cashText, "500,000원");
 // 모의투자에는 결제 대기 중인 돈이 없다 — 출금가능금액은 예수금과 같다.
 assert.equal(summary.withdrawText, summary.cashText);
-assert.equal(summary.settleText, "결제기준 08.16(일) 15:30");
+// `settleText` 는 넘긴 시각을 그대로 적는다 — 렌더 시각이 아니라 계좌를 읽은 시각.
+assert.equal(summary.settleText, "결제기준 08.16(일) 09:00");
 // 예약 매수 현금은 총자산·예수금에는 남고 새 주문에 쓸 수 있는 금액에서는 빠진다.
 const reservedSummary = returnSummary(
   300_000,
