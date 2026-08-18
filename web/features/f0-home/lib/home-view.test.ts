@@ -213,42 +213,77 @@ for (const v of [...gainAll, tinyGain, view, losing, empty]) {
   if (v.moodImg !== MOOD_FLAT_IMG && v.moodImg !== MOOD_SAD_IMG) assert.ok(v.goalCount >= 1);
 }
 
-// 무드 그림은 **캐릭터가 목표 그림 캐릭터와 같은 높이**로 서야 한다. 배율을 안 걸면
-// 손실 그림 캐릭터가 아이 목표 그림의 63% 로 쪼그라든다 — 여백이 넓은 캔버스를 상자에
-// 맞추기 때문이다. 아래는 그 배율이 실제로 높이를 맞추는지 원본 픽셀로 되짚는 검산이다.
+// 그림 크기는 캔버스가 아니라 **캐릭터**로 맞춘다. 배율을 안 걸면 손실 그림 캐릭터가 아이
+// 목표 그림의 63% 로, 아빠 목표 그림 캐릭터가 엄마의 86% 로 쪼그라든다 — 여백이 넓은
+// 캔버스를 상자에 맞추기 때문이다. 아래는 그 배율이 실제로 높이를 맞추는지, 그리고 키운
+// 그림의 캐릭터가 상자 밖으로 잘려 나가지 않는지 원본 픽셀로 되짚는 검산이다.
 const GOAL_BOX_H = 240; // HomeScreen 의 `GOAL_BOX` 높이
+const GOAL_CHILD = "/ui/assets/goal-child.png";
+const GOAL_MOM = "/ui/assets/goal-mom.png";
+const GOAL_DAD = "/ui/assets/goal-dad.png";
+/** 원본 PNG 의 알파 경계. `top` 은 캔버스 위끝에서 캐릭터 위끝까지의 투명 여백이다. */
 const CANVAS = {
-  "/ui/assets/goal-child.png": { w: 524, h: 654, art: 509 },
-  "/ui/assets/goal-mom.png": { w: 524, h: 654, art: 479 },
-  "/ui/assets/goal-dad.png": { w: 368, h: 655, art: 411 },
-  [MOOD_FLAT_IMG]: { w: 722, h: 722, art: 499 },
-  [MOOD_SAD_IMG]: { w: 542, h: 722, art: 356 },
+  [GOAL_CHILD]: { w: 524, h: 654, art: 509, top: 71 },
+  [GOAL_MOM]: { w: 524, h: 654, art: 479, top: 112 },
+  [GOAL_DAD]: { w: 368, h: 655, art: 411, top: 109 },
+  [MOOD_FLAT_IMG]: { w: 722, h: 722, art: 499, top: 116 },
+  [MOOD_SAD_IMG]: { w: 542, h: 722, art: 356, top: 194 },
 } as const;
+type ArtSrc = keyof typeof CANVAS;
 /** `contain` 으로 상자에 맞춘 뒤 배율을 건 캐릭터의 실제 세로 픽셀. */
-const artHeight = (src: keyof typeof CANVAS, scale: number) =>
+const artHeight = (src: ArtSrc, scale: number) =>
   (CANVAS[src].art / CANVAS[src].h) * GOAL_BOX_H * scale;
+/** 상자 한가운데를 0 으로 본 캐릭터의 위·아래 끝. `scale` 은 요소 중심에서 걸린다. */
+const artSpan = (src: ArtSrc, scale: number) => {
+  const px = (GOAL_BOX_H / CANVAS[src].h) * scale; // 원본 1px 이 화면에서 차지하는 길이
+  const top = CANVAS[src].top * px - (CANVAS[src].h * px) / 2;
+  return { top, bottom: top + CANVAS[src].art * px };
+};
 
-for (const goalImg of ["/ui/assets/goal-child.png", "/ui/assets/goal-mom.png", "/ui/assets/goal-dad.png"] as const) {
-  const target = artHeight(goalImg, 1);
+// 보합·손실 그림은 **세 계정에서 같은 크기**로 선다. 같은 그림이 계정마다 다른 크기면
+// 아이 화면에서 본 우는 황소와 아빠 화면의 우는 황소가 다른 그림처럼 읽힌다.
+const MOOD_H = artHeight(GOAL_CHILD, 1); // 아이 목표 그림과 같은 187px — 지금 크기 그대로다.
+for (const goalImg of [GOAL_CHILD, GOAL_MOM, GOAL_DAD] as const) {
   // 무드 그림이 서는 세 경우 — 보합·손실·"이익이지만 아직 0개".
   for (const [trend, goalCount] of [[0, 0], [-1, 0], [1, 0]] as [Trend, number][]) {
     const art = moodArt(trend, goalImg, goalCount);
     // 반올림한 배율이라 정확히 같지는 않다. 1px 안이면 눈으로는 같은 크기다.
     assert.ok(
-      Math.abs(artHeight(art.src as keyof typeof CANVAS, art.scale) - target) < 1,
-      `${goalImg} ${trend} 캐릭터 높이가 어긋난다`,
+      Math.abs(artHeight(art.src as ArtSrc, art.scale) - MOOD_H) < 1,
+      `${goalImg} ${trend} 무드 캐릭터 높이가 어긋난다`,
     );
-    // 키운 그림이 화면 밖으로 나가면 `max-width` 가 조용히 되돌린다(폰 화면 402 − 좌우 여백 16×2).
-    const width = (CANVAS[art.src as keyof typeof CANVAS].w / CANVAS[art.src as keyof typeof CANVAS].h) * GOAL_BOX_H * art.scale;
-    assert.ok(width <= 402 - 32, `${goalImg} ${trend} 그림이 상자보다 넓다: ${width}`);
   }
 }
-// 아빠는 목표 그림 캐릭터가 셋 중 가장 작아 배율이 1 아래로 내려간다 — 상자가 아니라
-// 그림을 맞추는 값이므로 방향이 반대로 나오는 계정도 있는 게 맞다.
-assert.ok(moodArt(0, "/ui/assets/goal-dad.png", 0).scale < 1);
-assert.ok(moodArt(-1, "/ui/assets/goal-child.png", 0).scale > 1.5);
+
+// 목표 그림은 원본 크기 그대로 서되, 여백이 넓은 아빠 그림만 엄마와 같은 높이로 키운다.
+const goalScale = (img: ArtSrc) => moodArt(1, img, 1).scale;
+assert.equal(goalScale(GOAL_CHILD), 1);
+assert.equal(goalScale(GOAL_MOM), 1);
+assert.ok(goalScale(GOAL_DAD) > 1);
+assert.ok(
+  Math.abs(artHeight(GOAL_DAD, goalScale(GOAL_DAD)) - artHeight(GOAL_MOM, 1)) < 1,
+  "아빠 목표 그림 캐릭터가 엄마와 다른 높이다",
+);
+
+// 키운 그림의 캔버스는 상자를 넘지만 넘치는 것은 투명 여백뿐이어야 한다. 캐릭터가 상자
+// 밖으로 나가면 위아래가 잘린다.
+for (const [src, scale] of [
+  [GOAL_CHILD, goalScale(GOAL_CHILD)],
+  [GOAL_MOM, goalScale(GOAL_MOM)],
+  [GOAL_DAD, goalScale(GOAL_DAD)],
+  [MOOD_FLAT_IMG, moodArt(0, GOAL_CHILD, 0).scale],
+  [MOOD_SAD_IMG, moodArt(-1, GOAL_CHILD, 0).scale],
+] as [ArtSrc, number][]) {
+  const span = artSpan(src, scale);
+  assert.ok(span.top >= -GOAL_BOX_H / 2, `${src} 캐릭터 위쪽이 잘린다: ${span.top}`);
+  assert.ok(span.bottom <= GOAL_BOX_H / 2, `${src} 캐릭터 아래쪽이 잘린다: ${span.bottom}`);
+  // 가로로 화면을 넘으면 좌우가 잘린다(폰 화면 402 − 좌우 여백 16×2).
+  const width = (CANVAS[src].w / CANVAS[src].h) * GOAL_BOX_H * scale;
+  assert.ok(width <= 402 - 32, `${src} 그림이 화면보다 넓다: ${width}`);
+}
+
 // 재 두지 않은 그림에는 배율을 지어내지 않는다.
-assert.equal(moodArt(0, "/ui/assets/goal-unknown.png", 0).scale, 1);
+assert.equal(moodArt(1, "/ui/assets/goal-unknown.png", 1).scale, 1);
 // 원값 +0.04% 는 화면에 `+0.0%` 로 적히므로 그림도 보합이다 — 숫자가 0인데 웃는 그림이
 // 서면 안 된다. 이 어긋남이 `rate` 원값 부호로 그림을 고르던 첫 구현의 결함이었다.
 const nearZero = homeView(
