@@ -1,28 +1,34 @@
 /**
- * 학교 시간 거래 제한의 화면 쪽 표현. 서버 응답
- * (`app/api/trade-restriction/rule.ts`)의 모양을 그대로 옮겨 담는다 —
- * `server-account.ts` 와 같은 방식이다.
+ * 학교 시간 거래 제한 — **화면만 있는 목업이다.**
  *
- * **지금 막혔는지는 여기서 계산하지 않는다.** 그 판정은 서버가 `blocked` 로 내려보낸다.
- * 화면이 따로 세면 브라우저 시계가 다른 나라에 맞춰져 있을 때 화면과 서버가 갈린다.
+ * 부모가 무엇을 정하든 아이 주문은 지금 그대로 나간다. 막는 코드는 어디에도 없고
+ * 서버 경로도 없다. 값은 `ConnectedPrototype` 이 로그인 세션 동안 메모리로 들고 있다가
+ * 설정 시트에 물려준다(`오늘 그만 보기`·캔들 안내와 같은 자리다).
+ *
+ * **여기에 판정 함수를 만들지 않는다.** `지금 막혔나` 를 세기 시작하면 그것을 읽는 화면이
+ * 생기고, 그 순간 목업이 아니라 반쯤 동작하는 기능이 된다. 실제로 잠글 때가 오면 서버가
+ * 판정하고 `api/trade`·`api/orders` 가 막아야 한다 — 화면이 세면 브라우저 시계가 다른
+ * 나라에 맞춰져 있을 때 화면은 열려 있는데 주문만 거절당한다.
  */
 export type TradeRestriction = {
   enabled: boolean;
   /** 1=월 … 7=일 (ISO 8601). */
   weekdays: number[];
+  /** 자정부터 흐른 분. 09:00 이면 540 이다. */
   start_minute: number;
   end_minute: number;
   block_buy: boolean;
   block_sell: boolean;
 };
 
-export type RestrictionState = {
-  rule: TradeRestriction;
-  blocked: { buy: boolean; sell: boolean };
-  /** 이 계정(자녀)에게 걸리는 규칙인지. 부모 계정에서는 거짓이다. */
-  applies: boolean;
-  /** 부모만 바꿀 수 있다. */
-  editable: boolean;
+/** 아직 아무것도 정하지 않았을 때 시트가 보여 주는 값. 켜짐은 부모가 직접 눌러야 한다. */
+export const DEFAULT_RESTRICTION: TradeRestriction = {
+  enabled: false,
+  weekdays: [1, 2, 3, 4, 5],
+  start_minute: 9 * 60,
+  end_minute: 15 * 60,
+  block_buy: true,
+  block_sell: true,
 };
 
 export const WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"] as const;

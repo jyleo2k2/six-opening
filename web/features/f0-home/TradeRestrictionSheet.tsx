@@ -14,11 +14,12 @@ import {
 /**
  * 부모가 여는 `학교 시간 거래 제한` 설정. 홈 햄버거 메뉴에서만 열린다.
  *
- * 여기서 정한 값은 같은 가족의 **자녀 계정 주문**에만 걸린다. 실제로 막는 자리는 서버
- * (`api/trade`·`api/orders`)이고 이 화면은 그 값을 고칠 뿐이다.
+ * **화면만 있는 목업이다.** 여기서 무엇을 정하든 아이 주문은 지금 그대로 나간다 —
+ * 저장은 서버로 가지 않고 `ConnectedPrototype` 의 메모리에만 남으며, 그 값을 읽어 주문을
+ * 막는 코드는 없다. 실제로 잠글 때가 오면 `api/trade`·`api/orders` 가 막아야 한다.
  *
- * 고치는 동안에는 초안(`draft`)만 바뀌고 `저장` 을 눌러야 서버로 간다. 토글 하나 만질
- * 때마다 저장하면 요일을 고르는 중간 상태(하루도 안 고른 값)까지 아이 계정에 걸린다.
+ * 고치는 동안에는 초안(`draft`)만 바뀌고 `저장` 을 눌러야 반영된다. 토글 하나 만질 때마다
+ * 반영하면 요일을 고르는 중간 상태(하루도 안 고른 값)가 메뉴 요약에 그대로 비친다.
  */
 const SCRIM = styleFromCss("position:absolute;inset:0;z-index:6;background:rgba(20,15,40,0.4)");
 const SHEET = styleFromCss(
@@ -59,13 +60,6 @@ const SAVE = styleFromCss(
   "flex:none;margin-top:16px;border-radius:16px;padding:15px;text-align:center;font-size:16px;font-weight:800;" +
     "color:#fff;cursor:pointer;background:linear-gradient(180deg,#7B45E8 0%,#5B23D6 100%)",
 );
-const SAVE_OFF = styleFromCss(
-  "flex:none;margin-top:16px;border-radius:16px;padding:15px;text-align:center;font-size:16px;font-weight:800;" +
-    "color:#B4B8CC;background:#F1F1F7",
-);
-const ERROR = styleFromCss(
-  "flex:none;text-align:center;font-size:12.5px;font-weight:700;color:#D5327A;padding-top:8px",
-);
 const STEP_NOTE = styleFromCss("font-size:11.5px;font-weight:600;color:#A9AEC4;padding-top:6px");
 
 function dayChip(on: boolean) {
@@ -102,26 +96,20 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
 
 export function TradeRestrictionSheet({
   rule,
-  saving,
   onSave,
   onClose,
 }: {
   rule: TradeRestriction;
-  saving: boolean;
-  onSave: (rule: TradeRestriction) => Promise<boolean>;
+  onSave: (rule: TradeRestriction) => void;
   onClose: () => void;
 }) {
   const [draft, setDraft] = useState<TradeRestriction>(rule);
-  const [failed, setFailed] = useState(false);
 
-  const patch = (next: TradeRestriction) => {
-    setFailed(false);
-    setDraft(next);
-  };
+  const patch = (next: TradeRestriction) => setDraft(next);
 
   const submit = () => {
-    if (saving) return;
-    void onSave(draft).then((ok) => (ok ? onClose() : setFailed(true)));
+    onSave(draft);
+    onClose();
   };
 
   return (
@@ -201,10 +189,9 @@ export function TradeRestrictionSheet({
           </div>
         </div>
 
-        <div onClick={submit} style={saving ? SAVE_OFF : SAVE}>
-          {saving ? "저장하는 중…" : "저장"}
+        <div onClick={submit} style={SAVE}>
+          저장
         </div>
-        {failed && <div style={ERROR}>저장하지 못했어요. 잠시 뒤에 다시 해볼까요?</div>}
       </div>
     </>
   );

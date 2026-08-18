@@ -45,8 +45,7 @@ import {
 } from "./lib/order-view";
 import type { TutorialStage } from "./lib/tutorial-steps";
 import { useStockLive } from "./lib/use-universe";
-import { useTradeRestriction } from "./lib/use-trade-restriction";
-import { useWallet, type WalletAccountId } from "./lib/use-wallet";
+import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
 import { useAccount } from "./lib/use-account";
 import {
   orderStageFromChatStep,
@@ -175,11 +174,6 @@ const SCRIM_CSS =
   "position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;" +
   "padding:0 32px;background:rgba(20,16,45,0.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)";
 const BLOCK_SCRIM = styleFromCss(`z-index:6;${SCRIM_CSS}`);
-/** 잠긴 주문 버튼 위에 적는 이유. 종목 상세의 잠금 띠(`stock-chrome` 의 `LOCK`)와 같은 말이다. */
-const LOCK_NOTE = styleFromCss(
-  "border-radius:14px;padding:10px 12px;margin-bottom:8px;text-align:center;font-size:13px;font-weight:700;" +
-    "color:#5B23D6;background:#EFEAFB",
-);
 /** 예약 시트(z-index 7) 에서 눌러 여는 확인이라 시트보다 위, 베젤(10) 아래여야 한다. */
 const REORDER_SCRIM = styleFromCss(`z-index:8;${SCRIM_CSS}`);
 const BLOCK_CARD = styleFromCss(
@@ -338,7 +332,6 @@ const REJECTION_TEXT: Record<string, string> = {
   unknown_stock: "이 회사는 아직 주문을 받을 수 없어.",
   invalid_amount: "주문할 수량이나 금액을 다시 확인해 볼까?",
   not_syncable: "지금 계정으로는 주문을 저장할 수 없어. 다시 로그인해 볼까?",
-  school_hours: "지금은 학교에서 공부할 시간! 매매는 하교하고 해요.",
   network: "연결이 잠깐 끊겼어. 잠깐 뒤에 다시 해볼까?",
 };
 
@@ -395,7 +388,6 @@ export function OrderScreen({
   const { wallet, update, refresh } = useWallet();
   const live = useStockLive(code);
   const user = useAccount();
-  const restriction = useTradeRestriction();
   const recordEvent = useChatBehaviorStore((s) => s.recordEvent);
 
   const [step, setStep] = useState(1);
@@ -642,13 +634,7 @@ export function OrderScreen({
     return <ScreenFrame embedded={embedded} />;
   }
 
-  /**
-   * 학교 시간 거래 제한. 부모가 정한 창 안이면 이쪽(매수·매도) 주문이 잠긴다.
-   *
-   * 막는 것은 서버(`api/trade`·`api/orders`)이고 이 값은 **왜 못 누르는지 말해 주는**
-   * 용도다. 부모 계정에서는 `applies` 가 거짓이라 늘 열려 있다.
-   */
-  const locked = Boolean(restriction.state?.applies && restriction.state.blocked[side]);
+  const locked = !canTrade(account);
   const marketOpen = isRegularMarketOpen(new Date());
   const scheduledFor = nextOpeningDate(new Date());
   // `app.html` 의 `dbSyncable()` — 서버 저장은 로그인 역할이 맞을 때만 뒤따른다.
@@ -970,13 +956,6 @@ export function OrderScreen({
   const stepFooter = (ok: boolean, label: string, onNext: () => void) =>
     step < 3 ? (
       <div style={{ flex: "none", padding: "8px 16px 10px" }}>
-        {/*
-          잠긴 이유를 적는다. 없으면 마지막 칸에서 회색 버튼만 남아, 무엇이 모자란 줄
-          알고 금액과 이유를 계속 고쳐 보게 된다. 문구는 종목 상세의 잠금 띠와 같다.
-        */}
-        {locked && step === 2 && (
-          <div style={LOCK_NOTE}>지금은 학교에서 공부할 시간! 매매는 하교하고 해요</div>
-        )}
         {/*
           접수를 기다리는 동안 라벨을 바꾸고 버튼을 끈다. 서버 확정을 기다리게 되면서
           버튼이 한 박자 늦게 반응하는데, 표시가 없으면 안 눌린 줄 알고 한 번 더 눌러

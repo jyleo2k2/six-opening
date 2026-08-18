@@ -18,6 +18,7 @@ import {
 import type { PrototypeChartPeriod } from "../f2-trade/chart-data";
 import { ExploreScreen } from "./ExploreScreen";
 import { HomeScreen } from "./HomeScreen";
+import { DEFAULT_RESTRICTION, type TradeRestriction } from "./lib/trade-restriction";
 import { OrderScreen } from "./OrderScreen";
 import { RankingScreen } from "./RankingScreen";
 import {
@@ -67,6 +68,13 @@ export function ConnectedPrototype({
    * 전체 새로고침)과 새 로그인에서 초기화된다.
    */
   const [homeBannerHiddenForSession, setHomeBannerHiddenForSession] = useState(false);
+  /**
+   * 학교 시간 거래 제한(홈 메뉴의 설정 시트). **화면만 있는 목업이라 아무것도 막지 않는다** —
+   * 이 값을 읽어 주문을 거절하는 코드는 어디에도 없다. 홈 배너 상태와 같은 이유로 여기서
+   * 갖는다: 홈은 오갈 때마다 다시 마운트돼 자기 상태를 잃으므로, 부모가 정해 둔 값이
+   * 다른 탭에 다녀오면 사라진다. 로그아웃·새 로그인에서 초기화된다.
+   */
+  const [tradeRestriction, setTradeRestriction] = useState<TradeRestriction>(DEFAULT_RESTRICTION);
   /**
    * 캔들 안내를 X 로 닫은 기간들. 아카이브 안내와 같은 이유로 여기 있다 — 상세 화면은
    * 종목을 떠나면 사라지므로 거기에 두면 닫아 놓은 안내가 다시 뜬다. 이 컴포넌트는 앱이
@@ -211,8 +219,10 @@ export function ConnectedPrototype({
                 bannerHiddenForSession={homeBannerHiddenForSession}
                 embedded
                 onHideBannerForSession={() => setHomeBannerHiddenForSession(true)}
+                onChangeTradeRestriction={setTradeRestriction}
                 onLeave={leaveToPath}
                 onStartTutorial={() => setTutorialOn(true)}
+                tradeRestriction={tradeRestriction}
               />
             )}
             {overlay.screen === "archive" && (

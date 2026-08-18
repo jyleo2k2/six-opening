@@ -8,8 +8,7 @@ import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { shouldOpenSheetByPull } from "./lib/sheet-drag";
 import { accountReadAt, useAccount } from "./lib/use-account";
 import { useSheetDrag } from "./lib/use-sheet-drag";
-import { restrictionSummary } from "./lib/trade-restriction";
-import { useTradeRestriction } from "./lib/use-trade-restriction";
+import { restrictionSummary, type TradeRestriction } from "./lib/trade-restriction";
 import { useUniverseLive } from "./lib/use-universe";
 import { ScreenFrame, usePhoneScreenRect } from "./PhoneFrame";
 import { TradeRestrictionSheet } from "./TradeRestrictionSheet";
@@ -321,6 +320,8 @@ export function HomeScreen({
   embedded = false,
   bannerHiddenForSession = false,
   onHideBannerForSession,
+  tradeRestriction,
+  onChangeTradeRestriction,
 }: {
   onLeave: (path: string) => void;
   /** 튜토리얼 `?`. 오버레이는 `ConnectedPrototype` 이 갖는다 — 화면 하나에 매이면 안 된다. */
@@ -334,12 +335,16 @@ export function HomeScreen({
    */
   bannerHiddenForSession?: boolean;
   onHideBannerForSession?: () => void;
+  /**
+   * 학교 시간 거래 제한(목업). 배너의 `오늘 그만 보기` 와 같은 이유로 `ConnectedPrototype`
+   * 이 들고 있다가 물려준다 — 홈은 오갈 때마다 다시 마운트돼 자기 상태를 잃는다.
+   */
+  tradeRestriction: TradeRestriction;
+  onChangeTradeRestriction: (rule: TradeRestriction) => void;
 }) {
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
   const [menuOpen, setMenuOpen] = useState(false);
-  // 학교 시간 거래 제한. 부모 계정에서만 메뉴에 뜨고, 값은 서버가 원본이다.
-  const restriction = useTradeRestriction();
   const [restrictionOpen, setRestrictionOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -503,11 +508,8 @@ export function HomeScreen({
               >
                 알림
               </div>
-              {/*
-                제한을 정하는 자리는 **부모 계정에만** 있다. 아이가 자기 제한을 열어 볼 수는
-                있어도 고칠 수는 없으므로(서버가 403), 고치지 못하는 화면을 열어 주지 않는다.
-              */}
-              {restriction.state?.editable && (
+              {/* 제한을 정하는 자리는 **부모 계정에만** 있다. 아이 화면에는 이 줄이 없다. */}
+              {user?.parent_child === "parent" && (
                 <div
                   onClick={() => {
                     setMenuOpen(false);
@@ -516,7 +518,7 @@ export function HomeScreen({
                   style={{ ...MENU_ITEM, display: "block" }}
                 >
                   학교 시간 거래 제한
-                  <div style={MENU_NOTE}>{restrictionSummary(restriction.state.rule)}</div>
+                  <div style={MENU_NOTE}>{restrictionSummary(tradeRestriction)}</div>
                 </div>
               )}
               <div onClick={logout} style={MENU_LOGOUT}>
@@ -648,12 +650,11 @@ export function HomeScreen({
           </>
         )}
 
-        {restrictionOpen && restriction.state && (
+        {restrictionOpen && (
           <TradeRestrictionSheet
             onClose={() => setRestrictionOpen(false)}
-            onSave={restriction.save}
-            rule={restriction.state.rule}
-            saving={restriction.saving}
+            onSave={onChangeTradeRestriction}
+            rule={tradeRestriction}
           />
         )}
 

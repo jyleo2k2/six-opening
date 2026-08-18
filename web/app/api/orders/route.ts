@@ -4,7 +4,6 @@ import { chartRetentionCutoff, readStoredCandles } from "../quote/stock-candles"
 import { marketFor } from "../../../shared/data/stocks";
 import { isOnTick, tickSize } from "../../../shared/engine/tick-size";
 import { planFields, rejectionReason } from "../trade/route";
-import { blockedBySchoolHours } from "../trade-restriction/guard";
 import { settleDueOrders, type ScheduledOrder } from "./settle";
 
 export const runtime = "nodejs";
@@ -189,14 +188,6 @@ export async function POST(request: NextRequest) {
   // 매수는 잠글 금액이, 매도는 잠글 수량이 있어야 예약을 되돌릴 수 있다 (DB 제약과 같은 판단).
   if (side === "buy" ? !reservedAmount : !requestedQuantity) {
     return Response.json({ error: "예약할 금액이나 수량이 없습니다.", reason: "invalid_amount" }, { status: 400 });
-  }
-
-  // 학교 시간 거래 제한(부모 설정). 예약도 아이가 지금 내는 주문이라 즉시 체결과 같이 막는다.
-  if (await blockedBySchoolHours(userId, side)) {
-    return Response.json(
-      { error: "지금은 보호자가 정한 거래 제한 시간이에요.", reason: "school_hours" },
-      { status: 403 },
-    );
   }
 
   const plan = planFields(side, payload);

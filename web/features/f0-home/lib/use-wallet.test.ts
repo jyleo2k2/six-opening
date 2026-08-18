@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { isRegularMarketOpen } from "../../f2-trade/lib/scheduled-orders.js";
-import { invalidateOpenOrders, loadOpenOrders, shouldRefreshAccount } from "./use-wallet";
+import {
+  canTrade,
+  invalidateOpenOrders,
+  isSchoolTime,
+  loadOpenOrders,
+  shouldRefreshAccount,
+} from "./use-wallet";
 
 // `isRegularMarketOpen`은 절대 시각을 KST로 환산해 비교한다(scheduled-orders.js).
 // 로컬 타임존으로 필드를 만들면 UTC 러너(CI)에서 9시간 어긋나므로, UTC 필드에서
@@ -9,23 +15,42 @@ import { invalidateOpenOrders, loadOpenOrders, shouldRefreshAccount } from "./us
 const wed = (hour: number, minute = 0) => new Date(Date.UTC(2026, 7, 12, hour - 9, minute)); // 수요일 KST
 const sun = (hour: number) => new Date(Date.UTC(2026, 7, 16, hour - 9, 0)); // 일요일 KST
 
-// ── 학교 시간 거래 제한은 여기 없다 ────────────────────────────────────
-// 예전에는 `평일 09:00~15:30` 이 이 파일에 박혀 있었고(`isSchoolTime`·`canTrade`),
-// 그 창이 정규장 창과 **정확히 같아서** 켜면 자녀가 즉시 체결을 볼 수 있는 시간대가
-// 사라졌다. 그래서 상수로 꺼 둔 채였다.
-//
-// 이제 창·요일·막을 기능을 부모가 정하고 판정은 서버가 한다
-// (`app/api/trade-restriction/rule.ts` 와 그 테스트). 기본값이 꺼짐이라 아무도 켜지
-// 않은 가족은 아래 두 창이 겹치든 말든 영향을 받지 않는다.
-//
-// 기본 제한 창(09:00~15:00)이 정규장 창 안에 들어 있다는 사실은 그대로다 —
-// 부모가 켜면 그 시간의 즉시 체결이 막히는 게 이 기능이 하려는 일이다.
-assert.equal(isRegularMarketOpen(wed(9)), true);
-assert.equal(isRegularMarketOpen(wed(14, 59)), true);
-assert.equal(isRegularMarketOpen(wed(15, 30)), false);
-assert.equal(isRegularMarketOpen(sun(12)), false);
+// ── 스쿨락은 꺼져 있다 ──────────────────────────────────────────────────
+// 예전 규칙은 평일 09:00~15:30 자녀 주문 차단이었다. 그 시간대에도 이제 안 잠긴다.
+assert.equal(isSchoolTime(wed(9)), false);
+assert.equal(isSchoolTime(wed(12)), false);
+assert.equal(isSchoolTime(wed(15, 29)), false);
+assert.equal(isSchoolTime(sun(12)), false);
 
-console.log("school lock moved to api/trade-restriction");
+assert.equal(canTrade("child", wed(10)), true, "자녀도 장중에 주문할 수 있다");
+assert.equal(canTrade("child", wed(20)), true);
+assert.equal(canTrade("parent", wed(10)), true);
+
+// ── 껐어야 하는 이유 ────────────────────────────────────────────────────
+// 스쿨락 창과 정규장 창이 **정확히 같았다.** 그래서 스쿨락을 켜면 자녀 계정으로
+// 즉시 체결을 볼 수 있는 시간대가 존재하지 않는다 — 장중이면 주문이 막히고,
+// 장외면 주문은 되지만 다음 거래일 시가 예약이 된다.
+//
+// 이 대조가 깨지면(예: 스쿨락 창만 15:00 으로 바뀌면) 다시 켤 수 있는지 검토할 값어치가
+// 생긴다. 그래서 두 창이 같다는 사실 자체를 여기 남긴다.
+const SCHOOL_WINDOW = [
+  [wed(9), true],
+  [wed(12), true],
+  [wed(15, 29), true],
+  [wed(8, 59), false],
+  [wed(15, 30), false],
+  [sun(12), false],
+] as const;
+
+for (const [at, inSchoolWindow] of SCHOOL_WINDOW) {
+  assert.equal(
+    isRegularMarketOpen(at),
+    inSchoolWindow,
+    `정규장 창이 옛 스쿨락 창과 어긋났다: ${at.toISOString()}`,
+  );
+}
+
+console.log("school lock disabled tests passed");
 
 // ── 열린 주문 조회 캐시 ─────────────────────────────────────────────────
 //

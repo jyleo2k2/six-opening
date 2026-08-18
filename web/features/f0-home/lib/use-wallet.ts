@@ -120,15 +120,32 @@ export function useWallet() {
 }
 
 /**
- * **학교 시간 거래 제한은 이제 부모가 정한다.**
+ * **스쿨락은 이 프로토타입에서 꺼 둔다.**
  *
- * 예전에는 `평일 09:00~15:30` 이 코드에 박혀 있었고, 그 창이 정규장 창과 정확히 같아서
- * 켜 두면 자녀 계정으로 즉시 체결을 볼 수 있는 시간대가 아예 없었다. 그래서 상수 하나로
- * 꺼 둔 채였다. 이제 창도 요일도 막을 기능(매수·매도)도 부모가 홈 메뉴에서 고르고,
- * **기본값은 꺼짐**이라 아무도 켜지 않은 가족은 지금까지와 똑같이 언제든 주문한다.
+ * 규칙 자체는 "평일 09:00~15:30 자녀 주문 차단" 이었는데, 그 창이 정규장 창
+ * (`isRegularMarketOpen`)과 **정확히 같다.** 켜 두면 이렇게 된다.
  *
- * 판정은 서버가 한다 — `app/api/trade-restriction` 이 원본이고 화면은
- * `lib/use-trade-restriction.ts` 로 읽는다. 여기 있던 `isSchoolTime`·`canTrade` 는
- * 브라우저 시계로 따로 세던 자리라 함께 걷어냈다. 두 곳이 각자 세면 화면은 열려 있는데
- * 주문만 거절당한다.
+ * - 평일 09:00~15:30: 자녀는 주문 단계(`locked && step === 2`)에서 막혀 질문식 매매를
+ *   끝까지 진행할 수 없다.
+ * - 그 밖의 시간: 주문은 되지만 정규장이 아니라 다음 거래일 시가 예약이 된다.
+ *
+ * 즉 **자녀 계정으로 즉시 체결을 볼 수 있는 시간대가 존재하지 않는다.** 스쿨락은
+ * 보여 줄 기능도 아니다 — 중간발표 대본에 없고, 통합문서 v2 에는 문구 불일치
+ * 체크리스트로 한 번 나오며, 골든 패스에도 단계가 없다.
+ *
+ * 판정 자리와 화면의 `locked` 분기(종목 상세·계좌의 안내 문구)는 그대로 둔다.
+ * 되살릴 때는 아래 상수만 `true` 로 되돌리면 된다.
  */
+const SCHOOL_LOCK_ENABLED = false;
+
+export function isSchoolTime(now = new Date()) {
+  if (!SCHOOL_LOCK_ENABLED) return false;
+  const day = now.getDay();
+  const hour = now.getHours() + now.getMinutes() / 60;
+  return day >= 1 && day <= 5 && hour >= 9 && hour < 15.5;
+}
+
+export function canTrade(account: WalletAccountId, now = new Date()) {
+  if (account === "parent") return true;
+  return !isSchoolTime(now);
+}
