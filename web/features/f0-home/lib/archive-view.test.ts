@@ -273,6 +273,29 @@ const bare = feedCards(
 )[0];
 assert.equal(bare.text, "");
 
+// 카드 머리의 시각은 **글을 올린 때**다. 체결 시각으로 두면 지난주에 산 종목을 오늘 올려도
+// 방금 쓴 글이 `3일 전` 으로 뜬다 — 언제 산 것인지는 바로 아래 날짜 라벨이 말한다.
+const late = feedCards(
+  [{ ...trades[0], id: "late", feedPostedAt: "2026-08-16T23:00:00Z" }],
+  members, {}, {}, {}, "all", now,
+)[0];
+assert.equal(late.time, "1시간 전");
+assert.equal(late.dateLabel, "8월 14일 매수");
+// 올린 시각이 없는 옛 행만 체결 시각으로 접는다.
+assert.equal(feedCards([trades[0]], members, {}, {}, {}, "all", now)[0].time, "3일 전");
+// 세우는 순서도 올린 순서다. 늦게 산 것을 먼저 올렸으면 그 카드가 아래다 — 체결 순서로
+// 세우면 방금 올린 글이 남의 옛 글 밑에 묻힌다.
+assert.deepEqual(
+  feedCards(
+    [
+      { ...trades[0], id: "posted-late", feedPostedAt: "2026-08-16T23:00:00Z" },
+      { ...trades[1], id: "posted-early", feedPostedAt: "2026-08-16T10:00:00Z" },
+    ],
+    members, {}, {}, {}, "all", now,
+  ).map((f) => f.id),
+  ["posted-late", "posted-early"],
+);
+
 // 구성원 필터는 그 사람 것만 남긴다.
 assert.deepEqual(feedCards(trades, members, {}, {}, {}, "db_1", now).map((f) => f.id), ["t1"]);
 

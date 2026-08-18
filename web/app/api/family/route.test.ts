@@ -31,6 +31,7 @@ let holdingFilter = "";
 let transactionOffset = "";
 let transactionLimit = "";
 let transactionFeedFilter = "";
+let transactionOrder = "";
 /** 성향 계산이 몇 번, 누구를 묶어 도는지. 사람마다 따로 돌면 그만큼 왕복이 늘어난다. */
 const profileBatches: number[][] = [];
 const deps: FamilyDataDeps = {
@@ -44,11 +45,14 @@ const deps: FamilyDataDeps = {
     transactionOffset = params.offset;
     transactionLimit = params.limit;
     transactionFeedFilter = params.feed_body;
+    transactionOrder = params.order;
     return [
       {
         id: "mine", user_id: 1, stock_id: 7, side: "buy", trade_price: 70000, trade_quantity: 2,
         trade_reason: "buy_news", plan_code: "plan_target", plan_target_price: "84000",
         memo: " 목표 오면 팔기 ", plan_match: null, plan_changed_reason: null, feed_body: "목표 오면 팔기",
+        // 8/14 에 사서 8/16 에 올린 글. 카드 머리의 시각은 뒤엣것이다.
+        feed_posted_at: "2026-08-16T00:00:00.000Z",
         created_at: "2026-08-14T00:00:00.000Z",
         stocks: { stock_code: "005930", stock_name: "삼성전자" },
       },
@@ -56,6 +60,8 @@ const deps: FamilyDataDeps = {
         id: "dad", user_id: 3, stock_id: 11, side: "sell", trade_price: 120000, trade_quantity: 4,
         trade_reason: null, plan_code: null, plan_target_price: null, memo: null,
         plan_match: false, plan_changed_reason: "change_price_emotion", feed_body: "정리했어",
+        // 마이그레이션 전에 올라가 있던 글 — 올린 시각을 모른다.
+        feed_posted_at: null,
         created_at: "2026-08-13T00:00:00.000Z",
         stocks: { stock_code: "035420", stock_name: "NAVER" },
       },
@@ -64,6 +70,7 @@ const deps: FamilyDataDeps = {
         id: "sold-out", user_id: 1, stock_id: 3, side: "sell", trade_price: 137500,
         trade_quantity: 17, trade_reason: null, plan_code: null, plan_target_price: null,
         memo: null, plan_match: null, plan_changed_reason: null, feed_body: "다 팔았어",
+        feed_posted_at: "2026-08-15T00:00:00.000Z",
         created_at: "2026-08-15T00:00:00.000Z",
         stocks: { stock_code: "271560", stock_name: "오리온" },
       },
@@ -108,6 +115,11 @@ async function main() {
    * 시험 삼아 눌러 본 매수까지 가족 피드로 간다 — 2026-08-17 에 그래서 고친 자리다.
    */
   assert.equal(transactionFeedFilter, "not.is.null");
+  /**
+   * **피드는 글을 올린 순서다.** 체결 순서로 세우면 지난주에 산 종목을 오늘 올린 글이
+   * 남의 옛 글 밑에 묻힌다. 올린 시각이 없는 옛 행은 뒤로 보내고 체결 순서로 잇는다.
+   */
+  assert.equal(transactionOrder, "feed_posted_at.desc.nullslast,created_at.desc");
   assert.deepEqual(family.members.map((member) => member.name), ["찬영", "찬영엄마", "찬영아빠"]);
   assert.equal(family.members[2].behavior?.samples.buys, 3);
 
@@ -186,6 +198,12 @@ async function main() {
   assert.equal(family.trades[0].memo, "목표 오면 팔기");
   // 카드 본문은 피드에 올린 글이다. 메모와 별개 컬럼이라 둘이 달라도 각자 나간다.
   assert.equal(family.trades[0].feedBody, "목표 오면 팔기");
+  // 카드 머리의 시각은 **글을 올린 때**다 — 체결 시각과 다른 날일 수 있다.
+  assert.equal(family.trades[0].feedPostedAt, "2026-08-16T00:00:00.000Z");
+  assert.equal(family.trades[0].tradedAt, "2026-08-14T00:00:00.000Z");
+  // 마이그레이션 전에 올라가 있던 글만 값이 없다. 빈 시각을 화면에 넘기지 않고 체결
+  // 시각으로 접는다 — 카드 머리가 `Invalid Date` 로 뜨면 안 된다.
+  assert.equal(family.trades[1].feedPostedAt, "2026-08-13T00:00:00.000Z");
   assert.equal(family.trades[1].feedBody, "정리했어");
   assert.equal(family.trades[0].planMatch, null);
   assert.equal(family.trades[1].planMatch, false);
@@ -210,6 +228,7 @@ async function main() {
     plan_match: null,
     plan_changed_reason: null,
     feed_body: "올린 글",
+    feed_posted_at: `2026-08-14T00:${String(index).padStart(2, "0")}:00.000Z`,
     created_at: `2026-08-14T00:${String(index).padStart(2, "0")}:00.000Z`,
     stocks: { stock_code: "005930", stock_name: "삼성전자" },
   }));
@@ -254,7 +273,7 @@ async function main() {
       id: "old", user_id: 2, stock_id: 7, side: "sell", trade_price: null as unknown as number,
       trade_quantity: null as unknown as number, trade_reason: null, plan_code: null,
       plan_target_price: null, memo: null, plan_match: null, plan_changed_reason: null,
-      feed_body: "올린 글", created_at: "2026-08-12T00:00:00.000Z",
+      feed_body: "올린 글", feed_posted_at: null, created_at: "2026-08-12T00:00:00.000Z",
       stocks: { stock_code: "005930", stock_name: "삼성전자" },
     }],
     selectHoldings: async () => [{ user_id: 2, stock_id: 7, quantity: 1, avg_price: "270000" }],

@@ -102,6 +102,15 @@ export type FamilyTrade = {
   symbol: string;
   stockName?: string | null;
   tradedAt: string;
+  /**
+   * 피드에 글을 올린 시각. **카드 머리의 `3일 전` 과 정렬이 이 값으로 난다** — 체결
+   * 시각으로 세면 지난주에 산 종목을 오늘 올린 글이 `5일 전` 으로 뜨고 아래쪽에 묻힌다.
+   * 언제 산 것인지는 카드 안 날짜 라벨이 따로 말한다.
+   *
+   * 서버는 값이 없는 옛 행을 체결 시각으로 접어서 준다. 그래도 없으면 여기서 같은 값으로
+   * 접는다 — 화면이 시각 없는 카드를 그리는 일은 없어야 한다.
+   */
+  feedPostedAt?: string | null;
   /** DB 에 값이 없는 옛 행만 `null` 이다. 가족 것도 가리지 않는다. */
   price?: number | null;
   quantity?: number | null;
@@ -138,7 +147,9 @@ export type FeedCard = {
   name: string;
   face: string;
   pose: string;
+  /** 이름 밑 한 줄 — **글을 올린 지 얼마나 됐는지**(`3시간 전`). */
   time: string;
+  /** 색 판 맨 위 — **체결한 날**(`8월 13일 매수`). 머리의 `time` 과 다른 날일 수 있다. */
   dateLabel: string;
   stockName: string;
   /** 왼쪽 색 판. 매수는 초록, 매도는 오르면 분홍·내리면 남색이다. */
@@ -178,6 +189,18 @@ const POSES: Record<string, string> = {
   dad: "/ui/assets/archive/pose-yw-cheer.png",
   mom: "/ui/assets/archive/pose-yw-magnify.png",
 };
+
+/**
+ * 카드 머리에 뜨는 시각의 원본 — **글을 올린 때**다. 체결 시각은 카드 안 날짜 라벨이
+ * 따로 말하므로, 지난주에 산 종목을 오늘 올려도 머리에는 `방금` 이 떠야 한다.
+ */
+const postedAt = (trade: FamilyTrade) => trade.feedPostedAt || trade.tradedAt;
+
+/**
+ * 정렬 키. 문자열로 견주지 않는다 — 올린 시각은 `…Z`, 체결 시각은 `…+00:00` 로 와서
+ * 같은 순간이 글자 순서로는 달라진다. 못 읽는 값은 맨 뒤로 보낸다.
+ */
+const stamp = (trade: FamilyTrade) => Date.parse(postedAt(trade)) || 0;
 
 const timeAgo = (ts: string, now: number) => {
   const minutes = Math.max(1, Math.round((now - new Date(ts).getTime()) / 60000));
@@ -224,7 +247,7 @@ export function feedCards(
       return member && (who === "all" || `db_${member.id}` === who);
     })
     .slice()
-    .sort((a, b) => String(b.tradedAt).localeCompare(String(a.tradedAt)))
+    .sort((a, b) => stamp(b) - stamp(a))
     // 정렬 뒤에 세야 **최신 두 장**이 남는다. 정렬 전에 자르면 아무 두 장이나 남는다.
     .filter((t) => {
       if (who !== "all") return true;
@@ -270,7 +293,8 @@ export function feedCards(
         name: member.name,
         face: faceOf(member.role, member.name),
         pose: POSES[poseKey],
-        time: timeAgo(trade.tradedAt, now),
+        // 머리의 시각은 **글을 올린 때**다. 바로 아래 날짜 라벨이 체결한 날을 말한다.
+        time: timeAgo(postedAt(trade), now),
         dateLabel: `${date.getMonth() + 1}월 ${date.getDate()}일 ${sell ? "매도" : "매수"}`,
         stockName: trade.stockName || trade.symbol,
         // 매수 판에는 산 가격을, 매도 판에는 **실현 수익률**을 크게 띄운다.

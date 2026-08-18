@@ -46,6 +46,7 @@ F11에는 자체 화면이 없다(오버레이 `FeedScreen`은 소비자가 없�
 | `transactions.user_id` + `profiles` | `userId`·`memberName`·`memberRole` |
 | `stocks` 관계 | `symbol`·`stockName` |
 | `trade_quantity`·`trade_price` | `quantity`·`price` — **가족 전원 그대로**(2026-08-17 유저 확정). DB 값이 없는 옛 행만 `null` |
+| `transactions.feed_posted_at` | `feedPostedAt` — 피드에 글을 올린 시각. 카드 머리의 `3시간 전` 과 정렬이 이 값으로 난다. 2026-08-18 마이그레이션 전에 올라가 있던 글만 값이 없어 서버가 `created_at` 으로 접어 준다 |
 | `holdings.avg_price` (같은 `user_id`+`stock_id`) | `avgPrice` — 매도 카드의 실현 손익을 내는 밑값 |
 | `holdings.quantity = 0` 이거나 행이 없음 | **그 거래를 응답에서 뺀다** — 아직 들고 있는 종목의 기록만 피드에 온다 |
 
@@ -57,7 +58,8 @@ F11에는 자체 화면이 없다(오버레이 `FeedScreen`은 소비자가 없�
 
 | 항목 | 현재 동작 |
 |---|---|
-| 정렬 | 받아서 누적한 페이지 전체를 `tradedAt` 내림차순으로 세운 뒤 **여섯 장만** (`FEED_LIMIT`) |
+| 정렬 | 받아서 누적한 페이지 전체를 **`feedPostedAt`(글 올린 시각)** 내림차순으로 세운 뒤 **여섯 장만** (`FEED_LIMIT`). 서버도 같은 순서로 페이지를 준다 |
+| 시각 표시 | 이름 밑 한 줄은 **글을 올린 지 얼마나 됐는지**(`3시간 전`), 색 판 맨 위는 **체결한 날**(`8월 13일 매수`). 피드가 체결과 따로 노는 이상 둘은 다른 날일 수 있다 |
 | `전체` 배분 | 구성원마다 **최신 두 장까지만** (`FEED_PER_MEMBER`). 구성원 칩을 누르면 그 사람 것으로 여섯 장 |
 | 상세 | 누구 카드든 주당 체결가를 `won(avg)`로 표시 |
 | 손익 | 매수는 **평가**(지금 시세 − 산 가격), 매도는 **실현**(판 가격 − `avgPrice`). 그 거래 수량만큼 |

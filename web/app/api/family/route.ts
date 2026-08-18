@@ -20,6 +20,7 @@ type TransactionRow = {
   plan_match: boolean | null;
   plan_changed_reason: string | null;
   feed_body: string | null;
+  feed_posted_at: string | null;
   created_at: string;
   stocks: { stock_code: string; stock_name: string } | null;
 };
@@ -74,7 +75,7 @@ export async function buildFamilyData(
     deps.selectTransactions({
       select:
         "id,user_id,stock_id,side,trade_price,trade_quantity,trade_reason,plan_code,plan_target_price," +
-        "memo,plan_match,plan_changed_reason,feed_body,created_at,stocks(stock_code,stock_name)",
+        "memo,plan_match,plan_changed_reason,feed_body,feed_posted_at,created_at,stocks(stock_code,stock_name)",
       user_id: `in.(${memberIds.join(",")})`,
       /**
        * **피드에 올린 것만 읽는다** (2026-08-17). 예전에는 체결이 곧 피드여서 한 번 살
@@ -85,7 +86,15 @@ export async function buildFamilyData(
        * 피드에 안 올렸다고 해서 안 산 것이 되면 안 된다.
        */
       feed_body: "not.is.null",
-      order: "created_at.desc",
+      /**
+       * **피드는 글을 올린 순서다.** 체결 순서(`created_at`)로 세우면 지난주에 산 종목을
+       * 오늘 올린 글이 카드 아래쪽에 묻힌다 — 피드는 체결과 따로 놀기 때문이다.
+       *
+       * 값이 없는 행은 뒤로 보내고 체결 순서로 이어 붙인다. 마이그레이션이 이미 올라가
+       * 있던 글을 `created_at` 으로 채웠으니 실제로는 시드가 `feed_body` 만 직접 넣은
+       * 경우에나 나온다 — 그때도 페이지 순서가 흔들리지 않아야 한다.
+       */
+      order: "feed_posted_at.desc.nullslast,created_at.desc",
       offset: String(offset),
       // 한 건을 더 읽어 다음 페이지가 있는지만 확인하고, 화면에는 50건만 보낸다.
       limit: String(FAMILY_TRADE_PAGE_SIZE + 1),
@@ -240,6 +249,13 @@ export async function buildFamilyData(
         planMatch: row.plan_match,
         planChangedReason: row.plan_changed_reason,
         tradedAt: row.created_at,
+        /**
+         * 피드에 글을 올린 시각. 카드 머리의 `3일 전` 이 이 값으로 뜬다 — 체결 시각은
+         * 카드 안 날짜 라벨(`8월 13일 매수`)이 따로 말한다.
+         *
+         * 마이그레이션 전에 올라간 글만 값이 없어 체결 시각으로 접는다.
+         */
+        feedPostedAt: row.feed_posted_at ?? row.created_at,
       }];
     }),
     page: {

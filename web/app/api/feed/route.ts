@@ -108,7 +108,14 @@ export async function POST(request: NextRequest) {
     const updated = await updateRow<{ id: string; feed_body: string }>(
       "transactions",
       { id: `eq.${parsed.transactionId}`, user_id: `eq.${userId}`, select: "id,feed_body" },
-      { feed_body: parsed.body },
+      /**
+       * **글을 쓴 시각을 함께 남긴다.** 카드 머리의 `3일 전` 이 이 값으로 뜬다 — 체결
+       * 시각(`created_at`)으로 두면 지난주에 산 종목을 오늘 올려도 방금 쓴 글이 `5일 전`
+       * 이 된다. 언제 산 것인지는 카드 안 날짜 라벨이 따로 말한다.
+       *
+       * 글을 갈아 끼울 때도 다시 찍는다 — 지금 화면에 남아 있는 글을 쓴 시각이 맞다.
+       */
+      { feed_body: parsed.body, feed_posted_at: new Date().toISOString() },
     );
     if (!updated) return Response.json({ error: "기록을 찾을 수 없습니다." }, { status: 404 });
     console.info(JSON.stringify({ event: "feed_posted", userId, transactionId: parsed.transactionId }));
@@ -136,7 +143,8 @@ export async function DELETE(request: NextRequest) {
     const updated = await updateRow<{ id: string }>(
       "transactions",
       { id: `eq.${transactionId}`, user_id: `eq.${userId}`, select: "id" },
-      { feed_body: null },
+      // 올린 시각도 함께 비운다 — 글이 없으면 쓴 시각도 없다. 다시 올리면 그때 새로 찍힌다.
+      { feed_body: null, feed_posted_at: null },
     );
     if (!updated) return Response.json({ error: "기록을 찾을 수 없습니다." }, { status: 404 });
     console.info(JSON.stringify({ event: "feed_removed", userId, transactionId }));
