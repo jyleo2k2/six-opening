@@ -113,6 +113,8 @@ const QUIZ_EXIT_INTENTS = lexicon([
   "다른거",
   "딴 거",
   "딴거",
+  "배당 궁금해",
+  "배당이 궁금해",
 ]);
 
 export function looksLikeQuizExitIntent(input: string) {
