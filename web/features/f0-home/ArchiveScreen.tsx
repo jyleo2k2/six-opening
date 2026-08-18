@@ -525,11 +525,10 @@ export function ArchiveScreen({
           // `top` 은 제목 줄 바로 아래다 — 첫 화면은 뒤로가기 줄이 없어 제목이 위에 붙는다.
           <div style={{ position: "absolute", left: 20, right: 20, top: 136, zIndex: INFO_Z, borderRadius: 20, padding: "16px 18px 17px", background: "#FDE7F1", boxShadow: "0 6px 18px -8px rgba(215,0,130,0.3)" }}>
             {/*
-              꼬리는 **아래로** 내려 가운데 성향 카드를 가리킨다. 안내가 말하는 대상이
-              ⓘ 가 아니라 그 아래 카드이기 때문이다. 카드는 레일 한가운데에 서므로
-              꼬리도 가운데다 — ⓘ 를 재서 맞추던 코드는 그래서 지웠다.
+              꼬리는 **위로** 올라 제목 옆 안내 아이콘을 가리킨다. 안내가 말하는
+              대상과 가까운 제목 줄에 꼬리를 붙여, 아래 카드와 겹치지 않게 한다.
             */}
-            <div style={{ position: "absolute", left: "50%", bottom: -7, width: 14, height: 14, transform: "translateX(-50%) rotate(45deg)", background: "#FDE7F1" }} />
+            <div style={{ position: "absolute", left: "50%", top: -7, width: 14, height: 14, transform: "translateX(-50%) rotate(45deg)", background: "#FDE7F1" }} />
             <div style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 10 }}>
               <div style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 800, color: ACCENT, letterSpacing: "-0.02em" }}>매주 새로운 카드가 쌓여요</div>
               <div onClick={() => onInfoOpenChange(false)} style={{ flex: "none", fontSize: 15, fontWeight: 800, color: ACCENT, lineHeight: 1, cursor: "pointer", padding: "0 2px" }}>✕</div>
