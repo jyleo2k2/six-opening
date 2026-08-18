@@ -35,7 +35,7 @@ import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
 import { useWallet, type WalletAccountId } from "./lib/use-wallet";
-import { PhoneFrame } from "./PhoneFrame";
+import { ScreenFrame } from "./PhoneFrame";
 
 /**
  * 성장 아카이브. `ui-src/screens/archive.html` 과 `methods/buildArchive.js` 를 옮겨 왔다.
@@ -339,6 +339,7 @@ export function ArchiveScreen({
   onPickOrder,
   reopenSheet,
   view: requested,
+  embedded = false,
 }: {
   account: WalletAccountId;
   infoOpen: boolean;
@@ -350,6 +351,8 @@ export function ArchiveScreen({
   reopenSheet?: { sheetIndex: number } | null;
   /** 주소가 가리킨 자리(`/archive/return` 등). 챗봇 점프가 이 길로 들어온다. */
   view?: string;
+  /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
+  embedded?: boolean;
 }) {
   const { wallet } = useWallet();
   const { universe, quotes } = useUniverseLive();
@@ -543,7 +546,7 @@ export function ArchiveScreen({
     view === "return" ? "우리 가족 투자 현황" : view === "family" ? "우리 가족 성향 리포트" : "내 투자 성향";
   const thisWeek = weekLabel(mondayOf(Date.now()));
   return (
-    <PhoneFrame>
+    <ScreenFrame embedded={embedded}>
       <div style={PAGE}>
         {/*
           뒤로는 **가족 자리에만** 있다 — 내 카드(첫 화면)로 돌아오는 길이다.
@@ -1423,6 +1426,6 @@ export function ArchiveScreen({
           </>
         )}
       </div>
-    </PhoneFrame>
+    </ScreenFrame>
   );
 }

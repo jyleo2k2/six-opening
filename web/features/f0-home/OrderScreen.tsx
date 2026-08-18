@@ -9,7 +9,7 @@ import {
   isRegularMarketOpen,
   nextOpeningDate,
 } from "../f2-trade/lib/scheduled-orders.js";
-import { PhoneFrame } from "./PhoneFrame";
+import { ScreenFrame } from "./PhoneFrame";
 import { styleFromCss } from "./lib/css-style";
 import { parseBehaviorEvent } from "./lib/prototype-bridge";
 import {
@@ -343,6 +343,7 @@ export function OrderScreen({
   onReturnToArchivePicks,
   onStage,
   tutorialMode = false,
+  embedded = false,
 }: {
   code: string;
   side: "buy" | "sell";
@@ -368,6 +369,8 @@ export function OrderScreen({
   onStage?: (stage: TutorialStage) => void;
   /** 튜토리얼에서는 완료 화면만 보여 주고 실제 주문·거래 기록은 만들지 않는다. */
   tutorialMode?: boolean;
+  /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
+  embedded?: boolean;
 }) {
   const { wallet, update, refresh } = useWallet();
   const live = useStockLive(code);
@@ -592,7 +595,9 @@ export function OrderScreen({
     setDone(null);
   }, [code, me, orderPrefill, price, sellDraft, side]);
 
-  if (!wallet || !me || !stock || (side === "sell" && !sellDraft)) return <PhoneFrame />;
+  if (!wallet || !me || !stock || (side === "sell" && !sellDraft)) {
+    return <ScreenFrame embedded={embedded} />;
+  }
 
   const locked = !canTrade(account);
   const marketOpen = isRegularMarketOpen(new Date());
@@ -614,7 +619,7 @@ export function OrderScreen({
    * 남기지 않는다. 기다리지 않은 쪽이 화면이었다.
    *
    * `syncable` 이 아니면 보내지 않고 거절한다. 이 화면은 `/api/account` 응답으로 지갑을
-   * 세운 뒤에야 그려지므로(`if (!wallet) return <PhoneFrame/>`), 주문 버튼을 누를 수 있는
+   * 세운 뒤에야 그려지므로(`if (!wallet) return <ScreenFrame/>`), 주문 버튼을 누를 수 있는
    * 시점에 `syncable` 이 거짓이면 응답을 기다리는 중이 아니라 **저장할 수 없는 계정**이다.
    */
   const postTrade = (body: Record<string, unknown>): Promise<OrderResponse> => postOrder("/api/trade", body);
@@ -2232,5 +2237,5 @@ export function OrderScreen({
     );
   };
 
-  return <PhoneFrame>{side === "buy" ? renderBuy() : renderSell()}</PhoneFrame>;
+  return <ScreenFrame embedded={embedded}>{side === "buy" ? renderBuy() : renderSell()}</ScreenFrame>;
 }

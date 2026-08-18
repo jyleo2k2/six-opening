@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BottomNav } from "./BottomNav";
 import { styleFromCss } from "./lib/css-style";
 import { rkPodium, rkRows, rkSeg, type RankTab } from "./lib/ranking-data";
-import { PhoneFrame } from "./PhoneFrame";
+import { ScreenFrame } from "./PhoneFrame";
 
 /**
  * 랭킹 화면. `app.html` 이 그리던 것을 그대로 옮겨 왔다 (`ui-src/screens/ranking.html`).
@@ -41,13 +41,20 @@ const LIST = styleFromCss(
     + "border-radius:26px 26px 0 0;overflow-y:auto;overflow-x:hidden;padding:10px 0 6px",
 );
 
-export function RankingScreen({ onLeave }: { onLeave: (path: string) => void }) {
+export function RankingScreen({
+  onLeave,
+  embedded = false,
+}: {
+  onLeave: (path: string) => void;
+  /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
+  embedded?: boolean;
+}) {
   const [tab, setTab] = useState<RankTab>("week");
   const podium = rkPodium(tab);
   const rows = rkRows(tab);
 
   return (
-    <PhoneFrame>
+    <ScreenFrame embedded={embedded}>
     <div style={WRAP}>
       <div style={HEAD}>
         <div style={TITLE}>
@@ -91,6 +98,6 @@ export function RankingScreen({ onLeave }: { onLeave: (path: string) => void }) 
 
       <BottomNav active="ranking" onLeave={onLeave} />
     </div>
-    </PhoneFrame>
+    </ScreenFrame>
   );
 }

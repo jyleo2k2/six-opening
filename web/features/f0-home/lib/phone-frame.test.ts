@@ -1,8 +1,9 @@
+import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
 import {
   PHONE_SCREEN,
+  PHONE_SCREEN_RECT,
   PROTOTYPE_PHONE,
-  phoneFrameRect,
   phoneScreenClipPath,
   prototypeScreenRectFromClientRect,
 } from "./phone-frame";
@@ -12,6 +13,17 @@ function main() {
   assert.equal(
     PHONE_SCREEN.left * 2 + PROTOTYPE_PHONE.screenWidth,
     PROTOTYPE_PHONE.frameWidth,
+  );
+  assert.deepEqual(PHONE_SCREEN_RECT, {
+    left: 24,
+    top: 23,
+    width: 402,
+    height: 874,
+    scale: 1,
+  });
+  assert.equal(
+    phoneScreenClipPath(PHONE_SCREEN_RECT),
+    "inset(23px calc(100% - 426px) calc(100% - 897px) 24px round 40px)",
   );
 
   // 오버레이 rect는 viewport 계산값이 아니라 #kw-screen 실측 client rect에서 파생한다.
@@ -27,12 +39,6 @@ function main() {
     width: 201,
     height: 437,
     scale: 0.5,
-  });
-  assert.deepEqual(phoneFrameRect(measured), {
-    left: 8,
-    top: 18.5,
-    width: 225,
-    height: 460,
   });
   assert.equal(
     prototypeScreenRectFromClientRect({ left: 0, top: 0, width: 0, height: 437 }),
@@ -54,6 +60,20 @@ function main() {
     phoneScreenClipPath({ left: 0, top: 0, width: 201, height: 437, scale: 0.5 }),
     "inset(0px calc(100% - 201px) calc(100% - 437px) 0px round 20px)",
   );
+
+  // 프레임 이미지는 PhoneFrame 안에서 한 번만 그리고, 호스트 바깥에 두 번째 이미지를
+  // 다시 놓지 않는다. 구조가 되돌아가면 핀치 줌에서 두 좌표계가 다시 갈라진다.
+  const connectedSource = readFileSync(
+    new URL("../ConnectedPrototype.tsx", import.meta.url),
+    "utf8",
+  );
+  const phoneFrameSource = readFileSync(
+    new URL("../PhoneFrame.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(connectedSource, /<PhoneFrame[\s\S]*overlay=/u);
+  assert.doesNotMatch(connectedSource, /phoneFrameRect|iphone-frame\.png/u);
+  assert.equal((phoneFrameSource.match(/iphone-frame\.png/gu) ?? []).length, 1);
 
   console.log("phone frame tests passed");
 }
