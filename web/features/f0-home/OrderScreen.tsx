@@ -353,6 +353,7 @@ export function OrderScreen({
   onReturnToArchivePicks,
   onStage,
   tutorialMode = false,
+  tutorialStage,
   embedded = false,
 }: {
   code: string;
@@ -379,6 +380,8 @@ export function OrderScreen({
   onStage?: (stage: TutorialStage) => void;
   /** 튜토리얼에서는 완료 화면만 보여 주고 실제 주문·거래 기록은 만들지 않는다. */
   tutorialMode?: boolean;
+  /** 튜토리얼이 이전 장으로 이동할 때 주문 화면의 내부 단계를 맞춘다. */
+  tutorialStage?: TutorialStage;
   /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
   embedded?: boolean;
 }) {
@@ -393,6 +396,12 @@ export function OrderScreen({
   useEffect(() => {
     onStage?.(`order-${step}` as TutorialStage);
   }, [step, onStage]);
+  useEffect(() => {
+    if (!tutorialMode || !tutorialStage || !tutorialStage.startsWith("order-")) return;
+    const requested = Number(tutorialStage.slice("order-".length));
+    if (!Number.isInteger(requested) || requested < 1 || requested > 3) return;
+    setStep((current) => (current === requested ? current : requested));
+  }, [tutorialMode, tutorialStage]);
   const [draft, setDraft] = useState<BuyDraft>(blankBuyDraft);
   const [sellDraft, setSellDraftState] = useState<SellDraft | null>(null);
   // 갖고 있지 않은 회사를 팔려고 했을 때 뜨는 안내. 프로토타입의 `sellBlocked` 와 같다.
@@ -406,6 +415,11 @@ export function OrderScreen({
   const [reasonOrder] = useState(() => shuffledIndexes(6));
   const [sellReasonOrder] = useState(() => shuffledIndexes(5).concat([5]));
   const [orderError, setOrderError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!tutorialMode || !tutorialStage || !tutorialStage.startsWith("order-")) return;
+    setShowPad(false);
+    setOrderError(null);
+  }, [tutorialMode, tutorialStage]);
   const [done, setDone] = useState<{
     name: string;
     qty: number;
@@ -494,6 +508,20 @@ export function OrderScreen({
   // 챗봇 맥락. 값 계산은 `lib/order-view.ts` 의 `orderChatContext` 가 소유한다 — 화면이
   // 쓰는 `buyMath`·`sellMath` 를 그대로 거쳐야 화면과 챗봇이 같은 수량을 말한다.
   const stockName = stock?.name ?? "";
+  // 매도 화면에서 매수 완료 장으로 되돌아갈 때도 튜토리얼 완료 카드의 자리를 보여 준다.
+  useEffect(() => {
+    if (!tutorialMode || tutorialStage !== "order-3" || done || !stockName || price <= 0) return;
+    setDone({
+      name: stockName,
+      qty: 1,
+      amount: price,
+      proceeds: price,
+      limit: null,
+      scheduled: false,
+      scheduledFor: null,
+      requestMode: side === "buy" ? "qty" : undefined,
+    });
+  }, [done, price, side, stockName, tutorialMode, tutorialStage]);
   const walletRef = useRef(wallet);
   walletRef.current = wallet;
   useEffect(() => {
