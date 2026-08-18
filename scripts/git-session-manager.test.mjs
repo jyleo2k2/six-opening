@@ -7,8 +7,6 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
-  POLICY,
-  SessionError,
   analyzeLocalConflicts,
   auditWorktreeEntries,
   classifyDevServer,
@@ -17,13 +15,16 @@ import {
   expectedWorktreePath,
   isDeleteOnlyPush,
   localConflicts,
-  parsePushRefs,
   matchingHotspots,
   parseBranchIdentity,
+  parseOptions,
+  parsePushRefs,
   parseWorktreePorcelain,
   pathOverlaps,
   pathsOutsideScopes,
+  POLICY,
   scopeContains,
+  SessionError,
   validatePullRequestPayload,
 } from "./git-session-manager.mjs";
 
@@ -42,6 +43,25 @@ function execute(executable, args, cwd, allowFailure = false) {
   }
   return result;
 }
+
+test("두 낱말 옵션을 camelCase 한 가지 이름으로만 담는다", () => {
+  // 읽는 쪽은 전부 `options.dryRun` 처럼 camelCase 로 본다. 파서가 `--dry-run` 을
+  // 하이픈 그대로 담으면 그 이름은 언제나 undefined 라, 지우는 명령의 미리보기가
+  // 조용히 꺼진 채 진짜로 지운다. 실제로 그렇게 한 세션이 예고 없이 정리됐다.
+  const parsed = parseOptions(["gc", "--dry-run", "--idle-minutes", "30", "--hook-input"]);
+  assert.equal(parsed.dryRun, true);
+  assert.equal(parsed.hookInput, true);
+  assert.equal(parsed.idleMinutes, "30");
+  assert.equal(parsed["dry-run"], undefined);
+  assert.equal(parsed["idle-minutes"], undefined);
+  assert.deepEqual(parsed._, ["gc"]);
+});
+
+test("한 낱말 옵션과 여러 번 준 --path 는 그대로 담는다", () => {
+  const parsed = parseOptions(["--json", "--path", "web/app", "--path", "web/shared"]);
+  assert.equal(parsed.json, true);
+  assert.deepEqual(parsed.path, ["web/app", "web/shared"]);
+});
 
 test("허용된 AI와 여섯 작업자의 한글 브랜치를 받는다", () => {
   for (const worker of POLICY.allowedWorkers) {

@@ -563,7 +563,11 @@ function validateChangedPaths(context, identity, claim, files) {
   for (const file of files) validateFileOwnership(identity, file);
 }
 
-function parseOptions(tokens) {
+function camelCase(key) {
+  return key.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+export function parseOptions(tokens) {
   const options = { _: [] };
   for (let index = 0; index < tokens.length; index += 1) {
     const token = tokens[index];
@@ -571,7 +575,10 @@ function parseOptions(tokens) {
       options._.push(token);
       continue;
     }
-    const key = token.slice(2);
+    // 옵션 키는 camelCase 하나로 통일한다. `--dry-run` 을 `options["dry-run"]` 로만
+    // 담아 두면 `options.dryRun` 을 읽는 쪽은 언제나 undefined 를 보고, 플래그가
+    // 조용히 무시된다. gc 처럼 지우는 명령에서는 그 침묵이 곧 사고다.
+    const key = camelCase(token.slice(2));
     const next = tokens[index + 1];
     const value = next && !next.startsWith("--") ? tokens[++index] : true;
     if (key === "path") {
@@ -673,7 +680,7 @@ function commandGuard(options) {
   const context = repositoryContext();
   const managed = validateManagedSession(context);
   validateChangedPaths(context, managed.identity, managed.claim, changedPaths(context.root));
-  const rawFile = options["hook-input"] ? hookFileFromStdin() : options.file;
+  const rawFile = options.hookInput ? hookFileFromStdin() : options.file;
   if (typeof rawFile === "string" && rawFile.length > 0) {
     const file = normalizeRepoPath(context.root, rawFile);
     if (!managed.claim.paths.some((scope) => scopeContains(scope, file))) {
