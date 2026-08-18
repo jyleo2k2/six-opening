@@ -138,6 +138,21 @@ function subscribeLive(listener: (snapshot: LiveSnapshot) => void) {
 }
 
 /**
+ * 로그인 직후 로딩 화면이 유니버스 스크립트와 첫 시세를 미리 받아 둔다(`prefetch-boot`).
+ *
+ * 새 경로를 만들지 않는다 — 위의 `loadUniverse`·`pollLive` 를 그대로 눌러 `KW_UNIVERSE` 와
+ * `lastLive` 를 채울 뿐이다. 홈·탐색이 마운트될 때 그 둘이 이미 차 있어 값 없는 카드가 한
+ * 프레임 스치지 않는다. 실패는 그 둘이 이미 삼키므로 여기서 다시 보지 않는다.
+ */
+export function prefetchUniverse(): Promise<Universe | null> {
+  return loadUniverse();
+}
+
+export function prefetchLiveQuotes(): Promise<void> {
+  return pollLive();
+}
+
+/**
  * 전 종목 시세. 탐색 카드 51장이 쓴다 — `app.html` 의 `liveRefreshTick` 과 같은
  * 주기(5초)·같은 경로다. 특정 종목을 데우지 않으므로 `symbol` 없이 부른다.
  */
