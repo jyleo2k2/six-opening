@@ -1503,26 +1503,33 @@ export function OrderScreen({
             }}
             width={128}
           />
-          <div style={{ fontSize: 14, fontWeight: 700, color: "#F5327F", letterSpacing: "0.08em", marginTop: 14 }}>
-            {done.limit ? "기다리는 주문에 넣었어요" : done.scheduled ? "다음 장 주문을 맡아뒀어요" :"주문 완료!"}
-          </div>
+          {/*
+            상태 라벨(`주문 완료!`·`기다리는 주문에 넣었어요`)은 띄우지 않는다 — 바로 아래
+            제목이 무엇을 언제 사는지 이미 다 말한다.
+          */}
           <div
             style={{
               fontSize: 26,
               fontWeight: 800,
               color: "#01185A",
-              marginTop: 6,
+              marginTop: 14,
               textAlign: "center",
               letterSpacing: "-0.01em",
               lineHeight: 1.4,
-              whiteSpace: "pre-line",
+              wordBreak: "keep-all",
+              overflowWrap: "break-word",
             }}
           >
+            {/*
+              줄바꿈 자리를 `\n` 으로 못 박지 않는다 — 종목 이름과 수량 길이가 제각각이라
+              고정 줄바꿈은 짧은 이름에서 어색하게 끊기고 긴 이름에서는 넘친다. `keep-all` 이
+              낱말 단위로만 접고 화면을 벗어날 때만 새 줄로 내린다.
+            */}
             {done.limit
-              ? `${done.limit.toLocaleString("ko-KR")}원이 되면\n${done.name} ${doneQtyText}를 살게요!`
+              ? `${done.limit.toLocaleString("ko-KR")}원이 되면 ${done.name} ${doneQtyText}를 살게요!`
               : done.scheduled
-                ? `${done.scheduledFor} 장이 열리면\n${done.name}을 시가로 살게요!`
-                : `${done.name} ${doneQtyText}를\n주문했어요!`}
+                ? `장이 열리면 ${done.name} ${doneQtyText}를 살게요`
+                : `${done.name} ${doneQtyText}를 주문했어요!`}
           </div>
           <div
             style={{
@@ -1532,7 +1539,8 @@ export function OrderScreen({
               marginTop: 12,
               textAlign: "center",
               lineHeight: 1.6,
-              whiteSpace: "pre-line",
+              wordBreak: "keep-all",
+              overflowWrap: "break-word",
             }}
           >
             {/*
@@ -1543,10 +1551,10 @@ export function OrderScreen({
               "아카이브에서 오늘의 나를 다시 만나요" 라고 없는 자리를 가리켰다.
             */}
             {done.limit
-              ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 돈은 잠깐 맡아둘게요!"
+              ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요. 그동안 그 돈은 잠깐 맡아둘게요!"
               : done.scheduled
-                ? "지금은 장이 닫혀 있어서 자리만 맡아뒀어요.\n주문과 체결은 달라요 — 거래가 열리는 첫날 시가로 사고, 안 열리면 돈은 그대로 있어요."
-                : "왜 샀는지까지 남긴 건 정말 잘한 거예요.\n나중에 팔 때 오늘의 마음을 다시 보여줄게요!"}
+                ? "주문과 체결은 달라요. 거래가 열리는 첫날 시가로 사고, 안 열리면 돈은 그대로 있어요"
+                : "왜 샀는지까지 남긴 건 정말 잘한 거예요. 나중에 팔 때 오늘의 마음을 다시 보여줄게요!"}
           </div>
           <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 22 }}>
             <div style={{ ...SUMMARY_ROW, padding: "4px 0" }}>
@@ -2153,22 +2161,20 @@ export function OrderScreen({
           }}
           width={150}
         />
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#8E93A8", letterSpacing: "0.08em", marginTop: 14 }}>
-          {done.limit ? "기다리는 주문에 넣었어요" : done.scheduled ? "다음 장 주문을 맡아뒀어요" :"매도 완료"}
-        </div>
-        <div style={{ fontSize: 24, fontWeight: 800, color: "#01185A", marginTop: 6, textAlign: "center", letterSpacing: "-0.01em", lineHeight: 1.4, whiteSpace: "pre-line" }}>
+        {/* 매수 완료와 같은 이유로 상태 라벨은 띄우지 않고, 줄바꿈도 낱말 단위로만 맡긴다. */}
+        <div style={{ fontSize: 24, fontWeight: 800, color: "#01185A", marginTop: 14, textAlign: "center", letterSpacing: "-0.01em", lineHeight: 1.4, wordBreak: "keep-all", overflowWrap: "break-word" }}>
           {done.limit
-            ? `${done.limit.toLocaleString("ko-KR")}원이 되면\n${done.name} ${sdQty}를 팔게요`
+            ? `${done.limit.toLocaleString("ko-KR")}원이 되면 ${done.name} ${sdQty}를 팔게요`
             : done.scheduled
-              ? `${done.scheduledFor} 장이 열리면\n${done.name} ${sdQty}를 시가로 팔게요`
-              : `${done.name} ${sdQty}를\n팔았어요`}
+              ? `장이 열리면 ${done.name} ${sdQty}를 팔게요`
+              : `${done.name} ${sdQty}를 팔았어요`}
         </div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "#5C6280", marginTop: 12, textAlign: "center", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: "#5C6280", marginTop: 12, textAlign: "center", lineHeight: 1.6, wordBreak: "keep-all", overflowWrap: "break-word" }}>
           {done.limit
-            ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요.\n그동안 그 주식은 잠깐 맡아둘게요."
+            ? "값이 목표에 닿을 때까지 키웅이가 지켜볼게요. 그동안 그 주식은 잠깐 맡아둘게요."
             : done.scheduled
-              ? "주문 접수와 체결은 달라요.\n거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게요."
-              : "왜 팔았는지까지 남겨뒀어요.\n종목 차트에서 산 날과 판 날을 함께 볼 수 있어요."}
+              ? "주문 접수와 체결은 달라요. 거래가 확인된 첫날의 시가로 체결하고, 휴장하거나 거래가 멈추면 주식을 그대로 맡아둘게요."
+              : "왜 팔았는지까지 남겨뒀어요. 종목 차트에서 산 날과 판 날을 함께 볼 수 있어요."}
         </div>
 
         <div id="tut-order-done" style={{ ...DONE_BOX, marginTop: 20 }}>
