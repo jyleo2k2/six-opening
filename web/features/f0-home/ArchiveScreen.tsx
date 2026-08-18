@@ -29,7 +29,7 @@ import {
   type WeekCard,
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
-import { closedWeekRows, seasonReport } from "./lib/archive-season";
+import { closedWeekRows, seasonReport, thisSeasonWeeks } from "./lib/archive-season";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
@@ -44,12 +44,15 @@ import { PhoneFrame } from "./PhoneFrame";
  *
  * **자리는 셋이고 첫 화면만 개인 것이다.** 들어오면 로그인한 사람의 주차 성향 카드가
  * 레일로 깔리고(`cards`), 가족 것은 두 자리다 — `성향 리포트`(`family`)가 가족 성향을
- * `지금까지`·`지난 주차`로 갈아 끼우고, `투자 현황`(`return`)이 수익률 자리다.
+ * `이번 시즌`·`지난 시즌`으로 갈아 끼우고, `투자 현황`(`return`)이 수익률 자리다.
  * 돌아오는 길은 머리의 `‹` 다.
  *
- * **지난 주차도 Supabase 다**(2026-08-17). `/api/family` 가 구성원마다 주차 카드를 함께
- * 주고 `archive-season.ts` 가 끝난 주만 골라 편다. 예전에 있던 4주 표본 픽스처는 지웠다 —
- * 되짚을 주가 없으면 빈 자리 문구를 세우고 가짜 값을 그리지 않는다.
+ * **가족 성향 리포트도 Supabase 다**(2026-08-17, 2026-08-18 시즌 이름 변경). `/api/family`
+ * 가 구성원마다 주차 카드를 함께 주고, `이번 시즌`은 그 전체를(진행 중인 이번 주 포함),
+ * `지난 시즌`은 `archive-season.ts` 가 끝난 주만 골라 편다. 예전에 있던 4주 표본 픽스처는
+ * 지웠다 — 되짚을 주가 없으면 빈 자리 문구를 세우고 가짜 값을 그리지 않는다.
+ * **`이번 시즌`에서 구성원을 누르면 그 사람의 주차별 흐름이 펼쳐진다** — `지난 시즌`
+ * 카드의 `주차별` 펼침과 같은 모양이고 `thisSeasonWeeks`(`archive-season.ts`)가 편다.
  *
  * **가족으로 가는 문은 첫 화면 아래 `우리 가족 투자 보기` 하나다**(2026-08-17). 머리에
  * 있던 분홍 단추 둘과 제목 옆 지갑을 지우고 목업대로 시트 한 장으로 모았다 — 첫 화면의
@@ -369,6 +372,8 @@ export function ArchiveScreen({
   const [famPick, setFamPick] = useState("all");
   const [who, setWho] = useState("all");
   const [detailOpen, setDetailOpen] = useState(false);
+  /** 이번 시즌 탭에서 펼쳐 놓은 구성원. 지난 시즌의 `lastOpen`과 같은 자리다. */
+  const [nowOpen, setNowOpen] = useState<string | null>(null);
   const [lastPick, setLastPick] = useState("all");
   const [lastOpen, setLastOpen] = useState<string | null>(null);
   const [openComments, setOpenComments] = useState<Record<string, boolean>>({});
@@ -410,7 +415,9 @@ export function ArchiveScreen({
   // 그릴 때 가족·피드 계산이 통째로 돌아서, 스크롤마다 그리면 튕길 때 눈에 띄게 버벅인다.
   const rail = useRailDrag(setCardActive, activeCard);
 
-  const family = familyMembers(data.family?.members ?? []);
+  /** `family`와 같은 순서의 원본 행. 이번 시즌 펼침이 주차 카드(`weeks`)를 여기서 얻는다. */
+  const rawFamily = data.family?.members ?? [];
+  const family = familyMembers(rawFamily);
   const famShown = family.filter((f) => f.has && (famPick === "all" || f.key === famPick));
   const lanes = runners(data.family?.members ?? []);
   const me = wallet?.acc[account];
@@ -466,7 +473,7 @@ export function ArchiveScreen({
   const sheetPicks = buildTypePicks(sheetCard?.type.key ?? null, universe, quotes);
 
   /**
-   * 지난 주차 — 서버가 구성원마다 준 주차 카드에서 **끝난 주만** 골라 되짚는다.
+   * 지난 시즌 — 서버가 구성원마다 준 주차 카드에서 **끝난 주만** 골라 되짚는다.
    * 되짚을 것이 없으면 `null` 이고 그 자리에는 빈 자리 문구가 선다.
    */
   const last = useMemo(
@@ -544,8 +551,8 @@ export function ArchiveScreen({
         {/* 가족 성향 안에서만 시즌을 바꾼다. 두 시즌이 같은 페이지에서 갈아 끼워진다. */}
         {view === "family" && (
           <div style={{ flex: "none", display: "flex", gap: 8, padding: "16px 20px 12px" }}>
-            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>지금까지</div>
-            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>지난 주차</div>
+            <div onClick={() => setSeason("now")} style={tabStyle(season === "now")}>이번 시즌</div>
+            <div onClick={() => setSeason("last")} style={tabStyle(season === "last")}>지난 시즌</div>
           </div>
         )}
 
@@ -562,29 +569,43 @@ export function ArchiveScreen({
 
               <FamilyRadar shown={famShown} />
 
-              {family.map((f) => (
-                <div
-                  key={f.key}
-                  onClick={() => setFamPick(famPick === f.key ? "all" : f.key)}
-                  style={{
-                    display: "flex", alignItems: "flex-start", gap: 12, padding: "13px 15px", borderRadius: 22,
-                    cursor: "pointer", transition: "box-shadow 0.18s ease", background: "#FFFFFF",
-                    boxShadow: famPick === f.key
-                      ? `inset 0 0 0 2px ${f.color},0 2px 10px rgba(30,25,60,0.05)`
-                      : "0 2px 10px rgba(30,25,60,0.05)",
-                  }}
-                >
-                  <div style={{ width: 42, height: 42, flex: "none", borderRadius: 999, background: `url(${f.face}) center/cover no-repeat,${f.color}2E`, boxShadow: `inset 0 0 0 2px ${f.color}99` }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                      <div style={{ width: 9, height: 9, borderRadius: 999, flex: "none", background: f.color }} />
-                      <span style={{ fontSize: 15, fontWeight: 800, color: "#001E5A" }}>{f.name}</span>
-                      <span style={{ fontSize: 12.5, fontWeight: 700, color: "#D70082" }}>{f.title}</span>
+              {family.map((f, index) => {
+                const open = nowOpen === f.key;
+                const weeksInfo = open ? thisSeasonWeeks(rawFamily[index]) : null;
+                return (
+                  <div key={f.key} style={{ flex: "none", background: "#FFFFFF", borderRadius: 22, padding: "13px 15px", boxShadow: open ? `inset 0 0 0 2px ${f.color},0 2px 10px rgba(30,25,60,0.05)` : "0 2px 10px rgba(30,25,60,0.05)" }}>
+                    <div
+                      // 펼치면서 오각형도 그 사람만 남긴다. 접으면 다시 전체로 돌린다 — 지난
+                      // 시즌 카드의 `주차별` 펼침(`lastOpen`)과 같은 배선이다.
+                      onClick={() => { setNowOpen(open ? null : f.key); setFamPick(open ? "all" : f.key); }}
+                      style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer" }}
+                    >
+                      <div style={{ width: 42, height: 42, flex: "none", borderRadius: 999, background: `url(${f.face}) center/cover no-repeat,${f.color}2E`, boxShadow: `inset 0 0 0 2px ${f.color}99` }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                          <div style={{ width: 9, height: 9, borderRadius: 999, flex: "none", background: f.color }} />
+                          <span style={{ fontSize: 15, fontWeight: 800, color: "#001E5A" }}>{f.name}</span>
+                          <span style={{ fontSize: 12.5, fontWeight: 700, color: "#D70082" }}>{f.title}</span>
+                        </div>
+                        <div style={{ whiteSpace: "pre-line", fontSize: 12.5, fontWeight: 500, color: "#7E849B", lineHeight: 1.65, marginTop: 5, textWrap: "pretty" }}>{f.desc}</div>
+                      </div>
+                      <div style={{ flex: "none", fontSize: 12, fontWeight: 700, color: "#A9AEC4", paddingTop: 3, whiteSpace: "nowrap" }}>{open ? "닫기" : "주차별"}</div>
                     </div>
-                    <div style={{ whiteSpace: "pre-line", fontSize: 12.5, fontWeight: 500, color: "#7E849B", lineHeight: 1.65, marginTop: 5, textWrap: "pretty" }}>{f.desc}</div>
+                    {open && weeksInfo && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12, paddingTop: 12, borderTop: "1px solid #F0F1F7" }}>
+                        {weeksInfo.weeks.map((week) => (
+                          <div key={week.label} style={{ display: "flex", alignItems: "center", gap: 10, borderRadius: 14, padding: "9px 11px", background: week.bg }}>
+                            <span style={{ flex: "none", fontSize: 12, fontWeight: 700, color: "#8E93A8", whiteSpace: "nowrap" }}>{week.label}</span>
+                            <span style={{ flex: 1, minWidth: 0, fontSize: 13.5, fontWeight: 800, color: week.ink, whiteSpace: "nowrap" }}>{week.typeName}</span>
+                            <span style={{ flex: "none", fontSize: 12, fontWeight: 600, color: "#8E93A8", whiteSpace: "nowrap" }}>{week.note}</span>
+                          </div>
+                        ))}
+                        <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.6, padding: "2px 2px 0", textWrap: "pretty" }}>{weeksInfo.trend}</div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
                 누가 더 좋다는 뜻은 아니에요. 서로 왜 그렇게 했는지 이야기해 보세요.
@@ -616,7 +637,7 @@ export function ArchiveScreen({
                   <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ flex: "none", width: 104, height: 124, margin: "-8px 0 -12px", background: last.image, filter: last.imageShadow }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: last.inkSoft }}>지난 주차 종합 리포트</div>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", color: last.inkSoft }}>지난 시즌 종합 리포트</div>
                       <div style={{ fontSize: 21, fontWeight: 900, marginTop: 4, letterSpacing: "-0.01em", lineHeight: 1.25, color: last.ink }}>{last.title}</div>
                       <div style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, marginTop: 6, textWrap: "pretty", color: last.inkSoft }}>{last.text}</div>
                     </div>
@@ -672,7 +693,7 @@ export function ArchiveScreen({
               })}
 
               <div style={{ fontSize: 12, fontWeight: 500, color: "#A9AEC4", lineHeight: 1.65, textAlign: "center", padding: "2px 6px 4px", textWrap: "pretty" }}>
-                끝난 주차 기록은 그대로 보관돼요. 위 단추로 지금까지와 견줘 보세요.
+                끝난 주차 기록은 그대로 보관돼요. 위 단추로 이번 시즌과 견줘 보세요.
               </div>
             </div>
           </>
@@ -1158,7 +1179,7 @@ export function ArchiveScreen({
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 9, marginTop: 18 }}>
-                <div onClick={() => { setView("family"); setSeason("now"); setFamPick("all"); famSheet.closeSheet(); }} style={FAMILY_ROW}>
+                <div onClick={() => { setView("family"); setSeason("now"); setFamPick("all"); setNowOpen(null); famSheet.closeSheet(); }} style={FAMILY_ROW}>
                   <svg fill="none" height="22" stroke="#1A1F4B" style={{ display: "block", flex: "none" }} viewBox="0 0 24 24" width="22">
                     <circle cx="12" cy="12" r="8.2" strokeWidth="1.7" />
                     <path d="M12 12 V3.8" strokeWidth="1.7" />

@@ -1,5 +1,5 @@
 /**
- * 지난 주차 리포트 — 가족 구성원마다 **이미 끝난 주차**를 되짚는다.
+ * 우리 가족 투자 성향 리포트 — `이번 시즌`·`지난 시즌` 두 탭이 쓰는 계산.
  *
  * **원본은 Supabase 다**(2026-08-17). `/api/family` 가 구성원마다 주차 카드(`weeks`)를
  * 함께 주고, 그 카드는 내 성향과 **같은 엔진**(`shared/engine/behavior-profile.ts`)이
@@ -12,10 +12,12 @@
  *
  * **왜 시즌이 아니라 주차인가.** 통합문서 v2 의 시즌은 4주 × 연 4회이고
  * `season-day.ts` 가 그 경계를 계산한다. 다만 지금 DB 에는 이번 시즌(2026-08-03~)
- * 기록만 있어 지난 시즌으로 좁히면 화면이 통째로 빈다. 끝난 주차는 시즌이 쌓이면
- * 자연히 지난 시즌 주차까지 함께 들어온다 — 좁히는 것은 경계가 실제로 필요해질 때 한다.
+ * 기록만 있어 진짜 시즌 경계로 가르지 않는다. **`지난 시즌` 탭은 끝난 주차 전체를,
+ * `이번 시즌` 탭은 진행 중인 주까지 포함한 전체 주차를 보여 주는 자리**다 — 시즌이
+ * 여러 번 쌓이면 `지난 시즌` 이 자연히 진짜 지난 시즌 주차만 남게 된다. 경계로 좁히는
+ * 것은 그게 실제로 필요해질 때 한다.
  *
- * 계산은 두 가지뿐이다. 한 사람의 성향은 **끝난 주차 중 최빈 유형**이고, 가족 성향은
+ * 계산은 두 가지뿐이다. 한 사람의 성향은 **주차 중 최빈 유형**이고, 가족 성향은
  * **구성원 성향 중 최빈 유형**이다. 점수를 다시 매기지 않는다 — 채점은 엔진 하나가 한다.
  */
 
@@ -57,8 +59,8 @@ export type SeasonRow = {
  * 서버가 준 구성원 주차 카드를 리포트 입력으로 편다. **끝난 주(`closed`)만** 쓴다 —
  * 이번 주는 아직 거래가 더 붙을 수 있어 되짚을 기록이 아니다.
  *
- * 색·얼굴은 `familyMembers` 가 정한 것을 그대로 쓴다. 같은 사람이 현재 시즌 오각형과
- * 지난 주차 오각형에서 다른 색이면 두 탭을 겹쳐 볼 수가 없다.
+ * 색·얼굴은 `familyMembers` 가 정한 것을 그대로 쓴다. 같은 사람이 이번 시즌 오각형과
+ * 지난 시즌 오각형에서 다른 색이면 두 탭을 겹쳐 볼 수가 없다.
  *
  * 끝난 주가 하나도 없는 사람은 아예 뺀다 — 빈 카드를 세워 두면 기록이 있는 사람과
  * 없는 사람이 같은 무게로 보인다.
@@ -76,8 +78,8 @@ export function closedWeekRows(members: FamilyRow[]): SeasonRow[] {
       color: view.color,
       fill: view.fill,
       /**
-       * 지난 주차 오각형은 **끝난 주 카드의 평균**이다. 누적 카드(`behavior`)를 쓰면
-       * 이번 주까지 섞여 현재 시즌 탭과 같은 그림이 되고, 그러면 두 탭을 견줄 것이 없다.
+       * 지난 시즌 오각형은 **끝난 주 카드의 평균**이다. 누적 카드(`behavior`)를 쓰면
+       * 이번 주까지 섞여 이번 시즌 탭과 같은 그림이 되고, 그러면 두 탭을 견줄 것이 없다.
        */
       scores: meanAxes(closed.map((week) => axesFromCard(week.card))),
       weeks: closed.map((week) => ({
@@ -118,6 +120,47 @@ export function seasonTypeOf(weeks: SeasonWeek[]): TypeKey | null {
   return topOf(weeks.map((week) => week.type));
 }
 
+/** 유형이 안 정해진 주의 회색. 어느 캐릭터 색도 아니어야 한다. */
+const PENDING_INK = "#8E93A8";
+
+export type SeasonWeekRow = { label: string; typeName: string; note: string; ink: string; bg: string };
+
+/** 주차 배열을 카드 목록으로 편다. `지난 시즌`·`이번 시즌` 리포트가 같은 모양을 쓴다. */
+function weekRows(weeks: SeasonWeek[]): SeasonWeekRow[] {
+  return weeks.map((week) => {
+    const meta = week.type ? TYPES[week.type] : null;
+    return {
+      label: week.label,
+      typeName: meta ? meta.name : "관찰 중",
+      note: `매수 ${week.count}건`,
+      ink: meta ? meta.pal[3] : PENDING_INK,
+      bg: meta ? rgba(meta.pal[1], 0.35) : rgba(PENDING_INK, 0.12),
+    };
+  });
+}
+
+/** 주차별 유형을 화살표로 이은 한 줄. 쌓인 주가 없으면 되짚을 것이 없다고 적는다. */
+function trendOf(weeks: SeasonWeekRow[]): string {
+  return weeks.length
+    ? `주차별로 보면 ${weeks.map((week) => week.typeName).join(" → ")} 순서였어요.`
+    : "아직 쌓인 주차가 없어요.";
+}
+
+/**
+ * 이번 시즌 사람별 주차 카드. `closedWeekRows`(지난 시즌)와 달리 **끝나지 않은 이번 주도
+ * 포함**한다 — 이번 시즌 리포트에서 한 사람을 누르면 지금까지 쌓인 주차 전부를 보여줘야
+ * 하기 때문이다. 원본은 `familyMembers`와 같은 `/api/family` 응답이다.
+ */
+export function thisSeasonWeeks(member: FamilyRow): { weeks: SeasonWeekRow[]; trend: string } {
+  const seasonWeeks: SeasonWeek[] = (member.weeks ?? []).map((week) => ({
+    label: week.label,
+    type: typeKeyOf(week.card.character),
+    count: week.count,
+  }));
+  const weeks = weekRows(seasonWeeks);
+  return { weeks, trend: trendOf(weeks) };
+}
+
 export type SeasonMemberView = {
   key: string;
   name: string;
@@ -126,7 +169,7 @@ export type SeasonMemberView = {
   fill: string;
   scores: number[];
   scaleMax: number;
-  /** `지난 주차 성향 · 저격수` */
+  /** `지난 시즌 성향 · 저격수` */
   title: string;
   desc: string;
   /** `주차별로 보면 탐험가 → 승부사 → 저격수 순서였어요.` */
@@ -148,11 +191,8 @@ export type SeasonReport = {
   members: SeasonMemberView[];
 };
 
-/** 유형이 안 정해진 주의 회색. 어느 캐릭터 색도 아니어야 한다. */
-const PENDING_INK = "#8E93A8";
-
 /**
- * 지난 주차 종합 리포트. 구성원마다 성향을 세고, 그중 최빈 유형을 가족 성향으로 삼는다.
+ * 지난 시즌 종합 리포트. 구성원마다 성향을 세고, 그중 최빈 유형을 가족 성향으로 삼는다.
  *
  * 유형 설명(`trait`·`sectors`)은 `TYPES` 의 고정 문구다 — 이 화면이 새로 지어내지 않는다.
  *
@@ -180,7 +220,7 @@ export function seasonReport(rows: SeasonRow[]): SeasonReport | null {
     members: rows.map((row, index) => {
       const key = seasonTypes[index];
       const type = key ? TYPES[key] : null;
-      const names = row.weeks.map((week) => (week.type ? TYPES[week.type].name : "관찰 중"));
+      const weeks = weekRows(row.weeks);
       return {
         key: row.key,
         name: row.name,
@@ -189,17 +229,11 @@ export function seasonReport(rows: SeasonRow[]): SeasonReport | null {
         fill: row.fill,
         scores: row.scores,
         scaleMax: 10,
-        title: type ? `지난 주차 성향 · ${type.name}` : "지난 주차 성향 · 관찰 중",
+        title: type ? `지난 시즌 성향 · ${type.name}` : "지난 시즌 성향 · 관찰 중",
         // 사람이 적어 둔 문장이 아니라 유형표의 고정 문구다.
         desc: type ? type.trait : "끝난 주차에 아직 유형이 정해질 만큼 기록이 쌓이지 않았어요.",
-        trend: `주차별로 보면 ${names.join(" → ")} 순서였어요.`,
-        weeks: row.weeks.map((week, i) => ({
-          label: week.label,
-          typeName: names[i],
-          note: `매수 ${week.count}건`,
-          ink: week.type ? TYPES[week.type].pal[3] : PENDING_INK,
-          bg: week.type ? rgba(TYPES[week.type].pal[1], 0.35) : rgba(PENDING_INK, 0.12),
-        })),
+        trend: trendOf(weeks),
+        weeks,
       };
     }),
   };

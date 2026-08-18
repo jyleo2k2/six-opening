@@ -19,7 +19,7 @@ import {
   weekCards,
   type FamilyRow,
 } from "./archive-profile-view";
-import { closedWeekRows, seasonReport, seasonTypeOf } from "./archive-season";
+import { closedWeekRows, seasonReport, seasonTypeOf, thisSeasonWeeks } from "./archive-season";
 
 // ── 성향: 원본은 season-cards 누적 카드 하나다 ──────────────────────────────
 const card = {
@@ -386,7 +386,7 @@ const rows = closedWeekRows(seasonMembers);
 assert.deepEqual(rows.map((r) => r.name), ["찬영아빠", "찬영엄마"]);
 // 이번 주가 빠졌으므로 아빠는 두 주만 남는다.
 assert.deepEqual(rows[0].weeks.map((w) => w.label), ["8/3 – 8/9", "8/10 – 8/16"]);
-// 오각형은 끝난 주 카드의 평균이다 — 누적 카드를 다시 쓰면 `지금까지` 탭과 같은 그림이 된다.
+// 오각형은 끝난 주 카드의 평균이다 — 누적 카드를 다시 쓰면 `이번 시즌` 탭과 같은 그림이 된다.
 assert.equal(rows[0].scores[0], 7);
 // 색·얼굴은 `familyMembers` 가 정한 것과 같아야 두 탭을 겹쳐 볼 수 있다.
 assert.deepEqual(rows.map((r) => r.color), familyMembers(seasonMembers).slice(0, 2).map((m) => m.color));
@@ -397,8 +397,8 @@ assert.ok(report);
 assert.equal(report.type, "sniper");
 assert.equal(report.title, "저격수 가족이었어요");
 assert.deepEqual(report.members.map((m) => m.title), [
-  "지난 주차 성향 · 저격수",
-  "지난 주차 성향 · 전략가",
+  "지난 시즌 성향 · 저격수",
+  "지난 시즌 성향 · 전략가",
 ]);
 assert.equal(report.members[0].trend, "주차별로 보면 저격수 → 저격수 순서였어요.");
 // 서버 `count` 는 매수 건수라 라벨도 `매수` 다 — 판 것까지 센 것처럼 보이면 안 된다.
@@ -416,6 +416,16 @@ assert.equal(
   }])),
   null,
 );
+
+// ── 이번 시즌: 지난 시즌(closedWeekRows)과 달리 진행 중인 이번 주도 포함한다 ─────
+const thisSeason = thisSeasonWeeks(seasonMembers[0]);
+assert.deepEqual(thisSeason.weeks.map((w) => w.label), ["8/3 – 8/9", "8/10 – 8/16", "8/17 – 8/23"]);
+assert.deepEqual(thisSeason.weeks.map((w) => w.typeName), ["저격수", "저격수", "탐험가"]);
+assert.equal(thisSeason.trend, "주차별로 보면 저격수 → 저격수 → 탐험가 순서였어요.");
+// 쌓인 주가 없는 사람은 빈 배열과 안내 문장을 낸다.
+const emptyThisSeason = thisSeasonWeeks({ id: 9, name: "새 가족", role: "child" });
+assert.deepEqual(emptyThisSeason.weeks, []);
+assert.equal(emptyThisSeason.trend, "아직 쌓인 주차가 없어요.");
 
 // ── 첫 화면 제목 옆 지갑: 가족 자산 합계 ────────────────────────────────────
 // `returnSummary` 와 같은 모양으로 편다 — 두 값이 같은 자리에 번갈아 들어간다.
