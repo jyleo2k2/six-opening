@@ -108,6 +108,7 @@ type Message = {
  */
 const CHAT_STORAGE_KEY = "kw_f10_chat_v1";
 const MAX_STORED_MESSAGES = 40;
+const SHEET_ENTER_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 function readStoredMessages(): Message[] {
   if (typeof window === "undefined") return [];
@@ -494,7 +495,7 @@ export function F10ChatbotDemo({
   // 닫힘→열림 전이에서만 슬라이드업을 재생한다. 이미 열린 채로 openChat()이 다시
   // 불려도(예: 메시지 전송마다) 시트가 또 오르내리지 않는다.
   const [isSheetEntering, setIsSheetEntering] = useState(false);
-  const [isHeaderAvatarVisible, setIsHeaderAvatarVisible] = useState(false);
+  const [isBackdropVisible, setIsBackdropVisible] = useState(false);
   const [explainAction, setExplainAction] =
     useState<ExplainActionPayload | null>(null);
   const [stockExploreAction, setStockExploreAction] =
@@ -656,15 +657,14 @@ export function F10ChatbotDemo({
   }, [isOpen, messages]);
 
   /**
-   * 시트를 화면 밖(`sheetDragY = PROTOTYPE_SHEET_HEIGHT`)에 마운트한 뒤 한 프레임을
-   * 쉬고 0으로 내린다. 같은 틱에 바로 0을 주면 브라우저가 시작값을 칠하기 전에
-   * 도착값을 받아 트랜지션이 생략된다 — 두 번째 rAF까지 미뤄야 첫 프레임이 실제로
-   * 그려진 뒤 값이 바뀐다.
+   * 시트를 화면 밖에 마운트한 뒤 첫 프레임에 스크림을 드러내고, 두 번째 프레임에
+   * 시트를 올린다. 같은 틱에 도착값을 주면 시작값을 칠하기 전에 트랜지션이 생략된다.
    */
   useEffect(() => {
     if (!isSheetEntering) return;
     let settleFrame = 0;
     const paintFrame = window.requestAnimationFrame(() => {
+      setIsBackdropVisible(true);
       settleFrame = window.requestAnimationFrame(() => {
         setSheetDragY(0);
       });
@@ -696,9 +696,12 @@ export function F10ChatbotDemo({
       );
     }
     if (!isOpen) {
-      setSheetDragY(PROTOTYPE_SHEET_HEIGHT);
-      setIsSheetEntering(true);
-      setIsHeaderAvatarVisible(false);
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      setSheetDragY(prefersReducedMotion ? 0 : PROTOTYPE_SHEET_HEIGHT);
+      setIsSheetEntering(!prefersReducedMotion);
+      setIsBackdropVisible(prefersReducedMotion);
     }
     setIsSheetDragging(false);
     sheetDragRef.current = null;
@@ -706,8 +709,8 @@ export function F10ChatbotDemo({
   }
 
   /**
-   * 시트가 다 올라온 순간(진입 트랜지션 종료)에만 헤더 아바타를 페이드인하고
-   * 진입 전용 느린 duration을 되돌린다. `isSheetEntering`을 트랜지션이 끝난 뒤에야
+   * 시트가 다 올라온 순간(진입 트랜지션 종료)에 진입 전용 duration을 되돌린다.
+   * `isSheetEntering`을 트랜지션이 끝난 뒤에야
    * 끄는 이유는, rAF 콜백에서 같은 틱에 꺼 버리면 `sheetDragY`가 0으로 바뀌는
    * 순간 className이 이미 평소 duration으로 넘어가 있어 느린 진입 모션이
    * 재생되지 않기 때문이다. 시트 안 다른 요소의 트랜지션이 버블링해 잘못
@@ -716,7 +719,6 @@ export function F10ChatbotDemo({
   function handleSheetTransitionEnd(event: ReactTransitionEvent<HTMLElement>) {
     if (event.target !== event.currentTarget) return;
     if (event.propertyName !== "transform") return;
-    setIsHeaderAvatarVisible(true);
     setIsSheetEntering(false);
   }
 
@@ -834,7 +836,7 @@ export function F10ChatbotDemo({
     setSheetDragY(0);
     setIsSheetDragging(false);
     setIsSheetEntering(false);
-    setIsHeaderAvatarVisible(false);
+    setIsBackdropVisible(false);
     sheetDragRef.current = null;
   }
 
@@ -1447,7 +1449,9 @@ export function F10ChatbotDemo({
         >
           <button
             aria-label={COPY.close}
-            className="absolute inset-0 z-0 bg-navy/20 backdrop-blur-[1px]"
+            className={`absolute inset-0 z-0 bg-navy/20 backdrop-blur-[1px] transition-opacity duration-200 motion-reduce:transition-none ${
+              isBackdropVisible ? "opacity-100" : "opacity-0"
+            }`}
             onClick={closeChat}
             type="button"
           />
@@ -1460,8 +1464,8 @@ export function F10ChatbotDemo({
                 ? ""
                 : isSheetEntering
                   ? // 슬라이드업 진입만 느리게 보여준다. 드래그를 놓아 원위치로
-                    // 스냅할 때까지 700ms를 쓰면 손짓에 비해 굼뜨게 느껴진다.
-                    "transition-transform duration-700 ease-out motion-reduce:transition-none"
+                    // 스냅할 때까지 1초를 쓰면 손짓에 비해 굼뜨게 느껴진다.
+                    "transition-transform duration-1000 ease-out motion-reduce:transition-none"
                   : "transition-transform duration-200 ease-out motion-reduce:transition-none"
             }`}
             onTransitionEnd={handleSheetTransitionEnd}
@@ -1471,6 +1475,9 @@ export function F10ChatbotDemo({
               height: PROTOTYPE_SHEET_HEIGHT,
               transform: `scale(${prototypeScreen.scale}) translateY(${sheetDragY}px)`,
               transformOrigin: "bottom left",
+              transitionTimingFunction: isSheetEntering
+                ? SHEET_ENTER_EASING
+                : undefined,
               willChange: "transform",
             }}
           >
@@ -1508,16 +1515,11 @@ export function F10ChatbotDemo({
                     {COPY.enableProactive}
                   </button>
                 )}
-                {/*
-                  시트가 다 올라온 뒤에만 페이드인한다(`isHeaderAvatarVisible`).
-                  플로팅 버튼은 스크림에 이미 즉시 가려지므로 별도 퇴장 모션은 두지 않는다.
-                */}
+                {/* 아바타는 시트와 함께 이동해 헤더가 뒤늦게 튀어나오지 않게 한다. */}
                 <img
                   alt=""
                   aria-hidden="true"
-                  className={`size-8 shrink-0 rounded-full object-cover transition-opacity duration-200 ${
-                    isHeaderAvatarVisible ? "opacity-100" : "opacity-0"
-                  }`}
+                  className="size-8 shrink-0 rounded-full object-cover"
                   height={32}
                   src={floatingAvatar.src}
                   width={32}
