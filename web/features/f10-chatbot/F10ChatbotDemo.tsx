@@ -85,8 +85,8 @@ type F10ChatbotDemoProps = {
   /** 검증된 화면 버튼을 사용자가 눌렀을 때만 호스트가 실제 React 화면을 연다. */
   onUiAction?: (action: ChatUiAction) => void;
   /**
-   * `PhoneFrame` 안 `#kw-screen`의 실제 client rect. 호스트가 실측값을 넘기지 않으면
-   * 단독 데모에서만 창 크기로 근사한다.
+   * `PhoneFrame` 내부 450×920 좌표의 화면 rect. 호스트가 값을 넘기지 않으면 단독
+   * 데모에서만 창 크기로 근사한다.
    */
   screenRect?: PrototypeScreenRect | null;
 };
@@ -465,7 +465,7 @@ export function F10ChatbotDemo({
   const [isOpen, setIsOpen] = useState(false);
   const [measuredScreen, setMeasuredScreen] =
     useState<PrototypeScreenRect | null>(null);
-  // 호스트가 실측값을 주면 그것만 쓴다. 두 값을 섞으면 프레임과 어긋나는 원래 문제로 돌아간다.
+  // 호스트가 프레임 내부 좌표를 주면 그것만 쓴다. 두 좌표계를 섞으면 프레임과 어긋난다.
   const hostMeasures = screenRect !== undefined;
   const prototypeScreen = hostMeasures ? screenRect : measuredScreen;
   const [sheetDragY, setSheetDragY] = useState(0);
@@ -1324,7 +1324,7 @@ export function F10ChatbotDemo({
       {signal && !isChatCollapsed && (signal !== "buyHesitation" || isBuyHesitationBubbleVisible) && (
         <aside
           aria-live="polite"
-          className="fixed z-20"
+          className="absolute z-20"
           style={{
             left: resolvedFloatingChatPosition.x + (bubbleOpensLeft ? 24 : -24),
             top: resolvedFloatingChatPosition.y - 36,
@@ -1366,7 +1366,7 @@ export function F10ChatbotDemo({
         <div
           aria-hidden="true"
           // 버튼과 같은 z-index 이고 DOM 에서 먼저 그려진다 — 끌고 있는 버튼이 항상 위에 온다.
-          className="pointer-events-none fixed z-10 grid place-items-center rounded-full border-[1.5px] text-white transition-all duration-150"
+          className="pointer-events-none absolute z-10 grid place-items-center rounded-full border-[1.5px] text-white transition-all duration-150"
           style={{
             left: dismissTarget.x,
             top: dismissTarget.y,
@@ -1407,7 +1407,7 @@ export function F10ChatbotDemo({
 
       <button
         aria-label={isChatCollapsed ? "키웅이 챗봇 다시 보이기" : COPY.openChat}
-        className={`fixed z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg transition-[transform,opacity] duration-150 ${isChatCollapsed ? "cursor-pointer opacity-80" : "cursor-grab active:cursor-grabbing"}`}
+        className={`absolute z-10 grid size-14 touch-none place-items-center overflow-hidden rounded-full border border-magenta/30 bg-magenta p-0 shadow-lg transition-[transform,opacity] duration-150 ${isChatCollapsed ? "cursor-pointer opacity-80" : "cursor-grab active:cursor-grabbing"}`}
         onClick={handleFloatingChatClick}
         onPointerCancel={isChatCollapsed ? undefined : finishFloatingChatDrag}
         onPointerDown={isChatCollapsed ? undefined : handleFloatingChatPointerDown}
@@ -1436,7 +1436,7 @@ export function F10ChatbotDemo({
 
       {isOpen && prototypeScreen && (
         <div
-          className="pointer-events-auto fixed z-30 overflow-hidden"
+          className="pointer-events-auto absolute z-30 overflow-hidden"
           style={{
             left: prototypeScreen.left,
             top: prototypeScreen.top,
