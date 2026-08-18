@@ -60,7 +60,7 @@ const WALLET_VALUE = styleFromCss(
 );
 /** 이 숫자가 언제 것인지. 계좌를 아직 못 읽었으면 적을 시각이 없어 줄째로 빠진다. */
 const WALLET_BASIS = styleFromCss(
-  "font-size:11.5px;font-weight:500;color:#A9AEC4;margin-top:9px;white-space:nowrap",
+  "font-size:11.5px;font-weight:500;color:#A9AEC4;margin-top:9px;white-space:nowrap;text-align:right",
 );
 const MENU_BTN = styleFromCss(
   "flex:none;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer",
