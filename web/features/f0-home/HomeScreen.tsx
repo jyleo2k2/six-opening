@@ -215,6 +215,47 @@ const SHEET_LIST = styleFromCss(
 /** 목록 아래 빈 자리. 여기를 눌러도 시트가 닫힌다 — 배경을 누른 것과 같은 손짓이다. */
 const SHEET_REST = styleFromCss("flex:1;min-height:24px");
 
+/**
+ * 홈 진입 배너. **화면 맨 아래에 붙는다.** 가로는 화면 폭에 꽉 차고 세로는 그림 비율
+ * (390:408)이 정한다 — 아래 손잡이 줄까지 더해 화면 절반쯤이 된다. 높이를 px 로 못
+ * 박지 않는다: 그림을 갈아 끼우면 그 값이 조용히 틀려진다.
+ *
+ * 뒤는 어둡게 깔아 배너를 도드라지게 한다.
+ */
+const BANNER_SCRIM = styleFromCss(
+  "position:absolute;inset:0;z-index:20;background:rgba(12,9,26,0.62);" +
+    "display:flex;align-items:flex-end;justify-content:center",
+);
+const BANNER_SHEET = styleFromCss("width:100%;line-height:0");
+/**
+ * 그림의 **위쪽 두 모서리는 이미 잘려 투명하다**(`home-banner-first-step.png`). 원본에는
+ * 그 자리에 흰 아크가 남아 있어 짙은 딤 위에 흰 뿔로 튀었다 — CSS `border-radius` 로
+ * 덮지 않는 이유는, 그림이 폭에 맞춰 늘어나므로 고정 radius 가 원본 아크와 어긋나 흰
+ * 실선이 남기 때문이다. 자른 것은 자산 쪽이 원본이다.
+ *
+ * **파일 이름에 그림 내용을 담는다.** `public/` 은 `max-age=86400` 으로 나가므로 같은
+ * 이름으로 그림만 갈아 끼우면 하루 동안 브라우저가 옛 그림을 계속 보여 준다 — 바꾼
+ * 사람만 새 그림을 보고 나머지는 그대로인 채로 리뷰가 오간다. 그림을 바꿀 때는 이름도
+ * 함께 바꾼다.
+ */
+const BANNER_IMG = styleFromCss("display:block;width:100%;height:auto");
+/**
+ * 손잡이 줄은 그림이 아니라 **여기서 그린다.** 시안의 흰 띠는 글자가 박혀 있어 누를 수
+ * 있는 자리를 그림 비율로 어림해야 했고, 문구를 고치려면 그림을 다시 받아야 했다.
+ */
+const BANNER_ACTIONS = styleFromCss(
+  "display:flex;align-items:stretch;background:#fff;line-height:normal;padding-bottom:10px",
+);
+const BANNER_ACTION_BTN = styleFromCss(
+  "flex:1;display:flex;align-items:center;justify-content:center;height:48px;" +
+    "background:transparent;border:none;padding:0;margin:0;cursor:pointer;" +
+    "font-family:inherit;font-size:14.5px;font-weight:700;color:#8E93A8",
+);
+/** 오른쪽 `닫기` 는 기본 손짓이라 본문 색으로 세운다 — 둘이 같은 회색이면 무엇이 기본인지 안 읽힌다. */
+const BANNER_CLOSE_BTN = styleFromCss("color:#01185A");
+/** 두 손잡이를 가르는 선. 흰 띠 안에서만 서므로 위아래로 여백을 남긴다. */
+const BANNER_DIVIDER = styleFromCss("flex:none;width:1px;margin:12px 0;background:#ECECF3");
+
 const pctStyle = (holding: HomeHolding, size: number) =>
   styleFromCss(
     `font-size:${size}px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;color:${trendColor(holding.trend)}`,
@@ -264,12 +305,21 @@ export function HomeScreen({
   onLeave,
   onStartTutorial,
   embedded = false,
+  bannerHiddenForSession = false,
+  onHideBannerForSession,
 }: {
   onLeave: (path: string) => void;
   /** 튜토리얼 `?`. 오버레이는 `ConnectedPrototype` 이 갖는다 — 화면 하나에 매이면 안 된다. */
   onStartTutorial?: () => void;
   /** ConnectedPrototype의 하나뿐인 PhoneFrame 안에 그릴 때 true. */
   embedded?: boolean;
+  /**
+   * `오늘 그만 보기` 로 배너를 껐는지. 홈 화면은 오갈 때마다 다시 마운트돼 자기 상태를
+   * 잃으므로, 로그인 세션이 끝날 때까지 유지해야 하는 이 값은 `ConnectedPrototype` 이
+   * 들고 있다가 물려준다.
+   */
+  bannerHiddenForSession?: boolean;
+  onHideBannerForSession?: () => void;
 }) {
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
@@ -277,6 +327,10 @@ export function HomeScreen({
   const [walletOpen, setWalletOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [popped, setPopped] = useState(false);
+  // 이번에 들어와서 닫았는지. 홈을 나갔다 다시 들어오면 새로 마운트되며 초기화된다 —
+  // "다시 들어오면 배너가 다시 뜬다"는 그 초기화 하나로 이미 이뤄진다.
+  const [bannerClosed, setBannerClosed] = useState(false);
+  const showBanner = !bannerHiddenForSession && !bannerClosed;
   const sheet = useSheetDrag(SHEET_HEIGHT);
   const scale = usePhoneScreenRect()?.scale ?? 1;
   // 카드를 위로 밀기 시작한 자리. 손을 뗄 때 얼마나 올렸는지로 시트를 열지 정한다.
@@ -562,6 +616,38 @@ export function HomeScreen({
         )}
 
         <BottomNav active="home" onLeave={onLeave} />
+
+        {showBanner && (
+          <div style={BANNER_SCRIM}>
+            <div style={BANNER_SHEET}>
+              <img
+                alt="우리 아이 투자 첫걸음 — 참가신청 7월 20일~8월 28일, 대회기간 8월 3일~8월 28일"
+                src="/ui/assets/home-banner-first-step.png"
+                style={BANNER_IMG}
+              />
+              <div style={BANNER_ACTIONS}>
+                <button
+                  onClick={() => {
+                    onHideBannerForSession?.();
+                    setBannerClosed(true);
+                  }}
+                  style={BANNER_ACTION_BTN}
+                  type="button"
+                >
+                  오늘 그만 보기
+                </button>
+                <div style={BANNER_DIVIDER} />
+                <button
+                  onClick={() => setBannerClosed(true)}
+                  style={{ ...BANNER_ACTION_BTN, ...BANNER_CLOSE_BTN }}
+                  type="button"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ScreenFrame>
   );
