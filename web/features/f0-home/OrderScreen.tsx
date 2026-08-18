@@ -1909,7 +1909,6 @@ export function OrderScreen({
           { label: "언제까지", value: choiceOf(PLANS, buyRec.planCode)?.label ?? "기록 없음" },
         ]
           .concat(buyRec.planTargetPrice ? [{ label: "목표 가격", value: won(buyRec.planTargetPrice) }] : [])
-          .concat(buyRec.memo ? [{ label: "그때 한 말", value: buyRec.memo }] : [])
       : [];
 
     const step2 = (
@@ -1941,7 +1940,8 @@ export function OrderScreen({
             <span style={{ fontSize: 26, fontWeight: 800, color: "#F5327F", lineHeight: 0.85 }}>“</span>
             <div style={{ flex: 1, fontSize: 20, fontWeight: 800, color: "#01185A", lineHeight: 1.5, letterSpacing: "-0.01em", whiteSpace: "pre-line" }}>
               {buyRec
-                ? `${[choiceOf(REASONS, buyRec.reasonCode)?.short, choiceOf(PLANS, buyRec.planCode)?.short]
+                ? buyRec.memo ||
+                  `${[choiceOf(REASONS, buyRec.reasonCode)?.short, choiceOf(PLANS, buyRec.planCode)?.short]
                     .filter(Boolean)
                     .join(",\n")} 샀어요.`
                 : "기록이 없어요."}
