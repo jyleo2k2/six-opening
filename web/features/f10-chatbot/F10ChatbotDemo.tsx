@@ -1558,10 +1558,16 @@ export function F10ChatbotDemo({
                 보이지 않는다. 끄지도 않은 기능의 스위치가 늘 떠 있을 이유가 없다.
               */}
               {/*
-                아래 여백은 두지 않는다. 구분선이 `초기화` 버튼의 아래 패딩(`py-2`)만큼
-                떨어져 헤더가 실제 내용보다 두꺼워 보이고, 그만큼 대화 목록이 눌린다.
+                글씨는 **구분선 위 빈 자리의 가운데**에 놓는다. 버튼의 `py-2` 만으로는 위쪽에
+                드래그 핸들 줄(`h-7` 안의 6 짜리 막대)이 남긴 11 이 더 얹혀, 글씨가 위로는
+                19 아래로는 8 떨어진 채 선에 붙어 보인다.
+
+                그래서 `-mt-1.5` 로 줄을 6 올리고 `pb-1.5` 로 선을 6 내려 제자리에 돌려놓는다.
+                두 값이 상쇄되므로 헤더 높이와 선 위치는 그대로고 글씨만 올라간다 — 위 13,
+                아래 14 로 눈에 가운데다. 아래 여백을 그냥 두면 선이 버튼 패딩만큼 내려앉아
+                헤더가 내용보다 두꺼워 보이고 그만큼 대화 목록이 눌린다.
               */}
-              <div className="flex items-center justify-end gap-1 border-b border-gray/40 px-5">
+              <div className="-mt-1.5 flex items-center justify-end gap-1 border-b border-gray/40 px-5 pb-1.5">
                 {isProactiveOff && (
                   <button
                     className="mr-auto rounded-lg px-3 py-2 text-sm font-semibold text-navy"
