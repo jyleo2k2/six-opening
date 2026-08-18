@@ -30,6 +30,7 @@ import {
 } from "./lib/archive-profile-view";
 import { useArchiveData } from "./lib/use-archive-data";
 import { lastSeasonRows, seasonReport, thisSeasonWeeks } from "./lib/archive-season";
+import { accountReadAt } from "./lib/use-account";
 import { useRailDrag } from "./lib/use-rail-drag";
 import { useSheetDrag } from "./lib/use-sheet-drag";
 import { useUniverseLive } from "./lib/use-universe";
@@ -424,11 +425,14 @@ export function ArchiveScreen({
   const famShown = family.filter((f) => f.has && (famPick === "all" || f.key === famPick));
   const lanes = runners(data.family?.members ?? []);
   const me = wallet?.acc[account];
+  // `결제기준` 은 지금 이 렌더 시각이 아니라 계좌를 서버에서 읽은 시각이어야 한다 —
+  // 홈 지갑의 `결제기준` 과 같은 이유(`accountReadAt` 주석)로, 상세를 열 때마다
+  // 시각만 새로 찍히면 잔액은 그대로인데 방금 갱신된 것처럼 보인다.
   const summary = returnSummary(
     me?.cash ?? 0,
     me?.holdings ?? [],
     prices,
-    new Date(),
+    new Date(accountReadAt() ?? Date.now()),
     me?.reservedCash ?? 0,
   );
   /**
