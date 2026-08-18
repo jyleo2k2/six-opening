@@ -55,6 +55,17 @@ supabase migration list # local·remote 양쪽에 같은 목록이 보이는지 
 PR 을 병합해 코드가 배포된 것을 확인한 다음 `db push` 한다. `stocks.market` 컬럼 추가만 먼저
 떼어 올리는 것은 안전하다 — 읽는 코드가 아직 없다.
 
+**적용 완료 — 2026-08-18, 라이브(hero-kiwoom).** 대시보드 SQL Editor 로 직접 올렸다(로컬에
+`supabase` CLI 도 링크도 없었다). 위 순서 권고와 달리 **코드보다 먼저 적용했다** — 그렇게
+결정했다. `stocks.market` 은 KOSDAQ 3종(에스엠·JYP·와이지)만 채워졌고 나머지 48종은 기본값
+`KOSPI` 다. `reserve_order` 가 262,385원(고치기 전 화면에 떠 있던 값)을 실제로 거절하는 것까지
+확인했다.
+
+**이 건은 `db push` 로 올린 것이 아니라 라이브 마이그레이션 이력에 `20260818064500` 이 남지
+않는다.** 다음에 누가 `db push` 를 하면 이미 들어간 스키마를 다시 올리려다 깨진다. 그 전에
+`supabase migration list` 로 대조하고 어긋나면 `supabase migration repair --status applied
+20260818064500` 로 **이력만** 맞춘다 — 스키마는 이미 있으므로 다시 적용하면 안 된다.
+
 파일 이름의 타임스탬프는 **라이브에 기록된 버전과 같아야 한다.** 다르면 다음 `db push` 가 이미
 적용된 마이그레이션을 다시 올리려다 `already exists` 로 깨진다. 적용 후 `migration list` 로
 확인하고 어긋나면 파일 이름을 기록된 버전으로 고친다.
