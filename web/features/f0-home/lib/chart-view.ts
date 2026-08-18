@@ -2,9 +2,14 @@
  * 차트 화면(`ChartScreen`)이 그리는 선·캔들 차트의 기하.
  *
  * 시안(서비스 개요 HTML)의 "차트 화면" 계산을 그대로 옮겼다. 시안은 축을 라이브러리에
- * 맡기지 않고 **직접 그린다**: 세로 축선도 시간축도 없고, 가로 눈금선 다섯 줄 위에
- * 가격 글자를 오른쪽 여백(`left:285px`)에 HTML 로 얹는다. 그래서 여기서 돌려주는 것은
- * 픽셀 좌표뿐이고 색·글꼴은 그리는 쪽(`ChartScreen`)이 정한다.
+ * 맡기지 않고 **직접 그린다**: 세로 축선 없이 가로 눈금선 다섯 줄만 긋고, 가격 글자를
+ * 오른쪽 여백(`left:285px`)에 HTML 로 얹는다. 그래서 여기서 돌려주는 것은 픽셀 좌표뿐이고
+ * 색·글꼴은 그리는 쪽(`ChartScreen`)이 정한다.
+ *
+ * **시간축은 시안에 없던 것을 더했다.** 확대·축소와 좌우 이동이 생기면서 지금 보고 있는
+ * 구간이 언제인지 화면에서 읽을 길이 필요해졌다. 어느 봉에 어떤 시각 글자를 놓을지는
+ * `chart-time-axis.ts` 가 정하고 여기서는 x 배치식만 넘긴다 — 두 파일이 다른 식을 쓰면
+ * 라벨이 가리키는 봉이 어긋난다.
  *
  * 시안과 갈리는 곳은 **데이터의 출처** 하나다. 시안은 종목코드를 시드로 만든 가짜 시세를
  * 그리지만(디자인 문서라 시세가 없다) 여기서는 `GET /api/quote/{symbol}/chart` 가 준
@@ -22,6 +27,7 @@
 import type { PrototypeChartPeriod, PrototypeChartType } from "../../f2-trade/chart-data";
 import { buildTradeMarkers, type ChartTrade } from "../../../shared/engine/trade-markers";
 import type { PinRole } from "./chart-trade-legend";
+import { buildChartTimeAxis, type ChartTimeTick } from "./chart-time-axis";
 import { defaultChartWindow, resolveChartWindow, type ChartWindow } from "./chart-window";
 import { PIN_COLORS } from "./detail-chart";
 import { won } from "./portfolio-view";
@@ -79,6 +85,11 @@ export type ChartView = {
   grid: number[];
   /** 오른쪽 가격 글자. 현재가 태그와 겹치는 줄은 선만 남기고 글자를 뺀다. */
   axis: { y: number; text: string }[];
+  /**
+   * 플롯 아래 시각 글자. 단위(분 15분·일 1개월·주 3개월이 기준)와 자리는
+   * `chart-time-axis.ts` 가 정하고 배율에 따라 배수·약수로 오르내린다.
+   */
+  timeAxis: ChartTimeTick[];
   /** 기간 첫 값에 깔리는 점선. "여기서 시작했다"를 읽는 기준선이다. */
   baseY: number;
   /** 선차트일 때만 채운다. */
@@ -109,6 +120,11 @@ export const NOW_LEFT = 281;
 
 const TOP = 26;
 const BOT = 28;
+/**
+ * 시간축 글자의 y. 플롯 바닥(`PLOT_H - BOT`) 아래로 남는 여백에 앉는다 — 봉을 가리지 않고
+ * SVG 높이(`PLOT_H`) 안에도 들어간다.
+ */
+export const TIME_AXIS_TOP = PLOT_H - BOT + 6;
 /** 위아래로 남기는 여유. 선이 눈금 맨 끝에 닿지 않게 한다. */
 const PAD_RATIO = 0.08;
 /** 눈금 칸 수. 선은 다섯 줄(`g = 0..4`)이다. */
@@ -267,6 +283,14 @@ export function buildChartView(options: {
   return {
     grid,
     axis,
+    timeAxis: buildChartTimeAxis({
+      times: bars.map((bar) => bar.time),
+      // 창의 첫 봉이 경계를 넘겼는지는 그 앞 봉을 봐야 안다. 맨 앞이면 알 길이 없다.
+      previousTime: points[start - 1]?.time ?? null,
+      period,
+      x,
+      plotWidth: PLOT_W,
+    }),
     baseY: y(candle ? bars[0].open : bars[0].close),
     linePoints: candle ? "" : bars.map((bar, i) => `${x(i).toFixed(1)},${y(bar.close).toFixed(1)}`).join(" "),
     candles,

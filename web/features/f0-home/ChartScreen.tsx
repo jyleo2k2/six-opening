@@ -17,6 +17,7 @@ import {
   PLOT_H,
   PLOT_W,
   SVG_W,
+  TIME_AXIS_TOP,
   type ChartViewTrade,
 } from "./lib/chart-view";
 import { defaultChartWindow, type ChartWindow } from "./lib/chart-window";
@@ -98,6 +99,14 @@ const CHART_WRAP = styleFromCss(
  */
 const AXIS_LABEL = styleFromCss(
   "position:absolute;font-size:10px;font-weight:500;color:#9096AE;white-space:nowrap;" +
+    "font-variant-numeric:tabular-nums;pointer-events:none",
+);
+/**
+ * 플롯 아래 시각 글자. 가격 글자와 같은 색·크기이되 봉 위에 가운데로 선다 — 어느 봉의
+ * 시각인지가 자리로 읽혀야 해서 왼쪽 정렬로 두지 않는다.
+ */
+const TIME_LABEL = styleFromCss(
+  "position:absolute;transform:translateX(-50%);font-size:10px;font-weight:500;color:#9096AE;white-space:nowrap;" +
     "font-variant-numeric:tabular-nums;pointer-events:none",
 );
 const NOW_TAG = styleFromCss(
@@ -420,9 +429,12 @@ export function ChartScreen({
             </div>
           )}
           {/*
-            시안의 차트. 세로 축선도 시간축도 없다 — 가로 눈금 다섯 줄만 플롯 폭(278)까지
-            긋고, 가격은 그 오른쪽 여백에 HTML 글자로 얹는다. 값을 어느 눈금과 맞춰 읽을지는
-            현재가 태그와 최고·최저 이름표가 대신 짚어 준다.
+            시안의 차트. 세로 축선은 없다 — 가로 눈금 다섯 줄만 플롯 폭(278)까지 긋고, 가격은
+            그 오른쪽 여백에 HTML 글자로 얹는다. 값을 어느 눈금과 맞춰 읽을지는 현재가 태그와
+            최고·최저 이름표가 대신 짚어 준다.
+
+            시간은 플롯 아래 글자로만 적는다(`timeAxis`). 세로 눈금선은 긋지 않는다 — 봉과
+            핀이 이미 세로로 서 있어 선을 더하면 어느 것이 값이고 어느 것이 눈금인지 갈린다.
           */}
           <div ref={gesture.ref} style={CHART_WRAP}>
             <svg
@@ -498,6 +510,11 @@ export function ChartScreen({
             </svg>
             {chart?.axis.map((tick) => (
               <div key={tick.y} style={{ ...AXIS_LABEL, left: AXIS_LEFT, top: tick.y - 7 }}>
+                {tick.text}
+              </div>
+            ))}
+            {chart?.timeAxis.map((tick) => (
+              <div key={tick.x} style={{ ...TIME_LABEL, left: tick.x, top: TIME_AXIS_TOP }}>
                 {tick.text}
               </div>
             ))}
