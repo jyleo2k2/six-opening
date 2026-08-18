@@ -48,7 +48,7 @@ test("an unknown or empty QUOTE_PROVIDER still reaches every provider", () => {
   withEnv({ QUOTE_PROVIDER: "tos", QUOTE_PROVIDER_FALLBACK: "" }, () => {
     assert.deepEqual(
       providerOrder().map((provider) => provider.id),
-      ["kiwoom", "toss"],
+      ["toss", "kiwoom"],
     );
   });
 });

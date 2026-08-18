@@ -20,7 +20,7 @@ const PROVIDERS: Record<ProviderId, QuoteProvider> = {
   toss: tossProvider,
 };
 
-const DEFAULT_ORDER: ProviderId[] = ["kiwoom", "toss"];
+const DEFAULT_ORDER: ProviderId[] = ["toss", "kiwoom"];
 
 /** 제공자가 하나도 살아 있지 않을 때 쓰는 값. 키움 기준으로 가장 보수적으로 잡는다. */
 const CONSERVATIVE_LIMITS: ProviderLimits = kiwoomProvider.limits;
