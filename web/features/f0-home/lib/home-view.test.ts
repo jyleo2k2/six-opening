@@ -163,9 +163,10 @@ assert.deepEqual(empty.holdings, []);
 assert.deepEqual(empty.topHoldings, []);
 assert.equal(empty.goalCount, 0);
 assert.equal(empty.rateText, "+0.0%");
-// 본전에는 도형이 없다 — `▲ 0원` 은 오르지 않았는데 오른 것처럼 읽힌다.
-assert.equal(empty.profitText, "0원");
-// 오르지도 내리지도 않았으면 회색이다 — `+0.0%` 를 핑크로 적으면 숫자와 색이 다른 말을 한다.
+// 보합은 세모가 아니라 대시다 — `▲ 0원` 은 오르지 않았는데 오른 것처럼 읽힌다.
+assert.equal(empty.profitText, "— 0원");
+// 오르지도 내리지도 않았으면 회색이다 — 대시도 줄 색을 그대로 받으므로 이 한 값이 곧 대시 색이다.
+// `+0.0%` 를 핑크로 적으면 숫자와 색이 다른 말을 한다.
 assert.equal(empty.rateColor, "#8E93A8");
 assert.equal(empty.moodImg, MOOD_FLAT_IMG);
 

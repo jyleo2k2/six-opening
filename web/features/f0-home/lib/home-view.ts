@@ -377,9 +377,12 @@ export function homeView(
     // 같은 뜻을 두 기호로 말하지 않는다. 도형은 글자이므로 줄에 걸린 `rateColor` 를 그대로
     // 물려받는다. 따로 칠하면 숫자와 도형의 색이 갈린다.
     //
-    // 본전에는 아무 것도 안 붙인다. `▲ 0원` 은 오르지 않았는데 오른 것처럼 읽힌다.
+    // 보합에는 `—` 를 둔다. 자리를 비우면 오르내린 날과 줄 길이가 달라져 숫자가 옆으로
+    // 움직이고, `▲` 를 쓰면 오르지 않았는데 오른 것처럼 읽힌다. 대시는 하이픈(`-`)이
+    // 아니라 em 대시다 — 하이픈은 세모 옆에서 눈에 안 띌 만큼 짧다. 색은 이 자리에서
+    // 칠하지 않는다: 보합이면 `rateColor` 가 이미 회색(`#8E93A8`)이고 줄 전체가 그 색이다.
     profitText:
-      (profit > 0 ? "▲ " : profit < 0 ? "▼ " : "") + won(Math.abs(profit)),
+      (profit > 0 ? "▲ " : profit < 0 ? "▼ " : "— ") + won(Math.abs(profit)),
     rateColor: trendColor(trend),
     moodImg: art.src,
     moodScale: art.scale,
