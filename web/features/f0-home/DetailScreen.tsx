@@ -21,7 +21,8 @@ import { validNewsItem, type NewsItem } from "./lib/stock-news";
 import { recordTabView } from "./lib/tab-views";
 import type { TutorialStage } from "./lib/tutorial-steps";
 import { useStockLive } from "./lib/use-universe";
-import { canTrade, useWallet, type WalletAccountId } from "./lib/use-wallet";
+import { useTradeRestriction } from "./lib/use-trade-restriction";
+import { useWallet, type WalletAccountId } from "./lib/use-wallet";
 import { useWatchlist } from "./lib/use-watchlist";
 
 const UP = "#E8322E";
@@ -154,6 +155,7 @@ export function DetailScreen({
   const { wallet } = useWallet();
   const { codes: watchCodes, toggle: watchToggle } = useWatchlist();
   const live = useStockLive(code);
+  const restriction = useTradeRestriction();
   const [view, setView] = useState<"detail" | "chart" | "news">("detail");
   useEffect(() => {
     onStage?.(view);
@@ -248,7 +250,9 @@ export function DetailScreen({
   if (!wallet || !live.stock) return <ScreenFrame embedded={embedded} />;
 
   const stock = live.stock;
-  const locked = !canTrade(account);
+  // 학교 시간 거래 제한. 이 화면의 유일한 주문 진입로가 매수라 매수 쪽만 본다.
+  // 부모 계정에서는 `applies` 가 거짓이라 늘 열려 있다.
+  const locked = Boolean(restriction.state?.applies && restriction.state.blocked.buy);
   const changeUp = live.change >= 0;
   const priceText = `${live.price.toLocaleString("ko-KR")}원`;
   // 원본은 **얼마 올랐는지(원)가 먼저**, 몇 %인지는 세로선 뒤에 작게 붙는다.

@@ -8,8 +8,11 @@ import { PROTOTYPE_PHONE } from "./lib/phone-frame";
 import { shouldOpenSheetByPull } from "./lib/sheet-drag";
 import { accountReadAt, useAccount } from "./lib/use-account";
 import { useSheetDrag } from "./lib/use-sheet-drag";
+import { restrictionSummary } from "./lib/trade-restriction";
+import { useTradeRestriction } from "./lib/use-trade-restriction";
 import { useUniverseLive } from "./lib/use-universe";
 import { ScreenFrame, usePhoneScreenRect } from "./PhoneFrame";
+import { TradeRestrictionSheet } from "./TradeRestrictionSheet";
 
 /**
  * 홈 화면. `ui-src/screens/home.html` 을 그대로 옮겨 왔다.
@@ -80,6 +83,8 @@ const MENU = styleFromCss(
 const MENU_ITEM = styleFromCss(
   "display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;color:#01185A;cursor:pointer",
 );
+/** 메뉴 줄 밑에 붙는 지금 설정. `꺼짐` 인지 몇 시부터인지를 열어 보지 않고 안다. */
+const MENU_NOTE = styleFromCss("font-size:11.5px;font-weight:600;color:#8E94AE;margin-top:3px");
 const MENU_LOGOUT = styleFromCss(
   "display:flex;align-items:center;gap:10px;border-radius:14px;padding:13px 14px;font-size:15px;font-weight:700;" +
     "color:#D5327A;cursor:pointer;border-top:1px solid #F1F1F7",
@@ -333,6 +338,9 @@ export function HomeScreen({
   const user = useAccount();
   const { quotes, universe } = useUniverseLive();
   const [menuOpen, setMenuOpen] = useState(false);
+  // 학교 시간 거래 제한. 부모 계정에서만 메뉴에 뜨고, 값은 서버가 원본이다.
+  const restriction = useTradeRestriction();
+  const [restrictionOpen, setRestrictionOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [popped, setPopped] = useState(false);
@@ -495,6 +503,22 @@ export function HomeScreen({
               >
                 알림
               </div>
+              {/*
+                제한을 정하는 자리는 **부모 계정에만** 있다. 아이가 자기 제한을 열어 볼 수는
+                있어도 고칠 수는 없으므로(서버가 403), 고치지 못하는 화면을 열어 주지 않는다.
+              */}
+              {restriction.state?.editable && (
+                <div
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setRestrictionOpen(true);
+                  }}
+                  style={{ ...MENU_ITEM, display: "block" }}
+                >
+                  학교 시간 거래 제한
+                  <div style={MENU_NOTE}>{restrictionSummary(restriction.state.rule)}</div>
+                </div>
+              )}
               <div onClick={logout} style={MENU_LOGOUT}>
                 로그아웃
               </div>
@@ -622,6 +646,15 @@ export function HomeScreen({
               <div onClick={sheet.closeSheet} style={SHEET_REST} />
             </div>
           </>
+        )}
+
+        {restrictionOpen && restriction.state && (
+          <TradeRestrictionSheet
+            onClose={() => setRestrictionOpen(false)}
+            onSave={restriction.save}
+            rule={restriction.state.rule}
+            saving={restriction.saving}
+          />
         )}
 
         <BottomNav active="home" onLeave={onLeave} />

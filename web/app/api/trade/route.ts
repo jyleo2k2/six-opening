@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { callRpc, sessionUserId } from "../supabase";
+import { blockedBySchoolHours } from "../trade-restriction/guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -101,6 +102,14 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "주문 정보가 올바르지 않습니다.", reason: "invalid_amount" }, { status: 400 });
   }
   const reason = typeof payload.reason === "string" ? payload.reason : null;
+
+  // 학교 시간 거래 제한(부모 설정). 체결 전에 본다 — `apply_trade` 는 되돌릴 수 없다.
+  if (await blockedBySchoolHours(userId, side)) {
+    return Response.json(
+      { error: "지금은 보호자가 정한 거래 제한 시간이에요.", reason: "school_hours" },
+      { status: 403 },
+    );
+  }
 
   try {
     const result = await callRpc<TradeResult>("apply_trade", {
