@@ -1557,7 +1557,11 @@ export function F10ChatbotDemo({
                 대화창을 여는 사람은 이미 도움을 원하는 상태라 맥락이 맞다. 켜져 있을 때는
                 보이지 않는다. 끄지도 않은 기능의 스위치가 늘 떠 있을 이유가 없다.
               */}
-              <div className="flex items-center justify-end gap-1 border-b border-gray/40 px-5 pb-3">
+              {/*
+                아래 여백은 두지 않는다. 구분선이 `초기화` 버튼의 아래 패딩(`py-2`)만큼
+                떨어져 헤더가 실제 내용보다 두꺼워 보이고, 그만큼 대화 목록이 눌린다.
+              */}
+              <div className="flex items-center justify-end gap-1 border-b border-gray/40 px-5">
                 {isProactiveOff && (
                   <button
                     className="mr-auto rounded-lg px-3 py-2 text-sm font-semibold text-navy"
