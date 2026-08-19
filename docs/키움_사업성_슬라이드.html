@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>영웅 키움 — 왜 키움이 해야 하나</title>
+<style>
+  /* 아키텍처_슬라이드.html·성향_스코어링_슬라이드.html과 같은 발표 덱 템플릿 실측값
+     설계 캔버스 1440x810 / 배경 #FCFCFC / 좌측 여백 116
+     eyebrow #D70182 16px / 제목 #001E5A 35px bold
+     카드 #F4F6FA / 강조 블록 #001E5A
+
+     좌표는 템플릿 실측값 그대로 1440x810 로 잡고, 무대만 1920x1080 로 키운다
+     (4/3 배). 앞선 부록 슬라이드들과 눈금이 어긋나지 않는다. */
+  :root{
+    --bg:#fcfcfc; --navy:#001e5a; --magenta:#d70182;
+    --card:#f4f6fa; --muted:#6b7797; --arrow:#a3acc2;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);
+       font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:var(--navy)}
+
+  /* 인쇄 → PDF 로 뽑으면 도형/글자가 벡터로 남는다 (슬라이드 한 장 크기 그대로) */
+  @page{size:1920px 1080px;margin:0}
+  @media print{body{background:#fff}.stage{margin:0}}
+
+  .stage{position:relative;width:1920px;height:1080px;margin:0 auto;overflow:hidden}
+  .slide{position:absolute;left:0;top:0;width:1440px;height:810px;background:var(--bg);
+         transform:scale(1.3333333);transform-origin:top left}
+
+  .eyebrow{position:absolute;left:116px;top:73px;font-size:16px;font-weight:500;color:var(--magenta);letter-spacing:.01em}
+  .title{position:absolute;left:116px;top:104px;margin:0;font-size:35px;font-weight:800;
+         line-height:1.2;letter-spacing:-.02em;color:var(--navy)}
+  .tagline{position:absolute;left:116px;top:157px;font-size:16px;font-weight:500;color:var(--muted)}
+  .tagline b{color:var(--magenta);font-weight:700}
+
+  /* 블록 */
+  .card{position:absolute;background:var(--card);border-radius:20px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+        box-shadow:0 4px 14px rgba(0,30,90,.06);text-align:center;padding:0 10px}
+  .card.solid{background:var(--navy);box-shadow:0 6px 18px rgba(0,30,90,.22)}
+
+  /* 섹션 라벨 — 템플릿의 네이비 필 */
+  .chip{position:absolute;font-size:12px;font-weight:700;letter-spacing:.06em;
+        background:var(--navy);color:#fff;border-radius:999px;padding:5px 14px}
+
+  .ct{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+  .card.solid .ct{color:#fff}
+  .cs{font-size:12px;font-weight:500;color:var(--muted);line-height:1.45}
+  .card.solid .cs{color:#dbe4ff}
+
+  /* 태그 — 시장 사실은 네이비, KPI 는 마젠타 */
+  .tag{font-size:10px;font-weight:700;letter-spacing:.05em;border-radius:999px;padding:3px 9px;
+       background:#fff;color:var(--navy);box-shadow:0 2px 6px rgba(0,30,90,.08)}
+  .tag.kpi{color:var(--magenta)}
+  .card.solid .tag{background:rgba(255,255,255,.16);color:#fff;box-shadow:none}
+
+  /* 수치는 숫자축이라 고정폭으로 둔다 */
+  .fx{font-family:"Consolas","D2Coding",monospace;font-size:12px;font-weight:600;
+      color:var(--navy);line-height:1.4}
+  .card.solid .fx{color:#fff}
+
+  /* 큰 숫자 — 시장 규모 한 줄에만 쓴다 */
+  .big{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--navy)}
+  .big em{font-size:14px;font-weight:700;font-style:normal;color:var(--magenta);margin-left:3px}
+
+  /* 화살표 */
+  .arw{position:absolute;height:2px;background:var(--navy)}
+  .arw::after{content:"";position:absolute;top:-5px;width:0;height:0;
+              border-top:6px solid transparent;border-bottom:6px solid transparent}
+  .arw.r::after{right:-9px;border-left:11px solid var(--navy)}
+</style>
+</head>
+<body>
+<div class="stage">
+<div class="slide">
+  <div class="eyebrow">부록</div>
+  <h1 class="title">왜 키움이 해야 하나? 돈이 되나?</h1>
+  <div class="tagline">단기는 <b>미성년 계좌 신설·활성화</b>, 길게는 <b>전환비용이 0인 유일한 구간</b>을 선점하는 가장 싼 고객 획득</div>
+
+  <!-- ── 시장은 이미 열렸다 ── -->
+  <div class="chip" style="left:116px;top:196px">MARKET — 이미 열풍이다</div>
+  <div class="card" style="left:116px;top:234px;width:381px;height:150px">
+    <span class="tag">3사 미성년 계좌</span>
+    <div class="big">약 3배<em>／1년</em></div>
+    <div class="fx">11,873좌 → 34,590좌</div>
+    <div class="cs">한국투자 · 미래에셋 · 신한투자증권</div>
+  </div>
+  <div class="card" style="left:527px;top:234px;width:381px;height:150px">
+    <span class="tag">예탁결제원 기준</span>
+    <div class="big">72만 8,344명</div>
+    <div class="fx">보유주식 약 2조 9,761억원</div>
+    <div class="cs">시총 상위 200개사 중 88개사의 미성년 주주</div>
+  </div>
+  <div class="card" style="left:943px;top:234px;width:381px;height:150px">
+    <span class="tag">경쟁사</span>
+    <div class="ct">이미 다 들어와 있다</div>
+    <div class="cs">토스 자녀계좌 · 미래에셋 우대 이벤트<br>신한 ‘우리아이 자산관리’ 추진<br>한국투자 · NH · 퍼핀 특화 상품</div>
+  </div>
+
+  <!-- ── 그런데 계좌는 옮기지 않는다 ── -->
+  <div class="chip" style="left:116px;top:416px">LOCK-IN — 증권계좌는 좀처럼 옮기지 않는다</div>
+  <div class="card" style="left:116px;top:454px;width:300px;height:118px">
+    <div class="ct">앱만 까는 게 아니다</div>
+    <div class="cs">주식과 현금을 실제로 옮겨야 한다<br>타사 대체출고 · 계좌 이관</div>
+  </div>
+  <div class="arw r" style="left:424px;top:513px;width:26px"></div>
+  <div class="card" style="left:458px;top:454px;width:300px;height:118px">
+    <div class="ct">그래서 하나를 오래 쓴다</div>
+    <div class="cs">병행하는 은행 · 카드와 다르다<br>주계좌를 바꿀 계기가 잘 안 생긴다</div>
+  </div>
+  <div class="arw r" style="left:766px;top:513px;width:26px"></div>
+  <div class="card solid" style="left:800px;top:454px;width:524px;height:118px">
+    <div class="ct">승부처는 “빼앗아 오기”가 아니라 “처음 선택될 때 선택받기”</div>
+    <div class="cs">주거래 증권사가 아직 없는 미성년·청소년기 = <b style="color:#fff">전환비용이 사실상 0인 유일한 구간</b><br>이 시기를 놓치면 현금성 이벤트·수수료 면제로 훨씬 비싸게 끌어와야 한다</div>
+  </div>
+
+  <!-- ── 무엇으로 확인하나 ── -->
+  <div class="chip" style="left:116px;top:604px">KPI — 계좌 개설이 곧 전환 이벤트다</div>
+  <div class="card" style="left:116px;top:642px;width:381px;height:100px">
+    <span class="tag kpi">① 신규</span>
+    <div class="ct">미성년 계좌 개설 수</div>
+    <div class="cs">참가하려고 새로 연 자녀 계좌 — 온보딩 개설 완료</div>
+  </div>
+  <div class="card" style="left:527px;top:642px;width:381px;height:100px">
+    <span class="tag kpi">② 활성</span>
+    <div class="ct">기존 계좌 활성화율</div>
+    <div class="cs">방치돼 있던 자녀 계좌의 첫 팀 연결</div>
+  </div>
+  <div class="card" style="left:943px;top:642px;width:381px;height:100px">
+    <span class="tag kpi">북극성</span>
+    <div class="ct">동반 활성 가족 수</div>
+    <div class="cs">부모·자녀가 모두 주 1회 이상 — 개설 KPI 의 선행 지표</div>
+  </div>
+</div>
+</div>
+</body>
+</html>
