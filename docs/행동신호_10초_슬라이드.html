@@ -10,7 +10,11 @@
      카드 #F4F6FA / 강조 블록 #001E5A
 
      좌표는 템플릿 실측값 그대로 1440x810 로 잡고, 무대만 1920x1080 로 키운다
-     (4/3 배). 앞선 부록 슬라이드들과 눈금이 어긋나지 않는다. */
+     (4/3 배). 앞선 부록 슬라이드들과 눈금이 어긋나지 않는다.
+
+     이 장은 카드 안 보조 설명(회색 작은 글씨)을 쓰지 않는다 — 말로 하는 자리다.
+     그래서 카드 높이를 170 으로 잡고 두 줄을 헤더 아래 남는 세로 공간의
+     한가운데에 둔다 (위 여백 76 = 아래 여백 76). */
   :root{
     --bg:#fcfcfc; --navy:#001e5a; --magenta:#d70182;
     --card:#f4f6fa; --muted:#6b7797; --arrow:#a3acc2;
@@ -35,7 +39,7 @@
 
   /* 블록 */
   .card{position:absolute;background:var(--card);border-radius:20px;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;
         box-shadow:0 4px 14px rgba(0,30,90,.06);text-align:center;padding:0 10px}
   .card.solid{background:var(--navy);box-shadow:0 6px 18px rgba(0,30,90,.22)}
 
@@ -43,10 +47,8 @@
   .chip{position:absolute;font-size:12px;font-weight:700;letter-spacing:.06em;
         background:var(--navy);color:#fff;border-radius:999px;padding:5px 14px}
 
-  .ct{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+  .ct{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
   .card.solid .ct{color:#fff}
-  .cs{font-size:12px;font-weight:500;color:var(--muted);line-height:1.45}
-  .card.solid .cs{color:#dbe4ff}
 
   /* 태그 — 세는 자리는 네이비, 아직 검증 전인 값은 마젠타 */
   .tag{font-size:10px;font-weight:700;letter-spacing:.05em;border-radius:999px;padding:3px 9px;
@@ -55,7 +57,7 @@
   .card.solid .tag{background:rgba(255,255,255,.16);color:#fff;box-shadow:none}
 
   /* 상수·산식은 숫자축이라 고정폭으로 둔다 */
-  .fx{font-family:"Consolas","D2Coding",monospace;font-size:12px;font-weight:600;
+  .fx{font-family:"Consolas","D2Coding",monospace;font-size:13px;font-weight:600;
       color:var(--navy);line-height:1.4}
   .card.solid .fx{color:#fff}
 
@@ -74,72 +76,48 @@
   <div class="tagline">10초는 <b>초기 운영값</b>이다 — 지금은 맞히는 대신 <b>잘못 세지 않는 것</b>에 걸었다</div>
 
   <!-- ── 무엇을 세는가 ── -->
-  <div class="chip" style="left:116px;top:196px">HOW WE COUNT</div>
-  <div class="card" style="left:116px;top:234px;width:230px;height:150px">
+  <div class="chip" style="left:116px;top:272px">HOW WE COUNT</div>
+  <div class="card" style="left:116px;top:310px;width:230px;height:170px">
     <span class="tag">탭 3종</span>
     <div class="ct">기업정보 · 차트 · 뉴스</div>
-    <div class="cs">이 셋만 근거로 센다<br>머문 시간은 저장하지 않는다</div>
   </div>
-  <div class="arw r" style="left:354px;top:308px;width:26px"></div>
-  <div class="card" style="left:388px;top:234px;width:230px;height:150px">
+  <div class="arw r" style="left:354px;top:395px;width:26px"></div>
+  <div class="card" style="left:388px;top:310px;width:230px;height:170px">
     <span class="tag">임계값</span>
     <div class="ct">10초 넘게 머문 열람만</div>
     <div class="fx">VALID_DWELL_MS = 10_000</div>
-    <div class="cs">그 아래는 본 것으로 치지 않는다</div>
   </div>
-  <div class="arw r" style="left:626px;top:308px;width:26px"></div>
-  <div class="card" style="left:660px;top:234px;width:230px;height:150px">
+  <div class="arw r" style="left:626px;top:395px;width:26px"></div>
+  <div class="card" style="left:660px;top:310px;width:230px;height:170px">
     <span class="tag">시점</span>
     <div class="ct">매수 이전 열람만</div>
-    <div class="cs">사고 난 뒤에 본 것은<br>고를 때 쓴 근거가 아니다</div>
   </div>
-  <div class="arw r" style="left:898px;top:308px;width:26px"></div>
-  <div class="card" style="left:932px;top:234px;width:180px;height:150px">
+  <div class="arw r" style="left:898px;top:395px;width:26px"></div>
+  <div class="card" style="left:932px;top:310px;width:180px;height:170px">
     <span class="tag">판정</span>
     <div class="ct">3탭 중 2탭 이상</div>
     <div class="fx">EVIDENCE_TAB_MIN = 2</div>
-    <div class="cs">그 매수는 ‘근거 있음’</div>
   </div>
-  <div class="arw r" style="left:1120px;top:308px;width:26px"></div>
-  <div class="card solid" style="left:1154px;top:234px;width:170px;height:150px">
+  <div class="arw r" style="left:1120px;top:395px;width:26px"></div>
+  <div class="card solid" style="left:1154px;top:310px;width:170px;height:170px">
     <span class="tag">AXIS</span>
     <div class="ct">근거력</div>
-    <div class="cs">근거 있는 매수의 비율<br>직관력 = 10 − 근거력</div>
-  </div>
-
-  <!-- ── 임계값이 틀려도 무너지지 않게 ── -->
-  <div class="chip" style="left:116px;top:416px">WHY 10s IS SAFE TO BE WRONG</div>
-  <div class="card" style="left:116px;top:454px;width:381px;height:118px">
-    <div class="ct">같은 판정을 두 번 한다</div>
-    <div class="cs">프론트가 10초 구간만 골라 보내고<br>서버가 각 구간을 다시 재서 센다</div>
-  </div>
-  <div class="card" style="left:527px;top:454px;width:381px;height:118px">
-    <div class="ct">체결이 방아쇠, 확인된 것만 지운다</div>
-    <div class="cs">매수 체결 때만 <span class="fx">/api/tab-view</span> 로 보내고<br>서버 2xx 를 받은 묶음만 버퍼에서 뺀다</div>
-  </div>
-  <div class="card" style="left:943px;top:454px;width:381px;height:118px">
-    <div class="ct">표본이 적으면 중립 5로 당긴다</div>
-    <div class="fx">shrink = 10 × (적중 + 2) ÷ (전체 + 4)</div>
-    <div class="cs">임계값이 빗나가도 극단값이 안 나온다</div>
   </div>
 
   <!-- ── 검증 계획 ── -->
-  <div class="chip" style="left:116px;top:604px">NEXT — 검증하고 조정한다</div>
-  <div class="card" style="left:116px;top:642px;width:381px;height:100px">
+  <div class="chip" style="left:116px;top:526px">NEXT — 검증하고 조정한다</div>
+  <div class="card" style="left:116px;top:564px;width:381px;height:170px">
     <span class="tag open">1</span>
     <div class="ct">질문식 매매 기록과 맞춰 본다</div>
-    <div class="cs">고른 이유·보유 계획 vs 실제 열람 탭</div>
   </div>
-  <div class="arw r" style="left:505px;top:692px;width:26px"></div>
-  <div class="card" style="left:539px;top:642px;width:381px;height:100px">
+  <div class="arw r" style="left:505px;top:649px;width:26px"></div>
+  <div class="card" style="left:539px;top:564px;width:381px;height:170px">
     <span class="tag open">2</span>
     <div class="ct">어긋나는 자리가 답을 준다</div>
-    <div class="cs">이유는 ‘뉴스’인데 뉴스 열람이 없다면<br>임계값과 집계 중 어느 쪽이 틀린지 갈린다</div>
   </div>
-  <div class="arw r" style="left:928px;top:692px;width:26px"></div>
-  <div class="card solid" style="left:962px;top:642px;width:362px;height:100px">
+  <div class="arw r" style="left:928px;top:649px;width:26px"></div>
+  <div class="card solid" style="left:962px;top:564px;width:362px;height:170px">
     <div class="ct">정합성 확인 뒤 10초를 고친다</div>
-    <div class="cs">상수 한 줄이라 바꾸는 비용은 0<br>바꿀 근거가 아직 없을 뿐이다</div>
   </div>
 </div>
 </div>
