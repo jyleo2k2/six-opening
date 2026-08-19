@@ -13,7 +13,7 @@
      (4/3 배). 덱 슬라이드 규격에 맞추면서 앞선 부록 두 장과 눈금이 어긋나지 않는다. */
   :root{
     --bg:#fcfcfc; --navy:#001e5a; --magenta:#d70182;
-    --card:#f4f6fa; --muted:#6b7797; --arrow:#a3acc2;
+    --card:#f4f6fa; --muted:#6b7797; --line:rgba(0,30,90,.08);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);
@@ -33,37 +33,39 @@
   .tagline{position:absolute;left:116px;top:157px;font-size:16px;font-weight:500;color:var(--muted)}
   .tagline b{color:var(--magenta);font-weight:700}
 
-  /* 블록 */
-  .card{position:absolute;background:var(--card);border-radius:20px;
-        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
-        box-shadow:0 4px 14px rgba(0,30,90,.06);text-align:center;padding:0 10px}
-  .card.solid{background:var(--navy);box-shadow:0 6px 18px rgba(0,30,90,.22)}
+  /* ── 3등분 기둥: 머리(네이비 강조 블록) + 몸통(카드) ── */
+  .head{position:absolute;top:196px;width:381px;height:64px;background:var(--navy);border-radius:20px;
+        display:flex;align-items:center;gap:11px;padding:0 22px;box-shadow:0 6px 18px rgba(0,30,90,.22)}
+  .pnum{font-size:11px;font-weight:700;letter-spacing:.09em;color:#8fa8e8}
+  .hname{font-size:21px;font-weight:800;color:#fff;letter-spacing:-.02em}
+  .hsub{margin-left:auto;text-align:right;font-size:11px;font-weight:500;color:#dbe4ff;line-height:1.4}
 
-  /* 섹션 라벨 — 템플릿의 네이비 필 */
-  .chip{position:absolute;font-size:12px;font-weight:700;letter-spacing:.06em;
-        background:var(--navy);color:#fff;border-radius:999px;padding:5px 14px}
+  .body{position:absolute;top:272px;width:381px;height:380px;background:var(--card);border-radius:20px;
+        padding:6px 22px;box-shadow:0 4px 14px rgba(0,30,90,.06)}
 
-  .ct{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
-  .card.solid .ct{color:#fff}
-  .cs{font-size:12px;font-weight:500;color:var(--muted);line-height:1.45}
-  .card.solid .cs{color:#dbe4ff}
-
-  /* 보완쌍 태그 — 캐릭터를 가르는 쌍은 네이비, 레벨만 내는 축은 마젠타 */
-  .tag{font-size:10px;font-weight:700;letter-spacing:.05em;border-radius:999px;padding:3px 9px;
-       background:#fff;color:var(--navy);box-shadow:0 2px 6px rgba(0,30,90,.08)}
-  .tag.lv{color:var(--magenta)}
-  .card.solid .tag{background:rgba(255,255,255,.16);color:#fff;box-shadow:none}
+  /* 단계 한 줄 — 번호 배지 + 제목 + 설명 */
+  .step{display:flex;gap:11px;align-items:flex-start;padding:17px 0}
+  .step + .step{border-top:1px solid var(--line)}
+  .n{flex:none;width:21px;height:21px;margin-top:1px;border-radius:999px;background:#fff;color:var(--navy);
+     font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;
+     box-shadow:0 2px 6px rgba(0,30,90,.10)}
+  .step.out .n{background:var(--magenta);color:#fff;box-shadow:none}
+  .st{font-size:13.5px;font-weight:800;letter-spacing:-.01em;line-height:1.3}
+  .sd{margin-top:4px;font-size:11.5px;font-weight:500;color:var(--muted);line-height:1.5}
 
   /* 산식은 숫자축이라 고정폭으로 둔다 */
-  .fx{font-family:"Consolas","D2Coding",monospace;font-size:12px;font-weight:600;
-      color:var(--navy);line-height:1.4}
-  .card.solid .fx{color:#fff}
+  .fx{font-family:"Consolas","D2Coding",monospace;font-size:11.5px;font-weight:700;color:var(--navy)}
 
-  /* 화살표 */
-  .arw{position:absolute;height:2px;background:var(--navy)}
-  .arw::after{content:"";position:absolute;top:-5px;width:0;height:0;
-              border-top:6px solid transparent;border-bottom:6px solid transparent}
-  .arw.r::after{right:-9px;border-left:11px solid var(--navy)}
+  /* ── 세 축에 공통으로 걸리는 규칙 ── */
+  .rules{position:absolute;left:116px;top:668px;width:1208px;height:74px;background:var(--card);
+         border-radius:20px;display:flex;align-items:center;gap:20px;padding:0 24px;
+         box-shadow:0 4px 14px rgba(0,30,90,.06)}
+  .rpill{flex:none;background:var(--navy);color:#fff;font-size:11px;font-weight:700;
+         letter-spacing:.06em;border-radius:999px;padding:5px 13px}
+  .rule{flex:1}
+  .rule b{display:block;font-size:12.5px;font-weight:800;letter-spacing:-.01em}
+  .rule .cap{display:block;margin-top:3px;font-size:11px;font-weight:500;color:var(--muted);line-height:1.4}
+  .sep{flex:none;width:1px;height:40px;background:var(--line)}
 </style>
 </head>
 <body>
@@ -71,73 +73,148 @@
 <div class="slide">
   <div class="eyebrow">Appendix</div>
   <h1 class="title">투자성향 스코어링 구현</h1>
-  <div class="tagline">다섯 축 전부 0~10 이고 <b>5가 중립</b> — 증거가 있을 때만 5에서 멀어진다</div>
+  <div class="tagline">실제로 재는 축은 셋뿐이다 — <b>직관력·분산력은 10에서 뺀 보완값</b></div>
 
-  <!-- ── 다섯 축 → 캐릭터 ── -->
-  <div class="chip" style="left:116px;top:196px">AXES</div>
-  <div class="card" style="left:116px;top:234px;width:176px;height:150px">
-    <span class="tag">보완쌍 A</span>
-    <div class="ct">근거력</div>
-    <div class="cs">매수 직전 10초 넘게 본<br>탭이 3중 2개 이상인 비율</div>
+  <!-- ══ PART 1 · 근거력 ══ -->
+  <div class="head" style="left:116px">
+    <span class="pnum">PART 1</span><span class="hname">근거력</span>
+    <span class="hsub">얼마나 보고 샀나<br>직관력 = 10 − 근거력</span>
   </div>
-  <div class="card" style="left:312px;top:234px;width:176px;height:150px">
-    <span class="tag">보완쌍 A</span>
-    <div class="ct">직관력</div>
-    <div class="fx">10 − 근거력</div>
-    <div class="cs">따로 재지 않는다</div>
-  </div>
-  <div class="card" style="left:508px;top:234px;width:176px;height:150px">
-    <span class="tag">보완쌍 B</span>
-    <div class="ct">집중력</div>
-    <div class="cs">유효 섹터수 1/Σw²<br>로그 배치 + 현금 감쇠</div>
-  </div>
-  <div class="card" style="left:704px;top:234px;width:176px;height:150px">
-    <span class="tag">보완쌍 B</span>
-    <div class="ct">분산력</div>
-    <div class="fx">10 − 집중력</div>
-    <div class="cs">따로 재지 않는다</div>
-  </div>
-  <div class="card" style="left:900px;top:234px;width:176px;height:150px">
-    <span class="tag lv">레벨</span>
-    <div class="ct">정확력</div>
-    <div class="cs">체결 2거래일 뒤 종가<br>매수는 오르면·매도는 내리면</div>
-  </div>
-  <div class="arw r" style="left:1084px;top:308px;width:32px"></div>
-  <div class="card solid" style="left:1128px;top:234px;width:196px;height:150px">
-    <span class="tag">CHARACTER</span>
-    <div class="ct">저격수 · 전략가<br>승부사 · 탐험가</div>
-    <div class="cs">두 보완쌍의 우세 조합<br>LV은 정확력이 정한다</div>
-  </div>
-
-  <!-- ── 중립에서 시작한다 ── -->
-  <div class="chip" style="left:116px;top:416px">NEUTRAL-FIRST</div>
-  <div class="card" style="left:116px;top:454px;width:381px;height:118px">
-    <div class="ct">표본이 적으면 중립으로 당긴다</div>
-    <div class="fx">shrink = 10 × (적중 + 2) ÷ (전체 + 4)</div>
-    <div class="cs">0건이면 정확히 5 · 1건 적중이어도 6</div>
-  </div>
-  <div class="card" style="left:527px;top:454px;width:381px;height:118px">
-    <div class="ct">매수 2건 미만이면 숫자도 보류</div>
-    <div class="cs">다섯 축 전부 5, 유형·레벨 없음 — ‘관찰 중’<br>화면이 스스로 모순된 말을 하지 않게</div>
-  </div>
-  <div class="card" style="left:943px;top:454px;width:381px;height:118px">
-    <div class="ct">차이가 1점 미만이면 유형 없음</div>
-    <div class="cs">한 쌍이라도 동점대면 캐릭터는 null<br>우세를 꾸며내지 않는다</div>
+  <div class="body" style="left:116px">
+    <div class="step">
+      <span class="n">1</span>
+      <div>
+        <div class="st">입력 — 매수 직전 종목 탭 열람</div>
+        <div class="sd">화면은 <span class="fx">stock_tab_views</span> 를 매수할 때만 보낸다.
+        한 행이 곧 “이 매수 직전에 10초 넘게 본 방문 N번”이다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <div>
+        <div class="st">매수 한 건을 판정한다</div>
+        <div class="sd">매수 시각 <b>이전</b>에 <span class="fx">10초</span> 이상 머문 <b>탭 종류 수</b>를 센다
+        (뉴스·차트·정보 3탭). <span class="fx">2개</span> 이상이면 근거 있는 매수다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <div>
+        <div class="st">비율로 모으고 중립으로 당긴다</div>
+        <div class="sd">근거 매수 ÷ 전체 매수에 표본 축소를 건다.
+        매수가 하나도 없으면 0이 아니라 <b>5</b>다.</div>
+      </div>
+    </div>
+    <div class="step out">
+      <span class="n">→</span>
+      <div>
+        <div class="st">근거력 0~10 · 직관력은 그 나머지</div>
+        <div class="sd">직관력을 따로 재지 않는다 — 근거를 못 찾은 매수가 곧 직관 매수다.</div>
+      </div>
+    </div>
   </div>
 
-  <!-- ── 주차 귀속 ── -->
-  <div class="chip" style="left:116px;top:604px">ATTRIBUTION</div>
-  <div class="card" style="left:116px;top:642px;width:381px;height:100px">
-    <div class="ct">주차 카드 = 그 주까지 누적</div>
-    <div class="cs">한 주만 자르면 표본이 2~3건뿐</div>
+  <!-- ══ PART 2 · 집중력 ══ -->
+  <div class="head" style="left:527px">
+    <span class="pnum">PART 2</span><span class="hname">집중력</span>
+    <span class="hsub">한 곳에 몰았나<br>분산력 = 10 − 집중력</span>
   </div>
-  <div class="card" style="left:527px;top:642px;width:381px;height:100px">
-    <div class="ct">정확력은 채점 끝난 날로 귀속</div>
-    <div class="cs">끝난 주 카드가 나중에 안 바뀐다</div>
+  <div class="body" style="left:527px">
+    <div class="step">
+      <span class="n">1</span>
+      <div>
+        <div class="st">입력 — 보유 스냅샷 + 현금</div>
+        <div class="sd">종목 수량·현재가·섹터와 현금을 본다. 지난 주 카드는
+        <span class="fx">replayPortfolio</span> 로 이후 거래를 되돌려 그 시점을 복원한다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <div>
+        <div class="st">유효 섹터수 <span class="fx">ES = 1 / Σwᵢ²</span></div>
+        <div class="sd">가짓수가 아니라 비중까지 본다. 반도체 900만 + 게임 1만은
+        섹터가 둘이어도 ES ≈ 1.0 이라 집중이다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <div>
+        <div class="st">로그로 0~10 에 얹는다</div>
+        <div class="sd"><span class="fx">raw = 10 − 5 × log₃(ES)</span> — ES 1이면 10, 3이면 5,
+        9면 0. 계단이 없어 한 주만 사도 연속으로 움직인다.</div>
+      </div>
+    </div>
+    <div class="step out">
+      <span class="n">→</span>
+      <div>
+        <div class="st">현금만큼 중립으로 끌어온다</div>
+        <div class="sd"><span class="fx">집중력 = 5 + (raw − 5) × 주식비중</span> — 전량 현금이면
+        정확히 5다. 판단할 근거가 없다는 뜻이다.</div>
+      </div>
+    </div>
   </div>
-  <div class="card" style="left:943px;top:642px;width:381px;height:100px">
-    <div class="ct">집중력은 그 시점 보유로 복원</div>
-    <div class="cs">이후 거래를 최신순으로 되돌린다</div>
+
+  <!-- ══ PART 3 · 정확력 ══ -->
+  <div class="head" style="left:943px">
+    <span class="pnum">PART 3</span><span class="hname">정확력</span>
+    <span class="hsub">그래서 맞았나<br>LV1~LV3 을 정한다</span>
+  </div>
+  <div class="body" style="left:943px">
+    <div class="step">
+      <span class="n">1</span>
+      <div>
+        <div class="st">입력 — 체결 기록 + 일봉 종가</div>
+        <div class="sd">매수·매도 체결과 그 종목 종가를 첫 거래 열흘 전부터 한 쿼리로 읽는다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">2</span>
+      <div>
+        <div class="st">언제 채점할지부터 고정한다</div>
+        <div class="sd">체결 <b>다음 거래일부터 2번째</b> 종가 — 월요일에 사면 수요일 종가다.
+        아직 안 지났으면 채점하지 않고 보류한다.</div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="n">3</span>
+      <div>
+        <div class="st">적중 조건은 방향뿐이다</div>
+        <div class="sd">매수는 그 종가가 체결가보다 <b>높으면</b>, 매도는 매도가보다
+        <b>낮으면</b> 적중이다. 수익률 크기는 보지 않는다.</div>
+      </div>
+    </div>
+    <div class="step out">
+      <span class="n">→</span>
+      <div>
+        <div class="st">적중률 → 0~10 → 레벨</div>
+        <div class="sd"><span class="fx">≥ 20/3</span> LV3 · <span class="fx">≥ 10/3</span> LV2 · 나머지 LV1.
+        주차 카드는 체결 주가 아니라 <b>채점이 끝난 주</b>에 넣어 끝난 주가 나중에 안 바뀐다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 세 축 공통 규칙 ══ -->
+  <div class="rules">
+    <span class="rpill">공통 규칙</span>
+    <div class="rule">
+      <b>0~10 · 5가 중립</b>
+      <span class="cap">표본이 없으면 5에서 시작한다</span>
+    </div>
+    <div class="sep"></div>
+    <div class="rule">
+      <b>표본 축소 <span class="fx">10 × (적중 + 2) ÷ (전체 + 4)</span></b>
+      <span class="cap">한두 건으로 0·10 이 나오지 않는다</span>
+    </div>
+    <div class="sep"></div>
+    <div class="rule">
+      <b>매수 2건 미만이면 숫자도 보류</b>
+      <span class="cap">다섯 축 전부 5, 유형·레벨 없이 ‘관찰 중’</span>
+    </div>
+    <div class="sep"></div>
+    <div class="rule">
+      <b>캐릭터 = 두 보완쌍의 우세 조합</b>
+      <span class="cap">차이가 1점 미만이면 유형을 꾸며내지 않는다</span>
+    </div>
   </div>
 </div>
 </div>
